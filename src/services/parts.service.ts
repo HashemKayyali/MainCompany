@@ -1,28 +1,44 @@
-import { supabase } from '../lib/supabase'
-import type { PartRow } from '../lib/database.types'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import type { Database, PartRow } from '../lib/database.types'
 import type { ProductPart } from '../data/products/types'
 
-// DB uses: title, in_stock, product_slug
-// App uses: name, inStock, productSlug
+type PartInsert = Database['public']['Tables']['parts']['Insert']
+type PartUpdate = Database['public']['Tables']['parts']['Update']
+
+function ensureSupabase() {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Supabase is not configured. Check VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY')
+  }
+}
+
+function slugify(input: string) {
+  return (input || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
 function dbToApp(row: PartRow): ProductPart {
   return {
     id: row.id,
     productSlug: row.product_slug || '',
-    name: row.title,                    // DB "title" → App "name"
+    name: row.title,
     description: row.description || '',
-    price: Number(row.price) || 0,
+    price: Number(row.price ?? 0),
     currency: row.currency || 'JOD',
     image: row.image || '',
     inStock: row.in_stock ?? true,
   }
 }
 
-function appToDb(p: ProductPart) {
+function appToDb(p: ProductPart): PartInsert {
+  const safeSlug = slugify(p.name) || `part-${Date.now()}`
   return {
-    title: p.name,                      // App "name" → DB "title"
-    slug: p.id,                         // Use id as slug (parts don't have separate slug in app)
-    description: p.description || '',
-    price: p.price || 0,
+    title: p.name,
+    slug: safeSlug,
+    description: p.description || null,
+    price: p.price ?? 0,
     is_active: true,
     product_slug: p.productSlug || '',
     currency: p.currency || 'JOD',
@@ -32,39 +48,71 @@ function appToDb(p: ProductPart) {
 }
 
 export async function getAll(): Promise<ProductPart[]> {
-  const { data, error } = await supabase.from('parts').select('*').order('created_at')
+  ensureSupabase()
+  const { data, error } = await supabase
+    .from('parts')
+    .select('*')
+    .order('created_at')
+    .returns<PartRow[]>()
+
   if (error) throw error
   return (data || []).map(dbToApp)
 }
 
 export async function getByProduct(productSlug: string): Promise<ProductPart[]> {
-  const { data, error } = await supabase.from('parts').select('*').eq('product_slug', productSlug)
+  ensureSupabase()
+  const { data, error } = await supabase
+    .from('parts')
+    .select('*')
+    .eq('product_slug', productSlug)
+    .returns<PartRow[]>()
+
   if (error) throw error
   return (data || []).map(dbToApp)
 }
 
 export async function create(part: ProductPart): Promise<ProductPart> {
-  const { data, error } = await supabase.from('parts').insert(appToDb(part)).select().single()
+  ensureSupabase()
+  const payload = appToDb(part)
+
+  const { data, error } = await supabase
+    .from('parts')
+    .insert(payload)
+    .select('*')
+    .single()
+    .returns<PartRow>()
+
   if (error) throw error
   return dbToApp(data)
 }
 
 export async function update(id: string, part: Partial<ProductPart>): Promise<ProductPart> {
-  const dbData: any = {}
+  ensureSupabase()
+
+  const dbData: PartUpdate = {}
+
   if (part.name !== undefined) dbData.title = part.name
   if (part.productSlug !== undefined) dbData.product_slug = part.productSlug
-  if (part.description !== undefined) dbData.description = part.description
+  if (part.description !== undefined) dbData.description = part.description || null
   if (part.price !== undefined) dbData.price = part.price
   if (part.currency !== undefined) dbData.currency = part.currency
   if (part.image !== undefined) dbData.image = part.image
   if (part.inStock !== undefined) dbData.in_stock = part.inStock
 
-  const { data, error } = await supabase.from('parts').update(dbData).eq('id', id).select().single()
+  const { data, error } = await supabase
+    .from('parts')
+    .update(dbData)
+    .eq('id', id)
+    .select('*')
+    .single()
+    .returns<PartRow>()
+
   if (error) throw error
   return dbToApp(data)
 }
 
 export async function remove(id: string): Promise<void> {
+  ensureSupabase()
   const { error } = await supabase.from('parts').delete().eq('id', id)
   if (error) throw error
 }

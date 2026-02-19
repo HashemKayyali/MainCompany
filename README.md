@@ -76,6 +76,6 @@ supabase/
 
 git status
 git add .
-git commit -m "Update"
+git commit -m "TEST"
 git push
 

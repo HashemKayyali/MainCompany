@@ -1,11 +1,22 @@
-import { createContext, useContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import type { Database } from '../lib/database.types'
+
+export type AdminRole = 'admin' | 'superadmin'
 
 export interface AdminUser {
   id: string
   email: string
   name: string
-  role: 'admin'
+  role: AdminRole
   createdAt?: string
 }
 
@@ -13,97 +24,114 @@ interface AuthCtx {
   user: AdminUser | null
   isAuth: boolean
   isAdmin: boolean
+  isSuperAdmin: boolean
   loading: boolean
+
   login: (email: string, password: string) => Promise<{ ok: boolean; message?: string }>
   logout: () => Promise<void>
 
   admins: AdminUser[]
-  isSuperAdmin: boolean
-  addAdmin: () => boolean
-  removeAdmin: () => void
+  addAdmin: (email: string, name: string, role: AdminRole) => boolean
+  removeAdmin: (id: string) => void
 }
 
 const Ctx = createContext<AuthCtx>({} as AuthCtx)
 
-async function fetchProfileRole(
-  userId: string
-): Promise<{ role: string | null; name: string | null }> {
-  type ProfilePick = { role: string | null; name: string | null }
+type ProfileRow = Database['public']['Tables']['profiles']['Row']
 
-  const { data, error } = (await supabase
-    .from('profiles' as any)
+async function fetchProfileRole(userId: string): Promise<{ role: string | null; name: string | null }> {
+  const { data, error } = await supabase
+    .from('profiles')
     .select('role,name')
     .eq('id', userId)
-    .maybeSingle()) as { data: ProfilePick | null; error: any }
+    .maybeSingle<Pick<ProfileRow, 'role' | 'name'>>()
 
   if (error) return { role: null, name: null }
   return { role: data?.role ?? null, name: data?.name ?? null }
 }
-
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<AdminUser | null>(null)
   const [admins, setAdmins] = useState<AdminUser[]>([])
 
-  /**
-   * Resolve whether a session user is an admin.
-   * IMPORTANT: Does NOT sign out non-admin users.
-   * It just returns null so AuthContext ignores them,
-   * while UserContext can still use the same Supabase session.
-   */
-  const resolveAdmin = useCallback(async (sessionUser: { id: string; email?: string } | null): Promise<AdminUser | null> => {
-    if (!sessionUser) return null
-    const prof = await fetchProfileRole(sessionUser.id)
-    if (prof.role !== 'admin') return null
-    return {
-      id: sessionUser.id,
-      email: sessionUser.email || '',
-      name: prof.name || sessionUser.email || 'Admin',
-      role: 'admin',
-    }
-  }, [])
+  const resolveAdmin = useCallback(
+    async (sessionUser: { id: string; email?: string } | null): Promise<AdminUser | null> => {
+      if (!sessionUser) return null
 
-  // Restore session + listen changes
+      const prof = await fetchProfileRole(sessionUser.id)
+      if (prof.role !== 'admin' && prof.role !== 'superadmin') return null
+
+      return {
+        id: sessionUser.id,
+        email: sessionUser.email || '',
+        name: prof.name || sessionUser.email || 'Admin',
+        role: prof.role as AdminRole,
+      }
+    },
+    []
+  )
+
   useEffect(() => {
     let mounted = true
 
     async function init() {
-      if (!isSupabaseConfigured()) {
-        if (mounted) {
-          setUser(null)
-          setAdmins([])
-          setLoading(false)
+      try {
+        if (!isSupabaseConfigured()) {
+          if (mounted) {
+            setUser(null)
+            setAdmins([])
+            setLoading(false)
+          }
+          return
         }
-        return
-      }
 
-      const { data } = await supabase.auth.getSession()
-      const sessionUser = data.session?.user ?? null
+        const { data } = await supabase.auth.getSession()
+        const sessionUser = data.session?.user ?? null
 
-      const adminUser = await resolveAdmin(sessionUser)
-      if (mounted) {
-        setUser(adminUser)
-        setAdmins(adminUser ? [adminUser] : [])
-        setLoading(false)
-      }
-    }
-
-    init()
-
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!mounted) return
-      const sessionUser = session?.user ?? null
-
-      if (sessionUser) {
-        setLoading(true)
         const adminUser = await resolveAdmin(sessionUser)
         if (mounted) {
           setUser(adminUser)
           setAdmins(adminUser ? [adminUser] : [])
           setLoading(false)
         }
-      } else {
+      } catch (e) {
+        console.warn('[AuthContext] init error:', e)
+        if (mounted) {
+          setUser(null)
+          setAdmins([])
+          setLoading(false)
+        }
+      }
+    }
+
+    init()
+
+    if (!isSupabaseConfigured()) return
+
+    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return
+
+      try {
+        const sessionUser = session?.user ?? null
+
+        if (sessionUser) {
+          setLoading(true)
+          const adminUser = await resolveAdmin(sessionUser)
+          if (mounted) {
+            setUser(adminUser)
+            setAdmins(adminUser ? [adminUser] : [])
+            setLoading(false)
+          }
+        } else {
+          if (mounted) {
+            setUser(null)
+            setAdmins([])
+            setLoading(false)
+          }
+        }
+      } catch (e) {
+        console.warn('[AuthContext] auth change error:', e)
         if (mounted) {
           setUser(null)
           setAdmins([])
@@ -127,36 +155,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error || !data.user) return { ok: false, message: error?.message || 'Login failed' }
 
     const prof = await fetchProfileRole(data.user.id)
-    if (prof.role !== 'admin') {
-      // Sign out ONLY when attempted through the admin login page
+    if (prof.role !== 'admin' && prof.role !== 'superadmin') {
       await supabase.auth.signOut()
       return { ok: false, message: 'This account is not an admin.' }
     }
 
-    // onAuthStateChange will update state automatically
     return { ok: true }
   }, [])
 
   const logout = useCallback(async () => {
-    await supabase.auth.signOut()
+    if (isSupabaseConfigured()) await supabase.auth.signOut()
     setUser(null)
     setAdmins([])
   }, [])
 
+  // UI-only admin management (no DB write)
+  const addAdmin = useCallback(
+    (email: string, name: string, role: AdminRole) => {
+      const cleanEmail = (email || '').trim().toLowerCase()
+      const cleanName = (name || '').trim()
+      if (!cleanEmail || !cleanName) return false
+      if (admins.some(a => a.email.trim().toLowerCase() === cleanEmail)) return false
+
+      const newAdmin: AdminUser = {
+        id: `local-${Date.now()}`,
+        email: cleanEmail,
+        name: cleanName,
+        role,
+        createdAt: new Date().toISOString(),
+      }
+      setAdmins(prev => [...prev, newAdmin])
+      return true
+    },
+    [admins]
+  )
+
+  const removeAdmin = useCallback((id: string) => {
+    setAdmins(prev => prev.filter(a => a.id !== id))
+  }, [])
+
   const value = useMemo<AuthCtx>(() => {
+    const isSuperAdmin = user?.role === 'superadmin'
     return {
       user,
       admins,
       isAuth: !!user,
       isAdmin: !!user,
+      isSuperAdmin,
       loading,
       login,
       logout,
-      isSuperAdmin: false,
-      addAdmin: () => false,
-      removeAdmin: () => {},
+      addAdmin,
+      removeAdmin,
     }
-  }, [user, admins, loading, login, logout])
+  }, [user, admins, loading, login, logout, addAdmin, removeAdmin])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

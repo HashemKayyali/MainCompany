@@ -1,56 +1,324 @@
 // ═══════════════════════════════════════════════
 // Database types matching ACTUAL Supabase schema
+// (public schema) — with Row/Insert/Update (NO more never)
 // ═══════════════════════════════════════════════
 
 export interface Database {
   public: {
     Tables: {
       profiles: {
-        Row: { id: string; name: string | null; email: string | null; phone: string | null; role: string; created_at: string }
-        Insert: { id: string; name?: string | null; email?: string | null; phone?: string | null; role?: string }
-        Update: { name?: string | null; email?: string | null; phone?: string | null; role?: string }
+        Row: {
+          id: string
+          name: string | null
+          email: string | null
+          phone: string | null
+          role: string
+          created_at: string
+        }
+        Insert: {
+          id: string
+          name?: string | null
+          email?: string | null
+          phone?: string | null
+          role?: string
+          created_at?: string
+        }
+        Update: {
+          name?: string | null
+          email?: string | null
+          phone?: string | null
+          role?: string
+        }
+        Relationships: []
       }
+
       categories: {
-        Row: { id: string; name: string; slug: string; icon: string; description: string; image: string; created_at: string }
-      }
-      products: {
         Row: {
-          id: string; title: string; slug: string; description: string | null
-          price: number | null; category_id: string | null; is_active: boolean
-          badge: string; badge_color: string; category_tags: string[]
-          short_description: string; featured: boolean; hero_image: string
-          gallery: string[]; quick_options: any[]; notes: string[]
-          features_left: string[]; features_right: string[]
-          rental_price_per_event: number; currency: string; created_at: string
+          id: string
+          name: string
+          slug: string
+          created_at: string
+          icon: string | null
+          description: string | null
+          image: string | null
         }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          created_at?: string
+          icon?: string | null
+          description?: string | null
+          image?: string | null
+        }
+        Update: {
+          name?: string
+          slug?: string
+          icon?: string | null
+          description?: string | null
+          image?: string | null
+        }
+        Relationships: []
       }
-      product_images: {
-        Row: { id: string; product_id: string; url: string; is_cover: boolean; sort_order: number; created_at: string }
-      }
+
       customers: {
-        Row: { id: string; name: string; logo_url: string | null; slug: string | null; category: string; created_at: string }
-      }
-      parts: {
         Row: {
-          id: string; title: string; slug: string; description: string | null
-          price: number | null; is_active: boolean; product_slug: string
-          currency: string; image: string; in_stock: boolean; created_at: string
+          id: string
+          name: string
+          logo_url: string | null
+          created_at: string
+          slug: string | null
+          category: string | null
         }
-      }
-      contact_submissions: {
-        Row: {
-          id: string; name: string; email: string; phone: string
-          product_slug: string; city: string; address: string
-          message: string; status: string; created_at: string
+        Insert: {
+          id?: string
+          name: string
+          logo_url?: string | null
+          created_at?: string
+          slug?: string | null
+          category?: string | null
         }
+        Update: {
+          name?: string
+          logo_url?: string | null
+          slug?: string | null
+          category?: string | null
+        }
+        Relationships: []
       }
+
       gallery_albums: {
         Row: {
-          id: string; slug: string; title: string; cover: string
-          images: string[]; category: string; sort_order: number; created_at: string
+          id: string
+          slug: string
+          title: string
+          cover: string | null
+          images: string[] | null
+          category: string | null
+          sort_order: number | null
+          created_at: string | null
+          updated_at: string | null
         }
+        Insert: {
+          id?: string
+          slug: string
+          title: string
+          cover?: string | null
+          images?: string[] | null
+          category?: string | null
+          sort_order?: number | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          slug?: string
+          title?: string
+          cover?: string | null
+          images?: string[] | null
+          category?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+
+      parts: {
+        Row: {
+          id: string
+          title: string
+          slug: string
+          description: string | null
+          price: number | null
+          is_active: boolean
+          created_at: string
+          product_slug: string | null
+          currency: string | null
+          image: string | null
+          in_stock: boolean | null
+        }
+        Insert: {
+          id?: string
+          title: string
+          slug: string
+          description?: string | null
+          price?: number | null
+          is_active?: boolean
+          created_at?: string
+          product_slug?: string | null
+          currency?: string | null
+          image?: string | null
+          in_stock?: boolean | null
+        }
+        Update: {
+          title?: string
+          slug?: string
+          description?: string | null
+          price?: number | null
+          is_active?: boolean
+          product_slug?: string | null
+          currency?: string | null
+          image?: string | null
+          in_stock?: boolean | null
+        }
+        Relationships: []
+      }
+
+      products: {
+        Row: {
+          id: string
+          title: string
+          slug: string
+          description: string | null
+          price: number | null
+          category_id: string | null
+          is_active: boolean
+          created_at: string
+
+          badge: string | null
+          badge_color: string | null
+          category_tags: string[] | null
+          short_description: string | null
+          featured: boolean | null
+          hero_image: string | null
+          gallery: string[] | null
+
+          quick_options: any | null
+          notes: string[] | null
+          features_left: string[] | null
+          features_right: string[] | null
+
+          rental_price_per_event: number | null
+          currency: string | null
+        }
+        Insert: {
+          id?: string
+          title: string
+          slug: string
+          description?: string | null
+          price?: number | null
+          category_id?: string | null
+          is_active?: boolean
+          created_at?: string
+
+          badge?: string | null
+          badge_color?: string | null
+          category_tags?: string[] | null
+          short_description?: string | null
+          featured?: boolean | null
+          hero_image?: string | null
+          gallery?: string[] | null
+
+          quick_options?: any | null
+          notes?: string[] | null
+          features_left?: string[] | null
+          features_right?: string[] | null
+
+          rental_price_per_event?: number | null
+          currency?: string | null
+        }
+        Update: {
+          title?: string
+          slug?: string
+          description?: string | null
+          price?: number | null
+          category_id?: string | null
+          is_active?: boolean
+
+          badge?: string | null
+          badge_color?: string | null
+          category_tags?: string[] | null
+          short_description?: string | null
+          featured?: boolean | null
+          hero_image?: string | null
+          gallery?: string[] | null
+
+          quick_options?: any | null
+          notes?: string[] | null
+          features_left?: string[] | null
+          features_right?: string[] | null
+
+          rental_price_per_event?: number | null
+          currency?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'products_category_id_fkey'
+            columns: ['category_id']
+            referencedRelation: 'categories'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+
+      product_images: {
+        Row: {
+          id: string
+          product_id: string
+          url: string
+          is_cover: boolean
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          url: string
+          is_cover?: boolean
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          product_id?: string
+          url?: string
+          is_cover?: boolean
+          sort_order?: number
+        }
+        Relationships: []
+      }
+
+      contact_submissions: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          phone: string
+          product_slug: string
+          city: string
+          address: string
+          message: string
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          email: string
+          phone: string
+          product_slug: string
+          city?: string
+          address?: string
+          message?: string
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          name?: string
+          email?: string
+          phone?: string
+          product_slug?: string
+          city?: string
+          address?: string
+          message?: string
+          status?: string
+        }
+        Relationships: []
       }
     }
+
+    Views: Record<string, never>
+    Functions: Record<string, never>
+    Enums: Record<string, never>
+    CompositeTypes: Record<string, never>
   }
 }
 
