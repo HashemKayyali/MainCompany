@@ -1,10 +1,12 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
 import type { Product, ProductPart, Category } from '../data/products/types'
 import type { Customer } from '../data/customers'
+import type { GalleryAlbum } from '../data/gallery'
 import * as productsApi from '../services/products.service'
 import * as partsApi from '../services/parts.service'
 import * as customersApi from '../services/customers.service'
 import * as categoriesApi from '../services/categories.service'
+import * as galleryApi from '../services/gallery.service'
 
 interface DataCtx {
   products: Product[]
@@ -30,6 +32,11 @@ interface DataCtx {
   updateCategory: (id: string, c: Partial<Category>) => Promise<void>
   deleteCategory: (id: string) => Promise<void>
 
+  galleryAlbums: GalleryAlbum[]
+  addGalleryAlbum: (a: GalleryAlbum) => Promise<void>
+  updateGalleryAlbum: (slug: string, a: Partial<GalleryAlbum>) => Promise<void>
+  deleteGalleryAlbum: (slug: string) => Promise<void>
+
   getProductBySlug: (s: string) => Product | undefined
   getPartsByProduct: (s: string) => ProductPart[]
   getProductsByCategory: (id: string) => Product[]
@@ -50,6 +57,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [parts, setParts] = useState<ProductPart[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+  const [galleryAlbums, setGalleryAlbums] = useState<GalleryAlbum[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const retryCount = useRef(0)
@@ -60,16 +68,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      const [p, pa, cu, ca] = await Promise.all([
+      const [p, pa, cu, ca, ga] = await Promise.all([
         productsApi.getAll(),
         partsApi.getAll(),
         customersApi.getAll(),
         categoriesApi.getAll(),
+        galleryApi.getAll().catch(() => []),
       ])
       setProducts(p)
       setParts(pa)
       setCustomers(cu)
       setCategories(ca)
+      setGalleryAlbums(ga)
       retryCount.current = 0 // Reset retry count on success
     } catch (err: any) {
       console.error('Failed to load data from Supabase:', err)
@@ -82,16 +92,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
         console.log(`Retrying data load in ${delay}ms (attempt ${retryCount.current}/${MAX_RETRIES})`)
         retryTimer.current = setTimeout(async () => {
           try {
-            const [p, pa, cu, ca] = await Promise.all([
+            const [p, pa, cu, ca, ga] = await Promise.all([
               productsApi.getAll(),
               partsApi.getAll(),
               customersApi.getAll(),
               categoriesApi.getAll(),
+              galleryApi.getAll().catch(() => []),
             ])
             setProducts(p)
             setParts(pa)
             setCustomers(cu)
             setCategories(ca)
+            setGalleryAlbums(ga)
             setError(null)
             retryCount.current = 0
           } catch (retryErr: any) {
@@ -207,6 +219,28 @@ export function DataProvider({ children }: { children: ReactNode }) {
     } catch (err: any) { console.error(err); throw err }
   }
 
+  // ── Gallery CRUD ──
+  const addGalleryAlbum = async (a: GalleryAlbum) => {
+    try {
+      const created = await galleryApi.create(a)
+      setGalleryAlbums(prev => [...prev, created])
+    } catch (err: any) { console.error(err); throw err }
+  }
+
+  const updateGalleryAlbum = async (slug: string, u: Partial<GalleryAlbum>) => {
+    try {
+      const updated = await galleryApi.update(slug, u)
+      setGalleryAlbums(prev => prev.map(a => a.slug === slug ? updated : a))
+    } catch (err: any) { console.error(err); throw err }
+  }
+
+  const deleteGalleryAlbum = async (slug: string) => {
+    try {
+      await galleryApi.remove(slug)
+      setGalleryAlbums(prev => prev.filter(a => a.slug !== slug))
+    } catch (err: any) { console.error(err); throw err }
+  }
+
   // ── Helpers ──
   const getProductBySlug = (s: string) => products.find(p => p.slug === s)
   const getPartsByProduct = (s: string) => parts.filter(p => p.productSlug === s)
@@ -225,6 +259,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       addPart, updatePart, deletePart,
       addCustomer, updateCustomer, deleteCustomer,
       addCategory, updateCategory, deleteCategory,
+      galleryAlbums, addGalleryAlbum, updateGalleryAlbum, deleteGalleryAlbum,
       getProductBySlug, getPartsByProduct, getProductsByCategory,
       featuredProducts, allCategoryTags,
       refreshAll, resetToDefaults,

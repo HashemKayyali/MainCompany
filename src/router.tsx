@@ -18,6 +18,7 @@ import AdminPartsPage from './pages/admin/AdminPartsPage'
 import AdminCustomersPage from './pages/admin/AdminCustomersPage'
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage'
 import AdminAdminsPage from './pages/admin/AdminAdminsPage'
+import AdminGalleryPage from './pages/admin/AdminGalleryPage'
 
 export const router = createBrowserRouter([
   {
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
       { path: 'parts', element: <AdminPartsPage /> },
       { path: 'customers', element: <AdminCustomersPage /> },
       { path: 'categories', element: <AdminCategoriesPage /> },
+      { path: 'gallery', element: <AdminGalleryPage /> },
       { path: 'admins', element: <AdminAdminsPage /> },
     ],
   },

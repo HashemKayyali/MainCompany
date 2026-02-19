@@ -44,6 +44,12 @@ export interface Database {
           message: string; status: string; created_at: string
         }
       }
+      gallery_albums: {
+        Row: {
+          id: string; slug: string; title: string; cover: string
+          images: string[]; category: string; sort_order: number; created_at: string
+        }
+      }
     }
   }
 }
@@ -55,3 +61,4 @@ export type CustomerRow = Database['public']['Tables']['customers']['Row']
 export type PartRow = Database['public']['Tables']['parts']['Row']
 export type ContactSubmissionRow = Database['public']['Tables']['contact_submissions']['Row']
 export type ProductImageRow = Database['public']['Tables']['product_images']['Row']
+export type GalleryAlbumRow = Database['public']['Tables']['gallery_albums']['Row']
