@@ -20,13 +20,6 @@ interface UserCtx {
 
 const Ctx = createContext<UserCtx>({} as UserCtx)
 
-// Helper to update profile bypassing strict types
-async function updateProfile(userId: string, fields: Record<string, string>): Promise<{ error: any }> {
-  const query = supabase.from('profiles' as any) as any
-  const { error } = await query.update(fields).eq('id', userId)
-  return { error }
-}
-
 export function UserProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null)
   const [loading, setLoading] = useState(true)
@@ -110,7 +103,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
       await new Promise(r => setTimeout(r, 500))
 
       // Update profile with phone
-      const { error: updateError } = await updateProfile(authData.user.id, { phone, name, email })
+      const profileQuery = supabase.from('profiles' as any) as any
+      const { error: updateError } = await profileQuery
+        .update({ phone, name, email })
+        .eq('id', authData.user.id)
 
       if (updateError) console.warn('Could not update profile phone:', updateError)
 
@@ -124,8 +120,23 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, pw: string): Promise<string | true> => {
     if (!isSupabaseConfigured()) return 'Supabase not configured'
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password: pw })
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password: pw })
       if (error) return error.message
+
+      // Check if this is an admin account — admins should use /login instead
+      if (data.user) {
+        const { data: profile } = await (supabase
+          .from('profiles' as any)
+          .select('role')
+          .eq('id', data.user.id)
+          .maybeSingle()) as { data: any; error: any }
+
+        if (profile?.role === 'admin') {
+          await supabase.auth.signOut()
+          return 'This is an admin account. Please use the admin login page.'
+        }
+      }
+
       return true
     } catch (err: any) {
       return err.message || 'Login failed'
