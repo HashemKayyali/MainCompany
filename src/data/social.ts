@@ -1,0 +1,2 @@
+export const social = { phone: '+962788611234', phoneFormatted: '+962 788 611 234', email: 'info@bike-jo.com', whatsapp: 'https://wa.me/962788611234', instagram: 'https://instagram.com/bike_blender', facebook: 'https://facebook.com/BikeBlender' }
+export const socialLinks = [{ platform: 'Instagram', url: social.instagram, label: '@bike_blender' },{ platform: 'Facebook', url: social.facebook, label: 'BikeBlender' }]
