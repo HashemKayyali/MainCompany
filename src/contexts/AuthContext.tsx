@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 
 export interface AdminUser {
@@ -17,7 +17,6 @@ interface AuthCtx {
   login: (email: string, password: string) => Promise<{ ok: boolean; message?: string }>
   logout: () => Promise<void>
 
-  // موجودين عشان صفحاتك ما تنكسر (لكن إدارة الأدمنز صارت يدويًا من Supabase)
   admins: AdminUser[]
   isSuperAdmin: boolean
   addAdmin: () => boolean
@@ -32,7 +31,7 @@ async function fetchProfileRole(
   type ProfilePick = { role: string | null; name: string | null }
 
   const { data, error } = (await supabase
-    .from('profiles' as any) // ✅ bypass types until database.types includes profiles
+    .from('profiles' as any)
     .select('role,name')
     .eq('id', userId)
     .maybeSingle()) as { data: ProfilePick | null; error: any }
@@ -47,13 +46,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AdminUser | null>(null)
   const [admins, setAdmins] = useState<AdminUser[]>([])
 
+  /**
+   * Resolve whether a session user is an admin.
+   * IMPORTANT: Does NOT sign out non-admin users.
+   * It just returns null so AuthContext ignores them,
+   * while UserContext can still use the same Supabase session.
+   */
+  const resolveAdmin = useCallback(async (sessionUser: { id: string; email?: string } | null): Promise<AdminUser | null> => {
+    if (!sessionUser) return null
+    const prof = await fetchProfileRole(sessionUser.id)
+    if (prof.role !== 'admin') return null
+    return {
+      id: sessionUser.id,
+      email: sessionUser.email || '',
+      name: prof.name || sessionUser.email || 'Admin',
+      role: 'admin',
+    }
+  }, [])
+
   // Restore session + listen changes
   useEffect(() => {
     let mounted = true
 
     async function init() {
       if (!isSupabaseConfigured()) {
-        // إذا ما فيه env مضبوط، خلّي الأدمن “مقفول”
         if (mounted) {
           setUser(null)
           setAdmins([])
@@ -65,31 +81,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data } = await supabase.auth.getSession()
       const sessionUser = data.session?.user ?? null
 
-      if (sessionUser) {
-        const prof = await fetchProfileRole(sessionUser.id)
-        if (prof.role === 'admin') {
-          const u: AdminUser = {
-            id: sessionUser.id,
-            email: sessionUser.email || '',
-            name: prof.name || sessionUser.email || 'Admin',
-            role: 'admin',
-          }
-          if (mounted) setUser(u)
-        } else {
-          // مستخدم مو أدمن => ما إله دخول على لوحة الأدمن
-          await supabase.auth.signOut()
-          if (mounted) setUser(null)
-        }
-      } else {
-        if (mounted) setUser(null)
+      const adminUser = await resolveAdmin(sessionUser)
+      if (mounted) {
+        setUser(adminUser)
+        setAdmins(adminUser ? [adminUser] : [])
+        setLoading(false)
       }
-
-      // (اختياري) قائمة الأدمنز للعرض فقط
-      // نجيب كل profiles.role=admin (قراءة مسموحة للمصادق؟ عندنا profiles_read_own فقط، فبنخليها فاضية)
-      // بما إن RLS على profiles تسمح قراءة صفك فقط، خلّي admins = [user]
-      if (mounted) setAdmins(prev => (user ? [user] : []))
-
-      if (mounted) setLoading(false)
     }
 
     init()
@@ -97,43 +94,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!mounted) return
       const sessionUser = session?.user ?? null
-      setLoading(true)
 
-      if (!sessionUser) {
-        setUser(null)
-        setAdmins([])
-        setLoading(false)
-        return
+      if (sessionUser) {
+        setLoading(true)
+        const adminUser = await resolveAdmin(sessionUser)
+        if (mounted) {
+          setUser(adminUser)
+          setAdmins(adminUser ? [adminUser] : [])
+          setLoading(false)
+        }
+      } else {
+        if (mounted) {
+          setUser(null)
+          setAdmins([])
+          setLoading(false)
+        }
       }
-
-      const prof = await fetchProfileRole(sessionUser.id)
-      if (prof.role !== 'admin') {
-        await supabase.auth.signOut()
-        setUser(null)
-        setAdmins([])
-        setLoading(false)
-        return
-      }
-
-      const u: AdminUser = {
-        id: sessionUser.id,
-        email: sessionUser.email || '',
-        name: prof.name || sessionUser.email || 'Admin',
-        role: 'admin',
-      }
-      setUser(u)
-      setAdmins([u])
-      setLoading(false)
     })
 
     return () => {
       mounted = false
       sub.subscription.unsubscribe()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [resolveAdmin])
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     if (!isSupabaseConfigured()) {
       return { ok: false, message: 'Supabase is not configured. Check your .env file.' }
     }
@@ -143,19 +128,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const prof = await fetchProfileRole(data.user.id)
     if (prof.role !== 'admin') {
+      // Sign out ONLY when attempted through the admin login page
       await supabase.auth.signOut()
       return { ok: false, message: 'This account is not an admin.' }
     }
 
-    // onAuthStateChange رح يحدّث الstate تلقائيًا
+    // onAuthStateChange will update state automatically
     return { ok: true }
-  }
+  }, [])
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await supabase.auth.signOut()
     setUser(null)
     setAdmins([])
-  }
+  }, [])
 
   const value = useMemo<AuthCtx>(() => {
     return {
@@ -166,13 +152,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       login,
       logout,
-
-      // legacy fields for existing UI (no admin management from UI)
       isSuperAdmin: false,
       addAdmin: () => false,
       removeAdmin: () => {},
     }
-  }, [user, admins, loading])
+  }, [user, admins, loading, login, logout])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
 import type { Product, ProductPart, Category } from '../data/products/types'
 import type { Customer } from '../data/customers'
 import * as productsApi from '../services/products.service'
@@ -42,6 +42,9 @@ interface DataCtx {
 
 const Ctx = createContext<DataCtx>({} as DataCtx)
 
+const MAX_RETRIES = 3
+const RETRY_DELAY = 2000
+
 export function DataProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([])
   const [parts, setParts] = useState<ProductPart[]>([])
@@ -49,8 +52,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const retryCount = useRef(0)
+  const retryTimer = useRef<ReturnType<typeof setTimeout>>()
 
-  // ── Load all data from Supabase ──
+  // ── Load all data from Supabase with retry ──
   const refreshAll = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -65,15 +70,53 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setParts(pa)
       setCustomers(cu)
       setCategories(ca)
+      retryCount.current = 0 // Reset retry count on success
     } catch (err: any) {
       console.error('Failed to load data from Supabase:', err)
       setError(err.message || 'Failed to load data')
+
+      // Auto-retry with exponential backoff
+      if (retryCount.current < MAX_RETRIES) {
+        retryCount.current++
+        const delay = RETRY_DELAY * retryCount.current
+        console.log(`Retrying data load in ${delay}ms (attempt ${retryCount.current}/${MAX_RETRIES})`)
+        retryTimer.current = setTimeout(async () => {
+          try {
+            const [p, pa, cu, ca] = await Promise.all([
+              productsApi.getAll(),
+              partsApi.getAll(),
+              customersApi.getAll(),
+              categoriesApi.getAll(),
+            ])
+            setProducts(p)
+            setParts(pa)
+            setCustomers(cu)
+            setCategories(ca)
+            setError(null)
+            retryCount.current = 0
+          } catch (retryErr: any) {
+            console.error('Retry failed:', retryErr)
+            setError(retryErr.message || 'Failed to load data')
+          } finally {
+            setLoading(false)
+          }
+        }, delay)
+        return // Don't set loading to false yet, the retry will handle it
+      }
     } finally {
-      setLoading(false)
+      // Only set loading false if we're not waiting for a retry
+      if (retryCount.current === 0 || retryCount.current >= MAX_RETRIES) {
+        setLoading(false)
+      }
     }
   }, [])
 
-  useEffect(() => { refreshAll() }, [refreshAll])
+  useEffect(() => {
+    refreshAll()
+    return () => {
+      if (retryTimer.current) clearTimeout(retryTimer.current)
+    }
+  }, [refreshAll])
 
   // ── Products CRUD ──
   const addProduct = async (p: Product) => {
@@ -164,7 +207,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     } catch (err: any) { console.error(err); throw err }
   }
 
-  // ── Helpers (same interface as before) ──
+  // ── Helpers ──
   const getProductBySlug = (s: string) => products.find(p => p.slug === s)
   const getPartsByProduct = (s: string) => parts.filter(p => p.productSlug === s)
   const getProductsByCategory = (id: string) => products.filter(p => p.categoryId === id)

@@ -5,7 +5,7 @@
  */
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 
-const BUCKET = 'product-images' // ✅ نفس اسم الـ bucket اللي عملناه على Supabase
+const BUCKET = 'bikeland-images' // Must match the bucket name in Supabase schema
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {

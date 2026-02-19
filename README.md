@@ -67,3 +67,15 @@ supabase/
 - **Effects**: Animated gradients, glow shadows, star field, nebula clouds
 - **Glass**: Frosted glass cards with colored borders
 - **Typography**: Outfit (display), Nunito Sans (body), JetBrains Mono (code)
+
+
+
+تمام. لرفع التحديثات على GitHub اكتب هالأوامر داخل فولدر مشروعك (PowerShell) بالترتيب:
+
+
+
+git status
+git add .
+git commit -m "Update"
+git push
+

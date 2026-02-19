@@ -6,7 +6,9 @@ export interface Database {
   public: {
     Tables: {
       profiles: {
-        Row: { id: string; name: string | null; role: string; created_at: string }
+        Row: { id: string; name: string | null; email: string | null; phone: string | null; role: string; created_at: string }
+        Insert: { id: string; name?: string | null; email?: string | null; phone?: string | null; role?: string }
+        Update: { name?: string | null; email?: string | null; phone?: string | null; role?: string }
       }
       categories: {
         Row: { id: string; name: string; slug: string; icon: string; description: string; image: string; created_at: string }
