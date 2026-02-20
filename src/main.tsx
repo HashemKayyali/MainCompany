@@ -11,20 +11,22 @@ import PerfClass from './components/PerfClass'
 import './styles/input.css'
 import './styles/site.css'
 
+const AppTree = (
+  <PerfClass>
+    <ThemeProvider>
+      <SessionProvider>
+        <AuthProvider>
+          <UserProvider>
+            <DataProvider>
+              <RouterProvider router={router} />
+            </DataProvider>
+          </UserProvider>
+        </AuthProvider>
+      </SessionProvider>
+    </ThemeProvider>
+  </PerfClass>
+)
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <PerfClass>
-      <ThemeProvider>
-        <SessionProvider>
-          <AuthProvider>
-            <UserProvider>
-              <DataProvider>
-                <RouterProvider router={router} />
-              </DataProvider>
-            </UserProvider>
-          </AuthProvider>
-        </SessionProvider>
-      </ThemeProvider>
-    </PerfClass>
-  </React.StrictMode>,
+  import.meta.env.DEV ? <React.StrictMode>{AppTree}</React.StrictMode> : AppTree,
 )

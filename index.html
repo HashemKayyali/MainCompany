@@ -6,10 +6,31 @@
   <title>Bike Land | Interactive Cycling Experiences in Jordan</title>
   <meta name="description" content="Bike Land turns cycling into a show. Bike blender smoothies, LED racing, VR cycling across Jordan." />
   <meta name="theme-color" content="#7c3aed" />
+
+  <!-- ✅ Faster font loading (avoid render-blocking) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Preload the stylesheet, then apply it asynchronously -->
+  <link
+    rel="preload"
+    as="style"
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+  />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    media="print"
+    onload="this.media='all'"
+  />
+  <noscript>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    />
+  </noscript>
 </head>
+
 <body class="antialiased">
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>

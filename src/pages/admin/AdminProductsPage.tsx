@@ -30,6 +30,8 @@ const BADGE_OPTIONS = [
   'Featured',
 ]
 
+const toThumbUrl = (url: string) => (url && url.includes('-hero.webp') ? url.replace('-hero.webp', '-thumb.webp') : url)
+
 const EMPTY: Product = {
   slug: '',
   name: '',
@@ -627,7 +629,7 @@ export default function AdminProductsPage() {
                     <div key={idx} className="relative group">
                       <div className={`aspect-video rounded-xl overflow-hidden border ${isDark ? 'border-purple-500/20' : 'border-gray-200'}`}>
                         <img
-                          src={url}
+                          src={toThumbUrl(url)}
                           alt=""
                           className="w-full h-full object-cover"
                           onError={e => {

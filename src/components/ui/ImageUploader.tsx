@@ -1,6 +1,13 @@
 import { useState, useRef } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
-import { uploadImage } from '../../services/storage.service'
+import { uploadImageVariants } from '../../services/storage.service'
+
+const toThumbUrl = (url: string) => {
+  // If we stored variants as -hero.webp, use -thumb.webp for lists/grids
+  if (!url) return url
+  return url.includes('-hero.webp') ? url.replace('-hero.webp', '-thumb.webp') : url
+}
+
 
 interface Props {
   /** Current image URL */
@@ -29,8 +36,8 @@ export default function ImageUploader({ value, onChange, folder = 'general', lab
     if (!file.type.startsWith('image/')) return
     setUploading(true)
     try {
-      const url = await uploadImage(file, folder)
-      onChange(url)
+      const { heroUrl } = await uploadImageVariants(file, folder)
+      onChange(heroUrl)
     } catch (err) {
       console.error('Upload failed:', err)
       alert('Failed to upload image. Please try again.')
@@ -60,7 +67,7 @@ export default function ImageUploader({ value, onChange, folder = 'general', lab
         <input ref={inputRef} type="file" accept="image/*" onChange={handleChange} className="hidden" />
         {value ? (
           <div className="relative aspect-video rounded-xl overflow-hidden">
-            <img src={value} alt="" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+            <img src={toThumbUrl(value)} alt="" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
             <div className={`absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'bg-black/60' : 'bg-white/60'}`}>
               <button type="button" onClick={() => inputRef.current?.click()} className={`text-[10px] font-semibold px-2 py-1 rounded-lg ${isDark ? 'bg-purple-500/30 text-white' : 'bg-violet-100 text-violet-700'}`}>
                 {uploading ? '⏳' : '🔄'}
@@ -88,7 +95,7 @@ export default function ImageUploader({ value, onChange, folder = 'general', lab
       
       {value ? (
         <div className="relative group rounded-xl overflow-hidden">
-          <img src={value} alt="Uploaded" className="w-full aspect-video object-cover rounded-xl" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+          <img src={toThumbUrl(value)} alt="Uploaded" className="w-full aspect-video object-cover rounded-xl" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
           <div className={`absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'bg-black/60' : 'bg-white/60'}`}>
             <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading}
               className={`px-4 py-2 rounded-xl text-xs font-semibold ${isDark ? 'bg-purple-500/40 text-white' : 'bg-violet-100 text-violet-700'}`}>

@@ -4,6 +4,8 @@ import { useTheme } from '../../contexts/ThemeContext'
 import type { Product } from '../../data/products/types'
 import { useMotionEnabled } from '../../hooks/useMotionEnabled'
 
+const toThumbUrl = (url: string) => (url && url.includes('-hero.webp') ? url.replace('-hero.webp', '-thumb.webp') : url)
+
 export default function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
   const { isDark } = useTheme()
   const motionEnabled = useMotionEnabled()
@@ -17,7 +19,7 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
       <div className={`group relative rounded-2xl overflow-hidden transition-all duration-700 hover:-translate-y-2 ${isDark ? 'bg-purple-500/[0.06] border border-purple-500/15 hover:border-prism-violet/40' : 'bg-white border border-violet-100/60 hover:border-violet-300 shadow-sm hover:shadow-xl hover:shadow-violet-100/40'}`}>
         <div className={`absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none ${isDark ? 'bg-gradient-to-b from-prism-violet/20 via-transparent to-prism-pink/[0.02]' : ''}`} />
         <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-void-800 to-void-900">
-          <img src={product.heroImage} alt={product.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-[1.2s]" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+          <img src={toThumbUrl(product.heroImage)} alt={product.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-[1.2s]" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
           <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-t from-void-950/80 via-void-950/20 to-transparent' : 'bg-gradient-to-t from-white/40 to-transparent'}`} />
           <div className="absolute top-3 left-3">
             {product.badge?.trim() && (
