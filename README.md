@@ -76,6 +76,6 @@ supabase/
 
 git status
 git add .
-git commit -m "loginpage"
+git commit -m "admin products"
 git push
 
