@@ -1,68 +1,354 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { useUser } from '../../contexts/UserContext'
-import ThemeToggle from '../theme/ThemeToggle'
 
-const NAV = [{ to: '/', l: 'Home' },{ to: '/products', l: 'Products' },{ to: '/customers', l: 'Customers' },{ to: '/gallery', l: 'Gallery' },{ to: '/about', l: 'About' }]
+const NAV = [
+  { to: '/', l: 'Home' },
+  { to: '/products', l: 'Products' },
+  { to: '/customers', l: 'Customers' },
+  { to: '/gallery', l: 'Gallery' },
+  { to: '/about', l: 'About' },
+]
 
 export default function Navbar() {
   const { pathname } = useLocation()
   const { isDark } = useTheme()
   const { isAuth } = useAuth()
   const { isLoggedIn, currentUser, logout } = useUser()
+
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  useEffect(() => { const fn = () => setScrolled(window.scrollY > 40); window.addEventListener('scroll', fn, { passive: true }); return () => window.removeEventListener('scroll', fn) }, [])
-  useEffect(() => { setOpen(false) }, [pathname])
-  const active = (p: string) => p === '/' ? pathname === '/' : pathname.startsWith(p)
+
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 18)
+    window.addEventListener('scroll', fn, { passive: true })
+    return () => window.removeEventListener('scroll', fn)
+  }, [])
+
+  useEffect(() => setOpen(false), [pathname])
+
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth >= 1024) setOpen(false)
+    }
+    window.addEventListener('resize', onResize, { passive: true })
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  const active = (p: string) => (p === '/' ? pathname === '/' : pathname.startsWith(p))
+
+  const focus =
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent'
+
+  const shell = useMemo(() => {
+    // ✅ شكل مرتب حتى قبل ما تعمل scroll
+    const base = isDark
+      ? 'bg-void-900/45 border-white/10'
+      : 'bg-white/55 border-violet-200/60'
+
+    // ✅ عند scroll بصير أثقل شوي
+    const strong = isDark
+      ? 'bg-void-900/72 border-purple-500/20 shadow-[0_12px_55px_rgba(0,0,0,0.55)]'
+      : 'bg-white/82 border-violet-200/70 shadow-lg shadow-violet-500/10'
+
+    return scrolled ? strong : base
+  }, [scrolled, isDark])
+
+  const linkBase =
+    'relative px-3.5 h-10 inline-flex items-center justify-center rounded-xl text-[13px] font-medium transition-all'
+  const linkText = (isActive: boolean) =>
+    isActive
+      ? isDark
+        ? 'text-white'
+        : 'text-gray-900'
+      : isDark
+        ? 'text-purple-100/80 hover:text-white'
+        : 'text-gray-600 hover:text-gray-900'
+
+  const actionBtn =
+    'h-10 px-3 rounded-xl text-[12px] font-medium transition-all inline-flex items-center justify-center'
+
+  const iconBtn = (extra: string) =>
+    `w-10 h-10 rounded-xl inline-flex items-center justify-center transition-all ${extra}`
+
+  const userInitial = (currentUser?.name?.trim()?.[0] || 'U').toUpperCase()
+  const firstName = currentUser?.name?.split(' ')[0] || 'User'
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-4 pt-3">
-      <nav className={`relative max-w-6xl mx-auto rounded-2xl px-5 py-2.5 transition-all duration-700 ${scrolled ? isDark ? 'bg-void-900/70 backdrop-blur-2xl border border-purple-500/20 shadow-[0_8px_40px_rgba(0,0,0,0.5)]' : 'bg-white/80 backdrop-blur-2xl border border-violet-200/40 shadow-lg shadow-violet-500/5' : 'bg-transparent border border-transparent'}`}>
-        {scrolled && <div className="absolute inset-x-4 top-0 h-px" style={{ background: isDark ? 'linear-gradient(90deg, transparent, rgba(124,58,237,0.3), rgba(236,72,153,0.2), transparent)' : 'linear-gradient(90deg, transparent, rgba(124,58,237,0.2), transparent)' }} />}
-        <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber flex items-center justify-center shadow-lg shadow-prism-violet/30 group-hover:scale-105 transition-transform">
-              <span className="text-white font-black text-xs font-display">BL</span>
-            </div>
-            <span className={`hidden sm:block text-[13px] font-bold tracking-[0.2em] uppercase font-display ${isDark ? 'text-white' : 'text-gray-900'}`}>Bike <span className={isDark ? 'text-prism-violet' : 'text-violet-600'}>Land</span></span>
-          </Link>
-          <div className={`hidden lg:flex items-center gap-0.5 rounded-xl p-1 border ${isDark ? 'bg-purple-500/[0.07] border-purple-500/20' : 'bg-violet-50/50 border-violet-100/50'}`}>
-            {NAV.map(l => (
-              <Link key={l.to} to={l.to} className={`relative px-4 py-2 rounded-lg text-[13px] font-medium transition-all ${active(l.to) ? isDark ? 'text-prism-violet' : 'text-violet-600' : isDark ? 'text-purple-200/80 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
-                {active(l.to) && <motion.div layoutId="nav-pill" className={`absolute inset-0 rounded-lg border ${isDark ? 'bg-prism-violet/15 border-prism-violet/30' : 'bg-violet-50 border-violet-200/50'}`} transition={{ type: 'spring', stiffness: 400, damping: 30 }} />}
-                <span className="relative z-10">{l.l}</span>
-              </Link>
-            ))}
-          </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            {isLoggedIn ? (
-              <div className="flex items-center gap-2">
-                <span className={`text-[11px] font-medium hidden sm:block ${isDark ? 'text-purple-200/80' : 'text-gray-500'}`}>{currentUser?.name.split(' ')[0]}</span>
-                <button onClick={logout} className={`text-[10px] font-mono px-2 py-1.5 rounded-lg ${isDark ? 'bg-purple-500/10 text-purple-300/80 hover:text-red-400' : 'bg-gray-100 text-gray-400 hover:text-red-500'}`}>Logout</button>
+    <header className="fixed inset-x-0 top-0 z-50">
+      {/* ✅ مسافة هواء */}
+      <div className="px-4 pt-4">
+        <nav className="relative max-w-7xl mx-auto">
+          {/* Gradient border frame */}
+          <div
+            className="absolute -inset-px rounded-2xl pointer-events-none opacity-70"
+            style={{
+              background: isDark
+                ? 'linear-gradient(90deg, rgba(124,58,237,0.35), rgba(236,72,153,0.22), rgba(245,158,11,0.18))'
+                : 'linear-gradient(90deg, rgba(124,58,237,0.22), rgba(236,72,153,0.16), rgba(245,158,11,0.12))',
+              filter: 'blur(0px)',
+            }}
+          />
+          {/* Inner shell */}
+          <div
+            className={`relative rounded-2xl border backdrop-blur-2xl ${shell}`}
+          >
+            <div className="px-4 sm:px-5 py-3">
+              <div className="flex items-center justify-between gap-3">
+                {/* Left: Brand */}
+                <Link to="/" className={`flex items-center gap-3 min-w-[140px] ${focus}`}>
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber flex items-center justify-center shadow-lg shadow-prism-violet/25">
+                    <span className="text-white font-black text-xs font-display">BL</span>
+                  </div>
+
+                  <div className="leading-none hidden sm:block">
+                    <div
+                      className={`text-[12px] font-bold tracking-[0.22em] uppercase font-display ${
+                        isDark ? 'text-white' : 'text-gray-900'
+                      }`}
+                    >
+                      Bike <span className={isDark ? 'text-prism-violet' : 'text-violet-600'}>Land</span>
+                    </div>
+                    <div className={`text-[10px] mt-1 ${isDark ? 'text-purple-200/60' : 'text-gray-400'}`}>
+                      Rentals • Events • Experiences
+                    </div>
+                  </div>
+                </Link>
+
+                {/* Center: Nav (desktop) */}
+                <div className="hidden lg:flex items-center justify-center flex-1">
+                  <div
+                    className={`px-2 py-1 rounded-2xl border ${
+                      isDark ? 'bg-white/[0.03] border-white/10' : 'bg-white/60 border-violet-200/60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1">
+                      {NAV.map((l) => {
+                        const isA = active(l.to)
+                        return (
+                          <Link
+                            key={l.to}
+                            to={l.to}
+                            className={`${linkBase} ${linkText(isA)} ${focus}`}
+                          >
+                            {/* Active glow */}
+                            {isA && (
+                              <motion.div
+                                layoutId="nav-active"
+                                className={`absolute inset-0 rounded-xl ${
+                                  isDark ? 'bg-white/[0.06]' : 'bg-violet-50'
+                                }`}
+                                transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                              />
+                            )}
+                            <span className="relative z-10">{l.l}</span>
+                            {/* Active underline */}
+                            {isA && (
+                              <motion.span
+                                layoutId="nav-underline"
+                                className="absolute -bottom-1 left-3 right-3 h-[2px] rounded-full"
+                                style={{
+                                  background: isDark
+                                    ? 'linear-gradient(90deg, rgba(124,58,237,0.9), rgba(236,72,153,0.75))'
+                                    : 'linear-gradient(90deg, rgba(124,58,237,0.85), rgba(236,72,153,0.65))',
+                                }}
+                              />
+                            )}
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Actions */}
+                <div className="flex items-center gap-2 min-w-[180px] justify-end">
+                  {/* Desktop actions */}
+                  <div className="hidden sm:flex items-center gap-2">
+                    {/* Theme */}
+                   
+
+                    {/* User chip */}
+                    {isLoggedIn ? (
+                      <div
+                        className={`h-10 pl-2 pr-1 rounded-2xl border inline-flex items-center gap-2 ${
+                          isDark ? 'bg-white/[0.03] border-white/10' : 'bg-white/70 border-violet-200/60'
+                        }`}
+                      >
+                        <div
+                          className={`w-8 h-8 rounded-xl flex items-center justify-center border ${
+                            isDark
+                              ? 'bg-purple-500/10 border-purple-500/20 text-purple-100'
+                              : 'bg-violet-50 border-violet-200 text-violet-700'
+                          }`}
+                          title={currentUser?.name || 'User'}
+                        >
+                          <span className="text-[11px] font-bold">{userInitial}</span>
+                        </div>
+                        <span className={`text-[12px] font-medium hidden md:block ${isDark ? 'text-purple-100/80' : 'text-gray-700'}`}>
+                          {firstName}
+                        </span>
+                        <button
+                          onClick={logout}
+                          className={`${actionBtn} ${focus} ${
+                            isDark
+                              ? 'text-purple-100/75 hover:text-red-300'
+                              : 'text-gray-600 hover:text-red-600'
+                          }`}
+                          style={{ paddingLeft: 10, paddingRight: 10 }}
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    ) : (
+                      <Link
+                        to="/user-login"
+                        className={`${actionBtn} ${focus} ${
+                          isDark
+                            ? 'bg-white/[0.04] border border-white/10 text-purple-100/80 hover:text-white hover:bg-white/[0.06]'
+                            : 'bg-white/70 border border-violet-200/60 text-gray-800 hover:bg-white'
+                        }`}
+                      >
+                        Login
+                      </Link>
+                    )}
+
+                    {/* Admin badge */}
+                    {isAuth && (
+                      <Link
+                        to="/admin"
+                        className={`${actionBtn} ${focus} ${
+                          isDark
+                            ? 'bg-prism-pink/15 border border-prism-pink/30 text-prism-pink hover:bg-prism-pink/20'
+                            : 'bg-pink-50 border border-pink-200 text-pink-700 hover:bg-pink-100'
+                        }`}
+                      >
+                        Admin
+                      </Link>
+                    )}
+
+                    {/* Book */}
+                    <Link to="/contact" className={`btn-primary !h-10 !px-4 !rounded-2xl !text-[12px] ${focus}`}>
+                      Book
+                    </Link>
+                  </div>
+
+                  {/* Mobile: only book + menu */}
+                  <div className="sm:hidden flex items-center gap-2">
+                    <Link to="/contact" className={`btn-primary !h-10 !px-4 !rounded-2xl !text-[12px] ${focus}`}>
+                      Book
+                    </Link>
+                  </div>
+
+                  {/* Mobile menu button */}
+                  <button
+                    onClick={() => setOpen((v) => !v)}
+                    className={`${iconBtn(
+                      isDark
+                        ? 'bg-white/[0.04] border border-white/10 hover:bg-white/[0.07] text-purple-100'
+                        : 'bg-white/70 border border-violet-200/60 hover:bg-white text-gray-800'
+                    )} ${focus} lg:hidden`}
+                    aria-label="Menu"
+                    aria-expanded={open}
+                  >
+                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      {open ? <path d="M5 5l8 8M5 13l8-8" /> : <path d="M3 6h12M3 9h12M3 12h12" />}
+                    </svg>
+                  </button>
+                </div>
               </div>
-            ) : (
-              <Link to="/user-login" className={`text-[11px] font-medium px-3 py-2 rounded-lg transition-all ${isDark ? 'bg-purple-500/10 text-purple-200/80 hover:text-prism-violet border border-purple-500/20' : 'bg-violet-50 text-violet-600 hover:bg-violet-100 border border-violet-200'}`}>Login</Link>
-            )}
-            {isAuth && <Link to="/admin" className={`text-[10px] font-mono px-2 py-1.5 rounded-lg ${isDark ? 'bg-prism-pink/15 text-prism-pink border border-prism-pink/30' : 'bg-pink-50 text-pink-600 border border-pink-200'}`}>Admin</Link>}
-            <Link to="/contact" className="btn-primary !px-4 !py-2 !rounded-xl !text-xs !gap-1.5"><span>Book</span></Link>
-            <button onClick={() => setOpen(!open)} className={`lg:hidden w-9 h-9 rounded-lg flex items-center justify-center ${isDark ? 'bg-purple-500/10 border border-purple-500/25 text-purple-200/90' : 'bg-violet-50 border border-violet-200 text-gray-500'}`} aria-label="Menu">
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">{open ? <path d="M4 4l8 8M4 12l8-8" /> : <path d="M2 5h12M2 8h12M2 11h12" />}</svg>
-            </button>
-          </div>
-        </div>
-        <AnimatePresence>{open && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="lg:hidden overflow-hidden">
-            <div className={`pt-3 pb-2 space-y-1 border-t mt-2.5 ${isDark ? 'border-purple-500/20' : 'border-violet-100'}`}>
-              {NAV.map(l => <Link key={l.to} to={l.to} className={`block px-4 py-2.5 rounded-xl text-sm font-medium ${active(l.to) ? isDark ? 'text-prism-violet bg-prism-violet/15' : 'text-violet-600 bg-violet-50' : isDark ? 'text-purple-200/80' : 'text-gray-500'}`}>{l.l}</Link>)}
+
+              {/* Mobile dropdown (blur دائماً) */}
+              <AnimatePresence>
+                {open && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.22, ease: 'easeOut' }}
+                    className="lg:hidden overflow-hidden"
+                  >
+                    <div
+                      className={`mt-3 rounded-2xl border p-2 backdrop-blur-2xl ${
+                        isDark ? 'bg-void-900/75 border-white/10' : 'bg-white/85 border-violet-200/60'
+                      }`}
+                    >
+                      <div className="grid grid-cols-2 gap-2">
+                        {NAV.map((l) => (
+                          <Link
+                            key={l.to}
+                            to={l.to}
+                            className={`h-11 rounded-2xl px-4 inline-flex items-center justify-center text-[13px] font-medium transition-colors ${focus} ${
+                              active(l.to)
+                                ? isDark
+                                  ? 'bg-white/[0.08] text-white'
+                                  : 'bg-violet-50 text-gray-900'
+                                : isDark
+                                  ? 'bg-white/[0.03] text-purple-100/80 hover:text-white hover:bg-white/[0.06]'
+                                  : 'bg-white/70 text-gray-700 hover:text-gray-900 hover:bg-white'
+                            }`}
+                          >
+                            {l.l}
+                          </Link>
+                        ))}
+                      </div>
+
+                      <div className={`mt-3 pt-3 border-t ${isDark ? 'border-white/10' : 'border-violet-200/50'}`}>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            {/* Theme on mobile dropdown */}
+                            
+
+                            {isAuth && (
+                              <Link
+                                to="/admin"
+                                className={`${actionBtn} ${focus} ${
+                                  isDark
+                                    ? 'bg-prism-pink/15 border border-prism-pink/30 text-prism-pink'
+                                    : 'bg-pink-50 border border-pink-200 text-pink-700'
+                                }`}
+                              >
+                                Admin
+                              </Link>
+                            )}
+                          </div>
+
+                          {isLoggedIn ? (
+                            <button
+                              onClick={logout}
+                              className={`${actionBtn} ${focus} ${
+                                isDark
+                                  ? 'bg-white/[0.04] border border-white/10 text-purple-100/80 hover:text-red-300'
+                                  : 'bg-white/70 border border-violet-200/60 text-gray-700 hover:text-red-600'
+                              }`}
+                            >
+                              Logout
+                            </button>
+                          ) : (
+                            <Link
+                              to="/user-login"
+                              className={`${actionBtn} ${focus} ${
+                                isDark
+                                  ? 'bg-white/[0.04] border border-white/10 text-purple-100/80 hover:text-white'
+                                  : 'bg-white/70 border border-violet-200/60 text-gray-800 hover:bg-white'
+                              }`}
+                            >
+                              Login
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </motion.div>
-        )}</AnimatePresence>
-      </nav>
+          </div>
+        </nav>
+      </div>
     </header>
   )
 }

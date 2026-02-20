@@ -2,7 +2,6 @@ import { Link, useLocation } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useData } from '../../contexts/DataContext'
-import ThemeToggle from '../theme/ThemeToggle'
 
 type SidebarVariant = 'desktop' | 'drawer'
 
@@ -284,10 +283,7 @@ export default function Sidebar({
 
       {/* Footer */}
       <div className={['p-3 border-t', isDark ? 'border-purple-500/15' : 'border-gray-100'].join(' ')}>
-        <div className={['flex items-center justify-between gap-2', collapsed ? 'justify-center' : ''].join(' ')}>
-          {!collapsed && <span className={['text-[11px] font-mono', isDark ? 'text-purple-200/60' : 'text-gray-500'].join(' ')}>Theme</span>}
-          <ThemeToggle />
-        </div>
+        
       </div>
     </aside>
   )

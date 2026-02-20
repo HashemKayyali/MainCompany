@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import CustomersGrid from '../components/customer/CustomersGrid'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Hero from '../components/home/Hero'
@@ -134,12 +135,37 @@ export default function HomePage() {
       </div>
     </section>
 
-    {/* ── Customers Section ── */}
-    <section className="py-24 relative"><div className="relative max-w-7xl mx-auto px-6">
-      <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, ease }} className="text-center mb-12"><span className="section-label">// Trusted By</span><h2 className={`section-title ${!isDark ? 'text-gray-900' : ''}`}>Our <span className="text-glow">Customers</span></h2></motion.div>
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">{customers.slice(0, 12).map(c => (<div key={c.slug} className="group glass !rounded-xl p-3.5 flex flex-col items-center gap-2"><div className={`w-11 h-11 rounded-xl flex items-center justify-center overflow-hidden ${isDark ? 'bg-purple-500/[0.08] border border-purple-500/20' : 'bg-gray-50 border border-gray-100'}`}><img src={c.logo} alt={c.name} loading="lazy" className="w-[55%] h-[55%] object-contain group-hover:scale-110 transition-transform duration-500" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} /></div><span className={`text-[9px] text-center font-medium uppercase tracking-wider ${isDark ? 'text-purple-300/70' : 'text-gray-400'}`}>{c.name}</span></div>))}</div>
-      <div className="text-center mt-8"><Link to="/customers" className={`text-sm font-medium ${isDark ? 'text-prism-violet hover:text-prism-violet' : 'text-violet-600'}`}>View All {customers.length} Customers</Link></div>
-    </div></section>
+{/* ── Customers Section ── */}
+<section className="py-24 relative">
+  <div className="relative max-w-7xl mx-auto px-6">
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.7, ease }}
+      className="text-center mb-12"
+    >
+      <span className="section-label">// Trusted By</span>
+      <h2 className={`section-title ${!isDark ? 'text-gray-900' : ''}`}>
+        Our <span className="text-glow">Customers</span>
+      </h2>
+    </motion.div>
+
+    <CustomersGrid customers={customers.slice(0, 12)} />
+
+    <div className="text-center mt-8">
+      <Link
+        to="/customers"
+        className={`text-sm font-medium ${
+          isDark ? 'text-prism-violet hover:text-prism-violet' : 'text-violet-600'
+        }`}
+      >
+        View All {customers.length} Customers
+      </Link>
+    </div>
+  </div>
+</section>
+
 
     {/* ── CTA ── */}
     <section className="py-28 relative overflow-hidden"><div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,_rgba(124,58,237,0.06),_transparent_70%)]" /><div className="relative max-w-3xl mx-auto px-6 text-center"><motion.div initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, ease }}><h2 className={`font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[0.95] ${!isDark ? 'text-gray-900' : ''}`}>Let us make your<br /><span className="text-glow">next event unforgettable</span></h2><p className={`mt-5 text-lg max-w-xl mx-auto ${isDark ? 'text-purple-200/70' : 'text-gray-500'}`}>Tell us about your event. We handle everything.</p><div className="mt-8 flex flex-wrap justify-center gap-3"><Link to="/contact" className="btn-primary">Book Your Event</Link><a href={social.whatsapp} target="_blank" rel="noopener noreferrer" className="btn-outline">WhatsApp</a></div></motion.div></div></section>
