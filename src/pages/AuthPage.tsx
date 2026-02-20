@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, Navigate } from 'react-router-dom'
-import { motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useUser } from '../contexts/UserContext'
 import { useTheme } from '../contexts/ThemeContext'
 import AnimatedBackground from '../components/theme/AnimatedBackground'
@@ -13,23 +13,21 @@ export default function AuthPage() {
   const navigate = useNavigate()
   const reduceMotion = useReducedMotion()
 
-  // ✅ المنطق الحقيقي (حسب الراوت)
+  const { login, register, isLoggedIn, isAdmin } = useUser()
+
+  // ✅ المنطق الحقيقي حسب الراوت
   const routeMode: Mode = pathname.includes('register') ? 'register' : 'login'
   const routeIsLogin = routeMode === 'login'
 
-  // ✅ منطق الـ UI للأنيميشن (موحّد)
-  const [uiIsLogin, setUiIsLogin] = useState(routeIsLogin)
+  // ✅ UI state (حتى نخلي الأنيميشن سلس)
+  const [uiMode, setUiMode] = useState<Mode>(routeMode)
 
-  // ✅ مدة السويتش (لازم تطابق transition)
-  const SWITCH_MS = reduceMotion ? 0 : 450
+  // ✅ مدة الفيد (لازم تطابق)
+  const FADE_MS = reduceMotion ? 0 : 260
 
-  const { login, register, isLoggedIn, isAdmin } = useUser()
-
-  // login fields
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  // register fields
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -39,14 +37,22 @@ export default function AuthPage() {
   const [busy, setBusy] = useState(false)
 
   const pendingRedirectRef = useRef(false)
-  const pendingNavTimerRef = useRef<number | null>(null)
+  const pendingTimerRef = useRef<number | null>(null)
+  const isSwitchingRef = useRef(false)
 
-  // ✅ حافظ تزامن UI مع الراوت (لو المستخدم دخل من URL مباشرة أو رجع Back)
+  // ✅ مزامنة UI مع الراوت (لكن مش أثناء السويتش)
   useEffect(() => {
-    setUiIsLogin(routeIsLogin)
-  }, [routeIsLogin])
+    if (isSwitchingRef.current) return
+    setUiMode(routeMode)
+  }, [routeMode])
 
-  // بعد login: اعرض success شوي وبعدين روح حسب الدور
+  useEffect(() => {
+    return () => {
+      if (pendingTimerRef.current) window.clearTimeout(pendingTimerRef.current)
+    }
+  }, [])
+
+  // ✅ بعد تسجيل الدخول: روح للصفحة المناسبة
   useEffect(() => {
     if (!isLoggedIn) return
 
@@ -60,27 +66,23 @@ export default function AuthPage() {
     navigate(isAdmin ? '/admin' : '/', { replace: true })
   }, [isLoggedIn, isAdmin, navigate])
 
-  useEffect(() => {
-    return () => {
-      if (pendingNavTimerRef.current) window.clearTimeout(pendingNavTimerRef.current)
-    }
-  }, [])
-
   if (isLoggedIn) return <Navigate to={isAdmin ? '/admin' : '/'} replace />
 
-  // ✅ سويتش موحّد: أنيميشن أولاً، ثم تغيير الراوت
+  // ✅ سويتش Fade: أولاً غيّر UI (ليصير خروج/دخول)، بعدين غيّر الراوت
   const switchTo = (next: Mode) => {
     setError('')
     setSuccess('')
+    if (pendingTimerRef.current) window.clearTimeout(pendingTimerRef.current)
 
-    if (pendingNavTimerRef.current) window.clearTimeout(pendingNavTimerRef.current)
+    isSwitchingRef.current = true
+    setUiMode(next)
 
-    const nextIsLogin = next === 'login'
-    setUiIsLogin(nextIsLogin)
-
-    pendingNavTimerRef.current = window.setTimeout(() => {
-      navigate(nextIsLogin ? '/user-login' : '/register', { replace: false })
-    }, SWITCH_MS)
+    pendingTimerRef.current = window.setTimeout(() => {
+      navigate(next === 'login' ? '/user-login' : '/register', { replace: false })
+      window.setTimeout(() => {
+        isSwitchingRef.current = false
+      }, 60)
+    }, FADE_MS)
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -127,248 +129,238 @@ export default function AuthPage() {
     setError(r || 'Register failed')
   }
 
-  // ✅ حركة التبديل (desktop) حسب UI state (موحّد)
-  const leftX = uiIsLogin ? '0%' : '100%'
-  const rightX = uiIsLogin ? '0%' : '-100%'
+const inputClass =
+  'w-full rounded-2xl px-4 py-3 text-[15px] font-semibold ' +
+  // ✅ glass input
+  'bg-white/12 backdrop-blur-xl text-white placeholder:text-white/55 ' +
+  'border border-white/18 shadow-[0_10px_30px_rgba(0,0,0,0.25)] ' +
+  // ✅ focus
+  'focus:outline-none focus:ring-2 focus:ring-violet-400/35 focus:border-violet-300/35 ' +
+  'transition'
 
-  const panelTransition = reduceMotion
-    ? { duration: 0 }
-    : { type: 'tween', duration: 0.45, ease: [0.22, 1, 0.36, 1] }
+const labelClass = 'block text-[13px] mb-2 font-extrabold text-violet-100/90'
+  const card =
+    'relative w-full max-w-[460px] rounded-[28px] overflow-hidden ' +
+    'bg-white/14 backdrop-blur-2xl border border-white/18 ' +
+    (isDark ? 'shadow-[0_20px_80px_rgba(0,0,0,0.55)]' : 'shadow-[0_18px_60px_rgba(0,0,0,0.18)]')
 
-  const cardIntro = reduceMotion
-    ? { initial: { opacity: 1, y: 0, scale: 1 }, animate: { opacity: 1, y: 0, scale: 1 }, transition: { duration: 0 } }
-    : { initial: { opacity: 0, y: 14, scale: 0.99 }, animate: { opacity: 1, y: 0, scale: 1 }, transition: { duration: 0.28 } }
-
-  const inputClass =
-    'w-full rounded-2xl px-4 py-3 text-[15px] font-medium ' +
-    'bg-gray-50 text-gray-900 placeholder:text-gray-500 ' +
-    'border border-gray-300 shadow-sm ' +
-    'focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-400 ' +
-    'transition'
-
-  const labelClass = 'block text-[13px] mb-2 font-semibold text-gray-800'
+  const fadeVariants = {
+    hidden: { opacity: 0, y: reduceMotion ? 0 : 8 },
+    show: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: reduceMotion ? 0 : -6 },
+  }
 
   return (
     <section className="min-h-[100dvh] relative overflow-hidden">
-      <div className={`absolute inset-0 ${isDark ? 'bg-black/30' : 'bg-black/5'}`} />
+      {/* ✅ نفس الخلفية المستوردة */}
+      {!reduceMotion && <AnimatedBackground position="absolute" className="z-0" />}
 
-      <div className="relative z-10 min-h-[100dvh] flex items-center justify-center px-5 py-10">
-        <motion.div {...cardIntro} className="w-full max-w-6xl">
-          <div className={`relative overflow-hidden rounded-[28px] shadow-2xl ${isDark ? 'shadow-black/50' : 'shadow-black/20'}`}>
-            <div className="relative h-[720px] lg:h-[640px]">
-              {/* LEFT PANEL */}
-              <motion.div
-                className="absolute inset-y-0 left-0 w-full lg:w-1/2 will-change-transform"
-                animate={{ x: leftX }}
-                transition={panelTransition}
-              >
-                <div className="relative h-full overflow-hidden">
-                  {!reduceMotion && <AnimatedBackground position="absolute" className="z-0" />}
-                  <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/55 via-black/35 to-black/55" />
+      {/* طبقة تباين خفيفة عشان الكارد يبين */}
+      <div className={`absolute inset-0 z-[1] ${isDark ? 'bg-black/35' : 'bg-black/10'}`} />
 
-                  <div className="relative z-[2] h-full p-8 lg:p-10 flex flex-col justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber flex items-center justify-center shadow-lg shadow-prism-violet/30">
-                        <span className="text-white font-black text-sm font-display">BL</span>
-                      </div>
-                      <div>
-                        <div className="text-white text-lg font-extrabold font-display tracking-wide">Bike Land</div>
-                        <div className="text-white/80 text-sm font-medium">Portal</div>
-                      </div>
+      <div className="relative z-[2] min-h-[100dvh] flex items-center justify-center px-5 py-10">
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 10, scale: 0.99 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: reduceMotion ? 0 : 0.25 }}
+          className={card}
+        >
+          {/* رأس الكارد */}
+          <div className="p-6 sm:p-7 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber flex items-center justify-center shadow-lg shadow-prism-violet/25">
+                <span className="text-white font-black text-sm font-display">BL</span>
+              </div>
+              <div>
+                <div className="text-white text-lg font-extrabold font-display tracking-wide">Bike Land</div>
+                <div className="text-white/75 text-sm font-semibold">Portal</div>
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <div className="text-white text-2xl font-display font-extrabold leading-tight drop-shadow">
+                {uiMode === 'login' ? 'Welcome back' : 'Create your account'}
+              </div>
+              <p className="text-white/80 text-sm mt-2 leading-relaxed font-semibold">
+                {uiMode === 'login'
+                  ? 'Sign in to continue to your dashboard and services.'
+                  : 'Join Bike Land to order parts, request quotes, and track updates.'}
+              </p>
+            </div>
+          </div>
+
+          {/* Alerts */}
+          <div className="px-6 sm:px-7">
+            {success && (
+              <div className="mb-4 px-3 py-2.5 rounded-2xl text-sm bg-emerald-200/20 border border-emerald-200/30 text-emerald-50 font-bold">
+                {success}
+              </div>
+            )}
+            {error && (
+              <div className="mb-4 px-3 py-2.5 rounded-2xl text-sm bg-red-200/15 border border-red-200/25 text-red-50 font-bold">
+                {error}
+              </div>
+            )}
+          </div>
+
+          {/* ✅ محتوى يتبدّل بفيد */}
+          <div className="px-6 sm:px-7 pb-7">
+            <AnimatePresence mode="wait" initial={false}>
+              {uiMode === 'login' ? (
+                <motion.div
+                  key="login"
+                  variants={fadeVariants}
+                  initial="hidden"
+                  animate="show"
+                  exit="exit"
+                  transition={{ duration: FADE_MS / 1000, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div>
+                      <label className={labelClass}>Email</label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        autoComplete="email"
+                        inputMode="email"
+                        className={inputClass}
+                      />
                     </div>
 
-                    <div className="max-w-md">
-                      <div className="text-white text-2xl lg:text-3xl font-display font-extrabold leading-tight drop-shadow">
-                        {uiIsLogin ? 'Hello! Have a good day.' : 'Welcome! Create your account.'}
-                      </div>
-                      <p className="text-white/85 text-sm mt-3 leading-relaxed font-medium">
-                        {uiIsLogin
-                          ? 'Sign in to manage products, events, gallery, and bookings.'
-                          : 'Join Bike Land to order parts, request quotes, and follow updates.'}
-                      </p>
-
-                      <button
-                        type="button"
-                        onClick={() => switchTo(uiIsLogin ? 'register' : 'login')}
-                        className="mt-6 inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-bold text-white
-                                   bg-white/15 border border-white/25 hover:bg-white/20 active:bg-white/25 transition"
-                      >
-                        {uiIsLogin ? 'Create an account →' : 'Already have an account? Sign in →'}
-                      </button>
+                    <div>
+                      <label className={labelClass}>Password</label>
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        placeholder="Your password"
+                        autoComplete="current-password"
+                        className={inputClass}
+                      />
                     </div>
 
-                    <div className="text-white/70 text-xs font-medium">© {new Date().getFullYear()} Bike Land</div>
-                  </div>
-                </div>
-              </motion.div>
+                    <button
+                      type="submit"
+                      disabled={busy || !!success}
+                      className="btn-primary w-full !rounded-2xl disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {busy ? 'Signing in…' : success ? 'Redirecting…' : 'Login'}
+                    </button>
 
-              {/* RIGHT PANEL */}
-              <motion.div
-                className="absolute inset-y-0 right-0 w-full lg:w-1/2 will-change-transform"
-                animate={{ x: rightX }}
-                transition={panelTransition}
-              >
-                {/* ✅ زودنا padding فوق/تحت + scroll لو الشاشة قصيرة */}
-                <div className="h-full bg-white/95 backdrop-blur-sm px-8 lg:px-10 pt-10 pb-10 border-l border-black/5">
-                  <div className="h-full overflow-y-auto pr-1">
-                    <div className="min-h-full flex flex-col justify-center py-6">
-                      <div className="mb-6">
-                        <h1 className="font-display text-3xl font-extrabold text-gray-950">
-                          {uiIsLogin ? 'Login' : 'Create Account'}
-                        </h1>
-                        <p className="text-sm text-gray-600 mt-1.5 font-medium">
-                          {uiIsLogin ? 'Sign in to continue' : 'Join Bike Land to order parts and request quotes'}
-                        </p>
-                      </div>
-
-                      {success && (
-                        <div className="mb-4 px-3 py-2.5 rounded-2xl text-sm bg-emerald-50 border border-emerald-200 text-emerald-800 font-semibold">
-                          {success}
-                        </div>
-                      )}
-                      {error && (
-                        <div className="mb-4 px-3 py-2.5 rounded-2xl text-sm bg-red-50 border border-red-200 text-red-700 font-semibold">
-                          {error}
-                        </div>
-                      )}
-
-                      {uiIsLogin ? (
-                        <form onSubmit={handleLogin} className="space-y-4">
-                          <div>
-                            <label className={labelClass}>Email</label>
-                            <input
-                              type="email"
-                              value={email}
-                              onChange={e => setEmail(e.target.value)}
-                              placeholder="you@example.com"
-                              autoComplete="email"
-                              inputMode="email"
-                              className={inputClass}
-                            />
-                          </div>
-
-                          <div>
-                            <label className={labelClass}>Password</label>
-                            <input
-                              type="password"
-                              value={password}
-                              onChange={e => setPassword(e.target.value)}
-                              placeholder="Your password"
-                              autoComplete="current-password"
-                              className={inputClass}
-                            />
-                          </div>
-
-                          <button
-                            type="submit"
-                            disabled={busy || !!success}
-                            className="btn-primary w-full !rounded-2xl disabled:opacity-60 disabled:cursor-not-allowed"
-                          >
-                            {busy ? 'Signing in…' : success ? 'Redirecting…' : 'Login'}
-                          </button>
-
-                          <div className="text-center text-sm text-gray-600 font-medium">
-                            Don&apos;t have an account?{' '}
-                            <button
-                              type="button"
-                              onClick={() => switchTo('register')}
-                              className="font-extrabold text-violet-700 hover:underline"
-                            >
-                              Create an account
-                            </button>
-                          </div>
-                        </form>
-                      ) : (
-                        <form onSubmit={handleRegister} className="space-y-4">
-                          <div>
-                            <label className={labelClass}>Full Name *</label>
-                            <input
-                              value={name}
-                              onChange={e => setName(e.target.value)}
-                              className={inputClass}
-                              placeholder="Your full name"
-                              autoComplete="name"
-                              required
-                            />
-                          </div>
-
-                          <div>
-                            <label className={labelClass}>Email *</label>
-                            <input
-                              type="email"
-                              value={email}
-                              onChange={e => setEmail(e.target.value)}
-                              className={inputClass}
-                              placeholder="you@example.com"
-                              autoComplete="email"
-                              inputMode="email"
-                              required
-                            />
-                          </div>
-
-                          <div>
-                            <label className={labelClass}>Phone</label>
-                            <input
-                              type="tel"
-                              value={phone}
-                              onChange={e => setPhone(e.target.value)}
-                              className={inputClass}
-                              placeholder="+962..."
-                              autoComplete="tel"
-                              inputMode="tel"
-                            />
-                          </div>
-
-                          <div>
-                            <label className={labelClass}>Password *</label>
-                            <input
-                              type="password"
-                              value={password}
-                              onChange={e => setPassword(e.target.value)}
-                              className={inputClass}
-                              placeholder="At least 6 characters"
-                              autoComplete="new-password"
-                              required
-                            />
-                          </div>
-
-                          <div>
-                            <label className={labelClass}>Confirm Password *</label>
-                            <input
-                              type="password"
-                              value={confirm}
-                              onChange={e => setConfirm(e.target.value)}
-                              className={inputClass}
-                              placeholder="Repeat password"
-                              autoComplete="new-password"
-                              required
-                            />
-                          </div>
-
-                          <button
-                            type="submit"
-                            disabled={busy || !!success}
-                            className="btn-primary w-full !rounded-2xl disabled:opacity-60 disabled:cursor-not-allowed"
-                          >
-                            {busy ? 'Creating Account…' : success ? 'Redirecting…' : 'Sign Up'}
-                          </button>
-
-                          <div className="text-center text-sm text-gray-600 font-medium">
-                            Have an account?{' '}
-                            <button
-                              type="button"
-                              onClick={() => switchTo('login')}
-                              className="font-extrabold text-violet-700 hover:underline"
-                            >
-                              Sign In
-                            </button>
-                          </div>
-                        </form>
-                      )}
+                    {/* ✅ زر تحت ليفتح register */}
+                    <button
+                      type="button"
+                      onClick={() => switchTo('register')}
+                      className="w-full rounded-2xl px-4 py-3 text-sm font-extrabold
+                                 bg-white/15 text-white border border-white/20
+                                 hover:bg-white/20 active:bg-white/25 transition"
+                    >
+                      Create an account
+                    </button>
+                  </form>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="register"
+                  variants={fadeVariants}
+                  initial="hidden"
+                  animate="show"
+                  exit="exit"
+                  transition={{ duration: FADE_MS / 1000, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <form onSubmit={handleRegister} className="space-y-4">
+                    <div>
+                      <label className={labelClass}>Full Name *</label>
+                      <input
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        className={inputClass}
+                        placeholder="Your full name"
+                        autoComplete="name"
+                        required
+                      />
                     </div>
-                  </div>
-                </div>
-              </motion.div>
+
+                    <div>
+                      <label className={labelClass}>Email *</label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        className={inputClass}
+                        placeholder="you@example.com"
+                        autoComplete="email"
+                        inputMode="email"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>Phone</label>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={e => setPhone(e.target.value)}
+                        className={inputClass}
+                        placeholder="+962..."
+                        autoComplete="tel"
+                        inputMode="tel"
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>Password *</label>
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        className={inputClass}
+                        placeholder="At least 6 characters"
+                        autoComplete="new-password"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>Confirm Password *</label>
+                      <input
+                        type="password"
+                        value={confirm}
+                        onChange={e => setConfirm(e.target.value)}
+                        className={inputClass}
+                        placeholder="Repeat password"
+                        autoComplete="new-password"
+                        required
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={busy || !!success}
+                      className="btn-primary w-full !rounded-2xl disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {busy ? 'Creating Account…' : success ? 'Redirecting…' : 'Sign Up'}
+                    </button>
+
+                    {/* ✅ زر تحت يرجع ل login */}
+                    <button
+                      type="button"
+                      onClick={() => switchTo('login')}
+                      className="w-full rounded-2xl px-4 py-3 text-sm font-extrabold
+                                 bg-white/15 text-white border border-white/20
+                                 hover:bg-white/20 active:bg-white/25 transition"
+                    >
+                      Back to login
+                    </button>
+                  </form>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="mt-6 text-center text-white/70 text-xs font-semibold">
+              © {new Date().getFullYear()} Bike Land
             </div>
           </div>
         </motion.div>

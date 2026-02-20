@@ -76,6 +76,6 @@ supabase/
 
 git status
 git add .
-git commit -m "BIG UI Changes"
+git commit -m "loginpage"
 git push
 
