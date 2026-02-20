@@ -1,11 +1,11 @@
-import { useState } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, Navigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { useAuth } from '../contexts/AuthContext'
+import { useUser } from '../contexts/UserContext'
 import { useTheme } from '../contexts/ThemeContext'
 
 export default function LoginPage() {
-  const { login, isAuth } = useAuth()
+  const { login, isLoggedIn, isAdmin } = useUser()
   const { isDark } = useTheme()
   const navigate = useNavigate()
 
@@ -14,7 +14,15 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
-  if (isAuth) return <Navigate to="/admin" replace />
+  // ✅ بعد تسجيل الدخول: حول حسب الدور
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate(isAdmin ? '/admin' : '/', { replace: true })
+    }
+  }, [isLoggedIn, isAdmin, navigate])
+
+  // إذا دخل بالفعل، خلّي الـ useEffect يوجهه
+  if (isLoggedIn) return <Navigate to={isAdmin ? '/admin' : '/'} replace />
 
   const handle = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,8 +41,8 @@ export default function LoginPage() {
     const res = await login(email.trim(), password)
     setBusy(false)
 
-    if (res.ok) navigate('/admin')
-    else setError(res.message || 'Login failed')
+    if (res !== true) setError(res || 'Login failed')
+    // ✅ لا تعمل navigate هون — الـ useEffect راح يتولى التحويل
   }
 
   return (
@@ -52,15 +60,17 @@ export default function LoginPage() {
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber flex items-center justify-center mx-auto mb-3 shadow-lg shadow-prism-violet/30">
             <span className="text-white font-black text-sm font-display">BL</span>
           </div>
-          <h1 className={`font-display text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Admin Login</h1>
-          <p className={`text-sm mt-1.5 ${isDark ? 'text-purple-200/70' : 'text-gray-500'}`}>Sign in to manage Bike Land</p>
+          <h1 className={`font-display text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Sign In</h1>
+          <p className={`text-sm mt-1.5 ${isDark ? 'text-purple-200/70' : 'text-gray-500'}`}>
+            Sign in to continue
+          </p>
         </div>
 
         <div className="glass p-6">
           <form onSubmit={handle} className="space-y-4">
             <div>
               <label className={`block text-[13px] mb-2 font-medium ${isDark ? 'text-purple-200/80' : 'text-gray-600'}`}>Email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="admin@bike-jo.com" className="form-field" />
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" className="form-field" />
             </div>
 
             <div>
@@ -79,6 +89,13 @@ export default function LoginPage() {
             </button>
           </form>
         </div>
+
+        <p className={`text-center text-sm mt-4 ${isDark ? 'text-purple-300/80' : 'text-gray-500'}`}>
+          Don&apos;t have an account?{' '}
+          <Link to="/register" className={`font-semibold ${isDark ? 'text-prism-violet' : 'text-violet-600'}`}>
+            Create one
+          </Link>
+        </p>
       </motion.div>
     </section>
   )

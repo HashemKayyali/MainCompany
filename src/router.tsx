@@ -19,10 +19,13 @@ import AdminCustomersPage from './pages/admin/AdminCustomersPage'
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage'
 import AdminAdminsPage from './pages/admin/AdminAdminsPage'
 import AdminGalleryPage from './pages/admin/AdminGalleryPage'
-
+import AuthCallback from './pages/AuthCallback'
+import AdminGuard from './components/AdminGuard'
 export const router = createBrowserRouter([
   {
-    path: '/', element: <App />, children: [
+    path: '/',
+    element: <App />,
+    children: [
       { index: true, element: <HomePage /> },
       { path: 'products', element: <ProductsPage /> },
       { path: 'products/:slug', element: <ProductDetailsPage /> },
@@ -33,18 +36,29 @@ export const router = createBrowserRouter([
       { path: '*', element: <NotFoundPage /> },
     ],
   },
+
+  // ✅ ADD THIS (Auth email link callback)
+  { path: '/auth/callback', element: <AuthCallback /> },
+
   { path: '/login', element: <LoginPage /> },
   { path: '/user-login', element: <UserLoginPage /> },
   { path: '/register', element: <RegisterPage /> },
-  {
-    path: '/admin', element: <AdminLayout />, children: [
-      { index: true, element: <DashboardPage /> },
-      { path: 'products', element: <AdminProductsPage /> },
-      { path: 'parts', element: <AdminPartsPage /> },
-      { path: 'customers', element: <AdminCustomersPage /> },
-      { path: 'categories', element: <AdminCategoriesPage /> },
-      { path: 'gallery', element: <AdminGalleryPage /> },
-      { path: 'admins', element: <AdminAdminsPage /> },
-    ],
-  },
+
+ {
+  path: '/admin',
+  element: (
+    <AdminGuard>
+      <AdminLayout />
+    </AdminGuard>
+  ),
+  children: [
+    { index: true, element: <DashboardPage /> },
+    { path: 'products', element: <AdminProductsPage /> },
+    { path: 'parts', element: <AdminPartsPage /> },
+    { path: 'customers', element: <AdminCustomersPage /> },
+    { path: 'categories', element: <AdminCategoriesPage /> },
+    { path: 'gallery', element: <AdminGalleryPage /> },
+    { path: 'admins', element: <AdminAdminsPage /> },
+  ],
+},
 ])

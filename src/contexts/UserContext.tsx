@@ -9,11 +9,13 @@ export interface AppUser {
   name: string
   phone: string
   createdAt: string
+  role?: string | null
 }
 
 interface UserCtx {
   currentUser: AppUser | null
   isLoggedIn: boolean
+  isAdmin: boolean
   loading: boolean
   register: (name: string, email: string, phone: string, pw: string) => Promise<string | true>
   login: (email: string, pw: string) => Promise<string | true>
@@ -44,12 +46,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         .eq('id', authUserId)
         .maybeSingle<Pick<ProfileRow, 'id' | 'name' | 'email' | 'phone' | 'role' | 'created_at'>>()
 
-      if (error) {
-        // غالباً RLS أو الصف مش موجود (قبل trigger)
-        return null
-      }
-      if (!data) return null
-      if (isAdminRole(data.role)) return null
+      if (error || !data) return null
 
       return {
         id: data.id,
@@ -57,6 +54,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         name: data.name || '',
         phone: data.phone || '',
         createdAt: data.created_at,
+        role: (data as any).role ?? null,
       }
     } catch (err) {
       console.warn('Failed to fetch profile:', err)
@@ -64,7 +62,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // ✅ بدل getSession/onAuthStateChange من هون، بنعتمد على SessionProvider
   useEffect(() => {
     mountedRef.current = true
 
@@ -105,6 +102,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, [authUser, sessionLoading, fetchProfile])
 
+  const waitForProfileRow = useCallback(async (userId: string) => {
+    for (let i = 0; i < 6; i++) {
+      const { data } = await supabase.from('profiles').select('id').eq('id', userId).maybeSingle()
+      if (data?.id) return true
+      await new Promise(r => setTimeout(r, 400))
+    }
+    return false
+  }, [])
+
   const register = useCallback(
     async (name: string, email: string, phone: string, pw: string): Promise<string | true> => {
       if (!isSupabaseConfigured()) return 'Supabase not configured'
@@ -114,24 +120,21 @@ export function UserProvider({ children }: { children: ReactNode }) {
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email,
           password: pw,
-          options: { data: { name } },
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: { name, phone },
+          },
         })
 
         if (authError) return authError.message
         if (!authData.user) return 'Registration failed'
 
-        // ✅ مهم: عندك RLS ما بيسمح INSERT على profiles
-        // لازم Trigger ينشئ row تلقائياً. بنستنى شوي ثم نعمل UPDATE (المسموح)
-        await new Promise(r => setTimeout(r, 600))
-
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({ phone, name, email } as Partial<ProfileRow>)
-          .eq('id', authData.user.id)
-
-        if (updateError) {
-          console.warn('Could not update profile:', updateError)
-          // ملاحظة للمستخدم/التطبيق: إذا ما في trigger، row مش موجود → update يفشل
+        const ok = await waitForProfileRow(authData.user.id)
+        if (ok) {
+          await supabase
+            .from('profiles')
+            .update({ phone: phone || null, name, email } as Partial<ProfileRow>)
+            .eq('id', authData.user.id)
         }
 
         return true
@@ -139,9 +142,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
         return err.message || 'Registration failed'
       }
     },
-    []
+    [waitForProfileRow]
   )
 
+  // ✅ Login موحّد للجميع (admin/user) — ما بنطرد الأدمن
   const login = useCallback(async (email: string, pw: string): Promise<string | true> => {
     if (!isSupabaseConfigured()) return 'Supabase not configured'
 
@@ -149,33 +153,27 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password: pw })
       if (error) return error.message
 
-      // منع حسابات الأدمن من الدخول من واجهة المستخدم
+      // ✅ نجيب البروفايل ونخزنه (فيه role)
       if (data.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', data.user.id)
-          .maybeSingle<Pick<ProfileRow, 'role'>>()
-
-        if (isAdminRole(profile?.role)) {
-          await supabase.auth.signOut()
-          return 'This is an admin account. Please use the admin login page.'
-        }
+        const profile = await fetchProfile(data.user.id)
+        safeSet(() => setCurrentUser(profile))
       }
 
       return true
     } catch (err: any) {
       return err.message || 'Login failed'
     }
-  }, [])
+  }, [fetchProfile])
 
   const logout = useCallback(() => {
     if (isSupabaseConfigured()) supabase.auth.signOut()
     safeSet(() => setCurrentUser(null))
   }, [])
 
+  const isAdmin = !!currentUser && isAdminRole(currentUser.role)
+
   return (
-    <Ctx.Provider value={{ currentUser, isLoggedIn: !!currentUser, loading, register, login, logout }}>
+    <Ctx.Provider value={{ currentUser, isLoggedIn: !!currentUser, isAdmin, loading, register, login, logout }}>
       {children}
     </Ctx.Provider>
   )
