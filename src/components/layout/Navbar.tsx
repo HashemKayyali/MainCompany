@@ -44,16 +44,10 @@ export default function Navbar() {
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent'
 
   const shell = useMemo(() => {
-    // ✅ شكل مرتب حتى قبل ما تعمل scroll
-    const base = isDark
-      ? 'bg-void-900/45 border-white/10'
-      : 'bg-white/55 border-violet-200/60'
-
-    // ✅ عند scroll بصير أثقل شوي
+    const base = isDark ? 'bg-void-900/45 border-white/10' : 'bg-white/55 border-violet-200/60'
     const strong = isDark
       ? 'bg-void-900/72 border-purple-500/20 shadow-[0_12px_55px_rgba(0,0,0,0.55)]'
       : 'bg-white/82 border-violet-200/70 shadow-lg shadow-violet-500/10'
-
     return scrolled ? strong : base
   }, [scrolled, isDark])
 
@@ -79,10 +73,8 @@ export default function Navbar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
-      {/* ✅ مسافة هواء */}
       <div className="px-4 pt-4">
         <nav className="relative max-w-7xl mx-auto">
-          {/* Gradient border frame */}
           <div
             className="absolute -inset-px rounded-2xl pointer-events-none opacity-70"
             style={{
@@ -92,27 +84,39 @@ export default function Navbar() {
               filter: 'blur(0px)',
             }}
           />
-          {/* Inner shell */}
-          <div
-            className={`relative rounded-2xl border backdrop-blur-2xl ${shell}`}
-          >
+
+          <div className={`relative rounded-2xl border backdrop-blur-2xl ${shell}`}>
             <div className="px-4 sm:px-5 py-3">
               <div className="flex items-center justify-between gap-3">
                 {/* Left: Brand */}
-                <Link to="/" className={`flex items-center gap-3 min-w-[140px] ${focus}`}>
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber flex items-center justify-center shadow-lg shadow-prism-violet/25">
+                {/* ✅ تغييرات مهمة:
+                   - min-w-0 عشان يسمح بالقص (truncate) بدل ما يزق العناصر
+                   - flex-1 على الموبايل عشان ياخذ مساحة من اليمين
+                */}
+                <Link
+                  to="/"
+                  className={`flex items-center gap-3 min-w-0 flex-1 lg:flex-none ${focus}`}
+                >
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber flex items-center justify-center shadow-lg shadow-prism-violet/25 flex-none">
                     <span className="text-white font-black text-xs font-display">BL</span>
                   </div>
 
-                  <div className="leading-none hidden sm:block">
+                  {/* ✅ هون كان hidden sm:block — شلناه وخليّناه responsive */}
+                  <div className="leading-none min-w-0">
                     <div
-                      className={`text-[12px] font-bold tracking-[0.22em] uppercase font-display ${
+                      className={`font-bold uppercase font-display truncate ${
                         isDark ? 'text-white' : 'text-gray-900'
-                      }`}
+                      } text-[11px] sm:text-[12px] tracking-[0.18em] sm:tracking-[0.22em]`}
                     >
                       Bike <span className={isDark ? 'text-prism-violet' : 'text-violet-600'}>Land</span>
                     </div>
-                    <div className={`text-[10px] mt-1 ${isDark ? 'text-purple-200/60' : 'text-gray-400'}`}>
+
+                    {/* ✅ السطر الثاني: نخليه يختفي فقط على xs إذا بدك (أنا خليته يظهر بس بحجم أصغر) */}
+                    <div
+                      className={`truncate mt-1 ${
+                        isDark ? 'text-purple-200/60' : 'text-gray-400'
+                      } text-[9.5px] sm:text-[10px]`}
+                    >
                       Rentals • Events • Experiences
                     </div>
                   </div>
@@ -126,26 +130,18 @@ export default function Navbar() {
                     }`}
                   >
                     <div className="flex items-center gap-1">
-                      {NAV.map((l) => {
+                      {NAV.map(l => {
                         const isA = active(l.to)
                         return (
-                          <Link
-                            key={l.to}
-                            to={l.to}
-                            className={`${linkBase} ${linkText(isA)} ${focus}`}
-                          >
-                            {/* Active glow */}
+                          <Link key={l.to} to={l.to} className={`${linkBase} ${linkText(isA)} ${focus}`}>
                             {isA && (
                               <motion.div
                                 layoutId="nav-active"
-                                className={`absolute inset-0 rounded-xl ${
-                                  isDark ? 'bg-white/[0.06]' : 'bg-violet-50'
-                                }`}
+                                className={`absolute inset-0 rounded-xl ${isDark ? 'bg-white/[0.06]' : 'bg-violet-50'}`}
                                 transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                               />
                             )}
                             <span className="relative z-10">{l.l}</span>
-                            {/* Active underline */}
                             {isA && (
                               <motion.span
                                 layoutId="nav-underline"
@@ -165,13 +161,9 @@ export default function Navbar() {
                 </div>
 
                 {/* Right: Actions */}
-                <div className="flex items-center gap-2 min-w-[180px] justify-end">
+                <div className="flex items-center gap-2 min-w-[180px] justify-end flex-none">
                   {/* Desktop actions */}
                   <div className="hidden sm:flex items-center gap-2">
-                    {/* Theme */}
-                   
-
-                    {/* User chip */}
                     {isLoggedIn ? (
                       <div
                         className={`h-10 pl-2 pr-1 rounded-2xl border inline-flex items-center gap-2 ${
@@ -194,9 +186,7 @@ export default function Navbar() {
                         <button
                           onClick={logout}
                           className={`${actionBtn} ${focus} ${
-                            isDark
-                              ? 'text-purple-100/75 hover:text-red-300'
-                              : 'text-gray-600 hover:text-red-600'
+                            isDark ? 'text-purple-100/75 hover:text-red-300' : 'text-gray-600 hover:text-red-600'
                           }`}
                           style={{ paddingLeft: 10, paddingRight: 10 }}
                         >
@@ -216,7 +206,6 @@ export default function Navbar() {
                       </Link>
                     )}
 
-                    {/* Admin badge */}
                     {isAuth && (
                       <Link
                         to="/admin"
@@ -230,27 +219,26 @@ export default function Navbar() {
                       </Link>
                     )}
 
-                    {/* Book */}
                     <Link to="/contact" className={`btn-primary !h-10 !px-4 !rounded-2xl !text-[12px] ${focus}`}>
                       Book
                     </Link>
                   </div>
 
-                  {/* Mobile: only book + menu */}
-                  <div className="sm:hidden flex items-center gap-2">
-                    <Link to="/contact" className={`btn-primary !h-10 !px-4 !rounded-2xl !text-[12px] ${focus}`}>
+                  {/* Mobile: book */}
+                  <div className="sm:hidden flex items-center gap-2 flex-none">
+                    <Link to="/contact" className={`btn-primary !h-10 !px-3 !rounded-2xl !text-[12px] ${focus}`}>
                       Book
                     </Link>
                   </div>
 
                   {/* Mobile menu button */}
                   <button
-                    onClick={() => setOpen((v) => !v)}
+                    onClick={() => setOpen(v => !v)}
                     className={`${iconBtn(
                       isDark
                         ? 'bg-white/[0.04] border border-white/10 hover:bg-white/[0.07] text-purple-100'
                         : 'bg-white/70 border border-violet-200/60 hover:bg-white text-gray-800'
-                    )} ${focus} lg:hidden`}
+                    )} ${focus} lg:hidden flex-none`}
                     aria-label="Menu"
                     aria-expanded={open}
                   >
@@ -261,7 +249,7 @@ export default function Navbar() {
                 </div>
               </div>
 
-              {/* Mobile dropdown (blur دائماً) */}
+              {/* Mobile dropdown */}
               <AnimatePresence>
                 {open && (
                   <motion.div
@@ -277,7 +265,7 @@ export default function Navbar() {
                       }`}
                     >
                       <div className="grid grid-cols-2 gap-2">
-                        {NAV.map((l) => (
+                        {NAV.map(l => (
                           <Link
                             key={l.to}
                             to={l.to}
@@ -299,9 +287,6 @@ export default function Navbar() {
                       <div className={`mt-3 pt-3 border-t ${isDark ? 'border-white/10' : 'border-violet-200/50'}`}>
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
-                            {/* Theme on mobile dropdown */}
-                            
-
                             {isAuth && (
                               <Link
                                 to="/admin"

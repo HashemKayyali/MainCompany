@@ -76,6 +76,6 @@ supabase/
 
 git status
 git add .
-git commit -m "admin products"
+git commit -m "navbar"
 git push
 
