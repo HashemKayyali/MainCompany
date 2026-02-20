@@ -76,6 +76,6 @@ supabase/
 
 git status
 git add .
-git commit -m "navbar"
+git commit -m "PERFORMANCE"
 git push
 

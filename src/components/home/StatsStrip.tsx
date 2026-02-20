@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
+import { usePerfMode } from '../../hooks/usePerfMode'
 
 const ITEMS = [
   '20+ Partners',
@@ -25,6 +26,7 @@ const ACCENTS = [
 
 export default function StatsStrip() {
   const { isDark } = useTheme()
+  const { perfLow } = usePerfMode()
 
   // Duplicate enough times so it always looks continuous on wide screens
   const loop = useMemo(() => {
@@ -49,8 +51,8 @@ export default function StatsStrip() {
       <div
         className={`absolute inset-0 ${isDark ? 'bg-black/10' : 'bg-white/40'}`}
         style={{
-          backdropFilter: 'blur(14px)',
-          WebkitBackdropFilter: 'blur(14px)',
+          backdropFilter: perfLow ? undefined : 'blur(14px)',
+          WebkitBackdropFilter: perfLow ? undefined : 'blur(14px)',
         }}
       />
 
@@ -126,6 +128,12 @@ export default function StatsStrip() {
             animation: none;
             transform: translateX(0);
           }
+        }
+
+        /* Extra safety for perf-low mode */
+        html.perf-low .stats-marquee__inner {
+          animation: none;
+          transform: translateX(0);
         }
 
         @keyframes stats-marquee-scroll {

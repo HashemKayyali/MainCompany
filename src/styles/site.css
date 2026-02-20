@@ -50,6 +50,25 @@
 }
 html.light .grain-overlay { opacity: 0.01; }
 
+/* ── Performance / Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .star-field, .grain-overlay { display: none !important; }
+  .star-field .layer { animation: none !important; }
+  .animate-aurora, .animate-orbit { animation: none !important; }
+}
+
+html.perf-low .star-field,
+html.perf-low .grain-overlay {
+  display: none !important;
+}
+html.perf-low .star-field .layer {
+  animation: none !important;
+}
+html.perf-low .animate-aurora,
+html.perf-low .animate-orbit {
+  animation: none !important;
+}
+
 /* ── Light Mode Pattern ── */
 html.light .dot-pattern {
   background-image: radial-gradient(rgba(124,58,237,0.08) 1px, transparent 1px);

@@ -7,21 +7,24 @@ import { AuthProvider } from './contexts/AuthContext'
 import { UserProvider } from './contexts/UserContext'
 import { DataProvider } from './contexts/DataContext'
 import { router } from './router'
+import PerfClass from './components/PerfClass'
 import './styles/input.css'
 import './styles/site.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ThemeProvider>
-      <SessionProvider>
-        <AuthProvider>
-          <UserProvider>
-            <DataProvider>
-              <RouterProvider router={router} />
-            </DataProvider>
-          </UserProvider>
-        </AuthProvider>
-      </SessionProvider>
-    </ThemeProvider>
+    <PerfClass>
+      <ThemeProvider>
+        <SessionProvider>
+          <AuthProvider>
+            <UserProvider>
+              <DataProvider>
+                <RouterProvider router={router} />
+              </DataProvider>
+            </UserProvider>
+          </AuthProvider>
+        </SessionProvider>
+      </ThemeProvider>
+    </PerfClass>
   </React.StrictMode>,
 )

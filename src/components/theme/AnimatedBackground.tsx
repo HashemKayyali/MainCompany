@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
+import { usePerfMode } from '../../hooks/usePerfMode'
 
 type Props = {
   /** default: fixed */
@@ -9,6 +10,7 @@ type Props = {
 
 export default function AnimatedBackground({ position = 'fixed', className = '' }: Props) {
   const { isDark } = useTheme()
+  const { perfLow } = usePerfMode()
 
   const starMap = useMemo(() => {
     const stars = [
@@ -27,6 +29,50 @@ export default function AnimatedBackground({ position = 'fixed', className = '' 
   }, [])
 
   const rootPos = position === 'fixed' ? 'fixed inset-0' : 'absolute inset-0'
+
+  // Low mode: no grain, no star layers, no huge blurs, no continuous animations.
+  if (perfLow) {
+    if (!isDark) {
+      return (
+        <div className={`${rootPos} pointer-events-none z-0 ${className}`}>
+          <div className="absolute inset-0 bg-[#f5f3ff]" />
+          <div className="absolute inset-0 dot-pattern opacity-60" />
+          <div
+            className="absolute -top-[18%] left-[10%] w-[520px] h-[520px] rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 62%)' }}
+          />
+          <div
+            className="absolute -bottom-[18%] right-[8%] w-[520px] h-[520px] rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 62%)' }}
+          />
+        </div>
+      )
+    }
+
+    return (
+      <div className={`${rootPos} pointer-events-none z-0 overflow-hidden ${className}`}>
+        <div className="absolute inset-0 bg-void-950" />
+        <div
+          className="absolute -left-[12%] top-[10%] w-[140%] h-[70%]"
+          style={{
+            background:
+              'radial-gradient(900px 360px at 35% 45%, rgba(236,72,153,0.28) 0%, transparent 72%),' +
+              'radial-gradient(820px 320px at 60% 50%, rgba(124,58,237,0.26) 0%, transparent 74%),' +
+              'radial-gradient(700px 300px at 80% 52%, rgba(34,211,238,0.16) 0%, transparent 76%)',
+            opacity: 0.9,
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(circle at 50% 45%, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.62) 70%, rgba(0,0,0,0.88) 100%)',
+            opacity: 0.95,
+          }}
+        />
+      </div>
+    )
+  }
 
   if (!isDark) {
     return (

@@ -2,11 +2,18 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { Product } from '../../data/products/types'
+import { useMotionEnabled } from '../../hooks/useMotionEnabled'
 
 export default function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
   const { isDark } = useTheme()
+  const motionEnabled = useMotionEnabled()
   return (
-    <motion.div initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-40px' }} transition={{ duration: 0.6, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}>
+    <motion.div
+      initial={motionEnabled ? { opacity: 0, y: 28 } : false}
+      whileInView={motionEnabled ? { opacity: 1, y: 0 } : undefined}
+      viewport={motionEnabled ? { once: true, margin: '-40px' } : undefined}
+      transition={motionEnabled ? { duration: 0.6, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] } : undefined}
+    >
       <div className={`group relative rounded-2xl overflow-hidden transition-all duration-700 hover:-translate-y-2 ${isDark ? 'bg-purple-500/[0.06] border border-purple-500/15 hover:border-prism-violet/40' : 'bg-white border border-violet-100/60 hover:border-violet-300 shadow-sm hover:shadow-xl hover:shadow-violet-100/40'}`}>
         <div className={`absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none ${isDark ? 'bg-gradient-to-b from-prism-violet/20 via-transparent to-prism-pink/[0.02]' : ''}`} />
         <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-void-800 to-void-900">

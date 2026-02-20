@@ -2,26 +2,28 @@ import { useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { Customer } from '../../data/customers'
+import { usePerfMode } from '../../hooks/usePerfMode'
 
 const ease = [0.16, 1, 0.3, 1] as const
 
 export default function CustomerCard({ customer }: { customer: Customer }) {
   const { isDark } = useTheme()
   const reduceMotion = useReducedMotion()
+  const { perfLow } = usePerfMode()
   const [imgOk, setImgOk] = useState(true)
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10, filter: 'blur(10px)' }}
-      whileInView={{ opacity: 1, y: 0, filter: 'blur(0)' }}
+      initial={perfLow ? { opacity: 0, y: 6 } : { opacity: 0, y: 10, filter: 'blur(10px)' }}
+      whileInView={perfLow ? { opacity: 1, y: 0 } : { opacity: 1, y: 0, filter: 'blur(0)' }}
       viewport={{ once: true, margin: '-80px' }}
       transition={reduceMotion ? { duration: 0 } : { duration: 0.7, ease }}
       className={`group relative overflow-hidden rounded-2xl border p-5 flex flex-col items-center gap-4 ${
         isDark ? 'bg-white/[0.03] border-white/10' : 'bg-white/70 border-violet-200/60'
       }`}
       style={{
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        backdropFilter: perfLow ? undefined : 'blur(16px)',
+        WebkitBackdropFilter: perfLow ? undefined : 'blur(16px)',
       }}
     >
       {/* Ambient glow */}
