@@ -1,0 +1,7 @@
+import { motion } from 'framer-motion'
+import { useTheme } from '../../contexts/ThemeContext'
+import type { GalleryAlbum } from '../../data/gallery'
+export default function GalleryGrid({ albums, onAlbumClick }: { albums: GalleryAlbum[]; onAlbumClick: (a: GalleryAlbum) => void }) {
+  const { isDark } = useTheme()
+  return <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">{albums.map((a, i) => (<motion.div key={a.slug} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}><button onClick={() => onAlbumClick(a)} className={`w-full text-left group rounded-2xl overflow-hidden transition-all hover:-translate-y-1 ${isDark ? 'bg-purple-500/[0.06] border border-purple-500/20 hover:border-prism-violet/30' : 'bg-white border border-gray-200 hover:border-violet-300 shadow-sm'}`}><div className="aspect-video overflow-hidden"><img src={a.cover} alt={a.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} /></div><div className="p-4"><h3 className={`font-display font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{a.title}</h3><p className={`text-xs mt-1 ${isDark ? 'text-purple-300/80' : 'text-gray-400'}`}>{a.images.length} photos</p></div></button></motion.div>))}</div>
+}

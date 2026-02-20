@@ -13,16 +13,28 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
           <img src={product.heroImage} alt={product.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-[1.2s]" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
           <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-t from-void-950/80 via-void-950/20 to-transparent' : 'bg-gradient-to-t from-white/40 to-transparent'}`} />
           <div className="absolute top-3 left-3">
-            <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r ${product.badgeColor} text-white shadow-lg`}>{product.badge}</span>
+            {product.badge?.trim() && (
+              <span
+                className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-lg ${String(product.badgeColor || '').includes('linear-gradient') ? '' : `bg-gradient-to-r ${product.badgeColor}`}`}
+                style={String(product.badgeColor || '').includes('linear-gradient') ? { backgroundImage: product.badgeColor } : undefined}
+              >{product.badge}</span>
+            )}
           </div>
         </div>
         <div className="relative p-5">
           <h3 className={`text-lg font-display font-bold transition-colors duration-500 ${isDark ? 'text-white/90 group-hover:text-prism-violet' : 'text-gray-900 group-hover:text-violet-600'}`}>{product.name}</h3>
           <p className={`text-[13px] mt-2 leading-relaxed line-clamp-2 ${isDark ? 'text-purple-300/70' : 'text-gray-500'}`}>{product.shortDescription}</p>
-          <div className={`flex items-center gap-3 mt-4 py-3 border-t ${isDark ? 'border-purple-500/15' : 'border-violet-50'}`}>
-            <span className={`text-xl font-display font-extrabold ${isDark ? 'text-white' : 'text-gray-900'}`}>{product.rentalPricePerDay}</span>
-            <span className={`text-[11px] font-mono ${isDark ? 'text-cyan-400/60' : 'text-gray-400'}`}>{product.currency}/day</span>
-          </div>
+          {/* Price block */}
+          {product.showPrice !== false ? (
+            <div className={`flex items-center gap-3 mt-4 py-3 border-t ${isDark ? 'border-purple-500/15' : 'border-violet-50'}`}>
+              <span className={`text-xl font-display font-extrabold ${isDark ? 'text-white' : 'text-gray-900'}`}>{product.rentalPricePerDay}</span>
+              <span className={`text-[11px] font-mono ${isDark ? 'text-cyan-400/60' : 'text-gray-400'}`}>{product.currency}/day</span>
+            </div>
+          ) : (
+            <div className={`mt-4 py-3 border-t ${isDark ? 'border-purple-500/15' : 'border-violet-50'}`}>
+              <span className={`text-[13px] font-semibold ${isDark ? 'text-cyan-400/80' : 'text-violet-500'}`}>Request a Quote</span>
+            </div>
+          )}
           <div className="flex gap-2 mt-3">
             <Link to={`/products/${product.slug}`} className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold text-center transition-all ${isDark ? 'text-purple-200/80 bg-purple-500/[0.08] border border-purple-500/20 hover:text-prism-violet hover:border-prism-violet/40' : 'text-gray-500 bg-gray-50 border border-gray-200 hover:text-violet-600 hover:border-violet-300'}`}>Details</Link>
             <Link to={`/contact?product=${product.slug}`} className="px-4 py-2.5 rounded-xl text-[13px] font-bold bg-gradient-to-r from-prism-violet to-prism-pink text-white hover:shadow-lg hover:shadow-prism-violet/30 transition-all">Request Quote</Link>
