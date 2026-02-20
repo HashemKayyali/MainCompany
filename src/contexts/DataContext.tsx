@@ -15,9 +15,11 @@ import * as partsApi from '../services/parts.service'
 import * as customersApi from '../services/customers.service'
 import * as categoriesApi from '../services/categories.service'
 import * as galleryApi from '../services/gallery.service'
+import * as logsApi from '../services/logs.service'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { DEFAULT_PRODUCTS, DEFAULT_PARTS, DEFAULT_CUSTOMERS, DEFAULT_CATEGORIES } from '../data/defaults'
 import { useSession } from './SessionContext'
+import { useUser } from './UserContext'
 
 interface DataCtx {
   products: Product[]
@@ -79,6 +81,7 @@ function applyDefaults(
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const { loading: sessionLoading } = useSession()
+  const { currentUser } = useUser()
   const [products, setProducts] = useState<Product[]>([])
   const [parts, setParts] = useState<ProductPart[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -94,6 +97,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const safeSet = (fn: () => void) => {
     if (mountedRef.current) fn()
   }
+
+  // Helper to write a log entry
+  const writeLog = useCallback(
+    (action: 'create' | 'update' | 'delete', entityType: string, entityId: string, entityName: string, details?: string) => {
+      if (!currentUser) return
+      logsApi.addLog({
+        admin_id: currentUser.id,
+        admin_name: currentUser.name || 'Admin',
+        admin_email: currentUser.email || '',
+        action,
+        entity_type: entityType,
+        entity_id: entityId,
+        entity_name: entityName,
+        details: details || '',
+      })
+    },
+    [currentUser]
+  )
 
   const loadAllOnce = useCallback(async () => {
     const [p, pa, cu, ca, ga] = await Promise.all([
@@ -196,83 +217,103 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addProduct = async (p: Product) => {
     const created = await productsApi.create(p)
     safeSet(() => setProducts(prev => [...prev, created]))
+    writeLog('create', 'product', created.slug, created.name || created.slug)
   }
 
   const updateProduct = async (slug: string, u: Partial<Product>) => {
     const updated = await productsApi.update(slug, u)
     safeSet(() => setProducts(prev => prev.map(p => (p.slug === slug ? updated : p))))
+    writeLog('update', 'product', slug, updated.name || slug)
   }
 
   const deleteProduct = async (slug: string) => {
+    const existing = products.find(p => p.slug === slug)
     await productsApi.remove(slug)
     safeSet(() => {
       setProducts(prev => prev.filter(p => p.slug !== slug))
       setParts(prev => prev.filter(p => p.productSlug !== slug))
     })
+    writeLog('delete', 'product', slug, existing?.name || slug)
   }
 
   // Parts CRUD
   const addPart = async (p: ProductPart) => {
     const created = await partsApi.create(p)
     safeSet(() => setParts(prev => [...prev, created]))
+    writeLog('create', 'part', created.id, created.name || created.id)
   }
 
   const updatePart = async (id: string, u: Partial<ProductPart>) => {
     const updated = await partsApi.update(id, u)
     safeSet(() => setParts(prev => prev.map(p => (p.id === id ? updated : p))))
+    writeLog('update', 'part', id, updated.name || id)
   }
 
   const deletePart = async (id: string) => {
+    const existing = parts.find(p => p.id === id)
     await partsApi.remove(id)
     safeSet(() => setParts(prev => prev.filter(p => p.id !== id)))
+    writeLog('delete', 'part', id, existing?.name || id)
   }
 
   // Customers CRUD
   const addCustomer = async (c: Customer) => {
     const created = await customersApi.create(c)
     safeSet(() => setCustomers(prev => [...prev, created]))
+    writeLog('create', 'customer', created.slug, created.name || created.slug)
   }
 
   const updateCustomer = async (slug: string, u: Partial<Customer>) => {
     const updated = await customersApi.update(slug, u)
     safeSet(() => setCustomers(prev => prev.map(c => (c.slug === slug ? updated : c))))
+    writeLog('update', 'customer', slug, updated.name || slug)
   }
 
   const deleteCustomer = async (slug: string) => {
+    const existing = customers.find(c => c.slug === slug)
     await customersApi.remove(slug)
     safeSet(() => setCustomers(prev => prev.filter(c => c.slug !== slug)))
+    writeLog('delete', 'customer', slug, existing?.name || slug)
   }
 
   // Categories CRUD
   const addCategory = async (c: Category) => {
     const created = await categoriesApi.create(c)
     safeSet(() => setCategories(prev => [...prev, created]))
+    writeLog('create', 'category', created.id, created.name || created.id)
   }
 
   const updateCategory = async (id: string, u: Partial<Category>) => {
     const updated = await categoriesApi.update(id, u)
     safeSet(() => setCategories(prev => prev.map(c => (c.id === id ? updated : c))))
+    writeLog('update', 'category', id, updated.name || id)
   }
 
   const deleteCategory = async (id: string) => {
+    const existing = categories.find(c => c.id === id)
     await categoriesApi.remove(id)
     safeSet(() => setCategories(prev => prev.filter(c => c.id !== id)))
+    writeLog('delete', 'category', id, existing?.name || id)
   }
 
   // Gallery CRUD
   const addGalleryAlbum = async (a: GalleryAlbum) => {
     const created = await galleryApi.create(a)
     safeSet(() => setGalleryAlbums(prev => [...prev, created]))
+    writeLog('create', 'gallery', created.slug, created.title || created.slug)
   }
 
   const updateGalleryAlbum = async (slug: string, u: Partial<GalleryAlbum>) => {
     const updated = await galleryApi.update(slug, u)
     safeSet(() => setGalleryAlbums(prev => prev.map(a => (a.slug === slug ? updated : a))))
+    writeLog('update', 'gallery', slug, updated.title || slug)
   }
 
   const deleteGalleryAlbum = async (slug: string) => {
+    const existing = galleryAlbums.find(a => a.slug === slug)
     await galleryApi.remove(slug)
     safeSet(() => setGalleryAlbums(prev => prev.filter(a => a.slug !== slug)))
+    writeLog('delete', 'gallery', slug, existing?.title || slug)
   }
 
   // Helpers

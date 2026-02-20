@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useData } from '../../contexts/DataContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useUser } from '../../contexts/UserContext'
+import { useAuth } from '../../contexts/AuthContext'
+import { supabase, isSupabaseConfigured } from '../../lib/supabase'
 
 type Stat = {
   icon: string
@@ -16,7 +18,24 @@ type Stat = {
 export default function DashboardPage() {
   const { products, parts, customers, categories, galleryAlbums, loading, refreshAll } = useData()
   const { currentUser, isAdmin } = useUser()
+  const { admins } = useAuth()
   const { isDark } = useTheme()
+  const [registeredUsersCount, setRegisteredUsersCount] = useState(0)
+
+  useEffect(() => {
+    async function fetchUserCount() {
+      if (!isSupabaseConfigured()) return
+      try {
+        const { count, error } = await supabase
+          .from('profiles')
+          .select('id', { count: 'exact', head: true })
+        if (!error && count !== null) setRegisteredUsersCount(count)
+      } catch {
+        // ignore
+      }
+    }
+    fetchUserCount()
+  }, [])
 
   const txt = isDark ? 'text-white' : 'text-gray-900'
   const sub = isDark ? 'text-purple-200/70' : 'text-gray-500'
@@ -34,8 +53,8 @@ export default function DashboardPage() {
     { icon: '👥', label: 'Customers', value: customers.length, to: '/admin/customers', gradient: 'from-cyan-500 to-blue-500', glow: 'shadow-cyan-500/20' },
     { icon: '📂', label: 'Categories', value: categories.length, to: '/admin/categories', gradient: 'from-lime-500 to-green-500', glow: 'shadow-lime-500/20' },
     { icon: '📸', label: 'Gallery Albums', value: galleryAlbums.length, to: '/admin/gallery', gradient: 'from-fuchsia-500 to-pink-500', glow: 'shadow-fuchsia-500/20' },
-    // لا نضرب شكل الداشبورد لو ما عندك قائمة admins حالياً
-    { icon: '🔐', label: 'Admins', value: isAdmin ? 1 : 0, to: '/admin/admins', gradient: 'from-pink-500 to-rose-500', glow: 'shadow-pink-500/20' },
+    { icon: '🔐', label: 'Admins', value: admins.length, to: '/admin/admins', gradient: 'from-pink-500 to-rose-500', glow: 'shadow-pink-500/20' },
+    { icon: '👤', label: 'Registered Users', value: registeredUsersCount, to: '/admin/logs', gradient: 'from-indigo-500 to-violet-500', glow: 'shadow-indigo-500/20' },
   ]
 
   const actions = [

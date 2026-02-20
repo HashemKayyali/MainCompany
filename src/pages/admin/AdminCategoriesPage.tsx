@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useData } from '../../contexts/DataContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { Category } from '../../data/products/types'
@@ -21,16 +21,56 @@ function makeSlug(name: string) {
 
 /** ✅ 100 مناسبة للمشروع */
 const EMOJI_ICONS: string[] = [
-  '🚲','🛴','🏍️','🚗','🛞','⛓️','🔩','🧰','🛠️','🔧',
-  '⚙️','🔋','🔌','💡','🧲','📡','🖥️','📱','⌚','🎮',
-  '🕹️','🧠','🤖','🧪','🧬','🛰️','🎧','🔊','🎤','📷',
-  '🎥','🖨️','🧾','📦','🛍️','🏷️','💳','🧑‍💻','👨‍🔧','👩‍🔧',
-  '🏗️','🏢','🏬','🏪','🧱','🧯','🔒','🔐','🛡️','🧿',
-  '⭐','✨','🔥','⚡','🌈','💎','🟣','🔵','🟢','🟡',
-  '🟠','🔴','⚫','⚪','📌','📍','🧭','🗺️','🌍','🌟',
-  '🏁','🎯','🏆','🥇','🥈','🥉','⏱️','🕒','📈','📊',
-  '🧩','📚','📝','📣','📢','🎟️','🎪','🎡','🎠','🏟️',
-  '🕶️','🥽','🧤','🪖','🧢','👕','🎒','🧸','🍀','🌿'
+  // ───────────────────────── VR / AR / Wearables ─────────────────────────
+  '🥽','🕶️','🎧','🎤','🔊','📢','📣','📷','🎥','📸',
+  '📹','🛰️','🧠','🤖','🦾','🦿','👾','🧬','🧪','🔬',
+  '🔭','📡','🧲','💡','🔦','🕹️','🎮','🧩','🧿','✨',
+  '⭐','🌟','🌈','⚡','🔥','💎','🟣','🔵','🟢','🟡',
+  '🟠','🔴','⚫','⚪','🌀','🌌','🪐','☄️','🌠','👓',
+
+  // ───────────────────────── Gaming / Esports / Arcade ───────────────────
+  '🎮','🕹️','👾','🧟','🧙','🧛','🧞','🧜','🧝','🧑‍🚀',
+  '🛰️','🚀','🛸','🎯','🏆','🥇','🥈','🥉','🏅','🎖️',
+  '🎲','🃏','🀄','♟️','🧩','🧸','🎈','🎉','🎊','🎆',
+  '🎇','🎟️','🎫','🏟️','🎪','🎡','🎠','🛝','🏓','🏸',
+  '🏒','🥅','🏀','⚽','🏈','⚾','🎳','🥊','🥋','⛳',
+  '🧨','💥','🔫','🧿','🦖','🦕','🐉','👑','💫','🧠',
+
+  // ───────────────────────── Screens / AV / Studio ───────────────────────
+  '🖥️','🖨️','📺','📻','📽️','🎞️','🧾','🧿','🔌','🔋',
+  '🔦','💡','🪫','⚙️','🔧','🪛','🔩','🧰','🛠️','🧲',
+  '📱','☎️','📞','📟','📠','🧮','⌚','⏱️','⏲️','🕒',
+  '🗜️','🎚️','🎛️','🎙️','🎧','🔊','🔉','🔈','📡','🛰️',
+  '📷','📸','📹','🎥','🧾','🧷','📎','🗂️','🗃️','🗄️',
+
+  // ───────────────────────── Printers / Printing / Design ────────────────
+  '🖨️','🧾','📄','📃','📑','🗞️','📚','📖','📝','✍️',
+  '🖊️','🖋️','✒️','🖍️','🖌️','🎨','🧵','🪡','📐','📏',
+  '🧰','🧲','⚙️','🔩','🪛','🔧','🛠️','🗜️','🧪','🧬',
+  '📦','📫','📬','📭','✉️','📩','📮','🏷️','🧾','🧷',
+
+  // ───────────────────────── Service / Repair / Maintenance ──────────────
+  '🧑‍💻','👨‍🔧','👩‍🔧','🧰','🛠️','🔧','🪛','🔩','⚙️','🧲',
+  '🧯','🪜','🧱','🏗️','🏭','🏢','🏬','🏪','🏷️','📦',
+  '🧼','🧽','🧴','🪣','🚿','🚰','🧹','🧺','🪠','🧻',
+  '🔒','🔐','🛡️','📌','📍','🧭','🗺️','📋','✅','☑️',
+  '📅','🗓️','⏱️','⏲️','🕒','📞','☎️','🧾','💳','🧰',
+
+  // ───────────────────────── Tech / Network / Security ───────────────────
+  '🌐','🖧','📡','🛰️','🧲','🔌','🔋','🪫','💾','💿',
+  '📀','🧠','🤖','🧬','🧪','🔬','🔭','🗄️','🗃️','🗂️',
+  '🧾','📈','📊','📉','🧮','🔍','🔎','🧷','📎','🔗',
+  '🔑','🗝️','🔒','🔐','🛡️','🚨','⚠️','⛔','✅','🧿',
+
+  // ───────────────────────── Business / Store / Events ───────────────────
+  '🏷️','🛍️','🛒','📦','🎁','💳','💰','🪙','💵','💶',
+  '💷','💴','🧾','📄','📝','📌','📍','📣','📢','🎤',
+  '🎟️','🎫','🏁','🏆','🌟','✨','📅','🗓️','🕒','⏱️',
+  '🏢','🏬','🏪','🏭','🏗️','🤝','👥','👤','🧑‍💼','📞',
+
+  // ───────────────────────── Extras (transport / misc) ───────────────────
+  '🚲','🛴','🏍️','🚗','🛞','⛓️','🧤','🪖','🧢','👕',
+  '🎒','🍀','🌿','🌍','🌟','🏁','🧩','📚','📝','🧸'
 ]
 
 export default function AdminCategoriesPage() {
@@ -44,6 +84,10 @@ export default function AdminCategoriesPage() {
   // ✅ Emoji picker state
   const [emojiQuery, setEmojiQuery] = useState('')
   const [showEmoji, setShowEmoji] = useState(false)
+
+  // ✅ refs لإغلاق البوب-أوفر عند الضغط خارجها
+  const iconWrapRef = useRef<HTMLDivElement | null>(null)
+  const popoverRef = useRef<HTMLDivElement | null>(null)
 
   const txt = isDark ? 'text-white' : 'text-gray-900'
   const sub = isDark ? 'text-purple-200/80' : 'text-gray-500'
@@ -99,9 +143,27 @@ export default function AdminCategoriesPage() {
   const filteredEmojis = useMemo(() => {
     const q = emojiQuery.trim()
     if (!q) return EMOJI_ICONS
-    // بحث بسيط: يفلتر حسب “رمز الإيموجي” (مفيد لو المستخدم ينسخ ايموجي/جزء)
     return EMOJI_ICONS.filter(e => e.includes(q))
   }, [emojiQuery])
+
+  // ✅ إغلاق البوب-أوفر عند الضغط خارجها (بدون overlay يقتل الماوس/السكرول)
+  useEffect(() => {
+    if (!showEmoji) return
+
+    const onPointerDown = (ev: PointerEvent) => {
+      const t = ev.target as Node
+      const wrap = iconWrapRef.current
+      const pop = popoverRef.current
+
+      // إذا الضغط داخل الزر/الحاوية أو داخل البوب-أوفر → لا تغلق
+      if (wrap?.contains(t) || pop?.contains(t)) return
+
+      setShowEmoji(false)
+    }
+
+    document.addEventListener('pointerdown', onPointerDown, true)
+    return () => document.removeEventListener('pointerdown', onPointerDown, true)
+  }, [showEmoji])
 
   return (
     <div className="space-y-5">
@@ -220,7 +282,7 @@ export default function AdminCategoriesPage() {
       <Modal open={!!editing} onClose={close} title={isNew ? 'Add Category / Brand' : 'Edit Category'}>
         {editing && (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-[1]">
               <div className="sm:col-span-2">
                 <label className={cn('block text-[12px] mb-1.5 font-medium', sub)}>
                   Name * (e.g. "The Terminal VR", "Bike Land")
@@ -244,15 +306,15 @@ export default function AdminCategoriesPage() {
                 />
               </div>
 
-              {/* ✅ Emoji picker بدل input عادي */}
-              <div>
+              {/* ✅ Icon picker (Popover فوق العناصر) */}
+              <div ref={iconWrapRef} className="relative">
                 <label className={cn('block text-[12px] mb-1.5 font-medium', sub)}>Icon</label>
 
                 <button
                   type="button"
                   onClick={() => setShowEmoji(v => !v)}
                   className={cn(
-                    'w-full flex items-center justify-between gap-3 rounded-xl border px-4 py-3 transition',
+                    'w-full flex items-center justify-between gap-3 rounded-xl border px-4 py-3 transition relative z-[20]',
                     isDark
                       ? 'border-purple-500/25 bg-purple-500/[0.06] hover:bg-purple-500/[0.10]'
                       : 'border-gray-200 bg-white hover:bg-gray-50'
@@ -269,10 +331,14 @@ export default function AdminCategoriesPage() {
 
                 {showEmoji && (
                   <div
+                    ref={popoverRef}
                     className={cn(
-                      'mt-2 rounded-2xl border p-3',
-                      isDark ? 'border-purple-500/20 bg-purple-500/[0.06]' : 'border-gray-200 bg-white'
+                      'absolute right-0 mt-2 w-[340px] z-[1000] rounded-2xl border p-3 shadow-2xl',
+                      isDark ? 'border-purple-500/20 bg-[#0b0b1a]' : 'border-gray-200 bg-white'
                     )}
+                    // ✅ أهم سطرين: امنع السكرول يطلع للمودال/الصفحة
+                    onWheelCapture={(e) => e.stopPropagation()}
+                    onTouchMove={(e) => e.stopPropagation()}
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <span className={cn('text-[11px] font-mono', sub)}>FILTER</span>
@@ -301,7 +367,7 @@ export default function AdminCategoriesPage() {
                       </button>
                     </div>
 
-                    <div className="grid grid-cols-10 gap-2 max-h-52 overflow-auto pr-1">
+                    <div className="grid grid-cols-10 gap-2 max-h-56 overflow-y-auto overscroll-contain pr-1">
                       {filteredEmojis.map(e => {
                         const active = editing.icon === e
                         return (
@@ -313,7 +379,7 @@ export default function AdminCategoriesPage() {
                               setShowEmoji(false)
                             }}
                             className={cn(
-                              'h-10 rounded-xl border flex items-center justify-center text-xl transition',
+                              'h-10 rounded-xl border flex items-center justify-center text-xl transition select-none',
                               active
                                 ? isDark
                                   ? 'border-prism-violet/50 bg-prism-violet/15'

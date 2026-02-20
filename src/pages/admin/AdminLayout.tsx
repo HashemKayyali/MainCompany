@@ -15,6 +15,7 @@ function usePageTitle(pathname: string) {
     if (pathname.startsWith('/admin/categories')) return 'Categories'
     if (pathname.startsWith('/admin/gallery')) return 'Gallery'
     if (pathname.startsWith('/admin/admins')) return 'Admins'
+    if (pathname.startsWith('/admin/logs')) return 'Logs'
     return 'Admin'
   }, [pathname])
 }
@@ -33,6 +34,7 @@ function buildBreadcrumbs(pathname: string): Crumb[] {
     categories: 'Categories',
     gallery: 'Gallery',
     admins: 'Admins',
+    logs: 'Logs',
   }
 
   const crumbs: Crumb[] = [{ label: 'Dashboard', to: '/admin' }]

@@ -8,7 +8,7 @@ type SidebarVariant = 'desktop' | 'drawer'
 
 const STORAGE_KEY = 'bl_admin_sidebar_collapsed'
 
-type IconName = 'home' | 'bike' | 'wrench' | 'users' | 'folder' | 'image' | 'shield'
+type IconName = 'home' | 'bike' | 'wrench' | 'users' | 'folder' | 'image' | 'shield' | 'log'
 
 function Icon({ name, className }: { name: IconName; className?: string }) {
   const common = `w-5 h-5 ${className || ''}`
@@ -97,6 +97,19 @@ function Icon({ name, className }: { name: IconName; className?: string }) {
           <path d="M9.5 12.2 11.2 14l3.5-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )
+    case 'log':
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+          <path d="M14 3v6h6" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+          <path d="M8 13h8M8 17h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        </svg>
+      )
   }
 }
 
@@ -108,6 +121,7 @@ const LINKS: { to: string; l: string; icon: IconName; exact?: boolean }[] = [
   { to: '/admin/categories', l: 'Categories', icon: 'folder' },
   { to: '/admin/gallery', l: 'Gallery', icon: 'image' },
   { to: '/admin/admins', l: 'Admins', icon: 'shield' },
+  { to: '/admin/logs', l: 'Logs', icon: 'log' },
 ]
 
 export default function Sidebar({

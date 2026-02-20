@@ -322,6 +322,43 @@ export interface Database {
         }
         Relationships: []
       }
+
+      admin_logs: {
+        Row: {
+          id: string
+          admin_id: string
+          admin_name: string
+          admin_email: string
+          action: string
+          entity_type: string
+          entity_id: string
+          entity_name: string
+          details: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          admin_id: string
+          admin_name: string
+          admin_email: string
+          action: string
+          entity_type: string
+          entity_id: string
+          entity_name: string
+          details?: string
+          created_at?: string
+        }
+        Update: {
+          admin_name?: string
+          admin_email?: string
+          action?: string
+          entity_type?: string
+          entity_id?: string
+          entity_name?: string
+          details?: string
+        }
+        Relationships: []
+      }
     }
 
     Views: Record<string, never>

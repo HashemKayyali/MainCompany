@@ -76,6 +76,6 @@ supabase/
 
 git status
 git add .
-git commit -m "UI Admin"
+git commit -m "logs and others"
 git push
 

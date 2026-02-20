@@ -17,6 +17,7 @@ import AdminPartsPage from './pages/admin/AdminPartsPage'
 import AdminCustomersPage from './pages/admin/AdminCustomersPage'
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage'
 import AdminAdminsPage from './pages/admin/AdminAdminsPage'
+import AdminLogsPage from './pages/admin/AdminLogsPage'
 import AdminGalleryPage from './pages/admin/AdminGalleryPage'
 import AuthCallback from './pages/AuthCallback'
 import AdminGuard from './components/AdminGuard'
@@ -58,6 +59,7 @@ export const router = createBrowserRouter([
       { path: 'categories', element: <AdminCategoriesPage /> },
       { path: 'gallery', element: <AdminGalleryPage /> },
       { path: 'admins', element: <AdminAdminsPage /> },
+      { path: 'logs', element: <AdminLogsPage /> },
     ],
   },
 ])

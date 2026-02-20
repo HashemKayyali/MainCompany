@@ -74,6 +74,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   )
 
+  // Fetch ALL admin/superadmin profiles from DB
+  const fetchAllAdmins = useCallback(async (): Promise<AdminUser[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, name, email, role, created_at')
+        .in('role', ['admin', 'superadmin'])
+
+      if (error || !data) return []
+
+      return (data as any[]).map((row: any) => ({
+        id: row.id,
+        email: row.email || '',
+        name: row.name || row.email || 'Admin',
+        role: row.role as AdminRole,
+        createdAt: row.created_at,
+      }))
+    } catch {
+      return []
+    }
+  }, [])
+
   // ✅ بدل getSession/onAuthStateChange من هون، بنعتمد على SessionProvider (مصدر واحد)
   useEffect(() => {
     let mounted = true
@@ -96,9 +118,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         const adminUser = await resolveAdmin(authUser ? { id: authUser.id, email: authUser.email } : null)
+        const allAdmins = adminUser ? await fetchAllAdmins() : []
+
         if (mounted) {
           setUser(adminUser)
-          setAdmins(adminUser ? [adminUser] : [])
+          setAdmins(allAdmins)
           setLoading(false)
         }
       } catch (e) {
@@ -115,7 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       mounted = false
     }
-  }, [authUser, sessionLoading, resolveAdmin])
+  }, [authUser, sessionLoading, resolveAdmin, fetchAllAdmins])
 
   const login = useCallback(async (email: string, password: string) => {
     if (!isSupabaseConfigured()) {
