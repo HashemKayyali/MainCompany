@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import App from './App'
 import HomePage from './pages/HomePage'
 import ProductsPage from './pages/ProductsPage'
@@ -8,7 +8,6 @@ import GalleryPage from './pages/GalleryPage'
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
 import LoginPage from './pages/LoginPage'
-import UserLoginPage from './pages/UserLoginPage'
 import RegisterPage from './pages/RegisterPage'
 import NotFoundPage from './pages/NotFoundPage'
 import AdminLayout from './pages/admin/AdminLayout'
@@ -21,6 +20,7 @@ import AdminAdminsPage from './pages/admin/AdminAdminsPage'
 import AdminGalleryPage from './pages/admin/AdminGalleryPage'
 import AuthCallback from './pages/AuthCallback'
 import AdminGuard from './components/AdminGuard'
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -37,28 +37,27 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // ✅ ADD THIS (Auth email link callback)
   { path: '/auth/callback', element: <AuthCallback /> },
 
   { path: '/login', element: <LoginPage /> },
-  { path: '/user-login', element: <UserLoginPage /> },
+  { path: '/user-login', element: <Navigate to="/login" replace /> },
   { path: '/register', element: <RegisterPage /> },
 
- {
-  path: '/admin',
-  element: (
-    <AdminGuard>
-      <AdminLayout />
-    </AdminGuard>
-  ),
-  children: [
-    { index: true, element: <DashboardPage /> },
-    { path: 'products', element: <AdminProductsPage /> },
-    { path: 'parts', element: <AdminPartsPage /> },
-    { path: 'customers', element: <AdminCustomersPage /> },
-    { path: 'categories', element: <AdminCategoriesPage /> },
-    { path: 'gallery', element: <AdminGalleryPage /> },
-    { path: 'admins', element: <AdminAdminsPage /> },
-  ],
-},
+  {
+    path: '/admin',
+    element: (
+      <AdminGuard>
+        <AdminLayout />
+      </AdminGuard>
+    ),
+    children: [
+      { index: true, element: <DashboardPage /> },
+      { path: 'products', element: <AdminProductsPage /> },
+      { path: 'parts', element: <AdminPartsPage /> },
+      { path: 'customers', element: <AdminCustomersPage /> },
+      { path: 'categories', element: <AdminCategoriesPage /> },
+      { path: 'gallery', element: <AdminGalleryPage /> },
+      { path: 'admins', element: <AdminAdminsPage /> },
+    ],
+  },
 ])
