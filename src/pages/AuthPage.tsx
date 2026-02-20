@@ -173,7 +173,7 @@ const labelClass = 'block text-[13px] mb-2 font-extrabold text-violet-100/90'
               </div>
               <div>
                 <div className="text-white text-lg font-extrabold font-display tracking-wide">Bike Land</div>
-                <div className="text-white/75 text-sm font-semibold">Portal</div>
+                <div className="text-white/75 text-sm font-semibold">Gate</div>
               </div>
             </div>
 
