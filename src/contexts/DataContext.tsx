@@ -17,6 +17,7 @@ import * as categoriesApi from '../services/categories.service'
 import * as galleryApi from '../services/gallery.service'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { DEFAULT_PRODUCTS, DEFAULT_PARTS, DEFAULT_CUSTOMERS, DEFAULT_CATEGORIES } from '../data/defaults'
+import { useSession } from './SessionContext'
 
 interface DataCtx {
   products: Product[]
@@ -77,6 +78,7 @@ function applyDefaults(
 }
 
 export function DataProvider({ children }: { children: ReactNode }) {
+  const { loading: sessionLoading } = useSession()
   const [products, setProducts] = useState<Product[]>([])
   const [parts, setParts] = useState<ProductPart[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -112,6 +114,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const refreshAll = useCallback(async () => {
+    // ✅ لا نبدأ تحميل الداتا قبل ما يخلص تهيئة auth (يقلل lock contention)
+    if (sessionLoading) return
+
     // Supabase not configured -> defaults immediately
     if (!isSupabaseConfigured()) {
       safeSet(() => {
@@ -176,7 +181,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       })
       retryCount.current = 0
     }
-  }, [loadAllOnce])
+  }, [loadAllOnce, sessionLoading])
 
   useEffect(() => {
     mountedRef.current = true

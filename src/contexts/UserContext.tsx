@@ -1,6 +1,7 @@
 import { createContext, useContext, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import type { Database } from '../lib/database.types'
+import { useSession } from './SessionContext'
 
 export interface AppUser {
   id: string
@@ -24,6 +25,7 @@ const Ctx = createContext<UserCtx>({} as UserCtx)
 type ProfileRow = Database['public']['Tables']['profiles']['Row']
 
 export function UserProvider({ children }: { children: ReactNode }) {
+  const { authUser, loading: sessionLoading } = useSession()
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null)
   const [loading, setLoading] = useState(true)
   const mountedRef = useRef(true)
@@ -62,57 +64,46 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // ✅ بدل getSession/onAuthStateChange من هون، بنعتمد على SessionProvider
   useEffect(() => {
     mountedRef.current = true
 
-    if (!isSupabaseConfigured()) {
-      safeSet(() => setLoading(false))
-      return () => {
-        mountedRef.current = false
+    async function syncFromSession() {
+      if (!isSupabaseConfigured()) {
+        safeSet(() => {
+          setCurrentUser(null)
+          setLoading(false)
+        })
+        return
       }
-    }
 
-    let unsubscribed = false
+      if (sessionLoading) {
+        safeSet(() => setLoading(true))
+        return
+      }
 
-    async function init() {
       try {
-        const { data } = await supabase.auth.getSession()
-        const sessionUser = data.session?.user
-        if (sessionUser && !unsubscribed) {
-          const profile = await fetchProfile(sessionUser.id)
-          safeSet(() => setCurrentUser(profile))
+        if (!authUser) {
+          safeSet(() => setCurrentUser(null))
+          return
         }
+
+        const profile = await fetchProfile(authUser.id)
+        safeSet(() => setCurrentUser(profile))
       } catch (err) {
-        console.warn('UserContext init error:', err)
+        console.warn('UserContext sync error:', err)
+        safeSet(() => setCurrentUser(null))
       } finally {
         safeSet(() => setLoading(false))
       }
     }
 
-    init()
-
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (unsubscribed) return
-
-      if (!session?.user) {
-        safeSet(() => setCurrentUser(null))
-        return
-      }
-
-      try {
-        const profile = await fetchProfile(session.user.id)
-        safeSet(() => setCurrentUser(profile))
-      } catch (err) {
-        console.warn('UserContext auth change error:', err)
-      }
-    })
+    syncFromSession()
 
     return () => {
-      unsubscribed = true
       mountedRef.current = false
-      sub.subscription.unsubscribe()
     }
-  }, [fetchProfile])
+  }, [authUser, sessionLoading, fetchProfile])
 
   const register = useCallback(
     async (name: string, email: string, phone: string, pw: string): Promise<string | true> => {

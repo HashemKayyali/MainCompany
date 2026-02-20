@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { useSession } from './SessionContext'
 import type { Database } from '../lib/database.types'
 
 export type AdminRole = 'admin' | 'superadmin'
@@ -51,6 +52,7 @@ async function fetchProfileRole(userId: string): Promise<{ role: string | null; 
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { authUser, loading: sessionLoading } = useSession()
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<AdminUser | null>(null)
   const [admins, setAdmins] = useState<AdminUser[]>([])
@@ -72,10 +74,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   )
 
+  // ✅ بدل getSession/onAuthStateChange من هون، بنعتمد على SessionProvider (مصدر واحد)
   useEffect(() => {
     let mounted = true
 
-    async function init() {
+    async function syncFromSession() {
       try {
         if (!isSupabaseConfigured()) {
           if (mounted) {
@@ -86,17 +89,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return
         }
 
-        const { data } = await supabase.auth.getSession()
-        const sessionUser = data.session?.user ?? null
+        // لسه SessionProvider عم يحمّل
+        if (sessionLoading) {
+          if (mounted) setLoading(true)
+          return
+        }
 
-        const adminUser = await resolveAdmin(sessionUser)
+        const adminUser = await resolveAdmin(authUser ? { id: authUser.id, email: authUser.email } : null)
         if (mounted) {
           setUser(adminUser)
           setAdmins(adminUser ? [adminUser] : [])
           setLoading(false)
         }
       } catch (e) {
-        console.warn('[AuthContext] init error:', e)
+        console.warn('[AuthContext] sync error:', e)
         if (mounted) {
           setUser(null)
           setAdmins([])
@@ -105,46 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    init()
-
-    if (!isSupabaseConfigured()) return
-
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!mounted) return
-
-      try {
-        const sessionUser = session?.user ?? null
-
-        if (sessionUser) {
-          setLoading(true)
-          const adminUser = await resolveAdmin(sessionUser)
-          if (mounted) {
-            setUser(adminUser)
-            setAdmins(adminUser ? [adminUser] : [])
-            setLoading(false)
-          }
-        } else {
-          if (mounted) {
-            setUser(null)
-            setAdmins([])
-            setLoading(false)
-          }
-        }
-      } catch (e) {
-        console.warn('[AuthContext] auth change error:', e)
-        if (mounted) {
-          setUser(null)
-          setAdmins([])
-          setLoading(false)
-        }
-      }
-    })
-
+    syncFromSession()
     return () => {
       mounted = false
-      sub.subscription.unsubscribe()
     }
-  }, [resolveAdmin])
+  }, [authUser, sessionLoading, resolveAdmin])
 
   const login = useCallback(async (email: string, password: string) => {
     if (!isSupabaseConfigured()) {

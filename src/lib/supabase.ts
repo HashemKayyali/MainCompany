@@ -15,4 +15,14 @@ if (!SUPABASE_ENABLED) {
 }
 
 // ✅ أهم تعديل: نحدد schema 'public' صراحةً
-export const supabase = createClient<Database, 'public'>(supabaseUrl || '', supabaseAnonKey || '')
+// ✅ ونثبت خيارات auth لتقليل مشاكل الـ auth lock (Navigator.locks) مع تعدد الـ providers
+export const supabase = createClient<Database, 'public'>(supabaseUrl || '', supabaseAnonKey || '', {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    // نستخدم localStorage صراحةً (وفي السيرفر بنتركها undefined)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    storage: (typeof window !== 'undefined' ? window.localStorage : undefined) as any,
+  },
+})
