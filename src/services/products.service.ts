@@ -32,6 +32,8 @@ function dbToApp(row: ProductRow): Product {
     currency: row.currency ?? 'JOD',
     // ✅ default = true (undefined/null means "show")
     showPrice: row.show_price !== false,
+    // ✅ Video URL for hover preview
+    videoUrl: row.video_url ?? '',
   }
 }
 
@@ -58,6 +60,8 @@ function appToDb(p: Product): ProductInsert {
     currency: p.currency || 'JOD',
     // ✅ store explicitly (false must be persisted)
     show_price: p.showPrice !== false,
+    // ✅ Video URL
+    video_url: p.videoUrl || null,
   }
 }
 
@@ -133,6 +137,8 @@ export async function update(slug: string, product: Partial<Product>): Promise<P
 
   // ✅ IMPORTANT: don't ignore false
   if (product.showPrice !== undefined) dbData.show_price = product.showPrice
+  // ✅ Video URL
+  if (product.videoUrl !== undefined) dbData.video_url = product.videoUrl || null
 
   const { data, error } = await supabase
     .from('products')

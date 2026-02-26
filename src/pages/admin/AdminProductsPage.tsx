@@ -3,6 +3,7 @@ import { useData } from '../../contexts/DataContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import Modal from '../../components/ui/Modal'
 import ImageUploader from '../../components/ui/ImageUploader'
+import VideoUploader from '../../components/ui/VideoUploader'
 import { slugify } from '../../utils/format'
 import type { Product } from '../../data/products/types'
 
@@ -44,6 +45,7 @@ const EMPTY: Product = {
   featured: false,
   heroImage: '',
   gallery: [],
+  videoUrl: '',
   quickOptions: [],
   notes: [],
   features: { left: [], right: [] },
@@ -127,6 +129,7 @@ export default function AdminProductsPage() {
       featuresLeft: '',
       featuresRight: '',
       gallery: [],
+      videoUrl: '',
       badgeFromHex: g.fromHex,
       badgeToHex: g.toHex,
       showPrice: true,
@@ -145,6 +148,7 @@ export default function AdminProductsPage() {
       featuresLeft: p.features.left.join('\n'),
       featuresRight: p.features.right.join('\n'),
       gallery: [...p.gallery],
+      videoUrl: p.videoUrl || '',
       badgeFromHex: g.fromHex,
       badgeToHex: g.toHex,
       showPrice: p.showPrice !== false,
@@ -215,6 +219,7 @@ export default function AdminProductsPage() {
       showPrice: form.showPrice !== false,
       heroImage: gallery[0] || form.heroImage || '',
       gallery,
+      videoUrl: form.videoUrl || '',
       quickOptions: form.quickOptions || [],
       notes,
       features: { left: fl, right: fr },
@@ -395,6 +400,11 @@ export default function AdminProductsPage() {
                         <span className={`text-[11px] px-2 py-1 rounded-full border ${isDark ? 'border-purple-500/20 bg-purple-500/[0.05] text-purple-200/80' : 'border-gray-200 bg-gray-50 text-gray-600'}`}>
                           {p.gallery.length} 📷
                         </span>
+                        {p.videoUrl && (
+                          <span className={`text-[11px] px-2 py-1 rounded-full border ${isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200/80' : 'border-blue-200 bg-blue-50 text-blue-600'}`}>
+                            🎬 Video
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -469,7 +479,7 @@ export default function AdminProductsPage() {
           <div className="flex flex-wrap gap-2">
             <Step k="basic" label="Basic" hint="Name / Category / Price" />
             <Step k="content" label="Content" hint="Descriptions / Notes" />
-            <Step k="images" label={`Images (${(form.gallery || []).length})`} hint="Upload & order" />
+            <Step k="images" label={`Media (${(form.gallery || []).length}${form.videoUrl ? ' +🎬' : ''})`} hint="Images & Video" />
             <Step k="options" label="Options" hint="Quick options / Features" />
           </div>
 
@@ -620,6 +630,26 @@ export default function AdminProductsPage() {
             {/* ═══ TAB: IMAGES (FIXED) ═══ */}
             {tab === 'images' && (
               <div className="space-y-4">
+                {/* ── Video Upload ── */}
+                <div className={`p-4 rounded-xl border ${isDark ? 'border-purple-500/20 bg-purple-500/[0.03]' : 'border-violet-100 bg-violet-50/30'}`}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-base">🎬</span>
+                    <div>
+                      <p className={`text-xs font-semibold ${txt}`}>Product Video (Hover Preview)</p>
+                      <p className={`text-[11px] ${isDark ? 'text-purple-200/50' : 'text-gray-400'}`}>
+                        This video plays when visitors hover over the product card. MP4 recommended, max 50MB.
+                      </p>
+                    </div>
+                  </div>
+                  <VideoUploader
+                    value={form.videoUrl || ''}
+                    onChange={(url: string) => setForm((f: any) => ({ ...f, videoUrl: url }))}
+                    onRemove={() => setForm((f: any) => ({ ...f, videoUrl: '' }))}
+                    folder="products"
+                  />
+                </div>
+
+                {/* ── Images ── */}
                 <div className={`p-3 rounded-xl ${soft2}`}>
                   <p className={`text-xs font-medium ${isDark ? 'text-purple-200/85' : 'text-gray-700'}`}>📷 The first image is the hero. Drag & reorder using arrows.</p>
                 </div>
@@ -736,6 +766,7 @@ export default function AdminProductsPage() {
             <div className="sm:ml-auto text-[11px] leading-4">
               <p className={sub}>
                 Hero image: <span className={txt}>{(form.gallery || [])[0] ? 'Gallery #1' : 'None'}</span>
+                {' · '}Video: <span className={txt}>{form.videoUrl ? '✓ Uploaded' : 'None'}</span>
               </p>
               <p className={isDark ? 'text-purple-200/45' : 'text-gray-400'}>Save will auto-generate slug if empty.</p>
             </div>

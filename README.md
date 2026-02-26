@@ -76,6 +76,6 @@ supabase/
 
 git status
 git add .
-git commit -m "statsstrip"
+git commit -m "vid+cardui"
 git push
 

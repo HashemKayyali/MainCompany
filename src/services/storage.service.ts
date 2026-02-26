@@ -221,3 +221,52 @@ export async function deleteImage(url: string): Promise<void> {
   const { error } = await supabase.storage.from(BUCKET).remove([path])
   if (error) console.warn('Failed to delete image:', error)
 }
+
+/**
+ * ✅ Upload a video file to Supabase Storage.
+ * - Accepts mp4, webm, mov (max ~50MB recommended)
+ * - Returns the public URL
+ */
+const VIDEO_BUCKET = 'product-videos'
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024 // 50MB
+
+export async function uploadVideo(file: File, folder: string, fileName?: string): Promise<string> {
+  if (!isSupabaseConfigured()) {
+    // Fallback: return object URL (won't persist across sessions)
+    return URL.createObjectURL(file)
+  }
+
+  if (file.size > MAX_VIDEO_SIZE) {
+    throw new Error(`Video too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Max is 50MB.`)
+  }
+
+  const safeFolder = folder?.trim() ? folder.trim() : 'uploads'
+  const base = safeBaseName(fileName)
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'mp4'
+  const path = normalizePath(`${safeFolder}/${base}.${ext}`)
+
+  const { error } = await supabase.storage.from(VIDEO_BUCKET).upload(path, file, {
+    cacheControl: CACHE_1Y,
+    upsert: true,
+    contentType: file.type || 'video/mp4',
+  })
+  if (error) throw error
+
+  const { data: urlData } = supabase.storage.from(VIDEO_BUCKET).getPublicUrl(path)
+  return urlData.publicUrl
+}
+
+export async function deleteVideo(url: string): Promise<void> {
+  if (!isSupabaseConfigured()) return
+  if (!url || url.startsWith('data:') || url.startsWith('blob:')) return
+
+  const marker = `/storage/v1/object/public/${VIDEO_BUCKET}/`
+  const idx = url.indexOf(marker)
+  if (idx === -1) return
+
+  const path = url.substring(idx + marker.length)
+  if (!path) return
+
+  const { error } = await supabase.storage.from(VIDEO_BUCKET).remove([path])
+  if (error) console.warn('Failed to delete video:', error)
+}

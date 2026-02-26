@@ -37,6 +37,10 @@ export interface Product {
 
   heroImage: string
   gallery: string[]
+
+  // ✅ Video URL for hover preview on cards
+  videoUrl?: string
+
   quickOptions: QuickOption[]
   notes: string[]
   features: { left: string[]; right: string[] }

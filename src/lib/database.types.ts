@@ -192,6 +192,9 @@ export interface Database {
 
           rental_price_per_event: number | null
           currency: string | null
+
+          // ✅ Video URL for hover preview
+          video_url: string | null
         }
         Insert: {
           id?: string
@@ -221,6 +224,9 @@ export interface Database {
 
           rental_price_per_event?: number | null
           currency?: string | null
+
+          // ✅ Video URL for hover preview
+          video_url?: string | null
         }
         Update: {
           title?: string
@@ -248,6 +254,9 @@ export interface Database {
 
           rental_price_per_event?: number | null
           currency?: string | null
+
+          // ✅ Video URL for hover preview
+          video_url?: string | null
         }
         Relationships: [
           {

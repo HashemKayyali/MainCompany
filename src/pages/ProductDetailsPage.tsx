@@ -46,7 +46,7 @@ export default function ProductDetailsPage() {
           {/* ── Left Column ── */}
           <div className="lg:col-span-3">
             <motion.div initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, ease }}>
-              <ProductGallery images={product.gallery} name={product.name} />
+              <ProductGallery images={product.gallery} name={product.name} videoUrl={product.videoUrl} />
             </motion.div>
 
             <motion.div
