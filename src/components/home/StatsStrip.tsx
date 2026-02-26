@@ -3,16 +3,26 @@ import { useTheme } from '../../contexts/ThemeContext'
 import { usePerfMode } from '../../hooks/usePerfMode'
 
 const ITEMS = [
-  '20+ Partners',
-  '6 Products',
-  '50+ Events',
-  '100% Customizable',
-  'Amman',
-  'Aqaba',
-  'Irbid',
-  'LED Racing',
-  'VR Cycling',
-  'Smoothie Bikes',
+  'Abdali Hospital',
+  'AMAZON',
+  'Amman Academy',
+  'AstraZeneca',
+  'Birthdays',
+  'City Mall',
+  'Delmonte',
+  'JU',
+  'MR.BURRITOS',
+  'Power Basketball',
+  'PROTEINAK',
+  'PSUT',
+  'RIA',
+  'Rotana Hotel',
+  'Saray Aqaba',
+  'SNA',
+  'TAJ mall',
+  'TRAX',
+  'Umniah',
+  'ZAIN',
 ]
 
 // Accent palette (used for both text + dot)

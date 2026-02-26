@@ -76,6 +76,6 @@ supabase/
 
 git status
 git add .
-git commit -m "PERFORMANCE3"
+git commit -m "statsstrip"
 git push
 
