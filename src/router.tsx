@@ -1,65 +1,76 @@
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import App from './App'
-import HomePage from './pages/HomePage'
-import ProductsPage from './pages/ProductsPage'
-import ProductDetailsPage from './pages/ProductDetailsPage'
-import CustomersPage from './pages/CustomersPage'
-import GalleryPage from './pages/GalleryPage'
-import AboutPage from './pages/AboutPage'
-import ContactPage from './pages/ContactPage'
-import LoginPage from './pages/LoginPage'
-import RegisterPage from './pages/RegisterPage'
-import NotFoundPage from './pages/NotFoundPage'
-import AdminLayout from './pages/admin/AdminLayout'
-import DashboardPage from './pages/admin/DashboardPage'
-import AdminProductsPage from './pages/admin/AdminProductsPage'
-import AdminPartsPage from './pages/admin/AdminPartsPage'
-import AdminCustomersPage from './pages/admin/AdminCustomersPage'
-import AdminCategoriesPage from './pages/admin/AdminCategoriesPage'
-import AdminAdminsPage from './pages/admin/AdminAdminsPage'
-import AdminLogsPage from './pages/admin/AdminLogsPage'
-import AdminGalleryPage from './pages/admin/AdminGalleryPage'
-import AuthCallback from './pages/AuthCallback'
 import AdminGuard from './components/AdminGuard'
+import PageLoader from './components/ui/PageLoader'
+
+// ── Lazy-loaded pages ──────────────────────────────────────────────
+const HomePage            = lazy(() => import('./pages/HomePage'))
+const ProductsPage        = lazy(() => import('./pages/ProductsPage'))
+const ProductDetailsPage  = lazy(() => import('./pages/ProductDetailsPage'))
+const CustomersPage       = lazy(() => import('./pages/CustomersPage'))
+const GalleryPage         = lazy(() => import('./pages/GalleryPage'))
+const AboutPage           = lazy(() => import('./pages/AboutPage'))
+const ContactPage         = lazy(() => import('./pages/ContactPage'))
+const LoginPage           = lazy(() => import('./pages/LoginPage'))
+const RegisterPage        = lazy(() => import('./pages/RegisterPage'))
+const NotFoundPage        = lazy(() => import('./pages/NotFoundPage'))
+const AuthCallback        = lazy(() => import('./pages/AuthCallback'))
+
+// Admin pages (loaded only when admin navigates)
+const AdminLayout         = lazy(() => import('./pages/admin/AdminLayout'))
+const DashboardPage       = lazy(() => import('./pages/admin/DashboardPage'))
+const AdminProductsPage   = lazy(() => import('./pages/admin/AdminProductsPage'))
+const AdminPartsPage      = lazy(() => import('./pages/admin/AdminPartsPage'))
+const AdminCustomersPage  = lazy(() => import('./pages/admin/AdminCustomersPage'))
+const AdminCategoriesPage = lazy(() => import('./pages/admin/AdminCategoriesPage'))
+const AdminAdminsPage     = lazy(() => import('./pages/admin/AdminAdminsPage'))
+const AdminLogsPage       = lazy(() => import('./pages/admin/AdminLogsPage'))
+const AdminGalleryPage    = lazy(() => import('./pages/admin/AdminGalleryPage'))
+
+// ── Suspense wrapper ───────────────────────────────────────────────
+function S({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<PageLoader />}>{children}</Suspense>
+}
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
     children: [
-      { index: true, element: <HomePage /> },
-      { path: 'products', element: <ProductsPage /> },
-      { path: 'products/:slug', element: <ProductDetailsPage /> },
-      { path: 'customers', element: <CustomersPage /> },
-      { path: 'gallery', element: <GalleryPage /> },
-      { path: 'about', element: <AboutPage /> },
-      { path: 'contact', element: <ContactPage /> },
-      { path: '*', element: <NotFoundPage /> },
+      { index: true,              element: <S><HomePage /></S> },
+      { path: 'products',         element: <S><ProductsPage /></S> },
+      { path: 'products/:slug',   element: <S><ProductDetailsPage /></S> },
+      { path: 'customers',        element: <S><CustomersPage /></S> },
+      { path: 'gallery',          element: <S><GalleryPage /></S> },
+      { path: 'about',            element: <S><AboutPage /></S> },
+      { path: 'contact',          element: <S><ContactPage /></S> },
+      { path: '*',                element: <S><NotFoundPage /></S> },
     ],
   },
 
-  { path: '/auth/callback', element: <AuthCallback /> },
+  { path: '/auth/callback', element: <S><AuthCallback /></S> },
 
-  { path: '/login', element: <LoginPage /> },
+  { path: '/login',      element: <S><LoginPage /></S> },
   { path: '/user-login', element: <Navigate to="/login" replace /> },
-  { path: '/register', element: <RegisterPage /> },
+  { path: '/register',   element: <S><RegisterPage /></S> },
 
   {
     path: '/admin',
     element: (
       <AdminGuard>
-        <AdminLayout />
+        <S><AdminLayout /></S>
       </AdminGuard>
     ),
     children: [
-      { index: true, element: <DashboardPage /> },
-      { path: 'products', element: <AdminProductsPage /> },
-      { path: 'parts', element: <AdminPartsPage /> },
-      { path: 'customers', element: <AdminCustomersPage /> },
-      { path: 'categories', element: <AdminCategoriesPage /> },
-      { path: 'gallery', element: <AdminGalleryPage /> },
-      { path: 'admins', element: <AdminAdminsPage /> },
-      { path: 'logs', element: <AdminLogsPage /> },
+      { index: true,        element: <S><DashboardPage /></S> },
+      { path: 'products',   element: <S><AdminProductsPage /></S> },
+      { path: 'parts',      element: <S><AdminPartsPage /></S> },
+      { path: 'customers',  element: <S><AdminCustomersPage /></S> },
+      { path: 'categories', element: <S><AdminCategoriesPage /></S> },
+      { path: 'gallery',    element: <S><AdminGalleryPage /></S> },
+      { path: 'admins',     element: <S><AdminAdminsPage /></S> },
+      { path: 'logs',       element: <S><AdminLogsPage /></S> },
     ],
   },
 ])

@@ -75,8 +75,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   // Fetch ALL admin/superadmin profiles from DB
+  // Uses RPC function if available (bypasses RLS), falls back to direct query
   const fetchAllAdmins = useCallback(async (): Promise<AdminUser[]> => {
     try {
+      // ✅ Approach 1: Try RPC function (bypasses RLS — recommended)
+      const { data: rpcData, error: rpcError } = await supabase.rpc('get_all_admins') as any
+      if (!rpcError && Array.isArray(rpcData) && rpcData.length > 0) {
+        return rpcData.map((row: any) => ({
+          id: row.id,
+          email: row.email || '',
+          name: row.name || row.email || 'Admin',
+          role: row.role as AdminRole,
+          createdAt: row.created_at,
+        }))
+      }
+
+      // ✅ Approach 2: Direct query (works if RLS allows admins to read all profiles)
       const { data, error } = await supabase
         .from('profiles')
         .select('id, name, email, role, created_at')

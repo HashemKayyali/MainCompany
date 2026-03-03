@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useData } from '../../contexts/DataContext'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useDialog } from '../../contexts/DialogContext'
 import Modal from '../../components/ui/Modal'
 import ImageUploader from '../../components/ui/ImageUploader'
 import VideoUploader from '../../components/ui/VideoUploader'
@@ -60,6 +61,7 @@ type TabKey = 'basic' | 'content' | 'images' | 'options'
 export default function AdminProductsPage() {
   const { products, categories, addProduct, updateProduct, deleteProduct } = useData()
   const { isDark } = useTheme()
+  const dialog = useDialog()
 
   const [modal, setModal] = useState(false)
   const [edit, setEdit] = useState<Product | null>(null)
@@ -228,8 +230,8 @@ export default function AdminProductsPage() {
       currency: form.currency || 'JOD',
     }
 
-    if (!data.name?.trim()) return alert('Product name is required')
-    if (!data.categoryId?.trim()) return alert('Category is required')
+    if (!data.name?.trim()) { await dialog.alert({ title: 'Missing Field', message: 'Product name is required.', variant: 'warning' }); return }
+    if (!data.categoryId?.trim()) { await dialog.alert({ title: 'Missing Field', message: 'Category is required.', variant: 'warning' }); return }
 
     setSaving(true)
     try {
@@ -237,7 +239,7 @@ export default function AdminProductsPage() {
       else await addProduct(data)
       setModal(false)
     } catch (err: any) {
-      alert('Error: ' + (err.message || 'Failed to save'))
+      dialog.alert({ title: 'Error', message: err.message || 'Failed to save', variant: 'danger' })
     } finally {
       setSaving(false)
     }
@@ -247,7 +249,7 @@ export default function AdminProductsPage() {
     try {
       await deleteProduct(slug)
     } catch (err: any) {
-      alert('Error: ' + (err.message || 'Failed to delete'))
+      dialog.alert({ title: 'Error', message: err.message || 'Failed to delete', variant: 'danger' })
     }
     setConfirm(null)
   }
@@ -473,7 +475,7 @@ export default function AdminProductsPage() {
       </div>
 
       {/* ═══ PRODUCT EDITOR MODAL ═══ */}
-      <Modal open={modal} onClose={() => setModal(false)} title={edit ? 'Edit Product' : 'Add Product'}>
+      <Modal open={modal} onClose={() => setModal(false)} title={edit ? 'Edit Product' : 'Add Product'} persistent>
         <div className="space-y-5">
           {/* Steps */}
           <div className="flex flex-wrap gap-2">

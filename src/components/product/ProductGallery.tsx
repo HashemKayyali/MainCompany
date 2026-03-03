@@ -41,7 +41,8 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
         {!isVideoActive && images[activeImageIndex] && (
           <img
             src={images[activeImageIndex]}
-            alt={name}
+            alt={`${name} — photo ${activeImageIndex + 1}`}
+            loading="lazy"
             className="w-full h-full object-cover"
             onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
           />
@@ -65,6 +66,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
           {hasVideo && (
             <button
               onClick={() => setActive(0)}
+              aria-label="Play video"
               className={`relative w-16 h-12 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${
                 active === 0
                   ? 'border-prism-violet/50 opacity-100'
@@ -85,13 +87,14 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
               <button
                 key={i}
                 onClick={() => setActive(itemIndex)}
+                aria-label={`View photo ${i + 1}`}
                 className={`w-16 h-12 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${
                   active === itemIndex
                     ? 'border-prism-violet/50 opacity-100'
                     : isDark ? 'border-purple-500/25 opacity-60 hover:opacity-90' : 'border-gray-200 opacity-70 hover:opacity-100'
                 }`}
               >
-                <img src={img} alt="" className="w-full h-full object-cover" />
+                <img src={img} alt="" loading="lazy" className="w-full h-full object-cover" />
               </button>
             )
           })}

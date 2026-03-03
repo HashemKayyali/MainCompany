@@ -9,6 +9,7 @@ import ProductOptions from '../components/product/ProductOptions'
 import ProductFeatures from '../components/product/ProductFeatures'
 import PricingCard from '../components/store/PricingCard'
 import NotFoundPage from './NotFoundPage'
+import { usePageMeta } from '../hooks/usePageMeta'
 
 const ease = [0.16, 1, 0.3, 1]
 
@@ -20,6 +21,12 @@ export default function ProductDetailsPage() {
   const product = getProductBySlug(slug || '')
   const parts = getPartsByProduct(slug || '')
   const [quoteOpen, setQuoteOpen] = useState(false)
+
+  usePageMeta({
+    title: product?.name || 'Product',
+    description: product?.description || 'View product details and book for your event.',
+    ogImage: product?.gallery?.[0],
+  })
 
   if (!product) return <NotFoundPage />
 
@@ -117,6 +124,7 @@ export default function ProductDetailsPage() {
                           <img
                             src={part.image}
                             alt={part.name}
+                            loading="lazy"
                             className="w-full h-full object-cover"
                             onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
                           />

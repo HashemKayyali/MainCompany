@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useData } from '../contexts/DataContext'
 import { galleryAlbums as staticAlbums, type GalleryAlbum } from '../data/gallery'
 import { useTheme } from '../contexts/ThemeContext'
+import { usePageMeta } from '../hooks/usePageMeta'
 import GalleryGrid from '../components/gallery/GalleryGrid'
 import Lightbox from '../components/gallery/Lightbox'
 import Chip from '../components/ui/Chip'
@@ -10,6 +11,7 @@ import Chip from '../components/ui/Chip'
 export default function GalleryPage() {
   const { galleryAlbums } = useData()
   const { isDark } = useTheme()
+  usePageMeta({ title: 'Gallery', description: 'Browse photos and videos from Bike Land events — LED races, smoothie bikes, VR cycling activations and more.' })
   const [cat, setCat] = useState('All')
   const [album, setAlbum] = useState<GalleryAlbum | null>(null)
 

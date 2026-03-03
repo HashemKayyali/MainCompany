@@ -159,6 +159,35 @@
     box-shadow: 0 0 0 3px rgba(124,58,237,0.1), 0 0 20px rgba(124,58,237,0.05);
   }
 
+  /* ── Select / Dropdown global fix ── */
+  select.form-field {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%239ca3af' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 14px;
+    padding-right: 40px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+  html.dark select, html.dark select.form-field { color-scheme: dark; }
+  html.dark select option, html.dark select optgroup {
+    background-color: #1a1035; color: #e8e4f8; padding: 8px 12px;
+  }
+  html.dark select option:hover, html.dark select option:checked {
+    background-color: rgba(124,58,237,0.3); color: #fff;
+  }
+  html.light select, html.light select.form-field { color-scheme: light; }
+  html.light select option, html.light select optgroup {
+    background-color: #ffffff; color: #1e1b4b; padding: 8px 12px;
+  }
+  html.light select option:hover, html.light select option:checked {
+    background-color: rgba(124,58,237,0.08); color: #1e1b4b;
+  }
+  html.dark select:not(.form-field) { color-scheme: dark; }
+  html.light select:not(.form-field) { color-scheme: light; }
+
   .card-surface { border-radius: 20px; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
   html.dark .card-surface { background: rgba(124,58,237,0.05); border: 1px solid rgba(124,58,237,0.15); }
   html.dark .card-surface:hover { border-color: rgba(124,58,237,0.3); box-shadow: 0 4px 30px rgba(124,58,237,0.08); }

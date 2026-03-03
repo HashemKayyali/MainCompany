@@ -2,7 +2,9 @@ import { motion } from 'framer-motion'
 import { useTheme } from '../contexts/ThemeContext'
 import ContactForm from '../components/contact/ContactForm'
 import { social } from '../data/social'
+import { usePageMeta } from '../hooks/usePageMeta'
 export default function ContactPage() {
+  usePageMeta({ title: 'Contact', description: 'Book your next event with Bike Land. Get in touch for quotes, availability and custom branding options.' })
   const { isDark } = useTheme()
   return (<section className="pt-32 pb-24"><div className="max-w-4xl mx-auto px-6">
     <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="mb-10"><span className="section-label">// Get in Touch</span><h1 className={`section-title !text-left ${!isDark ? 'text-gray-900' : ''}`}>Book Your <span className="text-glow">Experience</span></h1></motion.div>

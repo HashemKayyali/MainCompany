@@ -1,28 +1,13 @@
 import { useMemo } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { usePerfMode } from '../../hooks/usePerfMode'
+import { useData } from '../../contexts/DataContext'
 
-const ITEMS = [
-  'Abdali Hospital',
-  'AMAZON',
-  'Amman Academy',
-  'AstraZeneca',
-  'Birthdays',
-  'City Mall',
-  'Delmonte',
-  'JU',
-  'MR.BURRITOS',
-  'Power Basketball',
-  'PROTEINAK',
-  'PSUT',
-  'RIA',
-  'Rotana Hotel',
-  'Saray Aqaba',
-  'SNA',
-  'TAJ mall',
-  'TRAX',
-  'Umniah',
-  'ZAIN',
+// Fallback names if no customers loaded yet
+const FALLBACK = [
+  'Abdali Hospital', 'AMAZON', 'Amman Academy', 'AstraZeneca', 'City Mall',
+  'Delmonte', 'JU', 'PROTEINAK', 'PSUT', 'Rotana Hotel', 'TAJ mall',
+  'TRAX', 'Umniah', 'ZAIN',
 ]
 
 // Accent palette (used for both text + dot)
@@ -37,15 +22,20 @@ const ACCENTS = [
 export default function StatsStrip() {
   const { isDark } = useTheme()
   const { perfLow } = usePerfMode()
+  const { customers } = useData()
+
+  // Use customer names from DB, fallback to hardcoded list
+  const names = useMemo(() => {
+    if (customers.length > 0) return customers.map(c => c.name)
+    return FALLBACK
+  }, [customers])
 
   // Duplicate enough times so it always looks continuous on wide screens
   const loop = useMemo(() => {
-    const base = ITEMS
     const repeated: string[] = []
-    // 4x is usually enough for 4K widths
-    for (let i = 0; i < 4; i++) repeated.push(...base)
+    for (let i = 0; i < 4; i++) repeated.push(...names)
     return repeated
-  }, [])
+  }, [names])
 
   const edgeFade = isDark
     ? 'from-[#060613] via-[#060613]/70 to-transparent'
@@ -56,8 +46,9 @@ export default function StatsStrip() {
       className={`relative overflow-hidden border-y ${
         isDark ? 'border-white/10' : 'border-violet-200/50'
       }`}
+      aria-label="Our partners and customers"
     >
-      {/* ✅ Slight glass background so it doesn't look "flat" */}
+      {/* Glass background */}
       <div
         className={`absolute inset-0 ${isDark ? 'bg-black/10' : 'bg-white/40'}`}
         style={{
@@ -66,7 +57,7 @@ export default function StatsStrip() {
         }}
       />
 
-      {/* ✅ Subtle top glow line */}
+      {/* Top glow line */}
       <div
         className="absolute inset-x-0 top-0 h-px opacity-80"
         style={{
@@ -95,6 +86,7 @@ export default function StatsStrip() {
                     className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                       isDark ? a.dot : 'bg-violet-400'
                     }`}
+                    aria-hidden="true"
                   />
                 </div>
               )
@@ -103,13 +95,11 @@ export default function StatsStrip() {
         </div>
       </div>
 
-      {/* ✅ Edge fades (clean cut + nicer) */}
+      {/* Edge fades */}
       <div className={`pointer-events-none absolute left-0 top-0 h-full w-16 bg-gradient-to-r ${edgeFade}`} />
-      <div
-        className={`pointer-events-none absolute right-0 top-0 h-full w-16 bg-gradient-to-l ${edgeFade}`}
-      />
+      <div className={`pointer-events-none absolute right-0 top-0 h-full w-16 bg-gradient-to-l ${edgeFade}`} />
 
-      {/* ✅ CSS (self-contained) */}
+      {/* CSS */}
       <style>{`
         .stats-marquee {
           overflow: hidden;
@@ -125,14 +115,12 @@ export default function StatsStrip() {
           will-change: transform;
         }
 
-        /* Pause on hover (desktop only feels premium) */
         @media (hover: hover) {
           .stats-marquee:hover .stats-marquee__inner {
             animation-play-state: paused;
           }
         }
 
-        /* Respect reduced motion */
         @media (prefers-reduced-motion: reduce) {
           .stats-marquee__inner {
             animation: none;
@@ -140,7 +128,6 @@ export default function StatsStrip() {
           }
         }
 
-        /* Extra safety for perf-low mode */
         html.perf-low .stats-marquee__inner {
           animation: none;
           transform: translateX(0);

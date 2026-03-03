@@ -31,7 +31,7 @@ export default function Footer() {
   const topProducts = useMemo(() => (products || []).slice(0, 6), [products])
 
   return (
-    <footer className="relative overflow-hidden">
+    <footer className="relative overflow-hidden" role="contentinfo" aria-label="Site footer">
       {/* Arcade / nebula frame */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Base */}
@@ -205,6 +205,7 @@ export default function Footer() {
                           ? 'bg-white/[0.03] border-white/10 text-white/70 hover:text-white hover:bg-white/[0.06]'
                           : 'bg-white/70 border-violet-200/60 text-gray-700 hover:text-gray-900 hover:bg-white'
                       }`}
+                      aria-label={`Follow us on ${s.platform}`}
                     >
                       {s.platform}
                     </motion.a>

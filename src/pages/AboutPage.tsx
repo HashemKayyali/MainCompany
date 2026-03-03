@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { useTheme } from '../contexts/ThemeContext'
 import { socialLinks } from '../data/social'
+import { usePageMeta } from '../hooks/usePageMeta'
 
 const ease = [0.16, 1, 0.3, 1] as const
 
@@ -50,6 +51,7 @@ const STATS = [
 
 export default function AboutPage() {
   const { isDark } = useTheme()
+  usePageMeta({ title: 'About', description: 'Learn about Bike Land — interactive bike-powered activations for malls, schools, corporate events and community gatherings across Jordan.' })
   const txt = isDark ? 'text-white' : 'text-gray-900'
   const sub = isDark ? 'text-purple-200/75' : 'text-gray-500'
 

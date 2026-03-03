@@ -5,8 +5,10 @@ import { useData } from '../contexts/DataContext'
 import { useTheme } from '../contexts/ThemeContext'
 import ProductCard from '../components/product/ProductCard'
 import Chip from '../components/ui/Chip'
+import { usePageMeta } from '../hooks/usePageMeta'
 
 export default function ProductsPage() {
+  usePageMeta({ title: 'Products', description: 'Browse our interactive bike experiences — LED races, smoothie bikes, VR cycling, arcade scoring and more.' })
   const { products, categories, getProductsByCategory } = useData()
   const { isDark } = useTheme()
   const [searchParams] = useSearchParams()

@@ -76,6 +76,6 @@ supabase/
 
 git status
 git add .
-git commit -m "vid+cardui"
+git commit -m "performance"
 git push
 

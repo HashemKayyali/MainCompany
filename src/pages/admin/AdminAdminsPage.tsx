@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useDialog } from '../../contexts/DialogContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import Modal from '../../components/ui/Modal'
 
 export default function AdminAdminsPage() {
   const { admins, addAdmin, removeAdmin, user, isSuperAdmin } = useAuth()
+  const dialog = useDialog()
   const { isDark } = useTheme()
   const [showAdd, setShowAdd] = useState(false)
   const [email, setEmail] = useState('')
@@ -75,6 +77,20 @@ export default function AdminAdminsPage() {
         </div>
       )}
 
+      {admins.length === 1 && admins[0]?.id === user?.id && (
+        <div
+          className={`mb-6 px-4 py-3 rounded-xl text-sm leading-relaxed ${
+            isDark
+              ? 'bg-amber-400/10 border border-amber-400/20 text-amber-300'
+              : 'bg-amber-50 border border-amber-200 text-amber-700'
+          }`}
+        >
+          <strong>⚠️ Only your profile is visible.</strong>{' '}
+          This is likely a Supabase RLS (Row Level Security) issue.
+          To show all admins, run the SQL fix in your Supabase SQL Editor (see below).
+        </div>
+      )}
+
       <div className="space-y-3">
         {admins.map(a => {
           const safeRole = (a as any).role === 'superadmin' ? 'superadmin' : 'admin' // ✅ fallback
@@ -135,7 +151,7 @@ export default function AdminAdminsPage() {
               {isSuperAdmin && a.id !== 'sa-1' && a.id !== user?.id && (
                 <button
                   onClick={() => {
-                    if (confirm('Remove ' + a.name + '?')) removeAdmin(a.id)
+                    dialog.confirm({ title: 'Remove Admin?', message: 'Remove ' + a.name + ' from admin list?', confirmLabel: 'Remove', variant: 'danger' }).then(ok => { if (ok) removeAdmin(a.id) })
                   }}
                   className="btn-danger"
                 >
@@ -147,7 +163,7 @@ export default function AdminAdminsPage() {
         })}
       </div>
 
-      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Add Admin">
+      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Add Admin" persistent>
         <div className="space-y-4">
           <div>
             <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Name *</label>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useData } from '../../contexts/DataContext'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useDialog } from '../../contexts/DialogContext'
 import type { Category } from '../../data/products/types'
 import Modal from '../../components/ui/Modal'
 import ImageUploader from '../../components/ui/ImageUploader'
@@ -76,6 +77,7 @@ const EMOJI_ICONS: string[] = [
 export default function AdminCategoriesPage() {
   const { categories, products, addCategory, updateCategory, deleteCategory } = useData()
   const { isDark } = useTheme()
+  const dialog = useDialog()
 
   const [editing, setEditing] = useState<Category | null>(null)
   const [isNew, setIsNew] = useState(false)
@@ -127,7 +129,7 @@ export default function AdminCategoriesPage() {
       else await updateCategory(data.id, data)
       close()
     } catch (err: any) {
-      alert('Error: ' + (err.message || 'Failed to save'))
+      dialog.alert({ title: 'Error', message: err.message || 'Failed to save', variant: 'danger' })
     } finally {
       setSaving(false)
     }
@@ -257,15 +259,15 @@ export default function AdminCategoriesPage() {
                 <button
                   onClick={async () => {
                     if (count > 0) {
-                      alert('Remove products from this category first')
+                      dialog.alert({ title: 'Cannot Delete', message: 'Remove products from this category first.', variant: 'warning' })
                       return
                     }
-                    if (confirm('Delete?')) {
-                      try {
-                        await deleteCategory(c.id)
-                      } catch (e: any) {
-                        alert('Error: ' + (e.message || 'Failed to delete'))
-                      }
+                    const ok = await dialog.confirm({ title: 'Delete Category?', message: 'This will permanently remove this category.', confirmLabel: 'Delete', variant: 'danger' })
+                    if (!ok) return
+                    try {
+                      await deleteCategory(c.id)
+                    } catch (e: any) {
+                      dialog.alert({ title: 'Error', message: e.message || 'Failed to delete', variant: 'danger' })
                     }
                   }}
                   className="btn-danger !text-[11px] !px-3 !py-1 !rounded-lg"
@@ -279,7 +281,7 @@ export default function AdminCategoriesPage() {
       </div>
 
       {/* Modal */}
-      <Modal open={!!editing} onClose={close} title={isNew ? 'Add Category / Brand' : 'Edit Category'}>
+      <Modal open={!!editing} onClose={close} title={isNew ? 'Add Category / Brand' : 'Edit Category'} persistent>
         {editing && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-[1]">

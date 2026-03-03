@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useDialog } from '../../contexts/DialogContext'
 import { uploadVideo, deleteVideo } from '../../services/storage.service'
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
 
 export default function VideoUploader({ value, onChange, onRemove, folder = 'products', label }: Props) {
   const { isDark } = useTheme()
+  const dialog = useDialog()
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState('')
@@ -27,12 +29,12 @@ export default function VideoUploader({ value, onChange, onRemove, folder = 'pro
   const handleFile = async (file: File) => {
     const validTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v']
     if (!validTypes.includes(file.type) && !file.name.match(/\.(mp4|webm|mov|m4v)$/i)) {
-      alert('Please upload a video file (MP4, WebM, or MOV)')
+      dialog.alert({ title: 'Invalid File', message: 'Please upload a video file (MP4, WebM, or MOV).', variant: 'warning' })
       return
     }
 
     if (file.size > 50 * 1024 * 1024) {
-      alert('Video is too large. Max size is 50MB.')
+      dialog.alert({ title: 'File Too Large', message: 'Video is too large. Max size is 50MB.', variant: 'warning' })
       return
     }
 
@@ -45,7 +47,7 @@ export default function VideoUploader({ value, onChange, onRemove, folder = 'pro
       setProgress('')
     } catch (err: any) {
       console.error('Video upload failed:', err)
-      alert('Failed to upload video: ' + (err.message || 'Unknown error'))
+      dialog.alert({ title: 'Upload Failed', message: 'Failed to upload video: ' + (err.message || 'Unknown error'), variant: 'danger' })
       setProgress('')
     } finally {
       setUploading(false)

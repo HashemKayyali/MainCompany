@@ -313,7 +313,7 @@ export default function Hero() {
                 </span>
 
                 <span className={`text-[12px] font-medium font-mono tracking-wide ${isDark ? 'text-cyan-300' : 'text-violet-700'}`}>
-                  Available for Events 2025
+                  Available for Events {new Date().getFullYear()}
                 </span>
 
                 <motion.span

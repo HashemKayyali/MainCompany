@@ -4,13 +4,16 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Hero from '../components/home/Hero'
 import StatsStrip from '../components/home/StatsStrip'
+
 import ProductCard from '../components/product/ProductCard'
 import { useData } from '../contexts/DataContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { social } from '../data/social'
+import { usePageMeta } from '../hooks/usePageMeta'
 const ease = [0.16, 1, 0.3, 1]
 
 export default function HomePage() {
+  usePageMeta({ title: 'Home', description: 'Interactive bike-powered activations for events — LED races, smoothie bikes, VR cycling and more across Jordan.' })
   const { products, customers, categories, getProductsByCategory, loading } = useData()
   const { isDark } = useTheme()
   const [activeTab, setActiveTab] = useState('all')

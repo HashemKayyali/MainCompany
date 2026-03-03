@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useData } from '../../contexts/DataContext'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useDialog } from '../../contexts/DialogContext'
 import type { GalleryAlbum } from '../../data/gallery'
 import Modal from '../../components/ui/Modal'
 import ImageUploader from '../../components/ui/ImageUploader'
@@ -10,6 +11,7 @@ const emptyAlbum: GalleryAlbum = { slug: '', title: '', cover: '', images: [], c
 export default function AdminGalleryPage() {
   const { galleryAlbums, addGalleryAlbum, updateGalleryAlbum, deleteGalleryAlbum } = useData()
   const { isDark } = useTheme()
+  const dialog = useDialog()
 
   const [editing, setEditing] = useState<GalleryAlbum | null>(null)
   const [isNew, setIsNew] = useState(false)
@@ -47,7 +49,7 @@ export default function AdminGalleryPage() {
       else await updateGalleryAlbum(editing.slug || slug, data)
       close()
     } catch (err: any) {
-      alert('Error: ' + (err.message || 'Failed to save'))
+      dialog.alert({ title: 'Error', message: err.message || 'Failed to save', variant: 'danger' })
     } finally {
       setSaving(false)
     }
@@ -57,7 +59,7 @@ export default function AdminGalleryPage() {
     try {
       await deleteGalleryAlbum(slug)
     } catch (err: any) {
-      alert('Error: ' + (err.message || 'Failed to delete'))
+      dialog.alert({ title: 'Error', message: err.message || 'Failed to delete', variant: 'danger' })
     }
     setConfirm(null)
   }
@@ -197,7 +199,7 @@ export default function AdminGalleryPage() {
       )}
 
       {/* ── Edit/Create Modal ── */}
-      <Modal open={!!editing} onClose={close} title={isNew ? 'Create Album' : `Edit: ${editing?.title}`}>
+      <Modal open={!!editing} onClose={close} title={isNew ? 'Create Album' : `Edit: ${editing?.title}`} persistent>
         {editing && (
           <div className="space-y-5">
             {/* Basic Info */}

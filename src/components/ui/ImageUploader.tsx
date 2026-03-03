@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useDialog } from '../../contexts/DialogContext'
 import { uploadImageVariants } from '../../services/storage.service'
 
 const toThumbUrl = (url: string) => {
@@ -28,6 +29,7 @@ interface Props {
 
 export default function ImageUploader({ value, onChange, folder = 'general', label, removable = false, onRemove, compact = false }: Props) {
   const { isDark } = useTheme()
+  const dialog = useDialog()
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
@@ -40,7 +42,7 @@ export default function ImageUploader({ value, onChange, folder = 'general', lab
       onChange(heroUrl)
     } catch (err) {
       console.error('Upload failed:', err)
-      alert('Failed to upload image. Please try again.')
+      dialog.alert({ title: 'Upload Failed', message: 'Failed to upload image. Please try again.', variant: 'danger' })
     } finally {
       setUploading(false)
     }

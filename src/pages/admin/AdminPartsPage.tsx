@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useData } from '../../contexts/DataContext'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useDialog } from '../../contexts/DialogContext'
 import type { ProductPart } from '../../data/products/types'
 import Modal from '../../components/ui/Modal'
 import ImageUploader from '../../components/ui/ImageUploader'
@@ -23,6 +24,7 @@ function cn(...s: Array<string | false | undefined | null>) {
 export default function AdminPartsPage() {
   const { parts, products, addPart, updatePart, deletePart } = useData()
   const { isDark } = useTheme()
+  const dialog = useDialog()
 
   const [editing, setEditing] = useState<ProductPart | null>(null)
   const [isNew, setIsNew] = useState(false)
@@ -75,7 +77,7 @@ export default function AdminPartsPage() {
       else await updatePart(editing.id, editing)
       close()
     } catch (err: any) {
-      alert('Error: ' + (err.message || 'Failed to save'))
+      dialog.alert({ title: 'Error', message: err.message || 'Failed to save', variant: 'danger' })
     } finally {
       setSaving(false)
     }
@@ -216,11 +218,12 @@ export default function AdminPartsPage() {
 
                       <button
                         onClick={async () => {
-                          if (!confirm('Delete this part?')) return
+                          const ok = await dialog.confirm({ title: 'Delete Part?', message: 'This will permanently remove this part.', confirmLabel: 'Delete', variant: 'danger' })
+                          if (!ok) return
                           try {
                             await deletePart(p.id)
                           } catch (e: any) {
-                            alert('Error: ' + (e.message || 'Failed to delete'))
+                            dialog.alert({ title: 'Error', message: e.message || 'Failed to delete', variant: 'danger' })
                           }
                         }}
                         className={cn('btn-danger !text-xs !px-3 !py-1.5 !rounded-lg')}
@@ -245,7 +248,7 @@ export default function AdminPartsPage() {
       </div>
 
       {/* Modal */}
-      <Modal open={!!editing} onClose={close} title={isNew ? 'Add Part' : 'Edit Part'}>
+      <Modal open={!!editing} onClose={close} title={isNew ? 'Add Part' : 'Edit Part'} persistent>
         {editing && (
           <div className="space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

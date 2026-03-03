@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useData } from '../../contexts/DataContext'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useDialog } from '../../contexts/DialogContext'
 import type { Customer } from '../../data/customers'
 import Modal from '../../components/ui/Modal'
 import ImageUploader from '../../components/ui/ImageUploader'
@@ -14,6 +15,7 @@ function cn(...s: Array<string | false | undefined | null>) {
 export default function AdminCustomersPage() {
   const { customers, addCustomer, updateCustomer, deleteCustomer } = useData()
   const { isDark } = useTheme()
+  const dialog = useDialog()
 
   const [editing, setEditing] = useState<Customer | null>(null)
   const [isNew, setIsNew] = useState(false)
@@ -83,7 +85,7 @@ export default function AdminCustomersPage() {
       else await updateCustomer(data.slug, data)
       close()
     } catch (err: any) {
-      alert('Error: ' + (err.message || 'Failed to save'))
+      dialog.alert({ title: 'Error', message: err.message || 'Failed to save', variant: 'danger' })
     } finally {
       setSaving(false)
     }
@@ -175,12 +177,12 @@ export default function AdminCustomersPage() {
               </button>
               <button
                 onClick={async () => {
-                  if (confirm('Delete ' + c.name + '?')) {
-                    try {
-                      await deleteCustomer(c.slug)
-                    } catch (e: any) {
-                      alert('Error: ' + (e.message || 'Failed to delete'))
-                    }
+                  const ok = await dialog.confirm({ title: 'Delete Customer?', message: 'This will permanently remove ' + c.name + '.', confirmLabel: 'Delete', variant: 'danger' })
+                  if (!ok) return
+                  try {
+                    await deleteCustomer(c.slug)
+                  } catch (e: any) {
+                    dialog.alert({ title: 'Error', message: e.message || 'Failed to delete', variant: 'danger' })
                   }
                 }}
                 className="btn-danger !text-[11px] !px-3 !py-1 !rounded-lg"
@@ -197,7 +199,7 @@ export default function AdminCustomersPage() {
       </div>
 
       {/* Modal */}
-      <Modal open={!!editing} onClose={close} title={isNew ? 'Add Customer' : 'Edit Customer'}>
+      <Modal open={!!editing} onClose={close} title={isNew ? 'Add Customer' : 'Edit Customer'} persistent>
         {editing && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

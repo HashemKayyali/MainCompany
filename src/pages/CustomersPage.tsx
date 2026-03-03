@@ -3,9 +3,11 @@ import { motion } from 'framer-motion'
 import { useData } from '../contexts/DataContext'
 import { useTheme } from '../contexts/ThemeContext'
 import CustomersGrid from '../components/customer/CustomersGrid'
+import { usePageMeta } from '../hooks/usePageMeta'
 import Chip from '../components/ui/Chip'
 export default function CustomersPage() {
   const { customers } = useData(); const { isDark } = useTheme()
+  usePageMeta({ title: 'Customers', description: 'Trusted by leading brands, malls, schools and organizations across Jordan.' })
   const [search, setSearch] = useState(''); const [cat, setCat] = useState('All')
   const cats = Array.from(new Set(customers.map(c => c.category).filter(Boolean))) as string[]
   const filtered = customers.filter(c => c.name.toLowerCase().includes(search.toLowerCase()) && (cat === 'All' || c.category === cat))
