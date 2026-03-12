@@ -16,6 +16,8 @@ const LoginPage           = lazy(() => import('./pages/LoginPage'))
 const RegisterPage        = lazy(() => import('./pages/RegisterPage'))
 const NotFoundPage        = lazy(() => import('./pages/NotFoundPage'))
 const AuthCallback        = lazy(() => import('./pages/AuthCallback'))
+const ProfilePage         = lazy(() => import('./pages/ProfilePage'))
+const ResetPasswordPage   = lazy(() => import('./pages/ResetPasswordPage'))
 
 // Admin pages (loaded only when admin navigates)
 const AdminLayout         = lazy(() => import('./pages/admin/AdminLayout'))
@@ -25,6 +27,7 @@ const AdminPartsPage      = lazy(() => import('./pages/admin/AdminPartsPage'))
 const AdminCustomersPage  = lazy(() => import('./pages/admin/AdminCustomersPage'))
 const AdminCategoriesPage = lazy(() => import('./pages/admin/AdminCategoriesPage'))
 const AdminAdminsPage     = lazy(() => import('./pages/admin/AdminAdminsPage'))
+const AdminUsersPage      = lazy(() => import('./pages/admin/AdminUsersPage'))
 const AdminLogsPage       = lazy(() => import('./pages/admin/AdminLogsPage'))
 const AdminGalleryPage    = lazy(() => import('./pages/admin/AdminGalleryPage'))
 
@@ -45,6 +48,8 @@ export const router = createBrowserRouter([
       { path: 'gallery',          element: <S><GalleryPage /></S> },
       { path: 'about',            element: <S><AboutPage /></S> },
       { path: 'contact',          element: <S><ContactPage /></S> },
+      { path: 'profile',          element: <S><ProfilePage /></S> },
+      { path: 'reset-password',   element: <S><ResetPasswordPage /></S> },
       { path: '*',                element: <S><NotFoundPage /></S> },
     ],
   },
@@ -69,6 +74,7 @@ export const router = createBrowserRouter([
       { path: 'customers',  element: <S><AdminCustomersPage /></S> },
       { path: 'categories', element: <S><AdminCategoriesPage /></S> },
       { path: 'gallery',    element: <S><AdminGalleryPage /></S> },
+      { path: 'users',      element: <S><AdminUsersPage /></S> },
       { path: 'admins',     element: <S><AdminAdminsPage /></S> },
       { path: 'logs',       element: <S><AdminLogsPage /></S> },
     ],

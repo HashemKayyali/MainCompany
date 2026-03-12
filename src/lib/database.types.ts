@@ -371,7 +371,36 @@ export interface Database {
     }
 
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      get_all_admins: {
+        Args: Record<string, never>
+        Returns: { id: string; email: string; name: string; role: string; created_at: string }[]
+      }
+      get_all_users: {
+        Args: Record<string, never>
+        Returns: { id: string; email: string; name: string; phone: string; role: string; created_at: string }[]
+      }
+      is_admin: {
+        Args: Record<string, never>
+        Returns: boolean
+      }
+      is_superadmin: {
+        Args: Record<string, never>
+        Returns: boolean
+      }
+      remove_admin: {
+        Args: { target_id: string }
+        Returns: { ok: boolean; error?: string }
+      }
+      set_admin_role: {
+        Args: { target_id: string; new_role: string }
+        Returns: { ok: boolean; error?: string }
+      }
+      admin_update_user: {
+        Args: { target_id: string; new_name?: string | null; new_phone?: string | null }
+        Returns: { ok: boolean; error?: string }
+      }
+    }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
   }

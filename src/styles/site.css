@@ -50,15 +50,37 @@
 }
 html.light .grain-overlay { opacity: 0.01; }
 
+/* ── CSS Scan Line (replaces motion.div for better perf) ── */
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  pointer-events: none;
+  animation: scan-move 12s ease-in-out infinite;
+}
+@keyframes scan-move {
+  0%, 100% { top: 15%; }
+  50% { top: 75%; }
+}
+
+/* ── Better Focus Styles ── */
+:focus-visible {
+  outline: 2px solid rgba(124,58,237,0.7);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
 /* ── Performance / Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
-  .star-field, .grain-overlay { display: none !important; }
+  .star-field, .grain-overlay, .scan-line { display: none !important; }
   .star-field .layer { animation: none !important; }
   .animate-aurora, .animate-orbit { animation: none !important; }
 }
 
 html.perf-low .star-field,
-html.perf-low .grain-overlay {
+html.perf-low .grain-overlay,
+html.perf-low .scan-line {
   display: none !important;
 }
 html.perf-low .star-field .layer {

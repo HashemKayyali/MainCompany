@@ -20,6 +20,7 @@ import { isSupabaseConfigured } from '../lib/supabase'
 import { DEFAULT_PRODUCTS, DEFAULT_PARTS, DEFAULT_CUSTOMERS, DEFAULT_CATEGORIES } from '../data/defaults'
 import { useSession } from './SessionContext'
 import { useUser } from './UserContext'
+import { useToast } from './ToastContext'
 
 interface DataCtx {
   products: Product[]
@@ -82,6 +83,7 @@ function applyDefaults(
 export function DataProvider({ children }: { children: ReactNode }) {
   const { loading: sessionLoading } = useSession()
   const { currentUser } = useUser()
+  const { toast } = useToast()
   const [products, setProducts] = useState<Product[]>([])
   const [parts, setParts] = useState<ProductPart[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -215,105 +217,195 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // Products CRUD
   const addProduct = async (p: Product) => {
-    const created = await productsApi.create(p)
-    safeSet(() => setProducts(prev => [...prev, created]))
-    writeLog('create', 'product', created.slug, created.name || created.slug)
+    try {
+      const created = await productsApi.create(p)
+      safeSet(() => setProducts(prev => [...prev, created]))
+      writeLog('create', 'product', created.slug, created.name || created.slug)
+      toast(`${created.name} added`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to add product', 'error')
+      throw err
+    }
   }
 
   const updateProduct = async (slug: string, u: Partial<Product>) => {
-    const updated = await productsApi.update(slug, u)
-    safeSet(() => setProducts(prev => prev.map(p => (p.slug === slug ? updated : p))))
-    writeLog('update', 'product', slug, updated.name || slug)
+    try {
+      const updated = await productsApi.update(slug, u)
+      safeSet(() => setProducts(prev => prev.map(p => (p.slug === slug ? updated : p))))
+      writeLog('update', 'product', slug, updated.name || slug)
+      toast(`${updated.name} updated`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to update product', 'error')
+      throw err
+    }
   }
 
   const deleteProduct = async (slug: string) => {
-    const existing = products.find(p => p.slug === slug)
-    await productsApi.remove(slug)
-    safeSet(() => {
-      setProducts(prev => prev.filter(p => p.slug !== slug))
-      setParts(prev => prev.filter(p => p.productSlug !== slug))
-    })
-    writeLog('delete', 'product', slug, existing?.name || slug)
+    try {
+      const existing = products.find(p => p.slug === slug)
+      await productsApi.remove(slug)
+      safeSet(() => {
+        setProducts(prev => prev.filter(p => p.slug !== slug))
+        setParts(prev => prev.filter(p => p.productSlug !== slug))
+      })
+      writeLog('delete', 'product', slug, existing?.name || slug)
+      toast(`${existing?.name || slug} deleted`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to delete product', 'error')
+      throw err
+    }
   }
 
   // Parts CRUD
   const addPart = async (p: ProductPart) => {
-    const created = await partsApi.create(p)
-    safeSet(() => setParts(prev => [...prev, created]))
-    writeLog('create', 'part', created.id, created.name || created.id)
+    try {
+      const created = await partsApi.create(p)
+      safeSet(() => setParts(prev => [...prev, created]))
+      writeLog('create', 'part', created.id, created.name || created.id)
+      toast(`${created.name} added`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to add part', 'error')
+      throw err
+    }
   }
 
   const updatePart = async (id: string, u: Partial<ProductPart>) => {
-    const updated = await partsApi.update(id, u)
-    safeSet(() => setParts(prev => prev.map(p => (p.id === id ? updated : p))))
-    writeLog('update', 'part', id, updated.name || id)
+    try {
+      const updated = await partsApi.update(id, u)
+      safeSet(() => setParts(prev => prev.map(p => (p.id === id ? updated : p))))
+      writeLog('update', 'part', id, updated.name || id)
+      toast(`${updated.name} updated`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to update part', 'error')
+      throw err
+    }
   }
 
   const deletePart = async (id: string) => {
-    const existing = parts.find(p => p.id === id)
-    await partsApi.remove(id)
-    safeSet(() => setParts(prev => prev.filter(p => p.id !== id)))
-    writeLog('delete', 'part', id, existing?.name || id)
+    try {
+      const existing = parts.find(p => p.id === id)
+      await partsApi.remove(id)
+      safeSet(() => setParts(prev => prev.filter(p => p.id !== id)))
+      writeLog('delete', 'part', id, existing?.name || id)
+      toast(`${existing?.name || id} deleted`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to delete part', 'error')
+      throw err
+    }
   }
 
   // Customers CRUD
   const addCustomer = async (c: Customer) => {
-    const created = await customersApi.create(c)
-    safeSet(() => setCustomers(prev => [...prev, created]))
-    writeLog('create', 'customer', created.slug, created.name || created.slug)
+    try {
+      const created = await customersApi.create(c)
+      safeSet(() => setCustomers(prev => [...prev, created]))
+      writeLog('create', 'customer', created.slug, created.name || created.slug)
+      toast(`${created.name} added`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to add customer', 'error')
+      throw err
+    }
   }
 
   const updateCustomer = async (slug: string, u: Partial<Customer>) => {
-    const updated = await customersApi.update(slug, u)
-    safeSet(() => setCustomers(prev => prev.map(c => (c.slug === slug ? updated : c))))
-    writeLog('update', 'customer', slug, updated.name || slug)
+    try {
+      const updated = await customersApi.update(slug, u)
+      safeSet(() => setCustomers(prev => prev.map(c => (c.slug === slug ? updated : c))))
+      writeLog('update', 'customer', slug, updated.name || slug)
+      toast(`${updated.name} updated`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to update customer', 'error')
+      throw err
+    }
   }
 
   const deleteCustomer = async (slug: string) => {
-    const existing = customers.find(c => c.slug === slug)
-    await customersApi.remove(slug)
-    safeSet(() => setCustomers(prev => prev.filter(c => c.slug !== slug)))
-    writeLog('delete', 'customer', slug, existing?.name || slug)
+    try {
+      const existing = customers.find(c => c.slug === slug)
+      await customersApi.remove(slug)
+      safeSet(() => setCustomers(prev => prev.filter(c => c.slug !== slug)))
+      writeLog('delete', 'customer', slug, existing?.name || slug)
+      toast(`${existing?.name || slug} deleted`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to delete customer', 'error')
+      throw err
+    }
   }
 
   // Categories CRUD
   const addCategory = async (c: Category) => {
-    const created = await categoriesApi.create(c)
-    safeSet(() => setCategories(prev => [...prev, created]))
-    writeLog('create', 'category', created.id, created.name || created.id)
+    try {
+      const created = await categoriesApi.create(c)
+      safeSet(() => setCategories(prev => [...prev, created]))
+      writeLog('create', 'category', created.id, created.name || created.id)
+      toast(`${created.name} added`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to add category', 'error')
+      throw err
+    }
   }
 
   const updateCategory = async (id: string, u: Partial<Category>) => {
-    const updated = await categoriesApi.update(id, u)
-    safeSet(() => setCategories(prev => prev.map(c => (c.id === id ? updated : c))))
-    writeLog('update', 'category', id, updated.name || id)
+    try {
+      const updated = await categoriesApi.update(id, u)
+      safeSet(() => setCategories(prev => prev.map(c => (c.id === id ? updated : c))))
+      writeLog('update', 'category', id, updated.name || id)
+      toast(`${updated.name} updated`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to update category', 'error')
+      throw err
+    }
   }
 
   const deleteCategory = async (id: string) => {
-    const existing = categories.find(c => c.id === id)
-    await categoriesApi.remove(id)
-    safeSet(() => setCategories(prev => prev.filter(c => c.id !== id)))
-    writeLog('delete', 'category', id, existing?.name || id)
+    try {
+      const existing = categories.find(c => c.id === id)
+      await categoriesApi.remove(id)
+      safeSet(() => setCategories(prev => prev.filter(c => c.id !== id)))
+      writeLog('delete', 'category', id, existing?.name || id)
+      toast(`${existing?.name || id} deleted`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to delete category', 'error')
+      throw err
+    }
   }
 
   // Gallery CRUD
   const addGalleryAlbum = async (a: GalleryAlbum) => {
-    const created = await galleryApi.create(a)
-    safeSet(() => setGalleryAlbums(prev => [...prev, created]))
-    writeLog('create', 'gallery', created.slug, created.title || created.slug)
+    try {
+      const created = await galleryApi.create(a)
+      safeSet(() => setGalleryAlbums(prev => [...prev, created]))
+      writeLog('create', 'gallery', created.slug, created.title || created.slug)
+      toast(`${created.title} added`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to add album', 'error')
+      throw err
+    }
   }
 
   const updateGalleryAlbum = async (slug: string, u: Partial<GalleryAlbum>) => {
-    const updated = await galleryApi.update(slug, u)
-    safeSet(() => setGalleryAlbums(prev => prev.map(a => (a.slug === slug ? updated : a))))
-    writeLog('update', 'gallery', slug, updated.title || slug)
+    try {
+      const updated = await galleryApi.update(slug, u)
+      safeSet(() => setGalleryAlbums(prev => prev.map(a => (a.slug === slug ? updated : a))))
+      writeLog('update', 'gallery', slug, updated.title || slug)
+      toast(`${updated.title} updated`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to update album', 'error')
+      throw err
+    }
   }
 
   const deleteGalleryAlbum = async (slug: string) => {
-    const existing = galleryAlbums.find(a => a.slug === slug)
-    await galleryApi.remove(slug)
-    safeSet(() => setGalleryAlbums(prev => prev.filter(a => a.slug !== slug)))
-    writeLog('delete', 'gallery', slug, existing?.title || slug)
+    try {
+      const existing = galleryAlbums.find(a => a.slug === slug)
+      await galleryApi.remove(slug)
+      safeSet(() => setGalleryAlbums(prev => prev.filter(a => a.slug !== slug)))
+      writeLog('delete', 'gallery', slug, existing?.title || slug)
+      toast(`${existing?.title || slug} deleted`, 'success')
+    } catch (err: any) {
+      toast(err?.message || 'Failed to delete album', 'error')
+      throw err
+    }
   }
 
   // Helpers

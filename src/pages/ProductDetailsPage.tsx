@@ -22,10 +22,28 @@ export default function ProductDetailsPage() {
   const parts = getPartsByProduct(slug || '')
   const [quoteOpen, setQuoteOpen] = useState(false)
 
+  // ✅ showPrice gate (undefined = true)
+  const showPrice = product ? (product as any).showPrice !== false : true
+
   usePageMeta({
     title: product?.name || 'Product',
     description: product?.description || 'View product details and book for your event.',
     ogImage: product?.gallery?.[0],
+    jsonLd: product ? {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: product.name,
+      description: product.description,
+      image: product.gallery?.[0],
+      ...(showPrice ? {
+        offers: {
+          '@type': 'Offer',
+          price: product.rentalPricePerDay,
+          priceCurrency: product.currency || 'JOD',
+          availability: 'https://schema.org/InStock',
+        },
+      } : {}),
+    } : undefined,
   })
 
   if (!product) return <NotFoundPage />
@@ -33,9 +51,6 @@ export default function ProductDetailsPage() {
   const txt = isDark ? 'text-white' : 'text-gray-900'
   const sub = isDark ? 'text-purple-200/80' : 'text-gray-500'
   const card = isDark ? 'bg-purple-500/[0.07] border border-purple-500/20' : 'bg-white border border-violet-100 shadow-sm'
-
-  // ✅ showPrice gate (undefined = true)
-  const showPrice = (product as any).showPrice !== false
 
   return (
     <section className="pt-32 pb-24">
@@ -274,6 +289,27 @@ export default function ProductDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* ✅ Mobile floating CTA */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 p-3" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+        <div className={`rounded-2xl p-3 flex items-center gap-3 backdrop-blur-xl border ${
+          isDark ? 'bg-[#0d0b1a]/90 border-purple-500/20' : 'bg-white/90 border-violet-200'
+        }`} style={{ boxShadow: '0 -4px 30px rgba(0,0,0,0.15)' }}>
+          <div className="flex-1 min-w-0">
+            <div className={`text-sm font-bold truncate ${txt}`}>{product.name}</div>
+            {showPrice && (
+              <div className={`text-xs ${isDark ? 'text-cyan-400' : 'text-violet-600'}`}>
+                From {product.rentalPricePerDay} {product.currency}/day
+              </div>
+            )}
+          </div>
+          <Link to={`/contact?product=${product.slug}`} className="btn-primary !h-10 !px-5 !rounded-xl !text-[12px] shrink-0">
+            Get Quote
+          </Link>
+        </div>
+      </div>
+      {/* Spacer for floating bar */}
+      <div className="lg:hidden h-20" />
     </section>
   )
 }

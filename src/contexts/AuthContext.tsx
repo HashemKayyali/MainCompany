@@ -32,8 +32,9 @@ interface AuthCtx {
   logout: () => Promise<void>
 
   admins: AdminUser[]
-  addAdmin: (email: string, name: string, role: AdminRole) => boolean
-  removeAdmin: (id: string) => void
+  addAdmin: (email: string, name: string, role: AdminRole) => Promise<boolean>
+  removeAdmin: (id: string) => Promise<boolean>
+  changeAdminRole: (id: string, newRole: AdminRole) => Promise<boolean>
 }
 
 const Ctx = createContext<AuthCtx>({} as AuthCtx)
@@ -178,30 +179,99 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAdmins([])
   }, [])
 
-  // UI-only admin management (no DB write)
+  // ✅ Admin management via RPC functions (no Edge Functions needed)
   const addAdmin = useCallback(
-    (email: string, name: string, role: AdminRole) => {
+    async (email: string, _name: string, role: AdminRole): Promise<boolean> => {
       const cleanEmail = (email || '').trim().toLowerCase()
-      const cleanName = (name || '').trim()
-      if (!cleanEmail || !cleanName) return false
+      if (!cleanEmail) return false
       if (admins.some(a => a.email.trim().toLowerCase() === cleanEmail)) return false
 
-      const newAdmin: AdminUser = {
-        id: `local-${Date.now()}`,
-        email: cleanEmail,
-        name: cleanName,
-        role,
-        createdAt: new Date().toISOString(),
+      // Find user by email — must be registered
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', cleanEmail)
+        .maybeSingle()
+
+      if (!existingProfile?.id) {
+        // User not found
+        return false
       }
-      setAdmins(prev => [...prev, newAdmin])
+
+      // Use RPC to set role
+      const { data, error } = await supabase.rpc('set_admin_role', {
+        target_id: existingProfile.id,
+        new_role: role,
+      }) as any
+
+      if (error) {
+        console.error('[AuthContext] set_admin_role RPC error:', error)
+        return false
+      }
+      if (data && !data.ok) {
+        console.warn('[AuthContext] set_admin_role failed:', data.error)
+        return false
+      }
+
+      // Refresh admin list
+      const allAdmins = await fetchAllAdmins()
+      setAdmins(allAdmins)
       return true
     },
-    [admins]
+    [admins, fetchAllAdmins]
   )
 
-  const removeAdmin = useCallback((id: string) => {
-    setAdmins(prev => prev.filter(a => a.id !== id))
-  }, [])
+  // ✅ Change an existing admin's role
+  const changeAdminRole = useCallback(async (id: string, newRole: AdminRole): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.rpc('set_admin_role', {
+        target_id: id,
+        new_role: newRole,
+      }) as any
+
+      if (error) {
+        console.error('[AuthContext] changeAdminRole RPC error:', error)
+        return false
+      }
+      if (data && !data.ok) {
+        console.warn('[AuthContext] changeAdminRole failed:', data.error)
+        return false
+      }
+
+      const allAdmins = await fetchAllAdmins()
+      setAdmins(allAdmins)
+      return true
+    } catch (err) {
+      console.error('[AuthContext] changeAdminRole error:', err)
+      return false
+    }
+  }, [fetchAllAdmins])
+
+  const removeAdmin = useCallback(async (id: string): Promise<boolean> => {
+    if (id === user?.id) return false
+
+    try {
+      const { data, error } = await supabase.rpc('remove_admin', { target_id: id }) as any
+      if (error) {
+        console.error('[AuthContext] remove_admin RPC error:', error)
+        return false
+      }
+      if (data && !data.ok) {
+        console.warn('[AuthContext] remove_admin failed:', data.error)
+        return false
+      }
+
+      // Refresh admin list
+      const allAdmins = await fetchAllAdmins()
+      setAdmins(allAdmins)
+      return true
+    } catch (err) {
+      console.error('[AuthContext] remove_admin error:', err)
+      // Fallback: local remove
+      setAdmins(prev => prev.filter(a => a.id !== id))
+      return true
+    }
+  }, [user, fetchAllAdmins])
 
   const value = useMemo<AuthCtx>(() => {
     const isSuperAdmin = user?.role === 'superadmin'
@@ -216,8 +286,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       addAdmin,
       removeAdmin,
+      changeAdminRole,
     }
-  }, [user, admins, loading, login, logout, addAdmin, removeAdmin])
+  }, [user, admins, loading, login, logout, addAdmin, removeAdmin, changeAdminRole])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

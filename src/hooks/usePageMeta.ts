@@ -7,6 +7,8 @@ interface PageMeta {
   ogType?: string
   canonical?: string
   noIndex?: boolean
+  /** JSON-LD structured data object */
+  jsonLd?: Record<string, unknown>
 }
 
 const SITE_NAME = 'Bike Land'
@@ -33,14 +35,25 @@ function setLink(rel: string, href: string) {
   el.setAttribute('href', href)
 }
 
+function setJsonLd(data: Record<string, unknown>) {
+  let el = document.querySelector<HTMLScriptElement>('script[data-page-jsonld]')
+  if (!el) {
+    el = document.createElement('script')
+    el.type = 'application/ld+json'
+    el.setAttribute('data-page-jsonld', 'true')
+    document.head.appendChild(el)
+  }
+  el.textContent = JSON.stringify(data)
+}
+
 /**
- * Sets document title, meta description, Open Graph tags, and canonical URL.
- * Call once per page component.
+ * Sets document title, meta description, Open Graph tags, Twitter cards,
+ * canonical URL, and JSON-LD structured data.
  *
  * @example
  * usePageMeta({ title: 'Products', description: 'Browse our bike experiences' })
  */
-export function usePageMeta({ title, description, ogImage, ogType, canonical, noIndex }: PageMeta) {
+export function usePageMeta({ title, description, ogImage, ogType, canonical, noIndex, jsonLd }: PageMeta) {
   useEffect(() => {
     // Title
     const fullTitle = title === 'Home' ? SITE_NAME : `${title} — ${SITE_NAME}`
@@ -55,6 +68,8 @@ export function usePageMeta({ title, description, ogImage, ogType, canonical, no
     setMeta('og:description', desc, 'property')
     setMeta('og:type', ogType || 'website', 'property')
     setMeta('og:site_name', SITE_NAME, 'property')
+    // ✅ Always set og:url
+    setMeta('og:url', window.location.href, 'property')
 
     if (ogImage) {
       setMeta('og:image', ogImage, 'property')
@@ -80,5 +95,29 @@ export function usePageMeta({ title, description, ogImage, ogType, canonical, no
       const el = document.querySelector('meta[name="robots"]')
       if (el) el.remove()
     }
-  }, [title, description, ogImage, ogType, canonical, noIndex])
+
+    // ✅ JSON-LD Structured Data
+    if (jsonLd) {
+      setJsonLd(jsonLd)
+    } else {
+      // Default Organization schema
+      setJsonLd({
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: SITE_NAME,
+        description: DEFAULT_DESC,
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Amman',
+          addressCountry: 'JO',
+        },
+      })
+    }
+
+    return () => {
+      // Cleanup JSON-LD on unmount (new page will set its own)
+      const el = document.querySelector('script[data-page-jsonld]')
+      if (el) el.remove()
+    }
+  }, [title, description, ogImage, ogType, canonical, noIndex, jsonLd])
 }
