@@ -43,7 +43,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
             src={images[activeImageIndex]}
             alt={`${name} — photo ${activeImageIndex + 1}`}
             loading="lazy"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
             onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
           />
         )}

@@ -237,6 +237,7 @@ const labelClass = 'block text-[13px] mb-2 font-extrabold text-violet-100/90'
                         onChange={e => setPassword(e.target.value)}
                         placeholder="Your password"
                         autoComplete="current-password"
+                        required
                         className={inputClass}
                       />
                     </div>
@@ -319,6 +320,7 @@ const labelClass = 'block text-[13px] mb-2 font-extrabold text-violet-100/90'
                         className={inputClass}
                         placeholder="At least 6 characters"
                         autoComplete="new-password"
+                        minLength={6}
                         required
                       />
                     </div>
@@ -332,6 +334,7 @@ const labelClass = 'block text-[13px] mb-2 font-extrabold text-violet-100/90'
                         className={inputClass}
                         placeholder="Repeat password"
                         autoComplete="new-password"
+                        minLength={6}
                         required
                       />
                     </div>

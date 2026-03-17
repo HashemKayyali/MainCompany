@@ -23,7 +23,7 @@ export default function ProductDetailsPage() {
   const [quoteOpen, setQuoteOpen] = useState(false)
 
   // ✅ showPrice gate (undefined = true)
-  const showPrice = product ? (product as any).showPrice !== false : true
+  const showPrice = product ? product.showPrice !== false : true
 
   usePageMeta({
     title: product?.name || 'Product',
