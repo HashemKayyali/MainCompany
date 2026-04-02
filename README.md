@@ -76,6 +76,6 @@ supabase/
 
 git status
 git add .
-git commit -m "photos scale"
+git commit -m "Hero"
 git push
 

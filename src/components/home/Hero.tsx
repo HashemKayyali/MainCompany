@@ -76,9 +76,9 @@ type SceneLayout = {
 
 const sceneLayouts: SceneLayout[] = [
   {
-    className: 'left-[6%] top-[8%] z-30 w-[51%] sm:w-[48%] lg:w-[50%]',
+    className: 'left-[0%] top-[6%] z-30 w-[54%] sm:left-[7%] sm:top-[8%] sm:w-[48%] lg:w-[50%]',
     frameClassName: 'aspect-[5/4] rounded-[28px] sm:rounded-[34px]',
-    captionClassName: 'left-[7%] -bottom-5',
+    captionClassName: 'left-[6%] -bottom-3 sm:left-[7%] sm:-bottom-5',
     baseRotate: -6,
     floatY: -10,
     floatDuration: 11,
@@ -90,9 +90,9 @@ const sceneLayouts: SceneLayout[] = [
     eager: true,
   },
   {
-    className: 'right-[5%] top-[1%] z-40 w-[29%] sm:w-[30%]',
+    className: 'right-[0%] top-[1%] z-40 w-[30%] sm:right-[7%] sm:top-[3%] sm:w-[30%]',
     frameClassName: 'aspect-[4/5] rounded-[26px] sm:rounded-[30px]',
-    captionClassName: 'left-[8%] -bottom-5',
+    captionClassName: 'left-[4%] -bottom-3 sm:left-[8%] sm:-bottom-5',
     baseRotate: 9,
     floatY: -8,
     floatDuration: 12.4,
@@ -104,9 +104,9 @@ const sceneLayouts: SceneLayout[] = [
     eager: false,
   },
   {
-    className: 'right-[1%] bottom-[11%] z-20 w-[46%] sm:w-[48%]',
+    className: 'right-[0%] bottom-[10%] z-20 w-[48%] sm:right-[4%] sm:w-[48%]',
     frameClassName: 'aspect-[6/4.2] rounded-[28px] sm:rounded-[32px]',
-    captionClassName: 'left-[8%] -bottom-5',
+    captionClassName: 'left-[7%] -bottom-3 sm:left-[8%] sm:-bottom-5',
     baseRotate: -4,
     floatY: -7,
     floatDuration: 13,
@@ -118,9 +118,9 @@ const sceneLayouts: SceneLayout[] = [
     eager: false,
   },
   {
-    className: 'left-[1%] bottom-[9%] z-10 w-[27%] sm:w-[28%]',
+    className: 'left-[0%] bottom-[11%] z-10 w-[29%] sm:left-[1%] sm:bottom-[9%] sm:w-[28%]',
     frameClassName: 'aspect-square rounded-[24px] sm:rounded-[28px]',
-    captionClassName: 'left-[1%] -bottom-5',
+    captionClassName: 'left-[0%] -bottom-3 sm:left-[1%] sm:-bottom-5',
     baseRotate: 7,
     floatY: -6,
     floatDuration: 12.8,
@@ -132,9 +132,23 @@ const sceneLayouts: SceneLayout[] = [
     eager: false,
   },
   {
-    className: 'hidden sm:block left-[31%] bottom-[2%] z-[26] w-[31%] md:w-[29%]',
+    className: 'left-[18%] bottom-[1%] z-[26] w-[31%] sm:left-[31%] sm:bottom-[2%] sm:w-[31%] md:w-[29%]',
     frameClassName: 'aspect-[5/3.15] rounded-[22px] sm:rounded-[26px]',
-    captionClassName: 'left-[10%] -bottom-5',
+    captionClassName: 'left-[8%] -bottom-4 sm:left-[10%] sm:-bottom-5',
+    baseRotate: 2,
+    floatY: -5,
+    floatDuration: 14.1,
+    rotateAmplitude: 0.65,
+    rotateDuration: 17.4,
+    delay: 0.42,
+    glowOpacity: 0.11,
+    imageScale: 1.03,
+    eager: false,
+  },
+  {
+    className: 'left-[38%] bottom-[27%] z-10 w-[26%] sm:left-[30%] sm:bottom-[30%] sm:w-[28%]',
+    frameClassName: 'aspect-[5/3.15] rounded-[22px] sm:rounded-[26px]',
+    captionClassName: 'left-[8%] -bottom-4 sm:left-[10%] sm:-bottom-5',
     baseRotate: 2,
     floatY: -5,
     floatDuration: 14.1,
@@ -501,7 +515,7 @@ function FloatingImageShowcase({
       {/* Caption pill */}
       <figcaption className={`pointer-events-none absolute z-30 ${layout.captionClassName}`}>
         <div
-          className={`inline-flex max-w-[14rem] items-center gap-2.5 rounded-full border px-3.5 py-2 backdrop-blur-xl ${
+          className={`inline-flex max-w-[10.5rem] items-center gap-2 rounded-full border px-3 py-1.5 backdrop-blur-xl sm:max-w-[14rem] sm:px-3.5 sm:py-2 ${
             isDark
               ? 'border-white/[0.10] bg-[linear-gradient(180deg,rgba(12,14,26,0.96),rgba(7,9,18,0.94))] text-white shadow-[0_16px_40px_rgba(1,5,18,0.32),0_0_0_0.5px_rgba(255,255,255,0.06)]'
               : 'border-white/82 bg-white/92 text-slate-900 shadow-[0_16px_40px_rgba(76,29,149,0.12)]'
@@ -518,7 +532,7 @@ function FloatingImageShowcase({
               />
             )}
           </span>
-          <span className="truncate text-[0.80rem] font-semibold tracking-[-0.018em]">
+          <span className="truncate text-[0.72rem] font-semibold tracking-[-0.018em] sm:text-[0.8rem]">
             {item.displayName}
           </span>
         </div>
@@ -538,10 +552,8 @@ function FloatingScene({
   motionEnabled: boolean
 }) {
   return (
-    <div className="relative mx-auto h-[28rem] w-full max-w-[31rem] sm:h-[32rem] sm:max-w-[35rem] lg:h-[37rem] lg:max-w-[40rem]">
-      {/* Ambient background blobs */}
-      <div
-        className="pointer-events-none absolute left-[4%] top-[6%] h-64 w-64 rounded-full blur-[80px] sm:h-80 sm:w-80"
+<div className="relative mx-auto h-[20.5rem] w-full max-w-[23rem] sm:h-[32rem] sm:max-w-[35rem] lg:h-[37rem] lg:max-w-[40rem]">      <div
+        className="pointer-events-none absolute left-[4%] top-[6%] h-44 w-44 rounded-full blur-[60px] sm:h-80 sm:w-80 sm:blur-[80px]"
         style={{
           background: isDark
             ? 'radial-gradient(circle, rgba(236,72,153,0.22) 0%, transparent 68%)'
@@ -549,7 +561,7 @@ function FloatingScene({
         }}
       />
       <div
-        className="pointer-events-none absolute right-[1%] top-[0%] h-60 w-60 rounded-full blur-[80px] sm:h-80 sm:w-80"
+        className="pointer-events-none absolute right-[2%] top-[1%] h-[10.5rem] w-[10.5rem] rounded-full blur-[58px] sm:h-80 sm:w-80 sm:blur-[80px]"
         style={{
           background: isDark
             ? 'radial-gradient(circle, rgba(34,211,238,0.18) 0%, transparent 70%)'
@@ -557,7 +569,7 @@ function FloatingScene({
         }}
       />
       <div
-        className="pointer-events-none absolute bottom-[0%] left-[14%] h-64 w-80 rounded-full blur-[80px] sm:h-80 sm:w-[26rem]"
+        className="pointer-events-none absolute bottom-[3%] left-[14%] h-44 w-56 rounded-full blur-[60px] sm:h-80 sm:w-[26rem] sm:blur-[80px]"
         style={{
           background: isDark
             ? 'radial-gradient(circle, rgba(124,58,237,0.24) 0%, transparent 72%)'
@@ -567,7 +579,7 @@ function FloatingScene({
 
       {/* Central glass orb */}
       <div
-        className="pointer-events-none absolute left-[12%] top-[18%] h-[48%] w-[58%] rounded-[46%] border blur-[0.4px]"
+        className="pointer-events-none absolute left-[12%] top-[18%] h-[44%] w-[56%] rounded-[46%] border blur-[0.35px] sm:h-[48%] sm:w-[58%] sm:blur-[0.4px]"
         style={{
           background: isDark
             ? 'linear-gradient(160deg, rgba(255,255,255,0.015), rgba(124,58,237,0.055) 36%, rgba(3,7,18,0.03) 74%, rgba(236,72,153,0.03))'
@@ -608,7 +620,7 @@ export default function Hero() {
   )
 
   return (
-    <section className="relative overflow-hidden pb-10 pt-20 sm:pb-12 sm:pt-24 lg:min-h-[72svh] lg:pb-16 lg:pt-28">
+    <section className="relative overflow-hidden pb-8 pt-24 sm:pb-12 sm:pt-24 lg:min-h-[72svh] lg:pb-16 lg:pt-28">
 
       {/* ── Background layer ── */}
       <div className="pointer-events-none absolute inset-0">
@@ -653,7 +665,7 @@ export default function Hero() {
       </div>
 
       <div className="site-container relative z-10">
-        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.96fr)] lg:gap-10">
+        <div className="grid items-center gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.96fr)] lg:gap-10">
 
           {/* ── Left column ── */}
           <motion.div
@@ -670,7 +682,7 @@ export default function Hero() {
               className="mb-5 inline-flex"
             >
               <div
-                className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 ${
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 sm:px-3.5 ${
                   isDark
                     ? 'border-violet-500/25 bg-violet-500/10 text-violet-300'
                     : 'border-violet-300/70 bg-violet-50/80 text-violet-700'
@@ -684,20 +696,20 @@ export default function Hero() {
                       : '0 0 4px rgba(109,40,217,0.4)',
                   }}
                 />
-                <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">
+                <span className="text-[9px] font-semibold uppercase tracking-[0.16em] sm:text-[10px] sm:tracking-[0.18em]">
                   Event Services Platform
                 </span>
               </div>
             </motion.div>
 
             {/* Headline */}
-            <div className="max-w-[15ch] sm:max-w-none">
+            <div className="max-w-[22rem] sm:max-w-none">
               <h1
-                className={`font-display text-[clamp(2.4rem,6vw,5.1rem)] font-black leading-[0.87] tracking-[-0.066em] ${
+                className={`font-display text-[clamp(2.02rem,8.6vw,5.1rem)] font-black leading-[0.94] tracking-[-0.05em] sm:leading-[0.87] sm:tracking-[-0.066em] ${
                   isDark ? 'text-white' : 'text-slate-950'
                 }`}
               >
-                <span className="block">
+                <span className="inline sm:block">
                   Book{' '}
                   <span className="relative inline-block">
                     {/* Glow bloom behind gradient text */}
@@ -721,14 +733,14 @@ export default function Hero() {
                       Everything
                     </span>
                   </span>
-                </span>
-                <span className="mt-1 block">Your Event Needs</span>
+                </span>{' '}
+                <span className="inline sm:mt-1 sm:block">Your Event Needs</span>
               </h1>
             </div>
 
             {/* Sub-copy */}
             <p
-              className={`mt-5 max-w-[34rem] text-[0.95rem] leading-[1.75] sm:text-[1rem] ${
+              className={`mt-4 max-w-[34rem] text-[0.86rem] leading-[1.65] sm:mt-5 sm:text-[1rem] sm:leading-[1.75] ${
                 isDark ? 'text-purple-100/62' : 'text-slate-500'
               }`}
             >
@@ -737,7 +749,7 @@ export default function Hero() {
             </p>
 
             {/* Numbered journey steps */}
-            <div className="mt-5 flex items-center gap-0">
+            <div className="mt-4 flex flex-wrap items-center gap-y-2 sm:mt-5 sm:flex-nowrap sm:gap-0">
               {journeySteps.map((step, index) => (
                 <motion.div
                   key={step.label}
@@ -748,26 +760,26 @@ export default function Hero() {
                   className="flex items-center"
                 >
                   <div
-                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 ${
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.25 sm:gap-2 sm:px-3 sm:py-1.5 ${
                       isDark
                         ? 'border-white/[0.09] bg-[linear-gradient(180deg,rgba(16,20,38,0.88),rgba(9,11,24,0.78))] text-purple-100/72'
                         : 'border-violet-200/65 bg-white/74 text-violet-700'
                     }`}
                   >
                     <span
-                      className={`font-mono text-[8px] font-bold ${
+                      className={`font-mono text-[7px] font-bold sm:text-[8px] ${
                         isDark ? 'text-violet-400/60' : 'text-violet-400/80'
                       }`}
                     >
                       {step.num}
                     </span>
-                    <span className="text-[8.5px] font-semibold uppercase tracking-[0.13em]">
+                    <span className="text-[7.4px] font-semibold uppercase tracking-[0.11em] sm:text-[8.5px] sm:tracking-[0.13em]">
                       {step.label}
                     </span>
                   </div>
                   {index < journeySteps.length - 1 && (
                     <div
-                      className={`mx-1.5 h-px w-4 ${isDark ? 'bg-white/14' : 'bg-violet-300/50'}`}
+                      className={`mx-1 h-px w-3 sm:mx-1.5 sm:w-4 ${isDark ? 'bg-white/14' : 'bg-violet-300/50'}`}
                     />
                   )}
                 </motion.div>
@@ -783,12 +795,12 @@ export default function Hero() {
               whileInView={motionEnabled ? { opacity: 1, y: 0 } : undefined}
               viewport={{ once: true, margin: '-40px' }}
               transition={motionEnabled ? { duration: 0.6, delay: 0.14, ease } : undefined}
-              className="grid gap-3 sm:grid-cols-2"
+              className="grid min-w-0 gap-2.5 sm:grid-cols-2 sm:gap-3"
             >
               {platformSignals.map(({ title, body, icon: Icon, iconGradient, accentColor }) => (
                 <div
                   key={title}
-                  className={`group relative overflow-hidden rounded-[20px] border p-4 transition-all duration-300 hover:-translate-y-0.5 ${
+                  className={`group relative min-w-0 overflow-hidden rounded-[18px] border p-3 sm:rounded-[20px] sm:p-4 transition-all duration-300 hover:-translate-y-0.5 ${
                     isDark
                       ? 'border-white/[0.08] bg-[linear-gradient(160deg,rgba(14,18,34,0.90),rgba(8,10,20,0.80))] shadow-[0_20px_56px_rgba(1,5,18,0.28),inset_0_1px_0_rgba(255,255,255,0.055)] hover:border-white/[0.12]'
                       : 'border-slate-200/60 bg-white/88 shadow-[0_16px_44px_rgba(76,29,149,0.08),inset_0_1px_0_rgba(255,255,255,0.92)] hover:border-violet-200/80 hover:shadow-[0_20px_56px_rgba(76,29,149,0.12)]'
@@ -807,10 +819,10 @@ export default function Hero() {
                     }}
                   />
 
-                  <div className="relative flex items-start gap-3.5">
+                  <div className="relative flex min-w-0 items-start gap-3">
                     {/* Icon */}
                     <div
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[12px]"
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[11px] sm:h-8 sm:w-8 sm:rounded-[12px]"
                       style={{
                         background: `linear-gradient(135deg, ${
                           isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.90)'
@@ -822,7 +834,7 @@ export default function Hero() {
                       }}
                     >
                       <Icon
-                        className="h-4 w-4"
+                        className="h-3.5 w-3.5 sm:h-4 sm:w-4"
                         strokeWidth={1.8}
                         style={{
                           background: `linear-gradient(135deg, ${iconGradient.replace('from-', '').replace('to-', '')})`,
@@ -832,16 +844,16 @@ export default function Hero() {
                       />
                     </div>
 
-                    <div>
+                    <div className="min-w-0">
                       <div
-                        className={`text-[9.5px] font-semibold uppercase tracking-[0.18em] ${
+                        className={`text-[8.5px] font-semibold uppercase tracking-[0.15em] sm:text-[9.5px] sm:tracking-[0.18em] ${
                           isDark ? 'text-violet-300/55' : 'text-violet-600/65'
                         }`}
                       >
                         {title}
                       </div>
                       <p
-                        className={`mt-1.5 text-[0.825rem] leading-[1.55] ${
+                        className={`mt-1 text-[0.76rem] leading-[1.45] sm:mt-1.5 sm:text-[0.825rem] sm:leading-[1.55] ${
                           isDark ? 'text-white/75' : 'text-slate-600'
                         }`}
                       >
@@ -859,11 +871,11 @@ export default function Hero() {
               whileInView={motionEnabled ? { opacity: 1, y: 0 } : undefined}
               viewport={{ once: true, margin: '-40px' }}
               transition={motionEnabled ? { duration: 0.55, delay: 0.22, ease } : undefined}
-              className="mt-5 flex flex-wrap items-center gap-3"
+              className="mt-4 flex flex-wrap items-center gap-2.5 sm:mt-5 sm:gap-3"
             >
               <Link
                 to="/products"
-                className="btn-primary group relative !min-h-[42px] !overflow-hidden !rounded-[15px] !px-5 !text-[11px]"
+                className="btn-primary group relative !min-h-[40px] !overflow-hidden !rounded-[15px] !px-4 !text-[10.5px] sm:!min-h-[42px] sm:!px-5 sm:!text-[11px]"
               >
                 {/* Shine sweep */}
                 <span
@@ -875,7 +887,7 @@ export default function Hero() {
 
               <Link
                 to="/contact"
-                className={`btn-outline !min-h-[42px] !rounded-[15px] !px-5 !text-[11px] ${
+                className={`btn-outline !min-h-[40px] !rounded-[15px] !px-4 !text-[10.5px] sm:!min-h-[42px] sm:!px-5 sm:!text-[11px] ${
                   isDark ? '!text-white/85' : ''
                 }`}
               >
@@ -884,7 +896,7 @@ export default function Hero() {
             </motion.div>
 
             {/* Stats */}
-            <div className="mt-6 grid max-w-[27rem] grid-cols-3 gap-2.5">
+            <div className="mt-5 grid max-w-[22rem] grid-cols-3 gap-2 sm:mt-6 sm:max-w-[27rem] sm:gap-2.5">
               {heroStats.map((stat, index) => (
                 <HeroStat
                   key={stat.label}
@@ -903,7 +915,7 @@ export default function Hero() {
             initial={motionEnabled ? { opacity: 0, x: 20 } : false}
             animate={motionEnabled ? { opacity: 1, x: 0 } : undefined}
             transition={motionEnabled ? { duration: 0.84, delay: 0.14, ease } : undefined}
-            className="relative z-10 mt-4 lg:mt-0"
+            className="relative z-10 mt-2 px-1 sm:mt-4 sm:px-0 lg:mt-0"
           >
             {showcaseItems.length > 0 ? (
               <FloatingScene items={showcaseItems} isDark={isDark} motionEnabled={motionEnabled} />
