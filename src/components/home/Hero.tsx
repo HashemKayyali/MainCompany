@@ -552,7 +552,7 @@ function FloatingScene({
   motionEnabled: boolean
 }) {
   return (
-<div className="relative mx-auto h-[20.5rem] w-full max-w-[23rem] sm:h-[32rem] sm:max-w-[35rem] lg:h-[37rem] lg:max-w-[40rem]">      <div
+<div className="relative mx-auto h-[25.5rem] w-full max-w-[28rem] sm:h-[32rem] sm:max-w-[35rem] lg:h-[37rem] lg:max-w-[40rem]">      <div
         className="pointer-events-none absolute left-[4%] top-[6%] h-44 w-44 rounded-full blur-[60px] sm:h-80 sm:w-80 sm:blur-[80px]"
         style={{
           background: isDark
@@ -915,7 +915,7 @@ export default function Hero() {
             initial={motionEnabled ? { opacity: 0, x: 20 } : false}
             animate={motionEnabled ? { opacity: 1, x: 0 } : undefined}
             transition={motionEnabled ? { duration: 0.84, delay: 0.14, ease } : undefined}
-            className="relative z-10 mt-2 px-1 sm:mt-4 sm:px-0 lg:mt-0"
+           className="relative z-10 mt-2 sm:mt-4 lg:mt-0"
           >
             {showcaseItems.length > 0 ? (
               <FloatingScene items={showcaseItems} isDark={isDark} motionEnabled={motionEnabled} />
