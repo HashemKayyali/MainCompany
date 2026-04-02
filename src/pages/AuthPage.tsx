@@ -1,9 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
-import { useLocation, useNavigate, Navigate } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { useUser } from '../contexts/UserContext'
-import { useTheme } from '../contexts/ThemeContext'
+import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import AnimatedBackground from '../components/theme/AnimatedBackground'
+import AvatarPicker from '../components/ui/AvatarPicker'
+import { useTheme } from '../contexts/ThemeContext'
+import { useUser } from '../contexts/UserContext'
+import {
+  avatarIdentitySeed,
+  buildDefaultAvatarSelection,
+  type AvatarSelection,
+} from '../lib/avatar'
 
 type Mode = 'login' | 'register'
 
@@ -11,82 +17,90 @@ export default function AuthPage() {
   const { isDark } = useTheme()
   const { pathname } = useLocation()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const reduceMotion = useReducedMotion()
+  const { login, register, isLoggedIn, isAdmin, loading: userLoading } = useUser()
+  const redirectParam = searchParams.get('redirect') || ''
+  const redirectTarget =
+    redirectParam.startsWith('/') && !redirectParam.startsWith('//')
+      ? redirectParam
+      : null
+  const defaultDestination = redirectTarget || (isAdmin ? '/admin' : '/')
 
-  const { login, register, isLoggedIn, isAdmin } = useUser()
-
-  // ✅ المنطق الحقيقي حسب الراوت
   const routeMode: Mode = pathname.includes('register') ? 'register' : 'login'
-  const routeIsLogin = routeMode === 'login'
-
-  // ✅ UI state (حتى نخلي الأنيميشن سلس)
   const [uiMode, setUiMode] = useState<Mode>(routeMode)
-
-  // ✅ مدة الفيد (لازم تطابق)
-  const FADE_MS = reduceMotion ? 0 : 260
+  const fadeMs = reduceMotion ? 0 : 240
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-
+  const [rememberMe, setRememberMe] = useState(false)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [confirm, setConfirm] = useState('')
-
+  const [avatarSelection, setAvatarSelection] = useState<AvatarSelection>(() =>
+    buildDefaultAvatarSelection('guest')
+  )
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [busy, setBusy] = useState(false)
+  const registerAvatarIdentitySeed = useMemo(
+    () => avatarIdentitySeed([name, email]),
+    [email, name]
+  )
 
   const pendingRedirectRef = useRef(false)
   const pendingTimerRef = useRef<number | null>(null)
   const isSwitchingRef = useRef(false)
 
-  // ✅ مزامنة UI مع الراوت (لكن مش أثناء السويتش)
   useEffect(() => {
     if (isSwitchingRef.current) return
     setUiMode(routeMode)
   }, [routeMode])
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (pendingTimerRef.current) window.clearTimeout(pendingTimerRef.current)
-    }
-  }, [])
+    },
+    []
+  )
 
-  // ✅ بعد تسجيل الدخول: روح للصفحة المناسبة
   useEffect(() => {
-    if (!isLoggedIn) return
+    if (!isLoggedIn || userLoading) return
 
     if (pendingRedirectRef.current) {
-      const t = window.setTimeout(() => {
-        navigate(isAdmin ? '/admin' : '/', { replace: true })
+      const timer = window.setTimeout(() => {
+        navigate(defaultDestination, { replace: true })
       }, 650)
-      return () => window.clearTimeout(t)
+
+      return () => window.clearTimeout(timer)
     }
 
-    navigate(isAdmin ? '/admin' : '/', { replace: true })
-  }, [isLoggedIn, isAdmin, navigate])
+    navigate(defaultDestination, { replace: true })
+  }, [defaultDestination, isLoggedIn, navigate, userLoading])
 
-  if (isLoggedIn) return <Navigate to={isAdmin ? '/admin' : '/'} replace />
+  if (isLoggedIn && !userLoading) return <Navigate to={defaultDestination} replace />
 
-  // ✅ سويتش Fade: أولاً غيّر UI (ليصير خروج/دخول)، بعدين غيّر الراوت
   const switchTo = (next: Mode) => {
     setError('')
     setSuccess('')
+
     if (pendingTimerRef.current) window.clearTimeout(pendingTimerRef.current)
 
     isSwitchingRef.current = true
     setUiMode(next)
 
     pendingTimerRef.current = window.setTimeout(() => {
-      navigate(next === 'login' ? '/user-login' : '/register', { replace: false })
+      const nextPath = next === 'login' ? '/user-login' : '/register'
+      const suffix = redirectTarget ? `?redirect=${encodeURIComponent(redirectTarget)}` : ''
+      navigate(`${nextPath}${suffix}`, { replace: false })
       window.setTimeout(() => {
         isSwitchingRef.current = false
       }, 60)
-    }, FADE_MS)
+    }, fadeMs)
   }
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault()
     setError('')
     setSuccess('')
 
@@ -94,21 +108,21 @@ export default function AuthPage() {
     if (!password.trim()) return setError('Enter your password')
 
     setBusy(true)
-    const res = await login(email.trim(), password)
+    const result = await login(email.trim(), password, rememberMe)
     setBusy(false)
 
-    if (res === true) {
+    if (result === true) {
       pendingRedirectRef.current = true
-      setSuccess('Signed in successfully ✅')
+      setSuccess('Signed in successfully.')
       return
     }
 
     pendingRedirectRef.current = false
-    setError(res || 'Login failed')
+    setError(result || 'Login failed')
   }
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleRegister = async (event: React.FormEvent) => {
+    event.preventDefault()
     setError('')
     setSuccess('')
 
@@ -117,32 +131,34 @@ export default function AuthPage() {
     if (password !== confirm) return setError('Passwords do not match')
 
     setBusy(true)
-    const r = await register(name.trim(), email.trim(), phone.trim(), password)
+    const result = await register(
+      name.trim(),
+      email.trim(),
+      phone.trim(),
+      password,
+      avatarSelection
+    )
     setBusy(false)
 
-    if (r === true) {
-      setSuccess('Account created successfully ✅')
-      window.setTimeout(() => navigate('/', { replace: true }), 750)
+    if (result === true) {
+      setSuccess('Account created successfully.')
+      window.setTimeout(() => navigate(defaultDestination, { replace: true }), 750)
       return
     }
 
-    setError(r || 'Register failed')
+    setError(result || 'Register failed')
   }
 
-const inputClass =
-  'w-full rounded-2xl px-4 py-3 text-[15px] font-semibold ' +
-  // ✅ glass input
-  'bg-white/12 backdrop-blur-xl text-white placeholder:text-white/55 ' +
-  'border border-white/18 shadow-[0_10px_30px_rgba(0,0,0,0.25)] ' +
-  // ✅ focus
-  'focus:outline-none focus:ring-2 focus:ring-violet-400/35 focus:border-violet-300/35 ' +
-  'transition'
-
-const labelClass = 'block text-[13px] mb-2 font-extrabold text-violet-100/90'
-  const card =
-    'relative w-full max-w-[460px] rounded-[28px] overflow-hidden ' +
-    'bg-white/14 backdrop-blur-2xl border border-white/18 ' +
-    (isDark ? 'shadow-[0_20px_80px_rgba(0,0,0,0.55)]' : 'shadow-[0_18px_60px_rgba(0,0,0,0.18)]')
+  const inputClass =
+    'w-full rounded-2xl border border-white/18 bg-white/12 px-4 py-3 text-[14px] font-semibold text-white placeholder:text-white/55 shadow-[0_10px_30px_rgba(0,0,0,0.25)] backdrop-blur-xl transition focus:border-violet-300/35 focus:outline-none focus:ring-2 focus:ring-violet-400/35'
+  const labelClass = 'mb-2 block text-[12px] font-bold text-violet-100/90'
+  const cardClass =
+    `relative w-full overflow-hidden rounded-[26px] border border-white/18 bg-white/14 backdrop-blur-2xl ${
+      uiMode === 'register' ? 'max-w-[860px]' : 'max-w-[420px]'
+    } ` +
+    (isDark
+      ? 'shadow-[0_20px_80px_rgba(0,0,0,0.55)]'
+      : 'shadow-[0_18px_60px_rgba(0,0,0,0.18)]')
 
   const fadeVariants = {
     hidden: { opacity: 0, y: reduceMotion ? 0 : 8 },
@@ -151,37 +167,33 @@ const labelClass = 'block text-[13px] mb-2 font-extrabold text-violet-100/90'
   }
 
   return (
-    <section className="min-h-[100dvh] relative overflow-hidden">
-      {/* ✅ نفس الخلفية المستوردة */}
+    <section className="relative min-h-[100dvh] overflow-hidden">
       {!reduceMotion && <AnimatedBackground position="absolute" className="z-0" />}
-
-      {/* طبقة تباين خفيفة عشان الكارد يبين */}
       <div className={`absolute inset-0 z-[1] ${isDark ? 'bg-black/35' : 'bg-black/10'}`} />
 
-      <div className="relative z-[2] min-h-[100dvh] flex items-center justify-center px-5 py-10">
+      <div className="relative z-[2] flex min-h-[100dvh] items-center justify-center px-5 py-8">
         <motion.div
           initial={reduceMotion ? false : { opacity: 0, y: 10, scale: 0.99 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: reduceMotion ? 0 : 0.25 }}
-          className={card}
+          className={cardClass}
         >
-          {/* رأس الكارد */}
-          <div className="p-6 sm:p-7 pb-4">
+          <div className="px-5 pb-4 pt-5 sm:px-6 sm:pt-6">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber flex items-center justify-center shadow-lg shadow-prism-violet/25">
-                <span className="text-white font-black text-sm font-display">BL</span>
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber shadow-lg shadow-prism-violet/25">
+                <span className="font-display text-sm font-black text-white">BL</span>
               </div>
               <div>
-                <div className="text-white text-lg font-extrabold font-display tracking-wide">Bike Land</div>
-                <div className="text-white/75 text-sm font-semibold">Gate</div>
+                <div className="font-display text-[1.02rem] font-extrabold text-white">Bike Land</div>
+                <div className="text-xs font-semibold text-white/75">Access</div>
               </div>
             </div>
 
-            <div className="mt-5">
-              <div className="text-white text-2xl font-display font-extrabold leading-tight drop-shadow">
+            <div className="mt-4">
+              <div className="font-display text-[1.85rem] font-extrabold leading-tight text-white drop-shadow">
                 {uiMode === 'login' ? 'Welcome back' : 'Create your account'}
               </div>
-              <p className="text-white/80 text-sm mt-2 leading-relaxed font-semibold">
+              <p className="mt-2 text-sm font-medium leading-relaxed text-white/78">
                 {uiMode === 'login'
                   ? 'Sign in to continue to your dashboard and services.'
                   : 'Join Bike Land to order parts, request quotes, and track updates.'}
@@ -189,22 +201,20 @@ const labelClass = 'block text-[13px] mb-2 font-extrabold text-violet-100/90'
             </div>
           </div>
 
-          {/* Alerts */}
-          <div className="px-6 sm:px-7">
+          <div className="px-5 sm:px-6">
             {success && (
-              <div className="mb-4 px-3 py-2.5 rounded-2xl text-sm bg-emerald-200/20 border border-emerald-200/30 text-emerald-50 font-bold">
+              <div className="mb-4 rounded-2xl border border-emerald-200/30 bg-emerald-200/20 px-3 py-2.5 text-sm font-bold text-emerald-50">
                 {success}
               </div>
             )}
             {error && (
-              <div className="mb-4 px-3 py-2.5 rounded-2xl text-sm bg-red-200/15 border border-red-200/25 text-red-50 font-bold">
+              <div className="mb-4 rounded-2xl border border-red-200/25 bg-red-200/15 px-3 py-2.5 text-sm font-bold text-red-50">
                 {error}
               </div>
             )}
           </div>
 
-          {/* ✅ محتوى يتبدّل بفيد */}
-          <div className="px-6 sm:px-7 pb-7">
+          <div className="px-5 pb-6 sm:px-6 sm:pb-7">
             <AnimatePresence mode="wait" initial={false}>
               {uiMode === 'login' ? (
                 <motion.div
@@ -213,7 +223,7 @@ const labelClass = 'block text-[13px] mb-2 font-extrabold text-violet-100/90'
                   initial="hidden"
                   animate="show"
                   exit="exit"
-                  transition={{ duration: FADE_MS / 1000, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: fadeMs / 1000, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div>
@@ -221,7 +231,7 @@ const labelClass = 'block text-[13px] mb-2 font-extrabold text-violet-100/90'
                       <input
                         type="email"
                         value={email}
-                        onChange={e => setEmail(e.target.value)}
+                        onChange={(event) => setEmail(event.target.value)}
                         placeholder="you@example.com"
                         autoComplete="email"
                         inputMode="email"
@@ -234,7 +244,7 @@ const labelClass = 'block text-[13px] mb-2 font-extrabold text-violet-100/90'
                       <input
                         type="password"
                         value={password}
-                        onChange={e => setPassword(e.target.value)}
+                        onChange={(event) => setPassword(event.target.value)}
                         placeholder="Your password"
                         autoComplete="current-password"
                         required
@@ -242,21 +252,33 @@ const labelClass = 'block text-[13px] mb-2 font-extrabold text-violet-100/90'
                       />
                     </div>
 
+                    <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/12 bg-black/14 px-4 py-3 text-left backdrop-blur-xl transition hover:border-white/18 hover:bg-black/18">
+                      <div>
+                        <div className="text-sm font-bold text-white">Remember Me</div>
+                        <div className="mt-1 text-xs font-medium text-white/62">
+                          Keep this session signed in on this device.
+                        </div>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(event) => setRememberMe(event.target.checked)}
+                        className="h-4.5 w-4.5 rounded border-white/25 bg-white/10 text-violet-500 focus:ring-2 focus:ring-violet-400/35 focus:ring-offset-0"
+                      />
+                    </label>
+
                     <button
                       type="submit"
                       disabled={busy || !!success}
-                      className="btn-primary w-full !rounded-2xl disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="btn-primary w-full !rounded-2xl disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {busy ? 'Signing in…' : success ? 'Redirecting…' : 'Login'}
+                      {busy ? 'Signing in...' : success ? 'Redirecting...' : 'Login'}
                     </button>
 
-                    {/* ✅ زر تحت ليفتح register */}
                     <button
                       type="button"
                       onClick={() => switchTo('register')}
-                      className="w-full rounded-2xl px-4 py-3 text-sm font-extrabold
-                                 bg-white/15 text-white border border-white/20
-                                 hover:bg-white/20 active:bg-white/25 transition"
+                      className="w-full rounded-2xl border border-white/20 bg-white/15 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-white/20 active:bg-white/25"
                     >
                       Create an account
                     </button>
@@ -269,101 +291,114 @@ const labelClass = 'block text-[13px] mb-2 font-extrabold text-violet-100/90'
                   initial="hidden"
                   animate="show"
                   exit="exit"
-                  transition={{ duration: FADE_MS / 1000, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: fadeMs / 1000, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <form onSubmit={handleRegister} className="space-y-4">
-                    <div>
-                      <label className={labelClass}>Full Name *</label>
-                      <input
-                        value={name}
-                        onChange={e => setName(e.target.value)}
-                        className={inputClass}
-                        placeholder="Your full name"
-                        autoComplete="name"
-                        required
+                    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
+                      <div className="space-y-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div className="sm:col-span-2">
+                            <label className={labelClass}>Full Name *</label>
+                            <input
+                              value={name}
+                              onChange={(event) => setName(event.target.value)}
+                              className={inputClass}
+                              placeholder="Your full name"
+                              autoComplete="name"
+                              required
+                            />
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <label className={labelClass}>Email *</label>
+                            <input
+                              type="email"
+                              value={email}
+                              onChange={(event) => setEmail(event.target.value)}
+                              className={inputClass}
+                              placeholder="you@example.com"
+                              autoComplete="email"
+                              inputMode="email"
+                              required
+                            />
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <label className={labelClass}>Phone</label>
+                            <input
+                              type="tel"
+                              value={phone}
+                              onChange={(event) => setPhone(event.target.value)}
+                              className={inputClass}
+                              placeholder="+962..."
+                              autoComplete="tel"
+                              inputMode="tel"
+                            />
+                          </div>
+
+                          <div>
+                            <label className={labelClass}>Password *</label>
+                            <input
+                              type="password"
+                              value={password}
+                              onChange={(event) => setPassword(event.target.value)}
+                              className={inputClass}
+                              placeholder="At least 6 characters"
+                              autoComplete="new-password"
+                              minLength={6}
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className={labelClass}>Confirm Password *</label>
+                            <input
+                              type="password"
+                              value={confirm}
+                              onChange={(event) => setConfirm(event.target.value)}
+                              className={inputClass}
+                              placeholder="Repeat password"
+                              autoComplete="new-password"
+                              minLength={6}
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <AvatarPicker
+                        compact
+                        value={avatarSelection}
+                        onChange={setAvatarSelection}
+                        identitySeed={registerAvatarIdentitySeed}
+                        description="Choose a deterministic portrait avatar now. You can refresh or refine it later from your account center."
                       />
                     </div>
 
-                    <div>
-                      <label className={labelClass}>Email *</label>
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        className={inputClass}
-                        placeholder="you@example.com"
-                        autoComplete="email"
-                        inputMode="email"
-                        required
-                      />
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <button
+                        type="submit"
+                        disabled={busy || !!success}
+                        className="btn-primary w-full !rounded-2xl disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {busy ? 'Creating account...' : success ? 'Redirecting...' : 'Sign Up'}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => switchTo('login')}
+                        className="w-full rounded-2xl border border-white/20 bg-white/15 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-white/20 active:bg-white/25"
+                      >
+                        Back to login
+                      </button>
                     </div>
-
-                    <div>
-                      <label className={labelClass}>Phone</label>
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={e => setPhone(e.target.value)}
-                        className={inputClass}
-                        placeholder="+962..."
-                        autoComplete="tel"
-                        inputMode="tel"
-                      />
-                    </div>
-
-                    <div>
-                      <label className={labelClass}>Password *</label>
-                      <input
-                        type="password"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        className={inputClass}
-                        placeholder="At least 6 characters"
-                        autoComplete="new-password"
-                        minLength={6}
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className={labelClass}>Confirm Password *</label>
-                      <input
-                        type="password"
-                        value={confirm}
-                        onChange={e => setConfirm(e.target.value)}
-                        className={inputClass}
-                        placeholder="Repeat password"
-                        autoComplete="new-password"
-                        minLength={6}
-                        required
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={busy || !!success}
-                      className="btn-primary w-full !rounded-2xl disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                      {busy ? 'Creating Account…' : success ? 'Redirecting…' : 'Sign Up'}
-                    </button>
-
-                    {/* ✅ زر تحت يرجع ل login */}
-                    <button
-                      type="button"
-                      onClick={() => switchTo('login')}
-                      className="w-full rounded-2xl px-4 py-3 text-sm font-extrabold
-                                 bg-white/15 text-white border border-white/20
-                                 hover:bg-white/20 active:bg-white/25 transition"
-                    >
-                      Back to login
-                    </button>
                   </form>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <div className="mt-6 text-center text-white/70 text-xs font-semibold">
-              © {new Date().getFullYear()} Bike Land
+            <div className="mt-5 text-center text-xs font-medium text-white/70">
+              (c) {new Date().getFullYear()} Bike Land
             </div>
           </div>
         </motion.div>

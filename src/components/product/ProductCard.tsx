@@ -1,453 +1,406 @@
-import { useRef, useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
-import { Play, Star, ArrowUpRight, Sparkles } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { ArrowUpRight, Play, Sparkles } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { Product } from '../../data/products/types'
 import { useMotionEnabled } from '../../hooks/useMotionEnabled'
+import FramedImage from '../ui/FramedImage'
+import FramedVideo from '../ui/FramedVideo'
+import ProductCommerceActions from './ProductCommerceActions'
 
-/* ── helpers ── */
-const toThumb = (u: string) => (u?.includes('-hero.webp') ? u.replace('-hero.webp', '-thumb.webp') : u)
-const toPoster = (u: string) => (u?.includes('-hero.webp') ? u.replace('-hero.webp', '-poster.webp') : toThumb(u))
-const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 768
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+const titleClampStyle: CSSProperties = {
+  display: '-webkit-box',
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden',
+}
 
-export default function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
+const descriptionClampStyle: CSSProperties = {
+  display: '-webkit-box',
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden',
+}
+
+const ease = [0.16, 1, 0.3, 1] as const
+
+function cn(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(' ')
+}
+
+function prefersReducedMotion() {
+  return (
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+  )
+}
+
+function ProductPill({
+  children,
+  tone = 'neutral',
+}: {
+  children: React.ReactNode
+  tone?: 'neutral' | 'accent' | 'success'
+}) {
+  const classes =
+    tone === 'accent'
+      ? 'border-cyan-300/18 bg-[linear-gradient(180deg,rgba(34,211,238,0.14),rgba(124,58,237,0.08))] text-cyan-50'
+      : tone === 'success'
+        ? 'border-emerald-300/18 bg-[linear-gradient(180deg,rgba(16,185,129,0.16),rgba(6,182,212,0.08))] text-emerald-50'
+        : 'border-white/[0.08] bg-white/[0.05] text-white/78'
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2 py-[0.34rem] text-[7.5px] font-semibold uppercase tracking-[0.12em] backdrop-blur-md',
+        classes
+      )}
+    >
+      {children}
+    </span>
+  )
+}
+
+function PriceTile({
+  label,
+  value,
+  meta,
+  accent = 'violet',
+}: {
+  label: string
+  value: string
+  meta: string
+  accent?: 'violet' | 'cyan'
+}) {
+  return (
+    <div
+      className={cn(
+        'relative overflow-hidden rounded-[14px] border px-2.5 py-2',
+        accent === 'cyan'
+          ? 'border-cyan-300/14 bg-[linear-gradient(180deg,rgba(10,25,41,0.92),rgba(8,15,29,0.94))]'
+          : 'border-white/[0.08] bg-[linear-gradient(180deg,rgba(14,17,37,0.94),rgba(9,13,28,0.96))]'
+      )}
+    >
+      <div
+        className={cn(
+          'pointer-events-none absolute inset-x-0 top-0 h-px',
+          accent === 'cyan'
+            ? 'bg-gradient-to-r from-transparent via-cyan-300/35 to-transparent'
+            : 'bg-gradient-to-r from-transparent via-fuchsia-300/22 to-transparent'
+        )}
+      />
+      <div className="text-[8px] font-mono uppercase tracking-[0.16em] text-white/42">{label}</div>
+      <div className="mt-1 text-[0.84rem] font-display font-black leading-none tracking-[-0.04em] text-white">
+        {value}
+      </div>
+      <div className="mt-0.75 text-[9px] leading-4 text-white/58">{meta}</div>
+    </div>
+  )
+}
+
+export default function ProductCard({
+  product,
+  index = 0,
+}: {
+  product: Product
+  index?: number
+}) {
   const { isDark } = useTheme()
-  const motion_ = useMotionEnabled()
-  const navigate = useNavigate()
-
+  const motionEnabled = useMotionEnabled()
   const cardRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
+  const [isHovering, setIsHovering] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [isHover, setIsHover] = useState(false)
 
-  const hasVideo = !!product.videoUrl
-  const allowFancy = motion_ && !prefersReducedMotion()
+  const allowMotion = motionEnabled && !prefersReducedMotion()
+  const hasVideo = Boolean(product.videoUrl)
+  const rentalEnabled = product.rentalEnabled !== false
+  const saleEnabled = product.saleEnabled !== false
+  const showRentalPrice = rentalEnabled && product.showPrice !== false
+  const categoryLabel = product.categoryTags[0] || 'Marketplace'
+  const heroThumb = product.heroImage
+  const heroPoster = product.heroImage
 
-  /* ─── 3D tilt + spotlight ─── */
-  const mx = useMotionValue(0.5)
-  const my = useMotionValue(0.5)
+  const chips = useMemo(
+    () =>
+      Array.from(new Set(product.categoryTags.filter(Boolean))).slice(0, 2),
+    [product.categoryTags]
+  )
 
-  const rx = useSpring(useTransform(my, [0, 1], [5, -5]), { stiffness: 200, damping: 22 })
-  const ry = useSpring(useTransform(mx, [0, 1], [-5, 5]), { stiffness: 200, damping: 22 })
+  const pricingTiles = useMemo(() => {
+    const tiles: Array<{ label: string; value: string; meta: string; accent?: 'violet' | 'cyan' }> =
+      []
 
-  const spX = useSpring(useTransform(mx, [0, 1], ['0%', '100%']), { stiffness: 160, damping: 24 })
-  const spY = useSpring(useTransform(my, [0, 1], ['0%', '100%']), { stiffness: 160, damping: 24 })
+    if (rentalEnabled) {
+      tiles.push({
+        label: showRentalPrice ? 'Rental Rate' : 'Rental Pricing',
+        value: showRentalPrice
+          ? `${product.rentalPricePerDay} ${product.currency}`
+          : 'Tailored Pricing',
+        meta: showRentalPrice ? 'Per day rental pricing' : 'Quote-based rental setup',
+        accent: 'cyan',
+      })
+    }
 
-  const onMove = (e: React.MouseEvent) => {
-    if (!allowFancy || isMobile()) return
-    const el = cardRef.current
-    if (!el) return
-    const r = el.getBoundingClientRect()
-    mx.set((e.clientX - r.left) / r.width)
-    my.set((e.clientY - r.top) / r.height)
-  }
+    if (saleEnabled) {
+      tiles.push({
+        label: 'Purchase Quote',
+        value: 'Custom Quote',
+        meta: 'Built around your brief and scope',
+        accent: 'violet',
+      })
+    }
 
-  const resetTilt = () => { mx.set(0.5); my.set(0.5) }
-  useEffect(() => { resetTilt() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    return tiles
+  }, [product.currency, product.rentalPricePerDay, rentalEnabled, saleEnabled, showRentalPrice])
 
-  /* ─── IntersectionObserver — mobile autoplay ─── */
   useEffect(() => {
-    if (!hasVideo || !cardRef.current) return
+    if (!hasVideo || !cardRef.current || prefersReducedMotion()) return
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const v = videoRef.current
-        if (!v || prefersReducedMotion()) return
-        if (entry.isIntersecting && isMobile()) {
-          v.currentTime = 0; v.play().catch(() => {}); setIsPlaying(true)
-        } else if (!entry.isIntersecting) {
-          v.pause(); v.currentTime = 0; setIsPlaying(false)
+        if (!entry.isIntersecting) {
+          videoRef.current?.pause()
+          if (videoRef.current) videoRef.current.currentTime = 0
+          setIsPlaying(false)
         }
       },
-      { threshold: 0.55 }
+      { threshold: 0.4 }
     )
+
     observer.observe(cardRef.current)
     return () => observer.disconnect()
   }, [hasVideo])
 
-  /* ─── Desktop hover video ─── */
-  const onEnter = () => {
-    setIsHover(true)
-    if (isMobile() || prefersReducedMotion()) return
-    const v = videoRef.current
-    if (!v || !hasVideo) return
-    v.currentTime = 0; v.play().catch(() => {}); setIsPlaying(true)
+  const startPreview = () => {
+    setIsHovering(true)
+    if (!hasVideo || prefersReducedMotion()) return
+    const video = videoRef.current
+    if (!video) return
+    video.currentTime = 0
+    void video.play().catch(() => undefined)
   }
 
-  const onLeave = () => {
-    setIsHover(false)
-    if (isMobile()) return
-    const v = videoRef.current
-    if (v) { v.pause(); v.currentTime = 0; setIsPlaying(false) }
-    resetTilt()
+  const stopPreview = () => {
+    setIsHovering(false)
+    const video = videoRef.current
+    if (!video) return
+    video.pause()
+    video.currentTime = 0
+    setIsPlaying(false)
   }
-
-  const go = () => navigate(`/products/${product.slug}`)
-
-  /* ─── Theme-aware styles ─── */
-  const surface = useMemo(() =>
-    isDark
-      ? 'bg-[#0c0a1e]/90 backdrop-blur-2xl'
-      : 'bg-white/98 backdrop-blur-lg shadow-lg shadow-violet-100/40'
-  , [isDark])
 
   return (
-    <motion.div
-      className="h-full"
-      initial={allowFancy ? { opacity: 0, y: 30 } : false}
-      whileInView={allowFancy ? { opacity: 1, y: 0 } : undefined}
-      viewport={allowFancy ? { once: true, margin: '-40px' } : undefined}
-      transition={allowFancy ? { duration: 0.6, delay: index * 0.07, ease: [0.16, 1, 0.3, 1] } : undefined}
+    <motion.article
+      ref={cardRef}
+      className="group relative self-start"
+      initial={allowMotion ? { opacity: 0, y: 24 } : false}
+      whileInView={allowMotion ? { opacity: 1, y: 0 } : undefined}
+      viewport={allowMotion ? { once: true, margin: '-32px' } : undefined}
+      transition={
+        allowMotion
+          ? { duration: 0.58, delay: Math.min(index * 0.04, 0.18), ease }
+          : undefined
+      }
+      onMouseEnter={startPreview}
+      onMouseLeave={stopPreview}
     >
-      <motion.div
-        ref={cardRef}
-        onMouseEnter={onEnter}
-        onMouseLeave={onLeave}
-        onMouseMove={onMove}
-        style={
-          allowFancy && !isMobile()
-            ? ({ rotateX: rx, rotateY: ry, transformStyle: 'preserve-3d' } as any)
-            : undefined
-        }
-        className={`
-          pc group relative rounded-3xl overflow-hidden h-full flex flex-col
-          transition-all duration-500 will-change-transform
-          hover:-translate-y-2
-          ${surface}
-        `}
-      >
-        {/* ═══ Ambient border + glow ═══ */}
-        {isDark ? (
-          <>
-            {/* resting border */}
-            <div className="absolute inset-0 rounded-3xl pointer-events-none z-0"
-              style={{ border: '1px solid rgba(139,92,246,0.12)' }} />
-            {/* rotating neon edge on hover */}
-            <div className="pc-neon absolute -inset-px rounded-3xl pointer-events-none -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-              style={{
-                background: 'conic-gradient(from var(--neon-angle,220deg), rgba(139,92,246,0.6), rgba(59,130,246,0.45), rgba(236,72,153,0.5), rgba(139,92,246,0.6))',
-                filter: 'blur(18px)',
-              }}
-            />
-            {/* hover border glow */}
-            <div className="absolute inset-0 rounded-3xl pointer-events-none z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-              style={{
-                border: '1px solid rgba(139,92,246,0.45)',
-                boxShadow: '0 0 28px rgba(139,92,246,0.2), inset 0 0 28px rgba(139,92,246,0.04)',
-              }}
-            />
-            {/* spotlight follow */}
-            {allowFancy && !isMobile() && (
-              <motion.div
-                className="absolute inset-0 pointer-events-none z-[1]"
-                style={{
-                  background: `radial-gradient(550px circle at ${spX.get()} ${spY.get()}, rgba(139,92,246,0.13), transparent 55%)`,
-                  opacity: isHover ? 1 : 0,
-                  transition: 'opacity 300ms ease',
-                }}
-              />
-            )}
-          </>
-        ) : (
-          <>
-            <div className="absolute inset-0 rounded-3xl pointer-events-none z-0 border border-violet-200/50 group-hover:border-violet-300 transition-colors duration-500" />
-            {allowFancy && !isMobile() && (
-              <motion.div
-                className="absolute inset-0 pointer-events-none z-[1]"
-                style={{
-                  background: `radial-gradient(480px circle at ${spX.get()} ${spY.get()}, rgba(139,92,246,0.1), transparent 60%)`,
-                  opacity: isHover ? 1 : 0,
-                  transition: 'opacity 300ms ease',
-                }}
-              />
-            )}
-          </>
+      <div
+        className={cn(
+          'absolute inset-[6px] -z-10 rounded-[20px] border blur-lg transition-opacity duration-300',
+          isHovering ? 'opacity-100' : 'opacity-70',
+          isDark
+            ? 'border-cyan-400/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.12),transparent_58%)]'
+            : 'border-violet-300/12 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.12),transparent_58%)]'
         )}
+      />
 
-        {/* ═══ IMAGE / VIDEO ═══ */}
+      <div
+        className={cn(
+          'relative flex flex-col overflow-hidden rounded-[19px] border p-2',
+          isDark
+            ? 'border-white/[0.08] bg-[linear-gradient(145deg,rgba(10,14,30,0.96),rgba(6,10,20,0.98))] shadow-[0_30px_90px_-62px_rgba(8,16,38,0.96)]'
+            : 'border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,245,255,0.94))] shadow-[0_26px_58px_-40px_rgba(15,23,42,0.18)]'
+        )}
+      >
         <div
-          className="relative aspect-[16/10] overflow-hidden cursor-pointer z-[2]"
-          onClick={go}
-          role="button" tabIndex={0} aria-label={`Open ${product.name}`}
-          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go() } }}
+          className="pointer-events-none absolute inset-0 opacity-[0.1]"
+          style={{
+            backgroundImage: isDark
+              ? 'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)'
+              : 'linear-gradient(rgba(124,58,237,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px)',
+            backgroundSize: '78px 78px',
+            maskImage: 'linear-gradient(180deg, rgba(0,0,0,0.54), transparent 55%)',
+            WebkitMaskImage: 'linear-gradient(180deg, rgba(0,0,0,0.54), transparent 55%)',
+          }}
+        />
+
+        <Link
+          to={`/products/${product.slug}`}
+          aria-label={`Open ${product.name}`}
+          className={cn(
+            'relative block aspect-[1.82/1] overflow-hidden rounded-[16px] border outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:aspect-[16/9]',
+            isDark
+              ? 'border-white/[0.10] bg-black/20 focus-visible:ring-cyan-300/55 focus-visible:ring-offset-[#07101c]'
+              : 'border-white/85 bg-white/75 focus-visible:ring-violet-500/45 focus-visible:ring-offset-white'
+          )}
         >
-          {/* Thumbnail */}
-          <img
-            src={toThumb(product.heroImage)}
+          <FramedImage
+            media={heroThumb}
             alt={product.name}
             loading="lazy"
-            className={`w-full h-full object-cover transition-all duration-700 ${
-              isPlaying ? 'opacity-0 scale-105' : 'group-hover:scale-[1.06]'
-            }`}
-            onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+            className={cn(
+              'h-full w-full transition-all duration-700',
+              isPlaying ? 'opacity-0 scale-[1.04]' : 'opacity-100 scale-100'
+            )}
+            fallbackTransform={{ fit: 'cover' }}
+            draggable={false}
           />
 
-          {/* Video */}
-          {hasVideo && (
-            <video
+          {hasVideo ? (
+            <FramedVideo
               ref={videoRef}
-              className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 pointer-events-none ${
-                isPlaying ? 'opacity-100 scale-[1.02]' : 'opacity-0'
-              }`}
-              muted loop playsInline preload="metadata" poster={toPoster(product.heroImage)}
-            >
-              <source src={product.videoUrl} type="video/mp4" />
-            </video>
-          )}
+              media={product.videoUrl}
+              posterMedia={heroPoster}
+              className={cn(
+                'absolute inset-0 h-full w-full transition-opacity duration-300',
+                isPlaying ? 'opacity-100' : 'opacity-0'
+              )}
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              fallbackTransform={{ fit: 'cover' }}
+              onPlaying={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+            />
+          ) : null}
 
-          {/* Gradient overlay */}
-          <div className={`absolute inset-0 pointer-events-none ${
-            isDark
-              ? 'bg-gradient-to-t from-[#0c0a1e] via-[#0c0a1e]/30 to-transparent'
-              : 'bg-gradient-to-t from-white via-white/20 to-transparent'
-          }`} />
+          <div
+            className={cn(
+              'pointer-events-none absolute inset-0',
+              isDark
+                ? 'bg-[linear-gradient(180deg,rgba(2,6,18,0.08),transparent_34%,rgba(2,6,18,0.82))]'
+                : 'bg-[linear-gradient(180deg,rgba(255,255,255,0.10),transparent_36%,rgba(255,255,255,0.92))]'
+            )}
+          />
 
-          {/* Top shimmer line */}
-          <div className={`absolute top-0 inset-x-0 h-px pointer-events-none ${
-            isDark
-              ? 'bg-gradient-to-r from-transparent via-violet-400/30 to-transparent'
-              : 'bg-gradient-to-r from-transparent via-violet-300/30 to-transparent'
-          }`} />
-
-          {/* Play button */}
-          {hasVideo && !isPlaying && !prefersReducedMotion() && (
-            <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-              <motion.div
-                className={`w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-xl ${
-                  isDark
-                    ? 'bg-black/50 border border-white/20 shadow-[0_0_30px_rgba(139,92,246,0.35)]'
-                    : 'bg-white/40 border border-white/60 shadow-lg'
-                }`}
-                animate={{ scale: [1, 1.08, 1] }}
-                transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <Play size={18} className="text-white ml-0.5" fill="white" strokeWidth={0} />
-              </motion.div>
-            </div>
-          )}
-
-          {/* Badge */}
-          {product.badge?.trim() && (
-            <motion.div
-              className="absolute top-3 left-3 z-20"
-              initial={allowFancy ? { opacity: 0, x: -10, scale: 0.94 } : false}
-              whileInView={allowFancy ? { opacity: 1, x: 0, scale: 1 } : undefined}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.18 + index * 0.05 }}
-            >
-              <span
-                className={`pc-badge inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-[0.08em] text-white backdrop-blur-xl shadow-xl border border-white/15 ${
-                  String(product.badgeColor || '').includes('linear-gradient') ? '' : `bg-gradient-to-r ${product.badgeColor}`
-                }`}
-                style={{
-                  ...(String(product.badgeColor || '').includes('linear-gradient') ? { backgroundImage: product.badgeColor } : {}),
-                  textShadow: '0 1px 4px rgba(0,0,0,0.4)',
-                }}
-              >
-                <span className="pc-badge-dot w-1.5 h-1.5 rounded-full bg-white/90" />
-                {product.badge}
-              </span>
-            </motion.div>
-          )}
-
-          {/* Live Preview chip */}
-          {hasVideo && isPlaying && (
-            <motion.div className="absolute bottom-3 right-3 z-20" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.1em] backdrop-blur-xl ${
-                isDark
-                  ? 'bg-black/60 text-white/90 border border-violet-400/30 shadow-[0_0_14px_rgba(139,92,246,0.3)]'
-                  : 'bg-white/85 text-violet-700 border border-violet-200 shadow-sm'
-              }`}>
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse shadow-[0_0_8px_rgba(248,113,113,0.8)]" />
-                Live Preview
-              </span>
-            </motion.div>
-          )}
-
-          {/* Category floating chip */}
-          {product.categoryTags?.[0] && (
-            <motion.span
-              className={`absolute top-3 right-3 z-20 text-[9px] font-bold px-2.5 py-1 rounded-full backdrop-blur-xl border tracking-[0.1em] uppercase ${
-                isDark
-                  ? 'bg-black/40 border-violet-400/25 text-violet-200/90'
-                  : 'bg-white/70 border-violet-200 text-violet-600'
-              }`}
-              initial={allowFancy ? { opacity: 0, scale: 0.88 } : false}
-              whileInView={allowFancy ? { opacity: 1, scale: 1 } : undefined}
-              viewport={{ once: true }}
-              transition={allowFancy ? { duration: 0.4, delay: 0.22 + index * 0.04 } : undefined}
-            >
-              {product.categoryTags[0]}
-            </motion.span>
-          )}
-        </div>
-
-        {/* ═══ BODY ═══ */}
-        <div className="relative p-5 pt-4 flex-1 flex flex-col z-[2]">
-          {/* Title */}
-          <motion.h3
-            className={`text-[17px] font-display font-extrabold leading-snug transition-colors duration-400 ${
-              isDark ? 'text-white group-hover:text-violet-200' : 'text-gray-900 group-hover:text-violet-700'
-            }`}
-            initial={allowFancy ? { opacity: 0, x: -8 } : false}
-            whileInView={allowFancy ? { opacity: 1, x: 0 } : undefined}
-            viewport={{ once: true }}
-            transition={allowFancy ? { duration: 0.45, delay: 0.13 + index * 0.04 } : undefined}
-            style={allowFancy && !isMobile() ? ({ transform: 'translateZ(10px)' } as any) : undefined}
-          >
-            {product.name}
-          </motion.h3>
-
-          {/* Description */}
-          <p className={`text-[12.5px] mt-1.5 leading-relaxed line-clamp-2 min-h-[2.5em] ${
-            isDark ? 'text-violet-200/55' : 'text-gray-500'
-          }`}>
-            {product.shortDescription}
-          </p>
-
-          {/* Tags */}
-          {product.categoryTags?.length > 1 && (
-            <div className="flex flex-wrap gap-1.5 mt-3">
-              {product.categoryTags.slice(1, 4).map((tag, i) => (
-                <motion.span
-                  key={tag}
-                  className={`pc-tag text-[9px] font-semibold px-2 py-[3px] rounded-full border transition-all duration-300 ${
-                    isDark
-                      ? 'bg-violet-500/[0.06] text-violet-300/60 border-violet-500/10 group-hover:border-violet-400/25 group-hover:text-violet-200/75'
-                      : 'bg-violet-50/80 text-violet-500 border-violet-100 group-hover:border-violet-200'
-                  }`}
-                  initial={allowFancy ? { opacity: 0, y: 6 } : false}
-                  whileInView={allowFancy ? { opacity: 1, y: 0 } : undefined}
-                  viewport={{ once: true }}
-                  transition={allowFancy ? { duration: 0.35, delay: 0.28 + i * 0.06 } : undefined}
-                >
-                  {tag}
-                </motion.span>
-              ))}
-            </div>
-          )}
-
-          {/* Spacer + Divider */}
-          <div className="mt-auto pt-4 mb-3">
-            <div className={`h-px relative overflow-hidden ${isDark ? 'bg-white/[0.06]' : 'bg-violet-100/60'}`}>
-              {isDark && <div className="pc-divider-glow absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-violet-400/40 to-transparent" />}
-              {!isDark && <div className="pc-divider-glow2 absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-violet-300/50 to-transparent" />}
-            </div>
+          <div className="pointer-events-none absolute left-2 top-2 z-10 flex flex-wrap gap-1.25">
+            <ProductPill tone="accent">{categoryLabel}</ProductPill>
+            {product.badge?.trim() ? <ProductPill>{product.badge}</ProductPill> : null}
           </div>
 
-          {/* Price row */}
-          {product.showPrice !== false ? (
-            <div className="flex items-end justify-between gap-3 mb-4">
-              <div className="flex items-baseline gap-1.5">
-                <span className={`text-2xl font-display font-black tracking-tight ${
-                  isDark ? 'text-white' : 'text-gray-900'
-                }`}>
-                  {product.rentalPricePerDay}
-                </span>
-                <span className={`text-[10px] font-mono tracking-wider ${
-                  isDark ? 'text-violet-300/50' : 'text-gray-400'
-                }`}>
-                  {product.currency}/day
-                </span>
-              </div>
-              {product.rentalPricePerEvent > 0 && (
-                <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
-                  isDark
-                    ? 'bg-violet-500/[0.06] text-violet-300/50 border-violet-500/15'
-                    : 'bg-violet-50 text-violet-500 border-violet-100'
-                }`}>
-                  {product.rentalPricePerEvent} {product.currency}/event
-                </span>
-              )}
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles size={13} className={isDark ? 'text-violet-400/70' : 'text-violet-500'} />
-              <span className={`text-[12px] font-semibold ${isDark ? 'text-violet-300/70' : 'text-violet-600'}`}>
-                Request a Custom Quote
-              </span>
-            </div>
-          )}
+          <div className="pointer-events-none absolute right-2 top-2 z-10 flex flex-wrap justify-end gap-1.25">
+            {product.featured ? <ProductPill tone="success">Featured</ProductPill> : null}
+            {saleEnabled && !rentalEnabled ? <ProductPill>Quote Based</ProductPill> : null}
+          </div>
 
-          {/* CTA Buttons */}
-          <div className="flex gap-2">
+          {hasVideo ? (
+            <>
+              <div className="pointer-events-none absolute bottom-2 left-2 z-10">
+                <ProductPill>{isPlaying ? 'Preview Playing' : 'Video Preview'}</ProductPill>
+              </div>
+              {!isPlaying ? (
+                <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+                  <div
+                    className={cn(
+                      'flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur-md',
+                      isDark
+                        ? 'border-white/14 bg-black/36 text-white'
+                        : 'border-white/90 bg-white/70 text-violet-700'
+                    )}
+                  >
+                    <Play size={11} fill="currentColor" strokeWidth={0} className="ml-0.5" />
+                  </div>
+                </div>
+              ) : null}
+            </>
+          ) : null}
+        </Link>
+
+        <div className="relative flex flex-1 flex-col gap-2 px-0 pb-0 pt-2.5">
+          <div className="space-y-1.75">
+            <div className={cn('text-[8px] font-mono uppercase tracking-[0.18em]', isDark ? 'text-cyan-100/40' : 'text-violet-700/70')}>
+              Premium product listing
+            </div>
+
+            <div className="space-y-1.25">
+              <h3
+                className={cn(
+                  'font-display text-[0.98rem] font-black leading-[0.98] tracking-[-0.05em] sm:text-[1.04rem]',
+                  isDark ? 'text-white' : 'text-gray-900'
+                )}
+                style={titleClampStyle}
+              >
+                {product.name}
+              </h3>
+
+              <p
+                className={cn('text-[0.76rem] leading-[1.45]', isDark ? 'text-purple-100/68' : 'text-gray-500')}
+                style={descriptionClampStyle}
+              >
+                {product.shortDescription}
+              </p>
+            </div>
+
+            {chips.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {chips.map((chip, chipIndex) => (
+                  <span
+                    key={`${product.slug}-${chip}`}
+                    className={cn(
+                      'inline-flex items-center rounded-full border px-2 py-[0.34rem] text-[8.5px] font-medium',
+                      chipIndex === 0
+                        ? isDark
+                          ? 'border-cyan-400/16 bg-cyan-400/10 text-cyan-100'
+                          : 'border-violet-200 bg-violet-50 text-violet-700'
+                        : isDark
+                          ? 'border-white/[0.08] bg-white/[0.04] text-white/72'
+                          : 'border-gray-200 bg-gray-50 text-gray-600'
+                    )}
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          {pricingTiles.length > 0 ? (
+            <div className={cn('grid gap-1.25', pricingTiles.length > 1 ? 'sm:grid-cols-2' : 'grid-cols-1')}>
+              {pricingTiles.map(tile => (
+                <PriceTile
+                  key={`${product.slug}-${tile.label}`}
+                  label={tile.label}
+                  value={tile.value}
+                  meta={tile.meta}
+                  accent={tile.accent}
+                />
+              ))}
+            </div>
+          ) : null}
+
+          <div className="mt-auto space-y-1.5 pt-0.25">
             <Link
               to={`/products/${product.slug}`}
-              className={`pc-btn-details flex-1 py-2.5 rounded-xl text-[12px] font-bold text-center transition-all duration-300 flex items-center justify-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+              className={cn(
+                'inline-flex min-h-[35px] w-full items-center justify-center gap-1.25 rounded-[12px] border px-3 py-1.75 text-[9.75px] font-semibold transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                 isDark
-                  ? 'text-violet-200/70 bg-white/[0.04] border border-white/[0.08] hover:border-violet-400/30 hover:text-white hover:bg-violet-500/[0.08] focus-visible:ring-violet-400/60 focus-visible:ring-offset-[#0c0a1e]'
-                  : 'text-gray-500 bg-gray-50 border border-gray-200 hover:text-violet-700 hover:border-violet-300 hover:bg-violet-50 focus-visible:ring-violet-500/50 focus-visible:ring-offset-white'
-              }`}
+                  ? 'border-white/[0.10] bg-white/[0.05] text-slate-100/88 hover:border-cyan-300/22 hover:bg-white/[0.08] focus-visible:ring-cyan-300/55 focus-visible:ring-offset-[#07101c]'
+                  : 'border-white/90 bg-white/72 text-slate-700 hover:border-violet-300 hover:bg-white focus-visible:ring-violet-500/45 focus-visible:ring-offset-white'
+              )}
             >
-              Details
+              <Sparkles size={13} />
+              View Details
               <ArrowUpRight size={12} />
             </Link>
 
-            <Link
-              to={`/contact?product=${product.slug}`}
-              className={`pc-btn-cta flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl text-[12px] font-extrabold text-white transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                isDark
-                  ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 shadow-[0_4px_20px_rgba(139,92,246,0.3)] hover:shadow-[0_8px_30px_rgba(139,92,246,0.5)] hover:scale-[1.03] focus-visible:ring-violet-400/60 focus-visible:ring-offset-[#0c0a1e]'
-                  : 'bg-gradient-to-r from-violet-600 to-purple-600 shadow-md shadow-violet-200/50 hover:shadow-lg hover:shadow-violet-300/50 hover:scale-[1.02] focus-visible:ring-violet-500/50 focus-visible:ring-offset-white'
-              }`}
-            >
-              <Star size={11} />
-              Get Quote
-            </Link>
+            <ProductCommerceActions product={product} />
           </div>
         </div>
-
-        {/* ═══ CSS Animations ═══ */}
-        <style>{`
-          @property --neon-angle {
-            syntax: '<angle>';
-            inherits: false;
-            initial-value: 220deg;
-          }
-          .pc:hover .pc-neon { animation: neonSpin 4s linear infinite; }
-          @keyframes neonSpin { to { --neon-angle: 580deg; } }
-
-          .pc-badge { animation: badgePulse 3.5s ease-in-out infinite; }
-          @keyframes badgePulse {
-            0%, 100% { box-shadow: 0 2px 14px rgba(0,0,0,0.25); }
-            50% { box-shadow: 0 2px 22px rgba(139,92,246,0.35), 0 0 36px rgba(139,92,246,0.1); }
-          }
-          .pc-badge-dot { animation: dotBlink 2s ease-in-out infinite; }
-          @keyframes dotBlink { 0%, 100% { opacity: 0.9; } 50% { opacity: 0.3; } }
-
-          .pc-divider-glow { animation: dividerSweep 3s ease-in-out infinite; }
-          .pc-divider-glow2 { animation: dividerSweep 3.5s ease-in-out infinite; }
-          @keyframes dividerSweep {
-            0% { transform: translateX(-120%); }
-            100% { transform: translateX(420%); }
-          }
-
-          .pc-btn-cta { position: relative; overflow: hidden; }
-          .pc-btn-cta::after {
-            content: '';
-            position: absolute;
-            top: 0; left: -120%; bottom: 0;
-            width: 55%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-            animation: shimmer 3s ease-in-out infinite;
-          }
-          @keyframes shimmer { 0% { left: -120%; } 100% { left: 220%; } }
-
-          @media (max-width: 767px) {
-            .pc .pc-neon { opacity: 0.3 !important; }
-            .pc-badge { animation-duration: 4.5s; }
-            .pc-btn-cta::after { animation-duration: 4s; opacity: 0.6; }
-          }
-
-          @media (prefers-reduced-motion: reduce) {
-            .pc:hover .pc-neon { animation: none; }
-            .pc-badge, .pc-badge-dot, .pc-divider-glow, .pc-divider-glow2, .pc-btn-cta::after { animation: none !important; }
-          }
-        `}</style>
-      </motion.div>
-    </motion.div>
+      </div>
+    </motion.article>
   )
 }

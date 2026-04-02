@@ -7,13 +7,19 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { clearAuthPersistence, setAuthPersistence, supabase, isSupabaseConfigured } from '../lib/supabase'
 import { useSession } from './SessionContext'
-import type { Database } from '../lib/database.types'
+import type { AvatarFields } from '../lib/avatar'
+import {
+  fetchProfileIdentityRow,
+  fetchProfileAvatarMap,
+  mapProfileAvatarFields,
+} from '../services/profile.service'
+import { onProfileUpdated } from '../lib/profile-sync'
 
 export type AdminRole = 'admin' | 'superadmin'
 
-export interface AdminUser {
+export interface AdminUser extends AvatarFields {
   id: string
   email: string
   name: string
@@ -28,7 +34,7 @@ interface AuthCtx {
   isSuperAdmin: boolean
   loading: boolean
 
-  login: (email: string, password: string) => Promise<{ ok: boolean; message?: string }>
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<{ ok: boolean; message?: string }>
   logout: () => Promise<void>
 
   admins: AdminUser[]
@@ -39,17 +45,35 @@ interface AuthCtx {
 
 const Ctx = createContext<AuthCtx>({} as AuthCtx)
 
-type ProfileRow = Database['public']['Tables']['profiles']['Row']
+async function fetchProfileIdentity(
+  userId: string
+): Promise<{
+  role: string | null
+  name: string | null
+  avatarUrl: string | null
+  avatarStyle: string | null
+  avatarSeed: string | null
+  avatarOptions: AvatarFields['avatarOptions']
+}> {
+  const data = await fetchProfileIdentityRow(userId)
 
-async function fetchProfileRole(userId: string): Promise<{ role: string | null; name: string | null }> {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('role,name')
-    .eq('id', userId)
-    .maybeSingle<Pick<ProfileRow, 'role' | 'name'>>()
+  if (!data) {
+    return {
+      role: null,
+      name: null,
+      avatarUrl: null,
+      avatarStyle: null,
+      avatarSeed: null,
+      avatarOptions: null,
+    }
+  }
 
-  if (error) return { role: null, name: null }
-  return { role: data?.role ?? null, name: data?.name ?? null }
+  const avatar = mapProfileAvatarFields(data)
+  return {
+    role: data?.role ?? null,
+    name: data?.name ?? null,
+    ...avatar,
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -62,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (sessionUser: { id: string; email?: string } | null): Promise<AdminUser | null> => {
       if (!sessionUser) return null
 
-      const prof = await fetchProfileRole(sessionUser.id)
+      const prof = await fetchProfileIdentity(sessionUser.id)
       if (prof.role !== 'admin' && prof.role !== 'superadmin') return null
 
       return {
@@ -70,6 +94,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: sessionUser.email || '',
         name: prof.name || sessionUser.email || 'Admin',
         role: prof.role as AdminRole,
+        avatarUrl: prof.avatarUrl,
+        avatarStyle: prof.avatarStyle,
+        avatarSeed: prof.avatarSeed,
+        avatarOptions: prof.avatarOptions,
       }
     },
     []
@@ -82,12 +110,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // ✅ Approach 1: Try RPC function (bypasses RLS — recommended)
       const { data: rpcData, error: rpcError } = await supabase.rpc('get_all_admins') as any
       if (!rpcError && Array.isArray(rpcData) && rpcData.length > 0) {
+        const avatarMap = await fetchProfileAvatarMap(rpcData.map((row: any) => row.id))
         return rpcData.map((row: any) => ({
           id: row.id,
           email: row.email || '',
           name: row.name || row.email || 'Admin',
           role: row.role as AdminRole,
           createdAt: row.created_at,
+          ...(avatarMap[row.id] || {}),
         }))
       }
 
@@ -99,12 +129,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error || !data) return []
 
+      const avatarMap = await fetchProfileAvatarMap((data as any[]).map((row: any) => row.id))
+
       return (data as any[]).map((row: any) => ({
         id: row.id,
         email: row.email || '',
         name: row.name || row.email || 'Admin',
         role: row.role as AdminRole,
         createdAt: row.created_at,
+        ...(avatarMap[row.id] || {}),
       }))
     } catch {
       return []
@@ -156,17 +189,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [authUser, sessionLoading, resolveAdmin, fetchAllAdmins])
 
-  const login = useCallback(async (email: string, password: string) => {
+  useEffect(() => {
+    return onProfileUpdated(detail => {
+      setUser(prev =>
+        prev && prev.id === detail.userId
+          ? {
+              ...prev,
+              name: detail.name?.trim() || prev.name,
+              avatarUrl: detail.avatarUrl ?? prev.avatarUrl,
+              avatarStyle: detail.avatarStyle ?? prev.avatarStyle,
+              avatarSeed: detail.avatarSeed ?? prev.avatarSeed,
+              avatarOptions: detail.avatarOptions ?? prev.avatarOptions,
+            }
+          : prev
+      )
+
+      setAdmins(prev =>
+        prev.map(admin =>
+          admin.id === detail.userId
+            ? {
+                ...admin,
+                name: detail.name?.trim() || admin.name,
+                avatarUrl: detail.avatarUrl ?? admin.avatarUrl,
+                avatarStyle: detail.avatarStyle ?? admin.avatarStyle,
+                avatarSeed: detail.avatarSeed ?? admin.avatarSeed,
+                avatarOptions: detail.avatarOptions ?? admin.avatarOptions,
+              }
+            : admin
+        )
+      )
+    })
+  }, [])
+
+  const login = useCallback(async (email: string, password: string, rememberMe = false) => {
     if (!isSupabaseConfigured()) {
       return { ok: false, message: 'Supabase is not configured. Check your .env file.' }
     }
 
+    setAuthPersistence(rememberMe)
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error || !data.user) return { ok: false, message: error?.message || 'Login failed' }
 
-    const prof = await fetchProfileRole(data.user.id)
+    const prof = await fetchProfileIdentity(data.user.id)
     if (prof.role !== 'admin' && prof.role !== 'superadmin') {
       await supabase.auth.signOut()
+      clearAuthPersistence()
       return { ok: false, message: 'This account is not an admin.' }
     }
 
@@ -175,6 +242,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     if (isSupabaseConfigured()) await supabase.auth.signOut()
+    clearAuthPersistence()
     setUser(null)
     setAdmins([])
   }, [])

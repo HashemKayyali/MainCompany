@@ -2,13 +2,29 @@ import { useMemo, useState } from 'react'
 import { useData } from '../../contexts/DataContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useDialog } from '../../contexts/DialogContext'
+import * as productsApi from '../../services/products.service'
 import Modal from '../../components/ui/Modal'
 import ImageUploader from '../../components/ui/ImageUploader'
 import VideoUploader from '../../components/ui/VideoUploader'
+import FramedImage from '../../components/ui/FramedImage'
+import MediaPlacementModal from '../../components/ui/MediaPlacementModal'
+import AdminActionButton from '../../components/admin/AdminActionButton'
+import AdminDetailModal from '../../components/admin/AdminDetailModal'
+import AdminEntityCard from '../../components/admin/AdminEntityCard'
+import AdminEditorWorkspace, { AdminEditorSection } from '../../components/admin/AdminEditorWorkspace'
+import AdminPageHeader from '../../components/admin/AdminPageHeader'
+import AdminViewToggle from '../../components/admin/AdminViewToggle'
+import useAdminCardView from '../../components/admin/useAdminCardView'
+import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
+import ProductCard from '../../components/product/ProductCard'
 import { slugify } from '../../utils/format'
 import type { Product } from '../../data/products/types'
+import {
+  buildReorderedProducts,
+  getProductDisplayOrder,
+  sanitizeProductDisplayOrder,
+} from '../../utils/product-order'
 
-/* ── 20 Badge Presets ── */
 const BADGE_OPTIONS = [
   'Most Popular',
   'New',
@@ -32,11 +48,10 @@ const BADGE_OPTIONS = [
   'Featured',
 ]
 
-const toThumbUrl = (url: string) => (url && url.includes('-hero.webp') ? url.replace('-hero.webp', '-thumb.webp') : url)
-
 const EMPTY: Product = {
   slug: '',
   name: '',
+  displayOrder: 1,
   badge: '',
   badgeColor: 'linear-gradient(90deg, #8b5cf6, #ec4899)',
   categoryTags: [],
@@ -51,43 +66,63 @@ const EMPTY: Product = {
   notes: [],
   features: { left: [], right: [] },
   rentalPricePerDay: 0,
-  rentalPricePerEvent: 0,
   currency: 'JOD',
   showPrice: true,
+  rentalEnabled: true,
+  saleEnabled: true,
+  stockTotal: 0,
+  stockActive: 0,
+  minimumRentalDays: 1,
+  bufferBeforeDays: 0,
+  bufferAfterDays: 0,
 }
 
-type TabKey = 'basic' | 'content' | 'images' | 'options'
+type TabKey = 'basic' | 'content' | 'media' | 'options' | 'settings'
+
+function cn(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(' ')
+}
 
 export default function AdminProductsPage() {
-  const { products, categories, addProduct, updateProduct, deleteProduct } = useData()
+  const { products, categories, addProduct, updateProduct, deleteProduct, refreshAll } = useData()
   const { isDark } = useTheme()
   const dialog = useDialog()
 
   const [modal, setModal] = useState(false)
   const [edit, setEdit] = useState<Product | null>(null)
+  const [details, setDetails] = useState<Product | null>(null)
   const [form, setForm] = useState<any>({})
-  const [confirm, setConfirm] = useState<string | null>(null)
   const [tab, setTab] = useState<TabKey>('basic')
   const [saving, setSaving] = useState(false)
   const [q, setQ] = useState('')
+  const [filterCat, setFilterCat] = useState<string>('all')
+  const [activeGalleryIndex, setActiveGalleryIndex] = useState<number | null>(null)
+  const [optimisticProducts, setOptimisticProducts] = useState<Product[] | null>(null)
+  const [reorderingSlug, setReorderingSlug] = useState<string | null>(null)
+  const { cardView, displayCardView, viewTransitionClassName, setCardView } = useAdminCardView('products')
 
   const txt = isDark ? 'text-white' : 'text-gray-900'
   const sub = isDark ? 'text-purple-200/70' : 'text-gray-500'
-  const soft = isDark ? 'bg-purple-500/[0.06] border border-purple-500/20' : 'bg-white border border-gray-200 shadow-sm'
-  const soft2 = isDark ? 'bg-purple-500/[0.04] border border-purple-500/15' : 'bg-gray-50 border border-gray-100'
-  const divider = isDark ? 'border-purple-500/20' : 'border-gray-100'
-  const rowHover = isDark ? 'hover:bg-purple-500/[0.06]' : 'hover:bg-violet-50/40'
+  const soft = isDark ? 'bg-[#101732]/92 ring-1 ring-inset ring-cyan-400/12' : 'bg-white border border-gray-200 shadow-sm'
+  const soft2 = isDark ? 'bg-[#0f1430]/88 ring-1 ring-inset ring-cyan-400/10' : 'bg-gray-50 border border-gray-100'
+  const chipOn = isDark
+    ? 'bg-[linear-gradient(180deg,rgba(24,56,78,0.96),rgba(14,36,54,0.98))] text-cyan-100 ring-1 ring-inset ring-cyan-300/24 shadow-[0_12px_28px_-18px_rgba(34,211,238,0.3)]'
+    : 'bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200 shadow-[0_10px_24px_-18px_rgba(124,58,237,0.22)]'
+  const chipOff = isDark
+    ? 'bg-[#0f1630]/96 text-purple-100/78 ring-1 ring-inset ring-cyan-400/10 shadow-[0_10px_24px_-18px_rgba(4,8,20,0.8)] hover:bg-[#111a39]'
+    : 'bg-white text-gray-600 ring-1 ring-inset ring-gray-200 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.14)] hover:bg-gray-50'
+  const orderedProducts = optimisticProducts ?? products
+  const cardsLayoutClass = getAdminCardsLayoutClass(displayCardView)
 
-  /* ── Badge Gradient Helpers ── */
   const DEFAULT_FROM = '#8b5cf6'
   const DEFAULT_TO = '#ec4899'
 
   const normalizeHex = (hex: string | undefined, fallback: string) => {
     const h = String(hex || fallback).trim()
     if (/^#[0-9a-fA-F]{3}$/.test(h)) {
-      const r = h[1],
-        g = h[2],
-        b = h[3]
+      const r = h[1]
+      const g = h[2]
+      const b = h[3]
       return `#${r}${r}${g}${g}${b}${b}`.toLowerCase()
     }
     if (/^#[0-9a-fA-F]{8}$/.test(h)) return h.slice(0, 7).toLowerCase()
@@ -110,15 +145,20 @@ export default function AdminProductsPage() {
     setForm((f: any) => ({ ...f, badgeColor: `linear-gradient(90deg, ${from}, ${to})`, badgeFromHex: from, badgeToHex: to }))
   }
 
+  const fallbackDisplayOrderForSlug = (slug?: string) => {
+    const index = orderedProducts.findIndex(product => product.slug === slug)
+    return index >= 0 ? index + 1 : orderedProducts.length + 1
+  }
+
   const tabCls = (t: TabKey) =>
-    `px-4 py-2 rounded-xl text-[12px] font-semibold transition-all border ${
+    `rounded-xl px-4 py-2 text-[12px] font-semibold transition-all ${
       tab === t
         ? isDark
-          ? 'bg-prism-violet/15 text-prism-violet border-prism-violet/40'
-          : 'bg-violet-50 text-violet-700 border-violet-200'
+          ? 'bg-prism-violet/15 text-prism-violet ring-1 ring-inset ring-prism-violet/30'
+          : 'border-violet-200 bg-violet-50 text-violet-700'
         : isDark
-          ? 'bg-transparent text-purple-200/70 border-transparent hover:bg-purple-500/[0.08]'
-          : 'bg-transparent text-gray-500 border-transparent hover:bg-gray-50'
+          ? 'bg-transparent text-purple-200/70 ring-1 ring-inset ring-transparent hover:bg-purple-500/[0.08]'
+          : 'border-transparent bg-transparent text-gray-500 hover:bg-gray-50'
     }`
 
   const openNew = () => {
@@ -132,87 +172,149 @@ export default function AdminProductsPage() {
       featuresRight: '',
       gallery: [],
       videoUrl: '',
+      displayOrder: orderedProducts.length + 1,
       badgeFromHex: g.fromHex,
       badgeToHex: g.toHex,
       showPrice: true,
+      rentalEnabled: true,
+      saleEnabled: true,
+      stockTotal: 0,
+      stockActive: 0,
+      minimumRentalDays: 1,
+      bufferBeforeDays: 0,
+      bufferAfterDays: 0,
     })
     setTab('basic')
     setModal(true)
   }
 
-  const openEdit = (p: Product) => {
-    setEdit(p)
-    const g = parseGradient(p.badgeColor || 'linear-gradient(90deg, #8b5cf6, #ec4899)')
+  const openEdit = (product: Product) => {
+    setEdit(product)
+    const g = parseGradient(product.badgeColor || EMPTY.badgeColor)
     setForm({
-      ...p,
-      categoryTags: p.categoryTags.join(', '),
-      notes: p.notes.join('\n'),
-      featuresLeft: p.features.left.join('\n'),
-      featuresRight: p.features.right.join('\n'),
-      gallery: [...p.gallery],
-      videoUrl: p.videoUrl || '',
+      ...product,
+      categoryTags: product.categoryTags.join(', '),
+      notes: product.notes.join('\n'),
+      featuresLeft: product.features.left.join('\n'),
+      featuresRight: product.features.right.join('\n'),
+      gallery: [...product.gallery],
+      videoUrl: product.videoUrl || '',
+      displayOrder: getProductDisplayOrder(product, fallbackDisplayOrderForSlug(product.slug)),
       badgeFromHex: g.fromHex,
       badgeToHex: g.toHex,
-      showPrice: p.showPrice !== false,
+      showPrice: product.showPrice !== false,
+      rentalEnabled: product.rentalEnabled !== false,
+      saleEnabled: product.saleEnabled !== false,
+      stockTotal: product.stockTotal ?? 0,
+      stockActive: product.stockActive ?? 0,
+      minimumRentalDays: product.minimumRentalDays ?? 1,
+      bufferBeforeDays: product.bufferBeforeDays ?? 0,
+      bufferAfterDays: product.bufferAfterDays ?? 0,
     })
     setTab('basic')
     setModal(true)
   }
+
+  const closeModal = () => {
+    setModal(false)
+    setActiveGalleryIndex(null)
+  }
+
+  const moveProductCard = async (slug: string, direction: -1 | 1) => {
+    if (reorderingSlug) return
+    const currentIndex = orderedProducts.findIndex(product => product.slug === slug)
+    if (currentIndex === -1) return
+    const nextIndex = currentIndex + direction
+    if (nextIndex < 0 || nextIndex >= orderedProducts.length) return
+
+    const reorderedProducts = buildReorderedProducts(orderedProducts, slug, nextIndex + 1)
+    const changedProducts = reorderedProducts.filter(product => {
+      const existing = orderedProducts.find(item => item.slug === product.slug)
+      if (!existing) return false
+      return getProductDisplayOrder(existing, fallbackDisplayOrderForSlug(existing.slug)) !== product.displayOrder
+    })
+
+    setOptimisticProducts(reorderedProducts)
+    setReorderingSlug(slug)
+
+    try {
+      await Promise.all(changedProducts.map(product => productsApi.update(product.slug, { displayOrder: product.displayOrder })))
+      await refreshAll()
+    } catch (err: any) {
+      setOptimisticProducts(null)
+      dialog.alert({
+        title: 'Reorder Failed',
+        message: err?.message || 'Failed to update product order.',
+        variant: 'danger',
+      })
+    } finally {
+      setReorderingSlug(null)
+      setOptimisticProducts(null)
+    }
+  }
+
+  const productCategoryName = (product: Product) =>
+    categories.find(category => category.id === product.categoryId)?.name || 'Uncategorized'
+
+  const productCats = useMemo(() => {
+    const list = Array.from(new Set(orderedProducts.map(product => productCategoryName(product)).filter(Boolean)))
+    return list.sort((a, b) => a.localeCompare(b))
+  }, [orderedProducts, categories])
+
+  const countForCat = (cat: string) =>
+    orderedProducts.filter(product => productCategoryName(product) === cat).length
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase()
-    if (!needle) return products
-    return products.filter(p => {
-      const catName = categories.find(c => c.id === p.categoryId)?.name || ''
+    return orderedProducts.filter(product => {
+      const categoryName = productCategoryName(product)
+      const matchesCategory = filterCat === 'all' || categoryName === filterCat
+      if (!matchesCategory) return false
+      if (!needle) return true
       return (
-        p.name.toLowerCase().includes(needle) ||
-        p.slug.toLowerCase().includes(needle) ||
-        (p.badge || '').toLowerCase().includes(needle) ||
-        catName.toLowerCase().includes(needle)
+        product.name.toLowerCase().includes(needle) ||
+        product.slug.toLowerCase().includes(needle) ||
+        (product.badge || '').toLowerCase().includes(needle) ||
+        categoryName.toLowerCase().includes(needle)
       )
     })
-  }, [products, q, categories])
+  }, [orderedProducts, q, filterCat, categories])
 
   const save = async () => {
     const tags =
       typeof form.categoryTags === 'string'
-        ? form.categoryTags
-            .split(',')
-            .map((t: string) => t.trim())
-            .filter(Boolean)
+        ? form.categoryTags.split(',').map((tag: string) => tag.trim()).filter(Boolean)
         : form.categoryTags
 
     const notes =
       typeof form.notes === 'string'
-        ? form.notes
-            .split('\n')
-            .map((n: string) => n.trim())
-            .filter(Boolean)
+        ? form.notes.split('\n').map((note: string) => note.trim()).filter(Boolean)
         : form.notes || []
 
-    const fl =
+    const featuresLeft =
       typeof form.featuresLeft === 'string'
-        ? form.featuresLeft
-            .split('\n')
-            .map((n: string) => n.trim())
-            .filter(Boolean)
+        ? form.featuresLeft.split('\n').map((feature: string) => feature.trim()).filter(Boolean)
         : form.features?.left || []
 
-    const fr =
+    const featuresRight =
       typeof form.featuresRight === 'string'
-        ? form.featuresRight
-            .split('\n')
-            .map((n: string) => n.trim())
-            .filter(Boolean)
+        ? form.featuresRight.split('\n').map((feature: string) => feature.trim()).filter(Boolean)
         : form.features?.right || []
 
     const gallery = form.gallery || []
+    const desiredOrder = sanitizeProductDisplayOrder(form.displayOrder) ?? (edit ? fallbackDisplayOrderForSlug(edit.slug) : products.length + 1)
+    const stockTotal = Math.max(0, Number(form.stockTotal) || 0)
+    const stockActive = Math.max(0, Number(form.stockActive) || 0)
+    const minimumRentalDays = Math.max(1, Number(form.minimumRentalDays) || 1)
+    const bufferBeforeDays = Math.max(0, Number(form.bufferBeforeDays) || 0)
+    const bufferAfterDays = Math.max(0, Number(form.bufferAfterDays) || 0)
 
     const data: Product = {
       slug: form.slug || slugify(form.name),
       name: form.name,
+      displayOrder: desiredOrder,
       badge: form.badge,
-      badgeColor: form.badgeColor || 'linear-gradient(90deg, #8b5cf6, #ec4899)',
+      badgeColor: form.badgeColor || EMPTY.badgeColor,
       categoryTags: tags,
       categoryId: form.categoryId || '',
       shortDescription: form.shortDescription || '',
@@ -224,20 +326,57 @@ export default function AdminProductsPage() {
       videoUrl: form.videoUrl || '',
       quickOptions: form.quickOptions || [],
       notes,
-      features: { left: fl, right: fr },
+      features: { left: featuresLeft, right: featuresRight },
       rentalPricePerDay: Number(form.rentalPricePerDay) || 0,
-      rentalPricePerEvent: Number(form.rentalPricePerEvent) || 0,
       currency: form.currency || 'JOD',
+      rentalEnabled: form.rentalEnabled !== false,
+      saleEnabled: form.saleEnabled !== false,
+      stockTotal,
+      stockActive,
+      minimumRentalDays,
+      bufferBeforeDays,
+      bufferAfterDays,
     }
 
-    if (!data.name?.trim()) { await dialog.alert({ title: 'Missing Field', message: 'Product name is required.', variant: 'warning' }); return }
-    if (!data.categoryId?.trim()) { await dialog.alert({ title: 'Missing Field', message: 'Category is required.', variant: 'warning' }); return }
+    if (!data.name?.trim()) {
+      await dialog.alert({ title: 'Missing Field', message: 'Product name is required.', variant: 'warning' })
+      return
+    }
+    if (!data.categoryId?.trim()) {
+      await dialog.alert({ title: 'Missing Field', message: 'Category is required.', variant: 'warning' })
+      return
+    }
+    if (stockActive > stockTotal) {
+      await dialog.alert({
+        title: 'Invalid Stock',
+        message: 'Active stock cannot be greater than total stock.',
+        variant: 'warning',
+      })
+      return
+    }
+
+    const currentProducts = edit ? products.map(product => (product.slug === edit.slug ? data : product)) : [...products, data]
+    const reorderedProducts = buildReorderedProducts(currentProducts, data.slug, desiredOrder)
+    const finalProduct = reorderedProducts.find(product => product.slug === data.slug) || data
+    const reorderUpdates = reorderedProducts.filter(product => {
+      if (product.slug === finalProduct.slug) return false
+      const existing = products.find(item => item.slug === product.slug)
+      if (!existing) return false
+      return getProductDisplayOrder(existing, fallbackDisplayOrderForSlug(existing.slug)) !== product.displayOrder
+    })
 
     setSaving(true)
     try {
-      if (edit) await updateProduct(edit.slug, data)
-      else await addProduct(data)
-      setModal(false)
+      if (edit) await updateProduct(edit.slug, finalProduct)
+      else await addProduct(finalProduct)
+
+      if (reorderUpdates.length > 0) {
+        await Promise.all(reorderUpdates.map(product => productsApi.update(product.slug, { displayOrder: product.displayOrder })))
+      }
+
+      await refreshAll()
+      setOptimisticProducts(null)
+      closeModal()
     } catch (err: any) {
       dialog.alert({ title: 'Error', message: err.message || 'Failed to save', variant: 'danger' })
     } finally {
@@ -245,39 +384,93 @@ export default function AdminProductsPage() {
     }
   }
 
-  const del = async (slug: string) => {
+  const removeProduct = async (slug: string) => {
+    const target = products.find(product => product.slug === slug)
+    const ok = await dialog.confirm({
+      title: 'Delete Product?',
+      message: `This will permanently remove ${target?.name || 'this product'}.`,
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    })
+    if (!ok) return
+
+    const remainingProducts = products
+      .filter(product => product.slug !== slug)
+      .map((product, index) => ({ ...product, displayOrder: index + 1 }))
+    const reorderUpdates = remainingProducts.filter(product => {
+      const existing = products.find(item => item.slug === product.slug)
+      if (!existing) return false
+      return getProductDisplayOrder(existing, fallbackDisplayOrderForSlug(existing.slug)) !== product.displayOrder
+    })
+
     try {
       await deleteProduct(slug)
+      if (reorderUpdates.length > 0) {
+        await Promise.all(reorderUpdates.map(product => productsApi.update(product.slug, { displayOrder: product.displayOrder })))
+      }
+      await refreshAll()
+      setOptimisticProducts(null)
+      if (details?.slug === slug) setDetails(null)
     } catch (err: any) {
       dialog.alert({ title: 'Error', message: err.message || 'Failed to delete', variant: 'danger' })
     }
-    setConfirm(null)
   }
 
-  /* Gallery helpers */
   const addGalleryImage = (url: string) => setForm((f: any) => ({ ...f, gallery: [...(f.gallery || []), url] }))
   const removeGalleryImage = (idx: number) => setForm((f: any) => ({ ...f, gallery: (f.gallery || []).filter((_: any, i: number) => i !== idx) }))
   const moveGalleryImage = (idx: number, dir: -1 | 1) =>
     setForm((f: any) => {
-      const g = [...(f.gallery || [])]
-      const ni = idx + dir
-      if (ni < 0 || ni >= g.length) return f
-      ;[g[idx], g[ni]] = [g[ni], g[idx]]
-      return { ...f, gallery: g }
+      const gallery = [...(f.gallery || [])]
+      const nextIndex = idx + dir
+      if (nextIndex < 0 || nextIndex >= gallery.length) return f
+      ;[gallery[idx], gallery[nextIndex]] = [gallery[nextIndex], gallery[idx]]
+      return { ...f, gallery }
+    })
+  const updateGalleryFrame = (idx: number, media: string) =>
+    setForm((f: any) => {
+      const gallery = [...(f.gallery || [])]
+      gallery[idx] = media
+      return { ...f, gallery, heroImage: gallery[0] || f.heroImage || '' }
     })
 
-  /* Quick options */
   const addOption = () => setForm((f: any) => ({ ...f, quickOptions: [...(f.quickOptions || []), { label: '', values: [''] }] }))
-  const updateOption = (idx: number, field: string, val: any) =>
+  const updateOption = (idx: number, field: 'label' | 'values', value: string) =>
     setForm((f: any) => {
-      const opts = [...(f.quickOptions || [])]
-      if (field === 'label') opts[idx] = { ...opts[idx], label: val }
-      else opts[idx] = { ...opts[idx], values: String(val).split(',').map((v: string) => v.trim()).filter(Boolean) }
-      return { ...f, quickOptions: opts }
+      const options = [...(f.quickOptions || [])]
+      if (field === 'label') options[idx] = { ...options[idx], label: value }
+      else options[idx] = { ...options[idx], values: value.split(',').map(item => item.trim()).filter(Boolean) }
+      return { ...f, quickOptions: options }
     })
   const removeOption = (idx: number) => setForm((f: any) => ({ ...f, quickOptions: (f.quickOptions || []).filter((_: any, i: number) => i !== idx) }))
 
-  const catName = (id: string) => categories.find(c => c.id === id)?.name || '-'
+  const catName = (id: string) => categories.find(category => category.id === id)?.name || '-'
+
+  const renderCardPrice = (product: Product) => (
+    <div
+      className={cn(
+        'flex min-w-0 items-end justify-between gap-3 rounded-[16px] px-1 py-0.5',
+        isDark ? 'border-b border-cyan-400/10' : 'border-b border-violet-100'
+      )}
+    >
+      <div className="min-w-0">
+        <div className={`text-[9px] font-mono font-semibold uppercase tracking-[0.18em] ${sub}`}>Day Price</div>
+        {product.showPrice === false ? (
+          <div className={cn('mt-1 text-[0.96rem] font-display font-semibold leading-none', isDark ? 'text-purple-100/72' : 'text-slate-500')}>
+            Hidden
+          </div>
+        ) : (
+          <div className="mt-1 flex items-end gap-1.5">
+            <span className={cn('font-display text-[1.15rem] font-semibold leading-none', txt)}>
+              {product.rentalPricePerDay}
+            </span>
+            <span className={`pb-[1px] text-[9px] font-mono uppercase tracking-[0.16em] ${sub}`}>
+              {product.currency}/day
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 
   const Step = ({ k, label, hint }: { k: TabKey; label: string; hint: string }) => (
     <button onClick={() => setTab(k)} className={tabCls(k)} type="button">
@@ -290,504 +483,724 @@ export default function AdminProductsPage() {
 
   const BadgePill = ({ p }: { p: Product }) => {
     if (!p.badge) return null
-    const isLinear = String(p.badgeColor || '').includes('linear-gradient')
     return (
-      <span
-        className="inline-flex px-2.5 py-1 rounded-full text-[10px] font-extrabold text-white max-w-[180px] truncate"
-        style={isLinear ? { backgroundImage: p.badgeColor } : undefined}
-      >
+      <span className="inline-flex max-w-[180px] truncate rounded-full px-2.5 py-1 text-[10px] font-extrabold text-white" style={{ backgroundImage: p.badgeColor }}>
         {p.badge}
       </span>
     )
   }
 
+  const previewProduct: Product = {
+    slug: form.slug || slugify(form.name || 'preview-product'),
+    name: form.name || 'Product Name',
+    displayOrder: sanitizeProductDisplayOrder(form.displayOrder) ?? 1,
+    badge: form.badge || '',
+    badgeColor: form.badgeColor || EMPTY.badgeColor,
+    categoryTags:
+      typeof form.categoryTags === 'string'
+        ? form.categoryTags.split(',').map((tag: string) => tag.trim()).filter(Boolean)
+        : form.categoryTags || [],
+    categoryId: form.categoryId || '',
+    shortDescription: form.shortDescription || 'Short description appears here as the live product card summary.',
+    description: form.description || '',
+    featured: !!form.featured,
+    showPrice: form.showPrice !== false,
+    heroImage: (form.gallery || [])[0] || form.heroImage || '',
+    gallery: form.gallery || [],
+    videoUrl: form.videoUrl || '',
+    quickOptions: form.quickOptions || [],
+    notes:
+      typeof form.notes === 'string'
+        ? form.notes.split('\n').map((note: string) => note.trim()).filter(Boolean)
+        : form.notes || [],
+    features: {
+      left:
+        typeof form.featuresLeft === 'string'
+          ? form.featuresLeft.split('\n').map((feature: string) => feature.trim()).filter(Boolean)
+          : form.features?.left || [],
+      right:
+        typeof form.featuresRight === 'string'
+          ? form.featuresRight.split('\n').map((feature: string) => feature.trim()).filter(Boolean)
+          : form.features?.right || [],
+    },
+    rentalPricePerDay: Number(form.rentalPricePerDay) || 0,
+    currency: form.currency || 'JOD',
+    rentalEnabled: form.rentalEnabled !== false,
+    saleEnabled: form.saleEnabled !== false,
+    stockTotal: Math.max(0, Number(form.stockTotal) || 0),
+    stockActive: Math.max(0, Number(form.stockActive) || 0),
+    minimumRentalDays: Math.max(1, Number(form.minimumRentalDays) || 1),
+    bufferBeforeDays: Math.max(0, Number(form.bufferBeforeDays) || 0),
+    bufferAfterDays: Math.max(0, Number(form.bufferAfterDays) || 0),
+  }
+
+  const renderProductPreview = (overrides?: Partial<Product>) => {
+    const preview = { ...previewProduct, ...overrides }
+    return (
+      <div
+        aria-hidden="true"
+        className="mx-auto max-w-[320px] select-none [&_a]:pointer-events-none [&_button]:pointer-events-none [&_input]:pointer-events-none [&_select]:pointer-events-none [&_textarea]:pointer-events-none"
+      >
+        <ProductCard product={preview} />
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3">
-        <div>
-          <h1 className={`font-display text-2xl font-bold ${txt}`}>Products</h1>
+    <div className="flex h-full min-h-0 flex-col gap-3.5">
+      <AdminPageHeader
+        title="Products"
+        actions={
+          <>
+            <AdminViewToggle value={cardView} onChange={setCardView} />
+            <button onClick={openNew} className="btn-admin-create">
+              + Add Product
+            </button>
+          </>
+        }
+      />
+
+      <div
+        className={cn(
+          'min-h-0 flex flex-1 flex-col rounded-[18px] p-2.5',
+          isDark
+            ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(8,11,27,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_28px_90px_-58px_rgba(7,15,36,0.96)]'
+            : 'bg-white ring-1 ring-inset ring-gray-200'
+        )}
+      >
+        <div className="mb-2.5 flex flex-wrap gap-1.5">
+          <button
+            onClick={() => setFilterCat('all')}
+            className={cn('inline-flex min-h-[36px] items-center justify-center rounded-xl px-3.5 py-2 text-[11px] font-semibold transition active:translate-y-[1px]', filterCat === 'all' ? chipOn : chipOff)}
+          >
+            All ({orderedProducts.length})
+          </button>
+
+          {productCats.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setFilterCat(cat)}
+              className={cn('inline-flex min-h-[36px] items-center justify-center rounded-xl px-3.5 py-2 text-[11px] font-semibold transition active:translate-y-[1px]', filterCat === cat ? chipOn : chipOff)}
+            >
+              {cat} ({countForCat(cat)})
+            </button>
+          ))}
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl ${soft}`}>
+        <div className="mb-2.5 flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+          <div className={`flex items-center gap-2 rounded-xl px-2.5 py-1.75 ${soft}`}>
             <span className={isDark ? 'text-purple-200/60' : 'text-gray-400'}>⌕</span>
             <input
               value={q}
               onChange={e => setQ(e.target.value)}
-              className={`bg-transparent outline-none text-[12px] w-[210px] sm:w-[320px] ${isDark ? 'placeholder:text-purple-200/40' : 'placeholder:text-gray-400'}`}
-              placeholder="Search by name, badge, category…"
+              className={`w-[170px] bg-transparent text-[11px] outline-none sm:w-[280px] ${isDark ? 'placeholder:text-purple-200/40' : 'placeholder:text-gray-400'}`}
+              placeholder="Search by name, badge, category..."
             />
-            <span className={`text-[10px] font-mono px-2 py-0.5 rounded-lg border ${isDark ? 'border-purple-500/20 text-purple-200/60' : 'border-gray-200 text-gray-500'}`}>
+            <span className={`rounded-lg px-2 py-0.5 text-[10px] font-mono ${isDark ? 'text-purple-200/60 ring-1 ring-inset ring-cyan-400/10' : 'border-gray-200 text-gray-500'}`}>
               {filtered.length}/{products.length}
             </span>
           </div>
-          <button onClick={openNew} className="btn-primary !px-4 !py-2 !text-xs !rounded-xl">
-            + Add Product
-          </button>
-        </div>
-      </div>
-
-      {/* ✅ Responsive Cards (بديل الجدول) */}
-      <div className={`rounded-2xl overflow-hidden ${soft}`}>
-        <div className={`px-5 py-4 border-b ${divider} flex items-center justify-between`}>
-          <p className={`text-sm font-semibold ${txt}`}>All Products</p>
-          <span className={`text-[11px] ${sub}`}>Tap a card to edit</span>
+          <span className={`text-[11px] ${sub}`}>Use the arrows on each card to match homepage order</span>
         </div>
 
         {filtered.length === 0 ? (
-          <div className="p-10 text-center">
+          <div className="flex flex-1 items-center justify-center p-8 text-center">
             <span className="text-2xl">📦</span>
-            <p className={`mt-4 font-semibold ${txt}`}>No products found</p>
-            <button onClick={openNew} className="btn-primary !mt-5 !px-5 !py-2.5 !text-xs !rounded-xl">
+            <p className={`mt-4 font-semibold ${txt}`}>No products match this filter.</p>
+            <button onClick={openNew} className="btn-admin-create !mt-5">
               + Add Product
             </button>
           </div>
         ) : (
-          <div className="p-4 sm:p-5">
-            {/* موبايل: عمود واحد — تابلت: عمودين — ديسكتوب: 3 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-              {filtered.map(p => (
-                <button
-                  key={p.slug}
-                  type="button"
-                  onClick={() => openEdit(p)}
-                  className={`text-left rounded-2xl overflow-hidden border transition ${rowHover} ${
-                    isDark ? 'border-purple-500/20 bg-purple-500/[0.04]' : 'border-gray-200 bg-white'
-                  }`}
-                >
-                  {/* Top: image + title */}
-                  <div className="flex gap-3 p-3">
-                    {p.heroImage ? (
-                      <img
-                        src={p.heroImage}
-                        alt=""
-                        className="w-20 h-16 rounded-xl object-cover border border-white/5 flex-none"
-                        onError={e => {
-                          ;(e.target as HTMLImageElement).style.display = 'none'
-                        }}
-                      />
-                    ) : (
-                      <div className={`w-20 h-16 rounded-xl ${soft2} flex-none flex items-center justify-center text-[10px] ${sub}`}>
-                        No Img
-                      </div>
+          <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
+            <div className={cn('origin-top p-1 transition-[opacity,transform,filter] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform,filter] sm:p-2', viewTransitionClassName)}>
+            <div className={cardsLayoutClass}>
+              {filtered.map((product, index) => {
+                const globalIndex = orderedProducts.findIndex(item => item.slug === product.slug)
+                const displayOrder = getProductDisplayOrder(product, globalIndex >= 0 ? globalIndex + 1 : index + 1)
+                const canMoveLeft = globalIndex > 0
+                const canMoveRight = globalIndex >= 0 && globalIndex < orderedProducts.length - 1
+                const isReordering = reorderingSlug === product.slug
+                const reorderingLocked = isReordering || !!q.trim()
+                const orderTone = isDark
+                  ? 'bg-[linear-gradient(180deg,rgba(10,18,38,0.96),rgba(8,14,30,0.98))] text-cyan-200 ring-cyan-400/14 shadow-[0_16px_28px_-24px_rgba(34,211,238,0.34)]'
+                  : 'bg-white/95 text-violet-700 ring-violet-200 shadow-[0_12px_24px_-22px_rgba(124,58,237,0.22)]'
+                const orderControls = (
+                  <div
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] ring-1 ring-inset backdrop-blur-sm',
+                      orderTone
                     )}
+                  >
+                    <span className="pl-0.5">Order</span>
+                    <button
+                      type="button"
+                      onClick={event => {
+                        event.stopPropagation()
+                        void moveProductCard(product.slug, -1)
+                      }}
+                      disabled={!canMoveLeft || reorderingLocked}
+                      className={cn(
+                        'flex h-5 w-5 items-center justify-center rounded-full text-[10px] transition ring-1 ring-inset',
+                        !canMoveLeft || reorderingLocked
+                          ? isDark
+                            ? 'text-white/25 ring-cyan-400/8'
+                            : 'text-gray-300 ring-gray-200'
+                          : isDark
+                            ? 'bg-cyan-400/10 text-cyan-100 ring-cyan-400/14 hover:bg-cyan-400/16'
+                            : 'bg-violet-50 text-violet-700 ring-violet-200 hover:bg-violet-100'
+                      )}
+                      aria-label="Move earlier"
+                    >
+                      {'<'}
+                    </button>
+                    <span className="min-w-[1.15rem] text-center text-[10px]">{displayOrder}</span>
+                    <button
+                      type="button"
+                      onClick={event => {
+                        event.stopPropagation()
+                        void moveProductCard(product.slug, 1)
+                      }}
+                      disabled={!canMoveRight || reorderingLocked}
+                      className={cn(
+                        'flex h-5 w-5 items-center justify-center rounded-full text-[10px] transition ring-1 ring-inset',
+                        !canMoveRight || reorderingLocked
+                          ? isDark
+                            ? 'text-white/25 ring-cyan-400/8'
+                            : 'text-gray-300 ring-gray-200'
+                          : isDark
+                            ? 'bg-cyan-400/10 text-cyan-100 ring-cyan-400/14 hover:bg-cyan-400/16'
+                            : 'bg-violet-50 text-violet-700 ring-violet-200 hover:bg-violet-100'
+                      )}
+                      aria-label="Move later"
+                    >
+                      {'>'}
+                    </button>
+                  </div>
+                )
 
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-sm font-extrabold ${txt} truncate`}>{p.name}</span>
-                            {p.featured && (
-                              <span
-                                className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold border ${
-                                  isDark
-                                    ? 'border-prism-violet/30 bg-prism-violet/15 text-prism-violet'
-                                    : 'border-violet-200 bg-violet-50 text-violet-700'
-                                }`}
-                              >
-                                FEATURED
-                              </span>
+                return (
+                  <div key={product.slug} className="relative">
+                    <AdminEntityCard
+                      variant={getAdminEntityVariant(displayCardView)}
+                      className={displayCardView === 'grid' ? '!h-auto' : undefined}
+                      minHeightClassName={displayCardView === 'grid' ? 'min-h-[304px]' : 'min-h-[96px]'}
+                      bodyClassName={displayCardView === 'grid' ? 'gap-1.75 p-2.75' : 'gap-1.5 p-2.5'}
+                      titleBlockClassName={displayCardView === 'grid' ? 'min-h-[4.1rem]' : undefined}
+                      childrenWrapClassName={displayCardView === 'grid' ? 'pt-0.5' : 'pt-0'}
+                      actionsWrapClassName={displayCardView === 'grid' ? 'pt-1' : 'xl:w-[118px] xl:self-center'}
+                      gridActionsPlacement={displayCardView === 'grid' ? 'flow' : 'bottom'}
+                      listMediaWrapClassName="md:self-center"
+                      listMediaFrameClassName="!h-[72px] !w-[120px] md:!h-[76px] md:!w-[124px] !rounded-[16px] !bg-transparent !ring-0 !p-0"
+                      media={
+                        product.heroImage ? (
+                          <div
+                            className={cn(
+                              'aspect-[16/10] overflow-hidden rounded-[18px] p-[2px]',
+                              isDark
+                                ? 'bg-[linear-gradient(145deg,rgba(14,24,48,0.98),rgba(11,19,39,0.96))] ring-1 ring-inset ring-cyan-400/16 shadow-[0_20px_40px_-30px_rgba(34,211,238,0.32)]'
+                                : 'bg-white ring-1 ring-inset ring-violet-200 shadow-[0_18px_36px_-28px_rgba(124,58,237,0.22)]'
                             )}
+                          >
+                            <div className={cn('h-full w-full overflow-hidden rounded-[16px]', isDark ? 'bg-[#07101f]' : 'bg-gray-50')}>
+                              <FramedImage
+                                media={product.heroImage}
+                                alt={product.name}
+                                className="h-full w-full transition-transform duration-700 group-hover:scale-[1.035]"
+                                fallbackTransform={{ fit: 'cover' }}
+                              />
+                            </div>
                           </div>
-                          <p className={`text-[11px] mt-1 line-clamp-2 ${sub}`}>{p.shortDescription || '—'}</p>
-                        </div>
-                      </div>
-
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <BadgePill p={p} />
-                        <span className={`text-[11px] px-2 py-1 rounded-full border ${isDark ? 'border-purple-500/20 bg-purple-500/[0.05] text-purple-200/80' : 'border-gray-200 bg-gray-50 text-gray-600'}`}>
-                          {catName(p.categoryId)}
-                        </span>
-                        <span className={`text-[11px] px-2 py-1 rounded-full border ${isDark ? 'border-purple-500/20 bg-purple-500/[0.05] text-purple-200/80' : 'border-gray-200 bg-gray-50 text-gray-600'}`}>
-                          {p.gallery.length} 📷
-                        </span>
-                        {p.videoUrl && (
-                          <span className={`text-[11px] px-2 py-1 rounded-full border ${isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200/80' : 'border-blue-200 bg-blue-50 text-blue-600'}`}>
-                            🎬 Video
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                        ) : (
+                          <div
+                            className={cn(
+                              'flex aspect-[16/10] items-center justify-center rounded-[18px] p-[2px]',
+                              isDark
+                                ? 'bg-[linear-gradient(145deg,rgba(14,24,48,0.98),rgba(11,19,39,0.96))] ring-1 ring-inset ring-cyan-400/16'
+                                : 'bg-white ring-1 ring-inset ring-violet-200'
+                            )}
+                          >
+                            <div className={cn('flex h-full w-full items-center justify-center rounded-[16px]', soft2)}>
+                              <div className={`text-[10px] font-mono uppercase tracking-[0.24em] ${sub}`}>No image</div>
+                            </div>
+                          </div>
+                        )
+                      }
+                      mediaOverlayLeft={
+                        product.featured ? <span className={`rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.22em] ${isDark ? 'border-prism-violet/30 bg-prism-violet/15 text-prism-violet' : 'border-violet-200 bg-violet-50 text-violet-700'}`}>Featured</span> : undefined
+                      }
+                      title={product.name}
+                      subtitle={product.shortDescription || undefined}
+                      children={
+                        displayCardView === 'grid' ? (
+                          <div className="space-y-2">
+                            {renderCardPrice(product)}
+                            <div className="pt-0.5">{orderControls}</div>
+                          </div>
+                        ) : (
+                            <div className="flex flex-wrap items-center gap-2.5">
+                              <div className="min-w-[162px] flex-1">{renderCardPrice(product)}</div>
+                              <div className="shrink-0">{orderControls}</div>
+                            </div>
+                          )
+                        }
+                      actions={
+                        <>
+                          <AdminActionButton tone="primary" onClick={event => { event.stopPropagation(); setDetails(product) }}>Details</AdminActionButton>
+                          <AdminActionButton onClick={event => { event.stopPropagation(); openEdit(product) }}>Edit</AdminActionButton>
+                          <AdminActionButton tone="danger" onClick={event => { event.stopPropagation(); void removeProduct(product.slug) }}>Delete</AdminActionButton>
+                        </>
+                      }
+                    />
                   </div>
-
-                  {/* Middle: price */}
-                  <div className={`px-3 pb-3`}>
-                    <div className={`rounded-xl p-3 border ${isDark ? 'border-purple-500/20 bg-black/10' : 'border-gray-200 bg-gray-50'}`}>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className={`text-[11px] font-semibold ${sub}`}>Price / Day</div>
-                        <div className={`text-sm font-mono ${txt}`}>
-                          {p.showPrice === false ? <span className={`text-[11px] ${sub}`}>Hidden</span> : <>{p.rentalPricePerDay} {p.currency}</>}
-                        </div>
-                      </div>
-                      <div className="mt-1 flex items-center justify-between gap-2">
-                        <div className={`text-[11px] font-semibold ${sub}`}>Slug</div>
-                        <div className={`text-[11px] font-mono ${isDark ? 'text-purple-200/80' : 'text-gray-600'} truncate max-w-[65%]`}>
-                          {p.slug}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bottom: actions */}
-                  <div className={`px-3 pb-3`}>
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[11px] font-semibold ${sub}`}>Actions:</span>
-
-                      <button
-                        type="button"
-                        onClick={e => {
-                          e.stopPropagation()
-                          openEdit(p)
-                        }}
-                        className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold border transition ${
-                          isDark ? 'border-purple-500/20 bg-purple-500/[0.06] text-purple-200/90' : 'border-gray-200 bg-white text-gray-700'
-                        }`}
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={e => {
-                          e.stopPropagation()
-                          setConfirm(p.slug)
-                        }}
-                        className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold border transition ${
-                          isDark ? 'border-red-400/20 bg-red-400/10 text-red-200/90' : 'border-red-200 bg-red-50 text-red-700'
-                        }`}
-                      >
-                        Delete
-                      </button>
-
-                      <div className="ml-auto">
-                        <span className={`text-[10px] font-mono px-2 py-1 rounded-lg border ${isDark ? 'border-purple-500/20 text-purple-200/60' : 'border-gray-200 text-gray-500'}`}>
-                          Tap to edit
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              ))}
+                )
+              })}
+            </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* ═══ PRODUCT EDITOR MODAL ═══ */}
-      <Modal open={modal} onClose={() => setModal(false)} title={edit ? 'Edit Product' : 'Add Product'} persistent>
-        <div className="space-y-5">
-          {/* Steps */}
-          <div className="flex flex-wrap gap-2">
-            <Step k="basic" label="Basic" hint="Name / Category / Price" />
+      <AdminDetailModal
+        open={!!details}
+        onClose={() => setDetails(null)}
+        title={details?.name || 'Product Details'}
+        subtitle={details ? 'This panel moves the deeper product information out of the grid, so the product card can stay focused and easier to scan.' : undefined}
+        media={details ? (details.heroImage ? <div className="aspect-[16/9] overflow-hidden"><FramedImage media={details.heroImage} alt={details.name} className="h-full w-full" fallbackTransform={{ fit: 'cover' }} /></div> : <div className={`flex aspect-[16/9] items-center justify-center ${soft2}`}><div className={`text-sm ${sub}`}>No hero image uploaded yet.</div></div>) : null}
+        badges={details ? (<><BadgePill p={details} /><span className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${isDark ? 'border-white/10 bg-white/[0.04] text-purple-100/80' : 'border-gray-200 bg-white text-gray-700'}`}>{catName(details.categoryId)}</span>{details.featured && <span className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${isDark ? 'border-prism-violet/30 bg-prism-violet/15 text-prism-violet' : 'border-violet-200 bg-violet-50 text-violet-700'}`}>Featured</span>}</>) : null}
+        summaryFacts={details ? [
+          { label: 'Slug', value: <span className="font-mono text-xs">{details.slug}</span> },
+          { label: 'Category', value: catName(details.categoryId) },
+          { label: 'Day Price', value: details.showPrice === false ? 'Hidden' : `${details.rentalPricePerDay} ${details.currency}` },
+          { label: 'Rental', value: details.rentalEnabled !== false ? 'Enabled' : 'Disabled' },
+          { label: 'Sales', value: details.saleEnabled !== false ? 'Enabled' : 'Disabled' },
+          { label: 'Stock', value: `${details.stockActive ?? 0} active / ${details.stockTotal ?? 0} total` },
+        ] : []}
+        sections={details ? [{ title: 'Descriptions', content: <div className="space-y-3"><p className={`text-sm font-semibold ${txt}`}>Short Description</p><p className={`text-sm leading-6 ${isDark ? 'text-purple-100/80' : 'text-gray-700'}`}>{details.shortDescription || 'No short description yet.'}</p><p className={`pt-2 text-sm font-semibold ${txt}`}>Long Description</p><p className={`text-sm leading-6 ${isDark ? 'text-purple-100/80' : 'text-gray-700'}`}>{details.description || 'No long description yet.'}</p></div> }, { title: 'Configuration', facts: [{ label: 'Gallery items', value: String(details.gallery.length) }, { label: 'Video', value: details.videoUrl ? 'Uploaded' : 'Not uploaded' }, { label: 'Quick options', value: String(details.quickOptions.length) }], content: <div className="space-y-3">{details.notes.length > 0 ? <div><p className={`mb-2 text-[11px] font-mono uppercase tracking-[0.22em] ${sub}`}>Notes</p><div className="flex flex-wrap gap-2">{details.notes.slice(0, 6).map(note => <span key={note} className={`rounded-full border px-3 py-1 text-[11px] ${isDark ? 'border-white/10 bg-white/[0.04] text-purple-100/80' : 'border-gray-200 bg-gray-50 text-gray-600'}`}>{note}</span>)}</div></div> : null}{details.quickOptions.length > 0 ? <div><p className={`mb-2 text-[11px] font-mono uppercase tracking-[0.22em] ${sub}`}>Quick Options</p><div className="space-y-2">{details.quickOptions.map(option => <div key={option.label} className={`rounded-xl border px-3 py-2 ${isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-100 bg-gray-50'}`}><div className={`text-sm font-semibold ${txt}`}>{option.label}</div><div className={`mt-1 text-xs ${sub}`}>{option.values.join(', ') || 'No values'}</div></div>)}</div></div> : null}</div> }] : []}
+        actions={details ? (<><AdminActionButton onClick={() => { setDetails(null); openEdit(details) }}>Edit Product</AdminActionButton><AdminActionButton tone="danger" onClick={() => { setDetails(null); void removeProduct(details.slug) }}>Delete Product</AdminActionButton></>) : null}
+      />
+
+      <Modal
+        open={modal}
+        onClose={closeModal}
+        title={edit ? 'Edit Product' : 'Add Product'}
+        persistent
+        size="2xl"
+        bodyClassName="px-3.5 pb-3.5 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+      >
+        <AdminEditorWorkspace
+          preview={renderProductPreview()}
+          previewTitle="Live Product Card"
+          
+          footer={
+            <div className="flex flex-wrap items-center justify-between gap-2.5">
+              <div className={cn('text-[11px] leading-5', sub)}>
+                Hero image: <span className={txt}>{(form.gallery || [])[0] ? 'Ready' : 'None'}</span>
+                {' | '}Video: <span className={txt}>{form.videoUrl ? 'Uploaded' : 'None'}</span>
+              </div>
+              <div className="flex flex-wrap justify-end gap-2.5">
+                <button onClick={closeModal} className="btn-outline !rounded-xl !px-4 !py-2 !text-sm">
+                  Cancel
+                </button>
+                <button
+                  onClick={save}
+                  disabled={saving}
+                  className="btn-primary !rounded-xl !px-5 !py-2 !text-xs disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : edit ? 'Save Changes' : 'Add Product'}
+                </button>
+              </div>
+            </div>
+          }
+        >
+          <div
+            className={cn(
+              'grid gap-2 rounded-[16px] p-2 sm:grid-cols-2 xl:grid-cols-5',
+              isDark
+                ? 'border border-cyan-400/10 bg-[linear-gradient(180deg,rgba(10,14,31,0.82),rgba(8,12,24,0.9))]'
+                : 'border border-gray-200 bg-gray-50/80'
+            )}
+          >
+            <Step k="basic" label="Basic" hint="Name / Category / Badge" />
             <Step k="content" label="Content" hint="Descriptions / Notes" />
-            <Step k="images" label={`Media (${(form.gallery || []).length}${form.videoUrl ? ' +🎬' : ''})`} hint="Images & Video" />
+            <Step k="media" label={`Media (${(form.gallery || []).length}${form.videoUrl ? ' + video' : ''})`} hint="Images / Video" />
             <Step k="options" label="Options" hint="Quick options / Features" />
+            <Step k="settings" label="Settings" hint="Pricing / Rental / Inventory" />
           </div>
 
-          <div className={`rounded-2xl p-4 ${soft}`}>
-            {/* ═══ TAB: BASIC ═══ */}
-            {tab === 'basic' && (
-              <div className="space-y-4">
-                {/* Name + Slug */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {tab === 'basic' && (
+            <>
+              <AdminEditorSection
+                title="Identity"
+                hint="The storefront card pulls from these core fields first, so keep the name, slug, and badge setup together."
+              >
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Product Name *</label>
+                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Product Name *</label>
                     <input value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} className="form-field" placeholder="Bike Blender" />
                   </div>
                   <div>
-                    <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Slug (URL)</label>
+                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Slug (URL)</label>
                     <input value={form.slug || ''} onChange={e => setForm({ ...form, slug: e.target.value })} className="form-field" placeholder="auto-generated" />
-                    <p className={`text-[11px] mt-1 ${isDark ? 'text-purple-200/50' : 'text-gray-400'}`}>Leave empty to auto-generate.</p>
+                    <p className={`mt-1 text-[11px] ${isDark ? 'text-purple-200/50' : 'text-gray-400'}`}>Leave empty to auto-generate.</p>
                   </div>
                 </div>
 
-                {/* Badge Dropdown + Gradient */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Badge Text</label>
+                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Badge Text</label>
                     <select value={form.badge || ''} onChange={e => setForm({ ...form, badge: e.target.value })} className="form-field">
-                      <option value="">— No Badge —</option>
-                      {BADGE_OPTIONS.map(b => (
-                        <option key={b} value={b}>
-                          {b}
+                      <option value="">No badge</option>
+                      {BADGE_OPTIONS.map(badge => (
+                        <option key={badge} value={badge}>
+                          {badge}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Badge Gradient</label>
-                    <div className="flex items-center gap-3">
-                      <div className={`flex items-center gap-2 px-3 py-2 rounded-xl ${soft2}`}>
+                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Badge Gradient</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className={`flex items-center gap-2 rounded-xl px-3 py-2 ${soft2}`}>
                         <span className={`text-[11px] ${sub}`}>From</span>
-                        <input
-                          type="color"
-                          value={form.badgeFromHex || DEFAULT_FROM}
-                          onChange={e => setBadgeGradient(e.target.value, form.badgeToHex || DEFAULT_TO)}
-                          className="w-8 h-7 p-0 bg-transparent border-0 cursor-pointer rounded"
-                        />
+                        <input type="color" value={form.badgeFromHex || DEFAULT_FROM} onChange={e => setBadgeGradient(e.target.value, form.badgeToHex || DEFAULT_TO)} className="h-7 w-8 cursor-pointer rounded border-0 bg-transparent p-0" />
                       </div>
-                      <div className={`flex items-center gap-2 px-3 py-2 rounded-xl ${soft2}`}>
+                      <div className={`flex items-center gap-2 rounded-xl px-3 py-2 ${soft2}`}>
                         <span className={`text-[11px] ${sub}`}>To</span>
-                        <input
-                          type="color"
-                          value={form.badgeToHex || DEFAULT_TO}
-                          onChange={e => setBadgeGradient(form.badgeFromHex || DEFAULT_FROM, e.target.value)}
-                          className="w-8 h-7 p-0 bg-transparent border-0 cursor-pointer rounded"
-                        />
-                      </div>
-                      {/* Preview */}
-                      <div className={`px-3 py-2 rounded-xl border flex-1 min-w-0 ${isDark ? 'border-purple-500/20' : 'border-gray-200'}`}>
-                        <span
-                          className={`inline-flex px-3 py-1 rounded-full text-[11px] font-bold text-white truncate ${String(form.badgeColor || '').includes('linear-gradient') ? '' : `bg-gradient-to-r ${form.badgeColor}`}`}
-                          style={String(form.badgeColor || '').includes('linear-gradient') ? { backgroundImage: form.badgeColor } : undefined}
-                        >
-                          {form.badge?.trim() || 'Preview'}
-                        </span>
+                        <input type="color" value={form.badgeToHex || DEFAULT_TO} onChange={e => setBadgeGradient(form.badgeFromHex || DEFAULT_FROM, e.target.value)} className="h-7 w-8 cursor-pointer rounded border-0 bg-transparent p-0" />
                       </div>
                     </div>
                   </div>
                 </div>
+              </AdminEditorSection>
 
-                {/* Category */}
+              <AdminEditorSection
+                title="Listing Setup"
+                
+              >
                 <div>
-                  <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Category *</label>
+                  <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Category *</label>
                   <select value={form.categoryId || ''} onChange={e => setForm({ ...form, categoryId: e.target.value })} className="form-field">
-                    <option value="">-- Select Category --</option>
-                    {categories.map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.icon} {c.name}
+                    <option value="">Select Category</option>
+                    {categories.map(category => (
+                      <option key={category.id} value={category.id}>
+                        {category.icon} {category.name}
                       </option>
                     ))}
                   </select>
                 </div>
 
-                {/* Tags */}
-                <div>
-                  <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Tags (comma-separated)</label>
-                  <input
-                    value={typeof form.categoryTags === 'string' ? form.categoryTags : (form.categoryTags || []).join(', ')}
-                    onChange={e => setForm({ ...form, categoryTags: e.target.value })}
-                    className="form-field"
-                    placeholder="Interactive, Wellness"
-                  />
+             
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Category Tags</label>
+                    <input value={form.categoryTags || ''} onChange={e => setForm({ ...form, categoryTags: e.target.value })} className="form-field" placeholder="LED, VR, Party" />
+                  </div>
                 </div>
 
-                {/* Featured + Show Price toggles */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <label className="flex items-center gap-2.5 cursor-pointer">
-                    <input type="checkbox" checked={!!form.featured} onChange={e => setForm({ ...form, featured: e.target.checked })} className="w-4 h-4 rounded accent-violet-500" />
-                    <span className={`text-sm ${isDark ? 'text-purple-100/90' : 'text-gray-700'}`}>Featured on homepage</span>
-                  </label>
-                  <label className="flex items-center gap-2.5 cursor-pointer">
-                    <input type="checkbox" checked={form.showPrice !== false} onChange={e => setForm({ ...form, showPrice: e.target.checked })} className="w-4 h-4 rounded accent-violet-500" />
-                    <span className={`text-sm ${isDark ? 'text-purple-100/90' : 'text-gray-700'}`}>Show price on website</span>
+                <div className="flex flex-wrap gap-3">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={!!form.featured} onChange={e => setForm({ ...form, featured: e.target.checked })} className="h-4 w-4 rounded accent-violet-400" />
+                    <span className={cn('text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>Featured product</span>
                   </label>
                 </div>
+              </AdminEditorSection>
 
-                {/* Price Fields — only visible when showPrice is ON */}
-                {form.showPrice !== false && (
-                  <div className={`grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl ${soft2}`}>
-                    <div>
-                      <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Price/Day</label>
-                      <input type="number" value={form.rentalPricePerDay || 0} onChange={e => setForm({ ...form, rentalPricePerDay: e.target.value })} className="form-field" />
-                    </div>
-                    <div>
-                      <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Price/Event</label>
-                      <input type="number" value={form.rentalPricePerEvent || 0} onChange={e => setForm({ ...form, rentalPricePerEvent: e.target.value })} className="form-field" />
-                    </div>
-                    <div>
-                      <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Currency</label>
-                      <input value={form.currency || 'JOD'} onChange={e => setForm({ ...form, currency: e.target.value })} className="form-field" />
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+            </>
+          )}
 
-            {/* ═══ TAB: CONTENT ═══ */}
-            {tab === 'content' && (
-              <div className="space-y-4">
+          {tab === 'content' && (
+            <>
+              <AdminEditorSection title="Descriptions" hint="Short copy drives the product card; long copy supports the detail page.">
                 <div>
-                  <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Short Description</label>
-                  <input value={form.shortDescription || ''} onChange={e => setForm({ ...form, shortDescription: e.target.value })} className="form-field" placeholder="One line summary…" />
+                  <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Short Description</label>
+                  <textarea value={form.shortDescription || ''} onChange={e => setForm({ ...form, shortDescription: e.target.value })} className="form-field resize-none" rows={3} />
                 </div>
                 <div>
-                  <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Full Description</label>
-                  <textarea value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} className="form-field resize-none" rows={6} placeholder="Full product description…" />
+                  <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Full Description</label>
+                  <textarea value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} className="form-field resize-none" rows={6} />
                 </div>
-                <div>
-                  <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Notes (one per line)</label>
-                  <textarea
-                    value={typeof form.notes === 'string' ? form.notes : (form.notes || []).join('\n')}
-                    onChange={e => setForm({ ...form, notes: e.target.value })}
-                    className="form-field resize-none"
-                    rows={5}
-                    placeholder={'Requires fresh ingredients\nNeeds 1x power outlet\nSetup time: ~30 min'}
-                  />
-                </div>
-              </div>
-            )}
+              </AdminEditorSection>
 
-            {/* ═══ TAB: IMAGES (FIXED) ═══ */}
-            {tab === 'images' && (
-              <div className="space-y-4">
-                {/* ── Video Upload ── */}
-                <div className={`p-4 rounded-xl border ${isDark ? 'border-purple-500/20 bg-purple-500/[0.03]' : 'border-violet-100 bg-violet-50/30'}`}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-base">🎬</span>
-                    <div>
-                      <p className={`text-xs font-semibold ${txt}`}>Product Video (Hover Preview)</p>
-                      <p className={`text-[11px] ${isDark ? 'text-purple-200/50' : 'text-gray-400'}`}>
-                        This video plays when visitors hover over the product card. MP4 recommended, max 50MB.
-                      </p>
-                    </div>
-                  </div>
-                  <VideoUploader
-                    value={form.videoUrl || ''}
-                    onChange={(url: string) => setForm((f: any) => ({ ...f, videoUrl: url }))}
-                    onRemove={() => setForm((f: any) => ({ ...f, videoUrl: '' }))}
-                    folder="products"
-                  />
-                </div>
+              <AdminEditorSection title="Internal Notes" hint="One note per line. These stay out of the storefront card but help with setup and sales context.">
+                <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Notes (one per line)</label>
+                <textarea value={typeof form.notes === 'string' ? form.notes : (form.notes || []).join('\n')} onChange={e => setForm({ ...form, notes: e.target.value })} className="form-field resize-none" rows={7} />
+              </AdminEditorSection>
+            </>
+          )}
 
-                {/* ── Images ── */}
-                <div className={`p-3 rounded-xl ${soft2}`}>
-                  <p className={`text-xs font-medium ${isDark ? 'text-purple-200/85' : 'text-gray-700'}`}>📷 The first image is the hero. Drag & reorder using arrows.</p>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {tab === 'media' && (
+            <>
+              <AdminEditorSection title="Gallery" hint="The first image becomes the hero automatically. Keep the strongest framed image in slot one.">
+                <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-4">
                   {(form.gallery || []).map((url: string, idx: number) => (
-                    <div key={idx} className="relative group">
-                      <div className={`aspect-video rounded-xl overflow-hidden border ${isDark ? 'border-purple-500/20' : 'border-gray-200'}`}>
-                        <img
-                          src={toThumbUrl(url)}
-                          alt=""
-                          className="w-full h-full object-cover"
-                          onError={e => {
-                            ;(e.target as HTMLImageElement).style.display = 'none'
-                          }}
-                        />
+                    <div key={idx} className="group relative">
+                      <div className={`aspect-video overflow-hidden rounded-[14px] border ${isDark ? 'border-purple-500/20' : 'border-gray-200'}`}>
+                        <FramedImage media={url} alt="" className="h-full w-full" fallbackTransform={{ fit: 'cover' }} />
                       </div>
-                      {idx === 0 && (
-                        <span className={`absolute top-1.5 left-1.5 text-[8px] font-bold px-1.5 py-0.5 rounded-md ${isDark ? 'bg-cyan-400/25 text-cyan-200' : 'bg-violet-100 text-violet-700'}`}>
-                          HERO
-                        </span>
-                      )}
-                      <div className={`absolute inset-0 rounded-xl flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'bg-black/60' : 'bg-white/70'}`}>
-                        {idx > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => moveGalleryImage(idx, -1)}
-                            className={`text-[10px] px-2 py-1 rounded-lg ${isDark ? 'bg-purple-500/30 text-white' : 'bg-violet-100 text-violet-700'}`}
-                          >
-                            ◀
-                          </button>
-                        )}
-                        {idx < (form.gallery || []).length - 1 && (
-                          <button
-                            type="button"
-                            onClick={() => moveGalleryImage(idx, 1)}
-                            className={`text-[10px] px-2 py-1 rounded-lg ${isDark ? 'bg-purple-500/30 text-white' : 'bg-violet-100 text-violet-700'}`}
-                          >
-                            ▶
-                          </button>
-                        )}
-                        <button type="button" onClick={() => removeGalleryImage(idx)} className="text-[10px] px-2 py-1 rounded-lg bg-red-500/40 text-white">
-                          ✕
-                        </button>
+                      {idx === 0 ? <span className={`absolute left-1.5 top-1.5 rounded-md px-1.5 py-0.5 text-[8px] font-bold ${isDark ? 'bg-cyan-400/25 text-cyan-200' : 'bg-violet-100 text-violet-700'}`}>HERO</span> : null}
+                      <div className={`absolute inset-0 flex flex-wrap content-start items-start justify-start gap-1.5 rounded-[14px] p-1.5 opacity-0 transition-opacity group-hover:opacity-100 ${isDark ? 'bg-black/60' : 'bg-white/70'}`}>
+                        <button type="button" onClick={() => setActiveGalleryIndex(idx)} className={`rounded-lg px-2.5 py-1 text-[10px] font-semibold ${isDark ? 'bg-cyan-500/25 text-white' : 'bg-violet-100 text-violet-700'}`}>Frame</button>
+                        {idx > 0 ? <button type="button" onClick={() => moveGalleryImage(idx, -1)} className={`flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-bold ${isDark ? 'bg-purple-500/30 text-white' : 'bg-violet-100 text-violet-700'}`}>{'<'}</button> : null}
+                        {idx < (form.gallery || []).length - 1 ? <button type="button" onClick={() => moveGalleryImage(idx, 1)} className={`flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-bold ${isDark ? 'bg-purple-500/30 text-white' : 'bg-violet-100 text-violet-700'}`}>{'>'}</button> : null}
+                        <button type="button" onClick={() => removeGalleryImage(idx)} className="ml-auto flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/75 text-[11px] font-bold text-white">x</button>
                       </div>
                     </div>
                   ))}
 
-                  <ImageUploader compact onChange={addGalleryImage} folder="products" />
+                  <ImageUploader
+                    compact
+                    onChange={addGalleryImage}
+                    folder="products"
+                    frameAspect={16 / 10}
+                    defaultFit="cover"
+                    frameTitle="Adjust Product Image"
+                    frameHint="Choose what stays visible inside product cards and previews."
+                    previewAspectClass="aspect-video"
+                    renderFrameContextPreview={media =>
+                      renderProductPreview({
+                        heroImage: media,
+                        gallery: media ? [media, ...(previewProduct.gallery || []).filter(item => item !== media)] : previewProduct.gallery,
+                      })
+                    }
+                    frameContextTitle="Product Card Result"
+                    frameContextHint="Inspect the real storefront card result while you adjust the frame."
+                  />
                 </div>
+              </AdminEditorSection>
 
-                <p className={`text-[11px] ${sub}`}>Total: {(form.gallery || []).length} image(s). First image = Hero.</p>
-              </div>
-            )}
+              <AdminEditorSection title="Video" hint="Upload the optional hover-preview video and frame it against the actual product card output.">
+                <VideoUploader
+                  label="Product Video"
+                  value={form.videoUrl || ''}
+                  onChange={url => setForm((f: any) => ({ ...f, videoUrl: url }))}
+                  onRemove={() => setForm((f: any) => ({ ...f, videoUrl: '' }))}
+                  folder="products"
+                  frameAspect={16 / 10}
+                  defaultFit="cover"
+                  frameTitle="Adjust Product Video"
+                  frameHint="Choose what stays visible inside product previews."
+                  renderFrameContextPreview={media => renderProductPreview({ videoUrl: media })}
+                  frameContextTitle="Product Card Result"
+                  frameContextHint="Inspect the real storefront card result while you adjust the frame."
+                />
+              </AdminEditorSection>
+            </>
+          )}
 
-            {/* ═══ TAB: OPTIONS ═══ */}
-            {tab === 'options' && (
-              <div className="space-y-5">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <label className={`text-[12px] font-medium ${sub}`}>Quick Options</label>
-                    <button
-                      onClick={addOption}
-                      className={`text-[11px] font-semibold px-3 py-1 rounded-lg border ${isDark ? 'border-prism-violet/30 bg-prism-violet/15 text-prism-violet' : 'border-violet-200 bg-violet-50 text-violet-700'}`}
-                    >
-                      + Add Option
-                    </button>
+          {tab === 'options' && (
+            <>
+              <AdminEditorSection title="Quick Options" hint="Keep short labels and comma-separated values so the setup remains compact and scannable.">
+                <div className="mb-1 flex items-center justify-between">
+                  <label className={`text-[12px] font-medium ${sub}`}>Quick Options</label>
+                  <button
+                    onClick={addOption}
+                    className={`rounded-lg border px-3 py-1 text-[11px] font-semibold ${isDark ? 'border-prism-violet/30 bg-prism-violet/15 text-prism-violet' : 'border-violet-200 bg-violet-50 text-violet-700'}`}
+                  >
+                    + Add Option
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {(form.quickOptions || []).map((option: any, idx: number) => (
+                    <div key={idx} className={`flex flex-col gap-2 rounded-[16px] p-2.5 sm:flex-row sm:items-center ${soft2}`}>
+                      <input value={option.label} onChange={e => updateOption(idx, 'label', e.target.value)} className="form-field !py-2 !text-xs flex-1" placeholder="Label (e.g. Bikes)" />
+                      <input value={option.values?.join(', ') || ''} onChange={e => updateOption(idx, 'values', e.target.value)} className="form-field !py-2 !text-xs flex-[2]" placeholder="Values: 1, 2, 3, 4" />
+                      <button onClick={() => removeOption(idx)} className={`rounded-lg border px-3 py-2 text-[11px] font-semibold ${isDark ? 'border-red-400/20 bg-red-400/10 text-red-200/90' : 'border-red-200 bg-red-50 text-red-700'}`}>
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </AdminEditorSection>
+
+              <AdminEditorSection title="Feature Columns" hint="These feed the detailed product view. Keep each line focused so both columns scan well.">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  <div>
+                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Features - Left Column (one per line)</label>
+                    <textarea value={typeof form.featuresLeft === 'string' ? form.featuresLeft : (form.features?.left || []).join('\n')} onChange={e => setForm({ ...form, featuresLeft: e.target.value })} className="form-field resize-none" rows={6} />
                   </div>
-                  <div className="space-y-2">
-                    {(form.quickOptions || []).map((opt: any, idx: number) => (
-                      <div key={idx} className={`flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-xl ${soft2}`}>
-                        <input value={opt.label} onChange={e => updateOption(idx, 'label', e.target.value)} className="form-field !py-2 !text-xs flex-1" placeholder="Label (e.g. Bikes)" />
-                        <input value={opt.values?.join(', ') || ''} onChange={e => updateOption(idx, 'values', e.target.value)} className="form-field !py-2 !text-xs flex-[2]" placeholder="Values: 1, 2, 3, 4" />
-                        <button
-                          onClick={() => removeOption(idx)}
-                          className={`px-3 py-2 rounded-lg text-[11px] font-semibold border ${isDark ? 'border-red-400/20 bg-red-400/10 text-red-200/90' : 'border-red-200 bg-red-50 text-red-700'}`}
-                        >
-                          Remove
-                        </button>
+
+                  <div>
+                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Features - Right Column (one per line)</label>
+                    <textarea value={typeof form.featuresRight === 'string' ? form.featuresRight : (form.features?.right || []).join('\n')} onChange={e => setForm({ ...form, featuresRight: e.target.value })} className="form-field resize-none" rows={6} />
+                  </div>
+                </div>
+              </AdminEditorSection>
+            </>
+          )}
+
+          {tab === 'settings' && (
+            <>
+              <AdminEditorSection
+                title="Pricing & Commerce"
+                >
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <div>
+                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Day Price</label>
+                    <input
+                      type="number"
+                      value={form.rentalPricePerDay || 0}
+                      onChange={e => setForm({ ...form, rentalPricePerDay: e.target.value })}
+                      className="form-field"
+                    />
+                  </div>
+                  <div>
+                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Currency</label>
+                    <input
+                      value={form.currency || 'JOD'}
+                      onChange={e => setForm({ ...form, currency: e.target.value.toUpperCase() })}
+                      className="form-field"
+                      placeholder="JOD"
+                      maxLength={6}
+                    />
+                  <p className={`mt-1 text-[11px] ${isDark ? 'text-purple-200/50' : 'text-gray-400'}`}></p>
+                  </div>
+
+                  <div className={`rounded-[18px] p-4 sm:col-span-2 xl:col-span-1 ${soft2}`}>
+                    <p className={`text-[11px] font-mono uppercase tracking-[0.2em] ${sub}`}>Pricing Behavior</p>
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={form.showPrice !== false}
+                          onChange={e => setForm({ ...form, showPrice: e.target.checked })}
+                          className="h-4 w-4 rounded accent-violet-400"
+                        />
+                        <span className={cn('text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>Show pricing publicly</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={form.rentalEnabled !== false}
+                          onChange={e => setForm({ ...form, rentalEnabled: e.target.checked })}
+                          className="h-4 w-4 rounded accent-violet-400"
+                        />
+                        <span className={cn('text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>Available for rental</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={form.saleEnabled !== false}
+                          onChange={e => setForm({ ...form, saleEnabled: e.target.checked })}
+                          className="h-4 w-4 rounded accent-violet-400"
+                        />
+                        <span className={cn('text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>Available for purchase quote</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </AdminEditorSection>
+
+              <AdminEditorSection
+                title="Rental & Inventory"
+                hint="Stock and buffer windows live here so availability checks and request approval stay aligned."
+              >
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <div>
+                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Total Stock</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={form.stockTotal ?? 0}
+                      onChange={e => setForm({ ...form, stockTotal: e.target.value })}
+                      className="form-field"
+                    />
+                  </div>
+                  <div>
+                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Active Stock</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={form.stockActive ?? 0}
+                      onChange={e => setForm({ ...form, stockActive: e.target.value })}
+                      className="form-field"
+                    />
+                    <p className={`mt-1 text-[11px] ${isDark ? 'text-purple-200/50' : 'text-gray-400'}`}>Must stay less than or equal to total stock.</p>
+                  </div>
+                  <div>
+                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Minimum Rental Days</label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={form.minimumRentalDays ?? 1}
+                      onChange={e => setForm({ ...form, minimumRentalDays: e.target.value })}
+                      className="form-field"
+                    />
+                  </div>
+                  <div>
+                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Buffer Before (days)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={form.bufferBeforeDays ?? 0}
+                      onChange={e => setForm({ ...form, bufferBeforeDays: e.target.value })}
+                      className="form-field"
+                    />
+                  </div>
+                  <div>
+                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Buffer After (days)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={form.bufferAfterDays ?? 0}
+                      onChange={e => setForm({ ...form, bufferAfterDays: e.target.value })}
+                      className="form-field"
+                    />
+                  </div>
+                  <div className={`rounded-[18px] p-4 ${soft2}`}>
+                    <p className={`text-[11px] font-mono uppercase tracking-[0.2em] ${sub}`}>Availability Summary</p>
+                    <div className="mt-3 space-y-2 text-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className={sub}>Storefront rental status</span>
+                        <span className={cn('font-semibold', form.rentalEnabled !== false ? txt : isDark ? 'text-red-200' : 'text-red-600')}>
+                          {form.rentalEnabled !== false ? 'Enabled' : 'Disabled'}
+                        </span>
                       </div>
-                    ))}
+                      <div className="flex items-center justify-between gap-3">
+                        <span className={sub}>Quote request status</span>
+                        <span className={cn('font-semibold', form.saleEnabled !== false ? txt : isDark ? 'text-red-200' : 'text-red-600')}>
+                          {form.saleEnabled !== false ? 'Enabled' : 'Disabled'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className={sub}>Available units today</span>
+                        <span className={txt}>{Math.max(0, Number(form.stockActive) || 0)}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Features - Left Column (one per line)</label>
-                  <textarea
-                    value={typeof form.featuresLeft === 'string' ? form.featuresLeft : (form.features?.left || []).join('\n')}
-                    onChange={e => setForm({ ...form, featuresLeft: e.target.value })}
-                    className="form-field resize-none"
-                    rows={5}
-                  />
-                </div>
-                <div>
-                  <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Features - Right Column (one per line)</label>
-                  <textarea
-                    value={typeof form.featuresRight === 'string' ? form.featuresRight : (form.features?.right || []).join('\n')}
-                    onChange={e => setForm({ ...form, featuresRight: e.target.value })}
-                    className="form-field resize-none"
-                    rows={5}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <button onClick={save} disabled={saving} className="btn-primary !rounded-xl !px-6 !py-2.5 disabled:opacity-50">
-              {saving ? '⏳ Saving…' : edit ? 'Save Changes' : 'Add Product'}
-            </button>
-            <button onClick={() => setModal(false)} className="btn-outline !rounded-xl !px-6 !py-2.5">
-              Cancel
-            </button>
-            <div className="sm:ml-auto text-[11px] leading-4">
-              <p className={sub}>
-                Hero image: <span className={txt}>{(form.gallery || [])[0] ? 'Gallery #1' : 'None'}</span>
-                {' · '}Video: <span className={txt}>{form.videoUrl ? '✓ Uploaded' : 'None'}</span>
-              </p>
-              <p className={isDark ? 'text-purple-200/45' : 'text-gray-400'}>Save will auto-generate slug if empty.</p>
-            </div>
-          </div>
-        </div>
+              </AdminEditorSection>
+            </>
+          )}
+        </AdminEditorWorkspace>
       </Modal>
 
-      {/* Delete confirm */}
-      <Modal open={!!confirm} onClose={() => setConfirm(null)} title="Delete Product?">
-        <p className={`text-sm mb-5 ${sub}`}>This will permanently remove the product and all its data.</p>
-        <div className="flex gap-3">
-          <button onClick={() => del(confirm!)} className="btn-danger !px-5 !py-2.5">
-            Delete
-          </button>
-          <button onClick={() => setConfirm(null)} className="btn-outline !rounded-xl !px-5 !py-2.5">
-            Cancel
-          </button>
-        </div>
-      </Modal>
+      <MediaPlacementModal
+        open={activeGalleryIndex !== null}
+        media={activeGalleryIndex !== null ? (form.gallery || [])[activeGalleryIndex] : ''}
+        title="Adjust Product Image"
+        type="image"
+        aspectRatio={16 / 10}
+        defaultFit="cover"
+        hint="Choose what stays visible inside product cards and previews."
+        contextPreview={media =>
+          renderProductPreview({
+            heroImage: media,
+            gallery:
+              activeGalleryIndex === null
+                ? previewProduct.gallery
+                : (previewProduct.gallery || []).map((item, index) => (index === activeGalleryIndex ? media : item)),
+          })
+        }
+        contextPreviewTitle="Product Card Result"
+        contextPreviewHint="Refine the image while seeing the real storefront card result on the right."
+        onApply={media => {
+          if (activeGalleryIndex === null) return
+          updateGalleryFrame(activeGalleryIndex, media)
+        }}
+        onClose={() => setActiveGalleryIndex(null)}
+      />
     </div>
   )
 }

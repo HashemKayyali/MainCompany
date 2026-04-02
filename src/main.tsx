@@ -6,6 +6,8 @@ import { SessionProvider } from './contexts/SessionContext'
 import { AuthProvider } from './contexts/AuthContext'
 import { UserProvider } from './contexts/UserContext'
 import { DataProvider } from './contexts/DataContext'
+import { RentalCartProvider } from './contexts/RentalCartContext'
+import { PurchaseQuoteProvider } from './contexts/PurchaseQuoteContext'
 import { DialogProvider } from './contexts/DialogContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import { ToastProvider } from './contexts/ToastContext'
@@ -24,7 +26,11 @@ const AppTree = (
           <AuthProvider>
             <UserProvider>
               <DataProvider>
-                <RouterProvider router={router} />
+                <RentalCartProvider>
+                  <PurchaseQuoteProvider>
+                    <RouterProvider router={router} future={{ v7_startTransition: true }} />
+                  </PurchaseQuoteProvider>
+                </RentalCartProvider>
               </DataProvider>
             </UserProvider>
           </AuthProvider>

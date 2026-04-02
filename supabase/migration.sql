@@ -23,7 +23,7 @@ ALTER TABLE public.products ADD COLUMN IF NOT EXISTS quick_options JSONB DEFAULT
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS notes TEXT[] DEFAULT '{}';
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS features_left TEXT[] DEFAULT '{}';
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS features_right TEXT[] DEFAULT '{}';
-ALTER TABLE public.products ADD COLUMN IF NOT EXISTS rental_price_per_event NUMERIC(10,2) DEFAULT 0;
+ALTER TABLE public.products DROP COLUMN IF EXISTS rental_price_per_event;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'JOD';
 
 -- ── 3. Customers: add slug, category ──
@@ -88,6 +88,9 @@ USING (public.is_admin());
 -- ── 6. Profiles: add phone and email for user data ──
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT DEFAULT '';
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone TEXT DEFAULT '';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_style TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_seed TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_options JSONB;
 
 -- Update the trigger to also save email
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -103,7 +106,31 @@ BEGIN
     'user'
   )
   ON CONFLICT (id) DO UPDATE SET
-    email = coalesce(new.email, '');
+    email = coalesce(new.email, ''),
+    avatar_style = coalesce(nullif(new.raw_user_meta_data->>'avatarStyle', ''), public.profiles.avatar_style),
+    avatar_seed = coalesce(nullif(new.raw_user_meta_data->>'avatarSeed', ''), public.profiles.avatar_seed),
+    avatar_options = coalesce(
+      CASE
+        WHEN new.raw_user_meta_data ? 'avatarOptions'
+          THEN (new.raw_user_meta_data->'avatarOptions')::jsonb
+        ELSE NULL
+      END,
+      public.profiles.avatar_options
+    );
+
+  UPDATE public.profiles
+  SET
+    avatar_style = coalesce(nullif(new.raw_user_meta_data->>'avatarStyle', ''), avatar_style),
+    avatar_seed = coalesce(nullif(new.raw_user_meta_data->>'avatarSeed', ''), avatar_seed),
+    avatar_options = coalesce(
+      CASE
+        WHEN new.raw_user_meta_data ? 'avatarOptions'
+          THEN (new.raw_user_meta_data->'avatarOptions')::jsonb
+        ELSE NULL
+      END,
+      avatar_options
+    )
+  WHERE id = new.id;
   RETURN new;
 END;
 $$;

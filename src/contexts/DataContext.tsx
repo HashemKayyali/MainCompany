@@ -21,6 +21,7 @@ import { DEFAULT_PRODUCTS, DEFAULT_PARTS, DEFAULT_CUSTOMERS, DEFAULT_CATEGORIES 
 import { useSession } from './SessionContext'
 import { useUser } from './UserContext'
 import { useToast } from './ToastContext'
+import { sortProductsForDisplay } from '../utils/product-order'
 
 interface DataCtx {
   products: Product[]
@@ -73,7 +74,7 @@ function applyDefaults(
   setCategories: (v: Category[]) => void,
   setGalleryAlbums: (v: GalleryAlbum[]) => void
 ) {
-  setProducts(DEFAULT_PRODUCTS)
+  setProducts(sortProductsForDisplay(DEFAULT_PRODUCTS))
   setParts(DEFAULT_PARTS)
   setCustomers(DEFAULT_CUSTOMERS)
   setCategories(DEFAULT_CATEGORIES)
@@ -128,7 +129,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     ])
 
     safeSet(() => {
-      setProducts(p)
+      setProducts(sortProductsForDisplay(p))
       setParts(pa)
       setCustomers(cu)
       setCategories(ca)
@@ -219,7 +220,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addProduct = async (p: Product) => {
     try {
       const created = await productsApi.create(p)
-      safeSet(() => setProducts(prev => [...prev, created]))
+      safeSet(() => setProducts(prev => sortProductsForDisplay([...prev, created])))
       writeLog('create', 'product', created.slug, created.name || created.slug)
       toast(`${created.name} added`, 'success')
     } catch (err: any) {
@@ -231,7 +232,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const updateProduct = async (slug: string, u: Partial<Product>) => {
     try {
       const updated = await productsApi.update(slug, u)
-      safeSet(() => setProducts(prev => prev.map(p => (p.slug === slug ? updated : p))))
+      safeSet(() =>
+        setProducts(prev =>
+          sortProductsForDisplay(prev.map(p => (p.slug === slug ? updated : p)))
+        )
+      )
       writeLog('update', 'product', slug, updated.name || slug)
       toast(`${updated.name} updated`, 'success')
     } catch (err: any) {
@@ -412,7 +417,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const getProductBySlug = (s: string) => products.find(p => p.slug === s)
   const getPartsByProduct = (s: string) => parts.filter(p => p.productSlug === s)
   const getProductsByCategory = (id: string) => products.filter(p => p.categoryId === id)
-  const featuredProducts = products.filter(p => p.featured)
+  const featuredProducts = sortProductsForDisplay(products.filter(p => p.featured))
   const allCategoryTags = Array.from(new Set(products.flatMap(p => p.categoryTags)))
 
   const resetToDefaults = () => {

@@ -1,60 +1,332 @@
-import { useMemo } from 'react'
+import { useMemo, type CSSProperties } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { usePerfMode } from '../../hooks/usePerfMode'
 
 type Props = {
-  /** default: fixed */
   position?: 'fixed' | 'absolute'
   className?: string
 }
+
+type Layer = {
+  className: string
+  style: CSSProperties
+}
+
+const darkGridStyle: CSSProperties = {
+  backgroundImage:
+    'linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px)',
+  backgroundSize: '152px 152px',
+}
+
+const darkMeshStyle: CSSProperties = {
+  backgroundImage:
+    'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.065) 1px, transparent 0)',
+  backgroundSize: '24px 24px',
+}
+
+const darkScanStyle: CSSProperties = {
+  backgroundImage:
+    'linear-gradient(180deg, rgba(255,255,255,0.012), transparent 20%, transparent 82%, rgba(255,255,255,0.008)), linear-gradient(90deg, rgba(34,211,238,0.018), transparent 38%, rgba(236,72,153,0.016) 68%, transparent 100%)',
+  backgroundSize: '100% 8px, 100% 100%',
+  mixBlendMode: 'soft-light',
+}
+
+const lightGridStyle: CSSProperties = {
+  backgroundImage:
+    'linear-gradient(rgba(124,58,237,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.045) 1px, transparent 1px)',
+  backgroundSize: '152px 152px',
+}
+
+const atmosphereFields: Layer[] = [
+  {
+    className: 'absolute inset-x-[-18%] top-[0%] h-[30%] blur-[70px] ambient-drift',
+    style: {
+      background:
+        'radial-gradient(52% 80% at 18% 20%, rgba(124,58,237,0.28) 0%, rgba(124,58,237,0.10) 32%, transparent 68%), radial-gradient(36% 64% at 78% 18%, rgba(34,211,238,0.16) 0%, transparent 64%), radial-gradient(40% 60% at 50% 56%, rgba(236,72,153,0.14) 0%, transparent 66%)',
+      mixBlendMode: 'screen',
+      opacity: 0.62,
+      animationDuration: '28s',
+    },
+  },
+  {
+    className: 'absolute inset-x-[-20%] top-[31%] h-[32%] blur-[74px] ambient-drift-reverse',
+    style: {
+      background:
+        'radial-gradient(50% 78% at 20% 34%, rgba(236,72,153,0.15) 0%, rgba(236,72,153,0.06) 32%, transparent 68%), radial-gradient(54% 74% at 78% 44%, rgba(124,58,237,0.22) 0%, rgba(124,58,237,0.07) 34%, transparent 70%), radial-gradient(36% 58% at 58% 16%, rgba(34,211,238,0.14) 0%, transparent 66%)',
+      mixBlendMode: 'screen',
+      opacity: 0.54,
+      animationDuration: '30s',
+      animationDelay: '-8s',
+    },
+  },
+  {
+    className: 'absolute inset-x-[-16%] top-[66%] h-[30%] blur-[70px] ambient-drift',
+    style: {
+      background:
+        'radial-gradient(46% 74% at 22% 26%, rgba(34,211,238,0.14) 0%, transparent 64%), radial-gradient(52% 82% at 74% 40%, rgba(124,58,237,0.22) 0%, rgba(124,58,237,0.07) 34%, transparent 70%), radial-gradient(40% 64% at 48% 82%, rgba(236,72,153,0.14) 0%, transparent 68%)',
+      mixBlendMode: 'screen',
+      opacity: 0.5,
+      animationDuration: '32s',
+      animationDelay: '-15s',
+    },
+  },
+]
+
+const lightRibbons: Layer[] = [
+  {
+    className: 'absolute inset-x-[-10%] top-[18%] h-[11rem] blur-[38px] ambient-breathe',
+    style: {
+      background:
+        'linear-gradient(90deg, transparent 0%, rgba(124,58,237,0.15) 18%, rgba(236,72,153,0.18) 42%, rgba(34,211,238,0.13) 66%, transparent 88%)',
+      mixBlendMode: 'screen',
+      opacity: 0.22,
+      transform: 'rotate(-7deg)',
+      animationDuration: '15s',
+    },
+  },
+  {
+    className: 'absolute inset-x-[-12%] top-[49%] h-[12rem] blur-[42px] ambient-breathe',
+    style: {
+      background:
+        'linear-gradient(90deg, transparent 4%, rgba(34,211,238,0.12) 22%, rgba(124,58,237,0.16) 50%, rgba(236,72,153,0.13) 72%, transparent 94%)',
+      mixBlendMode: 'screen',
+      opacity: 0.17,
+      transform: 'rotate(5deg)',
+      animationDuration: '18s',
+      animationDelay: '-4s',
+    },
+  },
+  {
+    className: 'absolute inset-x-[-8%] top-[82%] h-[10rem] blur-[40px] ambient-breathe',
+    style: {
+      background:
+        'linear-gradient(90deg, transparent 10%, rgba(236,72,153,0.13) 32%, rgba(124,58,237,0.16) 52%, rgba(34,211,238,0.11) 70%, transparent 92%)',
+      mixBlendMode: 'screen',
+      opacity: 0.15,
+      transform: 'rotate(-4deg)',
+      animationDuration: '16s',
+      animationDelay: '-8s',
+    },
+  },
+]
+
+const ringFields: Layer[] = [
+  {
+    className: 'absolute -left-[26%] top-[1%] h-[54rem] w-[54rem] rounded-full ambient-drift',
+    style: {
+      background:
+        'radial-gradient(circle at center, transparent 60%, rgba(124,58,237,0.16) 62%, rgba(124,58,237,0.05) 66%, transparent 70%)',
+      mixBlendMode: 'screen',
+      opacity: 0.28,
+      filter: 'blur(1px)',
+      animationDuration: '32s',
+    },
+  },
+  {
+    className: 'absolute right-[-22%] top-[34%] h-[48rem] w-[48rem] rounded-full ambient-drift-reverse',
+    style: {
+      background:
+        'radial-gradient(circle at center, transparent 61%, rgba(34,211,238,0.12) 63%, rgba(34,211,238,0.04) 67%, transparent 71%)',
+      mixBlendMode: 'screen',
+      opacity: 0.24,
+      filter: 'blur(1px)',
+      animationDuration: '36s',
+      animationDelay: '-14s',
+    },
+  },
+  {
+    className: 'absolute left-[2%] top-[70%] h-[44rem] w-[44rem] rounded-full ambient-drift',
+    style: {
+      background:
+        'radial-gradient(circle at center, transparent 60%, rgba(236,72,153,0.12) 62%, rgba(124,58,237,0.05) 66%, transparent 71%)',
+      mixBlendMode: 'screen',
+      opacity: 0.2,
+      filter: 'blur(1px)',
+      animationDuration: '34s',
+      animationDelay: '-6s',
+    },
+  },
+]
+
+const sculptForms: Layer[] = [
+  {
+    className: 'absolute -left-[10%] top-[8%] h-[28rem] w-[18rem] ambient-drift',
+    style: {
+      borderRadius: '42% 58% 46% 54% / 36% 44% 56% 64%',
+      background:
+        'linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(124,58,237,0.1) 22%, rgba(9,11,24,0.28) 62%, rgba(236,72,153,0.08) 100%)',
+      border: '1px solid rgba(255,255,255,0.05)',
+      boxShadow:
+        'inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -18px 34px rgba(2,6,18,0.18), 0 32px 72px rgba(2,6,18,0.24)',
+      transform: 'rotate(-18deg)',
+      opacity: 0.18,
+      filter: 'blur(0.6px)',
+      animationDuration: '31s',
+    },
+  },
+  {
+    className: 'absolute right-[-8%] top-[28%] h-[24rem] w-[34rem] ambient-drift-reverse',
+    style: {
+      borderRadius: '58% 42% 52% 48% / 48% 58% 42% 52%',
+      background:
+        'linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(34,211,238,0.08) 26%, rgba(8,10,20,0.22) 60%, rgba(124,58,237,0.08) 100%)',
+      border: '1px solid rgba(255,255,255,0.04)',
+      boxShadow:
+        'inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -18px 34px rgba(2,6,18,0.18), 0 30px 70px rgba(2,6,18,0.22)',
+      transform: 'rotate(16deg)',
+      opacity: 0.14,
+      filter: 'blur(0.8px)',
+      animationDuration: '34s',
+      animationDelay: '-9s',
+    },
+  },
+  {
+    className: 'absolute left-[24%] top-[72%] h-[18rem] w-[16rem] ambient-drift',
+    style: {
+      borderRadius: '46% 54% 60% 40% / 40% 42% 58% 60%',
+      background:
+        'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(236,72,153,0.08) 22%, rgba(8,10,20,0.24) 64%, rgba(124,58,237,0.08) 100%)',
+      border: '1px solid rgba(255,255,255,0.04)',
+      boxShadow:
+        'inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -14px 28px rgba(2,6,18,0.16), 0 22px 56px rgba(2,6,18,0.18)',
+      transform: 'rotate(10deg)',
+      opacity: 0.1,
+      filter: 'blur(0.5px)',
+      animationDuration: '29s',
+      animationDelay: '-6s',
+    },
+  },
+]
+
+const lightColumns: Layer[] = [
+  {
+    className: 'absolute left-[5%] top-[9%] h-[34%] w-[24%] blur-[68px] ambient-drift',
+    style: {
+      background:
+        'linear-gradient(180deg, rgba(124,58,237,0.32), rgba(124,58,237,0.05) 72%)',
+      mixBlendMode: 'screen',
+      opacity: 0.16,
+      transform: 'rotate(12deg)',
+      animationDuration: '26s',
+    },
+  },
+  {
+    className: 'absolute right-[4%] top-[42%] h-[32%] w-[22%] blur-[72px] ambient-drift-reverse',
+    style: {
+      background:
+        'linear-gradient(180deg, rgba(34,211,238,0.22), rgba(34,211,238,0.03) 72%)',
+      mixBlendMode: 'screen',
+      opacity: 0.13,
+      transform: 'rotate(-13deg)',
+      animationDuration: '28s',
+      animationDelay: '-11s',
+    },
+  },
+  {
+    className: 'absolute left-[22%] top-[73%] h-[24%] w-[20%] blur-[66px] ambient-drift',
+    style: {
+      background:
+        'linear-gradient(180deg, rgba(236,72,153,0.20), rgba(236,72,153,0.03) 74%)',
+      mixBlendMode: 'screen',
+      opacity: 0.11,
+      transform: 'rotate(9deg)',
+      animationDuration: '29s',
+      animationDelay: '-5s',
+    },
+  },
+]
+
+const lightModeFields: Layer[] = [
+  {
+    className: 'absolute inset-x-[-10%] top-[0%] h-[34%] blur-[132px]',
+    style: {
+      background:
+        'radial-gradient(54% 78% at 18% 16%, rgba(124,58,237,0.18) 0%, transparent 74%), radial-gradient(42% 64% at 78% 20%, rgba(34,211,238,0.12) 0%, transparent 68%)',
+    },
+  },
+  {
+    className: 'absolute inset-x-[-10%] top-[42%] h-[30%] blur-[128px]',
+    style: {
+      background:
+        'radial-gradient(48% 72% at 30% 26%, rgba(236,72,153,0.12) 0%, transparent 72%), radial-gradient(50% 76% at 74% 42%, rgba(124,58,237,0.14) 0%, transparent 72%)',
+    },
+  },
+]
 
 export default function AnimatedBackground({ position = 'fixed', className = '' }: Props) {
   const { isDark } = useTheme()
   const { perfLow } = usePerfMode()
 
-  // ⭐️ Static stars map (no animation)
-  const starMap = useMemo(() => {
-    const stars = [
-      [6, 12, 1.2, 0.95],[12, 28, 1.0, 0.75],[18, 8, 1.6, 0.9],[22, 42, 1.1, 0.55],
-      [28, 16, 1.0, 0.55],[33, 30, 1.4, 0.8],[38, 12, 1.1, 0.65],[41, 55, 1.0, 0.55],
-      [46, 18, 2.0, 0.9],[52, 10, 1.0, 0.55],[57, 34, 1.2, 0.65],[61, 20, 1.0, 0.55],
-      [66, 8, 1.6, 0.9],[70, 28, 1.1, 0.6],[74, 46, 1.2, 0.65],[78, 14, 1.0, 0.55],
-      [83, 36, 1.4, 0.75],[88, 20, 1.0, 0.55],[92, 10, 1.8, 0.9],[95, 48, 1.0, 0.55],
-      [9, 58, 1.0, 0.5],[16, 74, 1.2, 0.6],[24, 86, 1.0, 0.5],[32, 66, 1.6, 0.75],
-      [40, 78, 1.0, 0.5],[48, 92, 1.1, 0.55],[58, 72, 1.3, 0.65],[68, 86, 1.0, 0.5],
-      [76, 64, 1.2, 0.6],[86, 82, 1.0, 0.5],[94, 70, 1.5, 0.7],
+  const rootPos = position === 'fixed' ? 'fixed inset-0' : 'absolute inset-0'
 
-      // extra tiny stars for richer field (still static)
-      [5, 85, 0.9, 0.45],[11, 50, 0.8, 0.35],[15, 18, 0.9, 0.4],[19, 60, 0.8, 0.35],
-      [27, 54, 0.9, 0.42],[35, 90, 0.8, 0.32],[43, 6, 0.9, 0.38],[51, 58, 0.8, 0.32],
-      [63, 44, 0.9, 0.4],[72, 6, 0.8, 0.32],[81, 92, 0.9, 0.42],[90, 36, 0.8, 0.3],
-    ] as Array<[number, number, number, number]>
+  const dustPattern = useMemo(() => {
+    const specks: Array<[number, number, number, string, number]> = [
+      [4, 6, 1.2, '255,255,255', 0.08],
+      [9, 12, 1.2, '167,139,250', 0.08],
+      [16, 9, 1.4, '255,255,255', 0.1],
+      [24, 16, 1.1, '34,211,238', 0.07],
+      [31, 7, 1.2, '236,72,153', 0.07],
+      [42, 14, 1.3, '255,255,255', 0.08],
+      [55, 8, 1.1, '167,139,250', 0.08],
+      [68, 12, 1.4, '34,211,238', 0.08],
+      [78, 7, 1.2, '255,255,255', 0.08],
+      [92, 11, 1.1, '236,72,153', 0.07],
+      [7, 24, 1.0, '255,255,255', 0.07],
+      [19, 28, 1.2, '167,139,250', 0.08],
+      [28, 34, 1.1, '255,255,255', 0.07],
+      [44, 30, 1.3, '34,211,238', 0.07],
+      [57, 26, 1.1, '236,72,153', 0.07],
+      [71, 33, 1.3, '255,255,255', 0.08],
+      [83, 28, 1.1, '167,139,250', 0.07],
+      [94, 35, 1.0, '255,255,255', 0.06],
+      [6, 46, 1.2, '34,211,238', 0.06],
+      [15, 52, 1.1, '255,255,255', 0.07],
+      [29, 49, 1.4, '236,72,153', 0.07],
+      [41, 56, 1.1, '255,255,255', 0.07],
+      [52, 45, 1.2, '167,139,250', 0.08],
+      [64, 54, 1.1, '34,211,238', 0.06],
+      [76, 48, 1.3, '255,255,255', 0.08],
+      [88, 57, 1.1, '236,72,153', 0.06],
+      [10, 67, 1.0, '255,255,255', 0.06],
+      [21, 72, 1.2, '167,139,250', 0.07],
+      [34, 69, 1.3, '34,211,238', 0.06],
+      [48, 78, 1.1, '255,255,255', 0.07],
+      [59, 71, 1.0, '236,72,153', 0.06],
+      [72, 76, 1.2, '255,255,255', 0.07],
+      [86, 70, 1.1, '167,139,250', 0.07],
+      [95, 82, 1.0, '34,211,238', 0.05],
+      [8, 88, 1.2, '255,255,255', 0.06],
+      [23, 94, 1.1, '236,72,153', 0.06],
+      [39, 90, 1.2, '167,139,250', 0.07],
+      [58, 96, 1.1, '255,255,255', 0.07],
+      [73, 91, 1.3, '34,211,238', 0.06],
+      [87, 95, 1.1, '255,255,255', 0.06],
+    ]
 
-    return stars
-      .map(([x, y, s, o]) => `radial-gradient(${s}px ${s}px at ${x}% ${y}%, rgba(255,255,255,${o}), transparent 60%)`)
+    return specks
+      .map(
+        ([x, y, size, color, alpha]) =>
+          `radial-gradient(${size}px ${size}px at ${x}% ${y}%, rgba(${color},${alpha}), transparent 68%)`
+      )
       .join(', ')
   }, [])
 
-  const rootPos = position === 'fixed' ? 'fixed inset-0' : 'absolute inset-0'
-
-  /**
-   * PERF LOW: static + light
-   * - no grain overlay heavy layers
-   * - no animations
-   */
   if (perfLow) {
     if (!isDark) {
       return (
-        <div className={`${rootPos} pointer-events-none z-0 ${className}`}>
+        <div className={`${rootPos} pointer-events-none z-0 overflow-hidden ${className}`}>
           <div className="absolute inset-0 bg-[#f6f5ff]" />
-          <div className="absolute inset-0 dot-pattern opacity-50" />
+          <div className="absolute inset-0 opacity-45" style={lightGridStyle} />
+          {lightModeFields.map((layer, index) => (
+            <div key={index} className={layer.className} style={layer.style} />
+          ))}
           <div
-            className="absolute -top-[18%] left-[10%] w-[520px] h-[520px] rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 62%)' }}
-          />
-          <div
-            className="absolute -bottom-[18%] right-[8%] w-[520px] h-[520px] rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 62%)' }}
+            className="absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(circle at 50% 34%, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.24) 36%, rgba(245,243,255,0) 74%)',
+              opacity: 0.58,
+            }}
           />
         </div>
       )
@@ -62,171 +334,99 @@ export default function AnimatedBackground({ position = 'fixed', className = '' 
 
     return (
       <div className={`${rootPos} pointer-events-none z-0 overflow-hidden ${className}`}>
-        <div className="absolute inset-0 bg-void-950" />
-
-        <div
-          className="absolute -left-[12%] top-[10%] w-[140%] h-[70%]"
-          style={{
-            background:
-              'radial-gradient(900px 360px at 35% 45%, rgba(236,72,153,0.22) 0%, transparent 72%),' +
-              'radial-gradient(820px 320px at 60% 50%, rgba(124,58,237,0.20) 0%, transparent 74%),' +
-              'radial-gradient(700px 300px at 80% 52%, rgba(34,211,238,0.12) 0%, transparent 76%)',
-            opacity: 0.9,
-          }}
-        />
-
-        <div
-          className="absolute inset-0 opacity-70"
-          style={{
-            backgroundImage: starMap,
-            filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.04))',
-          }}
-        />
-
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,#03050d_0%,#070a16_34%,#050711_100%)]" />
+        {atmosphereFields.map((layer, index) => (
+          <div key={index} className={layer.className.replace(' ambient-drift', '').replace(' ambient-drift-reverse', '')} style={layer.style} />
+        ))}
+          <div className="absolute inset-0 opacity-[0.08]" style={darkGridStyle} />
+          <div className="absolute inset-0 opacity-[0.035]" style={darkMeshStyle} />
+          <div className="absolute inset-0 opacity-[0.1]" style={{ backgroundImage: dustPattern }} />
         <div
           className="absolute inset-0"
           style={{
             background:
-              'radial-gradient(circle at 50% 45%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.62) 70%, rgba(0,0,0,0.90) 100%)',
-            opacity: 0.95,
+                'radial-gradient(circle at 50% 10%, rgba(255,255,255,0.034) 0%, transparent 12%), radial-gradient(circle at 50% 46%, transparent 0%, rgba(3,7,18,0.06) 34%, rgba(2,6,12,0.8) 100%)',
           }}
         />
       </div>
     )
   }
 
-  /**
-   * LIGHT MODE: static dreamy nebula + dots
-   * (no animate-aurora, no grain animation)
-   */
   if (!isDark) {
     return (
       <div className={`${rootPos} pointer-events-none z-0 overflow-hidden ${className}`}>
         <div className="absolute inset-0 bg-[#f6f5ff]" />
-        <div className="absolute inset-0 dot-pattern opacity-55" />
-
-        <div
-          className="absolute -top-[16%] left-[10%] w-[780px] h-[780px] rounded-full blur-[170px]"
-          style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 62%)' }}
-        />
-        <div
-          className="absolute -bottom-[14%] right-[6%] w-[640px] h-[640px] rounded-full blur-[160px]"
-          style={{ background: 'radial-gradient(circle, rgba(236,72,153,0.14) 0%, transparent 64%)' }}
-        />
-        <div
-          className="absolute top-[34%] left-[58%] w-[420px] h-[420px] rounded-full blur-[140px]"
-          style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.12) 0%, transparent 66%)' }}
-        />
-
-        {/* subtle vignette */}
+        <div className="absolute inset-0 opacity-50" style={lightGridStyle} />
+        {lightModeFields.map((layer, index) => (
+          <div key={index} className={layer.className} style={layer.style} />
+        ))}
         <div
           className="absolute inset-0"
           style={{
             background:
-              'radial-gradient(circle at 50% 35%, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.25) 38%, rgba(245,243,255,0.00) 70%)',
-            opacity: 0.55,
+              'radial-gradient(circle at 50% 34%, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.26) 36%, rgba(245,243,255,0) 74%)',
+            opacity: 0.6,
           }}
         />
       </div>
     )
   }
 
-  /**
-   * DARK MODE: static space nebula + static stars
-   * - no orbit rings animation
-   * - no star-field moving layers
-   * - no floating nebula animation
-   */
   return (
     <div className={`${rootPos} pointer-events-none z-0 overflow-hidden ${className}`}>
-      <div className="absolute inset-0 bg-void-950" />
-
-      {/* Static star layer */}
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,#03050d_0%,#070a16_34%,#050711_100%)]" />
       <div
-        className="absolute inset-0 opacity-80"
+        className="absolute inset-0"
         style={{
-          backgroundImage: starMap,
-          filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.06))',
+          background:
+              'radial-gradient(circle at 50% -8%, rgba(255,255,255,0.03) 0%, transparent 14%), linear-gradient(180deg, rgba(255,255,255,0.01), transparent 12%, transparent 88%, rgba(255,255,255,0.008))',
         }}
       />
 
-      {/* Nebula (static) */}
-      <div className="absolute inset-0">
-        <div
-          className="absolute -left-[20%] top-[6%] w-[160%] h-[70%]"
-          style={{
-            background:
-              'radial-gradient(1200px 420px at 35% 45%, rgba(236,72,153,0.52) 0%, rgba(236,72,153,0.18) 40%, transparent 72%),' +
-              'radial-gradient(980px 360px at 55% 50%, rgba(124,58,237,0.40) 0%, rgba(124,58,237,0.14) 42%, transparent 74%),' +
-              'radial-gradient(780px 320px at 78% 52%, rgba(34,211,238,0.22) 0%, rgba(34,211,238,0.10) 45%, transparent 78%),' +
-              'radial-gradient(820px 360px at 70% 30%, rgba(239,68,68,0.20) 0%, rgba(239,68,68,0.08) 48%, transparent 78%)',
-            mixBlendMode: 'screen',
-            filter: 'saturate(1.35) contrast(1.08)',
-            opacity: 0.95,
-            transform: 'rotate(-6deg)',
-          }}
-        />
+      {atmosphereFields.map((layer, index) => (
+        <div key={index} className={layer.className} style={layer.style} />
+      ))}
 
-        {/* Core glow */}
-        <div
-          className="absolute left-[-6%] top-[22%] w-[560px] h-[560px] rounded-full blur-[70px]"
-          style={{
-            background:
-              'radial-gradient(circle at 45% 45%, rgba(255,255,255,0.26) 0%, rgba(236,72,153,0.18) 28%, rgba(124,58,237,0.10) 52%, transparent 74%)',
-            mixBlendMode: 'screen',
-            opacity: 0.85,
-          }}
-        />
+      {lightRibbons.map((layer, index) => (
+        <div key={`ribbon-${index}`} className={layer.className} style={layer.style} />
+      ))}
 
-        {/* Dark dust lanes */}
-        <div
-          className="absolute -left-[10%] top-[30%] w-[140%] h-[44%]"
-          style={{
-            background:
-              'radial-gradient(1200px 260px at 52% 55%, rgba(0,0,0,0.86) 0%, rgba(0,0,0,0.55) 42%, transparent 80%),' +
-              'radial-gradient(900px 220px at 30% 60%, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.32) 50%, transparent 80%)',
-            opacity: 0.9,
-            transform: 'rotate(-8deg)',
-            filter: 'blur(6px)',
-          }}
-        />
+      {ringFields.map((layer, index) => (
+        <div key={`ring-${index}`} className={layer.className} style={layer.style} />
+      ))}
 
-        {/* Right cyan mist */}
-        <div
-          className="absolute right-[7%] top-[40%] w-[540px] h-[540px] rounded-full blur-[95px]"
-          style={{
-            background: 'radial-gradient(circle at 40% 40%, rgba(34,211,238,0.22) 0%, rgba(34,211,238,0.08) 40%, transparent 72%)',
-            mixBlendMode: 'screen',
-            opacity: 0.75,
-          }}
-        />
+      {sculptForms.map((layer, index) => (
+        <div key={`sculpt-${index}`} className={layer.className} style={layer.style} />
+      ))}
 
-        {/* Micro highlights (static) */}
-        <div
-          className="absolute -inset-[20%] blur-[26px]"
-          style={{
-            background:
-              'radial-gradient(circle at 25% 30%, rgba(255,255,255,0.08), transparent 22%),' +
-              'radial-gradient(circle at 62% 40%, rgba(255,255,255,0.06), transparent 24%),' +
-              'radial-gradient(circle at 45% 70%, rgba(255,255,255,0.05), transparent 28%)',
-            mixBlendMode: 'screen',
-            opacity: 0.55,
-          }}
-        />
+      {lightColumns.map((layer, index) => (
+        <div key={`column-${index}`} className={layer.className} style={layer.style} />
+      ))}
 
-        {/* Vignette */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(circle at 50% 45%, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.62) 70%, rgba(0,0,0,0.90) 100%)',
-            opacity: 0.95,
-          }}
-        />
-      </div>
+      <div className="absolute inset-0 opacity-[0.08]" style={darkGridStyle} />
+      <div className="absolute inset-0 opacity-[0.035]" style={darkMeshStyle} />
+      <div className="absolute inset-0 opacity-[0.016]" style={darkScanStyle} />
+      <div className="absolute inset-0 opacity-[0.072]" style={{ backgroundImage: dustPattern }} />
 
-      {/* Optional: static grain (kept very light). Remove if you want perfectly clean */}
-      <div className="grain-overlay opacity-60" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(54% 42% at 22% 16%, rgba(124,58,237,0.14) 0%, transparent 72%), radial-gradient(42% 34% at 78% 18%, rgba(34,211,238,0.10) 0%, transparent 72%), radial-gradient(44% 34% at 52% 86%, rgba(236,72,153,0.09) 0%, transparent 74%)',
+          mixBlendMode: 'screen',
+          opacity: 0.72,
+        }}
+      />
+
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(circle at 50% 10%, rgba(255,255,255,0.034) 0%, transparent 12%), radial-gradient(circle at 50% 44%, transparent 0%, rgba(3,7,18,0.05) 34%, rgba(2,6,12,0.82) 100%)',
+        }}
+      />
+
+      <div className="grain-overlay opacity-[0.045]" />
     </div>
   )
 }

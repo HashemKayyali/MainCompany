@@ -1,13 +1,14 @@
-import { type ReactNode, useEffect } from 'react'
+import { type ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Navbar from './Navbar'
 import Footer from './Footer'
 import AnimatedBackground from '../theme/AnimatedBackground'
+import { useSmoothScroll } from '../../hooks/useSmoothScroll'
 
 export default function PageContainer({ children }: { children: ReactNode }) {
   const { pathname } = useLocation()
-  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  useSmoothScroll()
 
   return (
     <div className="min-h-screen flex flex-col relative">
@@ -19,9 +20,9 @@ export default function PageContainer({ children }: { children: ReactNode }) {
         Skip to content
       </a>
 
-      <AnimatedBackground />
+      <AnimatedBackground position="absolute" className="z-0" />
 
-      <div className="relative z-10 flex flex-col min-h-screen">
+      <div className="relative z-10 flex min-h-screen flex-col">
         <Navbar />
         <motion.main
           id="main-content"

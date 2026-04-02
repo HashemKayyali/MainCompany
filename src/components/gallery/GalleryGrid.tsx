@@ -1,7 +1,55 @@
 import { motion } from 'framer-motion'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { GalleryAlbum } from '../../data/gallery'
-export default function GalleryGrid({ albums, onAlbumClick }: { albums: GalleryAlbum[]; onAlbumClick: (a: GalleryAlbum) => void }) {
+import FramedImage from '../ui/FramedImage'
+
+export default function GalleryGrid({
+  albums,
+  onAlbumClick,
+}: {
+  albums: GalleryAlbum[]
+  onAlbumClick: (a: GalleryAlbum) => void
+}) {
   const { isDark } = useTheme()
-  return <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">{albums.map((a, i) => (<motion.div key={a.slug} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}><button onClick={() => onAlbumClick(a)} aria-label={`View album: ${a.title}`} className={`w-full text-left group rounded-2xl overflow-hidden transition-all hover:-translate-y-1 ${isDark ? 'bg-purple-500/[0.06] border border-purple-500/20 hover:border-prism-violet/30' : 'bg-white border border-gray-200 hover:border-violet-300 shadow-sm'}`}><div className="aspect-video overflow-hidden"><img src={a.cover} alt={a.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} /></div><div className="p-4"><h3 className={`font-display font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{a.title}</h3><p className={`text-xs mt-1 ${isDark ? 'text-purple-300/80' : 'text-gray-400'}`}>{a.images.length} photos</p></div></button></motion.div>))}</div>
+
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      {albums.map((album, i) => (
+        <motion.div
+          key={album.slug}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: i * 0.08 }}
+        >
+          <button
+            onClick={() => onAlbumClick(album)}
+            aria-label={`View album: ${album.title}`}
+            className={`group w-full overflow-hidden rounded-[16px] text-left transition-all hover:-translate-y-0.5 ${
+              isDark
+                ? 'border border-purple-500/20 bg-purple-500/[0.06] hover:border-prism-violet/30'
+                : 'border border-gray-200 bg-white shadow-sm hover:border-violet-300'
+            }`}
+          >
+            <div className="aspect-[16/10] overflow-hidden">
+              <FramedImage
+                media={album.cover}
+                alt={album.title}
+                loading="lazy"
+                className="h-full w-full transition-transform duration-700 group-hover:scale-105"
+                fallbackTransform={{ fit: 'cover' }}
+                onError={e => {
+                  ;(e.target as HTMLImageElement).style.display = 'none'
+                }}
+              />
+            </div>
+            <div className="p-2.5">
+              <h3 className={`font-display text-[0.88rem] font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{album.title}</h3>
+              <p className={`mt-0.5 text-[10px] ${isDark ? 'text-purple-300/80' : 'text-gray-400'}`}>{album.images.length} photos</p>
+            </div>
+          </button>
+        </motion.div>
+      ))}
+    </div>
+  )
 }

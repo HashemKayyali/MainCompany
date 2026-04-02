@@ -1,185 +1,916 @@
-import { useEffect, useRef } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
+import { motion, useReducedMotion, type Transition } from 'framer-motion'
 import {
-  motion,
-  useMotionValue,
-  useSpring,
-  useTransform,
-  useReducedMotion,
-} from 'framer-motion'
+  ArrowRight,
+  Building2,
+  Sparkles,
+} from 'lucide-react'
+import { useData } from '../../contexts/DataContext'
 import { useTheme } from '../../contexts/ThemeContext'
-import ParticleCanvas from './ParticleCanvas'
+import type { Product } from '../../data/products/types'
+import { usePerfMode } from '../../hooks/usePerfMode'
+import { parseMediaValue } from '../../utils/media-frame'
+import FramedImage from '../ui/FramedImage'
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n))
+const heroStats = [
+  { value: '100+', label: 'Services' },
+  { value: '30+', label: 'Vendors' },
+  { value: '12+', label: 'Categories' },
+]
+
+const journeySteps = [
+  { label: 'Discover', num: '01' },
+  { label: 'Compare', num: '02' },
+  { label: 'Request', num: '03' },
+]
+
+const serviceTypes = [
+  'Bike VR', 'LED Screens', 'Photo Booths', 'Live Performers',
+  'Event Games', 'Production', 'Sound Systems', 'Lighting Rigs',
+  'Stage Design', '360° Cameras', 'Interactive Booths', 'DJ Setup',
+]
+
+const platformSignals = [
+  {
+    title: 'For clients',
+    body: 'Browse categories, compare options, and request event services with confidence.',
+    icon: Sparkles,
+    gradient: 'from-violet-500/20 to-fuchsia-500/10',
+    iconGradient: 'from-violet-500 to-fuchsia-500',
+    accentColor: 'rgba(139,92,246,0.5)',
+  },
+  {
+    title: 'For providers',
+    body: 'Showcase your company, receive inquiries, and grow inside a premium marketplace.',
+    icon: Building2,
+    gradient: 'from-cyan-500/20 to-violet-500/10',
+    iconGradient: 'from-cyan-400 to-violet-500',
+    accentColor: 'rgba(34,211,238,0.5)',
+  },
+]
+
+type HeroShowcaseItem = {
+  slug: string
+  displayName: string
+  heroImage: string
+  gallery: string[]
 }
 
-function Sparkle({ className = '' }: { className?: string }) {
+type SceneLayout = {
+  className: string
+  frameClassName: string
+  captionClassName: string
+  baseRotate: number
+  floatY: number
+  floatDuration: number
+  rotateAmplitude: number
+  rotateDuration: number
+  delay: number
+  glowOpacity: number
+  imageScale: number
+  eager: boolean
+}
+
+const sceneLayouts: SceneLayout[] = [
+  {
+    className: 'left-[6%] top-[8%] z-30 w-[51%] sm:w-[48%] lg:w-[50%]',
+    frameClassName: 'aspect-[5/4] rounded-[28px] sm:rounded-[34px]',
+    captionClassName: 'left-[7%] -bottom-5',
+    baseRotate: -6,
+    floatY: -10,
+    floatDuration: 11,
+    rotateAmplitude: 1.15,
+    rotateDuration: 17,
+    delay: 0.08,
+    glowOpacity: 0.2,
+    imageScale: 1.03,
+    eager: true,
+  },
+  {
+    className: 'right-[5%] top-[1%] z-40 w-[29%] sm:w-[30%]',
+    frameClassName: 'aspect-[4/5] rounded-[26px] sm:rounded-[30px]',
+    captionClassName: 'left-[8%] -bottom-5',
+    baseRotate: 9,
+    floatY: -8,
+    floatDuration: 12.4,
+    rotateAmplitude: -1,
+    rotateDuration: 18,
+    delay: 0.18,
+    glowOpacity: 0.16,
+    imageScale: 1.04,
+    eager: false,
+  },
+  {
+    className: 'right-[1%] bottom-[11%] z-20 w-[46%] sm:w-[48%]',
+    frameClassName: 'aspect-[6/4.2] rounded-[28px] sm:rounded-[32px]',
+    captionClassName: 'left-[8%] -bottom-5',
+    baseRotate: -4,
+    floatY: -7,
+    floatDuration: 13,
+    rotateAmplitude: 0.8,
+    rotateDuration: 16.8,
+    delay: 0.28,
+    glowOpacity: 0.14,
+    imageScale: 1.02,
+    eager: false,
+  },
+  {
+    className: 'left-[1%] bottom-[9%] z-10 w-[27%] sm:w-[28%]',
+    frameClassName: 'aspect-square rounded-[24px] sm:rounded-[28px]',
+    captionClassName: 'left-[1%] -bottom-5',
+    baseRotate: 7,
+    floatY: -6,
+    floatDuration: 12.8,
+    rotateAmplitude: -0.75,
+    rotateDuration: 16.4,
+    delay: 0.36,
+    glowOpacity: 0.12,
+    imageScale: 1.05,
+    eager: false,
+  },
+  {
+    className: 'hidden sm:block left-[31%] bottom-[2%] z-[26] w-[31%] md:w-[29%]',
+    frameClassName: 'aspect-[5/3.15] rounded-[22px] sm:rounded-[26px]',
+    captionClassName: 'left-[10%] -bottom-5',
+    baseRotate: 2,
+    floatY: -5,
+    floatDuration: 14.1,
+    rotateAmplitude: 0.65,
+    rotateDuration: 17.4,
+    delay: 0.42,
+    glowOpacity: 0.11,
+    imageScale: 1.03,
+    eager: false,
+  },
+  {
+    className: 'hidden sm:block right-[16%] top-[35%] z-[34] w-[22%] md:w-[20%]',
+    frameClassName: 'aspect-[4/5] rounded-[24px] sm:rounded-[28px]',
+    captionClassName: 'left-[8%] -bottom-5',
+    baseRotate: 5,
+    floatY: -6,
+    floatDuration: 12.6,
+    rotateAmplitude: -0.65,
+    rotateDuration: 16.6,
+    delay: 0.5,
+    glowOpacity: 0.11,
+    imageScale: 1.04,
+    eager: false,
+  },
+]
+
+function normalizeName(name: string) {
+  return name.replace(/\s+/g, ' ').trim()
+}
+
+function stripMedia(media?: string) {
+  if (!media) return ''
+  return parseMediaValue(media).src || media.split('#')[0] || ''
+}
+
+function mergeMediaSources(items: string[]) {
+  const seen = new Set<string>()
+  return items.filter((item) => {
+    const key = stripMedia(item)
+    if (!key || seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
+function getProductMediaSources(product: Product) {
+  return mergeMediaSources([product.heroImage, ...(product.gallery || [])])
+}
+
+function toHeroShowcaseItem(product: Product): HeroShowcaseItem | null {
+  const sources = getProductMediaSources(product)
+  const firstMedia = sources[0]
+  if (!firstMedia) return null
+  return {
+    slug: product.slug,
+    displayName: normalizeName(product.name),
+    heroImage: firstMedia,
+    gallery: sources,
+  }
+}
+
+function buildShowcaseItems(products: Product[], featuredProducts: Product[]) {
+  const limit = sceneLayouts.length
+  const featuredItems = featuredProducts
+    .map(toHeroShowcaseItem)
+    .filter((item): item is HeroShowcaseItem => Boolean(item))
+    .slice(0, limit)
+  if (featuredItems.length > 0) return featuredItems
+  return products
+    .map(toHeroShowcaseItem)
+    .filter((item): item is HeroShowcaseItem => Boolean(item))
+    .slice(0, limit)
+}
+
+function toneForItem(slug: string): CSSProperties {
+  if (slug === 'bike-vr' || slug === '360') {
+    return {
+      background:
+        'radial-gradient(circle, rgba(236,72,153,0.34) 0%, rgba(124,58,237,0.18) 38%, rgba(34,211,238,0.10) 66%, transparent 82%)',
+    }
+  }
+  if (slug === 'bike-tower') {
+    return {
+      background:
+        'radial-gradient(circle, rgba(34,211,238,0.28) 0%, rgba(124,58,237,0.18) 40%, rgba(236,72,153,0.08) 66%, transparent 82%)',
+    }
+  }
+  return {
+    background:
+      'radial-gradient(circle, rgba(124,58,237,0.26) 0%, rgba(236,72,153,0.16) 42%, rgba(34,211,238,0.08) 68%, transparent 82%)',
+  }
+}
+
+function sceneTransition(enabled: boolean, layout: SceneLayout): Transition | undefined {
+  if (!enabled) return undefined
+  return {
+    opacity: { duration: 0.72, delay: layout.delay, ease },
+    scale: { duration: 0.72, delay: layout.delay, ease },
+    y: {
+      duration: layout.floatDuration,
+      repeat: Infinity,
+      repeatType: 'mirror',
+      ease: 'easeInOut',
+      delay: layout.delay + 0.25,
+    },
+    rotate: {
+      duration: layout.rotateDuration,
+      repeat: Infinity,
+      repeatType: 'mirror',
+      ease: 'easeInOut',
+      delay: layout.delay + 0.35,
+    },
+  }
+}
+
+// ─── Noise texture overlay ───────────────────────────────────────────────────
+function NoiseOverlay({ isDark }: { isDark: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
-      <path d="M12 2l1.2 5.1L18 9l-4.8 1.9L12 16l-1.2-5.1L6 9l4.8-1.9L12 2z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-    </svg>
+    <div
+      className="pointer-events-none absolute inset-0 z-[1]"
+      style={{
+        opacity: isDark ? 0.055 : 0.03,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+        backgroundRepeat: 'repeat',
+        backgroundSize: '256px 256px',
+        mixBlendMode: isDark ? 'overlay' : 'multiply',
+      }}
+    />
   )
 }
 
-function Bolt({ className = '' }: { className?: string }) {
+// ─── Dot grid pattern ────────────────────────────────────────────────────────
+function DotGrid({ isDark }: { isDark: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
-      <path d="M13 2L4 14h7l-1 8 10-14h-7l0-6z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-    </svg>
+    <div
+      className="pointer-events-none absolute inset-0"
+      style={{
+        backgroundImage: `radial-gradient(circle, ${isDark ? 'rgba(139,92,246,0.18)' : 'rgba(109,40,217,0.08)'} 1px, transparent 1px)`,
+        backgroundSize: '36px 36px',
+        maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%)',
+        WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%)',
+      }}
+    />
   )
 }
 
-function Vr({ className = '' }: { className?: string }) {
+// ─── Marquee strip ───────────────────────────────────────────────────────────
+function MarqueeStrip({ isDark }: { isDark: boolean }) {
+  const doubled = [...serviceTypes, ...serviceTypes]
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
-      <path d="M7 8h10a3 3 0 013 3v2a3 3 0 01-3 3h-1l-1.4 1.4a1 1 0 01-1.6-.3L12 16H7a3 3 0 01-3-3v-2a3 3 0 013-3z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M9.2 12.1a1.1 1.1 0 102.2 0 1.1 1.1 0 00-2.2 0zM12.6 12.1a1.1 1.1 0 102.2 0 1.1 1.1 0 00-2.2 0z" fill="currentColor" />
-    </svg>
+    <div
+      className={`relative my-5 flex overflow-hidden py-2.5 ${
+        isDark ? 'border-y border-white/[0.06]' : 'border-y border-violet-200/50'
+      }`}
+      style={{
+        maskImage: 'linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)',
+        WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)',
+      }}
+    >
+      <style>{`
+        @keyframes marquee-scroll {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        .marquee-track {
+          animation: marquee-scroll 28s linear infinite;
+          will-change: transform;
+        }
+        .marquee-track:hover { animation-play-state: paused; }
+      `}</style>
+      <div className="marquee-track flex shrink-0 items-center gap-0">
+        {doubled.map((service, i) => (
+          <span key={i} className="flex shrink-0 items-center">
+            <span
+              className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${
+                isDark ? 'text-white/38' : 'text-violet-500/55'
+              }`}
+            >
+              {service}
+            </span>
+            <span
+              className={`mx-5 h-1 w-1 rounded-full ${isDark ? 'bg-violet-400/28' : 'bg-violet-400/40'}`}
+            />
+          </span>
+        ))}
+      </div>
+    </div>
   )
 }
 
-function FloatingChip({ title, subtitle, icon, tone, delay = 0, className = '', reduceMotion = false }: {
-  title: string; subtitle: string; icon: React.ReactNode; tone: 'violet' | 'cyan' | 'pink' | 'amber'; delay?: number; className?: string; reduceMotion?: boolean
+// ─── Stat card ───────────────────────────────────────────────────────────────
+function HeroStat({
+  value,
+  label,
+  isDark,
+  motionEnabled,
+  index,
+}: {
+  value: string
+  label: string
+  isDark: boolean
+  motionEnabled: boolean
+  index: number
 }) {
-  const toneCls = tone === 'violet' ? 'text-prism-violet border-prism-violet/30' : tone === 'cyan' ? 'text-cyan-300 border-cyan-400/25' : tone === 'pink' ? 'text-prism-pink border-prism-pink/25' : 'text-prism-amber border-prism-amber/25'
   return (
-    <motion.div initial={{ opacity: 0, y: 18, filter: 'blur(10px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0)' }} transition={{ duration: 0.8, delay, ease }} className={className}>
-      <motion.div animate={reduceMotion ? {} : { y: [0, -10, 0], rotate: [0, 0.6, 0] }} transition={reduceMotion ? { duration: 0 } : { duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-        className={`group relative rounded-2xl border backdrop-blur-2xl px-4 py-3 shadow-[0_12px_40px_rgba(0,0,0,0.35)] ${toneCls}`}
-        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))' }}>
-        <div className="absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-          style={{ background: tone === 'violet' ? 'radial-gradient(circle at 30% 20%, rgba(124,58,237,0.25), transparent 55%)' : tone === 'cyan' ? 'radial-gradient(circle at 30% 20%, rgba(34,211,238,0.22), transparent 55%)' : tone === 'pink' ? 'radial-gradient(circle at 30% 20%, rgba(236,72,153,0.22), transparent 55%)' : 'radial-gradient(circle at 30% 20%, rgba(245,158,11,0.18), transparent 55%)' }} />
-        <div className="relative flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-2xl border ${toneCls} flex items-center justify-center bg-white/[0.03]`}><span className="opacity-90">{icon}</span></div>
-          <div className="min-w-0">
-            <div className="text-[12px] font-semibold text-white/90 truncate">{title}</div>
-            <div className="text-[10px] font-mono tracking-[0.18em] uppercase text-white/55 truncate">{subtitle}</div>
-          </div>
-        </div>
-        <div className="absolute -bottom-3 left-6 right-6 h-px opacity-70" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)' }} />
-      </motion.div>
+    <motion.div
+      initial={motionEnabled ? { opacity: 0, y: 16 } : false}
+      whileInView={motionEnabled ? { opacity: 1, y: 0 } : undefined}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={motionEnabled ? { duration: 0.55, delay: 0.18 + index * 0.06, ease } : undefined}
+      className={`group relative overflow-hidden rounded-[18px] border px-4 py-3.5 sm:px-5 sm:py-4 ${
+        isDark
+          ? 'border-white/[0.08] bg-[linear-gradient(160deg,rgba(18,22,42,0.90),rgba(8,10,22,0.75))] shadow-[0_24px_64px_rgba(1,5,18,0.32),inset_0_1px_0_rgba(255,255,255,0.06)]'
+          : 'border-violet-200/60 bg-white/82 shadow-[0_18px_46px_rgba(76,29,149,0.09),inset_0_1px_0_rgba(255,255,255,0.90)]'
+      }`}
+    >
+      {/* Top shimmer border */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background: isDark
+            ? 'linear-gradient(90deg, transparent 0%, rgba(196,181,253,0.55) 40%, rgba(34,211,238,0.35) 70%, transparent 100%)'
+            : 'linear-gradient(90deg, transparent 0%, rgba(124,58,237,0.45) 40%, rgba(34,211,238,0.25) 70%, transparent 100%)',
+        }}
+      />
+      {/* Glow corner */}
+      <div
+        className="pointer-events-none absolute -right-6 -top-4 h-14 w-20 rounded-full blur-2xl transition-opacity duration-500 group-hover:opacity-100"
+        style={{
+          background: isDark
+            ? 'radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 70%)'
+            : 'radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)',
+          opacity: 0.7,
+        }}
+      />
+      <div
+        className={`font-display text-[1.4rem] font-black tracking-[-0.055em] ${
+          isDark ? 'text-white' : 'text-slate-900'
+        }`}
+      >
+        {value}
+      </div>
+      <div
+        className={`mt-1 text-[9px] font-semibold uppercase tracking-[0.16em] ${
+          isDark ? 'text-violet-300/48' : 'text-violet-600/60'
+        }`}
+      >
+        {label}
+      </div>
     </motion.div>
   )
 }
 
-export default function Hero() {
-  const { isDark } = useTheme()
-  const reduceMotion = useReducedMotion()
-  const ref = useRef<HTMLElement | null>(null)
-  const mx = useMotionValue(0)
-  const my = useMotionValue(0)
-  const sx = useSpring(mx, { stiffness: 120, damping: 20 })
-  const sy = useSpring(my, { stiffness: 120, damping: 20 })
-  const tiltX = useTransform(sy, [-1, 1], [6, -6])
-  const tiltY = useTransform(sx, [-1, 1], [-8, 8])
-  const floatX = useTransform(sx, [-1, 1], [-16, 16])
-  const floatY = useTransform(sy, [-1, 1], [-10, 10])
+// ─── Floating image card ─────────────────────────────────────────────────────
+function FloatingImageShowcase({
+  item,
+  layout,
+  isDark,
+  motionEnabled,
+}: {
+  item: HeroShowcaseItem
+  layout: SceneLayout
+  isDark: boolean
+  motionEnabled: boolean
+}) {
+  const [sourceIndex, setSourceIndex] = useState(0)
+  const [imageFailed, setImageFailed] = useState(false)
 
-  useEffect(() => {
-    if (reduceMotion) return
-    const el = ref.current
-    if (!el) return
-    const onMove = (e: MouseEvent) => { const r = el.getBoundingClientRect(); mx.set(clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1)); my.set(clamp(((e.clientY - r.top) / r.height) * 2 - 1, -1, 1)) }
-    const onLeave = () => { mx.set(0); my.set(0) }
-    el.addEventListener('mousemove', onMove, { passive: true })
-    el.addEventListener('mouseleave', onLeave, { passive: true })
-    return () => { el.removeEventListener('mousemove', onMove); el.removeEventListener('mouseleave', onLeave) }
-  }, [mx, my, reduceMotion])
+  const sources = useMemo(
+    () => mergeMediaSources([item.heroImage, ...item.gallery]),
+    [item.gallery, item.heroImage]
+  )
+
+  const activeMedia = sources[Math.min(sourceIndex, Math.max(sources.length - 1, 0))] || ''
+  const activeSrc = stripMedia(activeMedia)
+  const glowStyle = toneForItem(item.slug)
+
+  const onImageError = () => {
+    setSourceIndex((index) => {
+      if (index < sources.length - 1) return index + 1
+      setImageFailed(true)
+      return index
+    })
+  }
 
   return (
-    <section ref={ref} className="relative min-h-[100dvh] flex items-center overflow-hidden" aria-label="Hero section">
-      {/* ✅ Canvas-based particle field (was 18 motion.divs) */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 opacity-80" style={{ background: isDark ? 'radial-gradient(ellipse at 50% 30%, rgba(124,58,237,0.18), transparent 55%)' : 'radial-gradient(ellipse at 50% 30%, rgba(124,58,237,0.08), transparent 55%)' }} />
-        <div className="absolute inset-0 opacity-40" style={{ backgroundImage: isDark ? 'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)' : 'linear-gradient(rgba(17,24,39,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(17,24,39,0.05) 1px, transparent 1px)', backgroundSize: '72px 72px', maskImage: 'radial-gradient(circle at 50% 25%, black 0%, transparent 65%)', WebkitMaskImage: 'radial-gradient(circle at 50% 25%, black 0%, transparent 65%)' }} />
-        <ParticleCanvas isDark={isDark} reduceMotion={!!reduceMotion} />
-        {/* ✅ CSS scan line instead of motion.div */}
-        <div className="scan-line opacity-60" style={{ background: isDark ? 'linear-gradient(90deg, transparent, rgba(34,211,238,0.35), rgba(236,72,153,0.25), transparent)' : 'linear-gradient(90deg, transparent, rgba(124,58,237,0.22), transparent)' }} />
+    <motion.figure
+      initial={
+        motionEnabled
+          ? { opacity: 0, y: 24, scale: 0.95, rotate: layout.baseRotate - 1.2 }
+          : false
+      }
+      animate={
+        motionEnabled
+          ? {
+              opacity: 1,
+              scale: 1,
+              y: [0, layout.floatY, 0],
+              rotate: [layout.baseRotate, layout.baseRotate + layout.rotateAmplitude, layout.baseRotate],
+            }
+          : { opacity: 1, scale: 1, y: 0, rotate: layout.baseRotate }
+      }
+      transition={sceneTransition(motionEnabled, layout)}
+      whileHover={motionEnabled ? { y: layout.floatY - 4, scale: 1.022 } : undefined}
+      className={`absolute will-change-transform ${layout.className}`}
+      style={!motionEnabled ? { transform: `rotate(${layout.baseRotate}deg)` } : undefined}
+      aria-hidden="true"
+    >
+      {/* Glow blob behind card */}
+      <div
+        className="pointer-events-none absolute inset-[-12%] -z-10 rounded-full blur-[60px]"
+        style={{ ...glowStyle, opacity: layout.glowOpacity * 1.3 }}
+      />
+
+      {/* Card */}
+      <div
+        className={`relative overflow-hidden border ${layout.frameClassName} ${
+          isDark
+            ? 'border-white/[0.14] bg-black/10 shadow-[0_28px_72px_rgba(1,5,18,0.48),0_8px_24px_rgba(124,58,237,0.08),inset_0_1px_0_rgba(255,255,255,0.08)]'
+            : 'border-white/85 bg-white/85 shadow-[0_28px_80px_rgba(76,29,149,0.14),0_8px_24px_rgba(124,58,237,0.06),inset_0_1px_0_rgba(255,255,255,0.95)]'
+        }`}
+      >
+        {/* Top highlight line */}
+        <div
+          className="pointer-events-none absolute inset-x-6 top-0 z-20 h-px"
+          style={{
+            background: isDark
+              ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.56), rgba(34,211,238,0.22), transparent)'
+              : 'linear-gradient(90deg, transparent, rgba(124,58,237,0.42), rgba(34,211,238,0.22), transparent)',
+          }}
+        />
+
+        {!imageFailed && activeSrc ? (
+          <FramedImage
+            media={activeMedia}
+            alt={item.displayName}
+            loading={layout.eager ? 'eager' : 'lazy'}
+            draggable={false}
+            className="absolute inset-0 h-full w-full select-none"
+            extraScale={layout.imageScale}
+            onError={onImageError}
+          />
+        ) : (
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(150deg, rgba(19,23,44,0.96) 0%, rgba(84,28,135,0.52) 34%, rgba(12,84,106,0.28) 76%, rgba(4,7,18,0.96) 100%)',
+            }}
+          />
+        )}
+
+        {/* Overlay vignette */}
+        <div
+          className="pointer-events-none absolute inset-0 z-10"
+          style={{
+            background: isDark
+              ? 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 28%, transparent 72%, rgba(3,7,18,0.22) 88%, rgba(3,7,18,0.50) 100%)'
+              : 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 28%, transparent 72%, rgba(255,255,255,0.14) 88%, rgba(255,255,255,0.48) 100%)',
+          }}
+        />
       </div>
 
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[55%] w-[1100px] h-[860px] rounded-full pointer-events-none" style={{ background: isDark ? 'radial-gradient(ellipse, rgba(124,58,237,0.16) 0%, rgba(236,72,153,0.08) 38%, transparent 72%)' : 'radial-gradient(ellipse, rgba(124,58,237,0.08) 0%, transparent 62%)' }} />
+      {/* Caption pill */}
+      <figcaption className={`pointer-events-none absolute z-30 ${layout.captionClassName}`}>
+        <div
+          className={`inline-flex max-w-[14rem] items-center gap-2.5 rounded-full border px-3.5 py-2 backdrop-blur-xl ${
+            isDark
+              ? 'border-white/[0.10] bg-[linear-gradient(180deg,rgba(12,14,26,0.96),rgba(7,9,18,0.94))] text-white shadow-[0_16px_40px_rgba(1,5,18,0.32),0_0_0_0.5px_rgba(255,255,255,0.06)]'
+              : 'border-white/82 bg-white/92 text-slate-900 shadow-[0_16px_40px_rgba(76,29,149,0.12)]'
+          }`}
+        >
+          <span
+            className={`relative h-2 w-2 shrink-0 rounded-full ${isDark ? 'bg-cyan-300' : 'bg-violet-500'}`}
+          >
+            {motionEnabled && (
+              <motion.span
+                animate={{ scale: [1, 1.9, 1], opacity: [0.7, 0, 0.7] }}
+                transition={{ duration: 2.4, repeat: Infinity, ease: 'easeOut' }}
+                className={`absolute inset-0 rounded-full ${isDark ? 'bg-cyan-300' : 'bg-violet-500'}`}
+              />
+            )}
+          </span>
+          <span className="truncate text-[0.80rem] font-semibold tracking-[-0.018em]">
+            {item.displayName}
+          </span>
+        </div>
+      </figcaption>
+    </motion.figure>
+  )
+}
 
-      <div className="relative max-w-7xl mx-auto px-6 py-28 sm:py-40 w-full">
-        <div className="grid lg:grid-cols-[1.1fr,0.9fr] gap-12 items-center">
-          <div className="max-w-3xl">
-            <motion.div initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0)' }} transition={{ duration: 0.8, delay: 0.1, ease }}>
-              <div className={`inline-flex items-center gap-2.5 px-4 py-2 rounded-full mb-8 backdrop-blur-2xl ${isDark ? 'bg-prism-violet/15 border border-prism-violet/30' : 'bg-violet-50 border border-violet-200/60'}`}>
-                <span className="relative flex h-2 w-2" aria-hidden="true"><span className="animate-ping absolute h-full w-full rounded-full bg-cyan-400 opacity-75" /><span className={`relative rounded-full h-2 w-2 ${isDark ? 'bg-cyan-400' : 'bg-violet-500'}`} /></span>
-                <span className={`text-[12px] font-medium font-mono tracking-wide ${isDark ? 'text-cyan-300' : 'text-violet-700'}`}>Available for Events {new Date().getFullYear()}</span>
-                <motion.span className={`ml-1 inline-flex items-center gap-1 text-[11px] font-mono ${isDark ? 'text-white/55' : 'text-gray-500'}`} animate={reduceMotion ? {} : { opacity: [0.45, 0.85, 0.45] }} transition={reduceMotion ? { duration: 0 } : { duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}><Sparkle className="w-4 h-4" /> arcade</motion.span>
+// ─── Floating scene ──────────────────────────────────────────────────────────
+function FloatingScene({
+  items,
+  isDark,
+  motionEnabled,
+}: {
+  items: HeroShowcaseItem[]
+  isDark: boolean
+  motionEnabled: boolean
+}) {
+  return (
+    <div className="relative mx-auto h-[28rem] w-full max-w-[31rem] sm:h-[32rem] sm:max-w-[35rem] lg:h-[37rem] lg:max-w-[40rem]">
+      {/* Ambient background blobs */}
+      <div
+        className="pointer-events-none absolute left-[4%] top-[6%] h-64 w-64 rounded-full blur-[80px] sm:h-80 sm:w-80"
+        style={{
+          background: isDark
+            ? 'radial-gradient(circle, rgba(236,72,153,0.22) 0%, transparent 68%)'
+            : 'radial-gradient(circle, rgba(236,72,153,0.13) 0%, transparent 74%)',
+        }}
+      />
+      <div
+        className="pointer-events-none absolute right-[1%] top-[0%] h-60 w-60 rounded-full blur-[80px] sm:h-80 sm:w-80"
+        style={{
+          background: isDark
+            ? 'radial-gradient(circle, rgba(34,211,238,0.18) 0%, transparent 70%)'
+            : 'radial-gradient(circle, rgba(34,211,238,0.11) 0%, transparent 76%)',
+        }}
+      />
+      <div
+        className="pointer-events-none absolute bottom-[0%] left-[14%] h-64 w-80 rounded-full blur-[80px] sm:h-80 sm:w-[26rem]"
+        style={{
+          background: isDark
+            ? 'radial-gradient(circle, rgba(124,58,237,0.24) 0%, transparent 72%)'
+            : 'radial-gradient(circle, rgba(124,58,237,0.13) 0%, transparent 78%)',
+        }}
+      />
+
+      {/* Central glass orb */}
+      <div
+        className="pointer-events-none absolute left-[12%] top-[18%] h-[48%] w-[58%] rounded-[46%] border blur-[0.4px]"
+        style={{
+          background: isDark
+            ? 'linear-gradient(160deg, rgba(255,255,255,0.015), rgba(124,58,237,0.055) 36%, rgba(3,7,18,0.03) 74%, rgba(236,72,153,0.03))'
+            : 'linear-gradient(160deg, rgba(255,255,255,0.85), rgba(245,243,255,0.58))',
+          borderColor: isDark ? 'rgba(255,255,255,0.035)' : 'rgba(124,58,237,0.07)',
+          boxShadow: isDark
+            ? 'inset 0 1px 0 rgba(255,255,255,0.03), 0 32px 80px rgba(1,5,18,0.22)'
+            : '0 28px 72px rgba(124,58,237,0.09)',
+          transform: 'rotate(-16deg)',
+          opacity: isDark ? 0.20 : 0.55,
+        }}
+      />
+
+      {items.map((item, index) => (
+        <FloatingImageShowcase
+          key={item.slug}
+          item={item}
+          layout={sceneLayouts[index]}
+          isDark={isDark}
+          motionEnabled={motionEnabled}
+        />
+      ))}
+    </div>
+  )
+}
+
+// ─── Hero ────────────────────────────────────────────────────────────────────
+export default function Hero() {
+  const { products, featuredProducts } = useData()
+  const { isDark } = useTheme()
+  const reducedMotion = useReducedMotion()
+  const { perfLow } = usePerfMode()
+  const motionEnabled = !reducedMotion && !perfLow
+
+  const showcaseItems = useMemo(
+    () => buildShowcaseItems(products, featuredProducts),
+    [featuredProducts, products]
+  )
+
+  return (
+    <section className="relative overflow-hidden pb-10 pt-20 sm:pb-12 sm:pt-24 lg:min-h-[72svh] lg:pb-16 lg:pt-28">
+
+      {/* ── Background layer ── */}
+      <div className="pointer-events-none absolute inset-0">
+        <DotGrid isDark={isDark} />
+        <NoiseOverlay isDark={isDark} />
+
+        {/* Ambient gradient orbs */}
+        <div
+          className="absolute left-[-10%] top-[2%] h-[24rem] w-[24rem] rounded-full blur-[80px] sm:h-[28rem] sm:w-[28rem]"
+          style={{
+            background: isDark
+              ? 'radial-gradient(circle, rgba(124,58,237,0.20) 0%, transparent 68%)'
+              : 'radial-gradient(circle, rgba(124,58,237,0.11) 0%, transparent 76%)',
+          }}
+        />
+        <div
+          className="absolute left-[22%] top-[10%] h-[16rem] w-[18rem] rounded-full blur-[68px] sm:h-[20rem] sm:w-[22rem]"
+          style={{
+            background: isDark
+              ? 'radial-gradient(circle, rgba(236,72,153,0.14) 0%, transparent 70%)'
+              : 'radial-gradient(circle, rgba(236,72,153,0.08) 0%, transparent 78%)',
+          }}
+        />
+        <div
+          className="absolute right-[-8%] top-[6%] h-[24rem] w-[24rem] rounded-full blur-[84px] sm:h-[30rem] sm:w-[30rem]"
+          style={{
+            background: isDark
+              ? 'radial-gradient(circle, rgba(34,211,238,0.14) 0%, transparent 70%)'
+              : 'radial-gradient(circle, rgba(34,211,238,0.08) 0%, transparent 78%)',
+          }}
+        />
+
+        {/* Bottom fade */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-32"
+          style={{
+            background: isDark
+              ? 'linear-gradient(to top, rgba(4,6,16,0.40), transparent)'
+              : 'linear-gradient(to top, rgba(255,255,255,0.60), transparent)',
+          }}
+        />
+      </div>
+
+      <div className="site-container relative z-10">
+        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.96fr)] lg:gap-10">
+
+          {/* ── Left column ── */}
+          <motion.div
+            initial={motionEnabled ? { opacity: 0, y: 28 } : false}
+            animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
+            transition={motionEnabled ? { duration: 0.76, ease } : undefined}
+            className="relative z-10 max-w-[37rem]"
+          >
+            {/* Platform badge */}
+            <motion.div
+              initial={motionEnabled ? { opacity: 0, y: -8 } : false}
+              animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
+              transition={motionEnabled ? { duration: 0.55, delay: 0.06, ease } : undefined}
+              className="mb-5 inline-flex"
+            >
+              <div
+                className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 ${
+                  isDark
+                    ? 'border-violet-500/25 bg-violet-500/10 text-violet-300'
+                    : 'border-violet-300/70 bg-violet-50/80 text-violet-700'
+                }`}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${isDark ? 'bg-violet-400' : 'bg-violet-500'}`}
+                  style={{
+                    boxShadow: isDark
+                      ? '0 0 6px rgba(167,139,250,0.9)'
+                      : '0 0 4px rgba(109,40,217,0.4)',
+                  }}
+                />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">
+                  Event Services Platform
+                </span>
               </div>
             </motion.div>
 
-            <motion.h1 initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0)' }} transition={{ duration: 1, delay: 0.2, ease }} className={`font-display text-[clamp(2.8rem,7.5vw,6rem)] font-extrabold leading-[0.92] tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              <span className="block">Cycling Meets</span>
-              <span className="block text-glow mt-1">Pure Magic</span>
-            </motion.h1>
+            {/* Headline */}
+            <div className="max-w-[15ch] sm:max-w-none">
+              <h1
+                className={`font-display text-[clamp(2.4rem,6vw,5.1rem)] font-black leading-[0.87] tracking-[-0.066em] ${
+                  isDark ? 'text-white' : 'text-slate-950'
+                }`}
+              >
+                <span className="block">
+                  Book{' '}
+                  <span className="relative inline-block">
+                    {/* Glow bloom behind gradient text */}
+                    <span
+                      className="pointer-events-none absolute inset-x-0 bottom-1 h-6 rounded-full blur-2xl"
+                      style={{
+                        background: isDark
+                          ? 'linear-gradient(90deg, rgba(124,58,237,0.35), rgba(236,72,153,0.28), rgba(34,211,238,0.20))'
+                          : 'linear-gradient(90deg, rgba(124,58,237,0.22), rgba(236,72,153,0.18), rgba(34,211,238,0.12))',
+                      }}
+                    />
+                    <span
+                      className="relative bg-clip-text text-transparent"
+                      style={{
+                        backgroundImage: isDark
+                          ? 'linear-gradient(95deg, #c4b5fd 0%, #f0abfc 38%, #67e8f9 78%, #c4b5fd 100%)'
+                          : 'linear-gradient(95deg, #7c3aed 0%, #db2777 38%, #0891b2 78%, #7c3aed 100%)',
+                        backgroundSize: '200% 100%',
+                      }}
+                    >
+                      Everything
+                    </span>
+                  </span>
+                </span>
+                <span className="mt-1 block">Your Event Needs</span>
+              </h1>
+            </div>
 
-            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.45, ease }} className={`mt-7 text-lg sm:text-xl leading-relaxed max-w-lg ${isDark ? 'text-purple-200/80' : 'text-gray-600'}`}>
-              Interactive bike-powered activations for events.{' '}<span className={isDark ? 'text-cyan-200' : 'text-gray-800'}>LED races, smoothie bikes, VR cycling</span>{' '}and more across Jordan.
-            </motion.p>
+            {/* Sub-copy */}
+            <p
+              className={`mt-5 max-w-[34rem] text-[0.95rem] leading-[1.75] sm:text-[1rem] ${
+                isDark ? 'text-purple-100/62' : 'text-slate-500'
+              }`}
+            >
+              Find and book games, LED screens, performers, booths, rentals, and
+              production services from trusted event vendors in one place.
+            </p>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.6, ease }} className="mt-10 flex flex-wrap gap-3">
-              <Link to="/products" className="btn-primary group"><span>Explore Products</span>
-                <motion.svg className="w-4 h-4 relative z-10" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true" animate={reduceMotion ? {} : { x: [0, 4, 0] }} transition={reduceMotion ? { duration: 0 } : { duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}><path d="M5 8h6M8 5l3 3-3 3" /></motion.svg>
-              </Link>
-              <Link to="/contact" className="btn-outline">Book an Event</Link>
-            </motion.div>
+            {/* Numbered journey steps */}
+            <div className="mt-5 flex items-center gap-0">
+              {journeySteps.map((step, index) => (
+                <motion.div
+                  key={step.label}
+                  initial={motionEnabled ? { opacity: 0, y: 10 } : false}
+                  whileInView={motionEnabled ? { opacity: 1, y: 0 } : undefined}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={motionEnabled ? { duration: 0.5, delay: 0.12 + index * 0.06, ease } : undefined}
+                  className="flex items-center"
+                >
+                  <div
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 ${
+                      isDark
+                        ? 'border-white/[0.09] bg-[linear-gradient(180deg,rgba(16,20,38,0.88),rgba(9,11,24,0.78))] text-purple-100/72'
+                        : 'border-violet-200/65 bg-white/74 text-violet-700'
+                    }`}
+                  >
+                    <span
+                      className={`font-mono text-[8px] font-bold ${
+                        isDark ? 'text-violet-400/60' : 'text-violet-400/80'
+                      }`}
+                    >
+                      {step.num}
+                    </span>
+                    <span className="text-[8.5px] font-semibold uppercase tracking-[0.13em]">
+                      {step.label}
+                    </span>
+                  </div>
+                  {index < journeySteps.length - 1 && (
+                    <div
+                      className={`mx-1.5 h-px w-4 ${isDark ? 'bg-white/14' : 'bg-violet-300/50'}`}
+                    />
+                  )}
+                </motion.div>
+              ))}
+            </div>
 
-            {/* ✅ Semantic stats */}
-            <motion.dl initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.85 }} className="mt-14 flex items-center gap-10" aria-label="Company statistics">
-              {[{ n: '50+', l: 'Events', c: 'text-purple-400' }, { n: '20+', l: 'Partners', c: 'text-cyan-400' }, { n: '6', l: 'Products', c: 'text-pink-400' }].map((s, i) => (
-                <div key={s.l} className="relative">
-                  <dt className="sr-only">{s.l}</dt>
-                  <dd className={`text-2xl font-display font-extrabold ${isDark ? 'text-white' : 'text-gray-900'}`}>{s.n}</dd>
-                  <span className={`text-[10px] font-mono tracking-[0.2em] uppercase mt-1 block ${isDark ? s.c : 'text-gray-400'}`} aria-hidden="true">{s.l}</span>
-                  {i < 2 && <div className={`absolute right-[-20px] top-1/2 -translate-y-1/2 w-px h-6 ${isDark ? 'bg-purple-500/20' : 'bg-gray-200'}`} aria-hidden="true" />}
+            {/* Marquee strip */}
+            <MarqueeStrip isDark={isDark} />
+
+            {/* Platform signals — redesigned */}
+            <motion.div
+              initial={motionEnabled ? { opacity: 0, y: 16 } : false}
+              whileInView={motionEnabled ? { opacity: 1, y: 0 } : undefined}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={motionEnabled ? { duration: 0.6, delay: 0.14, ease } : undefined}
+              className="grid gap-3 sm:grid-cols-2"
+            >
+              {platformSignals.map(({ title, body, icon: Icon, iconGradient, accentColor }) => (
+                <div
+                  key={title}
+                  className={`group relative overflow-hidden rounded-[20px] border p-4 transition-all duration-300 hover:-translate-y-0.5 ${
+                    isDark
+                      ? 'border-white/[0.08] bg-[linear-gradient(160deg,rgba(14,18,34,0.90),rgba(8,10,20,0.80))] shadow-[0_20px_56px_rgba(1,5,18,0.28),inset_0_1px_0_rgba(255,255,255,0.055)] hover:border-white/[0.12]'
+                      : 'border-slate-200/60 bg-white/88 shadow-[0_16px_44px_rgba(76,29,149,0.08),inset_0_1px_0_rgba(255,255,255,0.92)] hover:border-violet-200/80 hover:shadow-[0_20px_56px_rgba(76,29,149,0.12)]'
+                  }`}
+                >
+                  {/* Accent glow */}
+                  <div
+                    className="pointer-events-none absolute -right-10 -top-8 h-24 w-28 rounded-full blur-3xl opacity-40 transition-opacity duration-500 group-hover:opacity-60"
+                    style={{ background: `radial-gradient(circle, ${accentColor} 0%, transparent 70%)` }}
+                  />
+                  {/* Top shimmer */}
+                  <div
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-60"
+                    style={{
+                      background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
+                    }}
+                  />
+
+                  <div className="relative flex items-start gap-3.5">
+                    {/* Icon */}
+                    <div
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[12px]"
+                      style={{
+                        background: `linear-gradient(135deg, ${
+                          isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.90)'
+                        }, ${isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.70)'})`,
+                        border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(255,255,255,0.90)',
+                        boxShadow: isDark
+                          ? `0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.08)`
+                          : '0 2px 8px rgba(109,40,217,0.10)',
+                      }}
+                    >
+                      <Icon
+                        className="h-4 w-4"
+                        strokeWidth={1.8}
+                        style={{
+                          background: `linear-gradient(135deg, ${iconGradient.replace('from-', '').replace('to-', '')})`,
+                          WebkitBackgroundClip: 'text',
+                          color: isDark ? 'rgba(196,181,253,0.90)' : 'rgba(109,40,217,0.85)',
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <div
+                        className={`text-[9.5px] font-semibold uppercase tracking-[0.18em] ${
+                          isDark ? 'text-violet-300/55' : 'text-violet-600/65'
+                        }`}
+                      >
+                        {title}
+                      </div>
+                      <p
+                        className={`mt-1.5 text-[0.825rem] leading-[1.55] ${
+                          isDark ? 'text-white/75' : 'text-slate-600'
+                        }`}
+                      >
+                        {body}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               ))}
-            </motion.dl>
-          </div>
-
-          {/* Right side — decorative */}
-          <div className="relative hidden lg:block" aria-hidden="true">
-            <motion.div style={{ rotateX: reduceMotion ? 0 : tiltX, rotateY: reduceMotion ? 0 : tiltY, x: reduceMotion ? 0 : floatX, y: reduceMotion ? 0 : floatY, transformPerspective: 900 }} className="relative">
-              <motion.div initial={{ opacity: 0, scale: 0.96, filter: 'blur(10px)' }} animate={{ opacity: 1, scale: 1, filter: 'blur(0)' }} transition={{ duration: 0.9, delay: 0.35, ease }}
-                className="relative rounded-[28px] border border-white/10 backdrop-blur-2xl p-6 overflow-hidden"
-                style={{ background: isDark ? 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))' : 'linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6))', boxShadow: isDark ? '0 30px 80px rgba(0,0,0,0.55)' : '0 20px 60px rgba(124,58,237,0.12)' }}>
-                <div className="absolute -inset-1 opacity-70 pointer-events-none" style={{ background: isDark ? 'radial-gradient(circle at 20% 20%, rgba(34,211,238,0.22), transparent 40%), radial-gradient(circle at 80% 30%, rgba(236,72,153,0.18), transparent 45%), radial-gradient(circle at 50% 80%, rgba(124,58,237,0.20), transparent 50%)' : 'radial-gradient(circle at 20% 20%, rgba(124,58,237,0.10), transparent 42%)' }} />
-                <div className="relative rounded-2xl overflow-hidden border border-white/10">
-                  <div className="h-56" style={{ background: isDark ? 'linear-gradient(135deg, rgba(124,58,237,0.25), rgba(236,72,153,0.18), rgba(34,211,238,0.14))' : 'linear-gradient(135deg, rgba(124,58,237,0.10), rgba(236,72,153,0.08), rgba(34,211,238,0.06))' }} />
-                  <motion.div className="absolute inset-0 opacity-70" animate={reduceMotion ? {} : { x: ['-20%', '120%'] }} transition={reduceMotion ? { duration: 0 } : { duration: 3.2, repeat: Infinity, ease: 'easeInOut' }} style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)', width: '60%', skewX: '-20deg' }} />
-                  <div className="absolute top-3 left-3 flex items-center gap-2">
-                    <div className="px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.06] backdrop-blur-xl text-[10px] font-mono tracking-[0.18em] uppercase text-white/80">VR MODE</div>
-                    <div className="px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.06] backdrop-blur-xl text-[10px] font-mono tracking-[0.18em] uppercase text-white/60">ARCADE</div>
-                  </div>
-                  <div className="absolute bottom-3 left-3 right-3 grid grid-cols-3 gap-2">
-                    {[{ k: 'SPD', v: '27' }, { k: 'RPM', v: '84' }, { k: 'LVL', v: '05' }].map(x => (
-                      <div key={x.k} className="rounded-2xl border border-white/10 bg-black/20 backdrop-blur-xl px-3 py-2"><div className="text-[10px] font-mono tracking-[0.18em] text-white/55">{x.k}</div><div className="text-[16px] font-display font-extrabold text-white/90">{x.v}</div></div>
-                    ))}
-                  </div>
-                </div>
-                <div className="relative mt-5 flex items-center justify-between">
-                  <div><div className={`text-[12px] font-semibold ${isDark ? 'text-white/90' : 'text-gray-900'}`}>Arcade-ready activations</div><div className={`text-[10px] font-mono tracking-[0.18em] uppercase ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Neon • Motion • Score</div></div>
-                  <div className={`w-11 h-11 rounded-2xl border flex items-center justify-center ${isDark ? 'bg-white/[0.05] border-white/10 text-cyan-200' : 'bg-white border-violet-200/60 text-violet-700'}`}><Bolt className="w-5 h-5" /></div>
-                </div>
-              </motion.div>
-              <FloatingChip title="VR Cycling" subtitle="immersive rides" icon={<Vr className="w-5 h-5" />} tone="cyan" delay={0.55} reduceMotion={!!reduceMotion} className="absolute -top-7 -left-6" />
-              <FloatingChip title="LED Races" subtitle="reactive lighting" icon={<Sparkle className="w-5 h-5" />} tone="violet" delay={0.7} reduceMotion={!!reduceMotion} className="absolute -right-8 top-14" />
-              <FloatingChip title="Arcade Score" subtitle="fast + competitive" icon={<Bolt className="w-5 h-5" />} tone="pink" delay={0.85} reduceMotion={!!reduceMotion} className="absolute -right-4 bottom-10" />
             </motion.div>
-          </div>
+
+            {/* CTA buttons */}
+            <motion.div
+              initial={motionEnabled ? { opacity: 0, y: 14 } : false}
+              whileInView={motionEnabled ? { opacity: 1, y: 0 } : undefined}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={motionEnabled ? { duration: 0.55, delay: 0.22, ease } : undefined}
+              className="mt-5 flex flex-wrap items-center gap-3"
+            >
+              <Link
+                to="/products"
+                className="btn-primary group relative !min-h-[42px] !overflow-hidden !rounded-[15px] !px-5 !text-[11px]"
+              >
+                {/* Shine sweep */}
+                <span
+                  className="pointer-events-none absolute inset-0 -translate-x-full skew-x-[-20deg] bg-white/10 transition-transform duration-700 group-hover:translate-x-[200%]"
+                />
+                Explore Services
+                <ArrowRight className="h-4 w-4" strokeWidth={1.9} />
+              </Link>
+
+              <Link
+                to="/contact"
+                className={`btn-outline !min-h-[42px] !rounded-[15px] !px-5 !text-[11px] ${
+                  isDark ? '!text-white/85' : ''
+                }`}
+              >
+                Talk to the Team
+              </Link>
+            </motion.div>
+
+            {/* Stats */}
+            <div className="mt-6 grid max-w-[27rem] grid-cols-3 gap-2.5">
+              {heroStats.map((stat, index) => (
+                <HeroStat
+                  key={stat.label}
+                  value={stat.value}
+                  label={stat.label}
+                  isDark={isDark}
+                  motionEnabled={motionEnabled}
+                  index={index}
+                />
+              ))}
+            </div>
+          </motion.div>
+
+          {/* ── Right column — floating scene ── */}
+          <motion.div
+            initial={motionEnabled ? { opacity: 0, x: 20 } : false}
+            animate={motionEnabled ? { opacity: 1, x: 0 } : undefined}
+            transition={motionEnabled ? { duration: 0.84, delay: 0.14, ease } : undefined}
+            className="relative z-10 mt-4 lg:mt-0"
+          >
+            {showcaseItems.length > 0 ? (
+              <FloatingScene items={showcaseItems} isDark={isDark} motionEnabled={motionEnabled} />
+            ) : null}
+          </motion.div>
         </div>
       </div>
-
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }} className="absolute bottom-8 left-1/2 -translate-x-1/2" aria-hidden="true">
-        <div className={`w-5 h-8 rounded-full border flex items-start justify-center pt-1.5 backdrop-blur-2xl ${isDark ? 'border-purple-500/25 bg-black/10' : 'border-gray-300/60 bg-white/40'}`}>
-          <motion.div animate={reduceMotion ? {} : { y: [0, 10, 0] }} transition={reduceMotion ? { duration: 0 } : { duration: 1.5, repeat: Infinity }} className={`w-1 h-1.5 rounded-full ${isDark ? 'bg-cyan-400' : 'bg-violet-500'}`} />
-        </div>
-      </motion.div>
     </section>
   )
 }

@@ -21,22 +21,22 @@ export default function GalleryPage() {
   const filtered = cat === 'All' ? albums : albums.filter(a => a.category === cat)
 
   return (
-    <section className="pt-32 pb-24">
-      <div className="max-w-7xl mx-auto px-6">
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
+    <section className="site-section">
+      <div className="site-container">
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="mb-5">
           <span className="section-label">// Visual Story</span>
           <h1 className={`section-title !text-left ${!isDark ? 'text-gray-900' : ''}`}>
             Event <span className="text-glow">Gallery</span>
           </h1>
         </motion.div>
-        <div className="flex flex-wrap gap-2 mb-10">
+        <div className="mb-5 flex flex-wrap gap-1.25">
           {categories.map(c => (
             <Chip key={c} active={cat === c} onClick={() => setCat(c)}>{c}</Chip>
           ))}
         </div>
         <GalleryGrid albums={filtered} onAlbumClick={a => setAlbum(a)} />
         {filtered.length === 0 && (
-          <div className={`text-center py-20 font-display text-lg ${isDark ? 'text-purple-300/50' : 'text-gray-300'}`}>
+          <div className={`py-10 text-center font-display text-[0.95rem] ${isDark ? 'text-purple-300/50' : 'text-gray-300'}`}>
             No albums match this filter.
           </div>
         )}

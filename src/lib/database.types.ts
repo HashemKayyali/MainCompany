@@ -1,7 +1,10 @@
-// ═══════════════════════════════════════════════
-// Database types matching ACTUAL Supabase schema
-// (public schema) — with Row/Insert/Update (NO more never)
-// ═══════════════════════════════════════════════
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export interface Database {
   public: {
@@ -14,6 +17,10 @@ export interface Database {
           phone: string | null
           role: string
           created_at: string
+          avatar_url: string | null
+          avatar_style: string | null
+          avatar_seed: string | null
+          avatar_options: Json | null
         }
         Insert: {
           id: string
@@ -22,12 +29,20 @@ export interface Database {
           phone?: string | null
           role?: string
           created_at?: string
+          avatar_url?: string | null
+          avatar_style?: string | null
+          avatar_seed?: string | null
+          avatar_options?: Json | null
         }
         Update: {
           name?: string | null
           email?: string | null
           phone?: string | null
           role?: string
+          avatar_url?: string | null
+          avatar_style?: string | null
+          avatar_seed?: string | null
+          avatar_options?: Json | null
         }
         Relationships: []
       }
@@ -173,10 +188,7 @@ export interface Database {
           category_id: string | null
           is_active: boolean
           created_at: string
-
-          // ✅ UI flag: if false, hide pricing on public website
           show_price: boolean | null
-
           badge: string | null
           badge_color: string | null
           category_tags: string[] | null
@@ -184,17 +196,19 @@ export interface Database {
           featured: boolean | null
           hero_image: string | null
           gallery: string[] | null
-
-          quick_options: any | null
+          quick_options: Json | null
           notes: string[] | null
           features_left: string[] | null
           features_right: string[] | null
-
-          rental_price_per_event: number | null
           currency: string | null
-
-          // ✅ Video URL for hover preview
           video_url: string | null
+          rental_enabled: boolean | null
+          sale_enabled: boolean | null
+          stock_total: number | null
+          stock_active: number | null
+          minimum_rental_days: number | null
+          buffer_before_days: number | null
+          buffer_after_days: number | null
         }
         Insert: {
           id?: string
@@ -205,10 +219,7 @@ export interface Database {
           category_id?: string | null
           is_active?: boolean
           created_at?: string
-
-          // ✅ UI flag: if false, hide pricing on public website
           show_price?: boolean | null
-
           badge?: string | null
           badge_color?: string | null
           category_tags?: string[] | null
@@ -216,17 +227,19 @@ export interface Database {
           featured?: boolean | null
           hero_image?: string | null
           gallery?: string[] | null
-
-          quick_options?: any | null
+          quick_options?: Json | null
           notes?: string[] | null
           features_left?: string[] | null
           features_right?: string[] | null
-
-          rental_price_per_event?: number | null
           currency?: string | null
-
-          // ✅ Video URL for hover preview
           video_url?: string | null
+          rental_enabled?: boolean | null
+          sale_enabled?: boolean | null
+          stock_total?: number | null
+          stock_active?: number | null
+          minimum_rental_days?: number | null
+          buffer_before_days?: number | null
+          buffer_after_days?: number | null
         }
         Update: {
           title?: string
@@ -235,10 +248,7 @@ export interface Database {
           price?: number | null
           category_id?: string | null
           is_active?: boolean
-
-          // ✅ UI flag: if false, hide pricing on public website
           show_price?: boolean | null
-
           badge?: string | null
           badge_color?: string | null
           category_tags?: string[] | null
@@ -246,17 +256,19 @@ export interface Database {
           featured?: boolean | null
           hero_image?: string | null
           gallery?: string[] | null
-
-          quick_options?: any | null
+          quick_options?: Json | null
           notes?: string[] | null
           features_left?: string[] | null
           features_right?: string[] | null
-
-          rental_price_per_event?: number | null
           currency?: string | null
-
-          // ✅ Video URL for hover preview
           video_url?: string | null
+          rental_enabled?: boolean | null
+          sale_enabled?: boolean | null
+          stock_total?: number | null
+          stock_active?: number | null
+          minimum_rental_days?: number | null
+          buffer_before_days?: number | null
+          buffer_after_days?: number | null
         }
         Relationships: [
           {
@@ -294,30 +306,30 @@ export interface Database {
         Relationships: []
       }
 
-      contact_submissions: {
-        Row: {
-          id: string
-          name: string
-          email: string
-          phone: string
-          product_slug: string
-          city: string
-          address: string
-          message: string
-          status: string
-          created_at: string
+        contact_submissions: {
+          Row: {
+            id: string
+            name: string
+            email: string
+            phone: string
+            product_slug: string | null
+            city: string
+            address: string
+            message: string
+            status: string
+            created_at: string
         }
-        Insert: {
-          id?: string
-          name: string
-          email: string
-          phone: string
-          product_slug: string
-          city?: string
-          address?: string
-          message?: string
-          status?: string
-          created_at?: string
+          Insert: {
+            id?: string
+            name: string
+            email: string
+            phone: string
+            product_slug?: string | null
+            city?: string
+            address?: string
+            message?: string
+            status?: string
+            created_at?: string
         }
         Update: {
           name?: string
@@ -368,6 +380,241 @@ export interface Database {
         }
         Relationships: []
       }
+
+      rental_requests: {
+        Row: {
+          id: string
+          request_number: string
+          profile_id: string
+          customer_name: string
+          email: string
+          phone: string
+          company_name: string | null
+          city: string
+          address: string
+          event_name: string | null
+          notes: string | null
+          admin_internal_notes: string | null
+          subtotal: number
+          extra_fees: number
+          grand_total: number
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          request_number?: string
+          profile_id: string
+          customer_name: string
+          email: string
+          phone: string
+          company_name?: string | null
+          city: string
+          address: string
+          event_name?: string | null
+          notes?: string | null
+          admin_internal_notes?: string | null
+          subtotal?: number
+          extra_fees?: number
+          grand_total?: number
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          customer_name?: string
+          email?: string
+          phone?: string
+          company_name?: string | null
+          city?: string
+          address?: string
+          event_name?: string | null
+          notes?: string | null
+          admin_internal_notes?: string | null
+          subtotal?: number
+          extra_fees?: number
+          grand_total?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+
+      rental_request_items: {
+        Row: {
+          id: string
+          rental_request_id: string
+          product_id: string
+          product_slug: string
+          product_title_snapshot: string
+          quantity: number
+          rental_start_date: string
+          rental_end_date: string
+          rental_days: number
+          unit_price: number
+          line_total: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          rental_request_id: string
+          product_id: string
+          product_slug: string
+          product_title_snapshot: string
+          quantity: number
+          rental_start_date: string
+          rental_end_date: string
+          rental_days: number
+          unit_price?: number
+          line_total?: number
+          created_at?: string
+        }
+        Update: {
+          quantity?: number
+          rental_start_date?: string
+          rental_end_date?: string
+          rental_days?: number
+          unit_price?: number
+          line_total?: number
+        }
+        Relationships: []
+      }
+
+      purchase_quote_requests: {
+        Row: {
+          id: string
+          request_number: string
+          profile_id: string
+          customer_name: string
+          email: string
+          phone: string
+          company_name: string | null
+          city: string
+          address: string
+          notes: string | null
+          admin_internal_notes: string | null
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          request_number?: string
+          profile_id: string
+          customer_name: string
+          email: string
+          phone: string
+          company_name?: string | null
+          city: string
+          address: string
+          notes?: string | null
+          admin_internal_notes?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          customer_name?: string
+          email?: string
+          phone?: string
+          company_name?: string | null
+          city?: string
+          address?: string
+          notes?: string | null
+          admin_internal_notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+
+      purchase_quote_items: {
+        Row: {
+          id: string
+          purchase_quote_request_id: string
+          product_id: string
+          product_slug: string
+          product_title_snapshot: string
+          quantity: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          purchase_quote_request_id: string
+          product_id: string
+          product_slug: string
+          product_title_snapshot: string
+          quantity: number
+          created_at?: string
+        }
+        Update: {
+          quantity?: number
+        }
+        Relationships: []
+      }
+
+      inventory_reservations: {
+        Row: {
+          id: string
+          product_id: string
+          rental_request_id: string
+          rental_request_item_id: string
+          reserved_quantity: number
+          start_date: string
+          end_date: string
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          rental_request_id: string
+          rental_request_item_id: string
+          reserved_quantity: number
+          start_date: string
+          end_date: string
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          reserved_quantity?: number
+          start_date?: string
+          end_date?: string
+          status?: string
+        }
+        Relationships: []
+      }
+
+      request_status_history: {
+        Row: {
+          id: string
+          request_type: string
+          request_id: string
+          old_status: string | null
+          new_status: string
+          note: string | null
+          changed_by_profile_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          request_type: string
+          request_id: string
+          old_status?: string | null
+          new_status: string
+          note?: string | null
+          changed_by_profile_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          old_status?: string | null
+          new_status?: string
+          note?: string | null
+          changed_by_profile_id?: string | null
+        }
+        Relationships: []
+      }
     }
 
     Views: Record<string, never>
@@ -397,8 +644,43 @@ export interface Database {
         Returns: { ok: boolean; error?: string }
       }
       admin_update_user: {
-        Args: { target_id: string; new_name?: string | null; new_phone?: string | null }
+        Args: {
+          target_id: string
+          new_name?: string | null
+          new_phone?: string | null
+          new_avatar_url?: string | null
+          new_avatar_style?: string | null
+          new_avatar_seed?: string | null
+          new_avatar_options?: Json | null
+        }
         Returns: { ok: boolean; error?: string }
+      }
+      get_rental_availability: {
+        Args: { product_id: string; start_date: string; end_date: string }
+        Returns: {
+          result_product_id: string
+          result_start_date: string
+          result_end_date: string
+          stock_active: number
+          reserved_quantity: number
+          available_quantity: number
+        }[]
+      }
+      create_rental_request: {
+        Args: { payload: Json }
+        Returns: { id: string; request_number: string }[]
+      }
+      create_purchase_quote_request: {
+        Args: { payload: Json }
+        Returns: { id: string; request_number: string }[]
+      }
+      approve_rental_request: {
+        Args: { request_id: string; admin_note?: string | null }
+        Returns: { ok: boolean; result_request_id: string; result_request_number: string }[]
+      }
+      update_request_status: {
+        Args: { request_type: string; request_id: string; new_status: string; note?: string | null }
+        Returns: { ok: boolean; result_request_id: string; result_new_status: string }[]
       }
     }
     Enums: Record<string, never>
@@ -414,3 +696,9 @@ export type PartRow = Database['public']['Tables']['parts']['Row']
 export type ContactSubmissionRow = Database['public']['Tables']['contact_submissions']['Row']
 export type ProductImageRow = Database['public']['Tables']['product_images']['Row']
 export type GalleryAlbumRow = Database['public']['Tables']['gallery_albums']['Row']
+export type RentalRequestRow = Database['public']['Tables']['rental_requests']['Row']
+export type RentalRequestItemRow = Database['public']['Tables']['rental_request_items']['Row']
+export type PurchaseQuoteRequestRow = Database['public']['Tables']['purchase_quote_requests']['Row']
+export type PurchaseQuoteItemRow = Database['public']['Tables']['purchase_quote_items']['Row']
+export type InventoryReservationRow = Database['public']['Tables']['inventory_reservations']['Row']
+export type RequestStatusHistoryRow = Database['public']['Tables']['request_status_history']['Row']

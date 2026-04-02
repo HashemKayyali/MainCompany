@@ -1,6 +1,8 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import type { AvatarFields } from '../lib/avatar'
+import { fetchProfileAvatarMap } from './profile.service'
 
-export interface AdminLog {
+export interface AdminLog extends AvatarFields {
   id: string
   admin_id: string
   admin_name: string
@@ -53,7 +55,13 @@ export async function getAllLogs(): Promise<AdminLog[]> {
       return []
     }
 
-    return (data || []) as AdminLog[]
+    const logs = (data || []) as AdminLog[]
+    const avatarMap = await fetchProfileAvatarMap(logs.map(log => log.admin_id))
+
+    return logs.map(log => ({
+      ...log,
+      ...(avatarMap[log.admin_id] || {}),
+    }))
   } catch (err) {
     console.warn('[Logs] Failed to fetch logs:', err)
     return []

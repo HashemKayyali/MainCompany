@@ -22,8 +22,10 @@ export interface Category {
 }
 
 export interface Product {
+  id?: string
   slug: string
   name: string
+  displayOrder?: number
   badge: string
   badgeColor: string
   categoryTags: string[]
@@ -45,6 +47,12 @@ export interface Product {
   notes: string[]
   features: { left: string[]; right: string[] }
   rentalPricePerDay: number
-  rentalPricePerEvent: number
   currency: string
+  rentalEnabled?: boolean
+  saleEnabled?: boolean
+  stockTotal?: number
+  stockActive?: number
+  minimumRentalDays?: number
+  bufferBeforeDays?: number
+  bufferAfterDays?: number
 }

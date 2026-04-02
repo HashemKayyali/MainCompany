@@ -50,6 +50,49 @@
 }
 html.light .grain-overlay { opacity: 0.01; }
 
+html.lenis-root,
+html.lenis-root body {
+  height: auto;
+}
+
+html.lenis-root body {
+  overscroll-behavior-y: none;
+}
+
+[data-native-scroll] {
+  overscroll-behavior: contain;
+}
+
+@keyframes ambient-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(2.5%, -1.5%, 0) scale(1.035); }
+}
+
+@keyframes ambient-drift-reverse {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-2.5%, 2%, 0) scale(1.04); }
+}
+
+@keyframes ambient-breathe {
+  0%, 100% { opacity: 0.72; filter: saturate(1) brightness(1); }
+  50% { opacity: 1; filter: saturate(1.08) brightness(1.04); }
+}
+
+.ambient-drift {
+  animation: ambient-drift 26s ease-in-out infinite;
+  will-change: transform;
+}
+
+.ambient-drift-reverse {
+  animation: ambient-drift-reverse 30s ease-in-out infinite;
+  will-change: transform;
+}
+
+.ambient-breathe {
+  animation: ambient-breathe 14s ease-in-out infinite;
+  will-change: opacity, filter;
+}
+
 /* ── CSS Scan Line (replaces motion.div for better perf) ── */
 .scan-line {
   position: absolute;
@@ -75,7 +118,7 @@ html.light .grain-overlay { opacity: 0.01; }
 @media (prefers-reduced-motion: reduce) {
   .star-field, .grain-overlay, .scan-line { display: none !important; }
   .star-field .layer { animation: none !important; }
-  .animate-aurora, .animate-orbit { animation: none !important; }
+  .animate-aurora, .animate-orbit, .ambient-drift, .ambient-drift-reverse, .ambient-breathe { animation: none !important; }
 }
 
 html.perf-low .star-field,
@@ -87,7 +130,10 @@ html.perf-low .star-field .layer {
   animation: none !important;
 }
 html.perf-low .animate-aurora,
-html.perf-low .animate-orbit {
+html.perf-low .animate-orbit,
+html.perf-low .ambient-drift,
+html.perf-low .ambient-drift-reverse,
+html.perf-low .ambient-breathe {
   animation: none !important;
 }
 

@@ -19,7 +19,7 @@ function EventCard({ event, index, isDark }: { event: BLEvent; index: number; is
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={reduceMotion ? { duration: 0 } : { duration: 0.6, delay: index * 0.08, ease }}
-      className={`group relative rounded-2xl border p-5 transition-all hover:-translate-y-1 ${
+      className={`group relative rounded-2xl border p-4 transition-all hover:-translate-y-0.5 ${
         isDark
           ? 'bg-white/[0.03] border-white/10 hover:border-purple-500/30'
           : 'bg-white/70 border-violet-200/60 hover:border-violet-300 shadow-sm'
@@ -39,10 +39,10 @@ function EventCard({ event, index, isDark }: { event: BLEvent; index: number; is
         }}
       />
 
-      <div className="relative flex items-start gap-4">
+      <div className="relative flex items-start gap-3">
         {/* Date block */}
         <div
-          className={`flex-none w-14 h-14 rounded-xl flex flex-col items-center justify-center border ${
+          className={`flex h-12 w-12 flex-none flex-col items-center justify-center rounded-xl border ${
             isDark
               ? 'bg-purple-500/10 border-purple-500/20'
               : 'bg-violet-50 border-violet-100'
@@ -111,14 +111,14 @@ export default function UpcomingEventsStrip() {
   if (sorted.length === 0) return null
 
   return (
-    <section className="py-20" aria-label="Upcoming events">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="site-section" aria-label="Upcoming events">
+      <div className="site-container">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={reduceMotion ? { duration: 0 } : { duration: 0.7, ease }}
-          className="text-center mb-12"
+          className="mb-9 text-center"
         >
           <span className="section-label">// Upcoming</span>
           <h2 className={`section-title ${!isDark ? 'text-gray-900' : ''}`}>
@@ -126,7 +126,7 @@ export default function UpcomingEventsStrip() {
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {sorted.slice(0, 6).map((event, i) => (
             <EventCard key={event.id} event={event} index={i} isDark={isDark} />
           ))}

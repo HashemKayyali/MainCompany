@@ -1,20 +1,30 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { getAllLogs, type AdminLog } from '../../services/logs.service'
+import AdminActionButton from '../../components/admin/AdminActionButton'
+import AdminDetailModal from '../../components/admin/AdminDetailModal'
+import AdminEntityCard from '../../components/admin/AdminEntityCard'
+import AdminPageHeader from '../../components/admin/AdminPageHeader'
+import AdminStatCard from '../../components/admin/AdminStatCard'
+import UserAvatar from '../../components/ui/UserAvatar'
 
 const ACTION_COLORS: Record<string, { dark: string; light: string; emoji: string }> = {
-  create: { dark: 'bg-green-400/15 text-green-300 border-green-400/20', light: 'bg-green-50 text-green-700 border-green-200', emoji: '➕' },
-  update: { dark: 'bg-amber-400/15 text-amber-300 border-amber-400/20', light: 'bg-amber-50 text-amber-700 border-amber-200', emoji: '✏️' },
-  delete: { dark: 'bg-red-400/15 text-red-300 border-red-400/20', light: 'bg-red-50 text-red-700 border-red-200', emoji: '🗑️' },
+  create: { dark: 'bg-emerald-400/10 text-emerald-200 ring-emerald-400/18', light: 'bg-emerald-50 text-emerald-700 ring-emerald-200', emoji: '+' },
+  update: { dark: 'bg-amber-400/10 text-amber-200 ring-amber-400/18', light: 'bg-amber-50 text-amber-700 ring-amber-200', emoji: '↺' },
+  delete: { dark: 'bg-red-400/10 text-red-200 ring-red-400/18', light: 'bg-red-50 text-red-700 ring-red-200', emoji: '×' },
 }
 
 const ENTITY_EMOJI: Record<string, string> = {
   product: '🚲',
-  part: '🔧',
-  customer: '👥',
-  category: '📂',
+  part: '🛠️',
+  customer: '🤝',
+  category: '🧩',
   gallery: '📸',
-  admin: '🔐',
+  admin: '🛡️',
+}
+
+function cn(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(' ')
 }
 
 function timeAgo(dateStr: string): string {
@@ -32,14 +42,14 @@ function timeAgo(dateStr: string): string {
 export default function AdminLogsPage() {
   const { isDark } = useTheme()
   const [logs, setLogs] = useState<AdminLog[]>([])
+  const [details, setDetails] = useState<AdminLog | null>(null)
   const [loading, setLoading] = useState(true)
   const [filterAction, setFilterAction] = useState<string>('all')
   const [filterEntity, setFilterEntity] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
 
-  const txt = isDark ? 'text-white' : 'text-gray-900'
   const sub = isDark ? 'text-purple-200/80' : 'text-gray-500'
-  const cardBg = isDark ? 'bg-purple-500/[0.07] border-purple-500/20' : 'bg-white border-gray-200'
+  const cardsLayoutClass = 'flex flex-col gap-3'
 
   useEffect(() => {
     let mounted = true
@@ -52,174 +62,249 @@ export default function AdminLogsPage() {
       }
     }
     load()
-    return () => { mounted = false }
+    return () => {
+      mounted = false
+    }
   }, [])
 
   const filtered = useMemo(() => {
     let result = logs
-    if (filterAction !== 'all') result = result.filter(l => l.action === filterAction)
-    if (filterEntity !== 'all') result = result.filter(l => l.entity_type === filterEntity)
+    if (filterAction !== 'all') result = result.filter(log => log.action === filterAction)
+    if (filterEntity !== 'all') result = result.filter(log => log.entity_type === filterEntity)
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
-      result = result.filter(l =>
-        l.admin_name?.toLowerCase().includes(q) ||
-        l.admin_email?.toLowerCase().includes(q) ||
-        l.entity_name?.toLowerCase().includes(q) ||
-        l.details?.toLowerCase().includes(q)
+      result = result.filter(
+        log =>
+          log.admin_name?.toLowerCase().includes(q) ||
+          log.admin_email?.toLowerCase().includes(q) ||
+          log.entity_name?.toLowerCase().includes(q) ||
+          log.details?.toLowerCase().includes(q)
       )
     }
     return result
   }, [logs, filterAction, filterEntity, searchQuery])
 
   const entityTypes = useMemo(() => {
-    const set = new Set(logs.map(l => l.entity_type))
+    const set = new Set(logs.map(log => log.entity_type))
     return Array.from(set).sort()
   }, [logs])
 
-  const selectCls = [
-    'px-3 py-2 rounded-xl text-[12px] font-medium border outline-none transition',
+  const selectCls = cn(
+    'rounded-xl px-3 py-2 text-[12px] font-medium outline-none transition',
     isDark
-      ? 'bg-void-950/40 border-purple-500/20 text-purple-100 focus:border-purple-500/40'
-      : 'bg-white border-gray-200 text-gray-700 focus:border-violet-300',
-  ].join(' ')
+      ? 'bg-[#0d1430]/90 text-purple-100 ring-1 ring-inset ring-cyan-400/10 focus:ring-cyan-300/20'
+      : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 focus:ring-violet-300'
+  )
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
-        <div>
-          <h1 className={`font-display text-2xl font-bold ${txt}`}>📋 Activity Logs</h1>
-          <p className={`text-sm ${sub}`}>
-            {filtered.length} {filtered.length === 1 ? 'entry' : 'entries'}
-            {logs.length !== filtered.length ? ` (of ${logs.length} total)` : ''}
-          </p>
-        </div>
+    <div className="flex h-full min-h-0 flex-col gap-5">
+      <AdminPageHeader
+        title="Activity Logs"
+        actions={
+          <button
+            onClick={async () => {
+              setLoading(true)
+              const data = await getAllLogs()
+              setLogs(data)
+              setLoading(false)
+            }}
+            className={cn(
+              'inline-flex min-h-[42px] items-center rounded-xl px-4 py-2.5 text-[12px] font-semibold transition active:translate-y-[1px]',
+              isDark
+                ? 'bg-[linear-gradient(180deg,rgba(24,56,78,0.96),rgba(14,36,54,0.98))] text-cyan-100 ring-1 ring-inset ring-cyan-300/24 shadow-[0_12px_28px_-18px_rgba(34,211,238,0.3)] hover:brightness-110'
+                : 'bg-cyan-50 text-cyan-700 ring-1 ring-inset ring-cyan-200 shadow-[0_10px_24px_-18px_rgba(34,211,238,0.2)] hover:bg-cyan-100'
+            )}
+          >
+            Refresh
+          </button>
+        }
+      />
 
-        <button
-          onClick={async () => {
-            setLoading(true)
-            const data = await getAllLogs()
-            setLogs(data)
-            setLoading(false)
-          }}
-          className={[
-            'px-4 py-2 rounded-xl text-[12px] font-medium border transition',
-            isDark
-              ? 'border-cyan-400/25 bg-cyan-400/10 hover:bg-cyan-400/15 text-cyan-300'
-              : 'border-cyan-200 bg-cyan-50 hover:bg-cyan-100 text-cyan-700',
-          ].join(' ')}
-        >
-          🔄 Refresh
-        </button>
+      <div className="grid shrink-0 gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+        <AdminStatCard label="Visible Logs" value={filtered.length} />
+        <AdminStatCard label="All Logs" value={logs.length} />
+        <AdminStatCard label="Updates" value={logs.filter(log => log.action === 'update').length} />
+        <AdminStatCard label="Deletes" value={logs.filter(log => log.action === 'delete').length} />
       </div>
 
-      {/* Filters */}
-      <div className={`rounded-2xl p-4 mb-6 border ${cardBg}`}>
-        <div className="flex flex-wrap gap-3">
+      <div
+        className={cn(
+          'min-h-0 flex flex-1 flex-col rounded-[24px] p-3',
+          isDark
+            ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(8,11,27,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_28px_90px_-58px_rgba(7,15,36,0.96)]'
+            : 'bg-white ring-1 ring-inset ring-gray-200'
+        )}
+      >
+        <div className="mb-4 flex flex-wrap gap-3">
           <input
-            placeholder="Search logs…"
+            placeholder="Search logs..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className={[
-              'flex-1 min-w-[200px] px-3 py-2 rounded-xl text-[12px] border outline-none transition',
-              isDark
-                ? 'bg-void-950/40 border-purple-500/20 text-purple-50 placeholder:text-purple-200/30 focus:border-purple-500/40'
-                : 'bg-white border-gray-200 text-gray-800 placeholder:text-gray-400 focus:border-violet-300',
-            ].join(' ')}
+            className={cn(
+              'form-field !mb-0 !min-w-[220px] !flex-1',
+              isDark ? 'placeholder:!text-purple-200/30' : ''
+            )}
           />
 
           <select value={filterAction} onChange={e => setFilterAction(e.target.value)} className={selectCls}>
             <option value="all">All Actions</option>
-            <option value="create">➕ Create</option>
-            <option value="update">✏️ Update</option>
-            <option value="delete">🗑️ Delete</option>
+            <option value="create">Create</option>
+            <option value="update">Update</option>
+            <option value="delete">Delete</option>
           </select>
 
           <select value={filterEntity} onChange={e => setFilterEntity(e.target.value)} className={selectCls}>
             <option value="all">All Types</option>
-            {entityTypes.map(t => (
-              <option key={t} value={t}>
-                {ENTITY_EMOJI[t] || '📦'} {t.charAt(0).toUpperCase() + t.slice(1)}
+            {entityTypes.map(type => (
+              <option key={type} value={type}>
+                {ENTITY_EMOJI[type] || '•'} {type.charAt(0).toUpperCase() + type.slice(1)}
               </option>
             ))}
           </select>
         </div>
+
+        {loading ? (
+          <div className={`flex flex-1 flex-col items-center justify-center py-16 text-center ${sub}`}>
+            <div className="mb-3 text-3xl">📋</div>
+            <p className="text-sm">Loading logs...</p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className={`flex flex-1 flex-col items-center justify-center py-16 text-center ${sub}`}>
+            <div className="mb-3 text-3xl">📭</div>
+            <p className="text-sm">No logs found</p>
+            <p className="mt-1 text-xs">Actions will appear here when admins create, edit, or delete items.</p>
+          </div>
+        ) : (
+          <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
+            <div className={cardsLayoutClass}>
+              {filtered.map(log => {
+              const tone = ACTION_COLORS[log.action] || ACTION_COLORS.create
+              const badgeTone = isDark ? tone.dark : tone.light
+              return (
+                <AdminEntityCard
+                  key={log.id}
+                  variant="list"
+                  className="!rounded-[20px]"
+                  bodyClassName="!gap-2 !p-3"
+                  minHeightClassName="min-h-[102px]"
+                  listMediaWrapClassName="md:self-center"
+                  listMediaFrameClassName="!h-[70px] !w-[84px] md:!h-[70px] md:!w-[84px] !rounded-[16px] !p-1.5"
+                  factsWrapClassName="xl:w-[164px]"
+                  actionsWrapClassName="xl:w-[104px]"
+                  media={
+                    <div className={cn('flex aspect-[4/3] items-center justify-center', isDark ? 'bg-[radial-gradient(circle,rgba(34,211,238,0.10),transparent_58%)]' : 'bg-[radial-gradient(circle,rgba(139,92,246,0.08),transparent_55%)]')}>
+                      <UserAvatar
+                        name={log.admin_name}
+                        email={log.admin_email}
+                        avatarUrl={log.avatarUrl}
+                        avatarStyle={log.avatarStyle}
+                        avatarSeed={log.avatarSeed}
+                        avatarOptions={log.avatarOptions}
+                        className="h-full w-full rounded-[18px]"
+                        fallbackClassName={cn(
+                          'text-[1.75rem] font-display font-bold',
+                          isDark
+                            ? 'bg-gradient-to-br from-prism-violet to-prism-cyan text-void-950'
+                            : 'bg-gradient-to-br from-violet-400 to-cyan-400 text-white'
+                        )}
+                      />
+                    </div>
+                  }
+                  mediaOverlayLeft={
+                    <span className={cn('rounded-full px-3 py-1 text-[10px] font-mono uppercase tracking-[0.22em] ring-1 ring-inset', badgeTone)}>
+                      {tone.emoji} {log.action}
+                    </span>
+                  }
+                  mediaOverlayRight={
+                    <span className={cn('rounded-full px-3 py-1 text-[10px] font-mono uppercase tracking-[0.22em] ring-1 ring-inset', isDark ? 'bg-black/35 text-cyan-100/70 ring-cyan-400/10' : 'bg-white/90 text-gray-600 ring-gray-200')}>
+                      {ENTITY_EMOJI[log.entity_type] || '•'} {log.entity_type}
+                    </span>
+                  }
+                  title={log.entity_name || log.entity_id}
+                  subtitle={log.details || `${log.action} recorded for ${log.entity_type}.`}
+                  badges={
+                    <>
+                      <span className={cn('rounded-full px-3 py-1 text-[11px] font-medium ring-1 ring-inset', isDark ? 'bg-[#0f1630]/92 text-purple-100/78 ring-cyan-400/10' : 'border-gray-200 bg-white text-gray-700')}>
+                        {log.admin_name || 'Unknown admin'}
+                      </span>
+                      <span className={cn('rounded-full px-3 py-1 text-[11px] font-medium ring-1 ring-inset', isDark ? 'bg-cyan-400/10 text-cyan-200 ring-cyan-400/18' : 'border-violet-200 bg-violet-50 text-violet-700')}>
+                        {timeAgo(log.created_at)}
+                      </span>
+                    </>
+                  }
+                  facts={[
+                    { label: 'Actor', value: log.admin_email || 'Unknown' },
+                    { label: 'When', value: timeAgo(log.created_at) },
+                  ]}
+                  actions={
+                    <AdminActionButton
+                      tone="primary"
+                      onClick={event => {
+                        event.stopPropagation()
+                        setDetails(log)
+                      }}
+                    >
+                      Details
+                    </AdminActionButton>
+                  }
+                />
+              )
+            })}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Logs List */}
-      {loading ? (
-        <div className={`text-center py-16 ${sub}`}>
-          <div className="text-3xl mb-3 animate-pulse">📋</div>
-          <p className="text-sm">Loading logs…</p>
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className={`text-center py-16 ${sub}`}>
-          <div className="text-3xl mb-3">📭</div>
-          <p className="text-sm">No logs found</p>
-          <p className="text-xs mt-1">Actions will appear here when admins create, edit, or delete items.</p>
-        </div>
-      ) : (
-        <div className="space-y-2.5">
-          {filtered.map(log => {
-            const ac = ACTION_COLORS[log.action] || ACTION_COLORS.create
-            const acCls = isDark ? ac.dark : ac.light
-
-            return (
-              <div
-                key={log.id}
-                className={`rounded-2xl p-4 border transition hover:-translate-y-[1px] ${cardBg}`}
-              >
-                <div className="flex items-start gap-3">
-                  {/* Avatar */}
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold font-display shrink-0 ${
-                      isDark
-                        ? 'bg-gradient-to-br from-prism-violet to-prism-cyan text-void-950'
-                        : 'bg-gradient-to-br from-violet-400 to-cyan-400 text-white'
-                    }`}
-                  >
-                    {(log.admin_name || '?').charAt(0).toUpperCase()}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center flex-wrap gap-2">
-                      <span className={`font-medium text-sm ${txt}`}>{log.admin_name || 'Unknown'}</span>
-
-                      <span className={`px-2 py-0.5 rounded-lg text-[10px] font-mono uppercase tracking-wider border ${acCls}`}>
-                        {ac.emoji} {log.action}
-                      </span>
-
-                      <span className={`px-2 py-0.5 rounded-lg text-[10px] font-mono border ${
-                        isDark ? 'bg-purple-500/10 text-purple-200/70 border-purple-500/20' : 'bg-gray-50 text-gray-500 border-gray-200'
-                      }`}>
-                        {ENTITY_EMOJI[log.entity_type] || '📦'} {log.entity_type}
-                      </span>
-                    </div>
-
-                    <p className={`text-xs mt-1 ${sub}`}>
-                      {log.action === 'create' && `Created ${log.entity_type}: `}
-                      {log.action === 'update' && `Updated ${log.entity_type}: `}
-                      {log.action === 'delete' && `Deleted ${log.entity_type}: `}
-                      <span className={txt}>{log.entity_name || log.entity_id}</span>
+      <AdminDetailModal
+        open={!!details}
+        onClose={() => setDetails(null)}
+        title={details?.entity_name || details?.entity_id || 'Log Details'}
+        subtitle={details ? 'This panel surfaces the full metadata for the selected admin activity event.' : undefined}
+        badges={
+          details ? (
+            <>
+              <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold', isDark ? (ACTION_COLORS[details.action] || ACTION_COLORS.create).dark : (ACTION_COLORS[details.action] || ACTION_COLORS.create).light)}>
+                {details.action}
+              </span>
+              <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold', isDark ? 'border-white/10 bg-white/[0.04] text-purple-100/80' : 'border-gray-200 bg-white text-gray-700')}>
+                {details.entity_type}
+              </span>
+            </>
+          ) : null
+        }
+        summaryFacts={
+          details
+            ? [
+                { label: 'Entity', value: details.entity_name || details.entity_id },
+                { label: 'Actor', value: details.admin_name || 'Unknown' },
+                { label: 'Email', value: details.admin_email || 'Unknown' },
+                { label: 'When', value: new Date(details.created_at).toLocaleString() },
+              ]
+            : []
+        }
+        sections={
+          details
+            ? [
+                {
+                  title: 'Event',
+                  facts: [
+                    { label: 'Action', value: details.action },
+                    { label: 'Entity type', value: details.entity_type },
+                    { label: 'Entity id', value: details.entity_id },
+                  ],
+                },
+                {
+                  title: 'Details',
+                  content: (
+                    <p className={cn('text-sm leading-6', isDark ? 'text-purple-100/80' : 'text-gray-700')}>
+                      {details.details || 'No additional log details were stored for this entry.'}
                     </p>
-
-                    {log.details && (
-                      <p className={`text-[11px] mt-1 ${isDark ? 'text-purple-200/50' : 'text-gray-400'}`}>
-                        {log.details}
-                      </p>
-                    )}
-
-                    <div className={`flex items-center gap-3 mt-2 text-[11px] ${isDark ? 'text-purple-200/50' : 'text-gray-400'}`}>
-                      <span>{log.admin_email}</span>
-                      <span>•</span>
-                      <span title={new Date(log.created_at).toLocaleString()}>{timeAgo(log.created_at)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
+                  ),
+                },
+              ]
+            : []
+        }
+      />
     </div>
   )
 }

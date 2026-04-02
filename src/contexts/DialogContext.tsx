@@ -7,6 +7,7 @@ import {
 } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from './ThemeContext'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
 /* ── Types ── */
 interface DialogOptions {
@@ -91,6 +92,7 @@ function DialogOverlay({
   onCancel: () => void
 }) {
   const { isDark } = useTheme()
+  useBodyScrollLock(true)
 
   const isAlert = dialog.type === 'alert'
   const variant = dialog.variant || 'danger'
@@ -116,7 +118,7 @@ function DialogOverlay({
     : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" data-native-scroll>
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}

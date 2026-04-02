@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Link, useParams } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowLeft, Check, ChevronDown, Package } from 'lucide-react'
 import { useData } from '../contexts/DataContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { social } from '../data/social'
@@ -8,6 +9,7 @@ import ProductGallery from '../components/product/ProductGallery'
 import ProductOptions from '../components/product/ProductOptions'
 import ProductFeatures from '../components/product/ProductFeatures'
 import PricingCard from '../components/store/PricingCard'
+import ProductCommerceActions from '../components/product/ProductCommerceActions'
 import NotFoundPage from './NotFoundPage'
 import { usePageMeta } from '../hooks/usePageMeta'
 
@@ -22,152 +24,205 @@ export default function ProductDetailsPage() {
   const parts = getPartsByProduct(slug || '')
   const [quoteOpen, setQuoteOpen] = useState(false)
 
-  // ✅ showPrice gate (undefined = true)
   const showPrice = product ? product.showPrice !== false : true
 
   usePageMeta({
     title: product?.name || 'Product',
-    description: product?.description || 'View product details and book for your event.',
+    description: product?.description || 'View product details and submit rental or purchase requests.',
     ogImage: product?.gallery?.[0],
-    jsonLd: product ? {
-      '@context': 'https://schema.org',
-      '@type': 'Product',
-      name: product.name,
-      description: product.description,
-      image: product.gallery?.[0],
-      ...(showPrice ? {
-        offers: {
-          '@type': 'Offer',
-          price: product.rentalPricePerDay,
-          priceCurrency: product.currency || 'JOD',
-          availability: 'https://schema.org/InStock',
-        },
-      } : {}),
-    } : undefined,
+    jsonLd: product
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: product.name,
+          description: product.description,
+          image: product.gallery?.[0],
+          ...(showPrice
+            ? {
+                offers: {
+                  '@type': 'Offer',
+                  price: product.rentalPricePerDay,
+                  priceCurrency: product.currency || 'JOD',
+                  availability: 'https://schema.org/InStock',
+                },
+              }
+            : {}),
+        }
+      : undefined,
   })
 
   if (!product) return <NotFoundPage />
 
   const txt = isDark ? 'text-white' : 'text-gray-900'
   const sub = isDark ? 'text-purple-200/80' : 'text-gray-500'
-  const card = isDark ? 'bg-purple-500/[0.07] border border-purple-500/20' : 'bg-white border border-violet-100 shadow-sm'
+  const card = isDark
+    ? 'border border-purple-500/20 bg-purple-500/[0.07]'
+    : 'border border-violet-100 bg-white shadow-sm'
 
   return (
-    <section className="pt-32 pb-24">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="site-section">
+      <div className="site-container">
         <Link
           to="/products"
-          className={`inline-flex items-center gap-2 mb-8 text-[13px] font-mono tracking-wider uppercase ${
+          className={`mb-6 inline-flex items-center gap-2 text-[12px] font-mono uppercase tracking-wider transition-colors ${
             isDark ? 'text-purple-300/80 hover:text-prism-violet' : 'text-gray-400 hover:text-violet-600'
-          } transition-colors`}
+          }`}
         >
-          {'<-'} Products
+          <ArrowLeft size={14} />
+          Products
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-14">
-          {/* ── Left Column ── */}
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-5 lg:gap-6">
           <div className="lg:col-span-3">
-            <motion.div initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, ease }}>
-              <ProductGallery images={product.gallery} name={product.name} videoUrl={product.videoUrl} />
+            <motion.div
+              initial={{ opacity: 0, x: -24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, ease }}
+            >
+              <ProductGallery
+                images={product.gallery}
+                name={product.name}
+                videoUrl={product.videoUrl}
+              />
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1, ease }}
-              className="mt-8"
+              className="mt-5"
             >
-              {/* ✅ hide empty badge */}
               {!!product.badge?.trim() && (
                 <span
-                  className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-white mb-4 ${String(product.badgeColor || '').includes('linear-gradient') ? '' : `bg-gradient-to-r ${product.badgeColor}`}`}
-                  style={String(product.badgeColor || '').includes('linear-gradient') ? { backgroundImage: product.badgeColor } : undefined}
+                  className={`mb-3 inline-flex rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.22em] text-white ${
+                    String(product.badgeColor || '').includes('linear-gradient')
+                      ? ''
+                      : `bg-gradient-to-r ${product.badgeColor}`
+                  }`}
+                  style={
+                    String(product.badgeColor || '').includes('linear-gradient')
+                      ? { backgroundImage: product.badgeColor }
+                      : undefined
+                  }
                 >
                   {product.badge}
                 </span>
               )}
 
-              <h1 className={`font-display text-3xl sm:text-4xl font-extrabold tracking-tight ${txt}`}>{product.name}</h1>
-              <p className={`mt-4 text-lg leading-relaxed ${sub}`}>{product.description}</p>
+              <h1 className={`font-display text-[1.55rem] font-extrabold tracking-tight sm:text-[1.85rem] ${txt}`}>
+                {product.name}
+              </h1>
+              <p className={`mt-2 text-[0.84rem] leading-5.5 sm:text-[0.9rem] ${sub}`}>{product.description}</p>
             </motion.div>
 
-            <div className={`my-7 h-px ${isDark ? 'bg-purple-500/10' : 'bg-violet-50'}`} />
+            <div className={`my-5 h-px ${isDark ? 'bg-purple-500/10' : 'bg-violet-50'}`} />
 
             {product.quickOptions.length > 0 && <ProductOptions options={product.quickOptions} />}
 
             {product.notes.length > 0 && (
-              <div className="mt-5 space-y-1.5">
-                {product.notes.map((n, i) => (
-                  <p key={i} className={`text-[13px] flex items-start gap-2 ${sub}`}>
-                    <span className="text-prism-violet/80 mt-px">{'>'}</span>
-                    {n}
+              <div className="mt-3.5 space-y-1.5">
+                {product.notes.map((note, index) => (
+                  <p key={index} className={`flex items-start gap-2 text-[12px] leading-5 ${sub}`}>
+                    <span className="mt-px text-prism-violet/80">{'>'}</span>
+                    {note}
                   </p>
                 ))}
               </div>
             )}
 
             {(product.features.left.length > 0 || product.features.right.length > 0) && (
-              <div className="mt-7">
+              <div className="mt-6">
                 <ProductFeatures features={product.features} />
               </div>
             )}
 
-            {/* ── Parts Section ── */}
             {parts.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.25, ease }}
-                className="mt-12"
+              className="mt-8"
               >
-                <div className={`mb-6 pb-4 border-b ${isDark ? 'border-purple-500/15' : 'border-violet-100'}`}>
-                  <h2 className={`font-display text-xl font-bold ${txt}`}>Spare Parts & Accessories</h2>
-                  <p className={`text-[13px] mt-1 ${sub}`}>{parts.length} available for {product.name}</p>
+                <div
+                    className={`mb-4 border-b pb-3 ${
+                      isDark ? 'border-purple-500/15' : 'border-violet-100'
+                    }`}
+                  >
+                  <h2 className={`font-display text-[1.05rem] font-bold ${txt}`}>
+                    Spare Parts & Accessories
+                  </h2>
+                  <p className={`mt-1 text-[12px] ${sub}`}>
+                    {parts.length} available for {product.name}
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {parts.map((part, i) => (
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                  {parts.map((part, index) => (
                     <motion.div
                       key={part.id}
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.3 + i * 0.06, ease }}
-                      className={`rounded-xl p-4 flex items-start gap-4 transition-all hover:-translate-y-0.5 ${card}`}
+                      transition={{ duration: 0.4, delay: 0.3 + index * 0.06, ease }}
+                      className={`flex items-start gap-2.5 rounded-[14px] p-3 transition-all hover:-translate-y-0.5 ${card}`}
                     >
                       {part.image ? (
-                        <div className={`w-14 h-14 rounded-xl overflow-hidden shrink-0 ${isDark ? 'bg-purple-500/10' : 'bg-violet-50'}`}>
+                        <div
+                          className={`h-12 w-12 shrink-0 overflow-hidden rounded-[14px] ${
+                            isDark ? 'bg-purple-500/10' : 'bg-violet-50'
+                          }`}
+                        >
                           <img
                             src={part.image}
                             alt={part.name}
                             loading="lazy"
-                            className="w-full h-full object-cover"
-                            onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                            className="h-full w-full object-cover"
+                            onError={event => {
+                              ;(event.target as HTMLImageElement).style.display = 'none'
+                            }}
                           />
                         </div>
                       ) : (
-                        <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${isDark ? 'bg-purple-500/10 border border-purple-500/20' : 'bg-violet-50 border border-violet-100'}`}>
-                          <span className="text-xl">🔧</span>
+                        <div
+                          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] ${
+                            isDark
+                              ? 'border border-purple-500/20 bg-purple-500/10'
+                              : 'border border-violet-100 bg-violet-50'
+                          }`}
+                        >
+                          <Package size={16} className={isDark ? 'text-purple-200/80' : 'text-violet-600'} />
                         </div>
                       )}
 
-                      <div className="flex-1 min-w-0">
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className={`text-sm font-semibold ${txt}`}>{part.name}</h3>
-                          <span className={`text-sm font-display font-bold whitespace-nowrap ${isDark ? 'text-cyan-400' : 'text-violet-600'}`}>
+                          <h3 className={`text-[13px] font-semibold ${txt}`}>{part.name}</h3>
+                          <span
+                            className={`whitespace-nowrap text-[13px] font-display font-bold ${
+                              isDark ? 'text-cyan-400' : 'text-violet-600'
+                            }`}
+                          >
                             {part.price} {part.currency}
                           </span>
                         </div>
-                        <p className={`text-[12px] mt-1 line-clamp-2 ${sub}`}>{part.description}</p>
+                        <p className={`mt-1 line-clamp-2 text-[11px] leading-5 ${sub}`}>{part.description}</p>
 
-                        <div className="flex items-center gap-3 mt-2">
+                        <div className="mt-2 flex items-center gap-2.5">
                           <span
-                            className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold ${
                               part.inStock
-                                ? isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-50 text-emerald-600'
-                                : isDark ? 'bg-red-500/15 text-red-400' : 'bg-red-50 text-red-500'
+                                ? isDark
+                                  ? 'bg-emerald-500/15 text-emerald-400'
+                                  : 'bg-emerald-50 text-emerald-600'
+                                : isDark
+                                  ? 'bg-red-500/15 text-red-400'
+                                  : 'bg-red-50 text-red-500'
                             }`}
                           >
-                            <span className={`w-1.5 h-1.5 rounded-full ${part.inStock ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${
+                                part.inStock ? 'bg-emerald-400' : 'bg-red-400'
+                              }`}
+                            />
                             {part.inStock ? 'In Stock' : 'Out of Stock'}
                           </span>
                         </div>
@@ -179,36 +234,53 @@ export default function ProductDetailsPage() {
             )}
           </div>
 
-          {/* ── Right Column (Sticky) ── */}
           <div className="lg:col-span-2">
-            <div className="lg:sticky lg:top-24 space-y-5">
-              {/* ✅ Hide pricing card if showPrice=false */}
+            <div className="space-y-3.5 lg:sticky lg:top-16">
               {showPrice && <PricingCard product={product} />}
 
-              {/* ── Request Quote Box ── */}
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2, ease }}>
-                <div className={`rounded-2xl overflow-hidden ${card}`}>
-                  <div className={`px-6 py-4 border-b ${isDark ? 'border-purple-500/20 bg-cyan-500/10' : 'border-violet-50 bg-cyan-50/50'}`}>
-                    <span className={`text-[10px] font-mono uppercase tracking-[0.25em] ${isDark ? 'text-cyan-400' : 'text-cyan-600'}`}>
-                      💬 Request a Quote
+              <motion.div
+                id="product-commerce-actions"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2, ease }}
+              >
+                <div className={`overflow-hidden rounded-[16px] ${card}`}>
+                  <div
+                    className={`border-b px-4 py-3 ${
+                      isDark
+                        ? 'border-purple-500/20 bg-cyan-500/10'
+                        : 'border-violet-50 bg-cyan-50/50'
+                    }`}
+                  >
+                    <span
+                      className={`text-[9px] font-mono uppercase tracking-[0.22em] ${
+                        isDark ? 'text-cyan-400' : 'text-cyan-600'
+                      }`}
+                    >
+                      Rental & Purchase Options
                     </span>
                   </div>
 
-                  <div className="p-6">
-                    <p className={`text-[13px] leading-relaxed mb-5 ${sub}`}>
-                      Interested in <strong className={txt}>{product.name}</strong>? Tell us about your event and we&apos;ll send you a customized quote — including setup, staffing, and branding options.
+                  <div className="p-4">
+                    <p className={`mb-3.5 text-[12px] leading-6 ${sub}`}>
+                      Choose whether you want to rent <strong className={txt}>{product.name}</strong> for an
+                      event or request a direct purchase quote. Rental requests stay stock-aware, while
+                      purchase quotes are reviewed separately by the sales team.
                     </p>
 
                     <button
-                      onClick={() => setQuoteOpen(!quoteOpen)}
-                      className={`w-full text-left px-4 py-3 rounded-xl text-[13px] font-medium flex items-center justify-between transition-all ${
+                      onClick={() => setQuoteOpen(value => !value)}
+                      className={`flex w-full items-center justify-between rounded-[14px] border px-3.5 py-2.5 text-left text-[12px] font-medium transition-all ${
                         isDark
-                          ? 'bg-purple-500/[0.07] hover:bg-purple-500/10 text-purple-100/90 border border-purple-500/15'
-                          : 'bg-violet-50/70 hover:bg-violet-50 text-gray-600 border border-violet-100'
+                          ? 'border-purple-500/15 bg-purple-500/[0.07] text-purple-100/90 hover:bg-purple-500/10'
+                          : 'border-violet-100 bg-violet-50/70 text-gray-600 hover:bg-violet-50'
                       }`}
                     >
-                      <span>{showPrice ? "📋 What's included in the quote?" : '📋 What can you customize?'}</span>
-                      <span className={`text-lg transition-transform duration-300 ${quoteOpen ? 'rotate-180' : ''}`}>⌄</span>
+                      <span>{showPrice ? "What's included in the quote?" : 'What can you customize?'}</span>
+                      <ChevronDown
+                        size={16}
+                        className={`transition-transform duration-300 ${quoteOpen ? 'rotate-180' : ''}`}
+                      />
                     </button>
 
                     <AnimatePresence>
@@ -220,7 +292,7 @@ export default function ProductDetailsPage() {
                           transition={{ duration: 0.3 }}
                           className="overflow-hidden"
                         >
-                          <div className="pt-3 space-y-2">
+                          <div className="space-y-1.5 pt-3">
                             {[
                               'Equipment rental & delivery',
                               'Professional on-site staff',
@@ -229,11 +301,11 @@ export default function ProductDetailsPage() {
                               'Insurance coverage',
                               'Spare parts availability',
                             ].map(item => (
-                              <div key={item} className="flex items-center gap-2.5">
-                                <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="text-cyan-400 shrink-0">
-                                  <path d="M2 6l3 3 5-6" />
-                                </svg>
-                                <span className={`text-[12px] ${isDark ? 'text-purple-200/70' : 'text-gray-500'}`}>{item}</span>
+                              <div key={item} className="flex items-center gap-2">
+                                <Check size={12} strokeWidth={3} className="shrink-0 text-cyan-400" />
+                                <span className={`text-[11px] ${isDark ? 'text-purple-200/70' : 'text-gray-500'}`}>
+                                  {item}
+                                </span>
                               </div>
                             ))}
                           </div>
@@ -241,10 +313,8 @@ export default function ProductDetailsPage() {
                       )}
                     </AnimatePresence>
 
-                    <div className="space-y-2.5 mt-5">
-                      <Link to={`/contact?product=${product.slug}`} className="btn-primary w-full !rounded-xl !text-[13px] text-center block">
-                        <span>📩 Get Your Quote</span>
-                      </Link>
+                    <div className="mt-3.5 space-y-2.5">
+                      <ProductCommerceActions product={product} variant="detail" showContactLink />
 
                       <a
                         href={`${social.whatsapp}?text=${encodeURIComponent(
@@ -252,7 +322,7 @@ export default function ProductDetailsPage() {
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn-outline w-full !rounded-xl !text-[13px] text-center block"
+                        className="btn-outline block w-full !rounded-[12px] !text-[11px] text-center"
                       >
                         WhatsApp Us
                       </a>
@@ -261,27 +331,43 @@ export default function ProductDetailsPage() {
                 </div>
               </motion.div>
 
-              {/* ── Parts quick summary (if any) ── */}
               {parts.length > 0 && (
-                <div className={`rounded-2xl p-5 ${card}`}>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className={`text-[10px] font-mono uppercase tracking-[0.25em] ${isDark ? 'text-purple-300/70' : 'text-gray-400'}`}>
-                      🔧 Spare Parts
+                <div className={`rounded-[16px] p-3 ${card}`}>
+                  <div className="mb-2 flex items-center justify-between">
+                    <span
+                      className={`text-[9px] font-mono uppercase tracking-[0.22em] ${
+                        isDark ? 'text-purple-300/70' : 'text-gray-400'
+                      }`}
+                    >
+                      Spare Parts
                     </span>
-                    <span className={`text-[11px] font-semibold ${isDark ? 'text-cyan-400' : 'text-violet-600'}`}>{parts.length} available</span>
+                    <span className={`text-[10px] font-semibold ${isDark ? 'text-cyan-400' : 'text-violet-600'}`}>
+                      {parts.length} available
+                    </span>
                   </div>
 
                   <div className="space-y-2">
                     {parts.slice(0, 4).map(part => (
                       <div key={part.id} className="flex items-center justify-between">
-                        <span className={`text-[12px] ${isDark ? 'text-purple-200/70' : 'text-gray-500'}`}>{part.name}</span>
+                        <span className={`text-[11px] ${isDark ? 'text-purple-200/70' : 'text-gray-500'}`}>
+                          {part.name}
+                        </span>
                         <div className="flex items-center gap-2">
-                          <span className={`text-[12px] font-mono font-semibold ${txt}`}>{part.price} {part.currency}</span>
-                          <span className={`w-1.5 h-1.5 rounded-full ${part.inStock ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                          <span className={`text-[11px] font-mono font-semibold ${txt}`}>
+                            {part.price} {part.currency}
+                          </span>
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${
+                              part.inStock ? 'bg-emerald-400' : 'bg-red-400'
+                            }`}
+                          />
                         </div>
                       </div>
                     ))}
-                    {parts.length > 4 && <p className={`text-[11px] text-center pt-1 ${sub}`}>+{parts.length - 4} more — scroll down ↓</p>}
+
+                    {parts.length > 4 && (
+                      <p className={`pt-1 text-center text-[10px] ${sub}`}>+{parts.length - 4} more below</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -290,26 +376,30 @@ export default function ProductDetailsPage() {
         </div>
       </div>
 
-      {/* ✅ Mobile floating CTA */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 p-3" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
-        <div className={`rounded-2xl p-3 flex items-center gap-3 backdrop-blur-xl border ${
-          isDark ? 'bg-[#0d0b1a]/90 border-purple-500/20' : 'bg-white/90 border-violet-200'
-        }`} style={{ boxShadow: '0 -4px 30px rgba(0,0,0,0.15)' }}>
-          <div className="flex-1 min-w-0">
-            <div className={`text-sm font-bold truncate ${txt}`}>{product.name}</div>
+      <div
+        className="fixed inset-x-0 bottom-0 z-40 p-2 lg:hidden"
+        style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
+      >
+        <div
+          className={`flex items-center gap-2 rounded-[16px] border p-2 backdrop-blur-lg ${
+            isDark ? 'border-purple-500/20 bg-[#0d0b1a]/90' : 'border-violet-200 bg-white/90'
+          }`}
+          style={{ boxShadow: '0 -4px 30px rgba(0,0,0,0.15)' }}
+        >
+          <div className="min-w-0 flex-1">
+            <div className={`truncate text-[12px] font-bold ${txt}`}>{product.name}</div>
             {showPrice && (
-              <div className={`text-xs ${isDark ? 'text-cyan-400' : 'text-violet-600'}`}>
+              <div className={`text-[11px] ${isDark ? 'text-cyan-400' : 'text-violet-600'}`}>
                 From {product.rentalPricePerDay} {product.currency}/day
               </div>
             )}
           </div>
-          <Link to={`/contact?product=${product.slug}`} className="btn-primary !h-10 !px-5 !rounded-xl !text-[12px] shrink-0">
-            Get Quote
-          </Link>
+          <a href="#product-commerce-actions" className="btn-primary shrink-0 !h-8 !rounded-[12px] !px-3.5 !text-[10px]">
+            View Options
+          </a>
         </div>
       </div>
-      {/* Spacer for floating bar */}
-      <div className="lg:hidden h-20" />
+      <div className="h-14 lg:hidden" />
     </section>
   )
 }

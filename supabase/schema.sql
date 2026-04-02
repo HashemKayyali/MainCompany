@@ -25,7 +25,6 @@ CREATE TABLE IF NOT EXISTS products (
   features_left TEXT[] DEFAULT '{}',
   features_right TEXT[] DEFAULT '{}',
   rental_price_per_day NUMERIC(10,2) DEFAULT 0,
-  rental_price_per_event NUMERIC(10,2) DEFAULT 0,
   currency TEXT DEFAULT 'JOD',
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()

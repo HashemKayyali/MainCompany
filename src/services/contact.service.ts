@@ -9,7 +9,7 @@ export interface ContactSubmission {
   name: string
   email: string
   phone: string
-  productSlug: string
+  productSlug: string | null
   city: string
   address: string
   message: string
@@ -55,7 +55,7 @@ export async function create(submission: {
   name: string
   email: string
   phone: string
-  productSlug: string
+  productSlug?: string | null
   city: string
   address: string
   message: string
@@ -66,7 +66,7 @@ export async function create(submission: {
     name: submission.name,
     email: submission.email,
     phone: submission.phone,
-    product_slug: submission.productSlug,
+    product_slug: submission.productSlug || null,
     city: submission.city,
     address: submission.address,
     message: submission.message,

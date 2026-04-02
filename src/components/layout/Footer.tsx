@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom'
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
+import { ArrowRight, MapPin, ShieldCheck, Sparkles, Users } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useData } from '../../contexts/DataContext'
 import { social, socialLinks } from '../../data/social'
@@ -12,238 +13,267 @@ export default function Footer() {
   const { products } = useData()
   const reduceMotion = useReducedMotion()
 
-  const sub = isDark ? 'text-purple-200/80' : 'text-gray-600'
-  const soft = isDark ? 'text-white/60' : 'text-gray-500'
-  const hov = isDark ? 'hover:text-cyan-200' : 'hover:text-violet-700'
-
   const pages = useMemo(
     () => [
-      { to: '/', l: 'Home' },
-      { to: '/products', l: 'Products' },
-      { to: '/customers', l: 'Customers' },
-      { to: '/gallery', l: 'Gallery' },
-      { to: '/about', l: 'About' },
-      { to: '/contact', l: 'Contact' },
+      { to: '/', label: 'Home' },
+      { to: '/products', label: 'Products' },
+      { to: '/customers', label: 'Customers' },
+      { to: '/gallery', label: 'Gallery' },
+      { to: '/about', label: 'About' },
+      { to: '/contact', label: 'Contact' },
     ],
     []
   )
 
-  const topProducts = useMemo(() => (products || []).slice(0, 6), [products])
+  const topProducts = useMemo(() => (products || []).slice(0, 5), [products])
+
+  const subtle = isDark ? 'text-purple-100/60' : 'text-gray-500'
+  const body = isDark ? 'text-purple-100/72' : 'text-gray-600'
+  const linkClass = isDark
+    ? 'text-white/76 hover:text-white'
+    : 'text-gray-700 hover:text-gray-900'
 
   return (
-    <footer className="relative overflow-hidden" role="contentinfo" aria-label="Site footer">
-      {/* Arcade / nebula frame */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Base */}
-        <div className={`absolute inset-0 ${isDark ? 'bg-black/15' : 'bg-white/30'}`} />
-        {/* Glow */}
-        <div
-          className="absolute -top-28 left-1/2 -translate-x-1/2 w-[1100px] h-[700px] rounded-full opacity-90"
-          style={{
-            background: isDark
-              ? 'radial-gradient(ellipse at 50% 35%, rgba(124,58,237,0.22) 0%, rgba(236,72,153,0.12) 34%, transparent 72%)'
-              : 'radial-gradient(ellipse at 50% 35%, rgba(124,58,237,0.10) 0%, transparent 70%)',
-          }}
-        />
-        {/* Neon grid */}
-        <div
-          className="absolute inset-0 opacity-35"
-          style={{
-            backgroundImage: isDark
-              ? 'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)'
-              : 'linear-gradient(rgba(17,24,39,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(17,24,39,0.05) 1px, transparent 1px)',
-            backgroundSize: '96px 96px',
-            maskImage: 'radial-gradient(circle at 50% 10%, black 0%, transparent 70%)',
-            WebkitMaskImage: 'radial-gradient(circle at 50% 10%, black 0%, transparent 70%)',
-          }}
-        />
-        {/* ✅ CSS scan line */}
-        <div
-          className="scan-line opacity-55"
-          style={{
-            background: isDark
-              ? 'linear-gradient(90deg, transparent, rgba(34,211,238,0.28), rgba(236,72,153,0.20), transparent)'
-              : 'linear-gradient(90deg, transparent, rgba(124,58,237,0.14), transparent)',
-          }}
-        />
-        {/* Top border glow */}
-        <div
-          className="absolute inset-x-0 top-0 h-px opacity-80"
-          style={{
-            background: isDark
-              ? 'linear-gradient(90deg, transparent, rgba(124,58,237,0.35), rgba(34,211,238,0.22), transparent)'
-              : 'linear-gradient(90deg, transparent, rgba(124,58,237,0.18), transparent)',
-          }}
-        />
-      </div>
+    <footer className="relative overflow-hidden pb-4 pt-4" role="contentinfo" aria-label="Site footer">
+      <div
+        className="pointer-events-none absolute inset-x-[8%] top-0 h-56 rounded-full blur-3xl"
+        style={{
+          background: isDark
+            ? 'linear-gradient(90deg, rgba(124,58,237,0.14), rgba(236,72,153,0.12), rgba(34,211,238,0.12))'
+            : 'linear-gradient(90deg, rgba(124,58,237,0.1), rgba(236,72,153,0.07), rgba(34,211,238,0.08))',
+        }}
+      />
 
-      <div className={`relative border-t ${isDark ? 'border-white/10' : 'border-violet-200/60'}`}>
-        <div className="max-w-7xl mx-auto px-6 py-14">
-          {/* Top row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-10">
-            {/* Brand */}
-            <div className="col-span-2 sm:col-span-1">
-              <Link to="/" className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber flex items-center justify-center shadow-lg shadow-prism-violet/25">
-                  <span className="text-white font-black text-[11px] font-display">BL</span>
+      <div className="site-container">
+        <div className="section-shell px-3 py-4 sm:px-3.5 lg:px-4 lg:py-4.5">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(124,58,237,0.14),transparent_28%),radial-gradient(circle_at_84%_16%,rgba(34,211,238,0.1),transparent_24%),radial-gradient(circle_at_50%_100%,rgba(236,72,153,0.1),transparent_26%)]" />
+
+          <div className="relative grid gap-4 lg:grid-cols-[1.02fr_0.72fr_0.78fr_0.88fr]">
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+              whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 0.65, ease }}
+              className="max-w-md"
+            >
+              <div className="inline-flex items-center gap-1.75 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.25 backdrop-blur-xl">
+                <Sparkles className="h-3.5 w-3.5 text-violet-300" strokeWidth={1.8} />
+                <span
+                  className={`text-[9px] uppercase tracking-[0.22em] ${
+                    isDark ? 'text-white/70' : 'text-violet-700'
+                  }`}
+                >
+                  Premium Marketplace
+                </span>
+              </div>
+
+              <div className="mt-3 flex items-center gap-2.5">
+                <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-[14px] border border-white/12 bg-[linear-gradient(145deg,#7c3aed_0%,#d946ef_48%,#22d3ee_115%)] shadow-[0_18px_40px_rgba(76,29,149,0.28)]">
+                  <div className="absolute inset-x-2 top-1.5 h-4 rounded-full bg-white/20 blur-md" />
+                  <span className="relative text-[11px] font-black tracking-[0.22em] text-white">
+                    BL
+                  </span>
                 </div>
+
                 <div className="leading-none">
-                  <div className={`text-[12px] font-bold tracking-[0.22em] uppercase font-display ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    Bike <span className={isDark ? 'text-prism-violet' : 'text-violet-600'}>Land</span>
+                  <div
+                    className={`font-display text-[11px] font-bold uppercase tracking-[0.2em] ${
+                      isDark ? 'text-white' : 'text-gray-900'
+                    }`}
+                  >
+                    Bike <span className="text-violet-300">Land</span>
                   </div>
-                  <div className={`text-[10px] mt-1 font-mono tracking-[0.16em] uppercase ${soft}`}>
-                    arcade • vr • led
+                  <div className={`mt-0.75 text-[9px] uppercase tracking-[0.18em] ${subtle}`}>
+                    Marketplace / Vendors / Requests
                   </div>
                 </div>
-              </Link>
+              </div>
 
-              <p className={`text-sm leading-relaxed ${sub}`}>
-                Interactive cycling experiences for events across Jordan — built to look amazing and feel competitive.
+              <p className={`mt-2.5 text-[11px] leading-5 ${body}`}>
+                A premium digital marketplace for discovering, comparing, and booking trusted
+                event services with a more polished brand experience from first visit to final
+                inquiry.
               </p>
 
-              {/* Mini chips */}
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-1">
                 {[
-                  { t: 'Fast setup', c: isDark ? 'text-cyan-200 border-cyan-400/25' : 'text-violet-700 border-violet-200/70' },
-                  { t: 'Custom themes', c: isDark ? 'text-purple-200 border-purple-500/25' : 'text-violet-700 border-violet-200/70' },
-                  { t: 'Crowd magnet', c: isDark ? 'text-pink-200 border-pink-400/25' : 'text-violet-700 border-violet-200/70' },
-                ].map((x, i) => (
-                  <motion.div
-                    key={x.t}
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-80px' }}
-                    transition={{ duration: 0.7, delay: 0.05 * i, ease }}
-                    className={`px-3 py-2 rounded-2xl border backdrop-blur-2xl bg-white/[0.04] text-[10px] font-mono tracking-[0.20em] uppercase ${x.c}`}
+                  { label: 'Trusted vendors', icon: ShieldCheck },
+                  { label: 'Fast discovery', icon: Sparkles },
+                  { label: 'Across Jordan', icon: MapPin },
+                ].map((item, index) => {
+                  const Icon = item.icon
+
+                  return (
+                    <motion.div
+                      key={item.label}
+                      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: '-80px' }}
+                      transition={{ duration: 0.45, delay: 0.06 * index, ease }}
+                      className={`inline-flex items-center gap-1.75 rounded-full border px-2.25 py-1 text-[8px] uppercase tracking-[0.15em] ${
+                        isDark
+                          ? 'border-white/10 bg-white/[0.04] text-white/74'
+                          : 'border-violet-200/70 bg-white/80 text-violet-700'
+                      }`}
+                    >
+                      <Icon className="h-3.5 w-3.5 text-violet-300" strokeWidth={1.8} />
+                      {item.label}
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+              whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 0.6, delay: 0.04, ease }}
+            >
+              <div className={`text-[10px] font-mono uppercase tracking-[0.26em] ${subtle}`}>
+                Navigate
+              </div>
+              <div className="mt-2.5 space-y-1">
+                {pages.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={`group flex items-center justify-between rounded-[12px] border px-2.75 py-1.75 text-[11px] font-medium transition-all ${
+                      isDark
+                        ? 'border-white/8 bg-white/[0.03] hover:border-violet-300/18 hover:bg-white/[0.05]'
+                        : 'border-violet-200/70 bg-white/80 hover:border-violet-300 hover:bg-white'
+                    } ${linkClass}`}
                   >
-                    {x.t}
-                  </motion.div>
+                    <span>{item.label}</span>
+                    <ArrowRight
+                      className="h-3.5 w-3.5 opacity-50 transition-transform duration-300 group-hover:translate-x-0.5"
+                      strokeWidth={1.8}
+                    />
+                  </Link>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
-            {/* Pages */}
-            <div>
-              <h4 className={`text-[10px] font-mono font-medium mb-3 uppercase tracking-[0.22em] ${soft}`}>Pages</h4>
-              <nav className="space-y-2.5">
-                {pages.map((lnk, i) => (
-                  <motion.div
-                    key={lnk.to}
-                    initial={{ opacity: 0, y: 8 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-80px' }}
-                    transition={{ duration: 0.55, delay: 0.03 * i, ease }}
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+              whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 0.6, delay: 0.08, ease }}
+            >
+              <div className={`text-[10px] font-mono uppercase tracking-[0.26em] ${subtle}`}>
+                Featured Services
+              </div>
+              <div className="mt-2.5 space-y-1">
+                {topProducts.map((item) => (
+                  <Link
+                    key={item.slug}
+                    to={`/products/${item.slug}`}
+                    className={`block rounded-[12px] border px-2.75 py-1.75 text-[11px] transition-all ${
+                      isDark
+                        ? 'border-white/8 bg-white/[0.03] hover:border-cyan-300/18 hover:bg-white/[0.05]'
+                        : 'border-violet-200/70 bg-white/80 hover:border-violet-300 hover:bg-white'
+                    } ${linkClass}`}
                   >
-                    <Link
-                      to={lnk.to}
-                      className={`inline-flex items-center gap-2 text-sm ${sub} ${hov} transition-colors`}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-purple-400/60' : 'bg-violet-400/60'}`}
-                      />
-                      {lnk.l}
-                    </Link>
-                  </motion.div>
+                    <div className="font-medium">{item.name}</div>
+                    <div className={`mt-0.75 text-[10px] uppercase tracking-[0.16em] ${subtle}`}>
+                      {item.categoryTags?.[0] || 'Marketplace'}
+                    </div>
+                  </Link>
                 ))}
-              </nav>
-            </div>
+              </div>
+            </motion.div>
 
-            {/* Products */}
-            <div>
-              <h4 className={`text-[10px] font-mono font-medium mb-3 uppercase tracking-[0.22em] ${soft}`}>Products</h4>
-              <nav className="space-y-2.5">
-                {topProducts.map((p, i) => (
-                  <motion.div
-                    key={p.slug}
-                    initial={{ opacity: 0, y: 8 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-80px' }}
-                    transition={{ duration: 0.55, delay: 0.03 * i, ease }}
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+              whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 0.6, delay: 0.12, ease }}
+            >
+              <div className={`text-[10px] font-mono uppercase tracking-[0.26em] ${subtle}`}>
+                Connect
+              </div>
+
+              <div className="mt-2.5 space-y-1.5">
+                <div
+                  className={`rounded-[14px] border px-2.75 py-2 ${
+                    isDark ? 'border-white/8 bg-white/[0.03]' : 'border-violet-200/70 bg-white/80'
+                  }`}
+                >
+                  <div className={`text-[10px] uppercase tracking-[0.22em] ${subtle}`}>Email</div>
+                  <a
+                    href={`mailto:${social.email}`}
+                    className={`mt-1.5 block text-[0.86rem] font-medium transition-colors ${linkClass}`}
                   >
-                    <Link
-                      to={`/products/${p.slug}`}
-                      className={`inline-flex items-center gap-2 text-sm ${sub} ${hov} transition-colors`}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-cyan-400/60' : 'bg-violet-400/60'}`}
-                      />
-                      {p.name}
-                    </Link>
-                  </motion.div>
-                ))}
-              </nav>
-            </div>
+                    {social.email}
+                  </a>
+                </div>
 
-            {/* Connect */}
-            <div>
-              <h4 className={`text-[10px] font-mono font-medium mb-3 uppercase tracking-[0.22em] ${soft}`}>Connect</h4>
-              <div className="space-y-2.5">
-                <a href={`mailto:${social.email}`} className={`inline-flex items-center gap-2 text-sm ${sub} ${hov} transition-colors`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-pink-400/60' : 'bg-violet-400/60'}`} />
-                  {social.email}
-                </a>
-                <a href={`tel:${social.phone}`} className={`inline-flex items-center gap-2 text-sm ${sub} ${hov} transition-colors`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-amber-400/60' : 'bg-violet-400/60'}`} />
-                  {social.phoneFormatted}
-                </a>
+                <div
+                  className={`rounded-[14px] border px-2.75 py-2 ${
+                    isDark ? 'border-white/8 bg-white/[0.03]' : 'border-violet-200/70 bg-white/80'
+                  }`}
+                >
+                  <div className={`text-[10px] uppercase tracking-[0.22em] ${subtle}`}>Phone</div>
+                  <a
+                    href={`tel:${social.phone}`}
+                    className={`mt-1.5 block text-[0.86rem] font-medium transition-colors ${linkClass}`}
+                  >
+                    {social.phoneFormatted}
+                  </a>
+                </div>
 
-                <div className="pt-2 grid grid-cols-2 gap-2">
-                  {socialLinks.map((s, i) => (
+                <div className="grid grid-cols-2 gap-2">
+                  {socialLinks.map((item, index) => (
                     <motion.a
-                      key={s.platform}
-                      href={s.url}
+                      key={item.platform}
+                      href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      initial={{ opacity: 0, y: 8 }}
-                      whileInView={{ opacity: 1, y: 0 }}
+                      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                       viewport={{ once: true, margin: '-80px' }}
-                      transition={{ duration: 0.55, delay: 0.03 * i, ease }}
-                      className={`h-10 px-3 rounded-2xl border backdrop-blur-2xl inline-flex items-center justify-center text-[12px] font-medium transition-all ${
+                      transition={{ duration: 0.45, delay: 0.04 * index, ease }}
+                    className={`inline-flex h-8 items-center justify-center rounded-[13px] border text-[10px] font-medium transition-all ${
                         isDark
-                          ? 'bg-white/[0.03] border-white/10 text-white/70 hover:text-white hover:bg-white/[0.06]'
-                          : 'bg-white/70 border-violet-200/60 text-gray-700 hover:text-gray-900 hover:bg-white'
+                          ? 'border-white/8 bg-white/[0.03] text-white/76 hover:border-violet-300/18 hover:bg-white/[0.05] hover:text-white'
+                          : 'border-violet-200/70 bg-white/80 text-gray-700 hover:border-violet-300 hover:bg-white hover:text-gray-900'
                       }`}
-                      aria-label={`Follow us on ${s.platform}`}
+                      aria-label={`Follow us on ${item.platform}`}
                     >
-                      {s.platform}
+                      {item.platform}
                     </motion.a>
                   ))}
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
 
-          {/* Bottom row */}
-          <div className={`mt-12 pt-6 border-t ${isDark ? 'border-white/10' : 'border-violet-200/50'} flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4`}>
-            <p className={`text-[11px] font-mono tracking-[0.12em] uppercase ${isDark ? 'text-white/45' : 'text-gray-500'}`}>
-              © {new Date().getFullYear()} Bike Land Jordan
-            </p>
+          <div
+            className={`relative mt-5 flex flex-col gap-3 border-t pt-3.5 sm:flex-row sm:items-center sm:justify-between ${
+              isDark ? 'border-white/8' : 'border-violet-200/60'
+            }`}
+          >
+            <div>
+              <p className={`text-[10px] uppercase tracking-[0.16em] ${subtle}`}>
+                (c) {new Date().getFullYear()} Bike Land
+              </p>
+              <p className={`mt-1.5 text-[0.85rem] ${body}`}>
+                A more immersive premium experience for exploring and booking event services.
+              </p>
+            </div>
 
-            <div className="flex items-center gap-3">
-              <Link to="/contact" className="btn-primary !h-10 !px-4 !rounded-2xl !text-[12px]">
-                Book an Event
+            <div className="flex flex-wrap gap-2">
+              <Link to="/products" className="btn-outline">
+                Explore Services
               </Link>
-              <Link
-                to="/products"
-                className={`h-10 px-4 rounded-2xl border inline-flex items-center justify-center text-[12px] font-medium transition-all ${
-                  isDark
-                    ? 'bg-white/[0.03] border-white/10 text-white/70 hover:text-white hover:bg-white/[0.06]'
-                    : 'bg-white/70 border-violet-200/60 text-gray-700 hover:text-gray-900 hover:bg-white'
-                }`}
-              >
-                Explore
+              <Link to="/contact" className="btn-primary">
+                <Users className="h-4 w-4" strokeWidth={1.9} />
+                Plan Your Event
               </Link>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Small local shimmer animation */}
-      <style>{`
-        @media (prefers-reduced-motion: reduce) {
-          * { scroll-behavior: auto; }
-        }
-      `}</style>
     </footer>
   )
 }

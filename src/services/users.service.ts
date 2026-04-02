@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { clearAuthPersistence, setAuthPersistence, supabase } from '../lib/supabase'
 
 export interface AppUser {
   id: string; name: string; email: string; phone: string
@@ -15,13 +15,17 @@ export async function register(name: string, email: string, phone: string, passw
   return { id: authData.user.id, name, email, phone }
 }
 
-export async function login(email: string, password: string) {
+export async function login(email: string, password: string, rememberMe = false) {
+  setAuthPersistence(rememberMe)
   const { data, error } = await supabase.auth.signInWithPassword({ email, password })
   if (error) throw error
   return data
 }
 
-export async function logout() { await supabase.auth.signOut() }
+export async function logout() {
+  await supabase.auth.signOut()
+  clearAuthPersistence()
+}
 
 export async function getCurrentUser(): Promise<AppUser | null> {
   const { data: { session } } = await supabase.auth.getSession()

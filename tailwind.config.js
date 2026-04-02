@@ -4,9 +4,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ['"Outfit"', 'system-ui', 'sans-serif'],
-        sans: ['"Nunito Sans"', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'monospace'],
+        display: ['"Sora"', '"Alexandria"', 'system-ui', 'sans-serif'],
+        sans: ['"Alexandria"', 'system-ui', 'sans-serif'],
+        mono: ['"Alexandria"', 'system-ui', 'sans-serif'],
       },
       colors: {
         void: { 950:'#06060e', 900:'#0b0b18', 800:'#111126', 700:'#1a1a38', 600:'#24244a' },

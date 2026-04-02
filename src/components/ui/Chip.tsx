@@ -1,5 +1,21 @@
 import { useTheme } from '../../contexts/ThemeContext'
 export default function Chip({ children, active = false, onClick }: { children: React.ReactNode; active?: boolean; onClick?: () => void }) {
   const { isDark } = useTheme()
-  return <button type="button" onClick={onClick} className={`px-4 py-2 rounded-full text-[13px] font-medium transition-all ${active ? isDark ? 'bg-prism-violet/15 text-prism-violet border border-prism-violet/40' : 'bg-violet-50 text-violet-700 border border-violet-200' : isDark ? 'bg-purple-500/[0.07] text-purple-200/70 hover:text-purple-100/90 border border-purple-500/20' : 'bg-white text-gray-500 hover:text-gray-700 border border-gray-200'}`}>{children}</button>
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex min-h-[29px] items-center gap-1 rounded-full px-2.25 py-[0.42rem] text-[9.5px] font-semibold tracking-[0.01em] transition-all duration-300 ${
+        active
+          ? isDark
+            ? 'border border-violet-300/30 bg-[linear-gradient(135deg,rgba(124,58,237,0.20),rgba(236,72,153,0.14),rgba(6,182,212,0.10))] text-white shadow-[0_14px_32px_rgba(76,29,149,0.20)]'
+            : 'border border-violet-200 bg-violet-50 text-violet-700'
+          : isDark
+            ? 'border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] text-purple-100/72 hover:border-violet-300/20 hover:text-white hover:bg-white/[0.06]'
+            : 'border border-gray-200 bg-white text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+      }`}
+    >
+      {children}
+    </button>
+  )
 }

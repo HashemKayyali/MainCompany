@@ -17,7 +17,6 @@ export const validateContactForm = (f: Record<string, string>): ValidationError[
   if (!isRequired(f.name)) e.push({ field: 'name', message: 'Name is required' })
   if (f.name && f.name.length > 100) e.push({ field: 'name', message: 'Name is too long (max 100)' })
   if (!isEmail(f.email)) e.push({ field: 'email', message: 'Valid email required' })
-  if (!isRequired(f.product)) e.push({ field: 'product', message: 'Select a product' })
   if (f.phone && !isPhone(f.phone)) e.push({ field: 'phone', message: 'Invalid phone number' })
   if (f.message && f.message.length > 2000) e.push({ field: 'message', message: 'Message too long (max 2000)' })
   return e

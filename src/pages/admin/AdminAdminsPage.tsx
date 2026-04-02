@@ -1,9 +1,25 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useAuth, type AdminRole } from '../../contexts/AuthContext'
 import { useDialog } from '../../contexts/DialogContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useToast } from '../../contexts/ToastContext'
+import type { AvatarFields } from '../../lib/avatar'
 import Modal from '../../components/ui/Modal'
+import UserAvatar from '../../components/ui/UserAvatar'
+import AdminActionButton from '../../components/admin/AdminActionButton'
+import AdminDetailModal from '../../components/admin/AdminDetailModal'
+import AdminEntityCard from '../../components/admin/AdminEntityCard'
+import AdminPageHeader from '../../components/admin/AdminPageHeader'
+import AdminStatCard from '../../components/admin/AdminStatCard'
+import AdminViewToggle from '../../components/admin/AdminViewToggle'
+import useAdminCardView from '../../components/admin/useAdminCardView'
+import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
+
+type AdminMember = { id: string; name: string; email: string; role: AdminRole } & AvatarFields
+
+function cn(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(' ')
+}
 
 export default function AdminAdminsPage() {
   const { admins, addAdmin, removeAdmin, changeAdminRole, user, isSuperAdmin } = useAuth()
@@ -11,22 +27,22 @@ export default function AdminAdminsPage() {
   const { isDark } = useTheme()
   const { toast } = useToast()
 
-  // Add modal state
   const [showAdd, setShowAdd] = useState(false)
   const [addEmail, setAddEmail] = useState('')
   const [addRole, setAddRole] = useState<AdminRole>('admin')
   const [addError, setAddError] = useState('')
   const [addSaving, setAddSaving] = useState(false)
 
-  // Edit modal state
-  const [editAdmin, setEditAdmin] = useState<{ id: string; name: string; email: string; role: AdminRole } | null>(null)
+  const [editAdmin, setEditAdmin] = useState<AdminMember | null>(null)
+  const [details, setDetails] = useState<AdminMember | null>(null)
   const [editRole, setEditRole] = useState<AdminRole>('admin')
   const [editSaving, setEditSaving] = useState(false)
+  const { cardView, displayCardView, viewTransitionClassName, setCardView } = useAdminCardView('admins')
 
   const txt = isDark ? 'text-white' : 'text-gray-900'
   const sub = isDark ? 'text-purple-200/80' : 'text-gray-500'
+  const cardsLayoutClass = getAdminCardsLayoutClass(displayCardView)
 
-  // ── Add: email only, must be registered ──
   const handleAdd = async () => {
     setAddError('')
     if (!addEmail.trim()) {
@@ -51,7 +67,6 @@ export default function AdminAdminsPage() {
     }
   }
 
-  // ── Edit: change role ──
   const handleChangeRole = async () => {
     if (!editAdmin) return
     setEditSaving(true)
@@ -70,174 +85,310 @@ export default function AdminAdminsPage() {
     }
   }
 
-  // ── Remove ──
-  const handleRemove = async () => {
-    if (!editAdmin) return
+  const handleRemove = async (target = editAdmin) => {
+    if (!target) return
     const ok = await dialog.confirm({
       title: 'Remove Admin?',
-      message: `This will remove ${editAdmin.name} from the admin team and change their role to "user".`,
+      message: `This will remove ${target.name} from the admin team and change their role to "user".`,
       confirmLabel: 'Remove',
       variant: 'danger',
     })
-    if (ok) {
-      setEditSaving(true)
-      const removed = await removeAdmin(editAdmin.id)
-      setEditSaving(false)
-      if (removed) {
-        toast(`${editAdmin.name} removed`, 'success')
-        setEditAdmin(null)
-      } else {
-        toast('Failed to remove admin', 'error')
-      }
+    if (!ok) return
+
+    setEditSaving(true)
+    const removed = await removeAdmin(target.id)
+    setEditSaving(false)
+    if (removed) {
+      toast(`${target.name} removed`, 'success')
+      if (editAdmin?.id === target.id) setEditAdmin(null)
+      if (details?.id === target.id) setDetails(null)
+    } else {
+      toast('Failed to remove admin', 'error')
     }
   }
 
-  const openEdit = (a: typeof admins[0]) => {
-    setEditAdmin({ id: a.id, name: a.name, email: a.email, role: a.role })
-    setEditRole(a.role)
+  const openEdit = (admin: AdminMember) => {
+    setEditAdmin({
+      id: admin.id,
+      name: admin.name,
+      email: admin.email,
+      role: admin.role,
+      avatarUrl: admin.avatarUrl,
+      avatarStyle: admin.avatarStyle,
+      avatarSeed: admin.avatarSeed,
+      avatarOptions: admin.avatarOptions,
+    })
+    setEditRole(admin.role)
   }
 
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className={`font-display text-2xl font-bold ${txt}`}>Admin Users</h1>
-          <p className={`text-sm ${sub}`}>{admins.length} administrator{admins.length !== 1 ? 's' : ''}</p>
-        </div>
+  const cardRoleTone = (role: AdminRole) =>
+    role === 'superadmin'
+      ? isDark
+        ? 'bg-amber-400/10 text-amber-200 ring-amber-400/18'
+        : 'bg-amber-50 text-amber-700 ring-amber-200'
+      : isDark
+        ? 'bg-cyan-400/10 text-cyan-200 ring-cyan-400/18'
+        : 'bg-violet-50 text-violet-700 ring-violet-200'
 
-        {isSuperAdmin && (
-          <button
-            onClick={() => { setShowAdd(true); setAddError(''); setAddEmail('') }}
-            className="btn-primary !text-xs !px-5 !py-2.5 !rounded-xl"
-          >
-            + Add Admin
-          </button>
-        )}
+  const avatarClass = (role: AdminRole) =>
+    role === 'superadmin'
+      ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white'
+      : 'bg-gradient-to-br from-prism-violet to-prism-cyan text-void-950'
+
+  return (
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <AdminPageHeader
+        title="Admin Users"
+        actions={
+          <>
+            <AdminViewToggle value={cardView} onChange={setCardView} />
+            {isSuperAdmin ? (
+              <button
+                onClick={() => {
+                  setShowAdd(true)
+                  setAddError('')
+                  setAddEmail('')
+                }}
+                className="btn-admin-create"
+              >
+                + Add Admin
+              </button>
+            ) : null}
+          </>
+        }
+      />
+
+      <div className="grid shrink-0 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        <AdminStatCard label="Admins" value={admins.length} />
+        <AdminStatCard label="Super Admins" value={admins.filter(admin => admin.role === 'superadmin').length} />
+        <AdminStatCard label="Standard Admins" value={admins.filter(admin => admin.role === 'admin').length} />
+        <AdminStatCard label="You" value={admins.some(admin => admin.id === user?.id) ? 'Included' : 'No'} />
       </div>
 
       {!isSuperAdmin && (
-        <div
-          className={`mb-6 px-4 py-3 rounded-xl text-sm ${
-            isDark
-              ? 'bg-amber-400/10 border border-amber-400/20 text-amber-300'
-              : 'bg-amber-50 border border-amber-200 text-amber-700'
-          }`}
-        >
+        <div className={cn('rounded-[18px] border px-3.5 py-2.75 text-[13px]', isDark ? 'border-amber-400/20 bg-amber-400/10 text-amber-300' : 'border-amber-200 bg-amber-50 text-amber-700')}>
           Only super admins can manage admins.
         </div>
       )}
 
-      {admins.length === 0 && (
-        <div
-          className={`mb-6 px-4 py-3 rounded-xl text-sm ${
-            isDark
-              ? 'bg-purple-500/10 border border-purple-500/20 text-purple-200/90'
-              : 'bg-violet-50 border border-violet-200 text-violet-700'
-          }`}
-        >
-          No admins loaded.
-        </div>
-      )}
+      <div
+        className={cn(
+          'min-h-0 flex flex-1 flex-col rounded-[22px] p-2.5',
+          isDark
+            ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(8,11,27,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_28px_90px_-58px_rgba(7,15,36,0.96)]'
+            : 'bg-white ring-1 ring-inset ring-gray-200'
+        )}
+      >
+        {admins.length === 0 ? (
+          <div className={cn('flex flex-1 items-center justify-center rounded-[18px] border px-5 py-11 text-center text-[13px]', isDark ? 'border-white/10 text-purple-200/70' : 'border-gray-100 text-gray-500')}>
+            No admins loaded.
+          </div>
+        ) : (
+          <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
+            <div className={cn('origin-top transition-[opacity,transform,filter] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform,filter]', viewTransitionClassName)}>
+            <div className={cardsLayoutClass}>
+              {admins.map(admin => {
+              const safeRole = admin.role === 'superadmin' ? 'superadmin' : 'admin'
+              const isYou = admin.id === user?.id
+              const member: AdminMember = {
+                id: admin.id,
+                name: admin.name,
+                email: admin.email,
+                role: safeRole,
+                avatarUrl: admin.avatarUrl,
+                avatarStyle: admin.avatarStyle,
+                avatarSeed: admin.avatarSeed,
+                avatarOptions: admin.avatarOptions,
+              }
 
-      {/* ── Admin List ── */}
-      <div className="space-y-3">
-        {admins.map(a => {
-          const safeRole = a.role === 'superadmin' ? 'superadmin' : 'admin'
-          const isYou = a.id === user?.id
-
-          return (
-            <div key={a.id} className="card-surface rounded-2xl p-5 flex items-center gap-4">
-              <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold font-display ${
-                  safeRole === 'superadmin'
-                    ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white'
-                    : 'bg-gradient-to-br from-prism-violet to-prism-cyan text-void-950'
-                }`}
-              >
-                {(a.name || '?').charAt(0)}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className={`font-medium text-sm ${txt}`}>{a.name}</span>
-                  {isYou && (
-                    <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono ${
-                        isDark ? 'bg-prism-violet/15 text-prism-violet' : 'bg-violet-50 text-violet-600'
-                      }`}
-                    >
-                      You
+              return (
+                <AdminEntityCard
+                  key={admin.id}
+                variant={getAdminEntityVariant(displayCardView)}
+                  minHeightClassName={displayCardView === 'grid' ? 'min-h-[212px]' : 'min-h-[96px]'}
+                  bodyClassName={displayCardView === 'grid' ? 'gap-2 p-3' : 'gap-1.5 p-2.5'}
+                  listMediaWrapClassName="md:self-center"
+                  listMediaFrameClassName="!h-[74px] !w-[74px] md:!h-[74px] md:!w-[74px] p-2"
+                  actionsWrapClassName={displayCardView === 'list' ? 'xl:w-[112px]' : undefined}
+                  media={
+                    <div className={cn('flex h-full w-full items-center justify-center rounded-[24px]', isDark ? 'bg-[radial-gradient(circle,rgba(34,211,238,0.12),transparent_58%)]' : 'bg-[radial-gradient(circle,rgba(139,92,246,0.08),transparent_55%)]')}>
+                      <UserAvatar
+                        name={admin.name}
+                        email={admin.email}
+                        avatarUrl={admin.avatarUrl}
+                        avatarStyle={admin.avatarStyle}
+                        avatarSeed={admin.avatarSeed}
+                        avatarOptions={admin.avatarOptions}
+                        className="h-full w-full rounded-[22px]"
+                        fallbackClassName={cn(
+                          'text-[2rem] font-display font-bold shadow-lg',
+                          avatarClass(safeRole)
+                        )}
+                      />
+                    </div>
+                  }
+                  mediaOverlayRight={
+                    <span className={cn('rounded-full px-3 py-1 text-[10px] font-mono uppercase tracking-[0.22em] ring-1 ring-inset', cardRoleTone(safeRole))}>
+                      {safeRole}
                     </span>
-                  )}
-                </div>
-                <div className={`text-xs ${sub}`}>{a.email}</div>
-              </div>
-
-              <span
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-mono uppercase tracking-wider ${
-                  safeRole === 'superadmin'
-                    ? isDark
-                      ? 'bg-amber-400/10 text-amber-300 border border-amber-400/20'
-                      : 'bg-amber-50 text-amber-600 border border-amber-200'
-                    : isDark
-                    ? 'bg-purple-500/10 text-purple-200/90 border border-purple-500/25'
-                    : 'bg-gray-50 text-gray-500 border border-gray-200'
-                }`}
-              >
-                {safeRole}
-              </span>
-
-              {/* Edit button — only for superadmin caller, can't edit yourself or other superadmins */}
-              {isSuperAdmin && !isYou && safeRole !== 'superadmin' && (
-                <button
-                  onClick={() => openEdit(a)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
-                    isDark
-                      ? 'border-purple-500/25 text-purple-200/80 hover:bg-purple-500/10'
-                      : 'border-violet-200 text-gray-600 hover:bg-violet-50'
-                  }`}
-                >
-                  Edit
-                </button>
-              )}
-
-              {/* Superadmins are protected — show lock */}
-              {isSuperAdmin && !isYou && safeRole === 'superadmin' && (
-                <span
-                  className={`px-3 py-1.5 rounded-xl text-[10px] font-mono ${
-                    isDark ? 'text-amber-300/50' : 'text-amber-600/50'
-                  }`}
-                  title="Superadmins can only be changed from Supabase dashboard"
-                >
-                  🔒 Protected
-                </span>
-              )}
+                  }
+                  title={admin.name}
+                  subtitle={isYou ? 'This account is your current session.' : undefined}
+                  badges={
+                    <>
+                      {isYou && (
+                        <span className={cn('rounded-full px-3 py-1 text-[11px] font-medium ring-1 ring-inset', isDark ? 'bg-cyan-400/10 text-cyan-200 ring-cyan-400/18' : 'border-violet-200 bg-violet-50 text-violet-700')}>
+                          You
+                        </span>
+                      )}
+                      <span className={cn('rounded-full px-3 py-1 text-[11px] font-medium ring-1 ring-inset', isDark ? 'bg-[#0f1630]/92 text-purple-100/78 ring-cyan-400/10' : 'border-gray-200 bg-gray-50 text-gray-600')}>
+                        {admin.email}
+                      </span>
+                    </>
+                  }
+                  actions={
+                    <>
+                      <AdminActionButton
+                        tone="primary"
+                        onClick={event => {
+                          event.stopPropagation()
+                          setDetails(member)
+                        }}
+                      >
+                        Details
+                      </AdminActionButton>
+                      {isSuperAdmin && !isYou && safeRole !== 'superadmin' ? (
+                        <>
+                          <AdminActionButton
+                            onClick={event => {
+                              event.stopPropagation()
+                              openEdit(member)
+                            }}
+                          >
+                            Edit
+                          </AdminActionButton>
+                          <AdminActionButton
+                            tone="danger"
+                            onClick={event => {
+                              event.stopPropagation()
+                              void handleRemove(member)
+                            }}
+                          >
+                            Remove
+                          </AdminActionButton>
+                        </>
+                      ) : null}
+                    </>
+                  }
+                />
+              )
+            })}
             </div>
-          )
-        })}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* ── Add Admin Modal ── */}
-      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Add Admin" persistent>
+      <AdminDetailModal
+        open={!!details}
+        onClose={() => setDetails(null)}
+        title={details?.name || 'Admin Details'}
+        subtitle={details ? 'A simplified account view with the core identity and role information only.' : undefined}
+        media={
+          details ? (
+            <div className={cn('flex aspect-[16/9] items-center justify-center', isDark ? 'bg-[radial-gradient(circle,rgba(34,211,238,0.15),transparent_58%)]' : 'bg-[radial-gradient(circle,rgba(139,92,246,0.10),transparent_55%)]')}>
+              <UserAvatar
+                name={details.name}
+                email={details.email}
+                avatarUrl={details.avatarUrl}
+                avatarStyle={details.avatarStyle}
+                avatarSeed={details.avatarSeed}
+                avatarOptions={details.avatarOptions}
+                className="h-28 w-28 rounded-[32px]"
+                fallbackClassName={cn(
+                  'text-5xl font-display font-bold shadow-lg',
+                  avatarClass(details.role)
+                )}
+              />
+            </div>
+          ) : null
+        }
+        badges={
+          details ? (
+            <>
+              <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold', cardRoleTone(details.role))}>
+                {details.role}
+              </span>
+              {details.id === user?.id && (
+                <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold', isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700')}>
+                  Current session
+                </span>
+              )}
+            </>
+          ) : null
+        }
+        summaryFacts={
+          details
+            ? [
+                { label: 'Email', value: details.email },
+                { label: 'Role', value: details.role },
+              ]
+            : []
+        }
+        sections={
+          details
+            ? [
+                {
+                  title: 'Identity',
+                  facts: [
+                    { label: 'Name', value: details.name },
+                    { label: 'Email', value: details.email },
+                    { label: 'Role', value: details.role },
+                  ],
+                },
+              ]
+            : []
+        }
+        actions={
+          details && isSuperAdmin && details.role !== 'superadmin' && details.id !== user?.id ? (
+            <>
+              <AdminActionButton
+                onClick={() => {
+                  setDetails(null)
+                  openEdit(details)
+                }}
+              >
+                Edit Role
+              </AdminActionButton>
+              <AdminActionButton tone="danger" onClick={() => void handleRemove(details)}>
+                Remove Admin
+              </AdminActionButton>
+            </>
+          ) : null
+        }
+      />
+
+      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Add Admin" persistent size="lg">
         <div className="space-y-4">
-          <p className={`text-sm ${sub}`}>
-            Enter the email of a registered user to make them an admin.
-          </p>
+          <p className={`text-sm ${sub}`}>Enter the email of a registered user to make them an admin.</p>
 
           <div>
-            <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Email *</label>
+            <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Email *</label>
             <input
               className={`form-field ${addError ? '!border-red-400/40' : ''}`}
               type="email"
               placeholder="user@example.com"
               value={addEmail}
-              onChange={e => { setAddEmail(e.target.value); setAddError('') }}
+              onChange={e => {
+                setAddEmail(e.target.value)
+                setAddError('')
+              }}
               onKeyDown={e => e.key === 'Enter' && handleAdd()}
             />
           </div>
 
           <div>
-            <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Role</label>
+            <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Role</label>
             <select className="form-field" value={addRole} onChange={e => setAddRole(e.target.value as AdminRole)}>
               <option value="admin">Admin</option>
               <option value="superadmin">Super Admin</option>
@@ -245,61 +396,53 @@ export default function AdminAdminsPage() {
           </div>
 
           {addError && (
-            <div className={`px-3 py-2.5 rounded-xl text-sm ${isDark ? 'bg-red-400/15 text-red-400' : 'bg-red-50 text-red-600'}`}>
+            <div className={`rounded-xl px-3 py-2.5 text-sm ${isDark ? 'bg-red-400/15 text-red-400' : 'bg-red-50 text-red-600'}`}>
               {addError}
             </div>
           )}
 
-          <div className="flex gap-3 justify-end mt-6">
-            <button onClick={() => setShowAdd(false)} className="btn-outline !px-5 !py-2.5 !rounded-xl !text-sm">
+          <div className="mt-6 flex justify-end gap-3">
+            <button onClick={() => setShowAdd(false)} className="btn-outline !rounded-xl !px-5 !py-2.5 !text-sm">
               Cancel
             </button>
-            <button onClick={handleAdd} disabled={addSaving} className="btn-primary !px-6 !py-2.5 !rounded-xl !text-xs disabled:opacity-50">
-              {addSaving ? '⏳ Searching...' : 'Add Admin'}
+            <button onClick={handleAdd} disabled={addSaving} className="btn-primary !rounded-xl !px-6 !py-2.5 !text-xs disabled:opacity-50">
+              {addSaving ? 'Searching...' : 'Add Admin'}
             </button>
           </div>
         </div>
       </Modal>
 
-      {/* ── Edit Admin Modal ── */}
-      <Modal open={!!editAdmin} onClose={() => setEditAdmin(null)} title={`Edit — ${editAdmin?.name || ''}`} persistent>
+      <Modal open={!!editAdmin} onClose={() => setEditAdmin(null)} title={`Edit - ${editAdmin?.name || ''}`} persistent size="lg">
         {editAdmin && (
           <div className="space-y-5">
-            {/* Info */}
-            <div className={`px-4 py-3 rounded-xl ${isDark ? 'bg-white/[0.03] border border-white/10' : 'bg-gray-50 border border-gray-200'}`}>
+            <div className={`rounded-xl px-4 py-3 ${isDark ? 'border border-white/10 bg-white/[0.03]' : 'border border-gray-200 bg-gray-50'}`}>
               <div className={`text-sm font-medium ${txt}`}>{editAdmin.name}</div>
               <div className={`text-xs ${sub}`}>{editAdmin.email}</div>
             </div>
 
-            {/* Change Role */}
             <div>
-              <label className={`block text-[12px] mb-1.5 font-medium ${sub}`}>Role</label>
+              <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Role</label>
               <select className="form-field" value={editRole} onChange={e => setEditRole(e.target.value as AdminRole)}>
                 <option value="admin">Admin</option>
                 <option value="superadmin">Super Admin</option>
               </select>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-3 justify-between mt-6">
-              <button
-                onClick={handleRemove}
-                disabled={editSaving}
-                className="btn-danger !text-xs disabled:opacity-50"
-              >
+            <div className="mt-6 flex justify-between gap-3">
+              <button onClick={() => void handleRemove()} disabled={editSaving} className="btn-danger !text-xs disabled:opacity-50">
                 Remove Admin
               </button>
 
               <div className="flex gap-3">
-                <button onClick={() => setEditAdmin(null)} className="btn-outline !px-5 !py-2.5 !rounded-xl !text-sm">
+                <button onClick={() => setEditAdmin(null)} className="btn-outline !rounded-xl !px-5 !py-2.5 !text-sm">
                   Cancel
                 </button>
                 <button
                   onClick={handleChangeRole}
                   disabled={editSaving || editRole === editAdmin.role}
-                  className="btn-primary !px-6 !py-2.5 !rounded-xl !text-xs disabled:opacity-50"
+                  className="btn-primary !rounded-xl !px-6 !py-2.5 !text-xs disabled:opacity-50"
                 >
-                  {editSaving ? '⏳ Saving...' : 'Save Role'}
+                  {editSaving ? 'Saving...' : 'Save Role'}
                 </button>
               </div>
             </div>
@@ -309,3 +452,4 @@ export default function AdminAdminsPage() {
     </div>
   )
 }
+
