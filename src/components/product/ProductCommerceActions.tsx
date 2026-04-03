@@ -37,23 +37,23 @@ export default function ProductCommerceActions({
     () =>
       variant === 'detail'
         ? {
-            primary: 'btn-primary !block !w-full !rounded-[14px] !text-center !text-[12px] sm:!text-[12.5px]',
-            secondary: 'btn-outline !block !w-full !rounded-[14px] !text-center !text-[12px] sm:!text-[12.5px]',
-          }
+          primary: 'btn-primary !block !w-full !rounded-[14px] !text-center !text-[12px] sm:!text-[12.5px]',
+          secondary: 'btn-outline !block !w-full !rounded-[14px] !text-center !text-[12px] sm:!text-[12.5px]',
+        }
         : {
-            primary: cn(
-              'inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-[14px] px-3 py-2 text-[10.75px] font-semibold transition-all duration-300',
-              isDark
-                ? 'bg-[linear-gradient(135deg,#1cc4ff_0%,#4f5fff_26%,#8b5cf6_64%,#ec4899_100%)] text-white shadow-[0_14px_36px_rgba(76,29,149,0.34)] hover:brightness-105'
-                : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-[0_12px_30px_rgba(124,58,237,0.24)] hover:brightness-105'
-            ),
-            secondary: cn(
-              'inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-[14px] px-3 py-2 text-[10.75px] font-semibold transition-all duration-300',
-              isDark
-                ? 'border border-white/[0.10] bg-white/[0.05] text-slate-100/86 hover:border-cyan-300/24 hover:bg-white/[0.09]'
-                : 'border border-white/80 bg-white/70 text-slate-700 hover:border-violet-300 hover:bg-white'
-            ),
-          },
+          primary: cn(
+            'inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-[14px] px-3 py-2 text-[10.75px] font-semibold transition-all duration-300',
+            isDark
+              ? 'bg-[linear-gradient(135deg,#1cc4ff_0%,#4f5fff_26%,#8b5cf6_64%,#ec4899_100%)] text-white shadow-[0_14px_36px_rgba(76,29,149,0.34)] hover:brightness-105'
+              : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-[0_12px_30px_rgba(124,58,237,0.24)] hover:brightness-105'
+          ),
+          secondary: cn(
+            'inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-[14px] px-3 py-2 text-[10.75px] font-semibold transition-all duration-300',
+            isDark
+              ? 'border border-white/[0.10] bg-white/[0.05] text-slate-100/86 hover:border-cyan-300/24 hover:bg-white/[0.09]'
+              : 'border border-white/80 bg-white/70 text-slate-700 hover:border-violet-300 hover:bg-white'
+          ),
+        },
     [isDark, variant]
   )
 

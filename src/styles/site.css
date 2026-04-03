@@ -55,10 +55,6 @@ html.lenis-root body {
   height: auto;
 }
 
-html.lenis-root body {
-  overscroll-behavior-y: none;
-}
-
 [data-native-scroll] {
   overscroll-behavior: contain;
 }

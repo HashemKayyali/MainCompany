@@ -1,29 +1,13 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowUpRight, Play, Sparkles } from 'lucide-react'
+import { Play } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { Product } from '../../data/products/types'
 import { useMotionEnabled } from '../../hooks/useMotionEnabled'
 import FramedImage from '../ui/FramedImage'
 import FramedVideo from '../ui/FramedVideo'
 import ProductCommerceActions from './ProductCommerceActions'
-
-const titleClampStyle: CSSProperties = {
-  display: '-webkit-box',
-  WebkitLineClamp: 2,
-  WebkitBoxOrient: 'vertical',
-  overflow: 'hidden',
-}
-
-const descriptionClampStyle: CSSProperties = {
-  display: '-webkit-box',
-  WebkitLineClamp: 2,
-  WebkitBoxOrient: 'vertical',
-  overflow: 'hidden',
-}
-
-const ease = [0.16, 1, 0.3, 1] as const
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ')
@@ -36,66 +20,18 @@ function prefersReducedMotion() {
   )
 }
 
-function ProductPill({
-  children,
-  tone = 'neutral',
-}: {
-  children: React.ReactNode
-  tone?: 'neutral' | 'accent' | 'success'
-}) {
-  const classes =
-    tone === 'accent'
-      ? 'border-cyan-300/18 bg-[linear-gradient(180deg,rgba(34,211,238,0.14),rgba(124,58,237,0.08))] text-cyan-50'
-      : tone === 'success'
-        ? 'border-emerald-300/18 bg-[linear-gradient(180deg,rgba(16,185,129,0.16),rgba(6,182,212,0.08))] text-emerald-50'
-        : 'border-white/[0.08] bg-white/[0.05] text-white/78'
-
+function SimpleBadge({ children, active }: { children: React.ReactNode; active?: boolean }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border px-2.25 py-[0.4rem] text-[8.5px] font-semibold uppercase tracking-[0.11em] backdrop-blur-md sm:text-[9px]',
-        classes
+        'inline-flex items-center rounded-md px-2 py-1 text-[10px] font-medium tracking-wide backdrop-blur-md',
+        active
+          ? 'bg-cyan-500/90 text-white shadow-sm'
+          : 'bg-black/40 text-white/90 border border-white/10'
       )}
     >
       {children}
     </span>
-  )
-}
-
-function PriceTile({
-  label,
-  value,
-  meta,
-  accent = 'violet',
-}: {
-  label: string
-  value: string
-  meta: string
-  accent?: 'violet' | 'cyan'
-}) {
-  return (
-    <div
-      className={cn(
-        'relative overflow-hidden rounded-[15px] border px-3 py-2.5',
-        accent === 'cyan'
-          ? 'border-cyan-300/14 bg-[linear-gradient(180deg,rgba(10,25,41,0.92),rgba(8,15,29,0.94))]'
-          : 'border-white/[0.08] bg-[linear-gradient(180deg,rgba(14,17,37,0.94),rgba(9,13,28,0.96))]'
-      )}
-    >
-      <div
-        className={cn(
-          'pointer-events-none absolute inset-x-0 top-0 h-px',
-          accent === 'cyan'
-            ? 'bg-gradient-to-r from-transparent via-cyan-300/35 to-transparent'
-            : 'bg-gradient-to-r from-transparent via-fuchsia-300/22 to-transparent'
-        )}
-      />
-      <div className="text-[9px] font-mono uppercase tracking-[0.14em] text-white/42">{label}</div>
-      <div className="mt-1 text-[0.92rem] font-display font-black leading-none tracking-[-0.04em] text-white">
-        {value}
-      </div>
-      <div className="mt-1 text-[10px] leading-4.5 text-white/58">{meta}</div>
-    </div>
   )
 }
 
@@ -116,45 +52,14 @@ export default function ProductCard({
 
   const allowMotion = motionEnabled && !prefersReducedMotion()
   const hasVideo = Boolean(product.videoUrl)
-  const rentalEnabled = product.rentalEnabled !== false
-  const saleEnabled = product.saleEnabled !== false
-  const showRentalPrice = rentalEnabled && product.showPrice !== false
+
   const categoryLabel = product.categoryTags[0] || 'Marketplace'
-  const heroThumb = product.heroImage
-  const heroPoster = product.heroImage
+  const isFeatured = product.featured
 
-  const chips = useMemo(
-    () =>
-      Array.from(new Set(product.categoryTags.filter(Boolean))).slice(0, 2),
-    [product.categoryTags]
-  )
-
-  const pricingTiles = useMemo(() => {
-    const tiles: Array<{ label: string; value: string; meta: string; accent?: 'violet' | 'cyan' }> =
-      []
-
-    if (rentalEnabled) {
-      tiles.push({
-        label: showRentalPrice ? 'Rental Rate' : 'Rental Pricing',
-        value: showRentalPrice
-          ? `${product.rentalPricePerDay} ${product.currency}`
-          : 'Tailored Pricing',
-        meta: showRentalPrice ? 'Per day rental pricing' : 'Quote-based rental setup',
-        accent: 'cyan',
-      })
-    }
-
-    if (saleEnabled) {
-      tiles.push({
-        label: 'Purchase Quote',
-        value: 'Custom Quote',
-        meta: 'Built around your brief and scope',
-        accent: 'violet',
-      })
-    }
-
-    return tiles
-  }, [product.currency, product.rentalPricePerDay, rentalEnabled, saleEnabled, showRentalPrice])
+  // We simplify pricing view. Just show the primary price (rental) if it has one.
+  const showRentalPrice = product.rentalEnabled !== false && product.showPrice !== false
+  const priceDisplay = showRentalPrice ? `${product.rentalPricePerDay} ${product.currency}` : 'Quote Based'
+  const priceLabel = showRentalPrice ? 'Per Day' : 'Custom Pricing'
 
   useEffect(() => {
     if (!hasVideo || !cardRef.current || prefersReducedMotion()) return
@@ -195,211 +100,122 @@ export default function ProductCard({
   return (
     <motion.article
       ref={cardRef}
-      className="group relative self-start"
-      initial={allowMotion ? { opacity: 0, y: 24 } : false}
+      initial={allowMotion ? { opacity: 0, y: 16 } : false}
       whileInView={allowMotion ? { opacity: 1, y: 0 } : undefined}
-      viewport={allowMotion ? { once: true, margin: '-32px' } : undefined}
+      viewport={allowMotion ? { once: true, margin: '-20px' } : undefined}
       transition={
         allowMotion
-          ? { duration: 0.58, delay: Math.min(index * 0.04, 0.18), ease }
+          ? { duration: 0.5, delay: Math.min(index * 0.05, 0.2), ease: [0.16, 1, 0.3, 1] }
           : undefined
       }
       onMouseEnter={startPreview}
       onMouseLeave={stopPreview}
+      className={cn(
+        'group relative flex h-full flex-col overflow-hidden rounded-[20px] transition-all duration-300',
+        isDark
+          ? 'bg-[#0a0d1a] border border-white/10 hover:border-white/20 hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-900/20'
+          : 'bg-white border border-slate-200 hover:border-violet-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200'
+      )}
     >
+      {/* Subtly animated glow behind content on hover (Desktop only effect) */}
       <div
         className={cn(
-          'absolute inset-[6px] -z-10 rounded-[20px] border blur-lg transition-opacity duration-300',
-          isHovering ? 'opacity-100' : 'opacity-70',
+          'pointer-events-none absolute -inset-px z-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100',
           isDark
-            ? 'border-cyan-400/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.12),transparent_58%)]'
-            : 'border-violet-300/12 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.12),transparent_58%)]'
+            ? 'bg-gradient-to-b from-white/[0.04] to-transparent'
+            : 'bg-gradient-to-b from-violet-50 to-transparent'
         )}
       />
 
-      <div
-        className={cn(
-          'relative flex flex-col overflow-hidden rounded-[20px] border p-2.5',
-          isDark
-            ? 'border-white/[0.08] bg-[linear-gradient(145deg,rgba(10,14,30,0.96),rgba(6,10,20,0.98))] shadow-[0_30px_90px_-62px_rgba(8,16,38,0.96)]'
-            : 'border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,245,255,0.94))] shadow-[0_26px_58px_-40px_rgba(15,23,42,0.18)]'
-        )}
+      <Link
+        to={`/products/${product.slug}`}
+        aria-label={`Open ${product.name}`}
+        className="relative block aspect-[1.5/1] w-full shrink-0 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 z-10"
       >
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.1]"
-          style={{
-            backgroundImage: isDark
-              ? 'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)'
-              : 'linear-gradient(rgba(124,58,237,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px)',
-            backgroundSize: '78px 78px',
-            maskImage: 'linear-gradient(180deg, rgba(0,0,0,0.54), transparent 55%)',
-            WebkitMaskImage: 'linear-gradient(180deg, rgba(0,0,0,0.54), transparent 55%)',
-          }}
+        <FramedImage
+          media={product.heroImage}
+          alt={product.name}
+          loading="lazy"
+          className={cn(
+            'h-full w-full object-cover transition-transform duration-700 ease-out',
+            isPlaying ? 'opacity-0 scale-105' : 'opacity-100 group-hover:scale-105'
+          )}
+          fallbackTransform={{ fit: 'cover' }}
+          draggable={false}
         />
 
-        <Link
-          to={`/products/${product.slug}`}
-          aria-label={`Open ${product.name}`}
-          className={cn(
-            'relative block aspect-[1.82/1] overflow-hidden rounded-[16px] border outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:aspect-[16/9]',
-            isDark
-              ? 'border-white/[0.10] bg-black/20 focus-visible:ring-cyan-300/55 focus-visible:ring-offset-[#07101c]'
-              : 'border-white/85 bg-white/75 focus-visible:ring-violet-500/45 focus-visible:ring-offset-white'
-          )}
-        >
-          <FramedImage
-            media={heroThumb}
-            alt={product.name}
-            loading="lazy"
+        {hasVideo && (
+          <FramedVideo
+            ref={videoRef}
+            media={product.videoUrl}
+            posterMedia={product.heroImage}
             className={cn(
-              'h-full w-full transition-all duration-700',
-              isPlaying ? 'opacity-0 scale-[1.04]' : 'opacity-100 scale-100'
+              'absolute inset-0 h-full w-full object-cover transition-opacity duration-300',
+              isPlaying ? 'opacity-100' : 'opacity-0'
             )}
+            muted
+            loop
+            playsInline
+            preload="metadata"
             fallbackTransform={{ fit: 'cover' }}
-            draggable={false}
+            onPlaying={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
           />
+        )}
 
-          {hasVideo ? (
-            <FramedVideo
-              ref={videoRef}
-              media={product.videoUrl}
-              posterMedia={heroPoster}
-              className={cn(
-                'absolute inset-0 h-full w-full transition-opacity duration-300',
-                isPlaying ? 'opacity-100' : 'opacity-0'
-              )}
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              fallbackTransform={{ fit: 'cover' }}
-              onPlaying={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-            />
-          ) : null}
+        {/* Cleaner Gradient Overlay - Only at bottom to ensure tag legibility */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent opacity-80" />
 
-          <div
-            className={cn(
-              'pointer-events-none absolute inset-0',
-              isDark
-                ? 'bg-[linear-gradient(180deg,rgba(2,6,18,0.08),transparent_34%,rgba(2,6,18,0.82))]'
-                : 'bg-[linear-gradient(180deg,rgba(255,255,255,0.10),transparent_36%,rgba(255,255,255,0.92))]'
-            )}
-          />
+        {/* Minimal Tags */}
+        <div className="absolute left-3 top-3 z-20 flex gap-2">
+          {isFeatured && <SimpleBadge active>Featured</SimpleBadge>}
+          {product.badge && <SimpleBadge>{product.badge}</SimpleBadge>}
+        </div>
 
-          <div className="pointer-events-none absolute left-2.5 top-2.5 z-10 flex flex-wrap gap-1.5">
-            <ProductPill tone="accent">{categoryLabel}</ProductPill>
-            {product.badge?.trim() ? <ProductPill>{product.badge}</ProductPill> : null}
-          </div>
-
-          <div className="pointer-events-none absolute right-2.5 top-2.5 z-10 flex flex-wrap justify-end gap-1.5">
-            {product.featured ? <ProductPill tone="success">Featured</ProductPill> : null}
-            {saleEnabled && !rentalEnabled ? <ProductPill>Quote Based</ProductPill> : null}
-          </div>
-
-          {hasVideo ? (
-            <>
-              <div className="pointer-events-none absolute bottom-2 left-2 z-10">
-                <ProductPill>{isPlaying ? 'Preview Playing' : 'Video Preview'}</ProductPill>
-              </div>
-              {!isPlaying ? (
-                <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
-                  <div
-                    className={cn(
-                  'flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md',
-                      isDark
-                        ? 'border-white/14 bg-black/36 text-white'
-                        : 'border-white/90 bg-white/70 text-violet-700'
-                    )}
-                  >
-                    <Play size={11} fill="currentColor" strokeWidth={0} className="ml-0.5" />
-                  </div>
-                </div>
-              ) : null}
-            </>
-          ) : null}
-        </Link>
-
-          <div className="relative flex flex-1 flex-col gap-2.5 px-0.5 pb-0 pt-3">
-          <div className="space-y-2">
-            <div className={cn('text-[9px] font-mono uppercase tracking-[0.14em]', isDark ? 'text-cyan-100/40' : 'text-violet-700/70')}>
-              Premium product listing
+        {hasVideo && !isPlaying && (
+          <div className="absolute right-3 top-3 z-20">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-white transition-transform group-hover:scale-110">
+              <Play size={14} fill="currentColor" className="ml-0.5" />
             </div>
-
-            <div className="space-y-1.5">
-              <h3
-                className={cn(
-                  'font-display text-[1.04rem] font-black leading-[1] tracking-[-0.05em] sm:text-[1.08rem]',
-                  isDark ? 'text-white' : 'text-gray-900'
-                )}
-                style={titleClampStyle}
-              >
-                {product.name}
-              </h3>
-
-              <p
-                className={cn('text-[0.82rem] leading-[1.52]', isDark ? 'text-purple-100/68' : 'text-gray-500')}
-                style={descriptionClampStyle}
-              >
-                {product.shortDescription}
-              </p>
-            </div>
-
-            {chips.length > 0 ? (
-              <div className="flex flex-wrap gap-1">
-                {chips.map((chip, chipIndex) => (
-                  <span
-                    key={`${product.slug}-${chip}`}
-                    className={cn(
-                      'inline-flex items-center rounded-full border px-2.25 py-[0.4rem] text-[9px] font-medium',
-                      chipIndex === 0
-                        ? isDark
-                          ? 'border-cyan-400/16 bg-cyan-400/10 text-cyan-100'
-                          : 'border-violet-200 bg-violet-50 text-violet-700'
-                        : isDark
-                          ? 'border-white/[0.08] bg-white/[0.04] text-white/72'
-                          : 'border-gray-200 bg-gray-50 text-gray-600'
-                    )}
-                  >
-                    {chip}
-                  </span>
-                ))}
-              </div>
-            ) : null}
           </div>
+        )}
+      </Link>
 
-          {pricingTiles.length > 0 ? (
-            <div className={cn('grid gap-1.25', pricingTiles.length > 1 ? 'sm:grid-cols-2' : 'grid-cols-1')}>
-              {pricingTiles.map(tile => (
-                <PriceTile
-                  key={`${product.slug}-${tile.label}`}
-                  label={tile.label}
-                  value={tile.value}
-                  meta={tile.meta}
-                  accent={tile.accent}
-                />
-              ))}
+      <div className="relative z-10 flex flex-1 flex-col p-4 sm:p-5">
+
+        {/* Metadata Row */}
+        <div className="mb-2 flex items-center justify-between">
+          <span className={cn('text-[11px] font-semibold uppercase tracking-wider', isDark ? 'text-cyan-400' : 'text-violet-600')}>
+            {categoryLabel}
+          </span>
+        </div>
+
+        {/* Content Block */}
+        <div className="mb-4">
+          <Link to={`/products/${product.slug}`} className="outline-none focus-visible:underline">
+            <h3 className={cn('font-display text-lg font-bold leading-tight tracking-tight line-clamp-1', isDark ? 'text-white' : 'text-slate-900')}>
+              {product.name}
+            </h3>
+          </Link>
+          <p className={cn('mt-2 text-sm leading-relaxed line-clamp-2', isDark ? 'text-slate-400' : 'text-slate-500')}>
+            {product.shortDescription}
+          </p>
+        </div>
+
+        {/* Pricing Block - Clean alignment */}
+        <div className="mb-5 mt-auto flex items-end justify-between border-t border-slate-200/10 pt-4">
+          <div>
+            <div className={cn('text-xs font-medium', isDark ? 'text-slate-400' : 'text-slate-500')}>
+              {priceLabel}
             </div>
-          ) : null}
-
-          <div className="mt-auto space-y-1.5 pt-0.25">
-            <Link
-              to={`/products/${product.slug}`}
-              className={cn(
-                'inline-flex min-h-[42px] w-full items-center justify-center gap-1.5 rounded-[14px] border px-3.5 py-2 text-[10.75px] font-semibold transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-                isDark
-                  ? 'border-white/[0.10] bg-white/[0.05] text-slate-100/88 hover:border-cyan-300/22 hover:bg-white/[0.08] focus-visible:ring-cyan-300/55 focus-visible:ring-offset-[#07101c]'
-                  : 'border-white/90 bg-white/72 text-slate-700 hover:border-violet-300 hover:bg-white focus-visible:ring-violet-500/45 focus-visible:ring-offset-white'
-              )}
-            >
-              <Sparkles size={13} />
-              View Details
-              <ArrowUpRight size={12} />
-            </Link>
-
-            <ProductCommerceActions product={product} />
+            <div className={cn('mt-0.5 font-display text-xl font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+              {priceDisplay}
+            </div>
           </div>
         </div>
+
+        {/* commerce actions - cleanly integrated */}
+        <ProductCommerceActions product={product} />
       </div>
     </motion.article>
   )

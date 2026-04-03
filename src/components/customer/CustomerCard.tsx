@@ -15,101 +15,63 @@ export default function CustomerCard({ customer }: { customer: Customer }) {
 
   return (
     <motion.div
-      initial={perfLow ? { opacity: 0, y: 6 } : { opacity: 0, y: 10, filter: 'blur(10px)' }}
+      initial={perfLow ? { opacity: 0, y: 6 } : { opacity: 0, y: 16, filter: 'blur(8px)' }}
       whileInView={perfLow ? { opacity: 1, y: 0 } : { opacity: 1, y: 0, filter: 'blur(0)' }}
-      viewport={{ once: true, margin: '-80px' }}
-      transition={reduceMotion ? { duration: 0 } : { duration: 0.7, ease }}
-      className={`group relative overflow-hidden rounded-[18px] border p-3 ${
+      viewport={{ once: true, margin: '-40px' }}
+      transition={reduceMotion ? { duration: 0 } : { duration: 0.6, ease }}
+      className={`group relative flex aspect-[4/3] w-full flex-col items-center justify-center overflow-hidden rounded-[20px] border transition-all duration-500 sm:aspect-[3/2] ${
+        !reduceMotion ? 'hover:-translate-y-1.5' : ''
+      } ${
         isDark
-          ? 'border-white/10 bg-[linear-gradient(180deg,rgba(12,15,31,0.8),rgba(8,10,20,0.72))]'
-          : 'border-violet-200/70 bg-white/82'
+          ? 'border-white/[0.06] bg-[linear-gradient(165deg,rgba(255,255,255,0.035)_0%,rgba(255,255,255,0.01)_100%)] hover:border-white/[0.12] hover:bg-[linear-gradient(165deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.015)_100%)]'
+          : 'border-violet-100 bg-white hover:border-violet-200 hover:shadow-[0_12px_40px_-12px_rgba(124,58,237,0.15)]'
       }`}
       style={{
-        backdropFilter: perfLow ? undefined : 'blur(14px)',
-        WebkitBackdropFilter: perfLow ? undefined : 'blur(14px)',
+        boxShadow: isDark
+          ? 'inset 0 1px 0 rgba(255,255,255,0.05), 0 24px 48px -12px rgba(0,0,0,0.5)'
+          : '0 4px 20px rgba(0,0,0,0.03)',
+        backdropFilter: perfLow ? undefined : 'blur(20px)',
+        WebkitBackdropFilter: perfLow ? undefined : 'blur(20px)',
       }}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)_18%,transparent_72%,rgba(255,255,255,0.02))]" />
-      <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/50 to-transparent" />
-
-      <div
-        className="absolute -inset-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+      <div 
+        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         style={{
-          background: isDark
-            ? 'radial-gradient(circle at 50% 24%, rgba(34,211,238,0.14), transparent 48%), radial-gradient(circle at 20% 78%, rgba(124,58,237,0.18), transparent 52%), radial-gradient(circle at 82% 76%, rgba(236,72,153,0.12), transparent 50%)'
-            : 'radial-gradient(circle at 50% 30%, rgba(124,58,237,0.10), transparent 60%)',
+          background: isDark 
+            ? 'radial-gradient(circle at 50% 0%, rgba(167,139,250,0.15) 0%, transparent 60%)'
+            : 'radial-gradient(circle at 50% 0%, rgba(124,58,237,0.05) 0%, transparent 60%)'
         }}
       />
 
-      <div className="relative flex flex-col items-center gap-2">
-        <div className={`text-[9px] font-mono uppercase tracking-[0.18em] ${isDark ? 'text-purple-100/46' : 'text-violet-600/70'}`}>
-          Trusted Client
-        </div>
-
-        <motion.div
-          whileHover={reduceMotion ? {} : { y: -2 }}
-          transition={reduceMotion ? { duration: 0 } : { duration: 0.35, ease }}
-          className={`relative flex h-[58px] w-[58px] items-center justify-center overflow-hidden rounded-[16px] border ${
-            isDark
-              ? 'border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))]'
-              : 'border-violet-200/70 bg-white'
-          }`}
-        >
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -18px 28px rgba(2,6,18,0.12)',
-            }}
+      <div className={`relative flex h-[55%] w-[70%] shrink-0 items-center justify-center rounded-[12px] p-2.5 transition-transform duration-500 group-hover:scale-[1.05] ${
+        imgOk && isDark ? 'bg-[#f8f9fa] shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)]' : ''
+      } ${
+        !imgOk && (isDark ? 'rounded-[14px] bg-white/[0.03]' : 'rounded-[14px] bg-violet-50')
+      }`}>
+        {imgOk ? (
+          <FramedImage
+            media={customer.logo}
+            alt={customer.name}
+            loading="lazy"
+            className={`h-full w-full object-contain ${
+              isDark ? 'opacity-85 mix-blend-multiply transition-all duration-500 group-hover:opacity-100' : 'opacity-85 transition-all duration-500 group-hover:opacity-100 drop-shadow-sm'
+            }`}
+            fallbackTransform={{ fit: 'contain' }}
+            onError={() => setImgOk(false)}
           />
-
-          {imgOk ? (
-            <FramedImage
-              media={customer.logo}
-              alt={customer.name}
-              loading="lazy"
-              className="h-[90%] w-[90%] transition-transform duration-500 group-hover:scale-105"
-              fallbackTransform={{ fit: 'contain' }}
-              onError={() => setImgOk(false)}
-            />
-          ) : (
-            <div className={`flex h-full w-full items-center justify-center ${isDark ? 'bg-black/10' : 'bg-violet-50'}`}>
-              <span className={`text-[12px] font-mono tracking-[0.18em] uppercase ${isDark ? 'text-white/60' : 'text-gray-500'}`}>
-                {customer.name.slice(0, 2)}
-              </span>
-            </div>
-          )}
-
-          <motion.div
-            className="absolute inset-y-0 -left-1/2 w-1/2 opacity-0 group-hover:opacity-80"
-            style={{
-              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent)',
-              transform: 'skewX(-18deg)',
-            }}
-            animate={reduceMotion ? {} : { x: ['-120%', '260%'] }}
-            transition={reduceMotion ? { duration: 0 } : { duration: 1.3, ease, repeat: Infinity, repeatDelay: 1.2 }}
-          />
-        </motion.div>
-
-        <div className="text-center">
-          <div className={`text-[11px] font-semibold leading-tight ${isDark ? 'text-white/88' : 'text-gray-800'}`}>
-            {customer.name}
-          </div>
-          <div className={`mt-0.5 text-[8px] uppercase tracking-[0.18em] ${isDark ? 'text-purple-100/40' : 'text-violet-600/60'}`}>
-            Brand Partner
-          </div>
-        </div>
+        ) : (
+          <span className={`text-base font-mono tracking-widest uppercase ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
+            {customer.name.slice(0, 2)}
+          </span>
+        )}
       </div>
 
-      {/* Bottom neon line */}
-      <div
-        className="absolute bottom-3 left-4 right-4 h-px opacity-60"
-        style={{
-          background: isDark
-            ? 'linear-gradient(90deg, transparent, rgba(124,58,237,0.45), rgba(34,211,238,0.25), transparent)'
-            : 'linear-gradient(90deg, transparent, rgba(124,58,237,0.18), transparent)',
-        }}
-      />
+      <div className={`absolute bottom-4 left-4 right-4 text-center text-[12px] font-bold tracking-wide transition-all duration-500 sm:bottom-5 ${
+        isDark ? 'text-purple-100/60 group-hover:-translate-y-0.5 group-hover:text-white' 
+               : 'text-violet-900/60 group-hover:-translate-y-0.5 group-hover:text-violet-900'
+      }`}>
+        {customer.name}
+      </div>
     </motion.div>
   )
 }

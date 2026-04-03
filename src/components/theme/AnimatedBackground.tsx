@@ -314,7 +314,7 @@ export default function AnimatedBackground({ position = 'fixed', className = '' 
   if (perfLow) {
     if (!isDark) {
       return (
-        <div className={`${rootPos} pointer-events-none z-0 overflow-hidden ${className}`}>
+        <div className={`${rootPos} pointer-events-none z-0 overflow-x-clip overflow-y-visible ${className}`}>
           <div className="absolute inset-0 bg-[#f6f5ff]" />
           <div className="absolute inset-0 opacity-45" style={lightGridStyle} />
           {lightModeFields.map((layer, index) => (
@@ -333,19 +333,19 @@ export default function AnimatedBackground({ position = 'fixed', className = '' 
     }
 
     return (
-      <div className={`${rootPos} pointer-events-none z-0 overflow-hidden ${className}`}>
+      <div className={`${rootPos} pointer-events-none z-0 overflow-x-clip overflow-y-visible ${className}`}>
         <div className="absolute inset-0 bg-[linear-gradient(180deg,#03050d_0%,#070a16_34%,#050711_100%)]" />
         {atmosphereFields.map((layer, index) => (
           <div key={index} className={layer.className.replace(' ambient-drift', '').replace(' ambient-drift-reverse', '')} style={layer.style} />
         ))}
-          <div className="absolute inset-0 opacity-[0.08]" style={darkGridStyle} />
-          <div className="absolute inset-0 opacity-[0.035]" style={darkMeshStyle} />
-          <div className="absolute inset-0 opacity-[0.1]" style={{ backgroundImage: dustPattern }} />
+        <div className="absolute inset-0 opacity-[0.08]" style={darkGridStyle} />
+        <div className="absolute inset-0 opacity-[0.035]" style={darkMeshStyle} />
+        <div className="absolute inset-0 opacity-[0.1]" style={{ backgroundImage: dustPattern }} />
         <div
           className="absolute inset-0"
           style={{
             background:
-                'radial-gradient(circle at 50% 10%, rgba(255,255,255,0.034) 0%, transparent 12%), radial-gradient(circle at 50% 46%, transparent 0%, rgba(3,7,18,0.06) 34%, rgba(2,6,12,0.8) 100%)',
+              'radial-gradient(circle at 50% 10%, rgba(255,255,255,0.034) 0%, transparent 12%), radial-gradient(circle at 50% 46%, transparent 0%, rgba(3,7,18,0.06) 34%, rgba(2,6,12,0.8) 100%)',
           }}
         />
       </div>
@@ -354,7 +354,7 @@ export default function AnimatedBackground({ position = 'fixed', className = '' 
 
   if (!isDark) {
     return (
-      <div className={`${rootPos} pointer-events-none z-0 overflow-hidden ${className}`}>
+      <div className={`${rootPos} pointer-events-none z-0 overflow-x-clip overflow-y-visible ${className}`}>
         <div className="absolute inset-0 bg-[#f6f5ff]" />
         <div className="absolute inset-0 opacity-50" style={lightGridStyle} />
         {lightModeFields.map((layer, index) => (
@@ -373,13 +373,13 @@ export default function AnimatedBackground({ position = 'fixed', className = '' 
   }
 
   return (
-    <div className={`${rootPos} pointer-events-none z-0 overflow-hidden ${className}`}>
+    <div className={`${rootPos} pointer-events-none z-0 overflow-x-clip overflow-y-visible ${className}`}>
       <div className="absolute inset-0 bg-[linear-gradient(180deg,#03050d_0%,#070a16_34%,#050711_100%)]" />
       <div
         className="absolute inset-0"
         style={{
           background:
-              'radial-gradient(circle at 50% -8%, rgba(255,255,255,0.03) 0%, transparent 14%), linear-gradient(180deg, rgba(255,255,255,0.01), transparent 12%, transparent 88%, rgba(255,255,255,0.008))',
+            'radial-gradient(circle at 50% -8%, rgba(255,255,255,0.03) 0%, transparent 14%), linear-gradient(180deg, rgba(255,255,255,0.01), transparent 12%, transparent 88%, rgba(255,255,255,0.008))',
         }}
       />
 

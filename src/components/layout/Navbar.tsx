@@ -422,9 +422,9 @@ export default function Navbar() {
       : 'border-violet-300/30 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(250,244,255,0.92))] text-gray-900 hover:border-violet-300/50 hover:bg-white'
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
-      <div className="px-3 pt-2.5 sm:px-5 sm:pt-3 lg:px-6">
-        <nav className="mx-auto max-w-[86rem]">
+    <header className="fixed inset-x-0 top-0 z-50 w-full">
+      <div className="mx-auto w-full max-w-[100vw] px-3 pt-2.5 sm:px-5 sm:pt-3 lg:px-6">
+        <nav className="mx-auto w-full max-w-[86rem]">
           <div className="relative">
             <div
               className="pointer-events-none absolute -inset-px rounded-[30px] opacity-90"
@@ -481,16 +481,14 @@ export default function Navbar() {
 
                     <div className="min-w-0 leading-none">
                       <div
-                        className={`truncate font-display text-[11.25px] font-bold uppercase tracking-[0.2em] ${
-                          isDark ? 'text-white' : 'text-gray-900'
-                        }`}
+                        className={`truncate font-display text-[11.25px] font-bold uppercase tracking-[0.2em] ${isDark ? 'text-white' : 'text-gray-900'
+                          }`}
                       >
                         Bike <span className="text-violet-300">Land</span>
                       </div>
                       <div
-                        className={`mt-1.5 truncate text-[10px] uppercase tracking-[0.16em] max-[379px]:hidden ${
-                          isDark ? 'text-purple-100/52' : 'text-violet-600/70'
-                        }`}
+                        className={`mt-1.5 truncate text-[10px] uppercase tracking-[0.16em] max-[379px]:hidden ${isDark ? 'text-purple-100/52' : 'text-violet-600/70'
+                          }`}
                       >
                         Marketplace
                       </div>
@@ -518,11 +516,10 @@ export default function Navbar() {
                                 {showPill && (
                                   <motion.div
                                     layoutId="desktop-nav-active"
-                                    className={`absolute inset-0 rounded-[17px] border ${
-                                      isDark
+                                    className={`absolute inset-0 rounded-[17px] border ${isDark
                                         ? 'border-violet-300/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.24),rgba(236,72,153,0.10),rgba(34,211,238,0.08))]'
                                         : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.06),rgba(34,211,238,0.06))]'
-                                    }`}
+                                      }`}
                                     transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                                   />
                                 )}
@@ -570,19 +567,17 @@ export default function Navbar() {
                               {showPill && (
                                 <motion.div
                                   layoutId="desktop-nav-active"
-                                  className={`absolute inset-0 rounded-[17px] border ${
-                                    isDark
+                                  className={`absolute inset-0 rounded-[17px] border ${isDark
                                       ? 'border-violet-300/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.24),rgba(236,72,153,0.10),rgba(34,211,238,0.08))]'
                                       : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.06),rgba(34,211,238,0.06))]'
-                                  }`}
+                                    }`}
                                   transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                                 />
                               )}
                               <span className="relative z-10">{item.label}</span>
                               <ChevronDown
-                                className={`relative z-10 h-3.5 w-3.5 transition-transform duration-200 ${
-                                  isOpen ? 'translate-y-[1px] rotate-180' : ''
-                                }`}
+                                className={`relative z-10 h-3.5 w-3.5 transition-transform duration-200 ${isOpen ? 'translate-y-[1px] rotate-180' : ''
+                                  }`}
                                 strokeWidth={1.9}
                               />
                             </button>
@@ -609,11 +604,10 @@ export default function Navbar() {
                       <Search className="h-4 w-4" strokeWidth={1.9} />
                       <span className="text-[12px] font-semibold">Search</span>
                       <span
-                        className={`rounded-full border px-2.5 py-1 text-[9px] font-mono uppercase tracking-[0.12em] ${
-                          isDark
+                        className={`rounded-full border px-2.5 py-1 text-[9px] font-mono uppercase tracking-[0.12em] ${isDark
                             ? 'border-white/10 bg-white/[0.05] text-purple-100/56'
                             : 'border-violet-200/80 bg-violet-50/80 text-violet-600'
-                        }`}
+                          }`}
                       >
                         Ctrl K
                       </span>
@@ -629,11 +623,10 @@ export default function Navbar() {
                           className={`inline-flex h-11 items-center gap-2.5 rounded-[18px] border pl-2.5 pr-3.5 transition-all ${utilitySurface} ${focus}`}
                         >
                           <div
-                            className={`flex h-[2.125rem] w-[2.125rem] items-center justify-center rounded-full border ${
-                              isDark
+                            className={`flex h-[2.125rem] w-[2.125rem] items-center justify-center rounded-full border ${isDark
                                 ? 'border-violet-300/20 bg-[linear-gradient(135deg,rgba(124,58,237,0.22),rgba(236,72,153,0.12))] text-white'
                                 : 'border-violet-300/40 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(236,72,153,0.08))] text-violet-700'
-                            }`}
+                              }`}
                           >
                             <UserAvatar
                               name={currentUser?.name}
@@ -654,25 +647,22 @@ export default function Navbar() {
 
                           <div className="hidden text-left md:block">
                             <div
-                              className={`text-[12px] font-semibold ${
-                                isDark ? 'text-white/88' : 'text-gray-900'
-                              }`}
+                              className={`text-[12px] font-semibold ${isDark ? 'text-white/88' : 'text-gray-900'
+                                }`}
                             >
                               {firstName}
                             </div>
                             <div
-                              className={`text-[9.75px] uppercase tracking-[0.18em] ${
-                                isDark ? 'text-purple-100/44' : 'text-violet-600/64'
-                              }`}
+                              className={`text-[9.75px] uppercase tracking-[0.18em] ${isDark ? 'text-purple-100/44' : 'text-violet-600/64'
+                                }`}
                             >
                               Account
                             </div>
                           </div>
 
                           <ChevronDown
-                            className={`h-3.5 w-3.5 transition-transform ${
-                              userMenu ? 'rotate-180' : ''
-                            } ${isDark ? 'text-purple-100/52' : 'text-violet-600/60'}`}
+                            className={`h-3.5 w-3.5 transition-transform ${userMenu ? 'rotate-180' : ''
+                              } ${isDark ? 'text-purple-100/52' : 'text-violet-600/60'}`}
                             strokeWidth={1.9}
                           />
                         </button>
@@ -680,7 +670,7 @@ export default function Navbar() {
                     ) : (
                       <Link
                         to="/login"
-                      className={`hidden h-11 items-center rounded-[18px] border px-4 text-[12px] font-semibold transition-all sm:inline-flex ${utilitySurface} ${focus}`}
+                        className={`hidden h-11 items-center rounded-[18px] border px-4 text-[12px] font-semibold transition-all sm:inline-flex ${utilitySurface} ${focus}`}
                       >
                         Login
                       </Link>
@@ -692,20 +682,18 @@ export default function Navbar() {
                       aria-label={cartHasItems ? `Cart with ${cartItemCount} item${cartItemCount === 1 ? '' : 's'}` : 'Cart'}
                     >
                       <span
-                        className={`relative flex h-8 w-8 items-center justify-center rounded-full border ${
-                          isDark
+                        className={`relative flex h-8 w-8 items-center justify-center rounded-full border ${isDark
                             ? 'border-cyan-300/18 bg-white/[0.05]'
                             : 'border-violet-200/80 bg-white/80'
-                        }`}
+                          }`}
                       >
                         <ShoppingCart className="h-4 w-4" strokeWidth={1.9} />
                         {cartHasItems && (
                           <span
-                            className={`absolute -right-1.5 -top-1.5 inline-flex min-w-[1.15rem] items-center justify-center rounded-full px-1.5 py-[2px] text-[9px] font-mono font-bold leading-none ${
-                              isDark
+                            className={`absolute -right-1.5 -top-1.5 inline-flex min-w-[1.15rem] items-center justify-center rounded-full px-1.5 py-[2px] text-[9px] font-mono font-bold leading-none ${isDark
                                 ? 'bg-[linear-gradient(135deg,#22d3ee,#7c3aed)] text-slate-950 shadow-[0_10px_22px_rgba(34,211,238,0.35)]'
                                 : 'bg-[linear-gradient(135deg,#7c3aed,#22d3ee)] text-white shadow-[0_10px_18px_rgba(124,58,237,0.28)]'
-                            }`}
+                              }`}
                           >
                             {cartCountLabel}
                           </span>
@@ -723,27 +711,25 @@ export default function Navbar() {
                             ? `Quote draft with ${quoteItemCount} item${quoteItemCount === 1 ? '' : 's'}`
                             : 'Purchase quote draft'
                         }
-                        >
-                          <span
-                          className={`relative flex h-8 w-8 items-center justify-center rounded-full border ${
-                            isDark
+                      >
+                        <span
+                          className={`relative flex h-8 w-8 items-center justify-center rounded-full border ${isDark
                               ? 'border-fuchsia-300/16 bg-white/[0.05]'
                               : 'border-violet-200/80 bg-white/80'
-                          }`}
+                            }`}
                         >
                           <FileText className="h-4 w-4" strokeWidth={1.9} />
                           {quoteHasItems && (
                             <span
-                              className={`absolute -right-1.5 -top-1.5 inline-flex min-w-[1.15rem] items-center justify-center rounded-full px-1.5 py-[2px] text-[9px] font-mono font-bold leading-none ${
-                                isDark
+                              className={`absolute -right-1.5 -top-1.5 inline-flex min-w-[1.15rem] items-center justify-center rounded-full px-1.5 py-[2px] text-[9px] font-mono font-bold leading-none ${isDark
                                   ? 'bg-[linear-gradient(135deg,#f472b6,#8b5cf6)] text-slate-950 shadow-[0_10px_20px_rgba(244,114,182,0.32)]'
                                   : 'bg-[linear-gradient(135deg,#ec4899,#7c3aed)] text-white shadow-[0_10px_18px_rgba(236,72,153,0.24)]'
-                              }`}
+                                }`}
                             >
                               {quoteCountLabel}
                             </span>
                           )}
-                          </span>
+                        </span>
                         <span className="text-[12px] font-semibold">Quote</span>
                       </Link>
                     )}
@@ -755,9 +741,9 @@ export default function Navbar() {
                       aria-expanded={open}
                     >
                       {open ? (
-                          <X className="h-4 w-4" strokeWidth={2} />
+                        <X className="h-4 w-4" strokeWidth={2} />
                       ) : (
-                          <Menu className="h-4 w-4" strokeWidth={2} />
+                        <Menu className="h-4 w-4" strokeWidth={2} />
                       )}
                     </button>
                   </div>
@@ -772,33 +758,31 @@ export default function Navbar() {
                       transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
                       className="overflow-hidden lg:hidden"
                     >
-                        <div
-                          className={`mt-4 max-h-[calc(100dvh-5.75rem)] overflow-y-auto rounded-[26px] border p-4 backdrop-blur-2xl ${
-                            isDark
-                              ? 'border-white/10 bg-[linear-gradient(180deg,rgba(9,11,24,0.88),rgba(7,9,20,0.88))]'
-                              : 'border-violet-200/70 bg-white/88'
+                      <div
+                        className={`mt-4 max-h-[calc(100dvh-5.75rem)] overflow-y-auto rounded-[26px] border p-4 backdrop-blur-2xl ${isDark
+                            ? 'border-white/10 bg-[linear-gradient(180deg,rgba(9,11,24,0.88),rgba(7,9,20,0.88))]'
+                            : 'border-violet-200/70 bg-white/88'
                           }`}
-                          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-                        >
-                          <div className={`mb-2 text-[10px] font-mono uppercase tracking-[0.18em] ${isDark ? 'text-purple-100/48' : 'text-violet-600/72'}`}>
-                            Explore
-                          </div>
+                        style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+                      >
+                        <div className={`mb-2 text-[10px] font-mono uppercase tracking-[0.18em] ${isDark ? 'text-purple-100/48' : 'text-violet-600/72'}`}>
+                          Explore
+                        </div>
 
-                          <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
-                            {MOBILE_NAV.map((item) => {
-                              const isCurrent = active(item.to)
+                        <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
+                          {MOBILE_NAV.map((item) => {
+                            const isCurrent = active(item.to)
 
                             return (
                               <Link
                                 key={item.to}
                                 to={item.to}
-                                  className={`inline-flex min-h-[48px] items-center justify-center rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${
-                                    isCurrent
-                                      ? isDark
-                                        ? 'border-violet-300/20 bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.08),rgba(34,211,238,0.06))] text-white'
+                                className={`inline-flex min-h-[48px] items-center justify-center rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${isCurrent
+                                    ? isDark
+                                      ? 'border-violet-300/20 bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.08),rgba(34,211,238,0.06))] text-white'
                                       : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.06),rgba(34,211,238,0.06))] text-gray-900'
                                     : mobileTile
-                                } ${focus}`}
+                                  } ${focus}`}
                               >
                                 {item.label}
                               </Link>
@@ -807,9 +791,8 @@ export default function Navbar() {
                         </div>
 
                         <div
-                          className={`mt-4 grid gap-2.5 border-t pt-3.5 ${
-                            isDark ? 'border-white/8' : 'border-violet-200/60'
-                          }`}
+                          className={`mt-4 grid gap-2.5 border-t pt-3.5 ${isDark ? 'border-white/8' : 'border-violet-200/60'
+                            }`}
                         >
                           <div className={`text-[10px] font-mono uppercase tracking-[0.18em] ${isDark ? 'text-purple-100/48' : 'text-violet-600/72'}`}>
                             Tools & Account
@@ -830,23 +813,21 @@ export default function Navbar() {
                             {(quoteHasItems || quoteActive) && (
                               <Link
                                 to="/purchase-quote"
-                                className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${
-                                  quoteActive
+                                className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${quoteActive
                                     ? isDark
                                       ? 'border-fuchsia-300/22 bg-[linear-gradient(135deg,rgba(39,15,57,0.96),rgba(16,14,36,0.98))] text-white'
                                       : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.06))] text-gray-900'
                                     : mobileTile
-                                } ${focus}`}
+                                  } ${focus}`}
                               >
                                 <FileText className="h-4 w-4" strokeWidth={1.9} />
                                 Quote Draft
                                 {quoteHasItems && (
                                   <span
-                                    className={`inline-flex min-w-[1.4rem] items-center justify-center rounded-full px-1.5 py-[3px] text-[10px] font-mono font-bold leading-none ${
-                                      isDark
+                                    className={`inline-flex min-w-[1.4rem] items-center justify-center rounded-full px-1.5 py-[3px] text-[10px] font-mono font-bold leading-none ${isDark
                                         ? 'bg-[linear-gradient(135deg,#f472b6,#8b5cf6)] text-slate-950'
                                         : 'bg-[linear-gradient(135deg,#ec4899,#7c3aed)] text-white'
-                                    }`}
+                                      }`}
                                   >
                                     {quoteCountLabel}
                                   </span>
@@ -856,23 +837,21 @@ export default function Navbar() {
 
                             <Link
                               to="/rental-cart"
-                              className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[18px] border px-4 text-[13.5px] font-semibold transition-all ${
-                                cartActive
+                              className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[18px] border px-4 text-[13.5px] font-semibold transition-all ${cartActive
                                   ? isDark
                                     ? 'border-cyan-300/24 bg-[linear-gradient(135deg,rgba(8,30,44,0.94),rgba(11,18,38,0.98))] text-white'
                                     : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(34,211,238,0.06))] text-gray-900'
                                   : mobileTile
-                              } ${focus}`}
+                                } ${focus}`}
                             >
                               <ShoppingCart className="h-4 w-4" strokeWidth={1.9} />
                               Cart
                               {cartHasItems && (
                                 <span
-                                  className={`inline-flex min-w-[1.4rem] items-center justify-center rounded-full px-1.5 py-[3px] text-[10px] font-mono font-bold leading-none ${
-                                    isDark
+                                  className={`inline-flex min-w-[1.4rem] items-center justify-center rounded-full px-1.5 py-[3px] text-[10px] font-mono font-bold leading-none ${isDark
                                       ? 'bg-[linear-gradient(135deg,#22d3ee,#7c3aed)] text-slate-950'
                                       : 'bg-[linear-gradient(135deg,#7c3aed,#22d3ee)] text-white'
-                                  }`}
+                                    }`}
                                 >
                                   {cartCountLabel}
                                 </span>
@@ -913,11 +892,10 @@ export default function Navbar() {
                                   onClick={() => {
                                     void logout()
                                   }}
-                                  className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${
-                                    isDark
+                                  className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${isDark
                                       ? 'border-red-400/18 bg-red-500/10 text-red-300'
                                       : 'border-red-200 bg-red-50 text-red-600'
-                                  } ${focus}`}
+                                    } ${focus}`}
                                 >
                                   <LogOut className="h-4 w-4" strokeWidth={1.9} />
                                   Logout
@@ -925,8 +903,8 @@ export default function Navbar() {
                               </div>
                             </>
                           ) : (
-                              <Link
-                                to="/login"
+                            <Link
+                              to="/login"
                               className={`inline-flex min-h-[48px] items-center justify-center rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${mobileTile} ${focus}`}
                             >
                               Login
@@ -959,22 +937,20 @@ export default function Navbar() {
                 >
                   <div className="pointer-events-none absolute inset-x-0 top-0 h-4" />
                   <div
-                    className={`relative overflow-hidden rounded-[28px] border backdrop-blur-2xl ${
-                      isDark
+                    className={`relative overflow-hidden rounded-[28px] border backdrop-blur-2xl ${isDark
                         ? 'border-white/10 bg-[linear-gradient(180deg,rgba(10,12,25,0.96),rgba(7,9,20,0.95))] shadow-[0_28px_110px_rgba(1,3,12,0.62)]'
                         : 'border-violet-200/80 bg-white/92 shadow-xl shadow-violet-500/12'
-                    }`}
+                      }`}
                   >
                     <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/60 to-transparent" />
                     <div
                       className={`grid gap-px ${isDark ? 'bg-white/8 md:grid-cols-[0.88fr_1.12fr]' : 'bg-violet-200/60 md:grid-cols-[0.88fr_1.12fr]'}`}
                     >
                       <div
-                        className={`relative overflow-hidden px-6 py-[1.375rem] ${
-                          isDark
+                        className={`relative overflow-hidden px-6 py-[1.375rem] ${isDark
                             ? 'bg-[linear-gradient(155deg,rgba(20,16,38,0.94),rgba(10,12,26,0.96),rgba(7,14,28,0.94))]'
                             : 'bg-[linear-gradient(155deg,rgba(248,245,255,0.98),rgba(255,255,255,0.96),rgba(240,249,255,0.96))]'
-                        }`}
+                          }`}
                       >
                         <div
                           className="pointer-events-none absolute -right-10 top-4 h-32 w-32 rounded-full blur-3xl"
@@ -985,23 +961,20 @@ export default function Navbar() {
                           }}
                         />
                         <div
-                          className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${
-                            isDark ? 'text-cyan-200/76' : 'text-violet-700/78'
-                          }`}
+                          className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${isDark ? 'text-cyan-200/76' : 'text-violet-700/78'
+                            }`}
                         >
                           {activeDesktopItem.eyebrow}
                         </div>
                         <div
-                          className={`mt-2 font-display text-[1.18rem] font-bold leading-[1.02] tracking-[-0.04em] ${
-                            isDark ? 'text-white' : 'text-gray-900'
-                          }`}
+                          className={`mt-2 font-display text-[1.18rem] font-bold leading-[1.02] tracking-[-0.04em] ${isDark ? 'text-white' : 'text-gray-900'
+                            }`}
                         >
                           {activeDesktopItem.title}
                         </div>
                         <p
-                          className={`mt-3 max-w-[17rem] text-[12.25px] leading-[1.42rem] ${
-                            isDark ? 'text-purple-100/60' : 'text-gray-600'
-                          }`}
+                          className={`mt-3 max-w-[17rem] text-[12.25px] leading-[1.42rem] ${isDark ? 'text-purple-100/60' : 'text-gray-600'
+                            }`}
                         >
                           {activeDesktopItem.body}
                         </p>
@@ -1009,11 +982,10 @@ export default function Navbar() {
                           <Link
                             to={activeDesktopItem.ctaTo}
                             onClick={() => scheduleDesktopClose(true)}
-                            className={`mt-5 inline-flex items-center gap-2 rounded-[16px] border px-[1.125rem] py-2.5 text-[11px] font-semibold transition-all ${
-                              isDark
+                            className={`mt-5 inline-flex items-center gap-2 rounded-[16px] border px-[1.125rem] py-2.5 text-[11px] font-semibold transition-all ${isDark
                                 ? 'border-white/12 bg-white/[0.05] text-white hover:bg-white/[0.08]'
                                 : 'border-violet-200/80 bg-white/82 text-gray-900 hover:bg-white'
-                            } ${focus}`}
+                              } ${focus}`}
                           >
                             {activeDesktopItem.ctaLabel}
                             <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.9} />
@@ -1022,13 +994,11 @@ export default function Navbar() {
                       </div>
 
                       <div
-                        className={`grid gap-2.5 p-3.5 ${
-                          activeDesktopItem.children.length > 2 ? 'md:grid-cols-2' : 'grid-cols-1'
-                        } ${
-                          isDark
+                        className={`grid gap-2.5 p-3.5 ${activeDesktopItem.children.length > 2 ? 'md:grid-cols-2' : 'grid-cols-1'
+                          } ${isDark
                             ? 'bg-[linear-gradient(180deg,rgba(8,10,22,0.86),rgba(7,9,18,0.78))]'
                             : 'bg-white/90'
-                        }`}
+                          }`}
                       >
                         {activeDesktopItem.children.map((child, index) => {
                           const isCurrent = active(child.to)
@@ -1040,15 +1010,14 @@ export default function Navbar() {
                               ref={index === 0 ? desktopPanelFirstLinkRef : undefined}
                               to={child.to}
                               onClick={() => scheduleDesktopClose(true)}
-                              className={`group relative overflow-hidden rounded-[20px] border px-4 py-4 transition-all ${
-                                isCurrent
+                              className={`group relative overflow-hidden rounded-[20px] border px-4 py-4 transition-all ${isCurrent
                                   ? isDark
                                     ? 'border-violet-300/22 bg-[linear-gradient(145deg,rgba(124,58,237,0.16),rgba(236,72,153,0.08),rgba(34,211,238,0.08))]'
                                     : 'border-violet-300/40 bg-[linear-gradient(145deg,rgba(124,58,237,0.08),rgba(236,72,153,0.04),rgba(34,211,238,0.05))]'
                                   : isDark
                                     ? 'border-white/8 bg-white/[0.03] hover:border-violet-300/18 hover:bg-white/[0.05]'
                                     : 'border-violet-100 bg-white hover:border-violet-200 hover:bg-violet-50/60'
-                              } ${focus}`}
+                                } ${focus}`}
                             >
                               <div
                                 className="pointer-events-none absolute -right-6 top-0 h-20 w-20 rounded-full blur-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -1060,37 +1029,33 @@ export default function Navbar() {
                               />
                               <div className="relative flex items-start gap-3.5">
                                 <div
-                                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[15px] border ${
-                                    isDark
+                                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[15px] border ${isDark
                                       ? 'border-white/10 bg-[linear-gradient(145deg,rgba(124,58,237,0.18),rgba(236,72,153,0.08),rgba(34,211,238,0.08))] text-white'
                                       : 'border-violet-200/80 bg-[linear-gradient(145deg,rgba(124,58,237,0.10),rgba(236,72,153,0.05),rgba(34,211,238,0.06))] text-violet-700'
-                                  }`}
+                                    }`}
                                 >
                                   <Icon className="h-[1.125rem] w-[1.125rem]" strokeWidth={1.9} />
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-start justify-between gap-3">
                                     <div
-                                      className={`text-[12.5px] font-semibold ${
-                                        isDark ? 'text-white' : 'text-gray-900'
-                                      }`}
+                                      className={`text-[12.5px] font-semibold ${isDark ? 'text-white' : 'text-gray-900'
+                                        }`}
                                     >
                                       {child.label}
                                     </div>
                                     <div
-                                      className={`shrink-0 rounded-full border px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.14em] ${
-                                        isDark
+                                      className={`shrink-0 rounded-full border px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.14em] ${isDark
                                           ? 'border-white/10 bg-white/[0.05] text-cyan-200/72'
                                           : 'border-violet-200/80 bg-violet-50/80 text-violet-700/76'
-                                      }`}
+                                        }`}
                                     >
                                       {child.meta}
                                     </div>
                                   </div>
                                   <p
-                                    className={`mt-2 text-[11.5px] leading-5 ${
-                                      isDark ? 'text-purple-100/56' : 'text-gray-600'
-                                    }`}
+                                    className={`mt-2 text-[11.5px] leading-5 ${isDark ? 'text-purple-100/56' : 'text-gray-600'
+                                      }`}
                                   >
                                     {child.description}
                                   </p>
@@ -1127,11 +1092,10 @@ export default function Navbar() {
                   scale: 0.97,
                 }}
                 transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-                className={`fixed z-[90] w-[286px] overflow-hidden rounded-[24px] border backdrop-blur-2xl ${
-                  isDark
+                className={`fixed z-[90] w-[286px] overflow-hidden rounded-[24px] border backdrop-blur-2xl ${isDark
                     ? 'border-white/10 bg-[linear-gradient(180deg,rgba(10,12,25,0.96),rgba(7,9,20,0.96))] shadow-[0_24px_90px_rgba(1,3,12,0.62)]'
                     : 'border-violet-200/80 bg-white/92 shadow-xl shadow-violet-500/12'
-                } ${userMenuPosition.placement === 'bottom' ? 'origin-top-right' : 'origin-bottom-right'}`}
+                  } ${userMenuPosition.placement === 'bottom' ? 'origin-top-right' : 'origin-bottom-right'}`}
                 style={{
                   top: `${userMenuPosition.top}px`,
                   left: `${userMenuPosition.left}px`,
@@ -1139,21 +1103,18 @@ export default function Navbar() {
               >
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/55 to-transparent" />
                 <div
-                  className={`border-b px-[1.125rem] py-[1.125rem] ${
-                    isDark ? 'border-white/8' : 'border-violet-100'
-                  }`}
+                  className={`border-b px-[1.125rem] py-[1.125rem] ${isDark ? 'border-white/8' : 'border-violet-100'
+                    }`}
                 >
                   <div
-                    className={`text-[13px] font-semibold ${
-                      isDark ? 'text-white' : 'text-gray-900'
-                    }`}
+                    className={`text-[13px] font-semibold ${isDark ? 'text-white' : 'text-gray-900'
+                      }`}
                   >
                     {currentUser?.name || 'User'}
                   </div>
                   <div
-                    className={`mt-1 text-[11px] ${
-                      isDark ? 'text-purple-100/46' : 'text-gray-500'
-                    }`}
+                    className={`mt-1 text-[11px] ${isDark ? 'text-purple-100/46' : 'text-gray-500'
+                      }`}
                   >
                     {currentUser?.email || ''}
                   </div>
@@ -1162,11 +1123,10 @@ export default function Navbar() {
                 <div className="p-2.5">
                   <Link
                     to="/my-requests"
-                    className={`flex items-center gap-3 rounded-[16px] px-3.5 py-3 text-[12.5px] font-medium transition-all ${
-                      isDark
+                    className={`flex items-center gap-3 rounded-[16px] px-3.5 py-3 text-[12.5px] font-medium transition-all ${isDark
                         ? 'text-purple-100/78 hover:bg-white/[0.06] hover:text-white'
                         : 'text-gray-700 hover:bg-violet-50 hover:text-gray-900'
-                    }`}
+                      }`}
                   >
                     <FileText className="h-4 w-4 opacity-70" strokeWidth={1.9} />
                     My Requests
@@ -1174,11 +1134,10 @@ export default function Navbar() {
 
                   <Link
                     to="/profile"
-                    className={`flex items-center gap-3 rounded-[16px] px-3.5 py-3 text-[12.5px] font-medium transition-all ${
-                      isDark
+                    className={`flex items-center gap-3 rounded-[16px] px-3.5 py-3 text-[12.5px] font-medium transition-all ${isDark
                         ? 'text-purple-100/78 hover:bg-white/[0.06] hover:text-white'
                         : 'text-gray-700 hover:bg-violet-50 hover:text-gray-900'
-                    }`}
+                      }`}
                   >
                     <User2 className="h-4 w-4 opacity-70" strokeWidth={1.9} />
                     Profile
@@ -1187,11 +1146,10 @@ export default function Navbar() {
                   {isAuth && (
                     <Link
                       to="/admin"
-                      className={`flex items-center gap-3 rounded-[16px] px-3.5 py-3 text-[12.5px] font-medium transition-all ${
-                        isDark
+                      className={`flex items-center gap-3 rounded-[16px] px-3.5 py-3 text-[12.5px] font-medium transition-all ${isDark
                           ? 'text-purple-100/78 hover:bg-white/[0.06] hover:text-white'
                           : 'text-gray-700 hover:bg-violet-50 hover:text-gray-900'
-                      }`}
+                        }`}
                     >
                       <ShieldCheck className="h-4 w-4 opacity-70" strokeWidth={1.9} />
                       Admin Panel
@@ -1203,11 +1161,10 @@ export default function Navbar() {
                       setUserMenu(false)
                       void logout()
                     }}
-                    className={`flex w-full items-center gap-3 rounded-[16px] px-3.5 py-3 text-left text-[12.5px] font-medium transition-all ${
-                      isDark
+                    className={`flex w-full items-center gap-3 rounded-[16px] px-3.5 py-3 text-left text-[12.5px] font-medium transition-all ${isDark
                         ? 'text-red-300/78 hover:bg-red-500/10 hover:text-red-200'
                         : 'text-red-600 hover:bg-red-50'
-                    }`}
+                      }`}
                   >
                     <LogOut className="h-4 w-4 opacity-70" strokeWidth={1.9} />
                     Logout
