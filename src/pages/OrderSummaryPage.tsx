@@ -85,13 +85,13 @@ export default function OrderSummaryPage() {
         <div className="mb-6">
           <span className="section-label">// Order Summary</span>
           <h1 className={cn('section-title !text-left', !isDark && 'text-gray-900')}>Rental Request Submitted</h1>
-          <p className={cn('mt-2 text-sm leading-6', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
+          <p className={cn('mt-3 text-[0.96rem] leading-7', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
             Your request was saved successfully and is waiting for admin review.
           </p>
         </div>
 
         {loading ? (
-          <div className={cn('rounded-2xl border p-6 text-sm', isDark ? 'border-white/10 bg-white/[0.03] text-purple-100/68' : 'border-gray-200 bg-white text-gray-500')}>
+          <div className={cn('rounded-[24px] border p-6 sm:p-7 text-[0.95rem]', isDark ? 'border-white/10 bg-white/[0.03] text-purple-100/68' : 'border-gray-200 bg-white text-gray-500')}>
             Loading order summary...
           </div>
         ) : loadError ? (
@@ -105,11 +105,11 @@ export default function OrderSummaryPage() {
             <p className={cn('mt-3 text-sm leading-7', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
               {loadError}
             </p>
-            <div className="mt-5 flex flex-wrap gap-2.5">
-              <Link to="/my-requests" className="btn-primary !rounded-xl !px-4 !py-2 !text-sm">
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+              <Link to="/my-requests" className="btn-primary !w-full !rounded-xl !px-4 !py-2 !text-sm sm:!w-auto">
                 Go to My Requests
               </Link>
-              <Link to="/products" className="btn-outline !rounded-xl !px-4 !py-2 !text-sm">
+              <Link to="/products" className="btn-outline !w-full !rounded-xl !px-4 !py-2 !text-sm sm:!w-auto">
                 Browse Products
               </Link>
             </div>
@@ -122,79 +122,79 @@ export default function OrderSummaryPage() {
             <p className={cn('mt-3 text-sm leading-7', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
               The request may have been removed, or this page may have been opened before the account session finished syncing.
             </p>
-            <div className="mt-5 flex flex-wrap gap-2.5">
-              <Link to="/my-requests" className="btn-primary !rounded-xl !px-4 !py-2 !text-sm">
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+              <Link to="/my-requests" className="btn-primary !w-full !rounded-xl !px-4 !py-2 !text-sm sm:!w-auto">
                 Go to My Requests
               </Link>
-              <Link to="/products" className="btn-outline !rounded-xl !px-4 !py-2 !text-sm">
+              <Link to="/products" className="btn-outline !w-full !rounded-xl !px-4 !py-2 !text-sm sm:!w-auto">
                 Browse Products
               </Link>
             </div>
           </div>
         ) : (
-          <div className="space-y-5">
-            <div className={cn('rounded-[20px] border p-4', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+          <div className="space-y-6">
+            <div className={cn('rounded-[24px] border p-5 sm:p-6', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <div className={cn('text-[11px] font-mono uppercase tracking-[0.18em]', isDark ? 'text-purple-100/50' : 'text-gray-400')}>
+                  <div className={cn('text-[12px] font-mono uppercase tracking-[0.18em]', isDark ? 'text-purple-100/50' : 'text-gray-400')}>
                     {request.requestNumber}
                   </div>
-                  <div className={cn('mt-2 text-2xl font-display font-black', isDark ? 'text-white' : 'text-gray-900')}>
+                  <div className={cn('mt-2 text-[1.9rem] font-display font-black leading-tight sm:text-[2rem]', isDark ? 'text-white' : 'text-gray-900')}>
                     {request.customerName}
                   </div>
                 </div>
                 <RequestStatusBadge status={request.status} />
               </div>
 
-              <div className={cn('mt-5 grid grid-cols-1 gap-4 md:grid-cols-3', isDark ? 'text-purple-100/72' : 'text-gray-600')}>
-                <div>
-                  <div className={cn('text-[10px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Created</div>
-                  <div className="mt-1">{new Date(request.createdAt).toLocaleString()}</div>
+              <div className={cn('mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3', isDark ? 'text-purple-100/72' : 'text-gray-600')}>
+                <div className={cn('rounded-[18px] px-4 py-3', isDark ? 'bg-white/[0.03] ring-1 ring-inset ring-white/[0.05]' : 'bg-gray-50 ring-1 ring-inset ring-gray-100')}>
+                  <div className={cn('text-[11px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Created</div>
+                  <div className="mt-1.5 text-[0.95rem] leading-6">{new Date(request.createdAt).toLocaleString()}</div>
                 </div>
-                <div>
-                  <div className={cn('text-[10px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Email</div>
-                  <div className="mt-1">{request.email}</div>
+                <div className={cn('rounded-[18px] px-4 py-3', isDark ? 'bg-white/[0.03] ring-1 ring-inset ring-white/[0.05]' : 'bg-gray-50 ring-1 ring-inset ring-gray-100')}>
+                  <div className={cn('text-[11px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Email</div>
+                  <div className="mt-1.5 break-words text-[0.95rem] leading-6">{request.email}</div>
                 </div>
-                <div>
-                  <div className={cn('text-[10px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Phone</div>
-                  <div className="mt-1">{request.phone}</div>
+                <div className={cn('rounded-[18px] px-4 py-3', isDark ? 'bg-white/[0.03] ring-1 ring-inset ring-white/[0.05]' : 'bg-gray-50 ring-1 ring-inset ring-gray-100')}>
+                  <div className={cn('text-[11px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Phone</div>
+                  <div className="mt-1.5 text-[0.95rem] leading-6">{request.phone}</div>
                 </div>
               </div>
             </div>
 
-            <div className={cn('rounded-[20px] border p-4', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-              <div className={cn('text-lg font-semibold', isDark ? 'text-white' : 'text-gray-900')}>Items</div>
-              <div className="mt-4 space-y-3">
+            <div className={cn('rounded-[24px] border p-5 sm:p-6', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+              <div className={cn('text-[1.08rem] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>Items</div>
+              <div className="mt-4 space-y-3.5">
                 {request.items.map(item => (
-                  <div key={item.id} className={cn('rounded-[16px] border px-3.5 py-2.5', isDark ? 'border-white/8 bg-white/[0.02]' : 'border-gray-100 bg-gray-50')}>
-                    <div className={cn('font-semibold', isDark ? 'text-white' : 'text-gray-900')}>{item.productTitleSnapshot}</div>
-                    <div className={cn('mt-1 text-sm', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
+                  <div key={item.id} className={cn('rounded-[18px] border px-4.5 py-4 sm:px-5', isDark ? 'border-white/8 bg-white/[0.02]' : 'border-gray-100 bg-gray-50')}>
+                    <div className={cn('text-[1rem] font-semibold leading-6', isDark ? 'text-white' : 'text-gray-900')}>{item.productTitleSnapshot}</div>
+                    <div className={cn('mt-1.5 text-[0.95rem]', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
                       {item.quantity} x {item.unitPrice} JOD/day
                     </div>
-                    <div className={cn('mt-1 text-sm', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
+                    <div className={cn('mt-1.5 text-[0.95rem] leading-6', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
                       {item.rentalStartDate}
                       {' -> '}
                       {item.rentalEndDate}
                       {' | '}
                       {item.rentalDays} day(s)
                     </div>
-                    <div className={cn('mt-2 text-sm font-semibold', isDark ? 'text-cyan-200' : 'text-violet-700')}>
+                    <div className={cn('mt-2.5 text-[0.95rem] font-semibold', isDark ? 'text-cyan-200' : 'text-violet-700')}>
                       {item.lineTotal.toFixed(2)} JOD
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className={cn('mt-4 rounded-xl px-4 py-3 text-sm', isDark ? 'bg-[#0d1430]/88 text-cyan-100' : 'bg-violet-50 text-violet-700')}>
+              <div className={cn('mt-4 rounded-[18px] px-4.5 py-4 text-[0.95rem] font-semibold', isDark ? 'bg-[#0d1430]/88 text-cyan-100' : 'bg-violet-50 text-violet-700')}>
                 Grand total: {request.grandTotal.toFixed(2)} JOD
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Link to="/my-requests" className="btn-primary !rounded-xl !px-5 !py-3 !text-sm">
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link to="/my-requests" className="btn-primary !w-full !rounded-xl !px-5 !py-3 !text-sm sm:!w-auto">
                 Go to My Requests
               </Link>
-              <Link to="/products" className="btn-outline !rounded-xl !px-5 !py-3 !text-sm">
+              <Link to="/products" className="btn-outline !w-full !rounded-xl !px-5 !py-3 !text-sm sm:!w-auto">
                 Continue Browsing
               </Link>
             </div>

@@ -118,11 +118,11 @@ export default function ContactForm() {
   const sub = isDark ? 'text-purple-200/80' : 'text-gray-600'
 
   return (
-    <div className="space-y-3.5">
-      <div className="glass rounded-[18px] p-4">
-        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+    <div className="space-y-4">
+      <div className="glass rounded-[20px] p-4.5 sm:p-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="cf-name" className={`mb-2 block text-[13px] font-medium ${sub}`}>
+            <label htmlFor="cf-name" className={`mb-2 block text-[13.5px] font-medium sm:text-[14px] ${sub}`}>
               Full Name *
             </label>
             <input
@@ -137,7 +137,7 @@ export default function ContactForm() {
           </div>
 
           <div>
-            <label htmlFor="cf-email" className={`mb-2 block text-[13px] font-medium ${sub}`}>
+            <label htmlFor="cf-email" className={`mb-2 block text-[13.5px] font-medium sm:text-[14px] ${sub}`}>
               Email *
             </label>
             <input
@@ -152,7 +152,7 @@ export default function ContactForm() {
           </div>
 
           <div className="sm:col-span-2">
-            <label htmlFor="cf-phone" className={`mb-2 block text-[13px] font-medium ${sub}`}>
+            <label htmlFor="cf-phone" className={`mb-2 block text-[13.5px] font-medium sm:text-[14px] ${sub}`}>
               Phone
             </label>
             <input
@@ -170,8 +170,8 @@ export default function ContactForm() {
         </div>
       </div>
 
-      <div className="glass rounded-[18px] p-4">
-        <label htmlFor="cf-product" className={`mb-2 block text-[13px] font-medium ${sub}`}>
+      <div className="glass rounded-[20px] p-4.5 sm:p-5">
+        <label htmlFor="cf-product" className={`mb-2 block text-[13.5px] font-medium sm:text-[14px] ${sub}`}>
           Product (optional)
         </label>
         <select
@@ -190,10 +190,10 @@ export default function ContactForm() {
         {errors.product && <p className="mt-1 text-xs text-red-400">{errors.product}</p>}
       </div>
 
-      <div className="glass rounded-[18px] p-4">
-        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+      <div className="glass rounded-[20px] p-4.5 sm:p-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="cf-city" className={`mb-2 block text-[13px] font-medium ${sub}`}>
+            <label htmlFor="cf-city" className={`mb-2 block text-[13.5px] font-medium sm:text-[14px] ${sub}`}>
               City
             </label>
             <select
@@ -211,7 +211,7 @@ export default function ContactForm() {
           </div>
 
           <div>
-            <label htmlFor="cf-venue" className={`mb-2 block text-[13px] font-medium ${sub}`}>
+            <label htmlFor="cf-venue" className={`mb-2 block text-[13.5px] font-medium sm:text-[14px] ${sub}`}>
               Venue
             </label>
             <input
@@ -224,7 +224,7 @@ export default function ContactForm() {
           </div>
 
           <div className="sm:col-span-2">
-            <label htmlFor="cf-notes" className={`mb-2 block text-[13px] font-medium ${sub}`}>
+            <label htmlFor="cf-notes" className={`mb-2 block text-[13.5px] font-medium sm:text-[14px] ${sub}`}>
               Notes
             </label>
             <textarea
@@ -272,12 +272,12 @@ export default function ContactForm() {
         </div>
       )}
 
-      <div className="flex flex-col gap-2.5 sm:flex-row">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <button
           type="button"
           disabled={saving}
           onClick={() => submit('whatsapp')}
-          className="inline-flex min-h-[42px] flex-1 items-center justify-center gap-2.5 rounded-[16px] bg-[#25D366] px-5 py-3 text-[13px] font-semibold text-white transition-all hover:bg-[#20BD5A] disabled:opacity-50"
+          className="inline-flex min-h-[46px] flex-1 items-center justify-center gap-2.5 rounded-[18px] bg-[#25D366] px-5 py-3 text-[13.5px] font-semibold text-white transition-all hover:bg-[#20BD5A] disabled:opacity-50"
         >
           {saving ? 'Saving...' : 'WhatsApp'}
         </button>
@@ -285,7 +285,7 @@ export default function ContactForm() {
           type="button"
           disabled={saving}
           onClick={() => submit('email')}
-          className="btn-outline flex-1 !rounded-[16px] !py-3 disabled:opacity-50"
+          className="btn-outline flex-1 !rounded-[18px] !py-3 disabled:opacity-50"
         >
           {saving ? 'Saving...' : 'Email'}
         </button>

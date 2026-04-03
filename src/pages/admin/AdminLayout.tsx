@@ -170,7 +170,7 @@ export default function AdminLayout() {
   const displayName = currentUser?.name?.trim() || 'Admin'
   const quickLinkClass = (target: string) =>
     cn(
-      'inline-flex min-h-[38px] items-center justify-center rounded-[14px] px-3.5 py-1.75 text-[10.5px] font-semibold transition active:translate-y-[1px]',
+      'inline-flex min-h-[42px] items-center justify-center rounded-[15px] px-4 py-2 text-[11.5px] font-semibold transition active:translate-y-[1px]',
       pathname.startsWith(target)
         ? isDark
           ? 'bg-[linear-gradient(180deg,rgba(17,39,72,0.96),rgba(14,28,54,0.98))] text-cyan-100 ring-1 ring-inset ring-cyan-300/18 shadow-[0_12px_26px_-18px_rgba(34,211,238,0.26)]'
@@ -201,7 +201,7 @@ export default function AdminLayout() {
         </div>
       )}
 
-      <div className="relative z-10 grid h-full grid-rows-[64px_minmax(0,1fr)]">
+      <div className="relative z-10 grid h-full grid-rows-[70px_minmax(0,1fr)]">
         <header
           className={cn(
             'border-b backdrop-blur-xl',
@@ -210,11 +210,11 @@ export default function AdminLayout() {
               : 'border-gray-200 bg-white/92'
           )}
         >
-          <div className="flex h-full items-center gap-3 px-3.5 sm:px-4.5 md:px-5">
+          <div className="flex h-full items-center gap-3 px-4 sm:px-5 md:px-5.5">
             <button
               onClick={() => setOpen(true)}
               className={cn(
-                'inline-flex h-10 w-10 items-center justify-center rounded-[15px] transition active:translate-y-[1px] md:hidden',
+                'inline-flex h-11 w-11 items-center justify-center rounded-[16px] transition active:translate-y-[1px] md:hidden',
                 isDark
                   ? 'bg-[linear-gradient(180deg,rgba(20,29,56,0.98),rgba(13,20,42,0.98))] text-cyan-100 ring-1 ring-inset ring-cyan-400/16 shadow-[0_12px_24px_-18px_rgba(34,211,238,0.24)]'
                   : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.14)]'
@@ -227,7 +227,7 @@ export default function AdminLayout() {
 
             <div className="min-w-0 flex-1">
               <div className="min-w-0">
-                <div className={cn('truncate font-display text-[1rem] font-bold', isDark ? 'text-white' : 'text-gray-900')}>
+                <div className={cn('truncate font-display text-[1.05rem] font-bold sm:text-[1.12rem]', isDark ? 'text-white' : 'text-gray-900')}>
                   {title}
                 </div>
                 <div className="mt-1.5 hidden items-center gap-1.75 sm:flex">
@@ -245,11 +245,11 @@ export default function AdminLayout() {
                       <div key={`${crumb.label}-${index}`} className="flex items-center gap-1.75">
                         {index > 0 && <Icon name="chev" className={isDark ? 'text-purple-100/26' : 'text-gray-400'} />}
                         {crumb.to && !last ? (
-                      <Link to={crumb.to} className={cn('text-[10px] transition hover:text-cyan-200', tone)}>
+                      <Link to={crumb.to} className={cn('text-[11px] transition hover:text-cyan-200', tone)}>
                             {crumb.label}
                           </Link>
                         ) : (
-                          <span className={cn('text-[10px]', tone)}>{crumb.label}</span>
+                          <span className={cn('text-[11px]', tone)}>{crumb.label}</span>
                         )}
                       </div>
                     )
@@ -312,7 +312,9 @@ export default function AdminLayout() {
               </div>
 
               <button
-                onClick={logout}
+                onClick={() => {
+                  void logout()
+                }}
                 className={cn(
                   'inline-flex min-h-[38px] items-center gap-2 rounded-[14px] px-3.5 py-1.75 text-[10.5px] font-semibold transition active:translate-y-[1px]',
                   isDark

@@ -6,12 +6,31 @@ export type AdminCardViewTransitionState = 'idle' | 'exit' | 'enter'
 const STORAGE_PREFIX = 'admin-card-view:'
 const EXIT_DURATION_MS = 95
 const ENTER_DURATION_MS = 170
-
 const VALID_VIEWS: AdminCardView[] = ['grid', 'list']
 
+function safeReadLocalStorage(key: string) {
+  if (typeof window === 'undefined') return null
+
+  try {
+    return window.localStorage.getItem(key)
+  } catch (error) {
+    console.warn(`[useAdminCardView] Failed to read "${key}" from localStorage:`, error)
+    return null
+  }
+}
+
+function safeWriteLocalStorage(key: string, value: string) {
+  if (typeof window === 'undefined') return
+
+  try {
+    window.localStorage.setItem(key, value)
+  } catch (error) {
+    console.warn(`[useAdminCardView] Failed to write "${key}" to localStorage:`, error)
+  }
+}
+
 function readStoredView(storageKey: string, fallback: AdminCardView): AdminCardView {
-  if (typeof window === 'undefined') return fallback
-  const value = window.localStorage.getItem(`${STORAGE_PREFIX}${storageKey}`)
+  const value = safeReadLocalStorage(`${STORAGE_PREFIX}${storageKey}`)
   if (value === 'grid-3' || value === 'grid-4' || value === 'grid-5') return 'grid'
   return VALID_VIEWS.includes(value as AdminCardView) ? (value as AdminCardView) : fallback
 }
@@ -64,15 +83,15 @@ export default function useAdminCardView(storageKey: string, fallback: AdminCard
   const timeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
     return () => {
-      if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current)
+      }
     }
   }, [])
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    window.localStorage.setItem(`${STORAGE_PREFIX}${storageKey}`, cardView)
+    safeWriteLocalStorage(`${STORAGE_PREFIX}${storageKey}`, cardView)
   }, [cardView, storageKey])
 
   useEffect(() => {
@@ -89,6 +108,7 @@ export default function useAdminCardView(storageKey: string, fallback: AdminCard
         window.clearTimeout(timeoutRef.current)
         timeoutRef.current = null
       }
+
       setDisplayCardView(resolvedCardView)
       setTransitionState('idle')
       return
@@ -113,7 +133,7 @@ export default function useAdminCardView(storageKey: string, fallback: AdminCard
         timeoutRef.current = null
       }
     }
-  }, [resolvedCardView, displayCardView])
+  }, [displayCardView, resolvedCardView])
 
   return {
     cardView,

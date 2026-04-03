@@ -157,53 +157,53 @@ export default function PurchaseQuotePage() {
         <div className="mb-6">
           <span className="section-label">// Purchase Quote</span>
           <h1 className={cn('section-title !text-left', !isDark && 'text-gray-900')}>Send a Purchase RFQ</h1>
-          <p className={cn('mt-2 max-w-2xl text-sm leading-6', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
+          <p className={cn('mt-2.5 max-w-2xl text-[0.95rem] leading-6.5', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
             Review your selected products, fine-tune quantities, and send the request to the sales team. Until you submit it, this draft is saved locally on this device only.
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-4">
-            <div className={cn('rounded-[20px] border p-4', isDark ? 'border-fuchsia-400/14 bg-[linear-gradient(180deg,rgba(34,12,45,0.74),rgba(10,10,22,0.94))]' : 'border-fuchsia-200 bg-white')}>
-              <div className={cn('text-[10px] font-mono uppercase tracking-[0.22em]', isDark ? 'text-fuchsia-100/72' : 'text-fuchsia-700/80')}>
+            <div className={cn('rounded-[22px] border p-4.5', isDark ? 'border-fuchsia-400/14 bg-[linear-gradient(180deg,rgba(34,12,45,0.74),rgba(10,10,22,0.94))]' : 'border-fuchsia-200 bg-white')}>
+              <div className={cn('text-[10px] font-mono uppercase tracking-[0.18em]', isDark ? 'text-fuchsia-100/72' : 'text-fuchsia-700/80')}>
                 Draft Destination
               </div>
               <h2 className={cn('mt-3 font-display text-[1.2rem] font-black', isDark ? 'text-white' : 'text-gray-900')}>
                 Saved locally until you send it
               </h2>
-              <p className={cn('mt-3 text-sm leading-7', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
+              <p className={cn('mt-3 text-[0.95rem] leading-6.5', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
                 This quote draft stays on this device and is available from the navbar draft button. After you send it, the submitted request appears in My Requests.
               </p>
-              <div className="mt-4 flex flex-wrap gap-2.5">
-                <Link to="/my-requests" className="btn-outline !rounded-xl !px-4 !py-2 !text-sm">
+              <div className="mt-4 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+                <Link to="/my-requests" className="btn-outline !rounded-[14px] !px-4 !py-2 !text-[0.95rem]">
                   Go to My Requests
                 </Link>
                 {rentalCart.itemCount > 0 && (
-                  <Link to="/rental-cart" className="btn-outline !rounded-xl !px-4 !py-2 !text-sm">
+                  <Link to="/rental-cart" className="btn-outline !rounded-[14px] !px-4 !py-2 !text-[0.95rem]">
                     Open Rental Cart
                   </Link>
                 )}
               </div>
             </div>
 
-            <div className={cn('rounded-[20px] border p-4', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+            <div className={cn('rounded-[22px] border p-4.5', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
               <RequestContactFields
                 form={form}
                 onChange={(field, value) => setForm(current => ({ ...current, [field]: value }))}
               />
 
               {validationMessage && (
-                <div className={cn('mt-4 rounded-xl px-4 py-3 text-sm', isDark ? 'bg-amber-500/10 text-amber-200' : 'bg-amber-50 text-amber-700')}>
+                <div className={cn('mt-4 rounded-[14px] px-4 py-3.5 text-[0.92rem] leading-5.5', isDark ? 'bg-amber-500/10 text-amber-200' : 'bg-amber-50 text-amber-700')}>
                   {validationMessage}
                 </div>
               )}
             </div>
 
-            <div className={cn('rounded-[20px] border p-4', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+            <div className={cn('rounded-[22px] border p-4.5', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
               <div className={cn('text-lg font-semibold', isDark ? 'text-white' : 'text-gray-900')}>Quote Draft Items</div>
               <div className="mt-4 space-y-4">
                 {purchaseQuote.items.map(item => (
-                  <div key={item.productSlug} className={cn('rounded-[16px] border p-3.5', isDark ? 'border-white/8 bg-white/[0.02]' : 'border-gray-100 bg-gray-50')}>
+                  <div key={item.productSlug} className={cn('rounded-[18px] border p-4', isDark ? 'border-white/8 bg-white/[0.02]' : 'border-gray-100 bg-gray-50')}>
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <div className={cn('font-semibold', isDark ? 'text-white' : 'text-gray-900')}>{item.productTitle}</div>
@@ -212,16 +212,16 @@ export default function PurchaseQuotePage() {
                       <button
                         type="button"
                         onClick={() => purchaseQuote.removeItem(item.productSlug)}
-                        className={cn('inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm', isDark ? 'bg-red-500/10 text-red-200' : 'bg-red-50 text-red-600')}
+                        className={cn('inline-flex min-h-[42px] items-center gap-2 rounded-[14px] px-3.5 py-2 text-[0.92rem]', isDark ? 'bg-red-500/10 text-red-200' : 'bg-red-50 text-red-600')}
                       >
                         <Trash2 size={14} />
                         Remove
                       </button>
                     </div>
 
-                    <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-[120px_minmax(0,1fr)]">
+                    <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-[140px_minmax(0,1fr)]">
                       <div>
-                        <label className={cn('mb-1.5 block text-[12px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
+                        <label className={cn('mb-2 block text-[13px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
                           Quantity
                         </label>
                         <input
@@ -235,7 +235,7 @@ export default function PurchaseQuotePage() {
                       </div>
 
                       <div>
-                        <label className={cn('mb-1.5 block text-[12px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
+                        <label className={cn('mb-2 block text-[13px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
                           Item Note
                         </label>
                         <textarea
@@ -250,39 +250,39 @@ export default function PurchaseQuotePage() {
                 ))}
               </div>
 
-              <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
                 <button
                   type="button"
                   onClick={() => {
                     purchaseQuote.clearDraft()
                     toast('Purchase quote draft cleared from this device.', 'success')
                   }}
-                  className="btn-outline !rounded-xl !px-5 !py-3 !text-sm"
+                  className="btn-outline !w-full !rounded-[14px] !px-5 !py-3 !text-[0.95rem] sm:!w-auto"
                 >
                   Clear Draft
                 </button>
-                <Link to="/products" className="btn-outline !rounded-xl !px-5 !py-3 !text-sm">
+                <Link to="/products" className="btn-outline !w-full !rounded-[14px] !px-5 !py-3 !text-[0.95rem] sm:!w-auto">
                   Add More Products
                 </Link>
-                <button type="button" onClick={submit} disabled={saving || !!validationMessage} className="btn-primary !rounded-xl !px-5 !py-3 !text-sm disabled:opacity-50">
+                <button type="button" onClick={submit} disabled={saving || !!validationMessage} className="btn-primary !w-full !rounded-[14px] !px-5 !py-3 !text-[0.95rem] disabled:opacity-50 sm:!w-auto">
                   {saving ? 'Submitting...' : 'Send Purchase Quote'}
                 </button>
               </div>
             </div>
           </div>
 
-          <div className={cn('h-fit rounded-[20px] border p-4 xl:sticky xl:top-24', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-            <div className={cn('text-[11px] font-mono uppercase tracking-[0.18em]', isDark ? 'text-purple-100/50' : 'text-gray-400')}>
+          <div className={cn('order-first h-fit rounded-[22px] border p-4 xl:order-none xl:sticky xl:top-28', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+            <div className={cn('text-[11px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/50' : 'text-gray-400')}>
               Draft Summary
             </div>
             <div className={cn('mt-2 text-3xl font-display font-black', isDark ? 'text-white' : 'text-gray-900')}>
               {purchaseQuote.itemCount}
             </div>
-            <div className={cn('mt-1 text-sm', isDark ? 'text-purple-100/65' : 'text-gray-500')}>
+            <div className={cn('mt-1 text-[0.95rem]', isDark ? 'text-purple-100/65' : 'text-gray-500')}>
               total unit(s) across {purchaseQuote.items.length} selected product(s)
             </div>
 
-            <div className={cn('mt-4 rounded-xl px-4 py-3 text-sm', isDark ? 'bg-white/[0.03] text-purple-100/72' : 'bg-gray-50 text-gray-600')}>
+            <div className={cn('mt-4 rounded-[14px] px-4 py-3.5 text-[0.92rem] leading-5.5', isDark ? 'bg-white/[0.03] text-purple-100/72' : 'bg-gray-50 text-gray-600')}>
               Submitted purchase quotes stay separate from rental approvals and do not reserve inventory. Drafts remain local until you send them.
             </div>
           </div>

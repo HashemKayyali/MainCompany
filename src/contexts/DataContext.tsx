@@ -105,7 +105,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const writeLog = useCallback(
     (action: 'create' | 'update' | 'delete', entityType: string, entityId: string, entityName: string, details?: string) => {
       if (!currentUser) return
-      logsApi.addLog({
+      void logsApi.addLog({
         admin_id: currentUser.id,
         admin_name: currentUser.name || 'Admin',
         admin_email: currentUser.email || '',
@@ -114,6 +114,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         entity_id: entityId,
         entity_name: entityName,
         details: details || '',
+      }).catch(error => {
+        console.warn('[DataContext] Failed to write admin log:', error)
       })
     },
     [currentUser]

@@ -1,6 +1,10 @@
-import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import type { AvatarFields } from '../lib/avatar'
+import type { Database } from '../lib/database.types'
+import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { fetchProfileAvatarMap } from './profile.service'
+
+type AdminLogRow = Database['public']['Tables']['admin_logs']['Row']
+type AdminLogInsert = Database['public']['Tables']['admin_logs']['Insert']
 
 export interface AdminLog extends AvatarFields {
   id: string
@@ -8,62 +12,66 @@ export interface AdminLog extends AvatarFields {
   admin_name: string
   admin_email: string
   action: 'create' | 'update' | 'delete'
-  entity_type: string   // 'product' | 'part' | 'customer' | 'category' | 'gallery' | 'admin'
+  entity_type: string
   entity_id: string
   entity_name: string
   details: string
   created_at: string
 }
 
-/**
- * Insert a log entry into admin_logs table
- */
-export async function addLog(log: Omit<AdminLog, 'id' | 'created_at'>): Promise<void> {
-  if (!isSupabaseConfigured()) return
-
-  try {
-    await supabase.from('admin_logs' as any).insert({
-      admin_id: log.admin_id,
-      admin_name: log.admin_name,
-      admin_email: log.admin_email,
-      action: log.action,
-      entity_type: log.entity_type,
-      entity_id: log.entity_id,
-      entity_name: log.entity_name,
-      details: log.details,
-    } as any)
-  } catch (err) {
-    console.warn('[Logs] Failed to write log:', err)
+function mapAdminLog(row: AdminLogRow): AdminLog {
+  return {
+    ...row,
+    action: row.action as AdminLog['action'],
+    avatarUrl: null,
+    avatarStyle: null,
+    avatarSeed: null,
+    avatarOptions: null,
   }
 }
 
-/**
- * Fetch all logs ordered by most recent first
- */
+export async function addLog(log: Omit<AdminLog, 'id' | 'created_at'>): Promise<void> {
+  if (!isSupabaseConfigured()) return
+
+  const payload: AdminLogInsert = {
+    admin_id: log.admin_id,
+    admin_name: log.admin_name,
+    admin_email: log.admin_email,
+    action: log.action,
+    entity_type: log.entity_type,
+    entity_id: log.entity_id,
+    entity_name: log.entity_name,
+    details: log.details,
+  }
+
+  const { error } = await supabase.from('admin_logs').insert(payload)
+  if (error) throw error
+}
+
 export async function getAllLogs(): Promise<AdminLog[]> {
   if (!isSupabaseConfigured()) return []
 
   try {
-    const { data, error } = await (supabase
-      .from('admin_logs' as any)
+    const { data, error } = await supabase
+      .from('admin_logs')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(500) as any)
+      .limit(500)
 
     if (error) {
       console.warn('[Logs] Failed to fetch logs:', error)
       return []
     }
 
-    const logs = (data || []) as AdminLog[]
+    const logs = (data || []).map(mapAdminLog)
     const avatarMap = await fetchProfileAvatarMap(logs.map(log => log.admin_id))
 
     return logs.map(log => ({
       ...log,
       ...(avatarMap[log.admin_id] || {}),
     }))
-  } catch (err) {
-    console.warn('[Logs] Failed to fetch logs:', err)
+  } catch (error) {
+    console.warn('[Logs] Failed to fetch logs:', error)
     return []
   }
 }

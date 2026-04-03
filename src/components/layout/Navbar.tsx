@@ -390,7 +390,7 @@ export default function Navbar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
-      <div className="px-4 pt-3 sm:px-5 lg:px-6">
+      <div className="px-3 pt-2.5 sm:px-5 sm:pt-3 lg:px-6">
         <nav className="mx-auto max-w-[86rem]">
           <div className="relative">
             <div
@@ -412,7 +412,7 @@ export default function Navbar() {
             />
 
             <div
-              className={`relative overflow-hidden rounded-[28px] border backdrop-blur-2xl ${shellClass}`}
+              className={`relative overflow-hidden rounded-[24px] border backdrop-blur-2xl sm:rounded-[28px] ${shellClass}`}
             >
               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.02)_18%,transparent_70%,rgba(255,255,255,0.02))]" />
               <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/60 to-transparent" />
@@ -430,13 +430,13 @@ export default function Navbar() {
                 }}
               />
 
-              <div className="relative px-4 py-3 sm:px-[1.125rem] lg:px-5">
+              <div className="relative px-3 py-2.5 sm:px-[1.125rem] sm:py-3 lg:px-5">
                 <div className="flex items-center justify-between gap-4 lg:gap-5">
                   <Link
                     to="/"
                     className={`flex min-w-0 flex-1 items-center gap-3.5 lg:flex-none ${focus}`}
                   >
-                    <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[17px] border border-white/12 bg-[linear-gradient(145deg,#7c3aed_0%,#d946ef_48%,#22d3ee_112%)] shadow-[0_22px_44px_rgba(76,29,149,0.32)]">
+                    <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[16px] border border-white/12 bg-[linear-gradient(145deg,#7c3aed_0%,#d946ef_48%,#22d3ee_112%)] shadow-[0_22px_44px_rgba(76,29,149,0.32)]">
                       <div className="absolute inset-x-2.5 top-2 h-[1.125rem] rounded-full bg-white/20 blur-md" />
                       <span className="relative text-[12px] font-black tracking-[0.22em] text-white">
                         BL
@@ -452,11 +452,11 @@ export default function Navbar() {
                         Bike <span className="text-violet-300">Land</span>
                       </div>
                       <div
-                        className={`mt-1.5 truncate text-[9.75px] uppercase tracking-[0.18em] ${
+                        className={`mt-1.5 truncate text-[10px] uppercase tracking-[0.16em] max-[379px]:hidden ${
                           isDark ? 'text-purple-100/52' : 'text-violet-600/70'
                         }`}
                       >
-                        Marketplace / Vendors / Requests
+                        Marketplace
                       </div>
                     </div>
                   </Link>
@@ -556,7 +556,7 @@ export default function Navbar() {
                     </div>
                   </div>
 
-                  <div className="flex min-w-[198px] items-center justify-end gap-2.5 sm:min-w-[252px] xl:min-w-[368px]">
+                  <div className="flex min-w-0 items-center justify-end gap-2 sm:min-w-[252px] sm:gap-2.5 xl:min-w-[368px]">
                     <button
                       onClick={() => setSearchOpen(true)}
                       className={`hidden h-11 items-center gap-3 rounded-[18px] border px-3.5 transition-all sm:inline-flex xl:hidden ${utilitySurface} ${focus}`}
@@ -643,7 +643,7 @@ export default function Navbar() {
                       </div>
                     ) : (
                       <Link
-                        to="/user-login"
+                        to="/login"
                       className={`hidden h-11 items-center rounded-[18px] border px-4 text-[12px] font-semibold transition-all sm:inline-flex ${utilitySurface} ${focus}`}
                       >
                         Login
@@ -652,7 +652,7 @@ export default function Navbar() {
 
                     <Link
                       to="/rental-cart"
-                      className={`relative inline-flex h-11 items-center gap-2.5 rounded-[18px] border px-3.5 transition-all ${cartSurface} ${focus}`}
+                      className={`relative inline-flex h-11 items-center gap-2 rounded-[18px] border px-3 transition-all sm:gap-2.5 sm:px-3.5 ${cartSurface} ${focus}`}
                       aria-label={cartHasItems ? `Cart with ${cartItemCount} item${cartItemCount === 1 ? '' : 's'}` : 'Cart'}
                     >
                       <span
@@ -736,25 +736,30 @@ export default function Navbar() {
                       transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
                       className="overflow-hidden lg:hidden"
                     >
-                      <div
-                        className={`mt-4 rounded-[28px] border p-3.5 backdrop-blur-2xl ${
-                          isDark
-                            ? 'border-white/10 bg-[linear-gradient(180deg,rgba(9,11,24,0.88),rgba(7,9,20,0.88))]'
-                            : 'border-violet-200/70 bg-white/88'
-                        }`}
-                      >
-                        <div className="grid grid-cols-2 gap-2">
-                          {MOBILE_NAV.map((item) => {
-                            const isCurrent = active(item.to)
+                        <div
+                          className={`mt-4 max-h-[calc(100dvh-5.75rem)] overflow-y-auto rounded-[26px] border p-4 backdrop-blur-2xl ${
+                            isDark
+                              ? 'border-white/10 bg-[linear-gradient(180deg,rgba(9,11,24,0.88),rgba(7,9,20,0.88))]'
+                              : 'border-violet-200/70 bg-white/88'
+                          }`}
+                          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+                        >
+                          <div className={`mb-2 text-[10px] font-mono uppercase tracking-[0.18em] ${isDark ? 'text-purple-100/48' : 'text-violet-600/72'}`}>
+                            Explore
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
+                            {MOBILE_NAV.map((item) => {
+                              const isCurrent = active(item.to)
 
                             return (
                               <Link
                                 key={item.to}
                                 to={item.to}
-                                className={`inline-flex h-12 items-center justify-center rounded-[18px] border px-4 text-[13px] font-medium transition-all ${
-                                  isCurrent
-                                    ? isDark
-                                      ? 'border-violet-300/20 bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.08),rgba(34,211,238,0.06))] text-white'
+                                  className={`inline-flex min-h-[48px] items-center justify-center rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${
+                                    isCurrent
+                                      ? isDark
+                                        ? 'border-violet-300/20 bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.08),rgba(34,211,238,0.06))] text-white'
                                       : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.06),rgba(34,211,238,0.06))] text-gray-900'
                                     : mobileTile
                                 } ${focus}`}
@@ -766,121 +771,131 @@ export default function Navbar() {
                         </div>
 
                         <div
-                          className={`mt-3 grid gap-2 border-t pt-3 ${
+                          className={`mt-4 grid gap-2.5 border-t pt-3.5 ${
                             isDark ? 'border-white/8' : 'border-violet-200/60'
                           }`}
                         >
+                          <div className={`text-[10px] font-mono uppercase tracking-[0.18em] ${isDark ? 'text-purple-100/48' : 'text-violet-600/72'}`}>
+                            Tools & Account
+                          </div>
+
                           <button
                             onClick={() => {
                               setOpen(false)
                               setSearchOpen(true)
                             }}
-                            className={`inline-flex h-12 items-center justify-center gap-2 rounded-[18px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+                            className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${mobileTile} ${focus}`}
                           >
                             <Search className="h-4 w-4" strokeWidth={1.9} />
                             Search
                           </button>
 
-                          {(quoteHasItems || quoteActive) && (
+                          <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
+                            {(quoteHasItems || quoteActive) && (
+                              <Link
+                                to="/purchase-quote"
+                                className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${
+                                  quoteActive
+                                    ? isDark
+                                      ? 'border-fuchsia-300/22 bg-[linear-gradient(135deg,rgba(39,15,57,0.96),rgba(16,14,36,0.98))] text-white'
+                                      : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.06))] text-gray-900'
+                                    : mobileTile
+                                } ${focus}`}
+                              >
+                                <FileText className="h-4 w-4" strokeWidth={1.9} />
+                                Quote Draft
+                                {quoteHasItems && (
+                                  <span
+                                    className={`inline-flex min-w-[1.4rem] items-center justify-center rounded-full px-1.5 py-[3px] text-[10px] font-mono font-bold leading-none ${
+                                      isDark
+                                        ? 'bg-[linear-gradient(135deg,#f472b6,#8b5cf6)] text-slate-950'
+                                        : 'bg-[linear-gradient(135deg,#ec4899,#7c3aed)] text-white'
+                                    }`}
+                                  >
+                                    {quoteCountLabel}
+                                  </span>
+                                )}
+                              </Link>
+                            )}
+
                             <Link
-                              to="/purchase-quote"
-                              className={`inline-flex h-12 items-center justify-center gap-2 rounded-[18px] border px-4 text-[13px] font-medium transition-all ${
-                                quoteActive
+                              to="/rental-cart"
+                              className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[18px] border px-4 text-[13.5px] font-semibold transition-all ${
+                                cartActive
                                   ? isDark
-                                    ? 'border-fuchsia-300/22 bg-[linear-gradient(135deg,rgba(39,15,57,0.96),rgba(16,14,36,0.98))] text-white'
-                                    : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.06))] text-gray-900'
+                                    ? 'border-cyan-300/24 bg-[linear-gradient(135deg,rgba(8,30,44,0.94),rgba(11,18,38,0.98))] text-white'
+                                    : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(34,211,238,0.06))] text-gray-900'
                                   : mobileTile
                               } ${focus}`}
                             >
-                              <FileText className="h-4 w-4" strokeWidth={1.9} />
-                              Quote Draft
-                              {quoteHasItems && (
+                              <ShoppingCart className="h-4 w-4" strokeWidth={1.9} />
+                              Cart
+                              {cartHasItems && (
                                 <span
                                   className={`inline-flex min-w-[1.4rem] items-center justify-center rounded-full px-1.5 py-[3px] text-[10px] font-mono font-bold leading-none ${
                                     isDark
-                                      ? 'bg-[linear-gradient(135deg,#f472b6,#8b5cf6)] text-slate-950'
-                                      : 'bg-[linear-gradient(135deg,#ec4899,#7c3aed)] text-white'
+                                      ? 'bg-[linear-gradient(135deg,#22d3ee,#7c3aed)] text-slate-950'
+                                      : 'bg-[linear-gradient(135deg,#7c3aed,#22d3ee)] text-white'
                                   }`}
                                 >
-                                  {quoteCountLabel}
+                                  {cartCountLabel}
                                 </span>
                               )}
                             </Link>
-                          )}
+                          </div>
 
                           {isLoggedIn ? (
                             <>
-                              <Link
-                                to="/my-requests"
-                                className={`inline-flex h-12 items-center justify-center gap-2 rounded-[18px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
-                              >
-                                <FileText className="h-4 w-4" strokeWidth={1.9} />
-                                My Requests
-                              </Link>
-
-                              <Link
-                                to="/profile"
-                                className={`inline-flex h-12 items-center justify-center gap-2 rounded-[18px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
-                              >
-                                <User2 className="h-4 w-4" strokeWidth={1.9} />
-                                {firstName}
-                              </Link>
-
-                              {isAuth && (
+                              <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                                 <Link
-                                  to="/admin"
-                                  className={`inline-flex h-12 items-center justify-center gap-2 rounded-[18px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+                                  to="/my-requests"
+                                  className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${mobileTile} ${focus}`}
                                 >
-                                  <ShieldCheck className="h-4 w-4" strokeWidth={1.9} />
-                                  Admin
+                                  <FileText className="h-4 w-4" strokeWidth={1.9} />
+                                  My Requests
                                 </Link>
-                              )}
 
-                              <button
-                                onClick={logout}
-                                className={`inline-flex h-12 items-center justify-center gap-2 rounded-[18px] border px-4 text-[13px] font-medium transition-all ${
-                                  isDark
-                                    ? 'border-red-400/18 bg-red-500/10 text-red-300'
-                                    : 'border-red-200 bg-red-50 text-red-600'
-                                } ${focus}`}
-                              >
-                                <LogOut className="h-4 w-4" strokeWidth={1.9} />
-                                Logout
-                              </button>
+                                <Link
+                                  to="/profile"
+                                  className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${mobileTile} ${focus}`}
+                                >
+                                  <User2 className="h-4 w-4" strokeWidth={1.9} />
+                                  {firstName}
+                                </Link>
+
+                                {isAuth && (
+                                  <Link
+                                    to="/admin"
+                                    className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${mobileTile} ${focus}`}
+                                  >
+                                    <ShieldCheck className="h-4 w-4" strokeWidth={1.9} />
+                                    Admin
+                                  </Link>
+                                )}
+
+                                <button
+                                  onClick={() => {
+                                    void logout()
+                                  }}
+                                  className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${
+                                    isDark
+                                      ? 'border-red-400/18 bg-red-500/10 text-red-300'
+                                      : 'border-red-200 bg-red-50 text-red-600'
+                                  } ${focus}`}
+                                >
+                                  <LogOut className="h-4 w-4" strokeWidth={1.9} />
+                                  Logout
+                                </button>
+                              </div>
                             </>
                           ) : (
-                            <Link
-                              to="/user-login"
-                              className={`inline-flex h-12 items-center justify-center rounded-[18px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+                              <Link
+                                to="/login"
+                              className={`inline-flex min-h-[48px] items-center justify-center rounded-[18px] border px-4 text-[13.5px] font-medium transition-all ${mobileTile} ${focus}`}
                             >
                               Login
                             </Link>
                           )}
-
-                          <Link
-                            to="/rental-cart"
-                            className={`inline-flex h-12 items-center justify-center gap-2 rounded-[18px] border px-4 text-[13px] font-semibold transition-all ${
-                              cartActive
-                                ? isDark
-                                  ? 'border-cyan-300/24 bg-[linear-gradient(135deg,rgba(8,30,44,0.94),rgba(11,18,38,0.98))] text-white'
-                                  : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(34,211,238,0.06))] text-gray-900'
-                                : mobileTile
-                            } ${focus}`}
-                          >
-                            <ShoppingCart className="h-4 w-4" strokeWidth={1.9} />
-                            Cart
-                            {cartHasItems && (
-                              <span
-                                className={`inline-flex min-w-[1.4rem] items-center justify-center rounded-full px-1.5 py-[3px] text-[10px] font-mono font-bold leading-none ${
-                                  isDark
-                                    ? 'bg-[linear-gradient(135deg,#22d3ee,#7c3aed)] text-slate-950'
-                                    : 'bg-[linear-gradient(135deg,#7c3aed,#22d3ee)] text-white'
-                                }`}
-                              >
-                                {cartCountLabel}
-                              </span>
-                            )}
-                          </Link>
                         </div>
                       </div>
                     </motion.div>
@@ -1150,7 +1165,7 @@ export default function Navbar() {
                   <button
                     onClick={() => {
                       setUserMenu(false)
-                      logout()
+                      void logout()
                     }}
                     className={`flex w-full items-center gap-3 rounded-[16px] px-3.5 py-3 text-left text-[12.5px] font-medium transition-all ${
                       isDark

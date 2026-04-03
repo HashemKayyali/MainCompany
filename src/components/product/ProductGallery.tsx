@@ -22,7 +22,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
 
   return (
     <div>
-      <div className={`relative aspect-video overflow-hidden rounded-[18px] ${isDark ? 'bg-void-800' : 'bg-gray-100'}`}>
+      <div className={`relative aspect-video overflow-hidden rounded-[20px] ${isDark ? 'bg-void-800' : 'bg-gray-100'}`}>
         {hasVideo && (
           <FramedVideo
             media={videoUrl}
@@ -52,7 +52,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
 
         {isVideoActive && (
           <div
-            className={`absolute left-2.5 top-2.5 z-20 inline-flex items-center gap-1.5 rounded-full px-2.25 py-0.75 text-[9px] font-semibold uppercase tracking-wider backdrop-blur-md ${
+            className={`absolute left-3 top-3 z-20 inline-flex min-h-[32px] items-center gap-1.5 rounded-full px-2.75 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] backdrop-blur-md ${
               isDark ? 'border border-white/10 bg-black/50 text-white/80' : 'border border-gray-200 bg-white/70 text-gray-700'
             }`}
           >
@@ -63,12 +63,12 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
       </div>
 
       {totalItems > 1 && (
-        <div className="mt-2.5 flex gap-1.5 overflow-x-auto pb-1">
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
           {hasVideo && (
             <button
               onClick={() => setActive(0)}
               aria-label="Play video"
-              className={`relative h-11 w-14 shrink-0 overflow-hidden rounded-[12px] border-2 transition-all ${
+              className={`relative h-12 w-16 shrink-0 overflow-hidden rounded-[13px] border-2 transition-all ${
                 active === 0
                   ? 'border-prism-violet/50 opacity-100'
                   : isDark
@@ -78,7 +78,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
             >
               <FramedVideo media={videoUrl} className="h-full w-full" fallbackTransform={{ fit: 'cover' }} muted preload="metadata" />
               <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                <Play size={11} className="text-white" fill="white" strokeWidth={0} />
+                <Play size={12} className="text-white" fill="white" strokeWidth={0} />
               </div>
             </button>
           )}
@@ -90,7 +90,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
                 key={i}
                 onClick={() => setActive(itemIndex)}
                 aria-label={`View photo ${i + 1}`}
-                className={`h-11 w-14 shrink-0 overflow-hidden rounded-[12px] border-2 transition-all ${
+                className={`h-12 w-16 shrink-0 overflow-hidden rounded-[13px] border-2 transition-all ${
                   active === itemIndex
                     ? 'border-prism-violet/50 opacity-100'
                     : isDark

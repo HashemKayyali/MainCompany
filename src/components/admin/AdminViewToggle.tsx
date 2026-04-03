@@ -36,7 +36,7 @@ export default function AdminViewToggle({ value, onChange }: AdminViewToggleProp
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              'inline-flex min-h-[30px] min-w-[62px] items-center justify-center rounded-[10px] px-2.75 py-1.25 text-[9.5px] font-semibold transition active:translate-y-[1px]',
+              'inline-flex min-h-[38px] min-w-[76px] items-center justify-center rounded-[12px] px-3 py-1.5 text-[10.5px] font-semibold transition active:translate-y-[1px] sm:min-h-[40px] sm:min-w-[82px]',
               active
                 ? isDark
                   ? 'bg-[linear-gradient(180deg,rgba(24,56,78,0.96),rgba(14,36,54,0.98))] text-cyan-100 ring-1 ring-inset ring-cyan-300/24 shadow-[0_12px_26px_-18px_rgba(34,211,238,0.3)]'

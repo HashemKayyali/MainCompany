@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { Check, RefreshCw, Sparkles } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import {
@@ -35,21 +35,21 @@ export default function AvatarPicker({
   compact = false,
 }: AvatarPickerProps) {
   const { isDark } = useTheme()
+  const variantsGroupId = useId()
+  const previewNoteId = useId()
   const valueSignature = useMemo(
     () => avatarSelectionSignature(value),
     [value?.avatarStyle, value?.avatarSeed, JSON.stringify(value?.avatarOptions || {})]
   )
-  const normalizedValue = useMemo(
-    () => normalizeAvatarSelection(value),
-    [valueSignature]
-  )
+  const normalizedValue = useMemo(() => normalizeAvatarSelection(value), [valueSignature])
   const [activeStyle, setActiveStyle] = useState(normalizedValue?.avatarStyle || 'personas')
   const [variantSet, setVariantSet] = useState(0)
-  const onChangeRef = useRef(onChange)
 
   useEffect(() => {
-    onChangeRef.current = onChange
-  }, [onChange])
+    if (normalizedValue?.avatarStyle && normalizedValue.avatarStyle !== activeStyle) {
+      setActiveStyle(normalizedValue.avatarStyle)
+    }
+  }, [activeStyle, normalizedValue?.avatarStyle])
 
   const normalizedSeed = useMemo(
     () => avatarIdentitySeed([identitySeed, String(variantSet)]),
@@ -61,36 +61,28 @@ export default function AvatarPicker({
     [activeStyle, compact, normalizedSeed]
   )
 
-  const preferredSelection = useMemo(
-    () => variants[0] || buildDefaultAvatarSelection(normalizedSeed, activeStyle),
-    [activeStyle, normalizedSeed, variants]
-  )
-  const preferredSelectionSignature = useMemo(
-    () => avatarSelectionSignature(preferredSelection),
-    [preferredSelection.avatarStyle, preferredSelection.avatarSeed, JSON.stringify(preferredSelection.avatarOptions || {})]
-  )
-
-  useEffect(() => {
-    if (normalizedValue?.avatarStyle && normalizedValue.avatarStyle !== activeStyle) {
-      setActiveStyle(normalizedValue.avatarStyle)
+  const previewSelection = useMemo(() => {
+    if (normalizedValue?.avatarStyle === activeStyle) {
+      const matchingVariant = variants.find(variant => isAvatarSelectionEqual(variant, normalizedValue))
+      if (matchingVariant) return matchingVariant
     }
-  }, [activeStyle, normalizedValue?.avatarStyle])
 
-  useEffect(() => {
-    const hasMatchingVariant = variants.some(variant => isAvatarSelectionEqual(variant, normalizedValue))
-    const shouldAutoSelect =
-      !normalizedValue ||
-      normalizedValue.avatarStyle !== activeStyle ||
-      !hasMatchingVariant
+    return variants[0] || buildDefaultAvatarSelection(normalizedSeed, activeStyle)
+  }, [activeStyle, normalizedSeed, normalizedValue, variants])
 
-    if (shouldAutoSelect && !isAvatarSelectionEqual(normalizedValue, preferredSelection)) {
-      onChangeRef.current(preferredSelection)
-    }
-  }, [activeStyle, normalizedValue, preferredSelection, preferredSelectionSignature, variants, valueSignature])
-
-  const selected = normalizedValue && normalizedValue.avatarStyle === activeStyle
-    ? normalizedValue
-    : preferredSelection
+  const activeStyleLabel = useMemo(
+    () => AVATAR_STYLE_OPTIONS.find(style => style.key === activeStyle)?.label || 'Avatar',
+    [activeStyle]
+  )
+  const savedStyleLabel = useMemo(
+    () =>
+      normalizedValue
+        ? AVATAR_STYLE_OPTIONS.find(style => style.key === normalizedValue.avatarStyle)?.label ||
+          normalizedValue.avatarStyle
+        : null,
+    [normalizedValue]
+  )
+  const isPreviewingUnsavedSelection = !isAvatarSelectionEqual(normalizedValue, previewSelection)
 
   return (
     <div
@@ -114,10 +106,20 @@ export default function AvatarPicker({
             <Sparkles className="h-3.5 w-3.5" strokeWidth={1.8} />
             Avatar identity
           </div>
-          <h3 className={cn('mt-2.5 font-display text-[0.98rem] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>
+          <h3
+            className={cn(
+              'mt-2.5 font-display text-[0.98rem] font-semibold',
+              isDark ? 'text-white' : 'text-gray-900'
+            )}
+          >
             {title}
           </h3>
-          <p className={cn('mt-1 max-w-[36rem] text-[11.5px] leading-5', isDark ? 'text-purple-100/64' : 'text-gray-600')}>
+          <p
+            className={cn(
+              'mt-1 max-w-[36rem] text-[12.5px] leading-5.5',
+              isDark ? 'text-purple-100/64' : 'text-gray-600'
+            )}
+          >
             {description}
           </p>
         </div>
@@ -125,8 +127,9 @@ export default function AvatarPicker({
         <button
           type="button"
           onClick={() => setVariantSet(value => value + 1)}
+          aria-label={`Show another ${activeStyleLabel} avatar set`}
           className={cn(
-            'inline-flex h-9 items-center gap-2 rounded-[13px] px-3 text-[10px] font-semibold transition',
+            'inline-flex min-h-[42px] items-center gap-2 rounded-[14px] px-3.5 text-[11px] font-semibold transition',
             isDark
               ? 'bg-[#0f1733] text-cyan-100/82 ring-1 ring-inset ring-cyan-400/14 hover:bg-[#111d40] hover:text-white'
               : 'bg-white text-violet-700 ring-1 ring-inset ring-violet-200 hover:bg-violet-50'
@@ -137,7 +140,12 @@ export default function AvatarPicker({
         </button>
       </div>
 
-      <div className={cn('mt-3.5 grid gap-3.5', compact ? 'lg:grid-cols-[168px_minmax(0,1fr)]' : 'lg:grid-cols-[190px_minmax(0,1fr)]')}>
+      <div
+        className={cn(
+          'mt-3.5 grid gap-3.5',
+          compact ? 'lg:grid-cols-[168px_minmax(0,1fr)]' : 'lg:grid-cols-[190px_minmax(0,1fr)]'
+        )}
+      >
         <div
           className={cn(
             'rounded-[18px] border p-2.5',
@@ -149,38 +157,53 @@ export default function AvatarPicker({
           <div className="relative overflow-hidden rounded-[18px]">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_48%)]" />
             <UserAvatar
-              name="Avatar"
-              avatarStyle={selected.avatarStyle}
-              avatarSeed={selected.avatarSeed}
-              avatarOptions={selected.avatarOptions}
+              name="Avatar preview"
+              avatarStyle={previewSelection.avatarStyle}
+              avatarSeed={previewSelection.avatarSeed}
+              avatarOptions={previewSelection.avatarOptions}
+              alt={`${activeStyleLabel} avatar preview`}
               className="aspect-square rounded-[18px]"
             />
           </div>
 
           <div className="mt-2.5 space-y-1">
-            <div className={cn('text-[10px] font-mono uppercase tracking-[0.18em]', isDark ? 'text-cyan-100/42' : 'text-violet-600/56')}>
-              Active style
+            <div
+              className={cn(
+                'text-[10px] font-mono uppercase tracking-[0.18em]',
+                isDark ? 'text-cyan-100/42' : 'text-violet-600/56'
+              )}
+            >
+              Preview style
             </div>
             <div className={cn('font-medium', isDark ? 'text-white' : 'text-gray-900')}>
-              {AVATAR_STYLE_OPTIONS.find(style => style.key === selected.avatarStyle)?.label}
+              {activeStyleLabel}
             </div>
-            <div className={cn('text-[10px]', isDark ? 'text-purple-100/42' : 'text-gray-500')}>
-              Seed: {selected.avatarSeed}
+            <div
+              id={previewNoteId}
+              className={cn('text-[10px] leading-5', isDark ? 'text-purple-100/42' : 'text-gray-500')}
+            >
+              {isPreviewingUnsavedSelection
+                ? `Previewing a new option. Your saved ${savedStyleLabel || 'avatar'} stays unchanged until you select one below.`
+                : `Currently selected avatar. Seed: ${previewSelection.avatarSeed}`}
             </div>
           </div>
         </div>
 
         <div className="space-y-2.5">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2.5">
             {AVATAR_STYLE_OPTIONS.map(style => {
               const active = style.key === activeStyle
               return (
                 <button
                   key={style.key}
                   type="button"
-                  onClick={() => setActiveStyle(style.key)}
+                  aria-pressed={active}
+                  onClick={() => {
+                    setActiveStyle(style.key)
+                    setVariantSet(0)
+                  }}
                   className={cn(
-                    'inline-flex min-h-[36px] items-center rounded-[13px] px-3 text-[10px] font-semibold transition',
+                    'inline-flex min-h-[42px] items-center rounded-[14px] px-3.5 text-[11px] font-semibold transition',
                     active
                       ? isDark
                         ? 'bg-[linear-gradient(135deg,rgba(27,66,92,0.98),rgba(20,44,74,0.96))] text-white ring-1 ring-inset ring-cyan-300/22 shadow-[0_14px_34px_-24px_rgba(34,211,238,0.32)]'
@@ -196,19 +219,29 @@ export default function AvatarPicker({
             })}
           </div>
 
-          <div className={cn('grid gap-2', compact ? 'grid-cols-2' : 'grid-cols-2 xl:grid-cols-3')}>
-            {variants.map(variant => {
-              const isSelected =
-                selected.avatarStyle === variant.avatarStyle &&
-                selected.avatarSeed === variant.avatarSeed
+          <div
+            id={variantsGroupId}
+            role="radiogroup"
+            aria-label={`${activeStyleLabel} avatar options`}
+            aria-describedby={previewNoteId}
+            className={cn('grid gap-2.5', compact ? 'grid-cols-2' : 'grid-cols-2 xl:grid-cols-3')}
+          >
+            {variants.map((variant, index) => {
+              const isSelected = isAvatarSelectionEqual(normalizedValue, variant)
+              const toneLabel = String(variant.avatarOptions.tone || '').replace(/^\w/, value =>
+                value.toUpperCase()
+              )
 
               return (
                 <button
                   key={variant.avatarSeed}
                   type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  aria-label={`Select ${activeStyleLabel} avatar option ${index + 1}${toneLabel ? `, ${toneLabel} tone` : ''}`}
                   onClick={() => onChange(variant)}
                   className={cn(
-                    'group relative rounded-[16px] border p-1.5 transition',
+                    'group relative rounded-[16px] border p-1.5 text-left transition',
                     isSelected
                       ? isDark
                         ? 'border-cyan-300/28 bg-cyan-400/8 shadow-[0_18px_34px_-26px_rgba(34,211,238,0.32)]'
@@ -223,14 +256,13 @@ export default function AvatarPicker({
                     avatarStyle={variant.avatarStyle}
                     avatarSeed={variant.avatarSeed}
                     avatarOptions={variant.avatarOptions}
+                    alt=""
                     className="aspect-square rounded-[14px]"
                   />
 
                   <div className="mt-1.5 flex items-center justify-between gap-2">
                     <span className={cn('text-[10px] font-medium', isDark ? 'text-purple-100/62' : 'text-gray-500')}>
-                      {String(variant.avatarOptions.tone || '').replace(/^\w/, value =>
-                        value.toUpperCase()
-                      )}
+                      {toneLabel}
                     </span>
                     {isSelected ? (
                       <span
@@ -240,6 +272,7 @@ export default function AvatarPicker({
                             ? 'bg-cyan-400/15 text-cyan-100 ring-1 ring-inset ring-cyan-300/18'
                             : 'bg-violet-100 text-violet-700 ring-1 ring-inset ring-violet-200'
                         )}
+                        aria-hidden="true"
                       >
                         <Check className="h-3 w-3" strokeWidth={2.1} />
                       </span>

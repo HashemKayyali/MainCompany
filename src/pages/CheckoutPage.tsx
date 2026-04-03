@@ -168,13 +168,13 @@ export default function CheckoutPage() {
         <div className="mb-6">
           <span className="section-label">// Checkout</span>
           <h1 className={cn('section-title !text-left', !isDark && 'text-gray-900')}>Confirm Your Rental Request</h1>
-          <p className={cn('mt-2 max-w-2xl text-sm leading-6', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
+          <p className={cn('mt-2.5 max-w-2xl text-[0.95rem] leading-6.5', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
             Review your items, complete your contact details, and submit the rental request for admin approval.
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <div className={cn('rounded-[20px] border p-4', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+          <div className={cn('rounded-[22px] border p-4.5', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
             <RequestContactFields
               form={form}
               showEventName
@@ -182,42 +182,42 @@ export default function CheckoutPage() {
             />
 
             {validationMessage && (
-              <div className={cn('mt-4 rounded-xl px-4 py-3 text-sm', isDark ? 'bg-amber-500/10 text-amber-200' : 'bg-amber-50 text-amber-700')}>
+              <div className={cn('mt-4 rounded-[14px] px-4 py-3.5 text-[0.92rem] leading-5.5', isDark ? 'bg-amber-500/10 text-amber-200' : 'bg-amber-50 text-amber-700')}>
                 {validationMessage}
               </div>
             )}
 
-            <div className="mt-6 flex flex-wrap justify-end gap-3">
-              <Link to="/rental-cart" className="btn-outline !rounded-xl !px-5 !py-3 !text-sm">
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
+              <Link to="/rental-cart" className="btn-outline !w-full !rounded-[14px] !px-5 !py-3 !text-[0.95rem] sm:!w-auto">
                 Back to Cart
               </Link>
-              <button type="button" onClick={submit} disabled={saving || !!validationMessage} className="btn-primary !rounded-xl !px-5 !py-3 !text-sm disabled:opacity-50">
+              <button type="button" onClick={submit} disabled={saving || !!validationMessage} className="btn-primary !w-full !rounded-[14px] !px-5 !py-3 !text-[0.95rem] disabled:opacity-50 sm:!w-auto">
                 {saving ? 'Submitting...' : 'Confirm Request'}
               </button>
             </div>
           </div>
 
-          <div className={cn('h-fit rounded-[20px] border p-4 xl:sticky xl:top-24', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-            <div className={cn('text-[11px] font-mono uppercase tracking-[0.18em]', isDark ? 'text-purple-100/50' : 'text-gray-400')}>
+          <div className={cn('order-first h-fit rounded-[22px] border p-4 xl:order-none xl:sticky xl:top-28', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+            <div className={cn('text-[11px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/50' : 'text-gray-400')}>
               Order Preview
             </div>
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 space-y-3.5">
               {rentalCart.items.map(item => {
                 const { startDate, endDate } = rentalCart.getItemDates(item)
                 return (
-                  <div key={item.productSlug} className={cn('rounded-xl border px-4 py-3', isDark ? 'border-white/8 bg-white/[0.02]' : 'border-gray-100 bg-gray-50')}>
+                  <div key={item.productSlug} className={cn('rounded-[15px] border px-4 py-3.5', isDark ? 'border-white/8 bg-white/[0.02]' : 'border-gray-100 bg-gray-50')}>
                     <div className={cn('font-semibold', isDark ? 'text-white' : 'text-gray-900')}>{item.productTitle}</div>
-                    <div className={cn('mt-1 text-sm', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
+                    <div className={cn('mt-1.5 text-[0.92rem]', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
                       {item.quantity} x {item.unitPrice} {item.currency}/day
                     </div>
-                    <div className={cn('mt-1 text-sm', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
+                    <div className={cn('mt-1.5 text-[0.92rem]', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
                       {startDate || '-'}
                       {' -> '}
                       {endDate || '-'}
                       {' | '}
                       {rentalCart.getItemDays(item)} day(s)
                     </div>
-                    <div className={cn('mt-2 text-sm font-semibold', isDark ? 'text-cyan-200' : 'text-violet-700')}>
+                    <div className={cn('mt-2.5 text-[0.95rem] font-semibold', isDark ? 'text-cyan-200' : 'text-violet-700')}>
                       {rentalCart.getItemLineTotal(item).toFixed(2)} {item.currency}
                     </div>
                   </div>
@@ -225,7 +225,7 @@ export default function CheckoutPage() {
               })}
             </div>
 
-            <div className={cn('mt-5 rounded-xl px-4 py-3 text-sm', isDark ? 'bg-[#0d1430]/88 text-cyan-100' : 'bg-violet-50 text-violet-700')}>
+            <div className={cn('mt-5 rounded-[14px] px-4 py-3.5 text-[0.95rem]', isDark ? 'bg-[#0d1430]/88 text-cyan-100' : 'bg-violet-50 text-violet-700')}>
               Grand total: {rentalCart.grandTotal.toFixed(2)}
             </div>
           </div>

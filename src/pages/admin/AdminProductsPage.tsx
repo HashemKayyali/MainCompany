@@ -151,7 +151,7 @@ export default function AdminProductsPage() {
   }
 
   const tabCls = (t: TabKey) =>
-    `rounded-xl px-4 py-2 text-[12px] font-semibold transition-all ${
+    `rounded-[14px] px-4 py-2.5 text-[13px] font-semibold transition-all sm:text-[13.5px] ${
       tab === t
         ? isDark
           ? 'bg-prism-violet/15 text-prism-violet ring-1 ring-inset ring-prism-violet/30'
@@ -476,7 +476,7 @@ export default function AdminProductsPage() {
     <button onClick={() => setTab(k)} className={tabCls(k)} type="button">
       <div className="flex flex-col items-start leading-4">
         <span>{label}</span>
-        <span className={isDark ? 'text-[10px] text-purple-200/50' : 'text-[10px] text-gray-400'}>{hint}</span>
+        <span className={isDark ? 'text-[11px] text-purple-200/50' : 'text-[11px] text-gray-400'}>{hint}</span>
       </div>
     </button>
   )
@@ -547,7 +547,7 @@ export default function AdminProductsPage() {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3.5">
+    <div className="flex h-full min-h-0 flex-col gap-4.5">
       <AdminPageHeader
         title="Products"
         actions={
@@ -562,16 +562,16 @@ export default function AdminProductsPage() {
 
       <div
         className={cn(
-          'min-h-0 flex flex-1 flex-col rounded-[18px] p-2.5',
+          'min-h-0 flex flex-1 flex-col rounded-[22px] p-3 sm:p-4',
           isDark
             ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(8,11,27,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_28px_90px_-58px_rgba(7,15,36,0.96)]'
             : 'bg-white ring-1 ring-inset ring-gray-200'
         )}
       >
-        <div className="mb-2.5 flex flex-wrap gap-1.5">
+        <div className="-mx-0.5 mb-3 flex gap-2 overflow-x-auto px-0.5 pb-1 sm:flex-wrap">
           <button
             onClick={() => setFilterCat('all')}
-            className={cn('inline-flex min-h-[36px] items-center justify-center rounded-xl px-3.5 py-2 text-[11px] font-semibold transition active:translate-y-[1px]', filterCat === 'all' ? chipOn : chipOff)}
+            className={cn('inline-flex min-h-[42px] shrink-0 items-center justify-center rounded-[16px] px-4 py-2.5 text-[13px] font-semibold transition active:translate-y-[1px] sm:text-[13.5px]', filterCat === 'all' ? chipOn : chipOff)}
           >
             All ({orderedProducts.length})
           </button>
@@ -580,33 +580,33 @@ export default function AdminProductsPage() {
             <button
               key={cat}
               onClick={() => setFilterCat(cat)}
-              className={cn('inline-flex min-h-[36px] items-center justify-center rounded-xl px-3.5 py-2 text-[11px] font-semibold transition active:translate-y-[1px]', filterCat === cat ? chipOn : chipOff)}
+              className={cn('inline-flex min-h-[42px] shrink-0 items-center justify-center rounded-[16px] px-4 py-2.5 text-[13px] font-semibold transition active:translate-y-[1px] sm:text-[13.5px]', filterCat === cat ? chipOn : chipOff)}
             >
               {cat} ({countForCat(cat)})
             </button>
           ))}
         </div>
 
-        <div className="mb-2.5 flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
-          <div className={`flex items-center gap-2 rounded-xl px-2.5 py-1.75 ${soft}`}>
+        <div className="mb-3 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className={`flex min-h-[46px] w-full items-center gap-2.5 rounded-[18px] px-3.5 py-2.5 ${soft}`}>
             <span className={isDark ? 'text-purple-200/60' : 'text-gray-400'}>⌕</span>
             <input
               value={q}
               onChange={e => setQ(e.target.value)}
-              className={`w-[170px] bg-transparent text-[11px] outline-none sm:w-[280px] ${isDark ? 'placeholder:text-purple-200/40' : 'placeholder:text-gray-400'}`}
+              className={`min-w-0 flex-1 bg-transparent text-[13px] outline-none sm:text-[13.5px] ${isDark ? 'placeholder:text-purple-200/40' : 'placeholder:text-gray-400'}`}
               placeholder="Search by name, badge, category..."
             />
-            <span className={`rounded-lg px-2 py-0.5 text-[10px] font-mono ${isDark ? 'text-purple-200/60 ring-1 ring-inset ring-cyan-400/10' : 'border-gray-200 text-gray-500'}`}>
+            <span className={`shrink-0 rounded-xl px-2.5 py-1 text-[11px] font-mono ${isDark ? 'text-purple-200/60 ring-1 ring-inset ring-cyan-400/10' : 'border-gray-200 text-gray-500'}`}>
               {filtered.length}/{products.length}
             </span>
           </div>
-          <span className={`text-[11px] ${sub}`}>Use the arrows on each card to match homepage order</span>
+          <span className={`text-[12.5px] leading-5 ${sub}`}>Use the arrows on each card to match homepage order</span>
         </div>
 
         {filtered.length === 0 ? (
           <div className="flex flex-1 items-center justify-center p-8 text-center">
             <span className="text-2xl">📦</span>
-            <p className={`mt-4 font-semibold ${txt}`}>No products match this filter.</p>
+            <p className={`mt-4 text-[1rem] font-semibold ${txt}`}>No products match this filter.</p>
             <button onClick={openNew} className="btn-admin-create !mt-5">
               + Add Product
             </button>
@@ -628,7 +628,7 @@ export default function AdminProductsPage() {
                 const orderControls = (
                   <div
                     className={cn(
-                      'inline-flex items-center gap-1.5 rounded-full px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] ring-1 ring-inset backdrop-blur-sm',
+                      'inline-flex items-center gap-2 rounded-full px-2.5 py-1.25 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] ring-1 ring-inset backdrop-blur-sm',
                       orderTone
                     )}
                   >
@@ -641,7 +641,7 @@ export default function AdminProductsPage() {
                       }}
                       disabled={!canMoveLeft || reorderingLocked}
                       className={cn(
-                        'flex h-5 w-5 items-center justify-center rounded-full text-[10px] transition ring-1 ring-inset',
+                        'flex h-7 w-7 items-center justify-center rounded-full text-[12px] transition ring-1 ring-inset',
                         !canMoveLeft || reorderingLocked
                           ? isDark
                             ? 'text-white/25 ring-cyan-400/8'
@@ -654,7 +654,7 @@ export default function AdminProductsPage() {
                     >
                       {'<'}
                     </button>
-                    <span className="min-w-[1.15rem] text-center text-[10px]">{displayOrder}</span>
+                    <span className="min-w-[1.35rem] text-center text-[11px]">{displayOrder}</span>
                     <button
                       type="button"
                       onClick={event => {
@@ -663,7 +663,7 @@ export default function AdminProductsPage() {
                       }}
                       disabled={!canMoveRight || reorderingLocked}
                       className={cn(
-                        'flex h-5 w-5 items-center justify-center rounded-full text-[10px] transition ring-1 ring-inset',
+                        'flex h-7 w-7 items-center justify-center rounded-full text-[12px] transition ring-1 ring-inset',
                         !canMoveRight || reorderingLocked
                           ? isDark
                             ? 'text-white/25 ring-cyan-400/8'
@@ -793,19 +793,19 @@ export default function AdminProductsPage() {
           previewTitle="Live Product Card"
           
           footer={
-            <div className="flex flex-wrap items-center justify-between gap-2.5">
+            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className={cn('text-[11px] leading-5', sub)}>
                 Hero image: <span className={txt}>{(form.gallery || [])[0] ? 'Ready' : 'None'}</span>
                 {' | '}Video: <span className={txt}>{form.videoUrl ? 'Uploaded' : 'None'}</span>
               </div>
-              <div className="flex flex-wrap justify-end gap-2.5">
-                <button onClick={closeModal} className="btn-outline !rounded-xl !px-4 !py-2 !text-sm">
+              <div className="flex flex-col gap-2.5 sm:flex-row sm:justify-end">
+                <button onClick={closeModal} className="btn-outline !w-full !rounded-xl !px-4 !py-2 !text-sm sm:!w-auto">
                   Cancel
                 </button>
                 <button
                   onClick={save}
                   disabled={saving}
-                  className="btn-primary !rounded-xl !px-5 !py-2 !text-xs disabled:opacity-50"
+                  className="btn-primary !w-full !rounded-xl !px-5 !py-2 !text-sm disabled:opacity-50 sm:!w-auto"
                 >
                   {saving ? 'Saving...' : edit ? 'Save Changes' : 'Add Product'}
                 </button>

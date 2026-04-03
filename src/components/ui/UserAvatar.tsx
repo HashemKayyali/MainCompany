@@ -52,6 +52,8 @@ export default function UserAvatar({
   const initials = avatarInitials(name, email)
   const dimensionStyle = size ? { width: `${size}px`, height: `${size}px` } : undefined
   const imageSrc = !uploadedImageFailed && resolvedAvatarUrl ? resolvedAvatarUrl : generatedDataUri
+  const decorative = !alt
+  const resolvedAlt = alt || ''
 
   useEffect(() => {
     setUploadedImageFailed(false)
@@ -65,12 +67,12 @@ export default function UserAvatar({
         className
       )}
       style={dimensionStyle}
-      aria-hidden={alt ? undefined : true}
+      aria-hidden={decorative ? true : undefined}
     >
       {imageSrc ? (
         <img
           src={imageSrc}
-          alt={alt || `${name || email || 'User'} avatar`}
+          alt={resolvedAlt}
           className={cn('h-full w-full object-cover', imageClassName)}
           draggable={false}
           onError={() => {

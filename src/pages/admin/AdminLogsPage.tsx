@@ -90,7 +90,7 @@ export default function AdminLogsPage() {
   }, [logs])
 
   const selectCls = cn(
-    'rounded-xl px-3 py-2 text-[12px] font-medium outline-none transition',
+    'min-h-[44px] rounded-[16px] px-4 py-2.5 text-[13px] font-medium outline-none transition sm:text-[13.5px]',
     isDark
       ? 'bg-[#0d1430]/90 text-purple-100 ring-1 ring-inset ring-cyan-400/10 focus:ring-cyan-300/20'
       : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 focus:ring-violet-300'
@@ -109,7 +109,7 @@ export default function AdminLogsPage() {
               setLoading(false)
             }}
             className={cn(
-              'inline-flex min-h-[42px] items-center rounded-xl px-4 py-2.5 text-[12px] font-semibold transition active:translate-y-[1px]',
+              'inline-flex min-h-[44px] items-center rounded-[14px] px-4.5 py-2.5 text-[13px] font-semibold transition active:translate-y-[1px] sm:text-[13.5px]',
               isDark
                 ? 'bg-[linear-gradient(180deg,rgba(24,56,78,0.96),rgba(14,36,54,0.98))] text-cyan-100 ring-1 ring-inset ring-cyan-300/24 shadow-[0_12px_28px_-18px_rgba(34,211,238,0.3)] hover:brightness-110'
                 : 'bg-cyan-50 text-cyan-700 ring-1 ring-inset ring-cyan-200 shadow-[0_10px_24px_-18px_rgba(34,211,238,0.2)] hover:bg-cyan-100'
@@ -129,19 +129,19 @@ export default function AdminLogsPage() {
 
       <div
         className={cn(
-          'min-h-0 flex flex-1 flex-col rounded-[24px] p-3',
+          'min-h-0 flex flex-1 flex-col rounded-[26px] p-3.5 sm:p-4',
           isDark
             ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(8,11,27,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_28px_90px_-58px_rgba(7,15,36,0.96)]'
             : 'bg-white ring-1 ring-inset ring-gray-200'
         )}
       >
-        <div className="mb-4 flex flex-wrap gap-3">
+        <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_220px_220px]">
           <input
             placeholder="Search logs..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             className={cn(
-              'form-field !mb-0 !min-w-[220px] !flex-1',
+              'form-field !mb-0 !min-w-0 !w-full',
               isDark ? 'placeholder:!text-purple-200/30' : ''
             )}
           />
@@ -166,13 +166,13 @@ export default function AdminLogsPage() {
         {loading ? (
           <div className={`flex flex-1 flex-col items-center justify-center py-16 text-center ${sub}`}>
             <div className="mb-3 text-3xl">📋</div>
-            <p className="text-sm">Loading logs...</p>
+            <p className="text-[0.96rem]">Loading logs...</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className={`flex flex-1 flex-col items-center justify-center py-16 text-center ${sub}`}>
             <div className="mb-3 text-3xl">📭</div>
-            <p className="text-sm">No logs found</p>
-            <p className="mt-1 text-xs">Actions will appear here when admins create, edit, or delete items.</p>
+            <p className="text-[0.96rem]">No logs found</p>
+            <p className="mt-1 text-[13px] leading-6">Actions will appear here when admins create, edit, or delete items.</p>
           </div>
         ) : (
           <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">

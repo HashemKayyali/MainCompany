@@ -76,9 +76,9 @@ type SceneLayout = {
 
 const sceneLayouts: SceneLayout[] = [
   {
-    className: 'left-[0%] top-[6%] z-30 w-[54%] sm:left-[7%] sm:top-[8%] sm:w-[48%] lg:w-[50%]',
+    className: 'left-[1%] top-[8%] z-30 w-[52%] sm:left-[7%] sm:w-[48%] lg:w-[50%]',
     frameClassName: 'aspect-[5/4] rounded-[28px] sm:rounded-[34px]',
-    captionClassName: 'left-[6%] -bottom-3 sm:left-[7%] sm:-bottom-5',
+    captionClassName: 'left-[7%] -bottom-3 sm:-bottom-5',
     baseRotate: -6,
     floatY: -10,
     floatDuration: 11,
@@ -90,9 +90,9 @@ const sceneLayouts: SceneLayout[] = [
     eager: true,
   },
   {
-    className: 'right-[0%] top-[1%] z-40 w-[30%] sm:right-[7%] sm:top-[3%] sm:w-[30%]',
+    className: 'right-[1%] top-[3%] z-40 w-[29%] sm:right-[7%] sm:w-[30%]',
     frameClassName: 'aspect-[4/5] rounded-[26px] sm:rounded-[30px]',
-    captionClassName: 'left-[4%] -bottom-3 sm:left-[8%] sm:-bottom-5',
+    captionClassName: 'left-[6%] -bottom-3 sm:left-[8%] sm:-bottom-5',
     baseRotate: 9,
     floatY: -8,
     floatDuration: 12.4,
@@ -104,9 +104,9 @@ const sceneLayouts: SceneLayout[] = [
     eager: false,
   },
   {
-    className: 'right-[0%] bottom-[10%] z-20 w-[48%] sm:right-[4%] sm:w-[48%]',
+    className: 'right-[0%] bottom-[10%] z-20 w-[46%] sm:right-[4%] sm:w-[48%]',
     frameClassName: 'aspect-[6/4.2] rounded-[28px] sm:rounded-[32px]',
-    captionClassName: 'left-[7%] -bottom-3 sm:left-[8%] sm:-bottom-5',
+    captionClassName: 'left-[8%] -bottom-3 sm:-bottom-5',
     baseRotate: -4,
     floatY: -7,
     floatDuration: 13,
@@ -118,9 +118,9 @@ const sceneLayouts: SceneLayout[] = [
     eager: false,
   },
   {
-    className: 'left-[0%] bottom-[11%] z-10 w-[29%] sm:left-[1%] sm:bottom-[9%] sm:w-[28%]',
+    className: 'left-[0%] bottom-[9%] z-10 w-[27%] sm:left-[1%] sm:w-[28%]',
     frameClassName: 'aspect-square rounded-[24px] sm:rounded-[28px]',
-    captionClassName: 'left-[0%] -bottom-3 sm:left-[1%] sm:-bottom-5',
+    captionClassName: 'left-[1%] -bottom-3 sm:-bottom-5',
     baseRotate: 7,
     floatY: -6,
     floatDuration: 12.8,
@@ -132,9 +132,9 @@ const sceneLayouts: SceneLayout[] = [
     eager: false,
   },
   {
-    className: 'left-[18%] bottom-[1%] z-[26] w-[31%] sm:left-[31%] sm:bottom-[2%] sm:w-[31%] md:w-[29%]',
+    className: 'hidden min-[420px]:block left-[16%] bottom-[2%] z-[26] w-[30%] sm:left-[31%] sm:w-[31%] md:w-[29%]',
     frameClassName: 'aspect-[5/3.15] rounded-[22px] sm:rounded-[26px]',
-    captionClassName: 'left-[8%] -bottom-4 sm:left-[10%] sm:-bottom-5',
+    captionClassName: 'left-[10%] -bottom-5',
     baseRotate: 2,
     floatY: -5,
     floatDuration: 14.1,
@@ -146,9 +146,9 @@ const sceneLayouts: SceneLayout[] = [
     eager: false,
   },
   {
-    className: 'left-[38%] bottom-[27%] z-10 w-[26%] sm:left-[30%] sm:bottom-[30%] sm:w-[28%]',
+    className: 'hidden min-[420px]:block right-[14%] bottom-[30%] z-10 w-[34%] sm:left-[30%] sm:bottom-[30%] sm:w-[28%]',
     frameClassName: 'aspect-[5/3.15] rounded-[22px] sm:rounded-[26px]',
-    captionClassName: 'left-[8%] -bottom-4 sm:left-[10%] sm:-bottom-5',
+    captionClassName: 'left-[10%] -bottom-5',
     baseRotate: 2,
     floatY: -5,
     floatDuration: 14.1,
@@ -385,14 +385,14 @@ function HeroStat({
         }}
       />
       <div
-        className={`font-display text-[1.4rem] font-black tracking-[-0.055em] ${
+        className={`font-display text-[1.5rem] font-black tracking-[-0.055em] ${
           isDark ? 'text-white' : 'text-slate-900'
         }`}
       >
         {value}
       </div>
       <div
-        className={`mt-1 text-[9px] font-semibold uppercase tracking-[0.16em] ${
+        className={`mt-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] ${
           isDark ? 'text-violet-300/48' : 'text-violet-600/60'
         }`}
       >
@@ -515,7 +515,7 @@ function FloatingImageShowcase({
       {/* Caption pill */}
       <figcaption className={`pointer-events-none absolute z-30 ${layout.captionClassName}`}>
         <div
-          className={`inline-flex max-w-[10.5rem] items-center gap-2 rounded-full border px-3 py-1.5 backdrop-blur-xl sm:max-w-[14rem] sm:px-3.5 sm:py-2 ${
+          className={`inline-flex max-w-[11rem] items-center gap-2 rounded-full border px-3.25 py-1.75 backdrop-blur-xl sm:max-w-[14rem] sm:px-3.5 sm:py-2 ${
             isDark
               ? 'border-white/[0.10] bg-[linear-gradient(180deg,rgba(12,14,26,0.96),rgba(7,9,18,0.94))] text-white shadow-[0_16px_40px_rgba(1,5,18,0.32),0_0_0_0.5px_rgba(255,255,255,0.06)]'
               : 'border-white/82 bg-white/92 text-slate-900 shadow-[0_16px_40px_rgba(76,29,149,0.12)]'
@@ -532,7 +532,7 @@ function FloatingImageShowcase({
               />
             )}
           </span>
-          <span className="truncate text-[0.72rem] font-semibold tracking-[-0.018em] sm:text-[0.8rem]">
+          <span className="truncate text-[0.78rem] font-semibold tracking-[-0.018em] sm:text-[0.82rem]">
             {item.displayName}
           </span>
         </div>
@@ -552,7 +552,9 @@ function FloatingScene({
   motionEnabled: boolean
 }) {
   return (
-<div className="relative mx-auto h-[25.5rem] w-full max-w-[28rem] sm:h-[32rem] sm:max-w-[35rem] lg:h-[37rem] lg:max-w-[40rem]">      <div
+    <div className="relative mx-auto h-[19rem] w-full max-w-[21rem] sm:h-[32rem] sm:max-w-[35rem] lg:h-[37rem] lg:max-w-[40rem]">
+      {/* Ambient background blobs */}
+      <div
         className="pointer-events-none absolute left-[4%] top-[6%] h-44 w-44 rounded-full blur-[60px] sm:h-80 sm:w-80 sm:blur-[80px]"
         style={{
           background: isDark
@@ -620,7 +622,7 @@ export default function Hero() {
   )
 
   return (
-    <section className="relative overflow-hidden pb-8 pt-24 sm:pb-12 sm:pt-24 lg:min-h-[72svh] lg:pb-16 lg:pt-28">
+    <section className="relative overflow-hidden pb-10 pt-24 sm:pb-12 sm:pt-24 lg:min-h-[72svh] lg:pb-16 lg:pt-28">
 
       {/* ── Background layer ── */}
       <div className="pointer-events-none absolute inset-0">
@@ -682,7 +684,7 @@ export default function Hero() {
               className="mb-5 inline-flex"
             >
               <div
-                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 sm:px-3.5 ${
+                className={`inline-flex min-h-[38px] items-center gap-2 rounded-full border px-3.25 py-1.75 sm:px-3.5 ${
                   isDark
                     ? 'border-violet-500/25 bg-violet-500/10 text-violet-300'
                     : 'border-violet-300/70 bg-violet-50/80 text-violet-700'
@@ -696,14 +698,14 @@ export default function Hero() {
                       : '0 0 4px rgba(109,40,217,0.4)',
                   }}
                 />
-                <span className="text-[9px] font-semibold uppercase tracking-[0.16em] sm:text-[10px] sm:tracking-[0.18em]">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] sm:text-[10.5px] sm:tracking-[0.17em]">
                   Event Services Platform
                 </span>
               </div>
             </motion.div>
 
             {/* Headline */}
-            <div className="max-w-[22rem] sm:max-w-none">
+            <div className="max-w-[23rem] sm:max-w-none">
               <h1
                 className={`font-display text-[clamp(2.02rem,8.6vw,5.1rem)] font-black leading-[0.94] tracking-[-0.05em] sm:leading-[0.87] sm:tracking-[-0.066em] ${
                   isDark ? 'text-white' : 'text-slate-950'
@@ -767,13 +769,13 @@ export default function Hero() {
                     }`}
                   >
                     <span
-                      className={`font-mono text-[7px] font-bold sm:text-[8px] ${
+                      className={`font-mono text-[8px] font-bold sm:text-[8.5px] ${
                         isDark ? 'text-violet-400/60' : 'text-violet-400/80'
                       }`}
                     >
                       {step.num}
                     </span>
-                    <span className="text-[7.4px] font-semibold uppercase tracking-[0.11em] sm:text-[8.5px] sm:tracking-[0.13em]">
+                    <span className="text-[8.4px] font-semibold uppercase tracking-[0.1em] sm:text-[9px] sm:tracking-[0.12em]">
                       {step.label}
                     </span>
                   </div>
@@ -846,7 +848,7 @@ export default function Hero() {
 
                     <div className="min-w-0">
                       <div
-                        className={`text-[8.5px] font-semibold uppercase tracking-[0.15em] sm:text-[9.5px] sm:tracking-[0.18em] ${
+                        className={`text-[9.5px] font-semibold uppercase tracking-[0.14em] sm:text-[10px] sm:tracking-[0.16em] ${
                           isDark ? 'text-violet-300/55' : 'text-violet-600/65'
                         }`}
                       >
@@ -875,7 +877,7 @@ export default function Hero() {
             >
               <Link
                 to="/products"
-                className="btn-primary group relative !min-h-[40px] !overflow-hidden !rounded-[15px] !px-4 !text-[10.5px] sm:!min-h-[42px] sm:!px-5 sm:!text-[11px]"
+                className="btn-primary group relative !min-h-[44px] !overflow-hidden !rounded-[16px] !px-4.5 !text-[11px] sm:!min-h-[46px] sm:!px-5 sm:!text-[11.25px]"
               >
                 {/* Shine sweep */}
                 <span
@@ -887,7 +889,7 @@ export default function Hero() {
 
               <Link
                 to="/contact"
-                className={`btn-outline !min-h-[40px] !rounded-[15px] !px-4 !text-[10.5px] sm:!min-h-[42px] sm:!px-5 sm:!text-[11px] ${
+                className={`btn-outline !min-h-[44px] !rounded-[16px] !px-4.5 !text-[11px] sm:!min-h-[46px] sm:!px-5 sm:!text-[11.25px] ${
                   isDark ? '!text-white/85' : ''
                 }`}
               >
@@ -896,7 +898,7 @@ export default function Hero() {
             </motion.div>
 
             {/* Stats */}
-            <div className="mt-5 grid max-w-[22rem] grid-cols-3 gap-2 sm:mt-6 sm:max-w-[27rem] sm:gap-2.5">
+            <div className="mt-5 grid max-w-[22rem] grid-cols-3 gap-2.5 sm:mt-6 sm:max-w-[27rem] sm:gap-2.5">
               {heroStats.map((stat, index) => (
                 <HeroStat
                   key={stat.label}
@@ -915,7 +917,7 @@ export default function Hero() {
             initial={motionEnabled ? { opacity: 0, x: 20 } : false}
             animate={motionEnabled ? { opacity: 1, x: 0 } : undefined}
             transition={motionEnabled ? { duration: 0.84, delay: 0.14, ease } : undefined}
-           className="relative z-10 mt-2 sm:mt-4 lg:mt-0"
+            className="relative z-10 mt-2 px-0 sm:mt-4 lg:mt-0"
           >
             {showcaseItems.length > 0 ? (
               <FloatingScene items={showcaseItems} isDark={isDark} motionEnabled={motionEnabled} />

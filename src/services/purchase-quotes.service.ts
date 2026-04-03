@@ -12,8 +12,8 @@ import type {
   PurchaseQuoteRequestDetails,
 } from '../types/commerce'
 import { normalizeRpcSingle } from '../utils/commerce'
+import { getPurchaseQuoteItemCounts } from './request-counts.service'
 import { getRequestHistory } from './request-history.service'
-import { requireAuthenticatedSession } from './session-auth.service'
 
 type CreatePurchaseQuoteRpcRow = Database['public']['Functions']['create_purchase_quote_request']['Returns'][number]
 
@@ -55,7 +55,6 @@ function mapPurchaseQuoteItem(row: PurchaseQuoteItemRow): PurchaseQuoteItem {
 
 export async function createPurchaseQuoteRequest(input: PurchaseQuoteCreateInput) {
   ensureSupabase()
-  await requireAuthenticatedSession('sending your purchase quote request')
 
   const payload = {
     customer_name: input.customerName,
@@ -94,25 +93,15 @@ export async function listMyPurchaseQuotes(profileId: string): Promise<CustomerR
   if (error) throw error
 
   const requests = (data || []).map(mapPurchaseQuoteRequest)
-  const itemCounts = await Promise.all(
-    requests.map(async request => {
-      const { count, error: countError } = await supabase
-        .from('purchase_quote_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('purchase_quote_request_id', request.id)
+  const itemCounts = await getPurchaseQuoteItemCounts(requests.map(request => request.id))
 
-      if (countError) throw countError
-      return count ?? 0
-    })
-  )
-
-  return requests.map((request, index) => ({
+  return requests.map(request => ({
     id: request.id,
     requestNumber: request.requestNumber,
     type: 'purchase_quote',
     status: request.status,
     createdAt: request.createdAt,
-    itemCount: itemCounts[index],
+    itemCount: itemCounts[request.id] || 0,
     total: null,
     customerName: request.customerName,
   }))

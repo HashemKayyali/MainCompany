@@ -116,7 +116,7 @@ function CategoryTile({
         <div className="relative flex h-full flex-col justify-between p-1.75">
           <div className="flex items-start justify-end">
             <span
-              className={`rounded-full border px-1.75 py-[0.34rem] text-[7.25px] font-semibold uppercase tracking-[0.12em] backdrop-blur-md ${
+              className={`rounded-full border px-2 py-[0.42rem] text-[8.25px] font-semibold uppercase tracking-[0.11em] backdrop-blur-md sm:text-[8.75px] ${
                 active
                   ? 'border-white/18 bg-black/26 text-white'
                   : isDark
@@ -146,7 +146,7 @@ function CategoryTile({
                 }`}
               />
               <span
-                className={`text-[7.25px] font-semibold uppercase tracking-[0.12em] ${
+                className={`text-[8.25px] font-semibold uppercase tracking-[0.11em] sm:text-[8.75px] ${
                   active ? 'text-cyan-100/84' : isDark ? 'text-white/62' : 'text-slate-700/70'
                 }`}
               >
@@ -217,7 +217,7 @@ function ViewAllTile({ isDark, delay }: { isDark: boolean; delay: number }) {
           <div className="relative flex h-full flex-col justify-between">
             <div className="flex items-start justify-between">
               <span
-                className={`rounded-full border px-1.75 py-[0.34rem] text-[7.25px] font-semibold uppercase tracking-[0.12em] ${
+                className={`rounded-full border px-2 py-[0.42rem] text-[8.25px] font-semibold uppercase tracking-[0.11em] sm:text-[8.75px] ${
                   isDark
                     ? 'border-white/12 bg-white/[0.05] text-white/82'
                     : 'border-white/86 bg-white/82 text-slate-800'
@@ -239,7 +239,7 @@ function ViewAllTile({ isDark, delay }: { isDark: boolean; delay: number }) {
             <div className={`max-w-[82%] rounded-[12px] border px-2 py-1.5 backdrop-blur-[10px] ${
               isDark ? 'border-white/12 bg-black/26' : 'border-white/84 bg-white/72'
             }`}>
-              <div className={`text-[7.25px] font-semibold uppercase tracking-[0.14em] ${isDark ? 'text-cyan-100/78' : 'text-violet-700/74'}`}>
+              <div className={`text-[8.25px] font-semibold uppercase tracking-[0.12em] ${isDark ? 'text-cyan-100/78' : 'text-violet-700/74'}`}>
                 Navigation
               </div>
               <h3 className={`mt-0.75 font-display text-[0.82rem] font-bold leading-[1.02] tracking-[-0.05em] sm:text-[0.86rem] ${isDark ? 'text-white' : 'text-slate-950'}`}>
@@ -343,7 +343,7 @@ function SelectedCategoryHeader({
             </div>
 
             <div className="min-w-0">
-              <div className={`text-[9px] font-semibold uppercase tracking-[0.16em] ${isDark ? 'text-purple-100/54' : 'text-violet-700/72'}`}>
+              <div className={`text-[10px] font-semibold uppercase tracking-[0.14em] ${isDark ? 'text-purple-100/54' : 'text-violet-700/72'}`}>
                 Selected Category
               </div>
               <div className="mt-0.75 flex flex-wrap items-center gap-2.5">
@@ -351,7 +351,7 @@ function SelectedCategoryHeader({
                   {category.name}
                 </h3>
                 <span
-                  className={`rounded-full border px-2.25 py-[0.4rem] text-[8px] font-semibold uppercase tracking-[0.14em] ${
+                  className={`rounded-full border px-2.5 py-[0.45rem] text-[8.75px] font-semibold uppercase tracking-[0.12em] ${
                     isDark
                       ? 'border-cyan-300/18 bg-cyan-400/[0.08] text-cyan-100'
                       : 'border-violet-200 bg-violet-50/90 text-violet-700'
@@ -364,7 +364,7 @@ function SelectedCategoryHeader({
           </div>
 
           <div
-            className={`inline-flex items-center gap-1.75 self-start rounded-full border px-3 py-1.25 text-[8px] font-semibold uppercase tracking-[0.14em] ${
+            className={`inline-flex items-center gap-1.75 self-start rounded-full border px-3.25 py-1.5 text-[8.75px] font-semibold uppercase tracking-[0.12em] ${
               isDark
                 ? 'border-white/10 bg-white/[0.05] text-purple-100/76'
                 : 'border-violet-200/80 bg-white/84 text-violet-700'

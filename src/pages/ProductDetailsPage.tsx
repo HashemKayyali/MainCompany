@@ -64,7 +64,7 @@ export default function ProductDetailsPage() {
       <div className="site-container">
         <Link
           to="/products"
-          className={`mb-6 inline-flex items-center gap-2 text-[12px] font-mono uppercase tracking-wider transition-colors ${
+          className={`mb-7 inline-flex items-center gap-2.5 text-[12.5px] font-mono uppercase tracking-[0.14em] transition-colors ${
             isDark ? 'text-purple-300/80 hover:text-prism-violet' : 'text-gray-400 hover:text-violet-600'
           }`}
         >
@@ -72,7 +72,7 @@ export default function ProductDetailsPage() {
           Products
         </Link>
 
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-5 lg:gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:gap-7">
           <div className="lg:col-span-3">
             <motion.div
               initial={{ opacity: 0, x: -24 }}
@@ -109,10 +109,10 @@ export default function ProductDetailsPage() {
                 </span>
               )}
 
-              <h1 className={`font-display text-[1.55rem] font-extrabold tracking-tight sm:text-[1.85rem] ${txt}`}>
+              <h1 className={`font-display text-[1.75rem] font-extrabold tracking-tight sm:text-[1.95rem] ${txt}`}>
                 {product.name}
               </h1>
-              <p className={`mt-2 text-[0.84rem] leading-5.5 sm:text-[0.9rem] ${sub}`}>{product.description}</p>
+              <p className={`mt-3 text-[0.92rem] leading-6 sm:text-[0.98rem] ${sub}`}>{product.description}</p>
             </motion.div>
 
             <div className={`my-5 h-px ${isDark ? 'bg-purple-500/10' : 'bg-violet-50'}`} />
@@ -122,7 +122,7 @@ export default function ProductDetailsPage() {
             {product.notes.length > 0 && (
               <div className="mt-3.5 space-y-1.5">
                 {product.notes.map((note, index) => (
-                  <p key={index} className={`flex items-start gap-2 text-[12px] leading-5 ${sub}`}>
+                  <p key={index} className={`flex items-start gap-2.5 text-[12.5px] leading-5.5 ${sub}`}>
                     <span className="mt-px text-prism-violet/80">{'>'}</span>
                     {note}
                   </p>
@@ -144,14 +144,14 @@ export default function ProductDetailsPage() {
               className="mt-8"
               >
                 <div
-                    className={`mb-4 border-b pb-3 ${
+                    className={`mb-4 border-b pb-3.5 ${
                       isDark ? 'border-purple-500/15' : 'border-violet-100'
                     }`}
                   >
-                  <h2 className={`font-display text-[1.05rem] font-bold ${txt}`}>
+                  <h2 className={`font-display text-[1.14rem] font-bold ${txt}`}>
                     Spare Parts & Accessories
                   </h2>
-                  <p className={`mt-1 text-[12px] ${sub}`}>
+                  <p className={`mt-1.5 text-[12.5px] ${sub}`}>
                     {parts.length} available for {product.name}
                   </p>
                 </div>
@@ -163,7 +163,7 @@ export default function ProductDetailsPage() {
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: 0.3 + index * 0.06, ease }}
-                      className={`flex items-start gap-2.5 rounded-[14px] p-3 transition-all hover:-translate-y-0.5 ${card}`}
+                      className={`flex items-start gap-3 rounded-[16px] p-3.5 transition-all hover:-translate-y-0.5 ${card}`}
                     >
                       {part.image ? (
                         <div
@@ -195,7 +195,7 @@ export default function ProductDetailsPage() {
 
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className={`text-[13px] font-semibold ${txt}`}>{part.name}</h3>
+                          <h3 className={`text-[14px] font-semibold ${txt}`}>{part.name}</h3>
                           <span
                             className={`whitespace-nowrap text-[13px] font-display font-bold ${
                               isDark ? 'text-cyan-400' : 'text-violet-600'
@@ -204,11 +204,11 @@ export default function ProductDetailsPage() {
                             {part.price} {part.currency}
                           </span>
                         </div>
-                        <p className={`mt-1 line-clamp-2 text-[11px] leading-5 ${sub}`}>{part.description}</p>
+                        <p className={`mt-1.5 line-clamp-2 text-[12px] leading-5.5 ${sub}`}>{part.description}</p>
 
                         <div className="mt-2 flex items-center gap-2.5">
                           <span
-                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold ${
+                              className={`inline-flex min-h-[32px] items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
                               part.inStock
                                 ? isDark
                                   ? 'bg-emerald-500/15 text-emerald-400'
@@ -235,7 +235,7 @@ export default function ProductDetailsPage() {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="space-y-3.5 lg:sticky lg:top-16">
+            <div className="space-y-4 lg:sticky lg:top-20">
               {showPrice && <PricingCard product={product} />}
 
               <motion.div
@@ -244,16 +244,16 @@ export default function ProductDetailsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2, ease }}
               >
-                <div className={`overflow-hidden rounded-[16px] ${card}`}>
+                <div className={`overflow-hidden rounded-[18px] ${card}`}>
                   <div
-                    className={`border-b px-4 py-3 ${
+                    className={`border-b px-4 py-3.5 ${
                       isDark
                         ? 'border-purple-500/20 bg-cyan-500/10'
                         : 'border-violet-50 bg-cyan-50/50'
                     }`}
                   >
                     <span
-                      className={`text-[9px] font-mono uppercase tracking-[0.22em] ${
+                      className={`text-[10px] font-mono uppercase tracking-[0.18em] ${
                         isDark ? 'text-cyan-400' : 'text-cyan-600'
                       }`}
                     >
@@ -262,7 +262,7 @@ export default function ProductDetailsPage() {
                   </div>
 
                   <div className="p-4">
-                    <p className={`mb-3.5 text-[12px] leading-6 ${sub}`}>
+                    <p className={`mb-4 text-[12.5px] leading-6 ${sub}`}>
                       Choose whether you want to rent <strong className={txt}>{product.name}</strong> for an
                       event or request a direct purchase quote. Rental requests stay stock-aware, while
                       purchase quotes are reviewed separately by the sales team.
@@ -270,7 +270,7 @@ export default function ProductDetailsPage() {
 
                     <button
                       onClick={() => setQuoteOpen(value => !value)}
-                      className={`flex w-full items-center justify-between rounded-[14px] border px-3.5 py-2.5 text-left text-[12px] font-medium transition-all ${
+                      className={`flex w-full items-center justify-between rounded-[15px] border px-4 py-3 text-left text-[12.5px] font-medium transition-all ${
                         isDark
                           ? 'border-purple-500/15 bg-purple-500/[0.07] text-purple-100/90 hover:bg-purple-500/10'
                           : 'border-violet-100 bg-violet-50/70 text-gray-600 hover:bg-violet-50'
@@ -303,7 +303,7 @@ export default function ProductDetailsPage() {
                             ].map(item => (
                               <div key={item} className="flex items-center gap-2">
                                 <Check size={12} strokeWidth={3} className="shrink-0 text-cyan-400" />
-                                <span className={`text-[11px] ${isDark ? 'text-purple-200/70' : 'text-gray-500'}`}>
+                                <span className={`text-[12px] ${isDark ? 'text-purple-200/70' : 'text-gray-500'}`}>
                                   {item}
                                 </span>
                               </div>
@@ -322,7 +322,7 @@ export default function ProductDetailsPage() {
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn-outline block w-full !rounded-[12px] !text-[11px] text-center"
+                        className="btn-outline block w-full !rounded-[14px] !text-[11.5px] text-center"
                       >
                         WhatsApp Us
                       </a>
@@ -332,16 +332,16 @@ export default function ProductDetailsPage() {
               </motion.div>
 
               {parts.length > 0 && (
-                <div className={`rounded-[16px] p-3 ${card}`}>
+                <div className={`rounded-[18px] p-3.5 ${card}`}>
                   <div className="mb-2 flex items-center justify-between">
                     <span
-                      className={`text-[9px] font-mono uppercase tracking-[0.22em] ${
+                      className={`text-[10px] font-mono uppercase tracking-[0.18em] ${
                         isDark ? 'text-purple-300/70' : 'text-gray-400'
                       }`}
                     >
                       Spare Parts
                     </span>
-                    <span className={`text-[10px] font-semibold ${isDark ? 'text-cyan-400' : 'text-violet-600'}`}>
+                    <span className={`text-[11px] font-semibold ${isDark ? 'text-cyan-400' : 'text-violet-600'}`}>
                       {parts.length} available
                     </span>
                   </div>
@@ -349,11 +349,11 @@ export default function ProductDetailsPage() {
                   <div className="space-y-2">
                     {parts.slice(0, 4).map(part => (
                       <div key={part.id} className="flex items-center justify-between">
-                        <span className={`text-[11px] ${isDark ? 'text-purple-200/70' : 'text-gray-500'}`}>
+                        <span className={`text-[12px] ${isDark ? 'text-purple-200/70' : 'text-gray-500'}`}>
                           {part.name}
                         </span>
                         <div className="flex items-center gap-2">
-                          <span className={`text-[11px] font-mono font-semibold ${txt}`}>
+                          <span className={`text-[12px] font-mono font-semibold ${txt}`}>
                             {part.price} {part.currency}
                           </span>
                           <span
@@ -366,7 +366,7 @@ export default function ProductDetailsPage() {
                     ))}
 
                     {parts.length > 4 && (
-                      <p className={`pt-1 text-center text-[10px] ${sub}`}>+{parts.length - 4} more below</p>
+                      <p className={`pt-1 text-center text-[11px] ${sub}`}>+{parts.length - 4} more below</p>
                     )}
                   </div>
                 </div>
@@ -377,29 +377,29 @@ export default function ProductDetailsPage() {
       </div>
 
       <div
-        className="fixed inset-x-0 bottom-0 z-40 p-2 lg:hidden"
-        style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
+        className="fixed inset-x-0 bottom-0 z-40 p-3 lg:hidden"
+        style={{ paddingBottom: 'max(14px, env(safe-area-inset-bottom))' }}
       >
         <div
-          className={`flex items-center gap-2 rounded-[16px] border p-2 backdrop-blur-lg ${
+          className={`flex items-center gap-3 rounded-[18px] border p-3 backdrop-blur-lg ${
             isDark ? 'border-purple-500/20 bg-[#0d0b1a]/90' : 'border-violet-200 bg-white/90'
           }`}
           style={{ boxShadow: '0 -4px 30px rgba(0,0,0,0.15)' }}
         >
           <div className="min-w-0 flex-1">
-            <div className={`truncate text-[12px] font-bold ${txt}`}>{product.name}</div>
+            <div className={`truncate text-[13px] font-bold ${txt}`}>{product.name}</div>
             {showPrice && (
-              <div className={`text-[11px] ${isDark ? 'text-cyan-400' : 'text-violet-600'}`}>
+              <div className={`text-[12px] ${isDark ? 'text-cyan-400' : 'text-violet-600'}`}>
                 From {product.rentalPricePerDay} {product.currency}/day
               </div>
             )}
           </div>
-          <a href="#product-commerce-actions" className="btn-primary shrink-0 !h-8 !rounded-[12px] !px-3.5 !text-[10px]">
+          <a href="#product-commerce-actions" className="btn-primary shrink-0 !min-h-[44px] !rounded-[14px] !px-4 !text-[11px]">
             View Options
           </a>
         </div>
       </div>
-      <div className="h-14 lg:hidden" />
+      <div className="h-20 lg:hidden" />
     </section>
   )
 }

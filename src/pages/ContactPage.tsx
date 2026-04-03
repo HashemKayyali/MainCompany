@@ -35,7 +35,7 @@ export default function ContactPage() {
 
         <ContactForm />
 
-        <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {contactCards.map((card) => {
             const Wrapper = card.href ? 'a' : 'div'
 
@@ -43,21 +43,21 @@ export default function ContactPage() {
               <Wrapper
                 key={card.label}
                 {...(card.href ? { href: card.href } : {})}
-                className="glass flex items-center gap-3 rounded-[18px] p-3.5"
+                className="glass flex items-center gap-3.5 rounded-[20px] p-4 sm:p-4.5"
               >
-                <span className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-prism-violet to-prism-pink text-[10px] font-bold font-mono text-white">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-br from-prism-violet to-prism-pink text-[11px] font-bold font-mono text-white">
                   {card.icon}
                 </span>
                 <div className="min-w-0">
                   <p
-                    className={`text-[10px] font-mono uppercase tracking-wider ${
+                    className={`text-[11px] font-mono uppercase tracking-wider ${
                       isDark ? 'text-purple-300/70' : 'text-gray-400'
                     }`}
                   >
                     {card.label}
                   </p>
                   <p
-                    className={`mt-0.5 truncate text-[13px] font-medium ${
+                    className={`mt-1 break-words text-[14.5px] font-medium leading-6 ${
                       isDark ? 'text-purple-100' : 'text-gray-700'
                     }`}
                   >

@@ -7,6 +7,7 @@ import type {
   RentalRequestDetails,
 } from '../types/commerce'
 import { normalizeRpcSingle } from '../utils/commerce'
+import { getPurchaseQuoteItemCounts, getRentalRequestItemCounts } from './request-counts.service'
 import { getPurchaseQuoteById } from './purchase-quotes.service'
 import { getRentalRequestById } from './rental-requests.service'
 
@@ -61,23 +62,18 @@ export async function listAdminRequests() {
   const rentals = (rentalsResponse.data || []).map(mapRentalRow)
   const purchaseQuotes = (purchaseResponse.data || []).map(mapPurchaseRow)
   const merged = [...rentals, ...purchaseQuotes].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  const [rentalCounts, purchaseCounts] = await Promise.all([
+    getRentalRequestItemCounts(rentals.map(request => request.id)),
+    getPurchaseQuoteItemCounts(purchaseQuotes.map(request => request.id)),
+  ])
 
-  const withCounts = await Promise.all(
-    merged.map(async request => {
-      const table = request.type === 'rental' ? 'rental_request_items' : 'purchase_quote_items'
-      const key = request.type === 'rental' ? 'rental_request_id' : 'purchase_quote_request_id'
-
-      const { count, error } = await (supabase
-        .from(table as 'rental_request_items')
-        .select('*', { count: 'exact', head: true })
-        .eq(key, request.id) as any)
-
-      if (error) throw error
-      return { ...request, itemCount: count ?? 0 }
-    })
-  )
-
-  return withCounts
+  return merged.map(request => ({
+    ...request,
+    itemCount:
+      request.type === 'rental'
+        ? rentalCounts[request.id] || 0
+        : purchaseCounts[request.id] || 0,
+  }))
 }
 
 export async function getAdminRentalRequestDetails(id: string): Promise<RentalRequestDetails | null> {

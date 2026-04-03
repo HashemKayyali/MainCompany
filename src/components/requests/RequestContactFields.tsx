@@ -15,10 +15,10 @@ export default function RequestContactFields({
   showEventName?: boolean
 }) {
   const { isDark } = useTheme()
-  const labelClass = cn('mb-1.5 block text-[11px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')
+  const labelClass = cn('mb-2 block text-[13px] font-medium sm:text-[13.5px]', isDark ? 'text-purple-200/80' : 'text-gray-600')
 
   return (
-    <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <div>
         <label className={labelClass}>Full Name *</label>
         <input className="form-field" value={form.customerName} onChange={event => onChange('customerName', event.target.value)} />
@@ -54,7 +54,7 @@ export default function RequestContactFields({
       <div className="md:col-span-2">
         <label className={labelClass}>Notes</label>
         <textarea
-          rows={3}
+          rows={4}
           className="form-field resize-none"
           value={form.notes}
           onChange={event => onChange('notes', event.target.value)}

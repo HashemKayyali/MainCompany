@@ -12,8 +12,8 @@ import type {
   RentalRequestItem,
 } from '../types/commerce'
 import { normalizeRpcSingle } from '../utils/commerce'
+import { getRentalRequestItemCounts } from './request-counts.service'
 import { getRequestHistory } from './request-history.service'
-import { requireAuthenticatedSession } from './session-auth.service'
 
 type CreateRentalRpcRow = Database['public']['Functions']['create_rental_request']['Returns'][number]
 
@@ -64,7 +64,6 @@ function mapRentalItem(row: RentalRequestItemRow): RentalRequestItem {
 
 export async function createRentalRequest(input: RentalRequestCreateInput) {
   ensureSupabase()
-  await requireAuthenticatedSession('submitting your rental request')
 
   const payload = {
     customer_name: input.customerName,
@@ -107,25 +106,15 @@ export async function listMyRentalRequests(profileId: string): Promise<CustomerR
   if (error) throw error
 
   const requests = (data || []).map(mapRentalRequest)
-  const itemCounts = await Promise.all(
-    requests.map(async request => {
-      const { count, error: countError } = await supabase
-        .from('rental_request_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('rental_request_id', request.id)
+  const itemCounts = await getRentalRequestItemCounts(requests.map(request => request.id))
 
-      if (countError) throw countError
-      return count ?? 0
-    })
-  )
-
-  return requests.map((request, index) => ({
+  return requests.map(request => ({
     id: request.id,
     requestNumber: request.requestNumber,
     type: 'rental',
     status: request.status,
     createdAt: request.createdAt,
-    itemCount: itemCounts[index],
+    itemCount: itemCounts[request.id] || 0,
     total: request.grandTotal,
     customerName: request.customerName,
   }))

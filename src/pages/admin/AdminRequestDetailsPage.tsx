@@ -214,7 +214,7 @@ export default function AdminRequestDetailsPage() {
       />
 
       {loading ? (
-        <div className={cn('rounded-2xl border p-6 text-sm', isDark ? 'border-white/10 bg-white/[0.03] text-purple-100/68' : 'border-gray-200 bg-white text-gray-500')}>
+        <div className={cn('rounded-[24px] border p-6 sm:p-7 text-[0.95rem]', isDark ? 'border-white/10 bg-white/[0.03] text-purple-100/68' : 'border-gray-200 bg-white text-gray-500')}>
           Loading request details...
         </div>
       ) : loadError ? (
@@ -228,106 +228,106 @@ export default function AdminRequestDetailsPage() {
           <p className="mt-3 max-w-2xl leading-7">{loadError}</p>
         </div>
       ) : !request ? (
-        <div className={cn('rounded-2xl border p-6 text-sm', isDark ? 'border-white/10 bg-white/[0.03] text-purple-100/68' : 'border-gray-200 bg-white text-gray-500')}>
+        <div className={cn('rounded-[24px] border p-6 sm:p-7 text-[0.95rem]', isDark ? 'border-white/10 bg-white/[0.03] text-purple-100/68' : 'border-gray-200 bg-white text-gray-500')}>
           We could not find this request.
         </div>
       ) : (
-        <div className="grid min-h-0 grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="space-y-5">
-            <div className={cn('rounded-2xl border p-5', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+        <div className="grid min-h-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="space-y-6">
+            <div className={cn('rounded-[24px] border p-5 sm:p-6', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <div className={cn('text-[11px] font-mono uppercase tracking-[0.18em]', isDark ? 'text-purple-100/50' : 'text-gray-400')}>
+                  <div className={cn('text-[12px] font-mono uppercase tracking-[0.18em]', isDark ? 'text-purple-100/50' : 'text-gray-400')}>
                     {formatRequestTypeLabel(type as RequestType)}
                   </div>
-                  <div className={cn('mt-2 text-2xl font-display font-black', isDark ? 'text-white' : 'text-gray-900')}>
+                  <div className={cn('mt-2 text-[1.85rem] font-display font-black leading-tight sm:text-[2rem]', isDark ? 'text-white' : 'text-gray-900')}>
                     {request.requestNumber}
                   </div>
-                  <div className={cn('mt-2 text-sm', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
+                  <div className={cn('mt-2 break-words text-[0.95rem] leading-7', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
                     {request.customerName} | {request.email}
                   </div>
                 </div>
                 <RequestStatusBadge status={request.status} />
               </div>
 
-              <div className={cn('mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3', isDark ? 'text-purple-100/72' : 'text-gray-600')}>
-                <div>
-                  <div className={cn('text-[10px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Created</div>
-                  <div className="mt-1">{new Date(request.createdAt).toLocaleString()}</div>
+              <div className={cn('mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3', isDark ? 'text-purple-100/72' : 'text-gray-600')}>
+                <div className={cn('rounded-[18px] px-4 py-3', isDark ? 'bg-white/[0.03] ring-1 ring-inset ring-white/[0.05]' : 'bg-gray-50 ring-1 ring-inset ring-gray-100')}>
+                  <div className={cn('text-[11px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Created</div>
+                  <div className="mt-1.5 text-[0.95rem] leading-6">{new Date(request.createdAt).toLocaleString()}</div>
                 </div>
-                <div>
-                  <div className={cn('text-[10px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Phone</div>
-                  <div className="mt-1">{request.phone || '-'}</div>
+                <div className={cn('rounded-[18px] px-4 py-3', isDark ? 'bg-white/[0.03] ring-1 ring-inset ring-white/[0.05]' : 'bg-gray-50 ring-1 ring-inset ring-gray-100')}>
+                  <div className={cn('text-[11px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Phone</div>
+                  <div className="mt-1.5 text-[0.95rem] leading-6">{request.phone || '-'}</div>
                 </div>
-                <div>
-                  <div className={cn('text-[10px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Company</div>
-                  <div className="mt-1">{request.companyName || '-'}</div>
+                <div className={cn('rounded-[18px] px-4 py-3', isDark ? 'bg-white/[0.03] ring-1 ring-inset ring-white/[0.05]' : 'bg-gray-50 ring-1 ring-inset ring-gray-100')}>
+                  <div className={cn('text-[11px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Company</div>
+                  <div className="mt-1.5 text-[0.95rem] leading-6">{request.companyName || '-'}</div>
                 </div>
-                <div>
-                  <div className={cn('text-[10px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>City</div>
-                  <div className="mt-1">{request.city || '-'}</div>
+                <div className={cn('rounded-[18px] px-4 py-3', isDark ? 'bg-white/[0.03] ring-1 ring-inset ring-white/[0.05]' : 'bg-gray-50 ring-1 ring-inset ring-gray-100')}>
+                  <div className={cn('text-[11px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>City</div>
+                  <div className="mt-1.5 text-[0.95rem] leading-6">{request.city || '-'}</div>
                 </div>
-                <div>
-                  <div className={cn('text-[10px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Address</div>
-                  <div className="mt-1">{request.address || '-'}</div>
+                <div className={cn('rounded-[18px] px-4 py-3', isDark ? 'bg-white/[0.03] ring-1 ring-inset ring-white/[0.05]' : 'bg-gray-50 ring-1 ring-inset ring-gray-100')}>
+                  <div className={cn('text-[11px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Address</div>
+                  <div className="mt-1.5 text-[0.95rem] leading-6">{request.address || '-'}</div>
                 </div>
                 {isRental && (
-                  <div>
-                    <div className={cn('text-[10px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Event</div>
-                    <div className="mt-1">{(request as RentalRequestDetails).eventName || '-'}</div>
+                  <div className={cn('rounded-[18px] px-4 py-3', isDark ? 'bg-white/[0.03] ring-1 ring-inset ring-white/[0.05]' : 'bg-gray-50 ring-1 ring-inset ring-gray-100')}>
+                    <div className={cn('text-[11px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/42' : 'text-gray-400')}>Event</div>
+                    <div className="mt-1.5 text-[0.95rem] leading-6">{(request as RentalRequestDetails).eventName || '-'}</div>
                   </div>
                 )}
               </div>
 
               {request.notes ? (
-                <div className={cn('mt-4 rounded-xl px-4 py-3 text-sm leading-6', isDark ? 'bg-white/[0.03] text-purple-100/72' : 'bg-gray-50 text-gray-600')}>
+                <div className={cn('mt-4 rounded-[18px] px-4 py-3.5 text-[0.95rem] leading-7', isDark ? 'bg-white/[0.03] text-purple-100/72' : 'bg-gray-50 text-gray-600')}>
                   <strong className={isDark ? 'text-white' : 'text-gray-900'}>Customer note:</strong> {request.notes}
                 </div>
               ) : null}
 
               {'grandTotal' in request && (
-                <div className={cn('mt-4 rounded-xl px-4 py-3 text-sm', isDark ? 'bg-[#0d1430]/88 text-cyan-100' : 'bg-violet-50 text-violet-700')}>
+                <div className={cn('mt-4 rounded-[18px] px-4 py-3.5 text-[0.95rem] font-semibold', isDark ? 'bg-[#0d1430]/88 text-cyan-100' : 'bg-violet-50 text-violet-700')}>
                   Grand total: {request.grandTotal.toFixed(2)} JOD
                 </div>
               )}
             </div>
 
-            <div className={cn('rounded-2xl border p-5', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-              <div className={cn('text-lg font-semibold', isDark ? 'text-white' : 'text-gray-900')}>Items</div>
-              <div className="mt-4 space-y-3">
+            <div className={cn('rounded-[24px] border p-5 sm:p-6', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+              <div className={cn('text-[1.08rem] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>Items</div>
+              <div className="mt-4 space-y-3.5">
                 {request.items.map(item => {
                   const availability = isRental ? availabilityMap[item.id] : null
                   return (
-                    <div key={item.id} className={cn('rounded-xl border px-4 py-3', isDark ? 'border-white/8 bg-white/[0.02]' : 'border-gray-100 bg-gray-50')}>
-                      <div className={cn('font-semibold', isDark ? 'text-white' : 'text-gray-900')}>
+                    <div key={item.id} className={cn('rounded-[18px] border px-4.5 py-4 sm:px-5', isDark ? 'border-white/8 bg-white/[0.02]' : 'border-gray-100 bg-gray-50')}>
+                      <div className={cn('text-[1rem] font-semibold leading-6', isDark ? 'text-white' : 'text-gray-900')}>
                         {item.productTitleSnapshot}
                       </div>
-                      <div className={cn('mt-1 text-sm', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
+                      <div className={cn('mt-1.5 text-[0.95rem]', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
                         Quantity: {item.quantity}
                       </div>
 
                       {'rentalStartDate' in item && (
                         <>
-                          <div className={cn('mt-1 text-sm', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
+                          <div className={cn('mt-1.5 text-[0.95rem] leading-6', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
                             {item.rentalStartDate}
                             {' -> '}
                             {item.rentalEndDate}
                             {' | '}
                             {item.rentalDays} day(s)
                           </div>
-                          <div className={cn('mt-1 text-sm', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
+                          <div className={cn('mt-1.5 text-[0.95rem] leading-6', isDark ? 'text-purple-100/66' : 'text-gray-500')}>
                             Unit price: {item.unitPrice.toFixed(2)} JOD/day
                           </div>
-                          <div className={cn('mt-2 flex flex-wrap gap-3 text-sm', isDark ? 'text-purple-100/72' : 'text-gray-600')}>
-                            <span className={cn('font-semibold', isDark ? 'text-cyan-200' : 'text-violet-700')}>
+                          <div className={cn('mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2', isDark ? 'text-purple-100/72' : 'text-gray-600')}>
+                            <span className={cn('rounded-[16px] px-3.5 py-3 text-[0.95rem] font-semibold', isDark ? 'bg-[#0d1430]/88 text-cyan-200' : 'bg-violet-50 text-violet-700')}>
                               Line total: {item.lineTotal.toFixed(2)} JOD
                             </span>
                             {availability ? (
-                              <span className={availability.availableQuantity >= item.quantity ? (isDark ? 'text-emerald-300' : 'text-emerald-700') : (isDark ? 'text-rose-300' : 'text-rose-700')}>
+                              <span className={cn('rounded-[16px] px-3.5 py-3 text-[0.95rem]', availability.availableQuantity >= item.quantity ? (isDark ? 'bg-emerald-400/10 text-emerald-300' : 'bg-emerald-50 text-emerald-700') : (isDark ? 'bg-rose-400/10 text-rose-300' : 'bg-rose-50 text-rose-700'))}>
                                 Available now: {availability.availableQuantity}
                               </span>
                             ) : (
-                              <span className={isDark ? 'text-purple-100/55' : 'text-gray-500'}>
+                              <span className={cn('rounded-[16px] px-3.5 py-3 text-[0.95rem]', isDark ? 'bg-white/[0.03] text-purple-100/55' : 'bg-gray-100 text-gray-500')}>
                                 Availability unavailable
                               </span>
                             )}
@@ -340,20 +340,20 @@ export default function AdminRequestDetailsPage() {
               </div>
             </div>
 
-            <div className={cn('rounded-2xl border p-5', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-              <div className={cn('text-lg font-semibold', isDark ? 'text-white' : 'text-gray-900')}>Status Timeline</div>
-              <div className="mt-4 space-y-3">
+            <div className={cn('rounded-[24px] border p-5 sm:p-6', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+              <div className={cn('text-[1.08rem] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>Status Timeline</div>
+              <div className="mt-4 space-y-3.5">
                 {request.history.length ? (
                   request.history.map(entry => (
-                    <div key={entry.id} className={cn('rounded-xl border px-4 py-3', isDark ? 'border-white/8 bg-white/[0.02]' : 'border-gray-100 bg-gray-50')}>
+                    <div key={entry.id} className={cn('rounded-[18px] border px-4.5 py-4 sm:px-5', isDark ? 'border-white/8 bg-white/[0.02]' : 'border-gray-100 bg-gray-50')}>
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <RequestStatusBadge status={entry.newStatus} />
-                        <div className={cn('text-sm', isDark ? 'text-purple-100/60' : 'text-gray-500')}>
+                        <div className={cn('text-[0.95rem]', isDark ? 'text-purple-100/60' : 'text-gray-500')}>
                           {new Date(entry.createdAt).toLocaleString()}
                         </div>
                       </div>
                       {entry.note ? (
-                        <div className={cn('mt-2 text-sm leading-6', isDark ? 'text-purple-100/72' : 'text-gray-600')}>
+                        <div className={cn('mt-2.5 text-[0.95rem] leading-7', isDark ? 'text-purple-100/72' : 'text-gray-600')}>
                           {entry.note}
                         </div>
                       ) : null}
@@ -368,12 +368,12 @@ export default function AdminRequestDetailsPage() {
             </div>
           </div>
 
-          <div className="space-y-5">
-            <div className={cn('rounded-2xl border p-5', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-              <div className={cn('text-lg font-semibold', isDark ? 'text-white' : 'text-gray-900')}>Actions</div>
+          <div className="order-first space-y-5 xl:order-none xl:sticky xl:top-28 xl:self-start">
+            <div className={cn('rounded-[24px] border p-5 sm:p-6', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+              <div className={cn('text-[1.08rem] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>Actions</div>
               <div className="mt-4 space-y-3">
                 <div>
-                  <label className={cn('mb-1.5 block text-[12px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
+                  <label className={cn('mb-1.5 block text-[13px] font-medium sm:text-[13.5px]', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
                     Status Note
                   </label>
                   <textarea
@@ -385,7 +385,7 @@ export default function AdminRequestDetailsPage() {
                   />
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-1">
                   {availableActions.length ? (
                     availableActions.map(action => (
                       <AdminActionButton
@@ -406,8 +406,8 @@ export default function AdminRequestDetailsPage() {
               </div>
             </div>
 
-            <div className={cn('rounded-2xl border p-5', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-              <div className={cn('text-lg font-semibold', isDark ? 'text-white' : 'text-gray-900')}>Internal Notes</div>
+            <div className={cn('rounded-[24px] border p-5 sm:p-6', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+              <div className={cn('text-[1.08rem] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>Internal Notes</div>
               <div className="mt-4 space-y-3">
                 <textarea
                   rows={8}
@@ -416,7 +416,7 @@ export default function AdminRequestDetailsPage() {
                   onChange={event => setInternalNotes(event.target.value)}
                   placeholder="Private notes for the admin team..."
                 />
-                <AdminActionButton tone="primary" disabled={savingNotes} onClick={() => void handleSaveInternalNotes()}>
+                <AdminActionButton tone="primary" className="w-full" disabled={savingNotes} onClick={() => void handleSaveInternalNotes()}>
                   {savingNotes ? 'Saving...' : 'Save Internal Notes'}
                 </AdminActionButton>
               </div>

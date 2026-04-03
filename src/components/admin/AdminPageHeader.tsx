@@ -16,7 +16,7 @@ export default function AdminPageHeader({
   const { isDark } = useTheme()
 
   return (
-    <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <div className="min-w-0">
         <div className="flex min-w-0 items-start gap-3.5">
           <span
@@ -52,7 +52,7 @@ export default function AdminPageHeader({
         </div>
       </div>
 
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+      {actions && <div className="flex flex-col gap-2 min-[420px]:flex-row min-[420px]:flex-wrap min-[420px]:items-center">{actions}</div>}
     </div>
   )
 }

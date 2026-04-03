@@ -22,7 +22,7 @@ export default function AdminStatCard({
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-[18px] px-4 py-3 min-h-[82px]',
+        'relative overflow-hidden rounded-[20px] px-4 py-3.5 min-h-[90px]',
         isDark
           ? 'bg-[linear-gradient(145deg,rgba(12,17,36,0.98),rgba(8,12,28,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_24px_80px_-58px_rgba(8,16,38,0.92)]'
           : 'bg-white ring-1 ring-inset ring-gray-200',
@@ -44,7 +44,7 @@ export default function AdminStatCard({
         <div className="space-y-2">
           <div
             className={cn(
-              'text-[8.5px] font-mono font-semibold uppercase tracking-[0.17em]',
+              'text-[9.5px] font-mono font-semibold uppercase tracking-[0.15em]',
               isDark ? 'text-cyan-100/42' : 'text-gray-400'
             )}
           >

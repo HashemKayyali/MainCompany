@@ -27,7 +27,8 @@ export default function Lightbox({ images, open, onClose }: { images: string[]; 
     >
       <button
         onClick={e => { e.stopPropagation(); prev() }}
-        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/20 flex items-center justify-center z-10"
+        className="absolute left-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/12 text-white hover:bg-white/22 sm:left-4"
+        style={{ marginTop: 'calc(env(safe-area-inset-top) * 0.25)' }}
         aria-label="Previous image"
       >
         &#8249;
@@ -37,13 +38,14 @@ export default function Lightbox({ images, open, onClose }: { images: string[]; 
         src={images[idx]}
         alt={`Gallery photo ${idx + 1} of ${images.length}`}
         loading="lazy"
-        className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg"
+        className="max-h-[82vh] max-w-[92vw] rounded-[18px] object-contain sm:max-h-[85vh] sm:max-w-[90vw]"
         onClick={e => e.stopPropagation()}
       />
 
       <button
         onClick={e => { e.stopPropagation(); next() }}
-        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/20 flex items-center justify-center z-10"
+        className="absolute right-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/12 text-white hover:bg-white/22 sm:right-4"
+        style={{ marginTop: 'calc(env(safe-area-inset-top) * 0.25)' }}
         aria-label="Next image"
       >
         &#8250;
@@ -51,13 +53,14 @@ export default function Lightbox({ images, open, onClose }: { images: string[]; 
 
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/20 flex items-center justify-center z-10"
+        className="absolute right-3 top-3 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/12 text-white hover:bg-white/22 sm:right-4 sm:top-4"
+        style={{ top: 'max(0.75rem, env(safe-area-inset-top))' }}
         aria-label="Close lightbox"
       >
         &#x2715;
       </button>
 
-      <div className="absolute bottom-4 text-purple-200/80 text-sm font-mono" aria-live="polite">
+      <div className="absolute bottom-3 rounded-full bg-black/28 px-3 py-1.5 text-[12px] font-mono text-purple-200/80 sm:bottom-4" style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }} aria-live="polite">
         {idx + 1} / {images.length}
       </div>
     </div>

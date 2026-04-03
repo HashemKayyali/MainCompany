@@ -37,7 +37,7 @@ export default function AdminActionButton({
     <button
       type={type}
       className={cn(
-        'inline-flex min-h-[33px] items-center justify-center rounded-[12px] px-3 py-1.5 text-[10px] font-semibold tracking-[0.01em] transition-all duration-200 active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40',
+        'inline-flex min-h-[40px] items-center justify-center rounded-[13px] px-3.5 py-2 text-[11px] font-semibold tracking-[0.01em] transition-all duration-200 active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-[42px] sm:text-[11.25px]',
         isDark ? 'focus-visible:ring-offset-[#09111f]' : 'focus-visible:ring-offset-white',
         tones[tone],
         className

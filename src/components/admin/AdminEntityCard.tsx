@@ -134,7 +134,7 @@ export default function AdminEntityCard({
 
         <div
           className={cn(
-            'relative grid min-w-0 gap-2 p-2.5 md:gap-2 xl:gap-2',
+            'relative grid min-w-0 gap-2.5 p-3 md:gap-2.5 xl:gap-2.5',
             listGridClass,
             bodyClassName
           )}
@@ -163,12 +163,12 @@ export default function AdminEntityCard({
 
             <div className="min-w-0 space-y-1.25">
               <div className={cn('min-w-0 space-y-0.5', titleBlockClassName)}>
-                <div className={cn(titleClampClass, 'font-display text-[0.92rem] font-bold leading-tight', isDark ? 'text-white' : 'text-gray-900')}>
+                <div className={cn(titleClampClass, 'font-display text-[1rem] font-bold leading-tight', isDark ? 'text-white' : 'text-gray-900')}>
                   {title}
                 </div>
 
                 {subtitle && (
-                  <p className={cn(subtitleClampClass, 'max-w-[54ch] text-[9.5px] leading-[1.35]', isDark ? 'text-purple-100/62' : 'text-gray-500')}>
+                  <p className={cn(subtitleClampClass, 'max-w-[54ch] text-[10.5px] leading-[1.45]', isDark ? 'text-purple-100/62' : 'text-gray-500')}>
                     {subtitle}
                   </p>
                 )}
@@ -185,14 +185,14 @@ export default function AdminEntityCard({
                 <div
                   key={fact.label}
                   className={cn(
-                  'min-w-0 rounded-[12px] px-2.25 py-1.5 ring-1 ring-inset',
+                  'min-w-0 rounded-[13px] px-2.5 py-2 ring-1 ring-inset',
                     isDark ? 'bg-[#0d1329]/92 ring-cyan-400/10' : 'bg-gray-50/90 ring-gray-200'
                   )}
                 >
-                  <div className={cn('text-[7.5px] font-mono font-semibold uppercase tracking-[0.13em]', isDark ? 'text-cyan-100/38' : 'text-gray-400')}>
+                  <div className={cn('text-[8px] font-mono font-semibold uppercase tracking-[0.12em]', isDark ? 'text-cyan-100/38' : 'text-gray-400')}>
                     {fact.label}
                   </div>
-                  <div className={cn('mt-1 min-w-0 truncate text-[10.5px] font-semibold leading-tight', isDark ? 'text-white' : 'text-gray-800')}>
+                  <div className={cn('mt-1 min-w-0 truncate text-[11.25px] font-semibold leading-tight', isDark ? 'text-white' : 'text-gray-800')}>
                     {fact.value}
                   </div>
                 </div>
@@ -258,14 +258,14 @@ export default function AdminEntityCard({
         </div>
       )}
 
-      <div className={cn('relative flex min-w-0 flex-1 flex-col gap-1 p-2', bodyClassName)}>
-        <div className={cn('space-y-0.5', titleBlockClassName)}>
-          <div className={cn(gridTitleClampClass, 'font-display text-[0.86rem] font-bold leading-tight', isDark ? 'text-white' : 'text-gray-900')}>
+        <div className={cn('relative flex min-w-0 flex-1 flex-col gap-1.25 p-2.5', bodyClassName)}>
+          <div className={cn('space-y-0.5', titleBlockClassName)}>
+          <div className={cn(gridTitleClampClass, 'font-display text-[0.94rem] font-bold leading-tight', isDark ? 'text-white' : 'text-gray-900')}>
             {title}
           </div>
 
           {subtitle && (
-            <p className={cn(gridSubtitleClampClass, 'max-w-3xl text-[9px] leading-[1.28]', isDark ? 'text-purple-100/64' : 'text-gray-500')}>
+            <p className={cn(gridSubtitleClampClass, 'max-w-3xl text-[10px] leading-[1.4]', isDark ? 'text-purple-100/64' : 'text-gray-500')}>
               {subtitle}
             </p>
           )}
@@ -279,15 +279,15 @@ export default function AdminEntityCard({
               <div
                 key={fact.label}
                 className={cn(
-                'relative overflow-hidden rounded-[11px] px-2 py-1.25 ring-1 ring-inset',
+                'relative overflow-hidden rounded-[12px] px-2.25 py-1.5 ring-1 ring-inset',
                   gridFactShellClass
                 )}
               >
                 <div className={cn('mb-2 h-px w-8 rounded-full', isDark ? 'bg-cyan-400/24' : 'bg-violet-200')} />
-                <div className={cn('text-[7px] font-mono font-semibold uppercase tracking-[0.13em]', gridFactLabelClass)}>
+                <div className={cn('text-[7.5px] font-mono font-semibold uppercase tracking-[0.12em]', gridFactLabelClass)}>
                   {fact.label}
                 </div>
-                <div className={cn('mt-0.75 min-h-[1rem] min-w-0 text-[0.8rem] font-display font-semibold leading-none', gridFactValueClass)}>
+                <div className={cn('mt-1 min-h-[1rem] min-w-0 text-[0.86rem] font-display font-semibold leading-none', gridFactValueClass)}>
                   {fact.value}
                 </div>
               </div>
@@ -300,7 +300,7 @@ export default function AdminEntityCard({
         {actions && (
           <div
             className={cn(
-              gridActionsPlacement === 'bottom' ? 'mt-auto flex items-center gap-1 pt-0.75' : 'flex items-center gap-1 pt-0.25',
+              gridActionsPlacement === 'bottom' ? 'mt-auto flex items-center gap-1.5 pt-1' : 'flex items-center gap-1.5 pt-0.5',
               actionsWrapClassName
             )}
           >

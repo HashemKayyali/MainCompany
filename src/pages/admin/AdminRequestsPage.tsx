@@ -86,7 +86,7 @@ export default function AdminRequestsPage() {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="flex h-full min-h-0 flex-col gap-5">
       <AdminPageHeader
         title="Requests"
         actions={
@@ -96,30 +96,32 @@ export default function AdminRequestsPage() {
         }
       />
 
-      <div className="flex flex-wrap gap-1.5">
-        {(['all', 'rental', 'purchase_quote'] as RequestFilter[]).map(value => (
-          <button
-            key={value}
-            type="button"
-            onClick={() => setTypeFilter(value)}
-            className={cn(
-              'rounded-[14px] px-3.5 py-1.5 text-[12px] font-semibold',
-              typeFilter === value
-                ? isDark
-                  ? 'bg-cyan-500/12 text-cyan-200'
-                  : 'bg-violet-100 text-violet-700'
-                : isDark
-                  ? 'bg-white/[0.04] text-purple-100/72'
-                  : 'bg-gray-100 text-gray-600'
-            )}
-          >
-            {value === 'all' ? 'All' : value === 'rental' ? 'Rental Requests' : 'Purchase Quotes'}
-          </button>
-        ))}
+      <div className="-mx-0.5 overflow-x-auto pb-1">
+        <div className="flex w-max min-w-full gap-2 px-0.5 sm:flex-wrap">
+          {(['all', 'rental', 'purchase_quote'] as RequestFilter[]).map(value => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setTypeFilter(value)}
+              className={cn(
+                'inline-flex min-h-[42px] items-center justify-center rounded-[16px] px-4 py-2.5 text-[13px] font-semibold sm:text-[13.5px]',
+                typeFilter === value
+                  ? isDark
+                    ? 'bg-cyan-500/12 text-cyan-200 ring-1 ring-inset ring-cyan-400/18'
+                    : 'bg-violet-100 text-violet-700 ring-1 ring-inset ring-violet-200'
+                  : isDark
+                    ? 'bg-white/[0.04] text-purple-100/72 ring-1 ring-inset ring-white/[0.05]'
+                    : 'bg-gray-100 text-gray-600 ring-1 ring-inset ring-gray-200'
+              )}
+            >
+              {value === 'all' ? 'All' : value === 'rental' ? 'Rental Requests' : 'Purchase Quotes'}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className={cn('rounded-[18px] p-3.5', isDark ? 'bg-[#0c1430]/88 ring-1 ring-inset ring-cyan-400/10' : 'bg-white ring-1 ring-inset ring-gray-200')}>
-        <div className="grid grid-cols-1 gap-2.5 lg:grid-cols-[minmax(0,1fr)_180px]">
+      <div className={cn('rounded-[20px] p-4 sm:p-4.5', isDark ? 'bg-[#0c1430]/88 ring-1 ring-inset ring-cyan-400/10' : 'bg-white ring-1 ring-inset ring-gray-200')}>
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
           <input
             className="form-field"
             value={search}
@@ -140,7 +142,7 @@ export default function AdminRequestsPage() {
 
       <div className="min-h-0 flex-1 overflow-y-auto space-y-3.5 pr-0.5">
         {loading ? (
-          <div className={cn('rounded-[18px] border p-5 text-sm', isDark ? 'border-white/10 bg-white/[0.03] text-purple-100/68' : 'border-gray-200 bg-white text-gray-500')}>
+          <div className={cn('rounded-[20px] border p-5 sm:p-6 text-[0.95rem]', isDark ? 'border-white/10 bg-white/[0.03] text-purple-100/68' : 'border-gray-200 bg-white text-gray-500')}>
             Loading requests...
           </div>
         ) : loadError ? (
@@ -154,7 +156,7 @@ export default function AdminRequestsPage() {
             <p className="mt-3 max-w-2xl leading-7">{loadError}</p>
           </div>
         ) : !filtered.length ? (
-          <div className={cn('rounded-[18px] border p-6 text-center text-sm', isDark ? 'border-white/10 bg-white/[0.03] text-purple-100/68' : 'border-gray-200 bg-white text-gray-500')}>
+          <div className={cn('rounded-[20px] border p-6 text-center text-[0.95rem]', isDark ? 'border-white/10 bg-white/[0.03] text-purple-100/68' : 'border-gray-200 bg-white text-gray-500')}>
             No requests match this filter.
           </div>
         ) : (

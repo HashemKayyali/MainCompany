@@ -1,6 +1,6 @@
-import { useEffect, useId } from 'react'
+import { useEffect, useId, useRef } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 
@@ -13,11 +13,6 @@ interface ModalProps {
   onClose: () => void
   title: string
   children: React.ReactNode
-  /**
-   * When true, clicking the backdrop does NOT close the modal.
-   * Only explicit actions (Cancel button, X button) can close it.
-   * Use for edit/create forms where losing data would be bad.
-   */
   persistent?: boolean
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'
   contentClassName?: string
@@ -33,6 +28,23 @@ const SIZE_CLASSES: Record<NonNullable<ModalProps['size']>, string> = {
   full: 'max-w-[min(78rem,calc(100vw-1rem))]',
 }
 
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'textarea:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ')
+
+function getFocusableElements(container: HTMLElement | null) {
+  if (!container) return []
+
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    element => !element.hasAttribute('disabled') && element.getAttribute('aria-hidden') !== 'true'
+  )
+}
+
 export default function Modal({
   open,
   onClose,
@@ -45,31 +57,97 @@ export default function Modal({
 }: ModalProps) {
   const { isDark } = useTheme()
   const titleId = useId()
-  const topOffsetClass = 'pt-[48px] sm:pt-[54px] lg:pt-[60px]'
-  const bottomOffsetClass = 'pb-2 sm:pb-2.5'
+  const panelRef = useRef<HTMLDivElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
+  const topOffsetClass = 'pt-3 sm:pt-5 lg:pt-6'
+  const bottomOffsetClass =
+    'pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-[max(0.875rem,env(safe-area-inset-bottom))]'
   const panelClass = isDark
     ? 'bg-[linear-gradient(145deg,rgba(10,14,32,0.98),rgba(7,10,24,0.99))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_32px_96px_-62px_rgba(7,17,42,0.98)]'
     : 'bg-white border border-gray-200 shadow-2xl'
-
-  const handleBackdropClick = () => {
-    if (!persistent) onClose()
-  }
 
   useBodyScrollLock(open)
 
   useEffect(() => {
     if (!open) return
 
+    previousFocusRef.current =
+      typeof document !== 'undefined' && document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null
+
+    const frame = window.requestAnimationFrame(() => {
+      const focusable = getFocusableElements(panelRef.current)
+      if (focusable.length) {
+        focusable[0].focus()
+        return
+      }
+
+      closeButtonRef.current?.focus()
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [open])
+
+  useEffect(() => {
+    if (open) return
+
+    const previousFocus = previousFocusRef.current
+    if (previousFocus && typeof previousFocus.focus === 'function') {
+      previousFocus.focus()
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
+        if (persistent) return
+
         event.preventDefault()
         onClose()
+        return
+      }
+
+      if (event.key !== 'Tab') return
+
+      const focusable = getFocusableElements(panelRef.current)
+      if (!focusable.length) {
+        event.preventDefault()
+        closeButtonRef.current?.focus()
+        return
+      }
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      const activeElement =
+        typeof document !== 'undefined' && document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null
+
+      if (event.shiftKey) {
+        if (activeElement === first || !panelRef.current?.contains(activeElement)) {
+          event.preventDefault()
+          last.focus()
+        }
+        return
+      }
+
+      if (activeElement === last) {
+        event.preventDefault()
+        first.focus()
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose, open])
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [onClose, open, persistent])
+
+  const handleBackdropClick = () => {
+    if (!persistent) onClose()
+  }
 
   return (
     <AnimatePresence>
@@ -89,28 +167,43 @@ export default function Modal({
             className="absolute inset-0 bg-black/58 backdrop-blur-[3px]"
           />
 
-          <div className={cn('relative flex min-h-full items-start justify-center px-2.5 sm:px-3.5', topOffsetClass, bottomOffsetClass)}>
+          <div
+            className={cn(
+              'relative flex min-h-full items-start justify-center px-2.5 sm:px-3.5',
+              topOffsetClass,
+              bottomOffsetClass
+            )}
+          >
             <motion.div
+              ref={panelRef}
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className={`relative flex w-full ${SIZE_CLASSES[size]} max-h-[calc(100dvh-60px)] flex-col overflow-hidden rounded-[19px] sm:max-h-[calc(100dvh-68px)] lg:max-h-[calc(100dvh-76px)] ${panelClass} ${contentClassName}`}
-              onClick={e => e.stopPropagation()}
+              className={`relative flex w-full ${SIZE_CLASSES[size]} max-h-[calc(100dvh-24px)] flex-col overflow-hidden rounded-[22px] sm:max-h-[calc(100dvh-40px)] lg:max-h-[calc(100dvh-52px)] ${panelClass} ${contentClassName}`}
+              onClick={event => event.stopPropagation()}
             >
               <div
-                className={`sticky top-0 z-20 flex items-start justify-between gap-3 border-b px-2.75 pb-2.25 pt-2.75 sm:px-3.25 sm:pb-2.5 sm:pt-3 ${
+                className={`sticky top-0 z-20 flex items-start justify-between gap-3 border-b px-3 pb-3 pt-3 sm:px-4 sm:pb-3.5 sm:pt-3.5 ${
                   isDark
                     ? 'border-cyan-400/10 bg-[linear-gradient(180deg,rgba(11,15,34,0.98),rgba(11,15,34,0.92))] backdrop-blur-xl'
                     : 'border-gray-200 bg-white/92 backdrop-blur-xl'
                 }`}
               >
-                <h2 id={titleId} className={`font-display text-[0.9rem] font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+                <h2
+                  id={titleId}
+                  className={`font-display text-[0.98rem] font-bold sm:text-[1.04rem] ${
+                    isDark ? 'text-white' : 'text-gray-900'
+                  }`}
+                >
+                  {title}
+                </h2>
 
                 <button
+                  ref={closeButtonRef}
                   type="button"
                   onClick={onClose}
-                    className={`inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-[11px] transition ${
+                  className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] transition ${
                     isDark
                       ? 'bg-[#101933]/92 text-purple-100/78 ring-1 ring-inset ring-cyan-400/10 hover:bg-[#132043] hover:text-white'
                       : 'bg-gray-50 text-gray-500 ring-1 ring-inset ring-gray-200 hover:bg-white hover:text-gray-800'
@@ -121,7 +214,15 @@ export default function Modal({
                 </button>
               </div>
 
-              <div data-native-scroll className={cn('min-h-0 flex-1 overflow-y-auto px-2.75 pb-2.75 pt-2.25 sm:px-3.25 sm:pb-3 sm:pt-2.5', bodyClassName)}>{children}</div>
+              <div
+                data-native-scroll
+                className={cn(
+                  'min-h-0 flex-1 overflow-y-auto px-3 pb-3.5 pt-2.75 sm:px-4 sm:pb-4 sm:pt-3',
+                  bodyClassName
+                )}
+              >
+                {children}
+              </div>
             </motion.div>
           </div>
         </div>

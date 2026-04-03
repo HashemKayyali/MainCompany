@@ -121,29 +121,29 @@ export default function RentalCartPage() {
   return (
     <section className="site-section">
       <div className="site-container">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3.5">
           <div>
             <span className="section-label">// Rental Cart</span>
             <h1 className={cn('section-title !text-left', !isDark && 'text-gray-900')}>Prepare Your Rental Request</h1>
-            <p className={cn('mt-2 max-w-2xl text-sm leading-6', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
+            <p className={cn('mt-2.5 max-w-2xl text-[0.95rem] leading-6.5', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
               Set shared event dates for the whole cart or switch to per-item dates. Availability is checked against the selected rental range.
             </p>
           </div>
 
-          <div className={cn('rounded-2xl border px-4 py-3 text-sm', isDark ? 'border-cyan-400/10 bg-[#0d1430]/88 text-cyan-100' : 'border-violet-200 bg-violet-50 text-violet-700')}>
+          <div className={cn('rounded-2xl border px-4 py-3.5 text-[0.95rem]', isDark ? 'border-cyan-400/10 bg-[#0d1430]/88 text-cyan-100' : 'border-violet-200 bg-violet-50 text-violet-700')}>
             {rentalCart.itemCount} item(s) | {rentalCart.grandTotal.toFixed(2)}
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-4">
-            <div className={cn('rounded-[20px] border p-3.5', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-              <div className="flex flex-wrap gap-2">
+            <div className={cn('rounded-[22px] border p-4', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <button
                   type="button"
                   onClick={() => rentalCart.setMode('shared')}
                   className={cn(
-                    'rounded-xl px-4 py-2 text-sm font-semibold',
+                    'min-h-[44px] rounded-[14px] px-4 py-2.5 text-[0.95rem] font-semibold',
                     rentalCart.mode === 'shared'
                       ? isDark
                         ? 'bg-cyan-500/12 text-cyan-200'
@@ -159,7 +159,7 @@ export default function RentalCartPage() {
                   type="button"
                   onClick={() => rentalCart.setMode('per_item')}
                   className={cn(
-                    'rounded-xl px-4 py-2 text-sm font-semibold',
+                    'min-h-[44px] rounded-[14px] px-4 py-2.5 text-[0.95rem] font-semibold',
                     rentalCart.mode === 'per_item'
                       ? isDark
                         ? 'bg-cyan-500/12 text-cyan-200'
@@ -176,7 +176,7 @@ export default function RentalCartPage() {
               {rentalCart.mode === 'shared' && (
                 <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label className={cn('mb-1.5 block text-[12px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
+                    <label className={cn('mb-2 block text-[13px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
                       Start Date
                     </label>
                     <input
@@ -187,7 +187,7 @@ export default function RentalCartPage() {
                     />
                   </div>
                   <div>
-                    <label className={cn('mb-1.5 block text-[12px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
+                    <label className={cn('mb-2 block text-[13px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
                       End Date
                     </label>
                     <input
@@ -208,9 +208,9 @@ export default function RentalCartPage() {
               const dateRangeValid = hasValidDateRange(startDate, endDate)
 
               return (
-                <div key={item.productSlug} className={cn('rounded-[20px] border p-3.5', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-                  <div className="flex flex-col gap-3.5 lg:flex-row">
-                    <div className={cn('h-24 w-full overflow-hidden rounded-[18px] lg:w-32', isDark ? 'bg-white/[0.03]' : 'bg-gray-100')}>
+                <div key={item.productSlug} className={cn('rounded-[22px] border p-4', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+                  <div className="flex flex-col gap-4 lg:flex-row">
+                    <div className={cn('h-32 w-full overflow-hidden rounded-[18px] sm:h-36 lg:h-24 lg:w-32', isDark ? 'bg-white/[0.03]' : 'bg-gray-100')}>
                       {item.productImage ? (
                         <img src={item.productImage} alt={item.productTitle} className="h-full w-full object-cover" />
                       ) : (
@@ -223,26 +223,26 @@ export default function RentalCartPage() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <div className={cn('text-[1rem] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>
+                          <div className={cn('text-[1.08rem] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>
                             {item.productTitle}
                           </div>
-                          <div className={cn('mt-1 text-sm', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
+                          <div className={cn('mt-1.5 text-[0.95rem]', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
                             {item.unitPrice} {item.currency}/day | minimum {item.minimumRentalDays} day(s)
                           </div>
                         </div>
                         <button
                           type="button"
                           onClick={() => rentalCart.removeItem(item.productSlug)}
-                          className={cn('inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm', isDark ? 'bg-red-500/10 text-red-200' : 'bg-red-50 text-red-600')}
+                          className={cn('inline-flex min-h-[42px] items-center gap-2 rounded-[14px] px-3.5 py-2 text-[0.92rem]', isDark ? 'bg-red-500/10 text-red-200' : 'bg-red-50 text-red-600')}
                         >
                           <Trash2 size={14} />
                           Remove
                         </button>
                       </div>
 
-                      <div className="mt-3.5 grid grid-cols-1 gap-3 md:grid-cols-3">
+                      <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
                         <div>
-                          <label className={cn('mb-1.5 block text-[12px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
+                          <label className={cn('mb-2 block text-[13px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
                             Quantity
                           </label>
                           <input
@@ -256,7 +256,7 @@ export default function RentalCartPage() {
                         </div>
 
                         <div>
-                          <label className={cn('mb-1.5 block text-[12px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
+                          <label className={cn('mb-2 block text-[13px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
                             Start Date
                           </label>
                           <input
@@ -269,7 +269,7 @@ export default function RentalCartPage() {
                         </div>
 
                         <div>
-                          <label className={cn('mb-1.5 block text-[12px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
+                          <label className={cn('mb-2 block text-[13px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
                             End Date
                           </label>
                           <input
@@ -282,14 +282,14 @@ export default function RentalCartPage() {
                         </div>
                       </div>
 
-                      <div className="mt-3.5 grid grid-cols-1 gap-2.5 md:grid-cols-3">
-                        <div className={cn('rounded-xl px-3 py-2 text-sm', isDark ? 'bg-white/[0.03] text-purple-100/72' : 'bg-gray-50 text-gray-600')}>
+                      <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+                        <div className={cn('rounded-[14px] px-3.5 py-3 text-[0.92rem]', isDark ? 'bg-white/[0.03] text-purple-100/72' : 'bg-gray-50 text-gray-600')}>
                           Rental Days: <strong>{days || '-'}</strong>
                         </div>
-                        <div className={cn('rounded-xl px-3 py-2 text-sm', isDark ? 'bg-white/[0.03] text-purple-100/72' : 'bg-gray-50 text-gray-600')}>
+                        <div className={cn('rounded-[14px] px-3.5 py-3 text-[0.92rem]', isDark ? 'bg-white/[0.03] text-purple-100/72' : 'bg-gray-50 text-gray-600')}>
                           Line Total: <strong>{rentalCart.getItemLineTotal(item).toFixed(2)} {item.currency}</strong>
                         </div>
-                        <div className={cn('rounded-xl px-3 py-2 text-sm', isDark ? 'bg-white/[0.03]' : 'bg-gray-50')}>
+                        <div className={cn('rounded-[14px] px-3.5 py-3 text-[0.92rem]', isDark ? 'bg-white/[0.03]' : 'bg-gray-50')}>
                           {!dateRangeValid ? (
                             <span className={isDark ? 'text-purple-100/60' : 'text-gray-500'}>
                               Availability depends on selected dates
@@ -307,7 +307,7 @@ export default function RentalCartPage() {
                       </div>
 
                       {dateRangeValid && days < item.minimumRentalDays && (
-                        <div className={cn('mt-3 rounded-xl px-3 py-2 text-sm', isDark ? 'bg-amber-500/10 text-amber-200' : 'bg-amber-50 text-amber-700')}>
+                        <div className={cn('mt-3 rounded-[14px] px-3.5 py-3 text-[0.92rem]', isDark ? 'bg-amber-500/10 text-amber-200' : 'bg-amber-50 text-amber-700')}>
                           This product requires at least {item.minimumRentalDays} rental day(s).
                         </div>
                       )}
@@ -318,18 +318,18 @@ export default function RentalCartPage() {
             })}
           </div>
 
-          <div className={cn('h-fit rounded-[20px] border p-4 xl:sticky xl:top-24', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-            <div className={cn('text-[11px] font-mono uppercase tracking-[0.18em]', isDark ? 'text-purple-100/50' : 'text-gray-400')}>
+          <div className={cn('order-first h-fit rounded-[22px] border p-4 xl:order-none xl:sticky xl:top-28', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
+            <div className={cn('text-[11px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/50' : 'text-gray-400')}>
               Cart Summary
             </div>
             <div className={cn('mt-2 text-3xl font-display font-black', isDark ? 'text-white' : 'text-gray-900')}>
               {rentalCart.grandTotal.toFixed(2)}
             </div>
-            <div className={cn('mt-1 text-sm', isDark ? 'text-purple-100/65' : 'text-gray-500')}>
+            <div className={cn('mt-1 text-[0.95rem]', isDark ? 'text-purple-100/65' : 'text-gray-500')}>
               Estimated total based on the current day-rate selection.
             </div>
 
-            <div className={cn('mt-4 rounded-xl px-4 py-3 text-sm', isDark ? 'bg-white/[0.03] text-purple-100/72' : 'bg-gray-50 text-gray-600')}>
+            <div className={cn('mt-4 rounded-[14px] px-4 py-3.5 text-[0.92rem] leading-5.5', isDark ? 'bg-white/[0.03] text-purple-100/72' : 'bg-gray-50 text-gray-600')}>
               {allItemsReady
                 ? isLoggedIn
                   ? 'All items are ready for checkout.'
@@ -337,16 +337,16 @@ export default function RentalCartPage() {
                 : 'Choose valid dates for every item before checkout.'}
             </div>
 
-            <div className="mt-5 space-y-2.5">
+            <div className="mt-5 space-y-3">
               <button
                 type="button"
                 onClick={() => void handleCheckout()}
                 disabled={!allItemsReady}
-                className="btn-primary !block !w-full !rounded-xl !text-center !text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                className="btn-primary !block !w-full !rounded-[14px] !text-center !text-[0.95rem] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isLoggedIn ? 'Continue to Checkout' : 'Sign in to Checkout'}
               </button>
-              <Link to="/products" className="btn-outline !block !w-full !rounded-xl !text-center !text-sm">
+              <Link to="/products" className="btn-outline !block !w-full !rounded-[14px] !text-center !text-[0.95rem]">
                 Continue Browsing
               </Link>
             </div>

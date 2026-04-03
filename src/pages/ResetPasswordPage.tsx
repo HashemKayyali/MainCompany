@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
 import { useTheme } from '../contexts/ThemeContext'
 import { useToast } from '../contexts/ToastContext'
+import { useSession } from '../contexts/SessionContext'
 import { usePageMeta } from '../hooks/usePageMeta'
+import { getErrorMessage } from '../lib/errors'
+import { supabase } from '../lib/supabase'
 
 export default function ResetPasswordPage() {
   usePageMeta({ title: 'Reset Password', noIndex: true })
 
+  const { authUser, loading: sessionLoading } = useSession()
   const { isDark } = useTheme()
   const { toast } = useToast()
   const navigate = useNavigate()
@@ -17,35 +20,41 @@ export default function ResetPasswordPage() {
   const [saving, setSaving] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
-  const [ready, setReady] = useState(false)
+
+  const hasRecoveryTokens = useMemo(() => {
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+    return Boolean(
+      hashParams.get('type') === 'recovery' ||
+      hashParams.get('access_token') ||
+      hashParams.get('refresh_token')
+    )
+  }, [])
+
+  const [linkChecked, setLinkChecked] = useState(false)
 
   const txt = isDark ? 'text-white' : 'text-gray-900'
   const sub = isDark ? 'text-purple-200/70' : 'text-gray-500'
   const muted = isDark ? 'text-purple-300/40' : 'text-gray-400'
+  const ready = !!authUser
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') setReady(true)
-    })
-
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setReady(true)
-    })
-
-    const timer = setTimeout(() => {
-      setReady((prev) => {
-        if (!prev) setError('This reset link may be expired or invalid. Please request a new one.')
-        return prev
-      })
-    }, 5000)
-
-    return () => {
-      subscription.unsubscribe()
-      clearTimeout(timer)
+    if (sessionLoading) return
+    if (authUser) {
+      setLinkChecked(true)
+      return
     }
-  }, [])
+
+    const timer = window.setTimeout(() => {
+      setLinkChecked(true)
+      setError(
+        hasRecoveryTokens
+          ? 'This reset link may be expired or invalid. Please request a new one.'
+          : 'Open the password reset link from your email to choose a new password.'
+      )
+    }, 800)
+
+    return () => window.clearTimeout(timer)
+  }, [authUser, hasRecoveryTokens, sessionLoading])
 
   const handleSubmit = async () => {
     setError('')
@@ -66,11 +75,12 @@ export default function ResetPasswordPage() {
       const { error: updateError } = await supabase.auth.updateUser({ password })
       if (updateError) throw updateError
 
+      await supabase.auth.signOut()
       setDone(true)
       toast('Password updated successfully!', 'success')
-      setTimeout(() => navigate('/login', { replace: true }), 2000)
-    } catch (err: any) {
-      setError(err?.message || 'Failed to update password')
+      window.setTimeout(() => navigate('/login', { replace: true }), 1200)
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to update password'))
     } finally {
       setSaving(false)
     }
@@ -125,7 +135,7 @@ export default function ResetPasswordPage() {
               </Link>
             </div>
           </div>
-        ) : !ready && !error ? (
+        ) : sessionLoading || (!linkChecked && !error) ? (
           <div className="py-10 text-center">
             <div
               className={`mx-auto h-8 w-8 animate-spin rounded-full border-2 border-t-transparent ${
@@ -192,7 +202,7 @@ export default function ResetPasswordPage() {
                   setError('')
                 }}
                 placeholder="Repeat your password"
-                onKeyDown={(event) => event.key === 'Enter' && handleSubmit()}
+                onKeyDown={(event) => event.key === 'Enter' && void handleSubmit()}
               />
             </div>
 
@@ -234,7 +244,7 @@ export default function ResetPasswordPage() {
             )}
 
             <button
-              onClick={handleSubmit}
+              onClick={() => void handleSubmit()}
               disabled={saving || !password || !confirm}
               className="btn-primary w-full !rounded-2xl disabled:opacity-40"
             >

@@ -22,7 +22,7 @@ export default function Select({
       {label && (
         <label
           htmlFor={id}
-          className={`block text-[13px] mb-2 font-medium ${
+          className={`mb-2 block text-[13.5px] font-medium sm:text-[14px] ${
             isDark ? 'text-purple-200/80' : 'text-gray-600'
           }`}
         >
@@ -43,7 +43,7 @@ export default function Select({
         ))}
       </select>
 
-      {error && <p className="text-red-400 text-xs mt-1.5">{error}</p>}
+      {error && <p className="mt-1.5 text-[12px] text-red-400">{error}</p>}
     </div>
   )
 }

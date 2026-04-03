@@ -5,7 +5,7 @@ export default function Chip({ children, active = false, onClick }: { children: 
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex min-h-[29px] items-center gap-1 rounded-full px-2.25 py-[0.42rem] text-[9.5px] font-semibold tracking-[0.01em] transition-all duration-300 ${
+      className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-3 py-[0.55rem] text-[10.75px] font-semibold tracking-[0.01em] transition-all duration-300 sm:min-h-[40px] sm:px-3.5 sm:text-[11px] ${
         active
           ? isDark
             ? 'border border-violet-300/30 bg-[linear-gradient(135deg,rgba(124,58,237,0.20),rgba(236,72,153,0.14),rgba(6,182,212,0.10))] text-white shadow-[0_14px_32px_rgba(76,29,149,0.20)]'

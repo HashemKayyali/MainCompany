@@ -1,19 +1,26 @@
-import { createContext, useContext, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { clearAuthPersistence, setAuthPersistence, supabase, isSupabaseConfigured } from '../lib/supabase'
 import type { Database } from '../lib/database.types'
+import { getErrorMessage } from '../lib/errors'
+import { clearAuthPersistence, isSupabaseConfigured, setAuthPersistence, supabase } from '../lib/supabase'
 import {
   avatarSelectionToProfileUpdate,
+  isAvatarSelectionEqual,
+  normalizeAvatarSelection,
   sanitizeAvatarOptions,
   type AvatarFields,
   type AvatarSelection,
 } from '../lib/avatar'
 import {
+  emitProfileUpdated,
+  onProfileUpdated,
+  type ProfileUpdatedDetail,
+} from '../lib/profile-sync'
+import {
   fetchProfileIdentityRow,
   isMissingAvatarColumnError,
   mapProfileAvatarFields,
 } from '../services/profile.service'
-import { emitProfileUpdated, onProfileUpdated } from '../lib/profile-sync'
 import { useSession } from './SessionContext'
 
 export interface AppUser extends AvatarFields {
@@ -24,6 +31,18 @@ export interface AppUser extends AvatarFields {
   createdAt: string
   role?: string | null
 }
+
+export type AuthFlowResult =
+  | {
+      ok: true
+      sessionReady: boolean
+      requiresEmailConfirmation: boolean
+      message: string
+    }
+  | {
+      ok: false
+      message: string
+    }
 
 interface UserCtx {
   currentUser: AppUser | null
@@ -36,12 +55,12 @@ interface UserCtx {
     phone: string,
     pw: string,
     avatar?: AvatarSelection | null
-  ) => Promise<string | true>
-  login: (email: string, pw: string, rememberMe?: boolean) => Promise<string | true>
-  logout: () => void
+  ) => Promise<AuthFlowResult>
+  login: (email: string, pw: string, rememberMe?: boolean) => Promise<AuthFlowResult>
+  logout: () => Promise<void>
   updateProfile: (updates: {
-    name: string
-    phone: string
+    name?: string
+    phone?: string
     avatar?: AvatarSelection | null
   }) => Promise<string | true>
 }
@@ -50,6 +69,10 @@ const Ctx = createContext<UserCtx>({} as UserCtx)
 
 type ProfileInsert = Database['public']['Tables']['profiles']['Insert']
 type ProfileUpdate = Database['public']['Tables']['profiles']['Update']
+
+function hasDetailKey(detail: ProfileUpdatedDetail, key: keyof ProfileUpdatedDetail) {
+  return Object.prototype.hasOwnProperty.call(detail, key)
+}
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const { authUser, loading: sessionLoading } = useSession()
@@ -66,13 +89,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const buildFallbackUser = useCallback((authAccount: User): AppUser => {
     const metadata = authAccount.user_metadata || {}
     const metadataName =
-      typeof metadata.name === 'string' && metadata.name.trim()
-        ? metadata.name.trim()
-        : null
+      typeof metadata.name === 'string' && metadata.name.trim() ? metadata.name.trim() : null
     const metadataPhone =
-      typeof metadata.phone === 'string' && metadata.phone.trim()
-        ? metadata.phone.trim()
-        : ''
+      typeof metadata.phone === 'string' && metadata.phone.trim() ? metadata.phone.trim() : ''
     const metadataRole =
       typeof metadata.role === 'string' && metadata.role.trim() ? metadata.role.trim() : null
     const avatar = mapProfileAvatarFields({
@@ -84,12 +103,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
             : typeof metadata.picture === 'string'
               ? metadata.picture
               : null,
-      avatar_style:
-        typeof metadata.avatarStyle === 'string' ? metadata.avatarStyle : null,
-      avatar_seed:
-        typeof metadata.avatarSeed === 'string' ? metadata.avatarSeed : null,
-      avatar_options:
-        sanitizeAvatarOptions(metadata.avatarOptions) ?? null,
+      avatar_style: typeof metadata.avatarStyle === 'string' ? metadata.avatarStyle : null,
+      avatar_seed: typeof metadata.avatarSeed === 'string' ? metadata.avatarSeed : null,
+      avatar_options: sanitizeAvatarOptions(metadata.avatarOptions) ?? null,
     })
 
     return {
@@ -103,59 +119,69 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const mapIdentityRowToUser = useCallback((data: Awaited<ReturnType<typeof fetchProfileIdentityRow>>): AppUser | null => {
-    if (!data) return null
-    return {
-      id: data.id,
-      email: data.email || '',
-      name: data.name || '',
-      phone: data.phone || '',
-      createdAt: data.created_at,
-      role: data.role ?? null,
-      ...mapProfileAvatarFields(data),
-    }
-  }, [])
+  const mapIdentityRowToUser = useCallback(
+    (data: Awaited<ReturnType<typeof fetchProfileIdentityRow>>): AppUser | null => {
+      if (!data) return null
 
-  const fetchProfile = useCallback(async (authAccount: User): Promise<AppUser | null> => {
-    try {
-      const data = await fetchProfileIdentityRow(authAccount.id)
-      return mapIdentityRowToUser(data)
-    } catch (err) {
-      console.warn('Failed to fetch profile:', err)
-      return null
-    }
-  }, [mapIdentityRowToUser])
+      return {
+        id: data.id,
+        email: data.email || '',
+        name: data.name || '',
+        phone: data.phone || '',
+        createdAt: data.created_at,
+        role: data.role ?? null,
+        ...mapProfileAvatarFields(data),
+      }
+    },
+    []
+  )
 
-  const recoverMissingProfile = useCallback(async (authAccount: User): Promise<AppUser | null> => {
-    const fallback = buildFallbackUser(authAccount)
+  const fetchProfile = useCallback(
+    async (authAccount: User): Promise<AppUser | null> => {
+      try {
+        const data = await fetchProfileIdentityRow(authAccount.id)
+        return mapIdentityRowToUser(data)
+      } catch (error) {
+        console.warn('Failed to fetch profile:', error)
+        return null
+      }
+    },
+    [mapIdentityRowToUser]
+  )
 
-    try {
-      const { error } = await supabase.from('profiles').upsert(
-        {
-          id: authAccount.id,
-          email: fallback.email,
-          name: fallback.name,
-          phone: fallback.phone || null,
-          avatar_url: fallback.avatarUrl ?? null,
-          avatar_style: fallback.avatarStyle ?? null,
-          avatar_seed: fallback.avatarSeed ?? null,
-          avatar_options: fallback.avatarOptions ?? null,
-        } as ProfileInsert,
-        { onConflict: 'id' }
-      )
+  const recoverMissingProfile = useCallback(
+    async (authAccount: User): Promise<AppUser | null> => {
+      const fallback = buildFallbackUser(authAccount)
 
-      if (error) {
-        console.warn('Failed to recover missing profile row:', error)
+      try {
+        const { error } = await supabase.from('profiles').upsert(
+          {
+            id: authAccount.id,
+            email: fallback.email,
+            name: fallback.name,
+            phone: fallback.phone || null,
+            avatar_url: fallback.avatarUrl ?? null,
+            avatar_style: fallback.avatarStyle ?? null,
+            avatar_seed: fallback.avatarSeed ?? null,
+            avatar_options: fallback.avatarOptions ?? null,
+          } as ProfileInsert,
+          { onConflict: 'id' }
+        )
+
+        if (error) {
+          console.warn('Failed to recover missing profile row:', error)
+          return fallback
+        }
+
+        const refreshed = await fetchProfile(authAccount)
+        return refreshed || fallback
+      } catch (error) {
+        console.warn('Profile recovery fallback failed:', error)
         return fallback
       }
-
-      const refreshed = await fetchProfile(authAccount)
-      return refreshed || fallback
-    } catch (err) {
-      console.warn('Profile recovery fallback failed:', err)
-      return fallback
-    }
-  }, [buildFallbackUser, fetchProfile])
+    },
+    [buildFallbackUser, fetchProfile]
+  )
 
   const syncCurrentUser = useCallback(async () => {
     if (!isSupabaseConfigured()) {
@@ -178,7 +204,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
 
     const recovered = await recoverMissingProfile(authUser)
-        safeSet(() => setCurrentUser(recovered))
+    safeSet(() => setCurrentUser(recovered))
   }, [authUser, fetchProfile, recoverMissingProfile])
 
   useEffect(() => {
@@ -188,12 +214,20 @@ export function UserProvider({ children }: { children: ReactNode }) {
           prev && prev.id === detail.userId
             ? {
                 ...prev,
-                name: detail.name?.trim() || prev.name,
-                phone: detail.phone?.trim() || prev.phone,
-                avatarUrl: detail.avatarUrl ?? prev.avatarUrl,
-                avatarStyle: detail.avatarStyle ?? prev.avatarStyle,
-                avatarSeed: detail.avatarSeed ?? prev.avatarSeed,
-                avatarOptions: detail.avatarOptions ?? prev.avatarOptions,
+                name: hasDetailKey(detail, 'name') ? detail.name?.trim() || '' : prev.name,
+                phone: hasDetailKey(detail, 'phone') ? detail.phone?.trim() || '' : prev.phone,
+                avatarUrl: hasDetailKey(detail, 'avatarUrl')
+                  ? detail.avatarUrl ?? null
+                  : prev.avatarUrl,
+                avatarStyle: hasDetailKey(detail, 'avatarStyle')
+                  ? detail.avatarStyle ?? null
+                  : prev.avatarStyle,
+                avatarSeed: hasDetailKey(detail, 'avatarSeed')
+                  ? detail.avatarSeed ?? null
+                  : prev.avatarSeed,
+                avatarOptions: hasDetailKey(detail, 'avatarOptions')
+                  ? detail.avatarOptions ?? null
+                  : prev.avatarOptions,
               }
             : prev
         )
@@ -226,15 +260,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
         safeSet(() => setLoading(true))
         await syncCurrentUser()
-      } catch (err) {
-        console.warn('UserContext sync error:', err)
+      } catch (error) {
+        console.warn('UserContext sync error:', error)
         safeSet(() => setCurrentUser(null))
       } finally {
         safeSet(() => setLoading(false))
       }
     }
 
-    syncFromSession()
+    void syncFromSession()
 
     return () => {
       mountedRef.current = false
@@ -242,11 +276,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [authUser, sessionLoading, syncCurrentUser])
 
   const waitForProfileRow = useCallback(async (userId: string) => {
-    for (let i = 0; i < 6; i++) {
+    for (let index = 0; index < 6; index += 1) {
       const { data } = await supabase.from('profiles').select('id').eq('id', userId).maybeSingle()
       if (data?.id) return true
-      await new Promise(r => setTimeout(r, 400))
+      await new Promise(resolve => setTimeout(resolve, 400))
     }
+
     return false
   }, [])
 
@@ -257,9 +292,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
       phone: string,
       pw: string,
       avatar?: AvatarSelection | null
-    ): Promise<string | true> => {
-      if (!isSupabaseConfigured()) return 'Supabase not configured'
-      if (pw.length < 6) return 'Password must be at least 6 characters'
+    ): Promise<AuthFlowResult> => {
+      if (!isSupabaseConfigured()) {
+        return { ok: false, message: 'Supabase not configured' }
+      }
+
+      if (pw.length < 6) {
+        return { ok: false, message: 'Password must be at least 6 characters' }
+      }
 
       try {
         const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -277,134 +317,230 @@ export function UserProvider({ children }: { children: ReactNode }) {
           },
         })
 
-        if (authError) return authError.message
-        if (!authData.user) return 'Registration failed'
+        if (authError) return { ok: false, message: authError.message }
+        if (!authData.user) return { ok: false, message: 'Registration failed' }
 
-        const ok = await waitForProfileRow(authData.user.id)
-        if (ok) {
-          let { error: profileError } = await supabase
-            .from('profiles')
-            .update({
-              phone: phone || null,
-              name,
-              email,
-              ...avatarSelectionToProfileUpdate(avatar),
-            } as ProfileUpdate)
-            .eq('id', authData.user.id)
+        const sessionReady = Boolean(authData.session?.user)
 
-          if (profileError && isMissingAvatarColumnError(profileError)) {
-            const retry = await supabase
+        if (sessionReady) {
+          const profileExists = await waitForProfileRow(authData.user.id)
+
+          if (profileExists) {
+            let { error: profileError } = await supabase
               .from('profiles')
               .update({
                 phone: phone || null,
                 name,
                 email,
+                ...avatarSelectionToProfileUpdate(avatar),
               } as ProfileUpdate)
               .eq('id', authData.user.id)
-            profileError = retry.error
-          }
 
-          if (profileError) {
-            console.warn('Profile enrichment after signup failed:', profileError)
+            if (profileError && isMissingAvatarColumnError(profileError)) {
+              const retry = await supabase
+                .from('profiles')
+                .update({
+                  phone: phone || null,
+                  name,
+                  email,
+                } as ProfileUpdate)
+                .eq('id', authData.user.id)
+              profileError = retry.error
+            }
+
+            if (profileError) {
+              console.warn('Profile enrichment after signup failed:', profileError)
+            }
           }
         }
 
-        return true
-      } catch (err: any) {
-        return err.message || 'Registration failed'
+        if (!sessionReady) {
+          return {
+            ok: true,
+            sessionReady: false,
+            requiresEmailConfirmation: true,
+            message: 'Account created. Check your email to confirm your address before signing in.',
+          }
+        }
+
+        return {
+          ok: true,
+          sessionReady: true,
+          requiresEmailConfirmation: false,
+          message: 'Account created successfully.',
+        }
+      } catch (error: unknown) {
+        return { ok: false, message: getErrorMessage(error, 'Registration failed') }
       }
     },
     [waitForProfileRow]
   )
 
-  // ✅ Login موحّد للجميع (admin/user) — ما بنطرد الأدمن
-  const login = useCallback(async (email: string, pw: string, rememberMe = false): Promise<string | true> => {
-    if (!isSupabaseConfigured()) return 'Supabase not configured'
+  const login = useCallback(
+    async (email: string, pw: string, rememberMe = false): Promise<AuthFlowResult> => {
+      if (!isSupabaseConfigured()) {
+        return { ok: false, message: 'Supabase not configured' }
+      }
 
-    try {
-      setAuthPersistence(rememberMe)
-      const { error } = await supabase.auth.signInWithPassword({ email, password: pw })
-      if (error) return error.message
+      try {
+        setAuthPersistence(rememberMe)
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password: pw })
 
-      // ✅ نجيب البروفايل ونخزنه (فيه role)
-      return true
-    } catch (err: any) {
-      return err.message || 'Login failed'
-    }
-  }, [])
+        if (error) {
+          return { ok: false, message: error.message }
+        }
+
+        if (!data.session?.user) {
+          return {
+            ok: false,
+            message: 'Your session could not be established. Please try again.',
+          }
+        }
+
+        return {
+          ok: true,
+          sessionReady: true,
+          requiresEmailConfirmation: false,
+          message: 'Signed in successfully.',
+        }
+      } catch (error: unknown) {
+        return { ok: false, message: getErrorMessage(error, 'Login failed') }
+      }
+    },
+    []
+  )
 
   const updateProfile = useCallback(
     async (updates: {
-      name: string
-      phone: string
+      name?: string
+      phone?: string
       avatar?: AvatarSelection | null
     }): Promise<string | true> => {
       const targetId = authUser?.id || currentUser?.id
       if (!targetId) return 'You need to sign in first'
 
-      const basePayload: ProfileUpdate = {
-        name: updates.name.trim() || null,
-        phone: updates.phone.trim() || null,
+      const hasNameUpdate = Object.prototype.hasOwnProperty.call(updates, 'name')
+      const hasPhoneUpdate = Object.prototype.hasOwnProperty.call(updates, 'phone')
+      const hasAvatarUpdate = Object.prototype.hasOwnProperty.call(updates, 'avatar')
+      const currentName = currentUser?.name?.trim() || ''
+      const currentPhone = currentUser?.phone?.trim() || ''
+      const currentAvatarSelection = normalizeAvatarSelection(currentUser)
+      const nextName = hasNameUpdate ? updates.name?.trim() || '' : currentName
+      const nextPhone = hasPhoneUpdate ? updates.phone?.trim() || '' : currentPhone
+      const nextAvatarSelection = hasAvatarUpdate
+        ? normalizeAvatarSelection(updates.avatar ?? null)
+        : currentAvatarSelection
+      const payload: ProfileUpdate = {}
+
+      if (hasNameUpdate && nextName !== currentName) {
+        payload.name = nextName || null
       }
-      const avatarPayload = avatarSelectionToProfileUpdate(updates.avatar)
+
+      if (hasPhoneUpdate && nextPhone !== currentPhone) {
+        payload.phone = nextPhone || null
+      }
+
+      if (hasAvatarUpdate && !isAvatarSelectionEqual(currentAvatarSelection, updates.avatar ?? null)) {
+        Object.assign(payload, avatarSelectionToProfileUpdate(updates.avatar ?? null))
+      }
+
+      if (!Object.keys(payload).length) {
+        return true
+      }
+
+      const baseUser = currentUser || (authUser ? buildFallbackUser(authUser) : null)
+      const optimisticUser = baseUser
+        ? {
+            ...baseUser,
+            ...(hasNameUpdate ? { name: nextName } : {}),
+            ...(hasPhoneUpdate ? { phone: nextPhone } : {}),
+            ...(hasAvatarUpdate
+              ? {
+                  avatarUrl: baseUser.avatarUrl ?? null,
+                  avatarStyle: nextAvatarSelection?.avatarStyle ?? null,
+                  avatarSeed: nextAvatarSelection?.avatarSeed ?? null,
+                  avatarOptions: nextAvatarSelection?.avatarOptions ?? null,
+                }
+              : {}),
+          }
+        : null
 
       try {
         let { error } = await supabase
           .from('profiles')
-          .update({
-            ...basePayload,
-            ...avatarPayload,
-          } as ProfileUpdate)
+          .update(payload)
           .eq('id', targetId)
 
         if (error && isMissingAvatarColumnError(error)) {
-          const retry = await supabase
-            .from('profiles')
-            .update(basePayload)
-            .eq('id', targetId)
+          const retryPayload: ProfileUpdate = {}
+
+          if (hasNameUpdate && payload.name !== undefined) retryPayload.name = payload.name
+          if (hasPhoneUpdate && payload.phone !== undefined) retryPayload.phone = payload.phone
+
+          if (!Object.keys(retryPayload).length) {
+            return 'Avatar updates are not available until the profile avatar columns are applied in Supabase.'
+          }
+
+          const retry = await supabase.from('profiles').update(retryPayload).eq('id', targetId)
           error = retry.error
         }
 
         if (error) return error.message
 
-        const refreshed =
-          (authUser && (await fetchProfile(authUser))) ||
-          (currentUser ? await fetchProfile({
-            id: currentUser.id,
-            email: currentUser.email,
-            app_metadata: {},
-            user_metadata: {
-              name: currentUser.name,
-              phone: currentUser.phone,
-            },
-            aud: 'authenticated',
-            created_at: currentUser.createdAt,
-          } as User) : null)
+        safeSet(() => setCurrentUser(optimisticUser || currentUser || null))
 
-        safeSet(() => setCurrentUser(refreshed || currentUser || null))
-        if (refreshed) {
+        const refreshTarget =
+          authUser ||
+          (optimisticUser
+            ? ({
+                id: optimisticUser.id,
+                email: optimisticUser.email,
+                app_metadata: {},
+                user_metadata: {
+                  name: optimisticUser.name,
+                  phone: optimisticUser.phone,
+                },
+                aud: 'authenticated',
+                created_at: optimisticUser.createdAt,
+              } as User)
+            : null)
+
+        const refreshed = refreshTarget ? await fetchProfile(refreshTarget) : null
+        const finalUser = refreshed || optimisticUser || currentUser || null
+
+        safeSet(() => setCurrentUser(finalUser))
+        if (finalUser) {
           emitProfileUpdated({
-            userId: refreshed.id,
-            name: refreshed.name,
-            phone: refreshed.phone,
-            avatarUrl: refreshed.avatarUrl,
-            avatarStyle: refreshed.avatarStyle,
-            avatarSeed: refreshed.avatarSeed,
-            avatarOptions: refreshed.avatarOptions,
+            userId: finalUser.id,
+            name: finalUser.name,
+            phone: finalUser.phone,
+            avatarUrl: finalUser.avatarUrl,
+            avatarStyle: finalUser.avatarStyle,
+            avatarSeed: finalUser.avatarSeed,
+            avatarOptions: finalUser.avatarOptions,
           })
         }
+
         return true
-      } catch (err: any) {
-        return err?.message || 'Failed to update profile'
+      } catch (error: unknown) {
+        return getErrorMessage(error, 'Failed to update profile')
       }
     },
-    [authUser, currentUser, fetchProfile]
+    [authUser, buildFallbackUser, currentUser, fetchProfile]
   )
 
-  const logout = useCallback(() => {
-    if (isSupabaseConfigured()) supabase.auth.signOut()
-    clearAuthPersistence()
-    safeSet(() => setCurrentUser(null))
+  const logout = useCallback(async () => {
+    try {
+      if (isSupabaseConfigured()) {
+        const { error } = await supabase.auth.signOut()
+        if (error) throw error
+      }
+    } catch (error) {
+      console.warn('Failed to sign out cleanly:', error)
+    } finally {
+      clearAuthPersistence()
+      safeSet(() => setCurrentUser(null))
+    }
   }, [])
 
   const isLoggedIn = !!authUser

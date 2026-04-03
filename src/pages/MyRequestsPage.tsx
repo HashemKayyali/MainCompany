@@ -99,19 +99,19 @@ export default function MyRequestsPage() {
         <div className="mb-5">
           <span className="section-label">// My Requests</span>
           <h1 className={cn('section-title !text-left', !isDark && 'text-gray-900')}>Track Every Request</h1>
-          <p className={cn('mt-2 max-w-2xl text-[0.92rem] leading-6', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
+          <p className={cn('mt-2.5 max-w-2xl text-[0.96rem] leading-6.5', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
             Review rental requests, purchase quotes, and follow their latest status updates from one place.
           </p>
         </div>
 
-        <div className="mb-4 flex flex-wrap gap-1.25">
+        <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
           {(['all', 'rental', 'purchase_quote'] as RequestTab[]).map(value => (
             <button
               key={value}
               type="button"
               onClick={() => setTab(value)}
               className={cn(
-                'rounded-xl px-3.5 py-1.75 text-[0.84rem] font-semibold transition-colors',
+                'shrink-0 min-h-[42px] rounded-[14px] px-4 py-2 text-[0.92rem] font-semibold transition-colors',
                 tab === value
                   ? isDark
                     ? 'bg-cyan-500/12 text-cyan-200'
@@ -127,18 +127,18 @@ export default function MyRequestsPage() {
         </div>
 
         {purchaseQuote.items.length > 0 && (
-          <div className={cn('mb-4 rounded-[20px] border p-4', isDark ? 'border-fuchsia-400/14 bg-[linear-gradient(180deg,rgba(34,12,45,0.74),rgba(10,10,22,0.94))]' : 'border-fuchsia-200 bg-white shadow-[0_18px_42px_-34px_rgba(168,85,247,0.16)]')}>
+          <div className={cn('mb-5 rounded-[22px] border p-4.5', isDark ? 'border-fuchsia-400/14 bg-[linear-gradient(180deg,rgba(34,12,45,0.74),rgba(10,10,22,0.94))]' : 'border-fuchsia-200 bg-white shadow-[0_18px_42px_-34px_rgba(168,85,247,0.16)]')}>
             <div className={cn('text-[10px] font-mono uppercase tracking-[0.22em]', isDark ? 'text-fuchsia-100/72' : 'text-fuchsia-700/80')}>
               Local Draft
             </div>
             <h2 className={cn('mt-3 font-display text-[1.2rem] font-black', isDark ? 'text-white' : 'text-gray-900')}>
               Your purchase quote draft is saved on this device
             </h2>
-            <p className={cn('mt-2.5 text-sm leading-7', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
+            <p className={cn('mt-2.5 text-[0.95rem] leading-6.5', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
               Drafts do not appear in My Requests until you submit them. You currently have {purchaseQuote.itemCount} unit(s) saved across {purchaseQuote.items.length} product(s).
             </p>
             <div className="mt-4">
-              <Link to="/purchase-quote" className="btn-outline !rounded-xl !px-4 !py-2 !text-[0.84rem]">
+              <Link to="/purchase-quote" className="btn-outline !rounded-[14px] !px-4 !py-2 !text-[0.92rem]">
                 Open Quote Draft
               </Link>
             </div>

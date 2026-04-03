@@ -42,7 +42,7 @@ export default function StatsStrip() {
     : 'from-white via-white/75 to-transparent'
 
   return (
-    <section className="relative px-4 pt-3 sm:px-5" aria-label="Our partners and customers">
+    <section className="relative px-4 pt-4 sm:px-5" aria-label="Our partners and customers">
       <div className="mx-auto max-w-[82rem]">
         <div className={`section-shell ${isDark ? '' : 'bg-white/85'}`}>
           <div
@@ -62,33 +62,33 @@ export default function StatsStrip() {
             }}
           />
 
-          <div className="relative flex items-center gap-3 px-4 py-3.5 sm:px-5">
-            <div className="hidden min-w-fit lg:block">
-              <div className={`text-[10px] font-mono uppercase tracking-[0.28em] ${isDark ? 'text-violet-200/56' : 'text-violet-600/70'}`}>
+          <div className="relative flex items-center gap-3 px-4 py-4 sm:px-5">
+            <div className="min-w-fit max-md:hidden lg:block">
+              <div className={`text-[10px] font-mono uppercase tracking-[0.22em] ${isDark ? 'text-violet-200/56' : 'text-violet-600/70'}`}>
                 Trusted by
               </div>
-              <div className={`mt-1 text-[13px] font-semibold ${isDark ? 'text-white/86' : 'text-gray-900'}`}>
+              <div className={`mt-1 text-[13.5px] font-semibold ${isDark ? 'text-white/86' : 'text-gray-900'}`}>
                 Leading brands and event teams
               </div>
             </div>
 
-            <div className={`h-10 w-px shrink-0 ${isDark ? 'bg-white/8' : 'bg-violet-200/70'} hidden lg:block`} />
+            <div className={`hidden h-10 w-px shrink-0 max-md:hidden ${isDark ? 'bg-white/8' : 'bg-violet-200/70'} lg:block`} />
 
             <div className="stats-marquee flex-1">
               <div className="stats-marquee__inner">
                 {loop.map((item, i) => {
                   const a = ACCENTS[i % ACCENTS.length]
                   return (
-                    <div key={`${item}-${i}`} className="flex items-center shrink-0 gap-2.5 px-4">
+                    <div key={`${item}-${i}`} className="flex items-center shrink-0 gap-3 px-4.5">
                       <span
                         className={`whitespace-nowrap uppercase tracking-[0.18em] font-display font-semibold ${
                           isDark ? a.text : 'text-violet-600'
-                        } text-[10px] sm:text-[11px]`}
+                        } text-[11px] sm:text-[11.5px]`}
                       >
                         {item}
                       </span>
                       <span
-                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                        className={`h-1.5 w-1.5 rounded-full shrink-0 ${
                           isDark ? a.dot : 'bg-violet-400'
                         }`}
                         aria-hidden="true"

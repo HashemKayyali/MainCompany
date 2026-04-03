@@ -53,7 +53,7 @@ function ProductPill({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border px-2 py-[0.34rem] text-[7.5px] font-semibold uppercase tracking-[0.12em] backdrop-blur-md',
+        'inline-flex items-center rounded-full border px-2.25 py-[0.4rem] text-[8.5px] font-semibold uppercase tracking-[0.11em] backdrop-blur-md sm:text-[9px]',
         classes
       )}
     >
@@ -76,7 +76,7 @@ function PriceTile({
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-[14px] border px-2.5 py-2',
+        'relative overflow-hidden rounded-[15px] border px-3 py-2.5',
         accent === 'cyan'
           ? 'border-cyan-300/14 bg-[linear-gradient(180deg,rgba(10,25,41,0.92),rgba(8,15,29,0.94))]'
           : 'border-white/[0.08] bg-[linear-gradient(180deg,rgba(14,17,37,0.94),rgba(9,13,28,0.96))]'
@@ -90,11 +90,11 @@ function PriceTile({
             : 'bg-gradient-to-r from-transparent via-fuchsia-300/22 to-transparent'
         )}
       />
-      <div className="text-[8px] font-mono uppercase tracking-[0.16em] text-white/42">{label}</div>
-      <div className="mt-1 text-[0.84rem] font-display font-black leading-none tracking-[-0.04em] text-white">
+      <div className="text-[9px] font-mono uppercase tracking-[0.14em] text-white/42">{label}</div>
+      <div className="mt-1 text-[0.92rem] font-display font-black leading-none tracking-[-0.04em] text-white">
         {value}
       </div>
-      <div className="mt-0.75 text-[9px] leading-4 text-white/58">{meta}</div>
+      <div className="mt-1 text-[10px] leading-4.5 text-white/58">{meta}</div>
     </div>
   )
 }
@@ -219,7 +219,7 @@ export default function ProductCard({
 
       <div
         className={cn(
-          'relative flex flex-col overflow-hidden rounded-[19px] border p-2',
+          'relative flex flex-col overflow-hidden rounded-[20px] border p-2.5',
           isDark
             ? 'border-white/[0.08] bg-[linear-gradient(145deg,rgba(10,14,30,0.96),rgba(6,10,20,0.98))] shadow-[0_30px_90px_-62px_rgba(8,16,38,0.96)]'
             : 'border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,245,255,0.94))] shadow-[0_26px_58px_-40px_rgba(15,23,42,0.18)]'
@@ -287,12 +287,12 @@ export default function ProductCard({
             )}
           />
 
-          <div className="pointer-events-none absolute left-2 top-2 z-10 flex flex-wrap gap-1.25">
+          <div className="pointer-events-none absolute left-2.5 top-2.5 z-10 flex flex-wrap gap-1.5">
             <ProductPill tone="accent">{categoryLabel}</ProductPill>
             {product.badge?.trim() ? <ProductPill>{product.badge}</ProductPill> : null}
           </div>
 
-          <div className="pointer-events-none absolute right-2 top-2 z-10 flex flex-wrap justify-end gap-1.25">
+          <div className="pointer-events-none absolute right-2.5 top-2.5 z-10 flex flex-wrap justify-end gap-1.5">
             {product.featured ? <ProductPill tone="success">Featured</ProductPill> : null}
             {saleEnabled && !rentalEnabled ? <ProductPill>Quote Based</ProductPill> : null}
           </div>
@@ -306,7 +306,7 @@ export default function ProductCard({
                 <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
                   <div
                     className={cn(
-                      'flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur-md',
+                  'flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md',
                       isDark
                         ? 'border-white/14 bg-black/36 text-white'
                         : 'border-white/90 bg-white/70 text-violet-700'
@@ -320,16 +320,16 @@ export default function ProductCard({
           ) : null}
         </Link>
 
-        <div className="relative flex flex-1 flex-col gap-2 px-0 pb-0 pt-2.5">
-          <div className="space-y-1.75">
-            <div className={cn('text-[8px] font-mono uppercase tracking-[0.18em]', isDark ? 'text-cyan-100/40' : 'text-violet-700/70')}>
+          <div className="relative flex flex-1 flex-col gap-2.5 px-0.5 pb-0 pt-3">
+          <div className="space-y-2">
+            <div className={cn('text-[9px] font-mono uppercase tracking-[0.14em]', isDark ? 'text-cyan-100/40' : 'text-violet-700/70')}>
               Premium product listing
             </div>
 
-            <div className="space-y-1.25">
+            <div className="space-y-1.5">
               <h3
                 className={cn(
-                  'font-display text-[0.98rem] font-black leading-[0.98] tracking-[-0.05em] sm:text-[1.04rem]',
+                  'font-display text-[1.04rem] font-black leading-[1] tracking-[-0.05em] sm:text-[1.08rem]',
                   isDark ? 'text-white' : 'text-gray-900'
                 )}
                 style={titleClampStyle}
@@ -338,7 +338,7 @@ export default function ProductCard({
               </h3>
 
               <p
-                className={cn('text-[0.76rem] leading-[1.45]', isDark ? 'text-purple-100/68' : 'text-gray-500')}
+                className={cn('text-[0.82rem] leading-[1.52]', isDark ? 'text-purple-100/68' : 'text-gray-500')}
                 style={descriptionClampStyle}
               >
                 {product.shortDescription}
@@ -351,7 +351,7 @@ export default function ProductCard({
                   <span
                     key={`${product.slug}-${chip}`}
                     className={cn(
-                      'inline-flex items-center rounded-full border px-2 py-[0.34rem] text-[8.5px] font-medium',
+                      'inline-flex items-center rounded-full border px-2.25 py-[0.4rem] text-[9px] font-medium',
                       chipIndex === 0
                         ? isDark
                           ? 'border-cyan-400/16 bg-cyan-400/10 text-cyan-100'
@@ -386,7 +386,7 @@ export default function ProductCard({
             <Link
               to={`/products/${product.slug}`}
               className={cn(
-                'inline-flex min-h-[35px] w-full items-center justify-center gap-1.25 rounded-[12px] border px-3 py-1.75 text-[9.75px] font-semibold transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+                'inline-flex min-h-[42px] w-full items-center justify-center gap-1.5 rounded-[14px] border px-3.5 py-2 text-[10.75px] font-semibold transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                 isDark
                   ? 'border-white/[0.10] bg-white/[0.05] text-slate-100/88 hover:border-cyan-300/22 hover:bg-white/[0.08] focus-visible:ring-cyan-300/55 focus-visible:ring-offset-[#07101c]'
                   : 'border-white/90 bg-white/72 text-slate-700 hover:border-violet-300 hover:bg-white focus-visible:ring-violet-500/45 focus-visible:ring-offset-white'

@@ -5,6 +5,7 @@ import AnimatedBackground from '../components/theme/AnimatedBackground'
 import AvatarPicker from '../components/ui/AvatarPicker'
 import { useTheme } from '../contexts/ThemeContext'
 import { useUser } from '../contexts/UserContext'
+import { getSafeRedirectPath } from '../lib/auth-routing'
 import {
   avatarIdentitySeed,
   buildDefaultAvatarSelection,
@@ -20,11 +21,10 @@ export default function AuthPage() {
   const [searchParams] = useSearchParams()
   const reduceMotion = useReducedMotion()
   const { login, register, isLoggedIn, isAdmin, loading: userLoading } = useUser()
-  const redirectParam = searchParams.get('redirect') || ''
-  const redirectTarget =
-    redirectParam.startsWith('/') && !redirectParam.startsWith('//')
-      ? redirectParam
-      : null
+  const redirectParam = searchParams.get('redirect')
+  const redirectTarget = redirectParam ? getSafeRedirectPath(redirectParam, '/') : null
+  const authError = searchParams.get('authError') || ''
+  const notice = searchParams.get('notice') || ''
   const defaultDestination = redirectTarget || (isAdmin ? '/admin' : '/')
 
   const routeMode: Mode = pathname.includes('register') ? 'register' : 'login'
@@ -57,6 +57,19 @@ export default function AuthPage() {
     setUiMode(routeMode)
   }, [routeMode])
 
+  useEffect(() => {
+    if (authError) {
+      setError(authError)
+      setSuccess('')
+      return
+    }
+
+    if (notice) {
+      setSuccess(notice)
+      setError('')
+    }
+  }, [authError, notice])
+
   useEffect(
     () => () => {
       if (pendingTimerRef.current) window.clearTimeout(pendingTimerRef.current)
@@ -83,6 +96,7 @@ export default function AuthPage() {
   const switchTo = (next: Mode) => {
     setError('')
     setSuccess('')
+    pendingRedirectRef.current = false
 
     if (pendingTimerRef.current) window.clearTimeout(pendingTimerRef.current)
 
@@ -90,8 +104,10 @@ export default function AuthPage() {
     setUiMode(next)
 
     pendingTimerRef.current = window.setTimeout(() => {
-      const nextPath = next === 'login' ? '/user-login' : '/register'
-      const suffix = redirectTarget ? `?redirect=${encodeURIComponent(redirectTarget)}` : ''
+      const nextPath = next === 'login' ? '/login' : '/register'
+      const suffix = redirectTarget && redirectTarget !== '/'
+        ? `?redirect=${encodeURIComponent(redirectTarget)}`
+        : ''
       navigate(`${nextPath}${suffix}`, { replace: false })
       window.setTimeout(() => {
         isSwitchingRef.current = false
@@ -111,14 +127,14 @@ export default function AuthPage() {
     const result = await login(email.trim(), password, rememberMe)
     setBusy(false)
 
-    if (result === true) {
+    if (result.ok) {
       pendingRedirectRef.current = true
-      setSuccess('Signed in successfully.')
+      setSuccess(result.message)
       return
     }
 
     pendingRedirectRef.current = false
-    setError(result || 'Login failed')
+    setError(result.message || 'Login failed')
   }
 
   const handleRegister = async (event: React.FormEvent) => {
@@ -140,13 +156,20 @@ export default function AuthPage() {
     )
     setBusy(false)
 
-    if (result === true) {
-      setSuccess('Account created successfully.')
-      window.setTimeout(() => navigate(defaultDestination, { replace: true }), 750)
+    if (result.ok) {
+      pendingRedirectRef.current = result.sessionReady
+      setSuccess(result.message)
+
+      if (result.requiresEmailConfirmation) {
+        setPassword('')
+        setConfirm('')
+      }
+
       return
     }
 
-    setError(result || 'Register failed')
+    pendingRedirectRef.current = false
+    setError(result.message || 'Register failed')
   }
 
   const inputClass =
@@ -272,7 +295,7 @@ export default function AuthPage() {
                       disabled={busy || !!success}
                       className="btn-primary w-full !rounded-2xl disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {busy ? 'Signing in...' : success ? 'Redirecting...' : 'Login'}
+                      {busy ? 'Signing in...' : success ? 'Continue' : 'Login'}
                     </button>
 
                     <button
@@ -381,7 +404,7 @@ export default function AuthPage() {
                         disabled={busy || !!success}
                         className="btn-primary w-full !rounded-2xl disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {busy ? 'Creating account...' : success ? 'Redirecting...' : 'Sign Up'}
+                        {busy ? 'Creating account...' : success ? 'Check your email' : 'Sign Up'}
                       </button>
 
                       <button
