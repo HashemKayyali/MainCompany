@@ -31,7 +31,7 @@ export function isMissingAvatarColumnError(error: unknown) {
   )
 }
 
-function isMissingGeneratedAvatarColumnError(error: unknown) {
+export function isMissingGeneratedAvatarColumnError(error: unknown) {
   const candidate = error as { code?: string | null; message?: string | null; details?: string | null }
   const text = `${candidate?.message || ''} ${candidate?.details || ''}`.toLowerCase()
   return (
@@ -44,7 +44,7 @@ function isMissingGeneratedAvatarColumnError(error: unknown) {
   )
 }
 
-function isMissingAvatarUrlColumnError(error: unknown) {
+export function isMissingAvatarUrlColumnError(error: unknown) {
   const candidate = error as { code?: string | null; message?: string | null; details?: string | null }
   const text = `${candidate?.message || ''} ${candidate?.details || ''}`.toLowerCase()
   return candidate?.code === '42703' && text.includes('avatar_url')

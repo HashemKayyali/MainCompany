@@ -46,10 +46,12 @@ export default function AvatarPicker({
   const [variantSet, setVariantSet] = useState(0)
 
   useEffect(() => {
-    if (normalizedValue?.avatarStyle && normalizedValue.avatarStyle !== activeStyle) {
-      setActiveStyle(normalizedValue.avatarStyle)
+    if (normalizedValue?.avatarStyle) {
+      setActiveStyle(previous =>
+        previous === normalizedValue.avatarStyle ? previous : normalizedValue.avatarStyle
+      )
     }
-  }, [activeStyle, normalizedValue?.avatarStyle])
+  }, [normalizedValue?.avatarStyle])
 
   const normalizedSeed = useMemo(
     () => avatarIdentitySeed([identitySeed, String(variantSet)]),
@@ -87,7 +89,7 @@ export default function AvatarPicker({
   return (
     <div
       className={cn(
-        'rounded-[22px] border p-3.5 sm:p-4',
+        compact ? 'rounded-[18px] border p-3' : 'rounded-[22px] border p-3.5 sm:p-4',
         isDark
           ? 'border-cyan-400/12 bg-[linear-gradient(180deg,rgba(10,14,28,0.92),rgba(8,11,22,0.96))] shadow-[0_28px_70px_-52px_rgba(34,211,238,0.22)]'
           : 'border-violet-200/70 bg-white/90 shadow-[0_20px_42px_-28px_rgba(124,58,237,0.18)]'
@@ -97,7 +99,9 @@ export default function AvatarPicker({
         <div className="min-w-0 flex-1">
           <div
             className={cn(
-              'inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[9px] font-mono uppercase tracking-[0.18em]',
+              compact
+                ? 'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[8px] font-mono uppercase tracking-[0.16em]'
+                : 'inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[9px] font-mono uppercase tracking-[0.18em]',
               isDark
                 ? 'bg-cyan-400/10 text-cyan-100/80 ring-1 ring-inset ring-cyan-300/12'
                 : 'bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200'
@@ -108,7 +112,9 @@ export default function AvatarPicker({
           </div>
           <h3
             className={cn(
-              'mt-2.5 font-display text-[0.98rem] font-semibold',
+              compact
+                ? 'mt-2 font-display text-[0.95rem] font-semibold'
+                : 'mt-2.5 font-display text-[0.98rem] font-semibold',
               isDark ? 'text-white' : 'text-gray-900'
             )}
           >
@@ -116,7 +122,9 @@ export default function AvatarPicker({
           </h3>
           <p
             className={cn(
-              'mt-1 max-w-[36rem] text-[12.5px] leading-5.5',
+              compact
+                ? 'mt-1 max-w-[32rem] text-[12px] leading-5'
+                : 'mt-1 max-w-[36rem] text-[12.5px] leading-5.5',
               isDark ? 'text-purple-100/64' : 'text-gray-600'
             )}
           >
@@ -129,7 +137,9 @@ export default function AvatarPicker({
           onClick={() => setVariantSet(value => value + 1)}
           aria-label={`Show another ${activeStyleLabel} avatar set`}
           className={cn(
-            'inline-flex min-h-[42px] items-center gap-2 rounded-[14px] px-3.5 text-[11px] font-semibold transition',
+            compact
+              ? 'inline-flex min-h-[38px] items-center gap-1.5 rounded-[12px] px-3 text-[10px] font-semibold transition'
+              : 'inline-flex min-h-[42px] items-center gap-2 rounded-[14px] px-3.5 text-[11px] font-semibold transition',
             isDark
               ? 'bg-[#0f1733] text-cyan-100/82 ring-1 ring-inset ring-cyan-400/14 hover:bg-[#111d40] hover:text-white'
               : 'bg-white text-violet-700 ring-1 ring-inset ring-violet-200 hover:bg-violet-50'
@@ -142,13 +152,13 @@ export default function AvatarPicker({
 
       <div
         className={cn(
-          'mt-3.5 grid gap-3.5',
+          compact ? 'mt-3 grid gap-3' : 'mt-3.5 grid gap-3.5',
           compact ? 'lg:grid-cols-[168px_minmax(0,1fr)]' : 'lg:grid-cols-[190px_minmax(0,1fr)]'
         )}
       >
         <div
           className={cn(
-            'rounded-[18px] border p-2.5',
+            compact ? 'rounded-[16px] border p-2' : 'rounded-[18px] border p-2.5',
             isDark
               ? 'border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))]'
               : 'border-violet-100 bg-violet-50/50'

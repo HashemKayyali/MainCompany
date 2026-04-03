@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { createPortal } from 'react-dom'
@@ -87,6 +87,7 @@ export default function Navbar() {
   } | null>(null)
   const userMenuAnchorRef = useRef<HTMLDivElement>(null)
   const userMenuPopoverRef = useRef<HTMLDivElement>(null)
+  const navbarBarRef = useRef<HTMLDivElement>(null)
   const desktopPanelFirstLinkRef = useRef<HTMLAnchorElement>(null)
   const desktopOpenTimerRef = useRef<number | null>(null)
   const desktopCloseTimerRef = useRef<number | null>(null)
@@ -205,6 +206,38 @@ export default function Navbar() {
   useEffect(() => {
     if (open || searchOpen || userMenu) setDesktopMenu(null)
   }, [open, searchOpen, userMenu])
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const root = document.documentElement
+    const navbarBar = navbarBarRef.current
+
+    if (!navbarBar) return
+
+    const updateNavbarHeight = () => {
+      const { bottom } = navbarBar.getBoundingClientRect()
+      root.style.setProperty('--app-navbar-height', `${Math.max(0, Math.round(bottom))}px`)
+    }
+
+    updateNavbarHeight()
+
+    const frame = window.requestAnimationFrame(updateNavbarHeight)
+    const timeout = window.setTimeout(updateNavbarHeight, 120)
+    const resizeObserver =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateNavbarHeight) : null
+
+    resizeObserver?.observe(navbarBar)
+    window.addEventListener('resize', updateNavbarHeight, { passive: true })
+
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.clearTimeout(timeout)
+      resizeObserver?.disconnect()
+      window.removeEventListener('resize', updateNavbarHeight)
+      root.style.removeProperty('--app-navbar-height')
+    }
+  }, [])
 
   const active = (target: string) =>
     target === '/' ? pathname === '/' : pathname.startsWith(target)
@@ -430,7 +463,10 @@ export default function Navbar() {
                 }}
               />
 
-              <div className="relative px-3 py-2.5 sm:px-[1.125rem] sm:py-3 lg:px-5">
+              <div
+                ref={navbarBarRef}
+                className="relative px-3 py-2.5 sm:px-[1.125rem] sm:py-3 lg:px-5"
+              >
                 <div className="flex items-center justify-between gap-4 lg:gap-5">
                   <Link
                     to="/"

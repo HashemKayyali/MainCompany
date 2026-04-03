@@ -3,10 +3,32 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --app-navbar-height: 5rem;
+    --app-header-offset: var(--app-navbar-height);
+    --app-header-gap: clamp(0.75rem, 1.6vw, 1.25rem);
+  }
+
+  @media (min-width: 640px) {
+    :root {
+      --app-navbar-height: 5.5rem;
+    }
+  }
+
   * { box-sizing: border-box; margin: 0; }
-  html { height: 100%; font-size: 14.05px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scroll-behavior: auto; }
+  html {
+    height: 100%;
+    font-size: 14.05px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: auto;
+    scroll-padding-top: calc(var(--app-header-offset) + var(--app-header-gap));
+  }
   body { min-height: 100%; font-family: 'Alexandria', system-ui, sans-serif; overflow-x: hidden; }
   body, #root { height: 100%; }
+  html [id] {
+    scroll-margin-top: calc(var(--app-header-offset) + var(--app-header-gap));
+  }
   html.dark body { background: #04040c; color: #ddd9f2; }
   html.light body { background: #f5f3ff; color: #1e1b4b; }
   ::selection { background: rgba(124,58,237,0.4); color: white; }

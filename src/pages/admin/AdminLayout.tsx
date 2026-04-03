@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useUser } from '../../contexts/UserContext'
 import Sidebar from '../../components/admin/Sidebar'
@@ -10,6 +10,8 @@ type Crumb = { label: string; to?: string }
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ')
 }
+
+const ADMIN_HEADER_HEIGHT = 70
 
 function usePageTitle(pathname: string) {
   return useMemo(() => {
@@ -107,6 +109,13 @@ export default function AdminLayout() {
   const title = usePageTitle(pathname)
   const crumbs = useMemo(() => buildBreadcrumbs(pathname), [pathname])
   const mainScrollRef = useRef<HTMLDivElement | null>(null)
+  const layoutVars = useMemo(
+    () =>
+      ({
+        '--app-header-offset': `${ADMIN_HEADER_HEIGHT}px`,
+      }) as CSSProperties,
+    []
+  )
 
   const [open, setOpen] = useState(false)
   useEffect(() => setOpen(false), [pathname])
@@ -181,7 +190,13 @@ export default function AdminLayout() {
     )
 
   return (
-    <div className={cn('relative h-screen overflow-hidden', isDark ? 'bg-[#060914] text-white' : 'bg-gray-50 text-gray-900')}>
+    <div
+      className={cn(
+        'relative h-screen overflow-hidden',
+        isDark ? 'bg-[#060914] text-white' : 'bg-gray-50 text-gray-900'
+      )}
+      style={layoutVars}
+    >
       {isDark && (
         <>
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.12),transparent_22%),radial-gradient(circle_at_top_right,rgba(236,72,153,0.11),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(139,92,246,0.14),transparent_28%),linear-gradient(180deg,#060813_0%,#09101f_46%,#06070f_100%)]" />
@@ -333,7 +348,11 @@ export default function AdminLayout() {
         <div className="min-h-0 md:grid md:grid-cols-[216px_minmax(0,1fr)]">
           <Sidebar variant="desktop" />
 
-          <main ref={mainScrollRef} className="min-h-0 overflow-y-auto overflow-x-hidden">
+          <main
+            ref={mainScrollRef}
+            className="min-h-0 overflow-y-auto overflow-x-hidden"
+            style={{ scrollPaddingTop: 'calc(var(--app-header-offset) + var(--app-header-gap))' }}
+          >
             <div className="mx-auto flex min-h-full w-full max-w-[1280px] flex-col px-3.5 py-4 sm:px-4.5 sm:py-5 md:px-5 md:py-6">
               <Outlet />
             </div>

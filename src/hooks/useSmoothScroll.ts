@@ -35,7 +35,7 @@ export function useSmoothScroll(enabled = true) {
       wheelMultiplier: 0.92,
       touchMultiplier: 1,
       overscroll: true,
-      anchors: { offset: -104, duration: 0.85, easing: smoothEase },
+      anchors: { duration: 0.85, easing: smoothEase },
       stopInertiaOnNavigate: true,
       prevent: node =>
         Boolean(node.closest('[data-native-scroll], [data-lenis-prevent], [role="dialog"]')),
@@ -95,4 +95,3 @@ export function useSmoothScroll(enabled = true) {
     }
   }, [pathname, shouldEnable])
 }
-

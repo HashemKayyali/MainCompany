@@ -22,7 +22,10 @@ export default function PageContainer({ children }: { children: ReactNode }) {
 
       <AnimatedBackground position="absolute" className="z-0" />
 
-      <div className="relative z-10 flex min-h-screen flex-col">
+      <div
+        className="relative z-10 flex min-h-screen flex-col"
+        style={{ ['--app-header-offset' as const]: 'var(--app-navbar-height)' }}
+      >
         <Navbar />
         <motion.main
           id="main-content"
@@ -31,6 +34,7 @@ export default function PageContainer({ children }: { children: ReactNode }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           className="flex-1"
+          style={{ paddingTop: 'var(--app-header-offset)' }}
         >
           {children}
         </motion.main>

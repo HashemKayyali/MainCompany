@@ -622,7 +622,7 @@ export default function Hero() {
   )
 
   return (
-    <section className="relative overflow-hidden pb-10 pt-24 sm:pb-12 sm:pt-24 lg:min-h-[72svh] lg:pb-16 lg:pt-28">
+    <section className="relative overflow-hidden pb-10 pt-4 sm:pb-12 sm:pt-6 lg:min-h-[72svh] lg:pb-16 lg:pt-8">
 
       {/* ── Background layer ── */}
       <div className="pointer-events-none absolute inset-0">

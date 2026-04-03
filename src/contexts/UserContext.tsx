@@ -19,6 +19,8 @@ import {
 import {
   fetchProfileIdentityRow,
   isMissingAvatarColumnError,
+  isMissingAvatarUrlColumnError,
+  isMissingGeneratedAvatarColumnError,
   mapProfileAvatarFields,
 } from '../services/profile.service'
 import { useSession } from './SessionContext'
@@ -61,6 +63,7 @@ interface UserCtx {
   updateProfile: (updates: {
     name?: string
     phone?: string
+    avatarUrl?: string | null
     avatar?: AvatarSelection | null
   }) => Promise<string | true>
 }
@@ -414,6 +417,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     async (updates: {
       name?: string
       phone?: string
+      avatarUrl?: string | null
       avatar?: AvatarSelection | null
     }): Promise<string | true> => {
       const targetId = authUser?.id || currentUser?.id
@@ -421,12 +425,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
       const hasNameUpdate = Object.prototype.hasOwnProperty.call(updates, 'name')
       const hasPhoneUpdate = Object.prototype.hasOwnProperty.call(updates, 'phone')
+      const hasAvatarUrlUpdate = Object.prototype.hasOwnProperty.call(updates, 'avatarUrl')
       const hasAvatarUpdate = Object.prototype.hasOwnProperty.call(updates, 'avatar')
       const currentName = currentUser?.name?.trim() || ''
       const currentPhone = currentUser?.phone?.trim() || ''
+      const currentAvatarUrl = currentUser?.avatarUrl?.trim() || ''
       const currentAvatarSelection = normalizeAvatarSelection(currentUser)
       const nextName = hasNameUpdate ? updates.name?.trim() || '' : currentName
       const nextPhone = hasPhoneUpdate ? updates.phone?.trim() || '' : currentPhone
+      const nextAvatarUrl = hasAvatarUrlUpdate ? updates.avatarUrl?.trim() || '' : currentAvatarUrl
       const nextAvatarSelection = hasAvatarUpdate
         ? normalizeAvatarSelection(updates.avatar ?? null)
         : currentAvatarSelection
@@ -438,6 +445,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
       if (hasPhoneUpdate && nextPhone !== currentPhone) {
         payload.phone = nextPhone || null
+      }
+
+      if (hasAvatarUrlUpdate && nextAvatarUrl !== currentAvatarUrl) {
+        payload.avatar_url = nextAvatarUrl || null
       }
 
       if (hasAvatarUpdate && !isAvatarSelectionEqual(currentAvatarSelection, updates.avatar ?? null)) {
@@ -454,9 +465,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
             ...baseUser,
             ...(hasNameUpdate ? { name: nextName } : {}),
             ...(hasPhoneUpdate ? { phone: nextPhone } : {}),
+            ...(hasAvatarUrlUpdate ? { avatarUrl: nextAvatarUrl || null } : {}),
             ...(hasAvatarUpdate
               ? {
-                  avatarUrl: baseUser.avatarUrl ?? null,
                   avatarStyle: nextAvatarSelection?.avatarStyle ?? null,
                   avatarSeed: nextAvatarSelection?.avatarSeed ?? null,
                   avatarOptions: nextAvatarSelection?.avatarOptions ?? null,
@@ -470,6 +481,32 @@ export function UserProvider({ children }: { children: ReactNode }) {
           .from('profiles')
           .update(payload)
           .eq('id', targetId)
+
+        if (error && isMissingAvatarUrlColumnError(error)) {
+          const retryPayload = { ...payload }
+          delete retryPayload.avatar_url
+
+          if (!Object.keys(retryPayload).length) {
+            return 'Uploaded profile photos are not available until the avatar_url column is applied in Supabase.'
+          }
+
+          const retry = await supabase.from('profiles').update(retryPayload).eq('id', targetId)
+          error = retry.error
+        }
+
+        if (error && isMissingGeneratedAvatarColumnError(error)) {
+          const retryPayload = { ...payload }
+          delete retryPayload.avatar_style
+          delete retryPayload.avatar_seed
+          delete retryPayload.avatar_options
+
+          if (!Object.keys(retryPayload).length) {
+            return 'Generated avatar updates are not available until the profile avatar columns are applied in Supabase.'
+          }
+
+          const retry = await supabase.from('profiles').update(retryPayload).eq('id', targetId)
+          error = retry.error
+        }
 
         if (error && isMissingAvatarColumnError(error)) {
           const retryPayload: ProfileUpdate = {}

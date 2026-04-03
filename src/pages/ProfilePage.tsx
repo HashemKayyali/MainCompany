@@ -1,21 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Mail, Phone, Save, Undo2, UserRound } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useTheme } from '../contexts/ThemeContext'
 import { useToast } from '../contexts/ToastContext'
 import { useUser } from '../contexts/UserContext'
 import { usePageMeta } from '../hooks/usePageMeta'
 import AvatarPicker from '../components/ui/AvatarPicker'
+import Modal from '../components/ui/Modal'
 import UserAvatar from '../components/ui/UserAvatar'
 import {
   avatarIdentitySeed,
   buildDefaultAvatarSelection,
   isAvatarSelectionEqual,
+  normalizeAvatarUrl,
   normalizeAvatarSelection,
   type AvatarSelection,
 } from '../lib/avatar'
 import { getErrorMessage } from '../lib/errors'
+import { deleteImage, uploadImageVariants } from '../services/storage.service'
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ')
@@ -36,7 +38,20 @@ type SyncedProfileSnapshot = {
   userId: string | null
   name: string
   phone: string
+  avatarUrl: string
   avatarSelection: AvatarSelection
+}
+
+function feedbackTextClassName(tone: FeedbackTone, isDark: boolean) {
+  if (tone === 'success') {
+    return isDark ? 'text-emerald-300' : 'text-emerald-700'
+  }
+
+  if (tone === 'error') {
+    return isDark ? 'text-rose-300' : 'text-rose-700'
+  }
+
+  return isDark ? 'text-sky-300' : 'text-sky-700'
 }
 
 export default function ProfilePage() {
@@ -48,18 +63,22 @@ export default function ProfilePage() {
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState('')
   const [avatarSelection, setAvatarSelection] = useState<AvatarSelection>(() =>
     buildDefaultAvatarSelection('guest-profile')
   )
+  const [avatarUploading, setAvatarUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveFeedback, setSaveFeedback] = useState<InlineFeedback | null>(null)
   const [resetSending, setResetSending] = useState(false)
   const [resetFeedback, setResetFeedback] = useState<InlineFeedback | null>(null)
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false)
+  const avatarFileInputRef = useRef<HTMLInputElement>(null)
   const syncedSnapshotRef = useRef<SyncedProfileSnapshot>({
     userId: null,
     name: '',
     phone: '',
+    avatarUrl: '',
     avatarSelection: buildDefaultAvatarSelection('guest-profile'),
   })
 
@@ -83,30 +102,75 @@ export default function ProfilePage() {
     () => currentAvatar || buildDefaultAvatarSelection(profileIdentitySeed),
     [currentAvatar, profileIdentitySeed]
   )
+  const baselineAvatarUrl = useMemo(() => normalizeAvatarUrl(currentUser?.avatarUrl) || '', [currentUser?.avatarUrl])
 
   const normalizedCurrentName = normalizeProfileValue(currentUser?.name)
   const normalizedCurrentPhone = normalizeProfileValue(currentUser?.phone)
   const trimmedName = name.trim()
   const trimmedPhone = phone.trim()
+  const trimmedAvatarUrl = normalizeAvatarUrl(avatarUrl) || ''
   const accountEmail = currentUser?.email?.trim() || ''
+  const avatarDisplayName = trimmedName || currentUser?.name || currentUser?.email || 'User'
+  const hasUploadedAvatar = trimmedAvatarUrl.length > 0
 
   const canResetPassword = accountEmail.length > 0
 
-  const txt = isDark ? 'text-white' : 'text-gray-900'
-  const sub = isDark ? 'text-purple-100/62' : 'text-gray-600'
-  const muted = isDark ? 'text-cyan-100/42' : 'text-violet-600/54'
+  const pageClassName = 'mx-auto w-full max-w-3xl px-4 py-12 sm:px-6'
+  const panelClassName = cn(
+    'rounded-2xl border p-6 sm:p-8',
+    isDark
+      ? 'border-white/10 bg-[#0b1220]/88 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.8)]'
+      : 'border-gray-200 bg-white shadow-[0_20px_50px_-36px_rgba(15,23,42,0.25)]'
+  )
+  const emptyStatePanelClassName = cn(panelClassName, 'mx-auto max-w-xl text-center')
+  const titleClassName = cn('text-3xl font-semibold tracking-tight', isDark ? 'text-white' : 'text-gray-900')
+  const subtitleClassName = cn('text-sm leading-6', isDark ? 'text-white/65' : 'text-gray-600')
+  const sectionTitleClassName = cn('text-lg font-semibold', isDark ? 'text-white' : 'text-gray-900')
+  const sectionBodyClassName = cn('mt-1 text-sm leading-6', isDark ? 'text-white/60' : 'text-gray-600')
+  const labelClassName = cn('mb-2 block text-sm font-medium', isDark ? 'text-white/85' : 'text-gray-700')
+  const inputClassName = cn(
+    'block w-full rounded-xl border px-3.5 py-3 text-sm transition focus:outline-none focus:ring-2',
+    isDark
+      ? 'border-white/10 bg-[#0a1120] text-white placeholder:text-white/30 focus:border-sky-300/40 focus:ring-sky-400/15'
+      : 'border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-violet-400 focus:ring-violet-200'
+  )
+  const readOnlyFieldClassName = cn(
+    'rounded-xl border px-3.5 py-3 text-sm leading-6 break-all',
+    isDark ? 'border-white/10 bg-white/[0.04] text-white/70' : 'border-gray-200 bg-gray-50 text-gray-600'
+  )
+  const secondaryButtonClassName = cn(
+    'inline-flex min-h-[42px] items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50',
+    isDark
+      ? 'border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06]'
+      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+  )
+  const primaryButtonClassName = cn(
+    'inline-flex min-h-[44px] items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50',
+    isDark ? 'bg-sky-300 text-slate-950 hover:bg-sky-200' : 'bg-gray-900 text-white hover:bg-gray-800'
+  )
+  const dividerClassName = cn('border-t pt-8', isDark ? 'border-white/10' : 'border-gray-200')
+  const saveFeedbackClassName = saveFeedback
+    ? feedbackTextClassName(saveFeedback.tone, isDark)
+    : ''
+  const resetFeedbackClassName = resetFeedback
+    ? feedbackTextClassName(resetFeedback.tone, isDark)
+    : ''
 
   useEffect(() => {
     if (!currentUser) return
 
     const nextName = normalizedCurrentName
     const nextPhone = normalizedCurrentPhone
+    const nextAvatarUrl = baselineAvatarUrl
     const nextAvatarSelection = baselineAvatarSelection
     const previousSnapshot = syncedSnapshotRef.current
     const switchedUser = previousSnapshot.userId !== currentUser.id
 
     setName(previous => (switchedUser || previous === previousSnapshot.name ? nextName : previous))
     setPhone(previous => (switchedUser || previous === previousSnapshot.phone ? nextPhone : previous))
+    setAvatarUrl(previous =>
+      switchedUser || previous === previousSnapshot.avatarUrl ? nextAvatarUrl : previous
+    )
     setAvatarSelection(previous =>
       switchedUser || isAvatarSelectionEqual(previous, previousSnapshot.avatarSelection)
         ? isAvatarSelectionEqual(previous, nextAvatarSelection)
@@ -119,14 +183,16 @@ export default function ProfilePage() {
       userId: currentUser.id,
       name: nextName,
       phone: nextPhone,
+      avatarUrl: nextAvatarUrl,
       avatarSelection: nextAvatarSelection,
     }
 
     if (switchedUser) {
       setSaveFeedback(null)
       setResetFeedback(null)
+      setAvatarPickerOpen(false)
     }
-  }, [baselineAvatarSelection, currentUser, normalizedCurrentName, normalizedCurrentPhone])
+  }, [baselineAvatarSelection, baselineAvatarUrl, currentUser, normalizedCurrentName, normalizedCurrentPhone])
 
   const hasChanges = useMemo(() => {
     if (!currentUser) return false
@@ -134,45 +200,20 @@ export default function ProfilePage() {
     return (
       trimmedName !== normalizedCurrentName ||
       trimmedPhone !== normalizedCurrentPhone ||
+      trimmedAvatarUrl !== baselineAvatarUrl ||
       !isAvatarSelectionEqual(baselineAvatarSelection, avatarSelection)
     )
   }, [
     avatarSelection,
     baselineAvatarSelection,
+    baselineAvatarUrl,
     currentUser,
     normalizedCurrentName,
     normalizedCurrentPhone,
+    trimmedAvatarUrl,
     trimmedName,
     trimmedPhone,
   ])
-
-  const saveFeedbackClassName = useMemo(() => {
-    if (!saveFeedback) return ''
-    if (saveFeedback.tone === 'success') {
-      return isDark
-        ? 'border-emerald-400/16 bg-emerald-400/10 text-emerald-200'
-        : 'border-emerald-200 bg-emerald-50 text-emerald-700'
-    }
-    if (saveFeedback.tone === 'error') {
-      return isDark
-        ? 'border-red-400/18 bg-red-400/10 text-red-200'
-        : 'border-red-200 bg-red-50 text-red-700'
-    }
-    return isDark
-      ? 'border-cyan-300/16 bg-cyan-400/10 text-cyan-100'
-      : 'border-cyan-200 bg-cyan-50 text-cyan-700'
-  }, [isDark, saveFeedback])
-
-  const resetFeedbackClassName = useMemo(() => {
-    if (!resetFeedback) return ''
-    if (resetFeedback.tone === 'success') {
-      return isDark ? 'text-emerald-200' : 'text-emerald-700'
-    }
-    if (resetFeedback.tone === 'error') {
-      return isDark ? 'text-red-200' : 'text-red-700'
-    }
-    return isDark ? 'text-cyan-100' : 'text-cyan-700'
-  }, [isDark, resetFeedback])
 
   useEffect(() => {
     if (!saveFeedback) return
@@ -187,13 +228,6 @@ export default function ProfilePage() {
     const timeoutId = window.setTimeout(() => setResetFeedback(null), 4000)
     return () => window.clearTimeout(timeoutId)
   }, [resetFeedback])
-
-  const resetDraft = () => {
-    setName(normalizedCurrentName)
-    setPhone(normalizedCurrentPhone)
-    setAvatarSelection(baselineAvatarSelection)
-    setSaveFeedback(null)
-  }
 
   const handleSave = async () => {
     if (!currentUser) return
@@ -211,23 +245,30 @@ export default function ProfilePage() {
     }
 
     const normalizedAvatarChanged = !isAvatarSelectionEqual(baselineAvatarSelection, avatarSelection)
+    const normalizedAvatarUrlChanged = trimmedAvatarUrl !== baselineAvatarUrl
     const nextName = trimmedName
     const nextPhone = trimmedPhone
+    const nextAvatarUrl = trimmedAvatarUrl
 
     setSaving(true)
     setSaveFeedback(null)
     setName(nextName)
     setPhone(nextPhone)
+    setAvatarUrl(nextAvatarUrl)
 
     const result = await updateProfile({
       ...(nextName !== normalizedCurrentName ? { name: nextName } : {}),
       ...(nextPhone !== normalizedCurrentPhone ? { phone: nextPhone } : {}),
+      ...(normalizedAvatarUrlChanged ? { avatarUrl: nextAvatarUrl } : {}),
       ...(normalizedAvatarChanged ? { avatar: avatarSelection } : {}),
     })
 
     setSaving(false)
 
     if (result === true) {
+      if (baselineAvatarUrl && baselineAvatarUrl !== nextAvatarUrl) {
+        void deleteImage(baselineAvatarUrl)
+      }
       const message = 'Profile updated successfully.'
       setSaveFeedback({ tone: 'success', message })
       toast('Profile updated', 'success')
@@ -237,6 +278,47 @@ export default function ProfilePage() {
     const message = result || 'Failed to update profile'
     setSaveFeedback({ tone: 'error', message })
     toast(message, 'error')
+  }
+
+  const handleAvatarFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+
+    if (!file) return
+    if (!currentUser) return
+
+    if (!file.type.startsWith('image/')) {
+      const message = 'Please choose an image file for your profile photo.'
+      toast(message, 'error')
+      setSaveFeedback({ tone: 'error', message })
+      return
+    }
+
+    setAvatarUploading(true)
+
+    try {
+      const { heroUrl } = await uploadImageVariants(file, `avatars/${currentUser.id}`)
+      if (trimmedAvatarUrl && trimmedAvatarUrl !== baselineAvatarUrl && trimmedAvatarUrl !== heroUrl) {
+        void deleteImage(trimmedAvatarUrl)
+      }
+      setAvatarUrl(heroUrl)
+      setSaveFeedback(null)
+      toast('Profile photo uploaded. Save profile to apply it.', 'success')
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, 'Failed to upload profile photo')
+      toast(message, 'error')
+      setSaveFeedback({ tone: 'error', message })
+    } finally {
+      setAvatarUploading(false)
+    }
+  }
+
+  const handleRemoveAvatarPhoto = () => {
+    if (trimmedAvatarUrl && trimmedAvatarUrl !== baselineAvatarUrl) {
+      void deleteImage(trimmedAvatarUrl)
+    }
+    setAvatarUrl('')
+    setSaveFeedback(null)
   }
 
   const handleResetPassword = async () => {
@@ -272,320 +354,316 @@ export default function ProfilePage() {
 
   if (!isLoggedIn) {
     return (
-      <section className="site-section">
-        <div className="site-container max-w-[34rem]">
-          <div className="section-shell site-shell-pad-lg text-center">
-            <div
-              className={cn(
-                'mx-auto flex h-16 w-16 items-center justify-center rounded-[22px]',
-                isDark
-                  ? 'bg-[linear-gradient(145deg,rgba(124,58,237,0.18),rgba(34,211,238,0.16))] ring-1 ring-inset ring-cyan-300/16'
-                  : 'bg-violet-50 ring-1 ring-inset ring-violet-200'
-              )}
-            >
-              <UserRound className={cn('h-7 w-7', isDark ? 'text-cyan-100/80' : 'text-violet-700')} />
-            </div>
-            <h1 className={cn('mt-5 font-display text-3xl font-bold', txt)}>Your account</h1>
-            <p className={cn('mt-3 text-sm leading-7', sub)}>
-              Sign in to manage your profile, avatar, and account details.
-            </p>
-            <Link
-              to={`/login?redirect=${encodeURIComponent('/profile')}`}
-              className="btn-primary mt-6 inline-flex"
-            >
-              Sign In
-            </Link>
-          </div>
+      <main className={pageClassName}>
+        <div className={emptyStatePanelClassName}>
+          <h1 className={titleClassName}>Profile settings</h1>
+          <p className={cn('mt-3', subtitleClassName)}>
+            Sign in to manage your profile details, avatar, and account security.
+          </p>
+          <Link
+            to={`/login?redirect=${encodeURIComponent('/profile')}`}
+            className={cn(primaryButtonClassName, 'mt-6 w-full sm:w-auto')}
+          >
+            Sign in
+          </Link>
         </div>
-      </section>
+      </main>
     )
   }
 
   if (loading && !currentUser) {
     return (
-      <section className="site-section">
-        <div className="site-container max-w-[34rem]">
-          <div className="section-shell site-shell-pad-lg text-center">
-            <div
-              className={cn(
-                'mx-auto h-9 w-9 animate-spin rounded-full border-2 border-t-transparent',
-                isDark ? 'border-cyan-300' : 'border-violet-500'
-              )}
-            />
-            <h1 className={cn('mt-5 font-display text-2xl font-bold', txt)}>Loading profile</h1>
-            <p className={cn('mt-2 text-sm leading-7', sub)}>
-              Syncing your account details and avatar preferences.
-            </p>
-          </div>
+      <main className={pageClassName}>
+        <div className={emptyStatePanelClassName}>
+          <div
+            className={cn(
+              'mx-auto h-8 w-8 animate-spin rounded-full border-2 border-t-transparent',
+              isDark ? 'border-sky-300' : 'border-gray-900'
+            )}
+          />
+          <h1 className={cn('mt-5 text-2xl font-semibold tracking-tight', isDark ? 'text-white' : 'text-gray-900')}>
+            Loading profile
+          </h1>
+          <p className={cn('mt-3', subtitleClassName)}>
+            Fetching your latest account details.
+          </p>
         </div>
-      </section>
+      </main>
     )
   }
 
   if (!currentUser) {
     return (
-      <section className="site-section">
-        <div className="site-container max-w-[36rem]">
-          <div className="section-shell site-shell-pad-lg text-center">
-            <div
-              className={cn(
-                'mx-auto flex h-16 w-16 items-center justify-center rounded-[22px]',
-                isDark
-                  ? 'bg-[linear-gradient(145deg,rgba(124,58,237,0.18),rgba(34,211,238,0.16))] ring-1 ring-inset ring-cyan-300/16'
-                  : 'bg-violet-50 ring-1 ring-inset ring-violet-200'
-              )}
-            >
-              <UserRound className={cn('h-7 w-7', isDark ? 'text-cyan-100/80' : 'text-violet-700')} />
-            </div>
-            <h1 className={cn('mt-5 font-display text-2xl font-bold', txt)}>Profile unavailable</h1>
-            <p className={cn('mt-2 text-sm leading-7', sub)}>
-              We couldn&apos;t load your profile details right now. Try refreshing the page or signing in again.
-            </p>
-            <Link to="/" className="btn-primary mt-6 inline-flex">
-              Back to Home
-            </Link>
-          </div>
+      <main className={pageClassName}>
+        <div className={emptyStatePanelClassName}>
+          <h1 className={titleClassName}>Profile unavailable</h1>
+          <p className={cn('mt-3', subtitleClassName)}>
+            We couldn&apos;t load your account details right now. Try refreshing the page or head back home.
+          </p>
+          <Link to="/" className={cn(secondaryButtonClassName, 'mt-6 w-full sm:w-auto')}>
+            Back to home
+          </Link>
         </div>
-      </section>
+      </main>
     )
   }
 
   return (
-    <section className="site-section">
-      <div className="site-container max-w-[38rem]">
-        <form
-          className="section-shell site-shell-pad-lg"
-          onSubmit={event => {
-            event.preventDefault()
-            void handleSave()
-          }}
-        >
-          <div>
-            <h1 className={cn('font-display text-[1.45rem] font-semibold', txt)}>Profile settings</h1>
-            <p className={cn('mt-2 text-sm leading-6', sub)}>Manage your account details.</p>
-          </div>
+    <>
+      <main className={pageClassName}>
+        <div className="space-y-8">
+          <header className="space-y-2">
+            <h1 className={titleClassName}>Profile settings</h1>
+            <p className={subtitleClassName}>Update your personal details and manage your avatar.</p>
+          </header>
 
-          {saveFeedback ? (
-            <div
-              aria-live="polite"
-              aria-atomic="true"
-              className={cn('mt-4 rounded-[16px] border px-4 py-3 text-sm transition', saveFeedbackClassName)}
-            >
-              {saveFeedback.message}
-            </div>
-          ) : null}
-
-          <div className="mt-5 space-y-4">
-            <div className="flex flex-wrap items-center gap-3 sm:flex-nowrap">
-              <div
-                className={cn(
-                  'relative overflow-hidden rounded-[18px] p-[2px]',
-                  isDark
-                    ? 'bg-[linear-gradient(145deg,rgba(34,211,238,0.24),rgba(168,85,247,0.14),rgba(236,72,153,0.18))]'
-                    : 'bg-[linear-gradient(145deg,rgba(124,58,237,0.14),rgba(236,72,153,0.1))]'
-                )}
-              >
-                <div
-                  className={cn(
-                    'rounded-[16px] p-1',
-                    isDark
-                      ? 'bg-[linear-gradient(180deg,rgba(9,13,26,0.96),rgba(7,9,20,0.98))]'
-                      : 'bg-white'
-                  )}
-                >
+          <form
+            className={panelClassName}
+            onSubmit={event => {
+              event.preventDefault()
+              void handleSave()
+            }}
+          >
+            <div className="space-y-8">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-center gap-4">
                   <UserAvatar
-                    name={trimmedName || currentUser.name || currentUser.email}
+                    name={avatarDisplayName}
                     email={accountEmail}
-                    avatarUrl={currentUser.avatarUrl}
+                    avatarUrl={trimmedAvatarUrl}
                     avatarStyle={avatarSelection.avatarStyle}
                     avatarSeed={avatarSelection.avatarSeed}
                     avatarOptions={avatarSelection.avatarOptions}
-                    alt={`${trimmedName || currentUser.name || currentUser.email || 'User'} avatar preview`}
-                    className="h-14 w-14 rounded-[14px]"
+                    alt={`${avatarDisplayName} avatar preview`}
+                    className={cn(
+                      'h-14 w-14 shrink-0 rounded-full border object-cover',
+                      isDark ? 'border-white/10' : 'border-gray-200'
+                    )}
                   />
+
+                  <div className="min-w-0">
+                    <p className={cn('text-sm font-medium', isDark ? 'text-white' : 'text-gray-900')}>Avatar</p>
+                    <p className={cn('mt-1 text-sm', isDark ? 'text-white/60' : 'text-gray-600')}>
+                      Used anywhere your profile appears.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setAvatarPickerOpen(true)}
+                  aria-haspopup="dialog"
+                  className={cn(secondaryButtonClassName, 'w-full sm:w-auto')}
+                >
+                  Update avatar
+                </button>
+              </div>
+
+              <div className="space-y-5">
+                <div>
+                  <label htmlFor="profile-name" className={labelClassName}>
+                    Full name
+                  </label>
+                  <input
+                    id="profile-name"
+                    className={inputClassName}
+                    value={name}
+                    onChange={event => {
+                      setName(event.target.value)
+                      setSaveFeedback(null)
+                    }}
+                    placeholder="Enter your full name"
+                    autoComplete="name"
+                    maxLength={100}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="profile-phone" className={labelClassName}>
+                    Phone number
+                  </label>
+                  <input
+                    id="profile-phone"
+                    className={inputClassName}
+                    type="tel"
+                    value={phone}
+                    onChange={event => {
+                      setPhone(event.target.value)
+                      setSaveFeedback(null)
+                    }}
+                    placeholder="Enter your phone number"
+                    autoComplete="tel"
+                    inputMode="tel"
+                    maxLength={20}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="profile-email" className={labelClassName}>
+                    Email
+                  </label>
+                  <div id="profile-email" className={readOnlyFieldClassName}>
+                    {accountEmail || 'No email address on file'}
+                  </div>
                 </div>
               </div>
 
+              <div className={cn('border-t pt-6', isDark ? 'border-white/10' : 'border-gray-200')}>
+                {saveFeedback ? (
+                  <p aria-live="polite" aria-atomic="true" className={cn('mb-3 text-sm', saveFeedbackClassName)}>
+                    {saveFeedback.message}
+                  </p>
+                ) : null}
+
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={saving || !hasChanges}
+                    className={cn(primaryButtonClassName, 'w-full sm:w-auto')}
+                  >
+                    {saving ? 'Saving...' : 'Save profile'}
+                  </button>
+                </div>
+              </div>
+
+              <section className={dividerClassName}>
+                <div className="space-y-4 sm:flex sm:items-start sm:justify-between sm:gap-6 sm:space-y-0">
+                  <div className="min-w-0">
+                    <h2 className={sectionTitleClassName}>Security</h2>
+                    <p className={sectionBodyClassName}>
+                      {canResetPassword ? (
+                        <>
+                          Send a password reset link to <span className="break-all">{accountEmail}</span>.
+                        </>
+                      ) : (
+                        'Add an email address to use password reset.'
+                      )}
+                    </p>
+
+                    {resetFeedback ? (
+                      <p
+                        aria-live="polite"
+                        aria-atomic="true"
+                        className={cn('mt-2 text-sm', resetFeedbackClassName)}
+                      >
+                        {resetFeedback.message}
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => void handleResetPassword()}
+                    disabled={resetSending || !canResetPassword}
+                    aria-disabled={resetSending || !canResetPassword}
+                    className={cn(secondaryButtonClassName, 'w-full sm:w-auto sm:shrink-0')}
+                  >
+                    {resetSending ? 'Sending...' : 'Send password reset email'}
+                  </button>
+                </div>
+              </section>
+            </div>
+          </form>
+        </div>
+      </main>
+
+      <Modal
+        open={avatarPickerOpen}
+        onClose={() => setAvatarPickerOpen(false)}
+        title="Update avatar"
+        size="md"
+        bodyClassName="px-3 pb-3.5 pt-3 sm:px-3.5 sm:pb-4"
+      >
+        <div className="space-y-3.5">
+          <input
+            ref={avatarFileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={event => {
+              void handleAvatarFileChange(event)
+            }}
+            className="hidden"
+          />
+
+          <div
+            className={cn(
+              'rounded-[18px] border p-3',
+              isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-gray-50/80'
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <UserAvatar
+                name={avatarDisplayName}
+                email={accountEmail}
+                avatarUrl={trimmedAvatarUrl}
+                avatarStyle={avatarSelection.avatarStyle}
+                avatarSeed={avatarSelection.avatarSeed}
+                avatarOptions={avatarSelection.avatarOptions}
+                alt={`${avatarDisplayName} avatar preview`}
+                className={cn(
+                  'h-16 w-16 shrink-0 rounded-full border',
+                  isDark ? 'border-white/10' : 'border-gray-200'
+                )}
+              />
+
               <div className="min-w-0 flex-1">
-                <div className={cn('text-sm font-semibold', txt)}>Avatar</div>
-                <p className={cn('mt-1 text-[12px] leading-5.5', sub)}>
-                  Choose the portrait shown across your account.
+                <p className={cn('text-sm font-medium', isDark ? 'text-white' : 'text-gray-900')}>
+                  {hasUploadedAvatar ? 'Uploaded photo active' : 'Generated avatar active'}
+                </p>
+                <p className={cn('mt-1 text-xs leading-5', isDark ? 'text-white/60' : 'text-gray-600')}>
+                  {hasUploadedAvatar
+                    ? 'Uploaded photos take priority. Remove it to switch back to your generated avatar.'
+                    : 'Upload a photo to override your generated avatar everywhere in the app.'}
                 </p>
               </div>
+            </div>
 
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
               <button
                 type="button"
-                onClick={() => setAvatarPickerOpen(open => !open)}
-                aria-expanded={avatarPickerOpen}
-                aria-controls="profile-avatar-picker"
-                className="btn-outline !w-full !rounded-[16px] !px-4 sm:!w-auto"
+                onClick={() => avatarFileInputRef.current?.click()}
+                disabled={avatarUploading}
+                className={cn(secondaryButtonClassName, 'w-full sm:w-auto')}
               >
-                {avatarPickerOpen ? 'Hide avatar options' : 'Change avatar'}
+                {avatarUploading ? 'Uploading...' : hasUploadedAvatar ? 'Replace photo' : 'Upload photo'}
               </button>
-            </div>
 
-            {avatarPickerOpen ? (
-              <div id="profile-avatar-picker">
-                <AvatarPicker
-                  value={avatarSelection}
-                  onChange={selection => {
-                    setAvatarSelection(selection)
-                    setSaveFeedback(null)
-                  }}
-                  identitySeed={pickerIdentitySeed}
-                  title="Choose an avatar"
-                  description="Pick the portrait you want to use across the app."
-                  compact={true}
-                />
-              </div>
-            ) : null}
-          </div>
-
-          <div className="mt-5 space-y-3.5">
-            <div className="space-y-2">
-              <label
-                htmlFor="profile-name"
-                className={cn('text-[11px] font-mono uppercase tracking-[0.18em]', muted)}
-              >
-                Full name
-              </label>
-              <div className="relative">
-                <UserRound
-                  className={cn(
-                    'pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2',
-                    muted
-                  )}
-                  strokeWidth={1.9}
-                />
-                <input
-                  id="profile-name"
-                  className="form-field !pl-11"
-                  value={name}
-                  onChange={event => {
-                    setName(event.target.value)
-                    setSaveFeedback(null)
-                  }}
-                  placeholder="Your full name"
-                  autoComplete="name"
-                  maxLength={100}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="profile-phone"
-                className={cn('text-[11px] font-mono uppercase tracking-[0.18em]', muted)}
-              >
-                Phone number
-              </label>
-              <div className="relative">
-                <Phone
-                  className={cn(
-                    'pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2',
-                    muted
-                  )}
-                  strokeWidth={1.9}
-                />
-                <input
-                  id="profile-phone"
-                  className="form-field !pl-11"
-                  type="tel"
-                  value={phone}
-                  onChange={event => {
-                    setPhone(event.target.value)
-                    setSaveFeedback(null)
-                  }}
-                  placeholder="+962..."
-                  autoComplete="tel"
-                  inputMode="tel"
-                  maxLength={20}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="profile-email"
-                className={cn('text-[11px] font-mono uppercase tracking-[0.18em]', muted)}
-              >
-                Email address
-              </label>
-              <div
-                id="profile-email"
-                className={cn(
-                  'flex min-h-[46px] items-center gap-3 rounded-[16px] px-4',
-                  isDark
-                    ? 'bg-[#0e1430]/92 text-purple-100/76 ring-1 ring-inset ring-cyan-400/10'
-                    : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200'
-                )}
-              >
-                <Mail className={cn('h-4 w-4 shrink-0', muted)} strokeWidth={1.9} />
-                <span className="min-w-0 break-all text-sm font-medium">
-                  {accountEmail || 'No email address on file'}
-                </span>
-              </div>
-              <p className={cn('text-[11px] leading-5.5', muted)}>
-                Email is managed by your sign-in account and cannot be changed here.
-              </p>
+              {hasUploadedAvatar ? (
+                <button
+                  type="button"
+                  onClick={handleRemoveAvatarPhoto}
+                  disabled={avatarUploading}
+                  className={cn(secondaryButtonClassName, 'w-full sm:w-auto')}
+                >
+                  Remove photo
+                </button>
+              ) : null}
             </div>
           </div>
 
-          <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <AvatarPicker
+            value={avatarSelection}
+            onChange={selection => {
+              setAvatarSelection(selection)
+              setSaveFeedback(null)
+            }}
+            identitySeed={pickerIdentitySeed}
+            title="Generated avatar"
+            description="Choose the fallback avatar that is used whenever you do not have an uploaded photo."
+            compact={true}
+          />
+
+          <div className="flex justify-end pt-1">
             <button
               type="button"
-              onClick={resetDraft}
-              disabled={saving || !hasChanges}
-              className="btn-outline !w-full !rounded-[16px] !px-4 disabled:opacity-40 sm:!w-auto"
+              onClick={() => setAvatarPickerOpen(false)}
+              className={secondaryButtonClassName}
             >
-              <Undo2 className="h-4 w-4" strokeWidth={1.9} />
-              Reset changes
-            </button>
-            <button
-              type="submit"
-              disabled={saving || !hasChanges}
-              className="btn-primary !w-full !rounded-[16px] !px-5 disabled:opacity-40 sm:!w-auto"
-            >
-              <Save className="h-4 w-4" strokeWidth={1.9} />
-              {saving ? 'Saving...' : 'Save profile'}
+              Done
             </button>
           </div>
-
-          <div className={cn('mt-6 border-t pt-5', isDark ? 'border-white/[0.06]' : 'border-gray-100')}>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className={cn('text-sm font-semibold', txt)}>Security</h2>
-                <p className={cn('mt-1 text-[12px] leading-5.5', sub)}>
-                  {canResetPassword
-                    ? `Send a password reset link to ${accountEmail}.`
-                    : 'Add an email address to use password reset.'}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => void handleResetPassword()}
-                disabled={resetSending || !canResetPassword}
-                aria-disabled={resetSending || !canResetPassword}
-                className="btn-outline !w-full !rounded-[16px] !px-4 disabled:opacity-40 sm:!w-auto"
-              >
-                <Mail className="h-4 w-4" strokeWidth={1.9} />
-                {resetSending ? 'Sending...' : 'Send password reset email'}
-              </button>
-            </div>
-
-            {resetFeedback ? (
-              <p
-                aria-live="polite"
-                aria-atomic="true"
-                className={cn('mt-3 text-sm leading-6', resetFeedbackClassName)}
-              >
-                {resetFeedback.message}
-              </p>
-            ) : null}
-          </div>
-        </form>
-      </div>
-    </section>
+        </div>
+      </Modal>
+    </>
   )
 }

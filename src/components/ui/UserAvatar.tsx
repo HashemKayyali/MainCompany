@@ -63,7 +63,7 @@ export default function UserAvatar({
     <div
       className={cn(
         'relative isolate flex items-center justify-center overflow-hidden',
-        size ? 'shrink-0' : 'h-full w-full',
+        size ? 'shrink-0' : undefined,
         className
       )}
       style={dimensionStyle}
@@ -73,7 +73,7 @@ export default function UserAvatar({
         <img
           src={imageSrc}
           alt={resolvedAlt}
-          className={cn('h-full w-full object-cover', imageClassName)}
+          className={cn('block h-full w-full object-cover', imageClassName)}
           draggable={false}
           onError={() => {
             if (resolvedAvatarUrl && !uploadedImageFailed) {

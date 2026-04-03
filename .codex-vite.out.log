@@ -1300,3 +1300,32 @@
 [2m4:39:43 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProfilePage.tsx, /src/styles/input.css[22m
 [2m4:41:54 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProfilePage.tsx, /src/styles/input.css[22m
 [2m2:45:25 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProfilePage.tsx, /src/styles/input.css[22m
+[2m2:55:29 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProfilePage.tsx, /src/styles/input.css[22m
+[2m2:57:04 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProfilePage.tsx, /src/styles/input.css[22m
+[2m2:58:22 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProfilePage.tsx, /src/styles/input.css[22m
+[2m3:10:35 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProfilePage.tsx, /src/styles/input.css[22m
+[2m3:10:35 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProfilePage.tsx, /src/styles/input.css[22m
+[2m3:16:08 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/ui/UserAvatar.tsx, /src/styles/input.css[22m
+[2m3:20:47 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProfilePage.tsx, /src/styles/input.css[22m
+[2m3:23:30 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles/input.css, /src/contexts/UserContext.tsx, /src/contexts/AuthContext.tsx, /src/contexts/DataContext.tsx, /src/pages/admin/AdminLogsPage.tsx, /src/pages/admin/AdminUsersPage.tsx[22m
+[2m3:23:31 PM[22m [36m[1m[vite][22m[39m [33mhmr invalidate [39m[2m/src/contexts/UserContext.tsx[22m Could not Fast Refresh ("useUser" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m3:23:31 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/contexts/UserContext.tsx[22m
+[2m3:23:31 PM[22m [36m[1m[vite][22m[39m [33mhmr invalidate [39m[2m/src/contexts/AuthContext.tsx[22m Could not Fast Refresh ("useAuth" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m3:23:31 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/contexts/AuthContext.tsx[22m
+[2m3:23:31 PM[22m [36m[1m[vite][22m[39m [33mhmr invalidate [39m[2m/src/contexts/DataContext.tsx[22m Could not Fast Refresh ("useData" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m3:23:31 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/contexts/DataContext.tsx[22m
+[2m3:23:48 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/ui/AvatarPicker.tsx, /src/styles/input.css[22m
+[2m3:24:04 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/contexts/UserContext.tsx, /src/styles/input.css[22m
+[2m3:24:05 PM[22m [36m[1m[vite][22m[39m [33mhmr invalidate [39m[2m/src/contexts/UserContext.tsx[22m Could not Fast Refresh ("useUser" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m3:24:05 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/contexts/UserContext.tsx[22m
+[2m3:24:38 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProfilePage.tsx, /src/styles/input.css[22m
+[2m3:24:56 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProfilePage.tsx, /src/styles/input.css[22m
+[2m3:25:43 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProfilePage.tsx, /src/styles/input.css[22m
+[2m3:25:43 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProfilePage.tsx, /src/styles/input.css[22m
+[2m3:25:53 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/ui/AvatarPicker.tsx, /src/styles/input.css[22m
+[2m3:30:47 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles/input.css[22m
+[2m3:30:56 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/Navbar.tsx, /src/styles/input.css[22m
+[2m3:31:02 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/PageContainer.tsx, /src/styles/input.css[22m
+[2m3:31:06 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/PageContainer.tsx, /src/styles/input.css[22m
+[2m3:31:15 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/AdminLayout.tsx, /src/styles/input.css[22m
+[2m3:31:19 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/home/Hero.tsx, /src/styles/input.css[22m
