@@ -14,12 +14,10 @@ import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminViewToggle from '../../components/admin/AdminViewToggle'
 import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
+import { cn } from '../../utils/cn'
 
 const empty: Category = { id: '', name: '', slug: '', icon: '', description: '', image: '' }
-
-function cn(...s: Array<string | false | undefined | null>) {
-  return s.filter(Boolean).join(' ')
-}
+
 
 function makeSlug(name: string) {
   return name

@@ -1,11 +1,14 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { LayoutGrid, SlidersHorizontal } from 'lucide-react'
 import ProductCard from '../components/product/ProductCard'
 import Chip from '../components/ui/Chip'
 import { useData } from '../contexts/DataContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { usePageMeta } from '../hooks/usePageMeta'
+
+const ease = [0.16, 1, 0.3, 1]
 
 export default function ProductsPage() {
   usePageMeta({
@@ -23,98 +26,159 @@ export default function ProductsPage() {
   const filtered = useMemo(() => {
     if (filter === 'all') return products
 
-    const catId = categories.find((c) => c.slug === filter)?.id || ''
+    const catId = categories.find(c => c.slug === filter)?.id || ''
     const byCategory = catId ? getProductsByCategory(catId) : []
-    const byTags = products.filter((p) =>
-      p.categoryTags?.some((t) => t.toLowerCase() === filter.toLowerCase())
+    const byTags = products.filter(p =>
+      p.categoryTags?.some(t => t.toLowerCase() === filter.toLowerCase())
     )
 
     return byCategory
       .concat(byTags)
-      .filter((p, i, arr) => arr.findIndex((x) => x.slug === p.slug) === i)
+      .filter((p, i, arr) => arr.findIndex(x => x.slug === p.slug) === i)
   }, [filter, products, categories, getProductsByCategory])
+
+  const divider = isDark ? 'border-white/[0.07]' : 'border-violet-100/60'
 
   return (
     <section className="site-section bg-transparent">
       <div className="site-container">
-        <div className="section-shell px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+        <div
+          className={`overflow-hidden rounded-[28px] border px-5 py-8 sm:px-7 sm:py-10 lg:px-9 lg:py-12 ${
+            isDark
+              ? 'border-white/[0.07] bg-[linear-gradient(180deg,rgba(14,12,32,0.72),rgba(8,8,20,0.55))] shadow-[0_24px_80px_rgba(2,4,16,0.4),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-sm'
+              : 'border-violet-100/80 bg-white/92 shadow-[0_20px_60px_rgba(15,23,42,0.06)]'
+          }`}
+        >
+          {/* Ambient top glow */}
           <div
-            className="pointer-events-none absolute left-0 top-0 h-44 w-80 opacity-75 blur-3xl"
-            style={{
-              background:
-                'radial-gradient(circle, rgba(124,58,237,0.14) 0%, transparent 72%)',
-            }}
+            className="pointer-events-none absolute left-0 top-0 h-52 w-80 opacity-50 blur-3xl"
+            style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.16) 0%, transparent 72%)' }}
           />
 
+          {/* ── Page Header ── */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease }}
             className="relative mb-8 flex flex-col gap-6 lg:mb-10 lg:flex-row lg:items-end lg:justify-between"
           >
-            <div className="max-w-2xl px-1">
+            <div className="max-w-2xl">
               <span className="section-label">// Marketplace Collection</span>
-              <h1 className={`section-title !text-left mt-2 ${!isDark ? 'text-gray-900' : ''}`}>
+              <h1 className={`section-title !text-left mt-2.5 ${!isDark ? 'text-gray-900' : ''}`}>
                 Explore the <span className="text-glow">marketplace catalog</span>
               </h1>
-              <p className={`mt-4 max-w-xl text-[1rem] leading-relaxed ${isDark ? 'text-purple-200/66' : 'text-gray-500'}`}>
-                Browse categories, compare listings, and move through the collection with a more curated premium marketplace experience.
+              <p className={`mt-4 max-w-xl text-[0.97rem] leading-relaxed ${isDark ? 'text-slate-300/72' : 'text-slate-500'}`}>
+                Browse premium event services across all categories. Filter by type to find exactly what your event needs.
               </p>
             </div>
 
-            <div
-              className={`rounded-2xl border px-5 py-4 min-w-[200px] ${
+            {/* Stat card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1, ease }}
+              className={`shrink-0 rounded-[18px] border px-5 py-4 ${
                 isDark
-                  ? 'border-white/10 bg-white/5 backdrop-blur-md'
-                  : 'border-violet-200 bg-white/80 backdrop-blur-md'
+                  ? 'border-white/[0.09] bg-white/[0.04]'
+                  : 'border-violet-200/60 bg-white shadow-[0_4px_20px_rgba(124,58,237,0.06)]'
               }`}
             >
-              <div className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-purple-300/80' : 'text-violet-600'}`}>
-                Format
+              <div className={`text-[9.5px] font-bold uppercase tracking-[0.18em] flex items-center gap-1.5 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                <LayoutGrid size={10} />
+                Listings
               </div>
-              <div className={`mt-1 text-3xl font-display font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <div className={`mt-1.5 font-display text-[2.4rem] font-black leading-none tracking-[-0.04em] ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {filtered.length}
               </div>
-              <div className={`text-sm mt-1 ${isDark ? 'text-purple-200/60' : 'text-gray-500'}`}>
-                premium listings
+              <div className={`mt-1 text-[11.5px] font-medium ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                {filter === 'all' ? 'total services' : 'in this category'}
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* ── Category Filter ── */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.08, ease }}
+            className="mb-8"
+          >
+            <div className="mb-3 flex items-center gap-2">
+              <SlidersHorizontal size={12} className={isDark ? 'text-slate-600' : 'text-slate-400'} />
+              <span className={`text-[9.5px] font-bold uppercase tracking-[0.18em] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+                Filter by category
+              </span>
+            </div>
+            <div className="-mx-5 overflow-x-auto px-5 pb-2 sm:-mx-7 sm:px-7 lg:-mx-9 lg:px-9">
+              <div className="flex w-max min-w-full gap-2 sm:flex-wrap">
+                <Chip active={filter === 'all'} onClick={() => setFilter('all')}>
+                  All ({products.length})
+                </Chip>
+                {categories.map(c => {
+                  const count = getProductsByCategory(c.id).length
+                  return (
+                    <Chip key={c.id} active={filter === c.slug} onClick={() => setFilter(c.slug)}>
+                      {c.icon} {c.name} ({count})
+                    </Chip>
+                  )
+                })}
               </div>
             </div>
           </motion.div>
 
-          <div className="mb-8 -mx-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 scrollbar-hide">
-            <div className="flex w-max min-w-full gap-2 sm:flex-wrap">
-              <Chip active={filter === 'all'} onClick={() => setFilter('all')}>
-                All ({products.length})
-              </Chip>
+          {/* ── Divider ── */}
+          <div className={`mb-8 h-px ${divider}`} />
 
-              {categories.map((c) => {
-                const count = getProductsByCategory(c.id).length
-                return (
-                  <Chip key={c.id} active={filter === c.slug} onClick={() => setFilter(c.slug)}>
-                    {c.icon} {c.name} ({count})
-                  </Chip>
-                )
-              })}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-5">
-            {filtered.map((p, i) => (
-              <ProductCard key={p.slug} product={p} index={i} />
-            ))}
-          </div>
-
-          {filtered.length === 0 && (
-            <div
-              className={`mt-8 rounded-2xl border border-dashed py-16 text-center ${
-                isDark
-                  ? 'border-white/10 bg-white/5 text-purple-200/40'
-                  : 'border-violet-200 bg-slate-50 text-gray-500'
-              }`}
+          {/* ── Product Grid ── */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={filter}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease }}
             >
-              <p className="font-display text-lg font-medium">No products match this filter.</p>
-              <p className="mt-2 text-sm">Try removing filters to see more results.</p>
-            </div>
-          )}
+              {filtered.length > 0 ? (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-5">
+                  {filtered.map((p, i) => (
+                    <ProductCard key={p.slug} product={p} index={i} />
+                  ))}
+                </div>
+              ) : (
+                <div
+                  className={`rounded-[22px] border border-dashed py-16 text-center ${
+                    isDark
+                      ? 'border-white/[0.10] bg-white/[0.025]'
+                      : 'border-violet-200 bg-slate-50'
+                  }`}
+                >
+                  <div
+                    className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] ${
+                      isDark ? 'bg-white/[0.06]' : 'bg-violet-50'
+                    }`}
+                  >
+                    <LayoutGrid size={22} className={isDark ? 'text-slate-600' : 'text-violet-400'} />
+                  </div>
+                  <p className={`font-display text-[1.05rem] font-semibold ${isDark ? 'text-white/60' : 'text-slate-700'}`}>
+                    No products match this filter
+                  </p>
+                  <p className={`mt-2 text-[13px] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+                    Try selecting a different category to see more results.
+                  </p>
+                  <button
+                    onClick={() => setFilter('all')}
+                    className={`mt-4 rounded-[12px] border px-4 py-2 text-[12px] font-semibold transition-colors ${
+                      isDark
+                        ? 'border-white/[0.10] bg-white/[0.04] text-white/70 hover:bg-white/[0.08]'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-violet-300'
+                    }`}
+                  >
+                    Show all products
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </section>

@@ -19,6 +19,7 @@ import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../component
 import ProductCard from '../../components/product/ProductCard'
 import { slugify } from '../../utils/format'
 import type { Product } from '../../data/products/types'
+import { cn } from '../../utils/cn'
 import {
   buildReorderedProducts,
   getProductDisplayOrder,
@@ -79,9 +80,6 @@ const EMPTY: Product = {
 
 type TabKey = 'basic' | 'content' | 'media' | 'options' | 'settings'
 
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
 
 export default function AdminProductsPage() {
   const { products, categories, addProduct, updateProduct, deleteProduct, refreshAll } = useData()

@@ -1,55 +1,4 @@
-/* ── Animated Star Field ── */
-@keyframes drift { from { transform: translateY(0) translateX(0); } to { transform: translateY(-1500px) translateX(-50px); } }
-@keyframes twinkle { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
-@keyframes colorPulse { 0%,100% { filter: hue-rotate(0deg); } 50% { filter: hue-rotate(30deg); } }
-
-.star-field { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-.star-field .layer { position: absolute; width: 120%; left: -10%; height: 4000px; }
-.star-field .layer.s1 {
-  background:
-    radial-gradient(1.5px 1.5px at 80px 120px, rgba(196,181,253,0.85) 50%, transparent),
-    radial-gradient(1.2px 1.2px at 250px 350px, rgba(255,255,255,0.7) 50%, transparent),
-    radial-gradient(1px 1px at 420px 180px, rgba(6,182,212,0.8) 50%, transparent),
-    radial-gradient(2px 2px at 580px 400px, rgba(124,58,237,0.9) 50%, transparent),
-    radial-gradient(1.3px 1.3px at 130px 550px, rgba(236,72,153,0.7) 50%, transparent),
-    radial-gradient(1.2px 1.2px at 360px 700px, rgba(236,72,153,0.6) 50%, transparent),
-    radial-gradient(1.8px 1.8px at 520px 200px, rgba(6,182,212,0.8) 50%, transparent),
-    radial-gradient(1px 1px at 700px 520px, rgba(245,158,11,0.6) 50%, transparent),
-    radial-gradient(1.5px 1.5px at 180px 850px, rgba(245,158,11,0.7) 50%, transparent),
-    radial-gradient(1px 1px at 480px 70px, rgba(196,181,253,0.7) 50%, transparent),
-    radial-gradient(2px 2px at 300px 500px, rgba(132,204,22,0.5) 50%, transparent),
-    radial-gradient(1px 1px at 650px 150px, rgba(255,255,255,0.9) 50%, transparent);
-  background-repeat: repeat; background-size: 800px 1000px;
-  animation: drift 90s linear infinite;
-}
-.star-field .layer.s2 {
-  background:
-    radial-gradient(2px 2px at 90px 280px, rgba(255,255,255,0.8) 50%, transparent),
-    radial-gradient(1.5px 1.5px at 380px 420px, rgba(124,58,237,0.7) 50%, transparent),
-    radial-gradient(2.5px 2.5px at 560px 130px, rgba(236,72,153,0.6) 50%, transparent),
-    radial-gradient(1px 1px at 220px 650px, rgba(6,182,212,0.7) 50%, transparent),
-    radial-gradient(1.3px 1.3px at 640px 320px, rgba(6,182,212,0.6) 50%, transparent),
-    radial-gradient(1.5px 1.5px at 440px 780px, rgba(245,158,11,0.5) 50%, transparent),
-    radial-gradient(2px 2px at 150px 150px, rgba(132,204,22,0.5) 50%, transparent),
-    radial-gradient(1px 1px at 500px 600px, rgba(196,181,253,0.6) 50%, transparent);
-  background-repeat: repeat; background-size: 750px 950px;
-  animation: drift 140s linear infinite;
-  animation-delay: -20s;
-}
-
-/* ── Nebula Blobs ── */
-.nebula { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(120px); }
-
-/* ── Film Grain ── */
-.grain-overlay {
-  position: fixed; inset: -100%; z-index: 1; pointer-events: none;
-  width: 300%; height: 300%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity: 0.015;
-  animation: grain 0.5s steps(1) infinite;
-}
-html.light .grain-overlay { opacity: 0.01; }
-
+/* ── Lenis smooth scroll ── */
 html.lenis-root,
 html.lenis-root body {
   height: auto;
@@ -59,51 +8,7 @@ html.lenis-root body {
   overscroll-behavior: contain;
 }
 
-@keyframes ambient-drift {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(2.5%, -1.5%, 0) scale(1.035); }
-}
-
-@keyframes ambient-drift-reverse {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(-2.5%, 2%, 0) scale(1.04); }
-}
-
-@keyframes ambient-breathe {
-  0%, 100% { opacity: 0.72; filter: saturate(1) brightness(1); }
-  50% { opacity: 1; filter: saturate(1.08) brightness(1.04); }
-}
-
-.ambient-drift {
-  animation: ambient-drift 26s ease-in-out infinite;
-  will-change: transform;
-}
-
-.ambient-drift-reverse {
-  animation: ambient-drift-reverse 30s ease-in-out infinite;
-  will-change: transform;
-}
-
-.ambient-breathe {
-  animation: ambient-breathe 14s ease-in-out infinite;
-  will-change: opacity, filter;
-}
-
-/* ── CSS Scan Line (replaces motion.div for better perf) ── */
-.scan-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  pointer-events: none;
-  animation: scan-move 12s ease-in-out infinite;
-}
-@keyframes scan-move {
-  0%, 100% { top: 15%; }
-  50% { top: 75%; }
-}
-
-/* ── Better Focus Styles ── */
+/* ── Focus Styles ── */
 :focus-visible {
   outline: 2px solid rgba(124,58,237,0.7);
   outline-offset: 3px;
@@ -112,46 +17,80 @@ html.lenis-root body {
 
 /* ── Performance / Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
-  .star-field, .grain-overlay, .scan-line { display: none !important; }
-  .star-field .layer { animation: none !important; }
-  .animate-aurora, .animate-orbit, .ambient-drift, .ambient-drift-reverse, .ambient-breathe { animation: none !important; }
+  .animate-aurora, .animate-orbit { animation: none !important; }
 }
 
-html.perf-low .star-field,
-html.perf-low .grain-overlay,
-html.perf-low .scan-line {
-  display: none !important;
-}
-html.perf-low .star-field .layer {
-  animation: none !important;
-}
 html.perf-low .animate-aurora,
-html.perf-low .animate-orbit,
-html.perf-low .ambient-drift,
-html.perf-low .ambient-drift-reverse,
-html.perf-low .ambient-breathe {
+html.perf-low .animate-orbit {
   animation: none !important;
 }
 
-/* ── Light Mode Pattern ── */
+/* ── Light Mode Dot Pattern ── */
 html.light .dot-pattern {
   background-image: radial-gradient(rgba(124,58,237,0.08) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
+/* ── Scrollbar hide utility ── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
 
-@media (max-width: 1024px) {
-  .grain-overlay,
-  .star-field,
-  .scan-line {
-    display: none !important;
-  }
+/* ── Premium transition durations ── */
+.transition-350 {
+  transition-duration: 350ms;
+}
 
-  .ambient-drift,
-  .ambient-drift-reverse,
-  .ambient-breathe,
-  .animate-aurora,
-  .animate-orbit {
-    animation: none !important;
-  }
+/* ── Premium image rendering ── */
+img {
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* ── Better selection ── */
+::selection {
+  background: rgba(124, 58, 237, 0.35);
+  color: white;
+}
+
+/* ── Smooth card elevation on hover ── */
+.card-hover {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* ── Product gallery thumbnail hover ── */
+.gallery-thumb-active {
+  box-shadow: 0 0 0 2px rgba(124,58,237,0.7);
+}
+
+/* ── Typography refinements for long-form content ── */
+.prose-detail p {
+  line-height: 1.72;
+  letter-spacing: -0.01em;
+}
+
+/* ── Admin sidebar transitions ── */
+.sidebar-link-transition {
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* ── Better input autofill style for dark theme ── */
+html.dark input:-webkit-autofill,
+html.dark input:-webkit-autofill:hover,
+html.dark input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #e8e4f8;
+  -webkit-box-shadow: 0 0 0px 1000px rgba(20, 14, 46, 0.95) inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+html.light input:-webkit-autofill,
+html.light input:-webkit-autofill:hover,
+html.light input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #1e1b4b;
+  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.98) inset;
+  transition: background-color 5000s ease-in-out 0s;
 }

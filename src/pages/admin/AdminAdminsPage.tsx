@@ -14,12 +14,9 @@ import AdminStatCard from '../../components/admin/AdminStatCard'
 import AdminViewToggle from '../../components/admin/AdminViewToggle'
 import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
+import { cn } from '../../utils/cn'
 
 type AdminMember = { id: string; name: string; email: string; role: AdminRole } & AvatarFields
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
 
 export default function AdminAdminsPage() {
   const { admins, addAdmin, removeAdmin, changeAdminRole, user, isSuperAdmin } = useAuth()

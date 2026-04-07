@@ -9,12 +9,9 @@ import { listMyPurchaseQuotes } from '../services/purchase-quotes.service'
 import { listMyRentalRequests } from '../services/rental-requests.service'
 import type { CustomerRequestListItem, RequestType } from '../types/commerce'
 import { getCommerceErrorMessage } from '../utils/commerce'
+import { cn } from '../utils/cn'
 
 type RequestTab = 'all' | RequestType
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
 
 export default function MyRequestsPage() {
   usePageMeta({

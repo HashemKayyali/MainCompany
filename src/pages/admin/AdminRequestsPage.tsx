@@ -7,12 +7,9 @@ import { useToast } from '../../contexts/ToastContext'
 import { approveRentalRequest, listAdminRequests, updateRequestStatus } from '../../services/admin-requests.service'
 import type { AdminRequestListItem, RequestType } from '../../types/commerce'
 import { getCommerceErrorMessage } from '../../utils/commerce'
+import { cn } from '../../utils/cn'
 
 type RequestFilter = 'all' | RequestType
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
 
 export default function AdminRequestsPage() {
   const { isDark } = useTheme()

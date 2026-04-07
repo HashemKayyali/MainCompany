@@ -10,6 +10,8 @@ export default function PageContainer({ children }: { children: ReactNode }) {
   const { pathname } = useLocation()
   useSmoothScroll()
 
+  const isHome = pathname === '/'
+
   const pageShellStyle = {
     '--app-header-offset': 'var(--app-navbar-height)',
   } as CSSProperties
@@ -23,7 +25,9 @@ export default function PageContainer({ children }: { children: ReactNode }) {
         Skip to content
       </a>
 
-      <AnimatedBackground position="absolute" className="z-0 overflow-hidden" />
+      {!isHome && (
+        <AnimatedBackground position="absolute" className="z-0 overflow-hidden" />
+      )}
 
       <div
         className="relative z-10 flex min-h-screen min-w-0 flex-col"
@@ -34,11 +38,11 @@ export default function PageContainer({ children }: { children: ReactNode }) {
         <motion.main
           id="main-content"
           key={pathname}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="flex-1 min-w-0 overflow-y-visible"
-          style={{ paddingTop: 'var(--app-header-offset)' }}
+          style={{ paddingTop: isHome ? 0 : 'var(--app-header-offset)' }}
         >
           {children}
         </motion.main>

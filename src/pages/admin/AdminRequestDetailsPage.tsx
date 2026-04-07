@@ -21,10 +21,7 @@ import type {
   RequestType,
 } from '../../types/commerce'
 import { formatRequestTypeLabel, getCommerceErrorMessage } from '../../utils/commerce'
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
+import { cn } from '../../utils/cn'
 
 const RENTAL_ACTIONS: Record<string, Array<{ label: string; status: string; tone?: 'primary' | 'danger' | 'neutral' }>> = {
   pending_review: [

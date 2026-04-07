@@ -14,12 +14,9 @@ import AdminViewToggle from '../../components/admin/AdminViewToggle'
 import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
 import CustomerCard from '../../components/customer/CustomerCard'
+import { cn } from '../../utils/cn'
 
 const empty: Customer = { name: '', slug: '', logo: '', category: '' }
-
-function cn(...s: Array<string | false | undefined | null>) {
-  return s.filter(Boolean).join(' ')
-}
 
 export default function AdminCustomersPage() {
   const { customers, addCustomer, updateCustomer, deleteCustomer } = useData()

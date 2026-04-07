@@ -10,10 +10,7 @@ import { createRentalRequest } from '../services/rental-requests.service'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { useRequireAuthAction } from '../hooks/useRequireAuthAction'
 import { buildInitialRequestForm, hasValidDateRange } from '../utils/commerce'
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
+import { cn } from '../utils/cn'
 
 export default function CheckoutPage() {
   usePageMeta({

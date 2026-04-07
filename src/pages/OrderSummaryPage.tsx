@@ -7,10 +7,7 @@ import { usePageMeta } from '../hooks/usePageMeta'
 import { getRentalRequestByNumber } from '../services/rental-requests.service'
 import type { RentalRequestDetails } from '../types/commerce'
 import { getCommerceErrorMessage } from '../utils/commerce'
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
+import { cn } from '../utils/cn'
 
 export default function OrderSummaryPage() {
   const { requestNumber = '' } = useParams<{ requestNumber: string }>()

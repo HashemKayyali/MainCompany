@@ -4,6 +4,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 import { useData } from '../../contexts/DataContext'
 import { useUser } from '../../contexts/UserContext'
 import UserAvatar from '../ui/UserAvatar'
+import { cn } from '../../utils/cn'
 
 type SidebarVariant = 'desktop' | 'drawer'
 type IconName = 'home' | 'bike' | 'wrench' | 'users' | 'folder' | 'image' | 'shield' | 'log' | 'person' | 'clipboard'
@@ -14,10 +15,7 @@ type SidebarLink = {
   icon: IconName
   exact?: boolean
 }
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
+
 
 function Icon({ name, className }: { name: IconName; className?: string }) {
   const common = `h-5 w-5 ${className || ''}`

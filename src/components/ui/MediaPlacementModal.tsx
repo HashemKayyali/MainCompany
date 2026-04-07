@@ -12,6 +12,7 @@ import Modal from './Modal'
 import FramedImage from './FramedImage'
 import FramedVideo from './FramedVideo'
 import AdminEditorWorkspace, { AdminEditorSection } from '../admin/AdminEditorWorkspace'
+import { cn } from '../../utils/cn'
 
 interface Props {
   open: boolean
@@ -30,10 +31,6 @@ interface Props {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
-}
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
 }
 
 export default function MediaPlacementModal({

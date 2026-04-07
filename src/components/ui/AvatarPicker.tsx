@@ -12,10 +12,7 @@ import {
   type AvatarSelection,
 } from '../../lib/avatar'
 import UserAvatar from './UserAvatar'
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
+import { cn } from '../../utils/cn'
 
 type AvatarPickerProps = {
   value?: AvatarSelection | null

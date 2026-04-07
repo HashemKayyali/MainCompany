@@ -15,6 +15,7 @@ import AdminStatCard from '../../components/admin/AdminStatCard'
 import AdminViewToggle from '../../components/admin/AdminViewToggle'
 import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
+import { cn } from '../../utils/cn'
 
 const emptyPart: ProductPart = {
   id: '',
@@ -26,10 +27,7 @@ const emptyPart: ProductPart = {
   image: '',
   inStock: true,
 }
-
-function cn(...s: Array<string | false | undefined | null>) {
-  return s.filter(Boolean).join(' ')
-}
+
 
 export default function AdminPartsPage() {
   const { parts, products, addPart, updatePart, deletePart } = useData()

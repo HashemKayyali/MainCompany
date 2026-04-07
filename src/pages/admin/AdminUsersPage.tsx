@@ -26,6 +26,7 @@ import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../component
 import UserAvatar from '../../components/ui/UserAvatar'
 import { emitProfileUpdated } from '../../lib/profile-sync'
 import { fetchProfileAvatarMap } from '../../services/profile.service'
+import { cn } from '../../utils/cn'
 
 interface UserProfile extends AvatarFields {
   id: string
@@ -39,10 +40,6 @@ interface UserProfile extends AvatarFields {
 type SortKey = 'role' | 'name' | 'email' | 'newest' | 'oldest'
 
 const ROLE_ORDER: Record<string, number> = { superadmin: 0, admin: 1, user: 2 }
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
 
 function buildUserAvatarSelection(user: UserProfile, fallbackName?: string) {
   return (

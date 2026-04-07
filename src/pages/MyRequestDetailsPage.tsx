@@ -7,15 +7,12 @@ import { usePageMeta } from '../hooks/usePageMeta'
 import { getPurchaseQuoteByNumber } from '../services/purchase-quotes.service'
 import { getRentalRequestByNumber } from '../services/rental-requests.service'
 import type { PurchaseQuoteRequestDetails, RentalRequestDetails } from '../types/commerce'
+import { cn } from '../utils/cn'
 import {
   formatRequestTypeLabel,
   getCommerceErrorMessage,
   isRentalRequestNumber,
 } from '../utils/commerce'
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
 
 export default function MyRequestDetailsPage() {
   const { requestNumber = '' } = useParams<{ requestNumber: string }>()

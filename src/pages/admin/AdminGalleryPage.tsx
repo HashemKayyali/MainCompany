@@ -16,12 +16,10 @@ import AdminViewToggle from '../../components/admin/AdminViewToggle'
 import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
 import AlbumCard from '../../components/gallery/AlbumCard'
+import { cn } from '../../utils/cn'
 
 const emptyAlbum: GalleryAlbum = { slug: '', title: '', cover: '', images: [], category: '' }
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
+
 
 export default function AdminGalleryPage() {
   const { galleryAlbums, addGalleryAlbum, updateGalleryAlbum, deleteGalleryAlbum } = useData()

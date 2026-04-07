@@ -1,14 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
+import { cn } from '../../utils/cn'
 import {
   avatarInitials,
   buildAvatarDataUri,
   normalizeAvatarUrl,
   type AvatarFields,
 } from '../../lib/avatar'
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
 
 type UserAvatarProps = AvatarFields & {
   name?: string | null

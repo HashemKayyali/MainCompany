@@ -7,6 +7,7 @@ import AdminEntityCard from '../../components/admin/AdminEntityCard'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminStatCard from '../../components/admin/AdminStatCard'
 import UserAvatar from '../../components/ui/UserAvatar'
+import { cn } from '../../utils/cn'
 
 const ACTION_COLORS: Record<string, { dark: string; light: string; emoji: string }> = {
   create: { dark: 'bg-emerald-400/10 text-emerald-200 ring-emerald-400/18', light: 'bg-emerald-50 text-emerald-700 ring-emerald-200', emoji: '+' },
@@ -21,10 +22,6 @@ const ENTITY_EMOJI: Record<string, string> = {
   category: '🧩',
   gallery: '📸',
   admin: '🛡️',
-}
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
 }
 
 function timeAgo(dateStr: string): string {

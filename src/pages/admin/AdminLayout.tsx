@@ -4,12 +4,9 @@ import { useTheme } from '../../contexts/ThemeContext'
 import { useUser } from '../../contexts/UserContext'
 import Sidebar from '../../components/admin/Sidebar'
 import UserAvatar from '../../components/ui/UserAvatar'
+import { cn } from '../../utils/cn'
 
 type Crumb = { label: string; to?: string }
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
 
 const ADMIN_HEADER_HEIGHT = 70
 

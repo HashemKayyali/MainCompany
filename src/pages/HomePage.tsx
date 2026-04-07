@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { ArrowRight, Sparkles } from 'lucide-react'
 import CustomersGrid from '../components/customer/CustomersGrid'
 import Hero from '../components/home/Hero'
+import FeaturedProducts from '../components/home/FeaturedProducts'
 import OfferSection from '../components/home/OfferSection'
 import StatsStrip from '../components/home/StatsStrip'
 import { useData } from '../contexts/DataContext'
@@ -26,106 +28,116 @@ export default function HomePage() {
       <Hero />
       <StatsStrip />
       <OfferSection />
+      <FeaturedProducts />
 
-      <section className={`site-section relative overflow-hidden ${isDark ? 'border-y border-white/[0.04]' : 'border-y border-gray-100 bg-gray-50/50'}`}>
-        {/* Cinematic ambient background */}
-        {isDark && <div className="pointer-events-none absolute inset-0 bg-[#04060e]" />}
-        <div 
-          className="pointer-events-none absolute inset-0 opacity-60"
-          style={{
-            background: isDark 
-              ? 'radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.15) 0%, transparent 60%), radial-gradient(ellipse at 50% 100%, rgba(34,211,238,0.05) 0%, transparent 50%)'
-              : 'radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.05) 0%, transparent 60%)'
-          }}
-        />
-        
-        <div className="site-container relative py-12 sm:py-16 md:py-24">
+      {/* ── Partners / Customers ── */}
+      <section className="site-section">
+        <div className="site-container">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease }}
-            className="relative mb-12 text-center sm:mb-16 md:mb-20"
+            className="mb-10 sm:mb-12"
           >
-            <div className={`mx-auto mb-5 inline-flex h-8 items-center rounded-full border px-3.5 text-[10.5px] font-bold uppercase tracking-widest ${
-              isDark ? 'border-white/10 bg-white/5 text-purple-200/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]' 
-                     : 'border-violet-200 bg-white text-violet-600 shadow-sm'
-            }`}>
-              <span className={`mr-2.5 inline-block h-1.5 w-1.5 rounded-full ${isDark ? 'bg-cyan-400' : 'bg-violet-500'} animate-pulse`} style={{ boxShadow: isDark ? '0 0 10px rgba(34,211,238,0.8)' : '' }} />
-              Global Partnerships
+            {/* Section header */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <span className="section-label">// Partnerships</span>
+                <h2 className={`section-title mt-2 ${!isDark ? 'text-gray-900' : ''}`}>
+                  Trusted by industry{' '}
+                  <span className="text-glow">leaders</span>
+                </h2>
+                <p className={`mt-4 max-w-xl text-[0.94rem] leading-relaxed ${isDark ? 'text-purple-100/55' : 'text-gray-500'}`}>
+                  A growing network of premium brands that rely on our marketplace to power world-class events.
+                </p>
+              </div>
+
+              <Link
+                to="/customers"
+                className="btn-outline group inline-flex shrink-0 items-center gap-2 self-start sm:self-auto"
+              >
+                <span>All {customers.length} partners</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={2} />
+              </Link>
             </div>
-            <h2 className={`font-display text-[2.2rem] font-bold tracking-tight sm:text-[3rem] md:text-[3.5rem] leading-[1.05] ${!isDark ? 'text-gray-900' : 'text-white'}`}>
-              Trusted by industry <span className="text-glow">leaders</span>
-            </h2>
-            <p className={`mt-5 text-[1.05rem] sm:text-[1.15rem] max-w-2xl mx-auto leading-relaxed ${isDark ? 'text-purple-100/60' : 'text-gray-500'}`}>
-              Join an elite network of premium brands defining the future of world-class events, productions, and immersive experiences across the region.
-            </p>
           </motion.div>
 
           <CustomersGrid customers={customers.slice(0, 12)} />
-
-          <div className="mt-16 text-center sm:mt-24">
-            <Link
-              to="/customers"
-              className={`group inline-flex items-center justify-center gap-3 rounded-[16px] border px-7 py-4 text-[0.95rem] font-bold tracking-wide transition-all duration-500 ${
-                isDark 
-                  ? 'border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] text-white/90 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.03))] hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.3)]' 
-                  : 'border-violet-200 bg-white text-violet-700 shadow-sm hover:border-violet-300 hover:bg-violet-50'
-              }`}
-            >
-              <span>Explore all {customers.length} partners</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300 group-hover:translate-x-1.5 group-hover:text-cyan-400">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
         </div>
       </section>
 
-      <section className="site-section relative overflow-hidden">
-        <div className="relative mx-auto max-w-5xl px-3.5 sm:px-4.5">
-          <div className="section-shell px-3.5 py-6 text-center sm:px-5 sm:py-7">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(124,58,237,0.18),transparent_34%),radial-gradient(circle_at_18%_100%,rgba(236,72,153,0.12),transparent_28%),radial-gradient(circle_at_84%_18%,rgba(34,211,238,0.10),transparent_26%)]" />
-
-            <motion.div
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease }}
-              className="relative"
+      {/* ── CTA ── */}
+      <section className="site-section">
+        <div className="mx-auto max-w-4xl px-4 sm:px-5">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, ease }}
+          >
+            <div
+              className={`relative overflow-hidden rounded-[28px] border px-6 py-10 text-center sm:px-8 sm:py-14 ${
+                isDark
+                  ? 'border-white/[0.08] bg-[linear-gradient(165deg,rgba(16,12,36,0.88),rgba(8,8,22,0.70))]'
+                  : 'border-violet-100 bg-white'
+              }`}
+              style={
+                isDark
+                  ? { backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 28px 72px rgba(2,6,18,0.36), inset 0 1px 0 rgba(255,255,255,0.04)' }
+                  : { boxShadow: '0 20px 56px rgba(15,23,42,0.07)' }
+              }
             >
-              <span className="section-label">// Signature Planning Flow</span>
-              <h2
-                className={`mt-2 font-display text-[1.9rem] font-extrabold tracking-tight leading-[0.95] sm:text-[2.35rem] lg:text-[2.85rem] ${
-                  !isDark ? 'text-gray-900' : ''
-                }`}
-              >
-                Let us make your
-                <br />
-                <span className="text-glow">next event unforgettable</span>
-              </h2>
-              <p
-                className={`mt-2.5 mx-auto max-w-xl text-[0.84rem] ${
-                  isDark ? 'text-purple-200/70' : 'text-gray-500'
-                }`}
-              >
-                Tell us about your event. We handle everything.
-              </p>
-              <div className="mt-4 flex flex-wrap justify-center gap-2">
-                <Link to="/contact" className="btn-primary">
-                  Plan Your Event
-                </Link>
-                <a
-                  href={social.whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-outline"
-                >
-                  WhatsApp
-                </a>
+              {/* Background glow */}
+              {isDark && (
+                <>
+                  <div
+                    className="pointer-events-none absolute -top-16 left-1/2 h-40 w-80 -translate-x-1/2 rounded-full blur-3xl"
+                    style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 70%)' }}
+                  />
+                  <div
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px"
+                    style={{ background: 'linear-gradient(90deg, transparent 10%, rgba(167,139,250,0.5) 50%, transparent 90%)' }}
+                  />
+                </>
+              )}
+
+              <div className="relative">
+                {/* Icon */}
+                <div className="mb-5 flex justify-center">
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-[16px]"
+                    style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.3), rgba(236,72,153,0.25), rgba(6,182,212,0.2))', border: '1px solid rgba(167,139,250,0.2)' }}
+                  >
+                    <Sparkles className={`h-5 w-5 ${isDark ? 'text-violet-300' : 'text-violet-600'}`} strokeWidth={1.9} />
+                  </div>
+                </div>
+
+                <span className="section-label">// Get Started</span>
+                <h2 className={`mt-2 section-title ${!isDark ? 'text-gray-900' : ''}`}>
+                  Let us make your{' '}
+                  <span className="text-glow">next event unforgettable</span>
+                </h2>
+                <p className={`mx-auto mt-4 max-w-lg text-[0.9rem] leading-relaxed ${isDark ? 'text-purple-200/55' : 'text-gray-500'}`}>
+                  Tell us about your event and we handle everything — from planning to execution.
+                </p>
+
+                <div className="mt-7 flex flex-wrap justify-center gap-3">
+                  <Link to="/contact" className="btn-primary !min-h-[48px] !rounded-[16px] !px-6 !text-[12px]">
+                    Plan Your Event
+                  </Link>
+                  <a
+                    href={social.whatsapp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-outline !min-h-[48px] !rounded-[16px] !px-6 !text-[12px]"
+                  >
+                    WhatsApp
+                  </a>
+                </div>
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         </div>
       </section>
     </>

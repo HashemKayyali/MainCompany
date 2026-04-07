@@ -31,6 +31,11 @@ export default {
         grain:{'0%,100%':{transform:'translate(0,0)'},'10%':{transform:'translate(-5%,-10%)'},'30%':{transform:'translate(3%,-15%)'},'50%':{transform:'translate(12%,9%)'},'70%':{transform:'translate(9%,4%)'},'90%':{transform:'translate(-1%,7%)'}},
       },
       backgroundSize: { '200%': '200%' },
+      transitionDuration: {
+        '350': '350ms',
+        '400': '400ms',
+        '450': '450ms',
+      },
     },
   },
   plugins: [],

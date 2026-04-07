@@ -1,18 +1,15 @@
 import { useMemo } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
-import { usePerfMode } from '../../hooks/usePerfMode'
 import { useData } from '../../contexts/DataContext'
 
-// Fallback names if no customers loaded yet
 const FALLBACK = [
   'Abdali Hospital', 'AMAZON', 'Amman Academy', 'AstraZeneca', 'City Mall',
   'Delmonte', 'JU', 'PROTEINAK', 'PSUT', 'Rotana Hotel', 'TAJ mall',
   'TRAX', 'Umniah', 'ZAIN',
 ]
 
-// Accent palette (used for both text + dot)
 const ACCENTS = [
-  { text: 'text-purple-300', dot: 'bg-purple-400' },
+  { text: 'text-violet-300', dot: 'bg-violet-400' },
   { text: 'text-cyan-300', dot: 'bg-cyan-400' },
   { text: 'text-pink-300', dot: 'bg-pink-400' },
   { text: 'text-fuchsia-300', dot: 'bg-fuchsia-400' },
@@ -21,78 +18,64 @@ const ACCENTS = [
 
 export default function StatsStrip() {
   const { isDark } = useTheme()
-  const { perfLow } = usePerfMode()
   const { customers } = useData()
 
-  // Use customer names from DB, fallback to hardcoded list
   const names = useMemo(() => {
     if (customers.length > 0) return customers.map(c => c.name)
     return FALLBACK
   }, [customers])
 
-  // Duplicate enough times so it always looks continuous on wide screens
   const loop = useMemo(() => {
     const repeated: string[] = []
     for (let i = 0; i < 4; i++) repeated.push(...names)
     return repeated
   }, [names])
 
-  const edgeFade = isDark
-    ? 'from-[#060613] via-[#060613]/70 to-transparent'
-    : 'from-white via-white/75 to-transparent'
-
   return (
-    <section className="relative px-4 pt-4 sm:px-5" aria-label="Our partners and customers">
-      <div className="mx-auto max-w-[82rem]">
-        <div className={`section-shell ${isDark ? '' : 'bg-white/85'}`}>
-          <div
-            className={`absolute inset-0 ${isDark ? 'bg-black/10' : 'bg-white/40'}`}
-            style={{
-              backdropFilter: perfLow ? undefined : 'blur(14px)',
-              WebkitBackdropFilter: perfLow ? undefined : 'blur(14px)',
-            }}
-          />
+    <section
+      className="relative"
+      aria-label="Our partners and customers"
+    >
+      {/* Top separator */}
+      <div
+        className="absolute inset-x-0 top-0 h-px"
+        style={{ background: isDark ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.055), transparent)' : 'linear-gradient(90deg, transparent, rgba(124,58,237,0.1), transparent)' }}
+      />
 
-          <div
-            className="absolute inset-x-0 top-0 h-px opacity-90"
-            style={{
-              background: isDark
-                ? 'linear-gradient(90deg, transparent, rgba(124,58,237,0.45), rgba(236,72,153,0.28), rgba(34,211,238,0.24), transparent)'
-                : 'linear-gradient(90deg, transparent, rgba(124,58,237,0.20), transparent)',
-            }}
-          />
+      <div className="py-7 sm:py-8">
+        <div className="site-container">
+          <div className="flex items-center gap-4 sm:gap-6">
 
-          <div className="relative flex items-center gap-3 px-4 py-4 sm:px-5">
-            <div className="min-w-fit max-md:hidden lg:block">
-              <div className={`text-[10px] font-mono uppercase tracking-[0.22em] ${isDark ? 'text-violet-200/56' : 'text-violet-600/70'}`}>
+            {/* Left label */}
+            <div className="hidden shrink-0 sm:block">
+              <div className={`text-[9.5px] font-semibold uppercase tracking-[0.24em] ${isDark ? 'text-violet-300/48' : 'text-violet-600/60'}`}>
                 Trusted by
               </div>
-              <div className={`mt-1 text-[13.5px] font-semibold ${isDark ? 'text-white/86' : 'text-gray-900'}`}>
-                Leading brands and event teams
+              <div className={`mt-1 text-[12.5px] font-semibold ${isDark ? 'text-white/62' : 'text-gray-800'}`}>
+                Top brands & teams
               </div>
             </div>
 
-            <div className={`hidden h-10 w-px shrink-0 max-md:hidden ${isDark ? 'bg-white/8' : 'bg-violet-200/70'} lg:block`} />
+            {/* Divider */}
+            <div className={`hidden h-10 w-px shrink-0 sm:block ${isDark ? 'bg-white/8' : 'bg-violet-200/60'}`} />
 
-            <div className="stats-marquee flex-1">
+            {/* Marquee */}
+            <div
+              className="stats-marquee min-w-0 flex-1"
+              style={{
+                maskImage: 'linear-gradient(90deg, transparent, black 4%, black 96%, transparent)',
+                WebkitMaskImage: 'linear-gradient(90deg, transparent, black 4%, black 96%, transparent)',
+              }}
+            >
               <div className="stats-marquee__inner">
                 {loop.map((item, i) => {
                   const a = ACCENTS[i % ACCENTS.length]
                   return (
-                    <div key={`${item}-${i}`} className="flex items-center shrink-0 gap-3 px-4.5">
-                      <span
-                        className={`whitespace-nowrap uppercase tracking-[0.18em] font-display font-semibold ${
-                          isDark ? a.text : 'text-violet-600'
-                        } text-[11px] sm:text-[11.5px]`}
-                      >
+                    <div key={`${item}-${i}`} className="flex shrink-0 items-center gap-3 px-4">
+                      <span className={`whitespace-nowrap font-display text-[10.5px] font-semibold uppercase tracking-[0.18em] ${isDark ? a.text : 'text-violet-600'}`}>
                         {item}
                       </span>
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full shrink-0 ${
-                          isDark ? a.dot : 'bg-violet-400'
-                        }`}
-                        aria-hidden="true"
-                      />
+                      <span className={`h-1 w-1 shrink-0 rounded-full ${isDark ? a.dot : 'bg-violet-400/60'}`} aria-hidden="true" />
                     </div>
                   )
                 })}
@@ -102,13 +85,10 @@ export default function StatsStrip() {
         </div>
       </div>
 
+      {/* Bottom separator */}
       <div
-        className={`pointer-events-none absolute left-4 top-4 w-16 bg-gradient-to-r ${edgeFade}`}
-        style={{ height: 'calc(100% - 1rem)' }}
-      />
-      <div
-        className={`pointer-events-none absolute right-4 top-4 w-16 bg-gradient-to-l ${edgeFade}`}
-        style={{ height: 'calc(100% - 1rem)' }}
+        className="absolute inset-x-0 bottom-0 h-px"
+        style={{ background: isDark ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent)' : 'linear-gradient(90deg, transparent, rgba(124,58,237,0.08), transparent)' }}
       />
     </section>
   )

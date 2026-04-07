@@ -18,10 +18,7 @@ import {
 } from '../lib/avatar'
 import { getErrorMessage } from '../lib/errors'
 import { deleteImage, uploadImageVariants } from '../services/storage.service'
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ')
-}
+import { cn } from '../utils/cn'
 
 function normalizeProfileValue(value?: string | null) {
   return value?.trim() || ''
