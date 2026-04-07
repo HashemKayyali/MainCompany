@@ -138,3 +138,20 @@ html.light .dot-pattern {
   background-image: radial-gradient(rgba(124,58,237,0.08) 1px, transparent 1px);
   background-size: 24px 24px;
 }
+
+
+@media (max-width: 1024px) {
+  .grain-overlay,
+  .star-field,
+  .scan-line {
+    display: none !important;
+  }
+
+  .ambient-drift,
+  .ambient-drift-reverse,
+  .ambient-breathe,
+  .animate-aurora,
+  .animate-orbit {
+    animation: none !important;
+  }
+}

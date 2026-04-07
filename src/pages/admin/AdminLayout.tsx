@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useUser } from '../../contexts/UserContext'
 import Sidebar from '../../components/admin/Sidebar'
@@ -121,59 +121,9 @@ export default function AdminLayout() {
   useEffect(() => setOpen(false), [pathname])
 
   useEffect(() => {
-    const html = document.documentElement
-    const body = document.body
-    const root = document.getElementById('root')
-
-    const previous = {
-      htmlOverflow: html.style.overflow,
-      bodyOverflow: body.style.overflow,
-      bodyHeight: body.style.height,
-      bodyOverscroll: body.style.overscrollBehavior,
-      rootHeight: root?.style.height || '',
-    }
-
-    html.style.overflow = 'hidden'
-    body.style.overflow = 'hidden'
-    body.style.height = '100%'
-    body.style.overscrollBehavior = 'none'
-    if (root) root.style.height = '100%'
-
-    return () => {
-      html.style.overflow = previous.htmlOverflow
-      body.style.overflow = previous.bodyOverflow
-      body.style.height = previous.bodyHeight
-      body.style.overscrollBehavior = previous.bodyOverscroll
-      if (root) root.style.height = previous.rootHeight
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!('scrollRestoration' in window.history)) return
-    const previous = window.history.scrollRestoration
-    window.history.scrollRestoration = 'manual'
-    return () => {
-      window.history.scrollRestoration = previous
-    }
-  }, [])
-
-  useLayoutEffect(() => {
-    const scrollToTop = () => {
-      const container = mainScrollRef.current
-      if (container) {
-        container.scrollTo({ top: 0, left: 0, behavior: 'auto' })
-        return
-      }
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
-    }
-
-    scrollToTop()
-    const frame = window.requestAnimationFrame(scrollToTop)
-    const timeout = window.setTimeout(scrollToTop, 60)
-    return () => {
-      window.cancelAnimationFrame(frame)
-      window.clearTimeout(timeout)
-    }
+    const container = mainScrollRef.current
+    if (!container) return
+    container.scrollTop = 0
   }, [pathname])
 
   const displayName = currentUser?.name?.trim() || 'Admin'
@@ -192,7 +142,7 @@ export default function AdminLayout() {
   return (
     <div
       className={cn(
-        'relative h-screen overflow-hidden',
+        'relative min-h-screen overflow-x-clip',
         isDark ? 'bg-[#060914] text-white' : 'bg-gray-50 text-gray-900'
       )}
       style={layoutVars}
@@ -216,10 +166,10 @@ export default function AdminLayout() {
         </div>
       )}
 
-      <div className="relative z-10 grid h-full grid-rows-[70px_minmax(0,1fr)]">
+      <div className="relative z-10 grid min-h-screen grid-rows-[70px_minmax(0,1fr)]">
         <header
           className={cn(
-            'border-b backdrop-blur-xl',
+            'sticky top-0 z-30 border-b backdrop-blur-xl',
             isDark
               ? 'border-cyan-400/10 bg-[linear-gradient(180deg,rgba(10,14,31,0.96),rgba(9,13,28,0.88))]'
               : 'border-gray-200 bg-white/92'

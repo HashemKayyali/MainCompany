@@ -111,10 +111,10 @@ export default function ProductCard({
       onMouseEnter={startPreview}
       onMouseLeave={stopPreview}
       className={cn(
-        'group relative flex h-full flex-col overflow-hidden rounded-[20px] transition-all duration-300',
+        'group relative flex h-full flex-col overflow-hidden rounded-[20px] transition-[transform,box-shadow,border-color,background-color] duration-300',
         isDark
-          ? 'bg-[#0a0d1a] border border-white/10 hover:border-white/20 hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-900/20'
-          : 'bg-white border border-slate-200 hover:border-violet-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200'
+          ? 'bg-[#0a0d1a] border border-white/10 hover:border-white/16 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_-28px_rgba(8,145,178,0.38)]'
+          : 'bg-white border border-slate-200 hover:border-violet-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-24px_rgba(139,92,246,0.22)]'
       )}
     >
       {/* Subtly animated glow behind content on hover (Desktop only effect) */}
@@ -191,7 +191,7 @@ export default function ProductCard({
         </div>
 
         {/* Content Block */}
-        <div className="mb-4">
+        <div className="mb-3">
           <Link to={`/products/${product.slug}`} className="outline-none focus-visible:underline">
             <h3 className={cn('font-display text-lg font-bold leading-tight tracking-tight line-clamp-1', isDark ? 'text-white' : 'text-slate-900')}>
               {product.name}
@@ -203,7 +203,7 @@ export default function ProductCard({
         </div>
 
         {/* Pricing Block - Clean alignment */}
-        <div className="mb-5 mt-auto flex items-end justify-between border-t border-slate-200/10 pt-4">
+        <div className="mb-4 mt-2 flex items-end justify-between border-t border-slate-200/10 pt-4">
           <div>
             <div className={cn('text-xs font-medium', isDark ? 'text-slate-400' : 'text-slate-500')}>
               {priceLabel}

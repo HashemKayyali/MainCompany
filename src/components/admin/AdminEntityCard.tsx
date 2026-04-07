@@ -258,7 +258,7 @@ export default function AdminEntityCard({
         </div>
       )}
 
-        <div className={cn('relative flex min-w-0 flex-1 flex-col gap-1.25 p-2.5', bodyClassName)}>
+        <div className={cn('relative flex min-w-0 flex-1 flex-col gap-2 p-2.5', bodyClassName)}>
           <div className={cn('space-y-0.5', titleBlockClassName)}>
           <div className={cn(gridTitleClampClass, 'font-display text-[0.94rem] font-bold leading-tight', isDark ? 'text-white' : 'text-gray-900')}>
             {title}
@@ -295,12 +295,12 @@ export default function AdminEntityCard({
           </div>
         )}
 
-        {children && <div className={childrenWrapClassName}>{children}</div>}
+        {children && <div className={cn('pt-0.5', childrenWrapClassName)}>{children}</div>}
 
         {actions && (
           <div
             className={cn(
-              gridActionsPlacement === 'bottom' ? 'mt-auto flex items-center gap-1.5 pt-1' : 'flex items-center gap-1.5 pt-0.5',
+              gridActionsPlacement === 'bottom' ? 'flex items-center gap-1.5 pt-2' : 'flex items-center gap-1.5 pt-1',
               actionsWrapClassName
             )}
           >
