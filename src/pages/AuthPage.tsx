@@ -131,12 +131,13 @@ export default function AuthPage() {
     setError(result.message || 'Register failed')
   }
 
+  /* ── Shared style tokens (always appears over dark background) ── */
   const inputClass =
-    'w-full rounded-[14px] border border-white/[0.16] bg-white/[0.09] px-4 py-3 text-[13.5px] font-medium text-white placeholder:text-white/40 backdrop-blur-sm transition-all duration-300 focus:border-violet-300/50 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:bg-white/[0.12]'
+    'w-full rounded-[13px] border border-white/[0.14] bg-white/[0.08] px-4 py-3 text-[13.5px] font-medium text-white placeholder:text-white/36 backdrop-blur-sm transition-all duration-300 focus:border-violet-300/55 focus:outline-none focus:ring-2 focus:ring-violet-400/28 focus:bg-white/[0.12]'
 
-  const labelClass = 'mb-2 block text-[11.5px] font-semibold uppercase tracking-[0.12em] text-white/60'
+  const labelClass = 'mb-1.5 block text-[10.5px] font-bold uppercase tracking-[0.14em] text-white/52'
 
-  const cardMaxWidth = uiMode === 'register' ? 'max-w-[900px]' : 'max-w-[440px]'
+  const cardMaxWidth = uiMode === 'register' ? 'max-w-[900px]' : 'max-w-[460px]'
 
   const fadeVariants = {
     hidden: { opacity: 0, y: reduceMotion ? 0 : 10 },
@@ -146,69 +147,100 @@ export default function AuthPage() {
 
   return (
     <section className="relative min-h-[100dvh] overflow-hidden">
+      {/* Animated background */}
       {!reduceMotion && <AnimatedBackground position="absolute" className="z-0" />}
 
-      {/* Overlay */}
-      <div className={`absolute inset-0 z-[1] ${isDark ? 'bg-black/40' : 'bg-black/15'}`} />
+      {/* Dark overlay */}
+      <div className={`absolute inset-0 z-[1] ${isDark ? 'bg-black/44' : 'bg-black/20'}`} />
 
-      {/* Decorative orbs */}
-      <div className="pointer-events-none absolute left-[-10%] top-[-5%] z-[1] h-[50vh] w-[50vh] rounded-full bg-violet-600/20 blur-[120px]" />
-      <div className="pointer-events-none absolute right-[-8%] bottom-[-6%] z-[1] h-[40vh] w-[40vh] rounded-full bg-cyan-500/15 blur-[100px]" />
+      {/* Ambient orbs */}
+      <div className="pointer-events-none absolute left-[-12%] top-[-8%] z-[1] h-[55vh] w-[55vh] rounded-full bg-violet-600/18 blur-[130px]" aria-hidden="true" />
+      <div className="pointer-events-none absolute right-[-10%] bottom-[-8%] z-[1] h-[44vh] w-[44vh] rounded-full bg-cyan-500/14 blur-[110px]" aria-hidden="true" />
+      <div className="pointer-events-none absolute right-[20%] top-[30%] z-[1] h-[30vh] w-[30vh] rounded-full bg-pink-500/10 blur-[100px]" aria-hidden="true" />
 
       <div className="relative z-[2] flex min-h-[100dvh] items-center justify-center px-4 py-8 sm:px-5">
         <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 14, scale: 0.985 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 16, scale: 0.982 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: reduceMotion ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className={`relative w-full ${cardMaxWidth} overflow-hidden rounded-[28px] border border-white/[0.14] ${
-            isDark ? 'bg-white/[0.08] shadow-[0_28px_80px_rgba(0,0,0,0.65)]' : 'bg-white/[0.12] shadow-[0_20px_60px_rgba(0,0,0,0.22)]'
+          transition={{ duration: reduceMotion ? 0 : 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className={`relative w-full ${cardMaxWidth} overflow-hidden rounded-[28px] border border-white/[0.13] ${
+            isDark
+              ? 'bg-[rgba(9,8,22,0.85)] shadow-[0_32px_88px_rgba(0,0,0,0.68)]'
+              : 'bg-[rgba(10,8,24,0.80)] shadow-[0_24px_68px_rgba(0,0,0,0.35)]'
           } backdrop-blur-2xl`}
         >
-          {/* Inner glow at top */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+          {/* Top shimmer line */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/28 to-transparent" />
+          {/* Left shimmer line */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-violet-400/20 to-transparent" />
 
-          {/* Card header */}
-          <div className="px-6 pb-5 pt-6 sm:px-7 sm:pt-7">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-[16px] bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber shadow-[0_8px_24px_rgba(124,58,237,0.4)]">
-                <span className="font-display text-sm font-black text-white">BL</span>
+          {/* ── Card header ── */}
+          <div className="relative px-6 pb-6 pt-7 sm:px-8 sm:pt-8">
+            {/* Brand mark */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[15px] bg-[linear-gradient(145deg,#7c3aed_0%,#d946ef_48%,#22d3ee_112%)] shadow-[0_8px_24px_rgba(124,58,237,0.45)]">
+                <div className="absolute inset-x-2 top-1.5 h-3.5 rounded-full bg-white/22 blur-md" />
+                <span className="relative text-[10.5px] font-black tracking-[0.22em] text-white">BL</span>
               </div>
               <div>
-                <div className="font-display text-[1.02rem] font-extrabold text-white">Bike Land</div>
-                <div className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-white/60">
+                <div className="font-display text-[11.5px] font-bold uppercase tracking-[0.2em] text-white">
+                  Bike <span className="text-violet-300">Land</span>
+                </div>
+                <div className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-white/50">
                   {uiMode === 'login' ? 'Member Access' : 'New Account'}
                 </div>
               </div>
             </div>
 
-            <div className="mt-5">
-              <h1 className="font-display text-[1.9rem] font-extrabold leading-tight text-white">
+            {/* Mode toggle pills */}
+            <div className="mb-5 flex gap-1 rounded-[14px] border border-white/[0.10] bg-white/[0.05] p-1">
+              {(['login', 'register'] as const).map(mode => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => switchTo(mode)}
+                  className={`flex-1 rounded-[11px] py-2 text-[12px] font-bold transition-all duration-300 ${
+                    uiMode === mode
+                      ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-[0_4px_16px_rgba(124,58,237,0.4)]'
+                      : 'text-white/50 hover:text-white/75'
+                  }`}
+                >
+                  {mode === 'login' ? 'Sign In' : 'Sign Up'}
+                </button>
+              ))}
+            </div>
+
+            {/* Headline */}
+            <div>
+              <h1 className="font-display text-[1.95rem] font-extrabold leading-tight tracking-[-0.04em] text-white">
                 {uiMode === 'login' ? 'Welcome back' : 'Create your account'}
               </h1>
-              <p className="mt-2 text-[13.5px] font-medium leading-relaxed text-white/65">
+              <p className="mt-2 text-[13.5px] font-medium leading-relaxed text-white/58">
                 {uiMode === 'login'
                   ? 'Sign in to manage requests, track rentals, and access your dashboard.'
-                  : 'Join Bike Land to request quotes, track orders, and manage your event gear.'}
+                  : 'Join to request quotes, track orders, and manage your event gear.'}
               </p>
             </div>
           </div>
 
-          {/* Alerts */}
-          <div className="px-6 sm:px-7">
+          {/* ── Alerts ── */}
+          <div className="px-6 sm:px-8">
             {success && (
-              <div className="mb-4 rounded-[14px] border border-emerald-300/25 bg-emerald-400/15 px-4 py-3 text-[13px] font-semibold text-emerald-100">
+              <div className="mb-4 flex items-start gap-2.5 rounded-[13px] border border-emerald-300/24 bg-emerald-400/14 px-4 py-3 text-[13px] font-semibold text-emerald-100">
+                <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
                 {success}
               </div>
             )}
             {error && (
-              <div className="mb-4 rounded-[14px] border border-red-300/22 bg-red-400/12 px-4 py-3 text-[13px] font-semibold text-red-100">
+              <div className="mb-4 flex items-start gap-2.5 rounded-[13px] border border-red-300/22 bg-red-400/12 px-4 py-3 text-[13px] font-semibold text-red-100">
+                <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-red-400" />
                 {error}
               </div>
             )}
           </div>
 
-          {/* Forms */}
-          <div className="px-6 pb-7 sm:px-7 sm:pb-8">
+          {/* ── Forms ── */}
+          <div className="px-6 pb-8 sm:px-8">
             <AnimatePresence mode="wait" initial={false}>
               {uiMode === 'login' ? (
                 <motion.div
@@ -246,10 +278,11 @@ export default function AuthPage() {
                       />
                     </div>
 
-                    <label className="flex cursor-pointer items-center justify-between gap-3 rounded-[14px] border border-white/[0.10] bg-black/[0.16] px-4 py-3 backdrop-blur-sm transition-all hover:border-white/[0.18] hover:bg-black/[0.2]">
+                    {/* Remember me toggle */}
+                    <label className="flex cursor-pointer items-center justify-between gap-3 rounded-[13px] border border-white/[0.10] bg-black/[0.18] px-4 py-3 backdrop-blur-sm transition-all hover:border-white/[0.18] hover:bg-black/[0.22]">
                       <div>
                         <div className="text-[13px] font-semibold text-white">Remember Me</div>
-                        <div className="mt-0.5 text-[11.5px] font-medium text-white/55">
+                        <div className="mt-0.5 text-[11.5px] font-medium text-white/50">
                           Keep this session signed in on this device.
                         </div>
                       </div>
@@ -264,17 +297,17 @@ export default function AuthPage() {
                     <button
                       type="submit"
                       disabled={busy || !!success}
-                      className="btn-primary w-full !min-h-[48px] !rounded-[14px] !text-[13.5px] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="btn-primary pc-cta w-full !min-h-[48px] !rounded-[14px] !text-[13.5px] disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {busy ? 'Signing in…' : success ? 'Redirecting…' : 'Sign In'}
+                      {busy ? 'Signing in…' : success ? 'Redirecting…' : 'Sign In →'}
                     </button>
 
                     <button
                       type="button"
                       onClick={() => switchTo('register')}
-                      className="w-full rounded-[14px] border border-white/[0.18] bg-white/[0.10] px-4 py-3 text-[13px] font-semibold text-white transition-all hover:bg-white/[0.15] active:bg-white/[0.2]"
+                      className="w-full rounded-[13px] border border-white/[0.16] bg-white/[0.08] px-4 py-3 text-[13px] font-semibold text-white/80 transition-all hover:bg-white/[0.13] hover:text-white active:bg-white/[0.18]"
                     >
-                      Create an account
+                      Don't have an account? Sign up free
                     </button>
                   </form>
                 </motion.div>
@@ -322,7 +355,7 @@ export default function AuthPage() {
                               value={phone}
                               onChange={e => setPhone(e.target.value)}
                               className={inputClass}
-                              placeholder="+962..."
+                              placeholder="+962…"
                               autoComplete="tel"
                               inputMode="tel"
                             />
@@ -361,7 +394,7 @@ export default function AuthPage() {
                         value={avatarSelection}
                         onChange={setAvatarSelection}
                         identitySeed={registerAvatarIdentitySeed}
-                        description="Choose a deterministic portrait avatar. You can update it later from your profile."
+                        description="Choose a portrait avatar. You can update it later from your profile."
                       />
                     </div>
 
@@ -369,16 +402,16 @@ export default function AuthPage() {
                       <button
                         type="submit"
                         disabled={busy || !!success}
-                        className="btn-primary w-full !min-h-[48px] !rounded-[14px] !text-[13.5px] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="btn-primary pc-cta w-full !min-h-[48px] !rounded-[14px] !text-[13.5px] disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {busy ? 'Creating account…' : success ? 'Check your email' : 'Create Account'}
+                        {busy ? 'Creating account…' : success ? 'Check your email' : 'Create Account →'}
                       </button>
                       <button
                         type="button"
                         onClick={() => switchTo('login')}
-                        className="w-full rounded-[14px] border border-white/[0.18] bg-white/[0.10] px-4 py-3 text-[13px] font-semibold text-white transition-all hover:bg-white/[0.15]"
+                        className="w-full rounded-[13px] border border-white/[0.16] bg-white/[0.08] px-4 py-3 text-[13px] font-semibold text-white/80 transition-all hover:bg-white/[0.13] hover:text-white"
                       >
-                        Back to login
+                        Already have an account?
                       </button>
                     </div>
                   </form>
@@ -386,7 +419,7 @@ export default function AuthPage() {
               )}
             </AnimatePresence>
 
-            <p className="mt-6 text-center text-[11.5px] font-medium text-white/50">
+            <p className="mt-7 text-center text-[11px] font-medium text-white/35">
               © {new Date().getFullYear()} Bike Land — Event Services Marketplace
             </p>
           </div>

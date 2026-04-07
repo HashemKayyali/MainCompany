@@ -97,28 +97,36 @@ export default function RentalCartPage() {
       <section className="site-section">
         <div className="site-container max-w-3xl">
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease }}
-            className={`rounded-[28px] border px-6 py-12 sm:py-16 text-center ${cardBase}`}
+            transition={{ duration: 0.55, ease }}
+            className={`relative overflow-hidden rounded-[28px] border px-6 py-14 sm:py-18 text-center ${cardBase}`}
           >
-            <div
-              className={`mx-auto mb-6 flex h-18 w-18 items-center justify-center rounded-[22px] ${
-                isDark ? 'bg-white/[0.06] border border-white/[0.08]' : 'bg-violet-50 border border-violet-100'
-              }`}
-            >
-              <ShoppingBag size={28} className={isDark ? 'text-slate-500' : 'text-violet-400'} />
-            </div>
-            <h1 className={`font-display text-[1.8rem] font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              Your cart is empty
-            </h1>
-            <p className={`mx-auto mt-3 max-w-md text-[0.95rem] leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-              Add event services from the catalog, choose your rental dates, and come back here to continue to checkout.
-            </p>
-            <div className="mt-7">
-              <Link to="/products" className="btn-primary !rounded-[14px] !px-6 !py-3 !text-[13px]">
-                Browse Products
-              </Link>
+            {/* Ambient glow */}
+            {isDark && (
+              <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-48 w-48 rounded-full bg-violet-500/[0.08] blur-[60px]" aria-hidden="true" />
+            )}
+            <div className="relative">
+              <div
+                className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-[24px] ${
+                  isDark
+                    ? 'bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(34,211,238,0.10))] border border-white/[0.08]'
+                    : 'bg-violet-50 border border-violet-100'
+                }`}
+              >
+                <ShoppingBag size={30} className={isDark ? 'text-violet-300/80' : 'text-violet-400'} />
+              </div>
+              <h1 className={`font-display text-[1.85rem] font-black tracking-[-0.04em] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                Your cart is empty
+              </h1>
+              <p className={`mx-auto mt-3 max-w-md text-[0.97rem] leading-[1.72] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                Add event services from the catalog, choose your rental dates, and come back here to continue to checkout.
+              </p>
+              <div className="mt-8">
+                <Link to="/products" className="btn-primary !rounded-[14px] !px-7 !py-3 !text-[13px]">
+                  Browse Products
+                </Link>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -132,16 +140,19 @@ export default function RentalCartPage() {
 
         {/* ── Page Header ── */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease }}
-          className="mb-7"
+          transition={{ duration: 0.58, ease }}
+          className="mb-9"
         >
-          <span className="section-label">// Rental Cart</span>
-          <h1 className={`section-title !text-left mt-2 ${!isDark ? 'text-gray-900' : ''}`}>
-            Prepare Your Request
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="section-label">// Rental Cart</span>
+            <div className={`h-px w-8 ${isDark ? 'bg-violet-500/30' : 'bg-violet-300/50'}`} />
+          </div>
+          <h1 className={`section-title !text-left ${!isDark ? 'text-gray-900' : ''}`}>
+            Prepare Your <span className="text-glow">Request</span>
           </h1>
-          <p className={`mt-3 max-w-2xl text-[0.95rem] leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+          <p className={`mt-4 max-w-2xl text-[0.97rem] leading-[1.72] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
             Set shared event dates for the whole cart, or switch to per-item mode. Availability is checked against your rental range.
           </p>
         </motion.div>

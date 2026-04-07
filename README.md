@@ -76,6 +76,6 @@ supabase/
 
 git status
 git add .
-git commit -m "Claud"
+git commit -m "Claud2"
 git push
 

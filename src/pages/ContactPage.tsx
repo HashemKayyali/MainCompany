@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Phone, Mail, MapPin } from 'lucide-react'
+import { Phone, Mail, MapPin, ArrowUpRight } from 'lucide-react'
 import ContactForm from '../components/contact/ContactForm'
 import { useTheme } from '../contexts/ThemeContext'
 import { social } from '../data/social'
@@ -14,6 +14,8 @@ const contactCards = [
     value: social.phoneFormatted,
     href: `tel:${social.phone}`,
     accent: 'violet',
+    gradient: 'from-violet-500 to-purple-600',
+    glow: 'rgba(124,58,237,0.4)',
   },
   {
     icon: Mail,
@@ -21,6 +23,8 @@ const contactCards = [
     value: social.email,
     href: `mailto:${social.email}`,
     accent: 'cyan',
+    gradient: 'from-cyan-500 to-blue-500',
+    glow: 'rgba(6,182,212,0.4)',
   },
   {
     icon: MapPin,
@@ -28,14 +32,10 @@ const contactCards = [
     value: 'Amman, Jordan',
     href: '',
     accent: 'pink',
+    gradient: 'from-pink-500 to-fuchsia-600',
+    glow: 'rgba(236,72,153,0.4)',
   },
 ]
-
-const accentClasses: Record<string, string> = {
-  violet: 'from-violet-500 to-purple-600',
-  cyan: 'from-cyan-500 to-blue-500',
-  pink: 'from-pink-500 to-fuchsia-600',
-}
 
 export default function ContactPage() {
   usePageMeta({
@@ -51,26 +51,29 @@ export default function ContactPage() {
 
         {/* ── Page Header ── */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease }}
-          className="mb-9"
+          transition={{ duration: 0.62, ease }}
+          className="mb-11"
         >
-          <span className="section-label">// Get in Touch</span>
-          <h1 className={`section-title !text-left mt-2.5 ${!isDark ? 'text-gray-900' : ''}`}>
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="section-label">// Get in Touch</span>
+            <div className={`h-px w-8 ${isDark ? 'bg-violet-500/30' : 'bg-violet-300/50'}`} />
+          </div>
+          <h1 className={`section-title !text-left ${!isDark ? 'text-gray-900' : ''}`}>
             Plan Your <span className="text-glow">Experience</span>
           </h1>
-          <p className={`mt-4 max-w-xl text-[0.97rem] leading-relaxed ${isDark ? 'text-slate-300/72' : 'text-slate-500'}`}>
+          <p className={`mt-4 max-w-xl text-[1rem] leading-[1.75] ${isDark ? 'text-slate-300/70' : 'text-slate-500'}`}>
             Have an event in mind? Reach out for rental inquiries, purchase quotes, or general questions. Our team responds within one business day.
           </p>
         </motion.div>
 
         {/* ── Contact Info Cards ── */}
         <motion.div
-          initial={{ opacity: 0, y: 14 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.08, ease }}
-          className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3"
+          transition={{ duration: 0.56, delay: 0.08, ease }}
+          className="mb-9 grid grid-cols-1 gap-3.5 sm:grid-cols-3"
         >
           {contactCards.map((card, index) => {
             const Wrapper = card.href ? 'a' : 'div'
@@ -79,27 +82,27 @@ export default function ContactPage() {
             return (
               <motion.div
                 key={card.label}
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: 0.1 + index * 0.07, ease }}
+                transition={{ duration: 0.48, delay: 0.1 + index * 0.08, ease }}
               >
                 <Wrapper
                   {...(card.href ? { href: card.href } : {})}
-                  className={`flex items-center gap-4 rounded-[20px] border p-4 transition-all duration-300 ${
-                    card.href ? 'cursor-pointer hover:-translate-y-0.5' : ''
-                  } ${
-                    isDark
-                      ? 'border-white/[0.08] bg-[linear-gradient(180deg,rgba(16,13,32,0.96),rgba(10,9,24,0.98))] hover:border-violet-400/[0.18]'
-                      : 'border-violet-100/70 bg-white shadow-[0_4px_20px_rgba(124,58,237,0.05)] hover:border-violet-300/50'
+                  className={`group contact-info-card flex items-center gap-4 p-5 ${
+                    card.href ? 'cursor-pointer' : ''
                   }`}
-                  style={{ willChange: 'transform' }}
                 >
+                  {/* Icon */}
                   <span
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-br ${accentClasses[card.accent]} shadow-[0_6px_18px_rgba(0,0,0,0.2)]`}
+                    className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br ${card.gradient}`}
+                    style={{
+                      boxShadow: `0 8px 24px ${card.glow}`,
+                    }}
                   >
-                    <Icon size={18} className="text-white" strokeWidth={1.8} />
+                    <Icon size={20} className="text-white" strokeWidth={1.8} />
                   </span>
-                  <div className="min-w-0">
+
+                  <div className="min-w-0 flex-1">
                     <p className={`text-[9.5px] font-bold uppercase tracking-[0.18em] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
                       {card.label}
                     </p>
@@ -107,20 +110,40 @@ export default function ContactPage() {
                       {card.value}
                     </p>
                   </div>
+
+                  {card.href && (
+                    <ArrowUpRight
+                      size={15}
+                      className={`shrink-0 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${
+                        isDark ? 'text-slate-400' : 'text-slate-400'
+                      }`}
+                    />
+                  )}
                 </Wrapper>
               </motion.div>
             )
           })}
         </motion.div>
 
-        {/* ── Contact Form ── */}
+        {/* ── Contact Form Section ── */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.15, ease }}
+          transition={{ duration: 0.56, delay: 0.16, ease }}
         >
+          {/* Form header */}
+          <div className="mb-6">
+            <h2 className={`font-display text-[1.3rem] font-bold tracking-[-0.03em] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              Send a Message
+            </h2>
+            <p className={`mt-1.5 text-[13.5px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              Fill out the form and we'll reach out to discuss your event requirements.
+            </p>
+          </div>
+
           <ContactForm />
         </motion.div>
+
       </div>
     </section>
   )

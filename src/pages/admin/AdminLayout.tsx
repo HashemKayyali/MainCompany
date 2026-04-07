@@ -146,11 +146,14 @@ export default function AdminLayout() {
     >
       {isDark && (
         <>
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.12),transparent_22%),radial-gradient(circle_at_top_right,rgba(236,72,153,0.11),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(139,92,246,0.14),transparent_28%),linear-gradient(180deg,#060813_0%,#09101f_46%,#06070f_100%)]" />
-          <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:56px_56px]" />
-          <div className="pointer-events-none absolute left-[6%] top-24 h-72 w-72 rounded-full bg-cyan-500/10 blur-[120px]" />
-          <div className="pointer-events-none absolute right-[8%] top-12 h-80 w-80 rounded-full bg-fuchsia-500/10 blur-[140px]" />
-          <div className="pointer-events-none absolute bottom-[-8rem] left-1/3 h-[26rem] w-[26rem] rounded-full bg-violet-500/10 blur-[150px]" />
+          {/* Rich layered background for dark admin */}
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_50%_-5%,rgba(34,211,238,0.10)_0%,transparent_55%),radial-gradient(ellipse_60%_45%_at_90%_90%,rgba(236,72,153,0.09)_0%,transparent_50%),radial-gradient(ellipse_50%_40%_at_0%_60%,rgba(139,92,246,0.12)_0%,transparent_45%),linear-gradient(180deg,#060813_0%,#080e1c_50%,#060710_100%)]" aria-hidden="true" />
+          {/* Subtle grid */}
+          <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:52px_52px]" aria-hidden="true" />
+          {/* Ambient glows */}
+          <div className="pointer-events-none absolute left-[5%] top-20 h-80 w-80 rounded-full bg-cyan-500/[0.09] blur-[130px]" aria-hidden="true" />
+          <div className="pointer-events-none absolute right-[6%] top-10 h-96 w-96 rounded-full bg-fuchsia-500/[0.09] blur-[150px]" aria-hidden="true" />
+          <div className="pointer-events-none absolute bottom-[-6rem] left-[30%] h-[28rem] w-[28rem] rounded-full bg-violet-500/[0.09] blur-[160px]" aria-hidden="true" />
         </>
       )}
 
@@ -166,10 +169,10 @@ export default function AdminLayout() {
       <div className="relative z-10 grid min-h-screen grid-rows-[70px_minmax(0,1fr)]">
         <header
           className={cn(
-            'sticky top-0 z-30 border-b backdrop-blur-xl',
+            'sticky top-0 z-30 border-b backdrop-blur-2xl',
             isDark
-              ? 'border-cyan-400/10 bg-[linear-gradient(180deg,rgba(10,14,31,0.96),rgba(9,13,28,0.88))]'
-              : 'border-gray-200 bg-white/92'
+              ? 'border-cyan-400/[0.10] bg-[linear-gradient(180deg,rgba(8,12,28,0.97),rgba(7,11,25,0.92))] shadow-[0_1px_0_rgba(34,211,238,0.06),0_4px_24px_rgba(0,0,0,0.3)]'
+              : 'border-gray-200/80 bg-white/95 shadow-[0_1px_0_rgba(15,23,42,0.06)]'
           )}
         >
           <div className="flex h-full items-center gap-3 px-4 sm:px-5 md:px-5.5">
@@ -300,7 +303,7 @@ export default function AdminLayout() {
             className="min-h-0 overflow-y-auto overflow-x-hidden"
             style={{ scrollPaddingTop: 'calc(var(--app-header-offset) + var(--app-header-gap))' }}
           >
-            <div className="mx-auto flex min-h-full w-full max-w-[1280px] flex-col px-3.5 py-4 sm:px-4.5 sm:py-5 md:px-5 md:py-6">
+            <div className="mx-auto flex min-h-full w-full max-w-[1300px] flex-col px-4 py-5 sm:px-5 sm:py-6 md:px-6 md:py-7">
               <Outlet />
             </div>
           </main>

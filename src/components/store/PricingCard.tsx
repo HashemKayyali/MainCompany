@@ -1,12 +1,12 @@
-import { Check } from 'lucide-react'
+import { Check, Zap, PackageCheck } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { Product } from '../../data/products/types'
 
 const INCLUDED = [
-  'Equipment setup & dismantling',
-  'Professional on-site staff',
-  'Full equipment insurance',
-  'Custom branding options',
+  { label: 'Equipment setup & dismantling', icon: PackageCheck },
+  { label: 'Professional on-site staff', icon: null },
+  { label: 'Full equipment insurance', icon: null },
+  { label: 'Custom branding options', icon: null },
 ]
 
 export default function PricingCard({ product }: { product: Product }) {
@@ -16,103 +16,118 @@ export default function PricingCard({ product }: { product: Product }) {
     <div
       className={`overflow-hidden rounded-[22px] ${
         isDark
-          ? 'border border-violet-500/20 bg-[linear-gradient(180deg,rgba(16,13,34,0.97),rgba(10,9,24,0.98))]'
-          : 'border border-violet-100/80 bg-white shadow-[0_8px_32px_rgba(124,58,237,0.08)]'
+          ? 'border border-violet-500/22 bg-[linear-gradient(165deg,rgba(16,13,36,0.98),rgba(10,9,26,0.99))] shadow-[0_24px_56px_rgba(2,4,14,0.42),inset_0_1px_0_rgba(255,255,255,0.05)]'
+          : 'border border-violet-100/90 bg-white shadow-[0_12px_36px_rgba(124,58,237,0.1)]'
       }`}
     >
-      {/* Header accent bar */}
+      {/* ── Premium gradient header ── */}
       <div
-        className={`relative px-5 py-4 ${
+        className={`relative px-5 pb-5 pt-5 ${
           isDark
-            ? 'border-b border-violet-500/15 bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(34,211,238,0.08))]'
-            : 'border-b border-violet-100 bg-gradient-to-r from-violet-50 to-cyan-50/50'
+            ? 'border-b border-white/[0.07] bg-[linear-gradient(135deg,rgba(124,58,237,0.24)_0%,rgba(184,50,225,0.14)_45%,rgba(34,211,238,0.09)_100%)]'
+            : 'border-b border-violet-100 bg-[linear-gradient(135deg,rgba(124,58,237,0.07)_0%,rgba(236,72,153,0.04)_50%,rgba(6,182,212,0.03)_100%)]'
         }`}
       >
-        <span
-          className={`text-[9.5px] font-bold uppercase tracking-[0.2em] ${
-            isDark ? 'text-violet-300/80' : 'text-violet-500'
-          }`}
-        >
-          Rental Pricing
-        </span>
-      </div>
+        {/* Shimmer line at very top */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/40 to-transparent" />
 
-      <div className="p-5 space-y-5">
-        {/* Price display */}
-        {product.showPrice === false ? (
-          <div
-            className={`rounded-[16px] px-4 py-3.5 text-center ${
-              isDark
-                ? 'border border-violet-500/15 bg-violet-500/[0.07]'
-                : 'border border-violet-100 bg-violet-50'
-            }`}
-          >
-            <div className={`text-[11px] font-bold uppercase tracking-[0.16em] mb-1 ${isDark ? 'text-violet-300/70' : 'text-violet-500/80'}`}>
-              Custom Quote
-            </div>
-            <div className={`text-[0.92rem] font-semibold ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
-              Pricing reviewed by our team
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <div className={`text-[10.5px] font-semibold uppercase tracking-[0.14em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                Starting from
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <span
+              className={`text-[9.5px] font-bold uppercase tracking-[0.2em] ${
+                isDark ? 'text-violet-300/80' : 'text-violet-500'
+              }`}
+            >
+              Rental Pricing
+            </span>
+
+            {product.showPrice === false ? (
+              <div className="mt-2">
+                <div
+                  className={`font-display text-[2rem] font-black leading-none tracking-[-0.04em] ${
+                    isDark ? 'text-white' : 'text-slate-900'
+                  }`}
+                >
+                  Custom
+                </div>
+                <div className={`mt-1.5 text-[12px] font-semibold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Quote reviewed by sales team
+                </div>
               </div>
-              <div className="mt-1 flex items-baseline gap-1.5">
-                <span className={`font-display text-[2.4rem] font-black leading-none tracking-[-0.04em] ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  {product.rentalPricePerDay}
-                </span>
-                <div>
-                  <span className={`text-[1rem] font-bold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                    {product.currency}
+            ) : (
+              <div className="mt-2">
+                <div className={`text-[10px] font-semibold uppercase tracking-[0.12em] mb-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                  Starting from
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span
+                    className={`font-display text-[2.6rem] font-black leading-none tracking-[-0.05em] ${
+                      isDark ? 'text-white' : 'text-slate-900'
+                    }`}
+                  >
+                    {product.rentalPricePerDay}
                   </span>
-                  <div className={`text-[10px] font-medium ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
-                    / day
+                  <div className="pb-1">
+                    <div className={`text-[1rem] font-bold leading-none ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                      {product.currency}
+                    </div>
+                    <div className={`mt-1 text-[10px] font-semibold ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                      per day
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
+          </div>
+
+          {/* Availability badge */}
+          <div
+            className={`shrink-0 rounded-[12px] px-3 py-2.5 text-center ${
+              isDark
+                ? 'border border-emerald-500/22 bg-emerald-500/[0.11]'
+                : 'border border-emerald-200 bg-emerald-50'
+            }`}
+          >
             <div
-              className={`shrink-0 rounded-[12px] px-3 py-2 text-center ${
-                isDark
-                  ? 'border border-emerald-500/20 bg-emerald-500/10'
-                  : 'border border-emerald-200 bg-emerald-50'
+              className={`flex items-center gap-1.5 text-[8.5px] font-bold uppercase tracking-[0.16em] ${
+                isDark ? 'text-emerald-400/80' : 'text-emerald-600/80'
               }`}
             >
-              <div className={`text-[8.5px] font-bold uppercase tracking-[0.16em] ${isDark ? 'text-emerald-400/80' : 'text-emerald-600/80'}`}>
-                Stock
-              </div>
-              <div className={`mt-0.5 text-[11px] font-bold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                Available
-              </div>
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.7)]" />
+              In Stock
+            </div>
+            <div className={`mt-1 text-[11.5px] font-bold ${isDark ? 'text-emerald-300' : 'text-emerald-600'}`}>
+              Available
             </div>
           </div>
-        )}
+        </div>
+      </div>
 
-        {/* Divider */}
-        <div className={`h-px ${isDark ? 'bg-white/[0.06]' : 'bg-violet-100/60'}`} />
-
-        {/* Included features */}
+      {/* ── Included features ── */}
+      <div className="p-5 space-y-4">
         <div>
-          <div className={`mb-3 text-[9.5px] font-bold uppercase tracking-[0.18em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+          <div
+            className={`mb-3.5 flex items-center gap-2 text-[9.5px] font-bold uppercase tracking-[0.18em] ${
+              isDark ? 'text-slate-500' : 'text-slate-400'
+            }`}
+          >
+            <Zap size={10} className={isDark ? 'text-cyan-400/70' : 'text-violet-500/80'} />
             What's included
           </div>
           <div className="space-y-2.5">
-            {INCLUDED.map(feature => (
-              <div key={feature} className="flex items-center gap-2.5">
+            {INCLUDED.map(({ label }) => (
+              <div key={label} className="flex items-center gap-2.5">
                 <span
-                  className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full ${
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
                     isDark
                       ? 'bg-violet-500/20 text-violet-300'
                       : 'bg-violet-100 text-violet-600'
                   }`}
                 >
-                  <Check size={9} strokeWidth={3} />
+                  <Check size={9.5} strokeWidth={3} />
                 </span>
-                <span className={`text-[12px] leading-5 ${isDark ? 'text-slate-300/80' : 'text-slate-600'}`}>
-                  {feature}
+                <span className={`text-[12.5px] leading-5 ${isDark ? 'text-slate-300/85' : 'text-slate-600'}`}>
+                  {label}
                 </span>
               </div>
             ))}
@@ -121,10 +136,10 @@ export default function PricingCard({ product }: { product: Product }) {
 
         {/* Info note */}
         <div
-          className={`rounded-[14px] px-3.5 py-3 text-[11px] leading-[1.65] ${
+          className={`rounded-[13px] px-3.5 py-3 text-[11.5px] leading-[1.65] ${
             isDark
-              ? 'bg-cyan-500/[0.07] border border-cyan-500/15 text-cyan-100/68'
-              : 'bg-cyan-50 border border-cyan-100 text-cyan-800/80'
+              ? 'bg-cyan-500/[0.07] border border-cyan-500/15 text-cyan-100/65'
+              : 'bg-cyan-50/80 border border-cyan-100 text-cyan-800/80'
           }`}
         >
           Use the actions below to start a rental request or request a direct purchase quote without leaving this page.

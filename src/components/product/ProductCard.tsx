@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Play } from 'lucide-react'
@@ -34,7 +34,6 @@ export default function ProductCard({
 
   const allowMotion = motionEnabled && !prefersReducedMotion()
   const hasVideo = Boolean(product.videoUrl)
-  const isFeatured = product.featured
 
   const categoryLabel = product.categoryTags[0] || 'Marketplace'
   const showRentalPrice = product.rentalEnabled !== false && product.showPrice !== false
@@ -78,36 +77,40 @@ export default function ProductCard({
   return (
     <motion.article
       ref={cardRef}
-      initial={allowMotion ? { opacity: 0, y: 18 } : false}
+      initial={allowMotion ? { opacity: 0, y: 20 } : false}
       whileInView={allowMotion ? { opacity: 1, y: 0 } : undefined}
       viewport={allowMotion ? { once: true, margin: '-20px' } : undefined}
       transition={
         allowMotion
-          ? { duration: 0.52, delay: Math.min(index * 0.05, 0.2), ease: [0.16, 1, 0.3, 1] }
+          ? { duration: 0.54, delay: Math.min(index * 0.05, 0.22), ease: [0.16, 1, 0.3, 1] }
           : undefined
       }
       onMouseEnter={startPreview}
       onMouseLeave={stopPreview}
       className={cn(
-        'group relative flex h-full flex-col overflow-hidden rounded-[22px] transition-all duration-350',
+        'group relative flex h-full flex-col overflow-hidden rounded-[22px]',
+        // Transition only on border/shadow properties — NOT transform (prevents GPU flicker)
+        'transition-[border-color,box-shadow] duration-350',
         isDark
-          ? 'border border-white/[0.08] bg-[linear-gradient(180deg,rgba(16,13,32,0.96),rgba(9,9,24,0.98))] hover:border-violet-400/[0.22] hover:-translate-y-1 hover:shadow-[0_28px_60px_-20px_rgba(124,58,237,0.28),0_0_0_1px_rgba(124,58,237,0.10)]'
-          : 'border border-slate-200/80 bg-white hover:border-violet-300/60 hover:-translate-y-1 hover:shadow-[0_24px_48px_-18px_rgba(139,92,246,0.22)]'
+          ? 'border border-white/[0.08] bg-[linear-gradient(165deg,rgba(16,13,34,0.97),rgba(9,9,26,0.98))] hover:border-violet-400/[0.24] hover:shadow-[0_28px_62px_-18px_rgba(124,58,237,0.3),0_0_0_1px_rgba(124,58,237,0.10)]'
+          : 'border border-slate-200/80 bg-white hover:border-violet-300/65 hover:shadow-[0_24px_52px_-16px_rgba(139,92,246,0.22)]'
       )}
-      // Fix flickering: use willChange instead of backdropFilter on a transforming element
+      // willChange: transform stays on the article, NOT inside nested elements,
+      // which prevents compositing-layer flickering from stacking contexts.
       style={{ willChange: 'transform' }}
     >
-      {/* Hover glow layer - static position, no transform, so no GPU invalidation */}
+      {/* Hover glow — positioned absolute with opacity transition only, no transform */}
       <div
         className={cn(
-          'pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 rounded-[22px]',
+          'pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100',
           isDark
-            ? 'bg-[radial-gradient(circle_at_50%_0%,rgba(124,58,237,0.14)_0%,transparent_55%)]'
-            : 'bg-[radial-gradient(circle_at_50%_0%,rgba(124,58,237,0.05)_0%,transparent_55%)]'
+            ? 'bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(124,58,237,0.15)_0%,transparent_65%)]'
+            : 'bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(124,58,237,0.055)_0%,transparent_65%)]'
         )}
+        aria-hidden="true"
       />
 
-      {/* ── Image / Video ── */}
+      {/* ── Image / Video area ── */}
       <Link
         to={`/products/${product.slug}`}
         aria-label={`Open ${product.name}`}
@@ -144,12 +147,12 @@ export default function ProductCard({
           />
         )}
 
-        {/* Image bottom gradient - stronger */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
+        {/* Bottom gradient */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-black/72 via-black/26 to-transparent" />
 
         {/* Top-left badges */}
         <div className="absolute left-3 top-3 z-20 flex flex-wrap gap-1.5">
-          {isFeatured && (
+          {product.featured && (
             <span className="inline-flex items-center rounded-[8px] border border-cyan-400/40 bg-cyan-500/90 px-2.5 py-1 text-[9.5px] font-bold tracking-wide text-white backdrop-blur-sm shadow-[0_4px_12px_rgba(34,211,238,0.3)]">
               Featured
             </span>
@@ -179,7 +182,7 @@ export default function ProductCard({
           <span className={cn(
             'inline-flex items-center rounded-full px-2.5 py-1 text-[9.5px] font-bold uppercase tracking-[0.14em]',
             isDark
-              ? 'bg-violet-500/[0.14] text-violet-300/90 ring-1 ring-violet-400/[0.18]'
+              ? 'bg-violet-500/[0.14] text-violet-300/92 ring-1 ring-violet-400/[0.18]'
               : 'bg-violet-50 text-violet-700 ring-1 ring-violet-200/80'
           )}>
             {categoryLabel}
@@ -190,15 +193,15 @@ export default function ProductCard({
         <div className="mb-4 flex-1">
           <Link to={`/products/${product.slug}`} className="outline-none focus-visible:underline">
             <h3 className={cn(
-              'font-display text-[1.05rem] font-bold leading-tight tracking-[-0.025em] line-clamp-1 transition-colors duration-300',
+              'font-display text-[1.06rem] font-bold leading-tight tracking-[-0.028em] line-clamp-1 transition-colors duration-300',
               isDark ? 'text-white group-hover:text-violet-100' : 'text-slate-900 group-hover:text-violet-900'
             )}>
               {product.name}
             </h3>
           </Link>
           <p className={cn(
-            'mt-2 text-[12.5px] leading-[1.6] line-clamp-2',
-            isDark ? 'text-slate-400/90' : 'text-slate-500'
+            'mt-2 text-[12.5px] leading-[1.62] line-clamp-2',
+            isDark ? 'text-slate-400/88' : 'text-slate-500'
           )}>
             {product.shortDescription}
           </p>
@@ -213,7 +216,7 @@ export default function ProductCard({
             <div className={cn('text-[10.5px] font-medium', isDark ? 'text-slate-500' : 'text-slate-400')}>
               {priceLabel}
             </div>
-            <div className={cn('mt-0.5 font-display text-[1.18rem] font-black tracking-[-0.04em]', isDark ? 'text-white' : 'text-slate-900')}>
+            <div className={cn('mt-0.5 font-display text-[1.2rem] font-black tracking-[-0.04em]', isDark ? 'text-white' : 'text-slate-900')}>
               {priceDisplay}
             </div>
           </div>
