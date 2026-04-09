@@ -59,39 +59,36 @@ export default function Hero() {
       {!perfLow && (
         <>
           {/* Violet orb – upper left */}
-          <motion.div
-            className="pointer-events-none absolute -z-20"
-            animate={motionEnabled ? { opacity: [0.32, 0.52, 0.32], scale: [1, 1.07, 1] } : {}}
-            transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+          <div
+            className={`pointer-events-none absolute -z-20${motionEnabled ? ' animate-hero-orb-violet' : ''}`}
             style={{
               left: '-5%', top: '-10%',
               width: '60%', height: '70%',
+              opacity: 0.32,
               background: 'radial-gradient(circle, rgba(124,58,237,0.30) 0%, rgba(124,58,237,0.10) 40%, transparent 68%)',
               filter: 'blur(72px)',
             }}
           />
 
           {/* Cyan orb – upper right */}
-          <motion.div
-            className="pointer-events-none absolute -z-20"
-            animate={motionEnabled ? { opacity: [0.18, 0.34, 0.18], scale: [1, 1.09, 1] } : {}}
-            transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut', delay: 2.5 }}
+          <div
+            className={`pointer-events-none absolute -z-20${motionEnabled ? ' animate-hero-orb-cyan' : ''}`}
             style={{
               right: '-8%', top: '-15%',
               width: '50%', height: '60%',
+              opacity: 0.18,
               background: 'radial-gradient(circle, rgba(6,182,212,0.22) 0%, rgba(6,182,212,0.07) 38%, transparent 65%)',
               filter: 'blur(64px)',
             }}
           />
 
           {/* Pink orb – lower center */}
-          <motion.div
-            className="pointer-events-none absolute -z-20"
-            animate={motionEnabled ? { opacity: [0.14, 0.26, 0.14], scale: [1, 1.06, 1] } : {}}
-            transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut', delay: 5 }}
+          <div
+            className={`pointer-events-none absolute -z-20${motionEnabled ? ' animate-hero-orb-pink' : ''}`}
             style={{
               left: '25%', bottom: '0%',
               width: '50%', height: '50%',
+              opacity: 0.14,
               background: 'radial-gradient(circle, rgba(236,72,153,0.20) 0%, rgba(236,72,153,0.06) 40%, transparent 68%)',
               filter: 'blur(80px)',
             }}
@@ -247,10 +244,8 @@ export default function Hero() {
               animate={motionEnabled ? { opacity: 1 } : undefined}
               transition={motionEnabled ? { duration: 0.9, delay: 0.35, ease } : undefined}
             >
-              <motion.div
-                animate={motionEnabled ? { y: [0, -10, 0] } : {}}
-                transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-                className="w-[258px] rounded-[24px] border border-white/[0.1] bg-[rgba(8,6,22,0.76)] p-5 backdrop-blur-xl"
+              <div
+                className={`w-[258px] rounded-[24px] border border-white/[0.1] bg-[rgba(8,6,22,0.76)] p-5 backdrop-blur-xl${motionEnabled ? ' animate-hero-float-up' : ''}`}
                 style={{ boxShadow: '0 32px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05)' }}
               >
                 <div
@@ -283,7 +278,7 @@ export default function Hero() {
                     </div>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             </motion.div>
 
             {/* Card 2: Stats – lower right */}
@@ -293,10 +288,8 @@ export default function Hero() {
               animate={motionEnabled ? { opacity: 1 } : undefined}
               transition={motionEnabled ? { duration: 0.9, delay: 0.55, ease } : undefined}
             >
-              <motion.div
-                animate={motionEnabled ? { y: [0, 9, 0] } : {}}
-                transition={{ duration: 8.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
-                className="w-[200px] rounded-[20px] border border-cyan-400/[0.12] bg-[rgba(5,20,32,0.72)] p-4 backdrop-blur-xl"
+              <div
+                className={`w-[200px] rounded-[20px] border border-cyan-400/[0.12] bg-[rgba(5,20,32,0.72)] p-4 backdrop-blur-xl${motionEnabled ? ' animate-hero-float-down' : ''}`}
                 style={{ boxShadow: '0 20px 56px rgba(0,0,0,0.48), inset 0 1px 0 rgba(34,211,238,0.1)' }}
               >
                 <div
@@ -318,7 +311,7 @@ export default function Hero() {
                     </div>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             </motion.div>
 
             {/* Card 3: For Providers – middle left */}
@@ -328,10 +321,8 @@ export default function Hero() {
               animate={motionEnabled ? { opacity: 1 } : undefined}
               transition={motionEnabled ? { duration: 0.9, delay: 0.72, ease } : undefined}
             >
-              <motion.div
-                animate={motionEnabled ? { y: [0, -7, 0] } : {}}
-                transition={{ duration: 9.5, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
-                className="w-[226px] rounded-[20px] border border-white/[0.08] bg-[rgba(6,8,22,0.68)] p-4 backdrop-blur-xl"
+              <div
+                className={`w-[226px] rounded-[20px] border border-white/[0.08] bg-[rgba(6,8,22,0.68)] p-4 backdrop-blur-xl${motionEnabled ? ' animate-hero-float-up-sm' : ''}`}
                 style={{ boxShadow: '0 20px 52px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.04)' }}
               >
                 <div
@@ -360,7 +351,7 @@ export default function Hero() {
                   />
                   <span className="text-[10px] font-medium text-green-400/78">30+ Active Vendors</span>
                 </div>
-              </motion.div>
+              </div>
             </motion.div>
 
           </div>

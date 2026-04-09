@@ -1,6 +1,7 @@
 import { Check, Zap, PackageCheck } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { Product } from '../../data/products/types'
+import { useSpotlight, SpotlightOverlay } from '../ui/spotlight-card'
 
 const INCLUDED = [
   { label: 'Equipment setup & dismantling', icon: PackageCheck },
@@ -11,15 +12,19 @@ const INCLUDED = [
 
 export default function PricingCard({ product }: { product: Product }) {
   const { isDark } = useTheme()
+  const spotlight = useSpotlight()
 
   return (
     <div
-      className={`overflow-hidden rounded-[22px] ${
+      {...spotlight.handlers}
+      className={`relative overflow-hidden rounded-[22px] ${
         isDark
           ? 'border border-violet-500/22 bg-[linear-gradient(165deg,rgba(16,13,36,0.98),rgba(10,9,26,0.99))] shadow-[0_24px_56px_rgba(2,4,14,0.42),inset_0_1px_0_rgba(255,255,255,0.05)]'
           : 'border border-violet-100/90 bg-white shadow-[0_12px_36px_rgba(124,58,237,0.1)]'
       }`}
     >
+      <SpotlightOverlay ref={spotlight.overlayRef} color="rgba(124,58,237,0.09)" size={280} />
+
       {/* ── Premium gradient header ── */}
       <div
         className={`relative px-5 pb-5 pt-5 ${

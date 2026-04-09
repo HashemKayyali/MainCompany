@@ -152,6 +152,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const retryCount = useRef(0)
   const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const snapshotTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const mountedRef = useRef(true)
   const cacheVisibleRef = useRef(false)
 
@@ -312,13 +313,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    writeSnapshot({
-      products,
-      parts,
-      customers,
-      categories,
-      galleryAlbums,
-    })
+    if (snapshotTimer.current) clearTimeout(snapshotTimer.current)
+    snapshotTimer.current = setTimeout(() => {
+      writeSnapshot({ products, parts, customers, categories, galleryAlbums })
+      snapshotTimer.current = null
+    }, 1500)
   }, [categories, customers, galleryAlbums, loading, parts, products])
 
   const addProduct = useCallback(

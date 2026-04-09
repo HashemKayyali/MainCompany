@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
@@ -21,7 +21,7 @@ function loopItems<T>(arr: T[], min = 12): T[] {
   return [...result, ...result]
 }
 
-function LogoCell({ customer, isDark }: { customer: Customer; isDark: boolean }) {
+const LogoCell = memo(function LogoCell({ customer, isDark }: { customer: Customer; isDark: boolean }) {
   return (
     <div
       className={`group mx-1.5 flex h-[68px] w-[130px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-[14px] border px-3 transition-all duration-300 sm:mx-2 sm:h-[72px] sm:w-[148px] lg:mx-2.5 lg:h-[76px] lg:w-[160px] ${
@@ -51,6 +51,7 @@ function LogoCell({ customer, isDark }: { customer: Customer; isDark: boolean })
           media={customer.logo}
           alt={customer.name}
           loading="lazy"
+          sizes="(max-width: 640px) 100px, 125px"
           className={`h-full max-h-7 w-auto max-w-[76%] object-contain transition-all duration-300 ${
             isDark
               ? 'opacity-54 group-hover:opacity-88'
@@ -72,7 +73,7 @@ function LogoCell({ customer, isDark }: { customer: Customer; isDark: boolean })
       </div>
     </div>
   )
-}
+})
 
 type Props = {
   customers: Customer[]
@@ -147,7 +148,7 @@ export default function LogoCloud({ customers }: Props) {
               ? 'border-white/[0.07] bg-[linear-gradient(180deg,rgba(10,8,26,0.72),rgba(6,6,18,0.54))] shadow-[0_24px_72px_rgba(2,2,14,0.32),inset_0_1px_0_rgba(255,255,255,0.03)]'
               : 'border-violet-100/80 bg-white/80 shadow-[0_16px_48px_rgba(124,58,237,0.07)]'
           }`}
-          style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+          style={{ backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
         >
           {/* Ambient corner glow */}
           {isDark && (

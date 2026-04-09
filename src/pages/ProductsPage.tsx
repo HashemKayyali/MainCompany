@@ -144,7 +144,7 @@ export default function ProductsPage() {
               transition={{ duration: 0.3, ease }}
             >
               {filtered.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-5">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4 xl:gap-5">
                   {filtered.map((p, i) => (
                     <ProductCard key={p.slug} product={p} index={i} />
                   ))}

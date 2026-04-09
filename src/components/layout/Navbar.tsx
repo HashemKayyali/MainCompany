@@ -130,12 +130,43 @@ export default function Navbar() {
 
   useBodyScrollLock(open)
 
+  const openSearchDialog = useCallback(() => {
+    if (desktopOpenTimerRef.current) {
+      window.clearTimeout(desktopOpenTimerRef.current)
+      desktopOpenTimerRef.current = null
+    }
+    if (desktopCloseTimerRef.current) {
+      window.clearTimeout(desktopCloseTimerRef.current)
+      desktopCloseTimerRef.current = null
+    }
+    setOpen(false)
+    setDesktopMenu(null)
+    setUserMenu(false)
+    setSearchOpen(true)
+  }, [])
+
   // Cmd/Ctrl+K search shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault()
-        setSearchOpen(v => !v)
+        setSearchOpen(current => {
+          const next = !current
+          if (next) {
+            if (desktopOpenTimerRef.current) {
+              window.clearTimeout(desktopOpenTimerRef.current)
+              desktopOpenTimerRef.current = null
+            }
+            if (desktopCloseTimerRef.current) {
+              window.clearTimeout(desktopCloseTimerRef.current)
+              desktopCloseTimerRef.current = null
+            }
+            setOpen(false)
+            setDesktopMenu(null)
+            setUserMenu(false)
+          }
+          return next
+        })
       }
     }
     window.addEventListener('keydown', handler)
@@ -143,7 +174,15 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 18)
+    let ticking = false
+    const onScroll = () => {
+      if (ticking) return
+      ticking = true
+      window.requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 18)
+        ticking = false
+      })
+    }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
@@ -152,6 +191,7 @@ export default function Navbar() {
     setOpen(false)
     setDesktopMenu(null)
     setUserMenu(false)
+    setSearchOpen(false)
   }, [pathname])
 
   useEffect(() => {
@@ -219,6 +259,20 @@ export default function Navbar() {
   useEffect(() => {
     if (open || searchOpen || userMenu) setDesktopMenu(null)
   }, [open, searchOpen, userMenu])
+
+  useEffect(() => {
+    if (!searchOpen) return
+    if (desktopOpenTimerRef.current) {
+      window.clearTimeout(desktopOpenTimerRef.current)
+      desktopOpenTimerRef.current = null
+    }
+    if (desktopCloseTimerRef.current) {
+      window.clearTimeout(desktopCloseTimerRef.current)
+      desktopCloseTimerRef.current = null
+    }
+    setOpen(false)
+    setUserMenu(false)
+  }, [searchOpen])
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined') return
@@ -558,7 +612,7 @@ export default function Navbar() {
 
               {/* Search compact (sm–xl) */}
               <button
-                onClick={() => setSearchOpen(true)}
+                onClick={openSearchDialog}
                 className={`hidden h-[2.375rem] items-center gap-2 rounded-[12px] border px-3 text-[12px] font-medium transition-all sm:inline-flex xl:hidden ${utilityPill} ${focus}`}
                 aria-label="Search (Ctrl+K)"
               >
@@ -567,7 +621,7 @@ export default function Navbar() {
 
               {/* Search with label (xl+) */}
               <button
-                onClick={() => setSearchOpen(true)}
+                onClick={openSearchDialog}
                 className={`hidden h-[2.375rem] items-center gap-2 rounded-[12px] border px-3.5 text-[12px] font-medium transition-all xl:inline-flex ${utilityPill} ${focus}`}
                 aria-label="Search (Ctrl+K)"
               >
@@ -878,7 +932,7 @@ export default function Navbar() {
                         {/* Search */}
                         <button
                           type="button"
-                          onClick={() => { setOpen(false); setSearchOpen(true) }}
+                          onClick={openSearchDialog}
                           className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
                         >
                           <Search className="h-4 w-4 opacity-70" strokeWidth={2} />

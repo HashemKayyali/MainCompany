@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight, LayoutGrid, Sparkles } from 'lucide-react'
@@ -20,7 +20,7 @@ type CategoryItem = {
 }
 
 // ── Premium neon/glass category card ─────────────────────────────────────────
-function CategoryTile({
+const CategoryTile = memo(function CategoryTile({
   category,
   active,
   index,
@@ -44,7 +44,6 @@ function CategoryTile({
       viewport={{ once: true }}
       transition={{ duration: 0.52, delay: index * 0.055, ease }}
       className="group relative w-full cursor-pointer text-left focus:outline-none"
-      style={{ willChange: 'transform' }}
     >
       <div
         className={cn(
@@ -164,7 +163,15 @@ function CategoryTile({
       </div>
     </motion.button>
   )
-}
+}, (prev, next) =>
+  prev.active === next.active &&
+  prev.isDark === next.isDark &&
+  prev.index === next.index &&
+  prev.category.id === next.category.id &&
+  prev.category.count === next.category.count &&
+  prev.category.name === next.category.name &&
+  prev.category.image === next.category.image
+)
 
 // ── "View All" tile ───────────────────────────────────────────────────────────
 function ViewAllTile({ isDark, delay }: { isDark: boolean; delay: number }) {
@@ -183,7 +190,6 @@ function ViewAllTile({ isDark, delay }: { isDark: boolean; delay: number }) {
             ? 'border-white/[0.08] hover:border-violet-400/30 hover:shadow-[0_0_20px_rgba(124,58,237,0.14),0_16px_44px_rgba(124,58,237,0.18)]'
             : 'border-slate-200/80 hover:border-violet-300/60 hover:shadow-[0_12px_36px_rgba(124,58,237,0.14)]'
         )}
-        style={{ willChange: 'transform' }}
       >
         <div
           className="relative aspect-[4/3]"
@@ -374,8 +380,18 @@ export default function OfferSection() {
     [categories, products]
   )
 
-  const activeCat = categoryItems.find(category => category.id === activeTab)
-  const filtered = activeCat ? products.filter(product => product.categoryId === activeCat.id) : []
+  const activeCat = useMemo(
+    () => categoryItems.find(category => category.id === activeTab),
+    [categoryItems, activeTab]
+  )
+  const filtered = useMemo(
+    () => (activeCat ? products.filter(product => product.categoryId === activeCat.id) : []),
+    [activeCat, products]
+  )
+
+  const handleCategoryClick = useCallback((id: string) => {
+    setActiveTab(prev => (prev === id ? '' : id))
+  }, [])
 
   useEffect(() => {
     if (!activeCat || !selectedCategoryRef.current || typeof window === 'undefined') return
@@ -478,7 +494,7 @@ export default function OfferSection() {
                       active={activeCat?.id === category.id}
                       index={index}
                       isDark={isDark}
-                      onClick={() => setActiveTab(prev => prev === category.id ? '' : category.id)}
+                      onClick={() => handleCategoryClick(category.id)}
                     />
                   ))}
                   <ViewAllTile isDark={isDark} delay={categoryItems.length * 0.055} />

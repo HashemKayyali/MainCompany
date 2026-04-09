@@ -1,5 +1,6 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useId, useMemo, useRef, useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Package, Search, Users, X } from 'lucide-react'
 import { useData } from '../../contexts/DataContext'
@@ -30,13 +31,24 @@ function getFocusableElements(container: HTMLElement | null) {
   )
 }
 
+function getResultIndexFromElement(element: HTMLElement | null, resultsListId: string) {
+  const id = element?.id || ''
+  const prefix = `${resultsListId}-option-`
+  if (!id.startsWith(prefix)) return -1
+
+  const parsed = Number(id.slice(prefix.length))
+  return Number.isFinite(parsed) ? parsed : -1
+}
+
 export default function SearchDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { products, customers } = useData()
   const { isDark } = useTheme()
   const navigate = useNavigate()
+  const location = useLocation()
   const dialogRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
+  const openRouteRef = useRef('')
   const resultsListId = useId()
   const [query, setQuery] = useState('')
   const [activeIndex, setActiveIndex] = useState(-1)
@@ -77,6 +89,7 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
   useEffect(() => {
     if (!open) return
 
+    openRouteRef.current = `${location.pathname}${location.search}${location.hash}`
     previousFocusRef.current =
       typeof document !== 'undefined' && document.activeElement instanceof HTMLElement
         ? document.activeElement
@@ -96,10 +109,23 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
     if (open) return
 
     const previousFocus = previousFocusRef.current
-    if (previousFocus && typeof previousFocus.focus === 'function') {
+    if (
+      previousFocus &&
+      typeof previousFocus.focus === 'function' &&
+      document.contains(previousFocus)
+    ) {
       previousFocus.focus()
     }
   }, [open])
+
+  useEffect(() => {
+    if (!open) return
+
+    const currentRoute = `${location.pathname}${location.search}${location.hash}`
+    if (openRouteRef.current && openRouteRef.current !== currentRoute) {
+      onClose()
+    }
+  }, [location.hash, location.pathname, location.search, onClose, open])
 
   useEffect(() => {
     if (!results.length) {
@@ -113,22 +139,32 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
     })
   }, [results])
 
-  const go = (href: string) => {
-    navigate(href)
-    onClose()
-  }
+  const go = useCallback(
+    (href: string) => {
+      onClose()
+      navigate(href)
+    },
+    [navigate, onClose]
+  )
 
   useEffect(() => {
     if (!open) return
+
+    const focusResult = (index: number) => {
+      const resultButton = document.getElementById(`${resultsListId}-option-${index}`)
+      if (resultButton instanceof HTMLElement) {
+        resultButton.focus()
+      }
+    }
 
     const handler = (event: KeyboardEvent) => {
       const activeElement =
         typeof document !== 'undefined' && document.activeElement instanceof HTMLElement
           ? document.activeElement
           : null
+      const focusedResultIndex = getResultIndexFromElement(activeElement, resultsListId)
       const keyboardSearchTarget =
-        activeElement === inputRef.current ||
-        Boolean(activeElement?.id?.startsWith(`${resultsListId}-option-`))
+        activeElement === inputRef.current || focusedResultIndex >= 0
 
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
@@ -143,19 +179,36 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
 
       if (event.key === 'ArrowDown' && results.length && keyboardSearchTarget) {
         event.preventDefault()
-        setActiveIndex(current => (current + 1) % results.length)
+        const nextIndex =
+          focusedResultIndex >= 0
+            ? (focusedResultIndex + 1) % results.length
+            : (activeIndex + 1 + results.length) % results.length
+        setActiveIndex(nextIndex)
+        if (focusedResultIndex >= 0) {
+          window.requestAnimationFrame(() => focusResult(nextIndex))
+        }
         return
       }
 
       if (event.key === 'ArrowUp' && results.length && keyboardSearchTarget) {
         event.preventDefault()
-        setActiveIndex(current => (current <= 0 ? results.length - 1 : current - 1))
+        const nextIndex =
+          focusedResultIndex >= 0
+            ? (focusedResultIndex <= 0 ? results.length - 1 : focusedResultIndex - 1)
+            : activeIndex <= 0
+              ? results.length - 1
+              : activeIndex - 1
+        setActiveIndex(nextIndex)
+        if (focusedResultIndex >= 0) {
+          window.requestAnimationFrame(() => focusResult(nextIndex))
+        }
         return
       }
 
-      if (event.key === 'Enter' && keyboardSearchTarget && activeIndex >= 0 && results[activeIndex]) {
+      const selectedIndex = focusedResultIndex >= 0 ? focusedResultIndex : activeIndex
+      if (event.key === 'Enter' && keyboardSearchTarget && selectedIndex >= 0 && results[selectedIndex]) {
         event.preventDefault()
-        go(results[activeIndex].href)
+        go(results[selectedIndex].href)
         return
       }
 
@@ -182,18 +235,25 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
 
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  }, [activeIndex, onClose, open, results])
+  }, [activeIndex, go, onClose, open, results, resultsListId])
 
-  return (
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
     <AnimatePresence>
       {open && (
         <>
-          <motion.div
+          <motion.button
+            type="button"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onMouseDown={event => {
+              event.preventDefault()
+              onClose()
+            }}
             className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
+            aria-label="Close search overlay"
             data-native-scroll
           />
 
@@ -206,6 +266,7 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
             role="dialog"
             aria-modal="true"
             aria-label="Search site"
+            onMouseDown={event => event.stopPropagation()}
           >
             <div
               className={`overflow-hidden rounded-[24px] border shadow-2xl ${
@@ -278,6 +339,7 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
                         aria-selected={isActive}
                         type="button"
                         onClick={() => go(result.href)}
+                        onFocus={() => setActiveIndex(index)}
                         onMouseEnter={() => setActiveIndex(index)}
                         className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors ${
                           isDark
@@ -333,6 +395,7 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   )
 }

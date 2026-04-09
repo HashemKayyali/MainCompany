@@ -3,14 +3,17 @@ import { useTheme } from '../../contexts/ThemeContext'
 import type { Customer } from '../../data/customers'
 import { usePerfMode } from '../../hooks/usePerfMode'
 import FramedImage from '../ui/FramedImage'
+import { useSpotlight, SpotlightOverlay } from '../ui/spotlight-card'
 
 const CustomerCard = memo(function CustomerCard({ customer }: { customer: Customer }) {
   const { isDark } = useTheme()
   const { perfLow } = usePerfMode()
   const [imgOk, setImgOk] = useState(true)
+  const spotlight = useSpotlight()
 
   return (
     <div
+      {...spotlight.handlers}
       className={`group relative flex flex-col items-center justify-center overflow-hidden rounded-[16px] border p-4 transition-all duration-300 ${
         !perfLow ? 'hover:-translate-y-0.5' : ''
       } ${
@@ -24,6 +27,8 @@ const CustomerCard = memo(function CustomerCard({ customer }: { customer: Custom
           : undefined
       }
     >
+      <SpotlightOverlay ref={spotlight.overlayRef} color="rgba(124,58,237,0.09)" size={160} />
+
       {/* Hover shimmer */}
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-400 group-hover:opacity-100"

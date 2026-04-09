@@ -38,6 +38,7 @@ export default function Lightbox({ images, open, onClose }: { images: string[]; 
         src={images[idx]}
         alt={`Gallery photo ${idx + 1} of ${images.length}`}
         loading="lazy"
+        decoding="async"
         className="max-h-[82vh] max-w-[92vw] rounded-[18px] object-contain sm:max-h-[85vh] sm:max-w-[90vw]"
         onClick={e => e.stopPropagation()}
       />

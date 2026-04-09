@@ -56,8 +56,8 @@ export default function HomePage() {
                 style={
                   isDark
                     ? {
-                        backdropFilter: 'blur(22px)',
-                        WebkitBackdropFilter: 'blur(22px)',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
                         boxShadow:
                           '0 30px 80px rgba(2,6,18,0.38), inset 0 1px 0 rgba(255,255,255,0.05)',
                       }

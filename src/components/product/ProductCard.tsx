@@ -10,6 +10,7 @@ import FramedImage from '../ui/FramedImage'
 import FramedVideo from '../ui/FramedVideo'
 import ProductCommerceActions from './ProductCommerceActions'
 import { cn } from '../../utils/cn'
+import { useSpotlight, SpotlightOverlay } from '../ui/spotlight-card'
 
 const CARD_IMAGE_SIZES = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
 
@@ -32,6 +33,7 @@ const ProductCard = memo(function ProductCard({
 
   const cardRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const spotlight = useSpotlight()
 
   const [isPlaying, setIsPlaying] = useState(false)
 
@@ -99,6 +101,7 @@ const ProductCard = memo(function ProductCard({
       ref={cardRef}
       onMouseEnter={startPreview}
       onMouseLeave={stopPreview}
+      {...spotlight.handlers}
       className={cn(
         'group relative flex h-full flex-col overflow-hidden rounded-[22px]',
         'transition-[border-color,box-shadow] duration-350',
@@ -108,6 +111,8 @@ const ProductCard = memo(function ProductCard({
       )}
       style={{ willChange: allowPreviewMotion ? 'transform' : 'auto' }}
     >
+      <SpotlightOverlay ref={spotlight.overlayRef} className="z-[11]" />
+
       <div
         className={cn(
           'pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100',

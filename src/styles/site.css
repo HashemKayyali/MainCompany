@@ -131,3 +131,92 @@ img.framed-image--revealed.framed-image--reveal-crisp {
     filter: blur(0) saturate(1);
   }
 }
+
+/* ── Hero background orb pulses (CSS-driven, zero JS overhead) ── */
+@keyframes hero-orb-violet {
+  0%, 100% { opacity: 0.32; transform: scale(1); }
+  50%       { opacity: 0.52; transform: scale(1.07); }
+}
+@keyframes hero-orb-cyan {
+  0%, 100% { opacity: 0.18; transform: scale(1); }
+  50%       { opacity: 0.34; transform: scale(1.09); }
+}
+@keyframes hero-orb-pink {
+  0%, 100% { opacity: 0.14; transform: scale(1); }
+  50%       { opacity: 0.26; transform: scale(1.06); }
+}
+
+.animate-hero-orb-violet {
+  animation: hero-orb-violet 9s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+.animate-hero-orb-cyan {
+  animation: hero-orb-cyan 11s ease-in-out 2.5s infinite;
+  will-change: opacity, transform;
+}
+.animate-hero-orb-pink {
+  animation: hero-orb-pink 13s ease-in-out 5s infinite;
+  will-change: opacity, transform;
+}
+
+/* ── Hero floating card animations (CSS-driven) ── */
+@keyframes hero-float-up {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+@keyframes hero-float-down {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(9px); }
+}
+@keyframes hero-float-up-sm {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-7px); }
+}
+
+.animate-hero-float-up {
+  animation: hero-float-up 7s ease-in-out infinite;
+  will-change: transform;
+}
+.animate-hero-float-down {
+  animation: hero-float-down 8.5s ease-in-out 1.5s infinite;
+  will-change: transform;
+}
+.animate-hero-float-up-sm {
+  animation: hero-float-up-sm 9.5s ease-in-out 3s infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-orb-violet,
+  .animate-hero-orb-cyan,
+  .animate-hero-orb-pink,
+  .animate-hero-float-up,
+  .animate-hero-float-down,
+  .animate-hero-float-up-sm {
+    animation: none;
+  }
+}
+
+/* ── Spotlight hover glow ─────────────────────────────────────────── */
+/* Cursor-tracking radial glow. --sx/--sy are set via JS (useSpotlight hook).  */
+/* opacity is toggled directly on the DOM node — zero React re-renders.        */
+.spotlight-glow {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  z-index: 2;
+  background: radial-gradient(
+    var(--ss, 220px) circle at var(--sx, 50%) var(--sy, 50%),
+    var(--sc, rgba(124, 58, 237, 0.11)),
+    transparent 70%
+  );
+}
+
+/* Touch devices have no persistent hover — hide unconditionally */
+@media (pointer: coarse) {
+  .spotlight-glow { display: none; }
+}
+
+/* Instant show/hide for users who prefer no motion */
+@media (prefers-reduced-motion: reduce) {
+  .spotlight-glow { transition: none; }
+}
