@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowRight, Building2, Sparkles } from 'lucide-react'
@@ -21,6 +22,7 @@ export default function Hero() {
   const reducedMotion = useReducedMotion()
   const { perfLow } = usePerfMode()
   const motionEnabled = !reducedMotion && !perfLow
+  const [heroImageReady, setHeroImageReady] = useState(false)
 
   return (
     <section className="relative isolate flex min-h-screen flex-col overflow-hidden">
@@ -32,12 +34,18 @@ export default function Hero() {
 
       {/* Layer 1 – hero image (subdued atmosphere) */}
       <div className="absolute inset-0 -z-30">
-        <div
-          className="h-full w-full bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: "url('/images/hero-bg-event.png')",
-            opacity: 1.18,
-          }}
+        <img
+          src="/images/hero-bg-event.png"
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+          className={`h-full w-full object-cover transition-opacity duration-700 ${
+            heroImageReady ? 'opacity-100' : 'opacity-0'
+          }`}
+          onLoad={() => setHeroImageReady(true)}
         />
         <div
           className="absolute inset-0"

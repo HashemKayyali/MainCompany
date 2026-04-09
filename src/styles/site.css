@@ -94,3 +94,40 @@ html.light input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.98) inset;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+/* Shared media reveal */
+img.framed-image {
+  backface-visibility: hidden;
+}
+
+img.framed-image--pending.framed-image--reveal-soft {
+  filter: blur(12px) saturate(0.92);
+}
+
+img.framed-image--revealed.framed-image--reveal-soft {
+  animation: framed-image-clarify 360ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+img.framed-image--reveal-crisp {
+  transition: opacity 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+img.framed-image--pending.framed-image--reveal-crisp {
+  opacity: 0.94;
+  filter: none;
+}
+
+img.framed-image--revealed.framed-image--reveal-crisp {
+  opacity: 1;
+  filter: none;
+}
+
+@keyframes framed-image-clarify {
+  from {
+    filter: blur(12px) saturate(0.92);
+  }
+
+  to {
+    filter: blur(0) saturate(1);
+  }
+}

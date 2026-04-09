@@ -1,5 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { MotionConfig } from 'framer-motion'
 import { RouterProvider } from 'react-router-dom'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { SessionProvider } from './contexts/SessionContext'
@@ -19,25 +20,27 @@ import './styles/site.css'
 const AppTree = (
   <ErrorBoundary>
     <PerfClass>
-      <ThemeProvider>
-        <ToastProvider>
-        <DialogProvider>
-        <SessionProvider>
-          <AuthProvider>
-            <UserProvider>
-              <DataProvider>
-                <RentalCartProvider>
-                  <PurchaseQuoteProvider>
-                    <RouterProvider router={router} future={{ v7_startTransition: true }} />
-                  </PurchaseQuoteProvider>
-                </RentalCartProvider>
-              </DataProvider>
-            </UserProvider>
-          </AuthProvider>
-        </SessionProvider>
-        </DialogProvider>
-        </ToastProvider>
-      </ThemeProvider>
+      <MotionConfig reducedMotion="user">
+        <ThemeProvider>
+          <ToastProvider>
+          <DialogProvider>
+          <SessionProvider>
+            <AuthProvider>
+              <UserProvider>
+                <DataProvider>
+                  <RentalCartProvider>
+                    <PurchaseQuoteProvider>
+                      <RouterProvider router={router} future={{ v7_startTransition: true }} />
+                    </PurchaseQuoteProvider>
+                  </RentalCartProvider>
+                </DataProvider>
+              </UserProvider>
+            </AuthProvider>
+          </SessionProvider>
+          </DialogProvider>
+          </ToastProvider>
+        </ThemeProvider>
+      </MotionConfig>
     </PerfClass>
   </ErrorBoundary>
 )

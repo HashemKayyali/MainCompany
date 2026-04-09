@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { GalleryAlbum } from '../../data/gallery'
+import { getDeferredRenderStyle, useRevealGroup } from '../../hooks/useReveal'
 import FramedImage from '../ui/FramedImage'
 
 export default function GalleryGrid({
@@ -11,17 +12,21 @@ export default function GalleryGrid({
   onAlbumClick: (a: GalleryAlbum) => void
 }) {
   const { isDark } = useTheme()
+  const { containerProps, itemProps } = useRevealGroup({
+    distance: 16,
+    stagger: 0.05,
+    delayChildren: 0.03,
+    margin: '-28px',
+  })
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-      {albums.map((album, i) => (
-        <motion.div
-          key={album.slug}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: i * 0.08 }}
-        >
+    <motion.div
+      {...containerProps}
+      className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
+      style={getDeferredRenderStyle('860px')}
+    >
+      {albums.map(album => (
+        <motion.div key={album.slug} {...itemProps}>
           <button
             onClick={() => onAlbumClick(album)}
             aria-label={`View album: ${album.title}`}
@@ -36,20 +41,29 @@ export default function GalleryGrid({
                 media={album.cover}
                 alt={album.title}
                 loading="lazy"
+                sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
                 className="h-full w-full transition-transform duration-700 group-hover:scale-105"
                 fallbackTransform={{ fit: 'cover' }}
-                onError={e => {
-                  ;(e.target as HTMLImageElement).style.display = 'none'
+                onError={event => {
+                  ;(event.target as HTMLImageElement).style.display = 'none'
                 }}
               />
             </div>
             <div className="p-2.5">
-              <h3 className={`font-display text-[0.88rem] font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{album.title}</h3>
-              <p className={`mt-0.5 text-[10px] ${isDark ? 'text-purple-300/80' : 'text-gray-400'}`}>{album.images.length} photos</p>
+              <h3
+                className={`font-display text-[0.88rem] font-bold ${
+                  isDark ? 'text-white' : 'text-gray-900'
+                }`}
+              >
+                {album.title}
+              </h3>
+              <p className={`mt-0.5 text-[10px] ${isDark ? 'text-purple-300/80' : 'text-gray-400'}`}>
+                {album.images.length} photos
+              </p>
             </div>
           </button>
         </motion.div>
       ))}
-    </div>
+    </motion.div>
   )
 }

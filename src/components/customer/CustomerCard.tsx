@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { Customer } from '../../data/customers'
 import { usePerfMode } from '../../hooks/usePerfMode'
 import FramedImage from '../ui/FramedImage'
 
-export default function CustomerCard({ customer }: { customer: Customer }) {
+const CustomerCard = memo(function CustomerCard({ customer }: { customer: Customer }) {
   const { isDark } = useTheme()
   const { perfLow } = usePerfMode()
   const [imgOk, setImgOk] = useState(true)
@@ -39,6 +39,7 @@ export default function CustomerCard({ customer }: { customer: Customer }) {
             media={customer.logo}
             alt={customer.name}
             loading="lazy"
+            sizes="(max-width: 640px) 42vw, (max-width: 1024px) 24vw, 160px"
             className={`h-full max-h-10 w-auto max-w-[80%] object-contain transition-all duration-300 ${
               isDark
                 ? 'opacity-60 group-hover:opacity-90'
@@ -70,4 +71,6 @@ export default function CustomerCard({ customer }: { customer: Customer }) {
       </div>
     </div>
   )
-}
+})
+
+export default CustomerCard
