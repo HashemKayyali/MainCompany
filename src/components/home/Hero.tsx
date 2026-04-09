@@ -126,14 +126,14 @@ export default function Hero() {
               initial={motionEnabled ? { opacity: 0, y: -10 } : false}
               animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
               transition={motionEnabled ? { duration: 0.5, delay: 0.06, ease } : undefined}
-              className="mb-6 inline-flex w-fit"
+              className="mb-4 inline-flex w-fit sm:mb-6"
             >
-              <div className="inline-flex items-center gap-2.5 rounded-full border border-violet-400/22 bg-violet-500/10 px-4 py-2 backdrop-blur-md">
+              <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/22 bg-violet-500/10 px-3 py-1.5 backdrop-blur-md sm:gap-2.5 sm:px-4 sm:py-2">
                 <span
                   className="h-1.5 w-1.5 shrink-0 rounded-full bg-violet-400"
                   style={{ boxShadow: '0 0 8px rgba(167,139,250,0.95), 0 0 18px rgba(167,139,250,0.45)' }}
                 />
-                <span className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-violet-200/82">
+                <span className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-violet-200/82 sm:text-[10.5px] sm:tracking-[0.18em]">
                   Event Services Marketplace
                 </span>
               </div>
