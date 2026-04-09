@@ -35,14 +35,15 @@ export default function Footer() {
             {/* Brand */}
             <div className="max-w-md">
               <div className="flex items-center gap-3">
-                <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-[14px] border border-white/12 bg-[linear-gradient(145deg,#7c3aed_0%,#d946ef_48%,#22d3ee_115%)] shadow-md">
-                  <span className="relative text-[11px] font-black tracking-[0.22em] text-white">BL</span>
+                <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-[14px] border border-white/14 bg-[linear-gradient(145deg,#7c3aed_0%,#d946ef_48%,#22d3ee_115%)] shadow-md">
+                  <div className="absolute inset-x-2 top-1.5 h-2.5 rounded-full bg-white/18 blur-sm" />
+                  <span className="relative text-[10.5px] font-black tracking-[0.12em] text-white">Ev</span>
                 </div>
                 <div className="leading-none">
-                  <div className={`font-display text-[11px] font-bold uppercase tracking-[0.2em] ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    Bike <span className="text-violet-300">Land</span>
+                  <div className={`font-display text-[13px] font-bold tracking-[-0.01em] ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    Eventies
                   </div>
-                  <div className={`mt-1 text-[10px] uppercase tracking-[0.16em] ${subtle}`}>
+                  <div className={`mt-[3px] text-[9px] uppercase tracking-[0.18em] ${subtle}`}>
                     Marketplace
                   </div>
                 </div>
@@ -127,7 +128,7 @@ export default function Footer() {
 
           <div className={`relative mt-6 border-t pt-4 ${isDark ? 'border-white/8' : 'border-violet-200/60'}`}>
             <p className={`text-[10px] uppercase tracking-[0.14em] ${subtle}`}>
-              &copy; {new Date().getFullYear()} Bike Land &middot; Premium event services marketplace
+              &copy; {new Date().getFullYear()} Eventies &middot; Premium event services marketplace
             </p>
           </div>
         </div>

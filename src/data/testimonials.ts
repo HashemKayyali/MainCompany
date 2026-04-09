@@ -13,7 +13,7 @@ export const testimonials: Testimonial[] = [
     name: 'Sarah Al-Masri',
     role: 'Events Manager',
     company: 'City Mall',
-    quote: 'Bike Land completely transformed our summer event. The LED races had guests lining up for hours — the energy was unreal.',
+    quote: 'Eventies completely transformed our summer event. The LED races had guests lining up for hours — the energy was unreal.',
   },
   {
     id: 't-2',
@@ -41,13 +41,13 @@ export const testimonials: Testimonial[] = [
     name: 'Rania Nasser',
     role: 'Brand Manager',
     company: 'AstraZeneca',
-    quote: 'We needed something unique for our corporate family day. Bike Land delivered beyond expectations — custom branding and all.',
+    quote: 'We needed something unique for our corporate family day. Eventies delivered beyond expectations — custom branding and all.',
   },
   {
     id: 't-6',
     name: 'Tariq Abu Zeid',
     role: 'Operations',
     company: 'TAJ Mall',
-    quote: 'Third year working with Bike Land. They handle everything from setup to crowd management. Reliable partners.',
+    quote: 'Third year working with Eventies. They handle everything from setup to crowd management. Reliable partners.',
   },
 ]

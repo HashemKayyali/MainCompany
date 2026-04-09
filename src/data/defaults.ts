@@ -2,7 +2,7 @@ import type { Product, ProductPart, Category } from './products/types'
 import type { Customer } from './customers'
 
 export const DEFAULT_CATEGORIES: Category[] = [
-  { id: 'cat-bikeland', name: 'Bike Land', slug: 'bike-land', icon: '🚲', description: 'Interactive bike-powered activations — LED racing, smoothie bikes, energy generation & more', image: '' },
+  { id: 'cat-bikeland', name: 'Eventies', slug: 'eventies', icon: '✨', description: 'Interactive event activations — LED racing, smoothie bikes, energy generation & more', image: '' },
   { id: 'cat-terminal-vr', name: 'The Terminal VR', slug: 'terminal-vr', icon: '🥽', description: 'Immersive VR gaming experiences and virtual reality activations', image: '' },
 ]
 

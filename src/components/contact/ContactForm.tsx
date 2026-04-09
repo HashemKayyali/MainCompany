@@ -62,7 +62,7 @@ export default function ContactForm() {
     const selectedProduct = products.find(product => product.slug === form.product)
 
     return [
-      'Bike Land Inquiry',
+      'Eventies Inquiry',
       '',
       `Name: ${form.name}`,
       `Email: ${form.email}`,

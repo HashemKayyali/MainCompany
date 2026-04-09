@@ -65,7 +65,7 @@ export default function AboutPage() {
   usePageMeta({
     title: 'About',
     description:
-      'Learn about Bike Land and our interactive bike-powered activations for malls, schools, corporate events, and community gatherings across Jordan.',
+      'Learn about Eventies — a premium event services marketplace connecting clients with trusted vendors for activations, experiences, and events across Jordan.',
   })
 
   const txt = isDark ? 'text-white' : 'text-gray-900'

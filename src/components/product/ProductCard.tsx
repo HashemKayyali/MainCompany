@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Play } from 'lucide-react'
@@ -35,30 +35,49 @@ export default function ProductCard({
   const allowMotion = motionEnabled && !prefersReducedMotion()
   const hasVideo = Boolean(product.videoUrl)
 
+  // Detect touch device once at mount — stable for the session
+  const isTouchDevice = useMemo(
+    () =>
+      typeof window !== 'undefined' &&
+      ('ontouchstart' in window || navigator.maxTouchPoints > 0),
+    []
+  )
+
   const categoryLabel = product.categoryTags[0] || 'Marketplace'
   const showRentalPrice = product.rentalEnabled !== false && product.showPrice !== false
-  const priceDisplay = showRentalPrice ? `${product.rentalPricePerDay} ${product.currency}` : 'Quote Based'
+  const priceDisplay = showRentalPrice
+    ? `${product.rentalPricePerDay} ${product.currency}`
+    : 'Quote Based'
   const priceLabel = showRentalPrice ? 'Per Day' : 'Custom Pricing'
 
+  // ── IntersectionObserver: handles out-of-view pause + mobile autoplay ──────
   useEffect(() => {
     if (!hasVideo || !cardRef.current || prefersReducedMotion()) return
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting) {
+        if (entry.isIntersecting) {
+          // Mobile: autoplay when card is sufficiently in view
+          if (isTouchDevice) {
+            void videoRef.current?.play().catch(() => undefined)
+          }
+        } else {
           videoRef.current?.pause()
           if (videoRef.current) videoRef.current.currentTime = 0
           setIsPlaying(false)
         }
       },
-      { threshold: 0.4 }
+      { threshold: isTouchDevice ? 0.65 : 0.3 }
     )
+
     observer.observe(cardRef.current)
     return () => observer.disconnect()
-  }, [hasVideo])
+  }, [hasVideo, isTouchDevice])
 
+  // ── Desktop hover play/stop ───────────────────────────────────────────────
   const startPreview = () => {
     setIsHovering(true)
-    if (!hasVideo || prefersReducedMotion()) return
+    if (!hasVideo || isTouchDevice || prefersReducedMotion()) return
     const video = videoRef.current
     if (!video) return
     video.currentTime = 0
@@ -67,6 +86,7 @@ export default function ProductCard({
 
   const stopPreview = () => {
     setIsHovering(false)
+    if (isTouchDevice) return // mobile handles its own state
     const video = videoRef.current
     if (!video) return
     video.pause()
@@ -89,28 +109,25 @@ export default function ProductCard({
       onMouseLeave={stopPreview}
       className={cn(
         'group relative flex h-full flex-col overflow-hidden rounded-[22px]',
-        // Transition only on border/shadow properties — NOT transform (prevents GPU flicker)
         'transition-[border-color,box-shadow] duration-350',
         isDark
-          ? 'border border-white/[0.08] bg-[linear-gradient(165deg,rgba(16,13,34,0.97),rgba(9,9,26,0.98))] hover:border-violet-400/[0.24] hover:shadow-[0_28px_62px_-18px_rgba(124,58,237,0.3),0_0_0_1px_rgba(124,58,237,0.10)]'
+          ? 'border border-white/[0.08] bg-[linear-gradient(168deg,rgba(16,13,34,0.97),rgba(9,9,26,0.98))] hover:border-violet-400/[0.26] hover:shadow-[0_28px_64px_-18px_rgba(124,58,237,0.3),0_0_0_1px_rgba(124,58,237,0.10)]'
           : 'border border-slate-200/80 bg-white hover:border-violet-300/65 hover:shadow-[0_24px_52px_-16px_rgba(139,92,246,0.22)]'
       )}
-      // willChange: transform stays on the article, NOT inside nested elements,
-      // which prevents compositing-layer flickering from stacking contexts.
       style={{ willChange: 'transform' }}
     >
-      {/* Hover glow — positioned absolute with opacity transition only, no transform */}
+      {/* ── Hover glow overlay ── */}
       <div
         className={cn(
           'pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100',
           isDark
-            ? 'bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(124,58,237,0.15)_0%,transparent_65%)]'
-            : 'bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(124,58,237,0.055)_0%,transparent_65%)]'
+            ? 'bg-[radial-gradient(ellipse_80%_55%_at_50%_0%,rgba(124,58,237,0.14)_0%,transparent_65%)]'
+            : 'bg-[radial-gradient(ellipse_80%_55%_at_50%_0%,rgba(124,58,237,0.05)_0%,transparent_65%)]'
         )}
         aria-hidden="true"
       />
 
-      {/* ── Image / Video area ── */}
+      {/* ── Media area ── */}
       <Link
         to={`/products/${product.slug}`}
         aria-label={`Open ${product.name}`}
@@ -148,10 +165,13 @@ export default function ProductCard({
         )}
 
         {/* Bottom gradient */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-black/72 via-black/26 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[52%] bg-gradient-to-t from-black/75 via-black/22 to-transparent" />
+
+        {/* Top gradient (subtle) */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[30%] bg-gradient-to-b from-black/28 to-transparent" />
 
         {/* Top-left badges */}
-        <div className="absolute left-3 top-3 z-20 flex flex-wrap gap-1.5">
+        <div className="absolute left-2 top-2 z-20 flex flex-wrap gap-1 sm:left-3 sm:top-3 sm:gap-1.5">
           {product.featured && (
             <span className="inline-flex items-center rounded-[8px] border border-cyan-400/40 bg-cyan-500/90 px-2.5 py-1 text-[9.5px] font-bold tracking-wide text-white backdrop-blur-sm shadow-[0_4px_12px_rgba(34,211,238,0.3)]">
               Featured
@@ -164,25 +184,25 @@ export default function ProductCard({
           )}
         </div>
 
-        {/* Play icon */}
-        {hasVideo && !isPlaying && (
+        {/* Play icon (desktop) — hidden on mobile since autoplay handles it */}
+        {hasVideo && !isPlaying && !isTouchDevice && (
           <div className="absolute right-3 top-3 z-20">
             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/25 bg-black/45 text-white backdrop-blur-md transition-transform duration-300 group-hover:scale-110">
-              <Play size={13} fill="currentColor" className="ml-0.5" />
+              <Play size={12} fill="currentColor" className="ml-0.5" />
             </div>
           </div>
         )}
       </Link>
 
       {/* ── Card content ── */}
-      <div className="relative z-10 flex flex-1 flex-col p-4 sm:p-5">
+      <div className="relative z-10 flex flex-1 flex-col px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3.5 lg:px-5 lg:pb-5 lg:pt-4">
 
         {/* Category tag */}
-        <div className="mb-2.5">
+        <div className="mb-1.5 sm:mb-2.5">
           <span className={cn(
-            'inline-flex items-center rounded-full px-2.5 py-1 text-[9.5px] font-bold uppercase tracking-[0.14em]',
+            'inline-flex items-center rounded-full px-2 py-[3px] text-[8.5px] font-bold uppercase tracking-[0.14em] sm:px-2.5 sm:text-[9px] sm:tracking-[0.16em]',
             isDark
-              ? 'bg-violet-500/[0.14] text-violet-300/92 ring-1 ring-violet-400/[0.18]'
+              ? 'bg-violet-500/[0.13] text-violet-300/95 ring-1 ring-violet-400/[0.17]'
               : 'bg-violet-50 text-violet-700 ring-1 ring-violet-200/80'
           )}>
             {categoryLabel}
@@ -190,17 +210,17 @@ export default function ProductCard({
         </div>
 
         {/* Title + description */}
-        <div className="mb-4 flex-1">
+        <div className="mb-2.5 flex-1 sm:mb-4">
           <Link to={`/products/${product.slug}`} className="outline-none focus-visible:underline">
             <h3 className={cn(
-              'font-display text-[1.06rem] font-bold leading-tight tracking-[-0.028em] line-clamp-1 transition-colors duration-300',
+              'font-display text-[0.875rem] font-bold leading-tight tracking-[-0.028em] line-clamp-1 transition-colors duration-300 sm:text-[1.06rem]',
               isDark ? 'text-white group-hover:text-violet-100' : 'text-slate-900 group-hover:text-violet-900'
             )}>
               {product.name}
             </h3>
           </Link>
           <p className={cn(
-            'mt-2 text-[12.5px] leading-[1.62] line-clamp-2',
+            'mt-1 text-[11px] leading-[1.55] line-clamp-2 sm:mt-1.5 sm:text-[12.5px] sm:leading-[1.6]',
             isDark ? 'text-slate-400/88' : 'text-slate-500'
           )}>
             {product.shortDescription}
@@ -209,14 +229,14 @@ export default function ProductCard({
 
         {/* Pricing */}
         <div className={cn(
-          'mb-4 flex items-end justify-between border-t pt-3.5',
+          'mb-2 flex items-end justify-between border-t pt-2.5 sm:mb-3.5 sm:pt-3',
           isDark ? 'border-white/[0.07]' : 'border-slate-100'
         )}>
           <div>
-            <div className={cn('text-[10.5px] font-medium', isDark ? 'text-slate-500' : 'text-slate-400')}>
+            <div className={cn('text-[10px] font-semibold uppercase tracking-[0.12em]', isDark ? 'text-slate-500' : 'text-slate-400')}>
               {priceLabel}
             </div>
-            <div className={cn('mt-0.5 font-display text-[1.2rem] font-black tracking-[-0.04em]', isDark ? 'text-white' : 'text-slate-900')}>
+            <div className={cn('mt-0.5 font-display text-[0.95rem] font-black tracking-[-0.04em] sm:text-[1.18rem]', isDark ? 'text-white' : 'text-slate-900')}>
               {priceDisplay}
             </div>
           </div>

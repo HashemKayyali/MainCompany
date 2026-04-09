@@ -58,11 +58,12 @@
 
   /* ─── Dark Mode Body Background ─── */
   html.dark body {
-    background-color: #04050e;
+    background-color: #020410;
     background-image:
-      radial-gradient(ellipse 100% 55% at 50% -5%, rgba(124, 58, 237, 0.13) 0%, transparent 65%),
-      radial-gradient(ellipse 70% 45% at 85% 105%, rgba(6, 182, 212, 0.07) 0%, transparent 55%),
-      radial-gradient(ellipse 60% 40% at 10% 90%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+      radial-gradient(ellipse 110% 55% at 50% -8%, rgba(124, 58, 237, 0.10) 0%, transparent 62%),
+      radial-gradient(ellipse 70% 45% at 88% 108%, rgba(6, 182, 212, 0.06) 0%, transparent 52%),
+      radial-gradient(ellipse 60% 40% at 8% 92%, rgba(236, 72, 153, 0.04) 0%, transparent 48%),
+      radial-gradient(ellipse 80% 50% at 50% 50%, rgba(139, 92, 246, 0.03) 0%, transparent 60%);
     color: #ddd9f2;
   }
 
@@ -141,6 +142,7 @@
 }
 
 @layer components {
+
   /* ─── Glass surface ─── */
   .glass {
     border-radius: 16px;
@@ -462,12 +464,19 @@
   }
 
   @keyframes pc-shimmer {
-    0% { left: -120%; }
-    100% { left: 220%; }
+    0% {
+      left: -120%;
+    }
+
+    100% {
+      left: 220%;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .pc-cta::after { animation: none !important; }
+    .pc-cta::after {
+      animation: none !important;
+    }
   }
 
   /* ─── Outline button ─── */
@@ -643,7 +652,9 @@
   }
 
   html.dark select,
-  html.dark select.form-field { color-scheme: dark; }
+  html.dark select.form-field {
+    color-scheme: dark;
+  }
 
   html.dark select option,
   html.dark select optgroup {
@@ -659,7 +670,9 @@
   }
 
   html.light select,
-  html.light select.form-field { color-scheme: light; }
+  html.light select.form-field {
+    color-scheme: light;
+  }
 
   html.light select option,
   html.light select optgroup {
@@ -674,8 +687,13 @@
     color: #1e1b4b;
   }
 
-  html.dark select:not(.form-field) { color-scheme: dark; }
-  html.light select:not(.form-field) { color-scheme: light; }
+  html.dark select:not(.form-field) {
+    color-scheme: dark;
+  }
+
+  html.light select:not(.form-field) {
+    color-scheme: light;
+  }
 
   /* ─── Card surface ─── */
   .card-surface {
@@ -773,8 +791,13 @@
   }
 
   @keyframes stats-marquee-scroll {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -787,16 +810,16 @@
   /* ─── Pricing card accent header ─── */
   .pricing-header-gradient {
     background: linear-gradient(135deg,
-      rgba(124, 58, 237, 0.22) 0%,
-      rgba(184, 50, 225, 0.16) 40%,
-      rgba(34, 211, 238, 0.10) 100%);
+        rgba(124, 58, 237, 0.22) 0%,
+        rgba(184, 50, 225, 0.16) 40%,
+        rgba(34, 211, 238, 0.10) 100%);
   }
 
   html.light .pricing-header-gradient {
     background: linear-gradient(135deg,
-      rgba(124, 58, 237, 0.08) 0%,
-      rgba(236, 72, 153, 0.05) 50%,
-      rgba(6, 182, 212, 0.04) 100%);
+        rgba(124, 58, 237, 0.08) 0%,
+        rgba(236, 72, 153, 0.05) 50%,
+        rgba(6, 182, 212, 0.04) 100%);
   }
 
   /* ─── Product page ambient glow ─── */
@@ -873,6 +896,96 @@
     border-color: rgba(124, 58, 237, 0.2);
     transform: translateY(-3px);
     box-shadow: 0 12px 36px rgba(124, 58, 237, 0.1);
+  }
+
+  /* ─── Home section: star twinkle animations ─── */
+  @keyframes hs-star-a {
+    0%, 100% { opacity: 0.28; transform: scale(1); }
+    40%       { opacity: 0.96; transform: scale(1.55); }
+    60%       { opacity: 0.82; transform: scale(1.4);  }
+  }
+  @keyframes hs-star-b {
+    0%, 100% { opacity: 0.15; transform: scale(1); }
+    50%       { opacity: 0.72; transform: scale(1.38); }
+  }
+  @keyframes hs-star-c {
+    0%, 100% { opacity: 0.42; transform: scale(1); }
+    35%       { opacity: 1;    transform: scale(1.22); }
+    65%       { opacity: 0.78; transform: scale(1.10); }
+  }
+
+  /* ─── Home section: cosmic dust particle drift ─── */
+  @keyframes hs-particle-drift {
+    0%   { opacity: 0;    transform: translateY(0px)   scale(1);    }
+    15%  { opacity: 1;                                               }
+    50%  { opacity: 0.6;  transform: translateY(-18px) scale(1.15); }
+    85%  { opacity: 0.3;                                             }
+    100% { opacity: 0;    transform: translateY(-36px) scale(0.85); }
+  }
+
+  /* ─── Home section: meteor trails ─── */
+  .meteor-trail {
+    position: absolute;
+    pointer-events: none;
+    width: 2px;
+    height: 130px;
+    border-radius: 999px;
+    opacity: 0;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+
+  /* Violet meteor */
+  html.dark .meteor-trail--violet {
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(139, 92, 246, 0.32) 18%,
+      rgba(196, 166, 255, 0.82) 56%,
+      rgba(230, 215, 255, 1)   80%,
+      rgba(255, 255, 255, 0.9) 100%
+    );
+    box-shadow:
+      0 0 8px 2px rgba(167, 139, 250, 0.60),
+      0 0 18px 4px rgba(139, 92, 246, 0.30);
+    animation-name: hs-meteor-fall;
+  }
+
+  /* Cyan meteor */
+  html.dark .meteor-trail--cyan {
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(6, 182, 212, 0.28) 18%,
+      rgba(103, 232, 249, 0.80) 56%,
+      rgba(200, 248, 255, 1)   80%,
+      rgba(255, 255, 255, 0.9) 100%
+    );
+    box-shadow:
+      0 0 8px 2px rgba(103, 232, 249, 0.60),
+      0 0 18px 4px rgba(6, 182, 212, 0.30);
+    animation-name: hs-meteor-fall;
+  }
+
+  @keyframes hs-meteor-fall {
+    0% {
+      opacity: 0;
+      transform: rotate(-45deg) translateX(0px);
+    }
+    3%  { opacity: 1; }
+    18% { opacity: 0.7; }
+    28% { opacity: 0; }
+    100% {
+      opacity: 0;
+      transform: rotate(-45deg) translateX(-920px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .meteor-trail {
+      animation: none !important;
+      opacity: 0 !important;
+    }
   }
 
   /* ─── Responsive overrides ─── */

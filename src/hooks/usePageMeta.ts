@@ -11,9 +11,9 @@ interface PageMeta {
   jsonLd?: Record<string, unknown>
 }
 
-const SITE_NAME = 'Bike Land'
+const SITE_NAME = 'Eventies'
 const DEFAULT_DESC =
-  'Interactive bike-powered activations for events — LED races, smoothie bikes, VR cycling and more across Jordan.'
+  'Premium event services marketplace in Jordan — discover, compare, and book trusted vendors for your next event.'
 
 function setMeta(name: string, content: string, attr: 'name' | 'property' = 'name') {
   let el = document.querySelector<HTMLMetaElement>(`meta[${attr}="${name}"]`)

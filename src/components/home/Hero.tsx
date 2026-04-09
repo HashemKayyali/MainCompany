@@ -110,9 +110,9 @@ export default function Hero() {
       {/* ════ HERO CONTENT ════ */}
       <div
         className="site-container relative z-20 flex flex-1 flex-col"
-        style={{ paddingTop: 'calc(var(--app-navbar-height, 72px) + clamp(2.5rem, 5vw, 4.5rem))' }}
+        style={{ paddingTop: 'calc(var(--app-navbar-height, 72px) + clamp(0.75rem, 3vw, 4.5rem))' }}
       >
-        <div className="grid flex-1 grid-cols-1 items-center gap-10 pb-32 lg:grid-cols-[1fr_0.58fr] lg:gap-6 xl:gap-12">
+        <div className="grid flex-1 grid-cols-1 items-center gap-10 pb-20 sm:pb-28 lg:grid-cols-[1fr_0.58fr] lg:gap-6 lg:pb-32 xl:gap-12">
 
           {/* ── LEFT: Text content ── */}
           <motion.div

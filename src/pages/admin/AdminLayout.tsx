@@ -4,6 +4,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 import { useUser } from '../../contexts/UserContext'
 import Sidebar from '../../components/admin/Sidebar'
 import UserAvatar from '../../components/ui/UserAvatar'
+import AnimatedBackground from '../../components/theme/AnimatedBackground'
 import { cn } from '../../utils/cn'
 
 type Crumb = { label: string; to?: string }

@@ -420,7 +420,7 @@ export default function AuthPage() {
             </AnimatePresence>
 
             <p className="mt-7 text-center text-[11px] font-medium text-white/35">
-              © {new Date().getFullYear()} Bike Land — Event Services Marketplace
+              © {new Date().getFullYear()} Eventies — Event Services Marketplace
             </p>
           </div>
         </motion.div>

@@ -66,6 +66,41 @@ function getDesktopNavActive(
   return item.children?.some(child => isRouteActive(child.to)) ?? false
 }
 
+// ── Logo wordmark ─────────────────────────────────────────────────────────────
+function EventiesLogo({
+  heroMode,
+  isDark,
+}: {
+  heroMode: boolean
+  isDark: boolean
+}) {
+  const textColor = isDark || heroMode ? 'text-white' : 'text-gray-900'
+  const metaColor = heroMode
+    ? 'text-white/38'
+    : isDark
+      ? 'text-purple-100/50'
+      : 'text-violet-600/70'
+
+  return (
+    <div className="flex items-center gap-2.5">
+      {/* Badge */}
+      <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[13px] border border-white/14 bg-[linear-gradient(145deg,#7c3aed_0%,#d946ef_48%,#22d3ee_112%)] shadow-[0_12px_32px_rgba(124,58,237,0.42)]">
+        <div className="absolute inset-x-2 top-1.5 h-3 rounded-full bg-white/20 blur-sm" />
+        <span className="relative text-[10.5px] font-black tracking-[0.12em] text-white">Ev</span>
+      </div>
+      {/* Text mark */}
+      <div className="min-w-0 leading-none">
+        <div className={`font-display text-[12.5px] font-bold tracking-[-0.01em] transition-colors duration-500 sm:text-[13px] ${textColor}`}>
+          Eventies
+        </div>
+        <div className={`mt-[3px] text-[8.5px] uppercase tracking-[0.15em] transition-colors duration-500 sm:text-[9px] sm:tracking-[0.18em] ${metaColor}`}>
+          Marketplace
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Navbar() {
   const { pathname } = useLocation()
   const { isDark } = useTheme()
@@ -95,11 +130,12 @@ export default function Navbar() {
 
   useBodyScrollLock(open)
 
+  // Cmd/Ctrl+K search shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault()
-        setSearchOpen(value => !value)
+        setSearchOpen(v => !v)
       }
     }
     window.addEventListener('keydown', handler)
@@ -131,7 +167,10 @@ export default function Navbar() {
     if (!userMenu) return
     const handleOutsideClick = (e: MouseEvent) => {
       const target = e.target as Node
-      if (!userMenuAnchorRef.current?.contains(target) && !userMenuPopoverRef.current?.contains(target)) {
+      if (
+        !userMenuAnchorRef.current?.contains(target) &&
+        !userMenuPopoverRef.current?.contains(target)
+      ) {
         setUserMenu(false)
       }
     }
@@ -143,19 +182,18 @@ export default function Navbar() {
     const anchor = userMenuAnchorRef.current
     if (!anchor) return
     const rect = anchor.getBoundingClientRect()
-    const viewportPadding = 16
-    const menuWidth = 276
-    const menuHeight = userMenuPopoverRef.current?.offsetHeight ?? 260
-    const canPlaceAbove = rect.top - 10 - menuHeight > viewportPadding
-    const shouldPlaceAbove =
-      rect.bottom + 10 + menuHeight > window.innerHeight - viewportPadding && canPlaceAbove
+    const pad = 16
+    const menuW = 280
+    const menuH = userMenuPopoverRef.current?.offsetHeight ?? 260
+    const canAbove = rect.top - 10 - menuH > pad
+    const shouldAbove = rect.bottom + 10 + menuH > window.innerHeight - pad && canAbove
     const left = Math.min(
-      window.innerWidth - viewportPadding - menuWidth,
-      Math.max(viewportPadding, rect.right - menuWidth)
+      window.innerWidth - pad - menuW,
+      Math.max(pad, rect.right - menuW)
     )
-    const unclampedTop = shouldPlaceAbove ? rect.top - menuHeight - 10 : rect.bottom + 10
-    const top = Math.max(viewportPadding, Math.min(unclampedTop, window.innerHeight - viewportPadding - menuHeight))
-    setUserMenuPosition({ top, left, placement: shouldPlaceAbove ? 'top' : 'bottom' })
+    const rawTop = shouldAbove ? rect.top - menuH - 10 : rect.bottom + 10
+    const top = Math.max(pad, Math.min(rawTop, window.innerHeight - pad - menuH))
+    setUserMenuPosition({ top, left, placement: shouldAbove ? 'top' : 'bottom' })
   }, [])
 
   useEffect(() => {
@@ -185,28 +223,28 @@ export default function Navbar() {
   useLayoutEffect(() => {
     if (typeof window === 'undefined') return
     const root = document.documentElement
-    const navbarBar = navbarBarRef.current
-    if (!navbarBar) return
-    const updateNavbarHeight = () => {
-      const rect = navbarBar.getBoundingClientRect()
+    const bar = navbarBarRef.current
+    if (!bar) return
+    const update = () => {
+      const rect = bar.getBoundingClientRect()
       root.style.setProperty('--app-navbar-height', `${Math.round(rect.bottom)}px`)
     }
-    updateNavbarHeight()
-    const frame = window.requestAnimationFrame(updateNavbarHeight)
-    const timeout = window.setTimeout(updateNavbarHeight, 120)
-    const resizeObserver =
-      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateNavbarHeight) : null
-    resizeObserver?.observe(navbarBar)
-    window.addEventListener('resize', updateNavbarHeight, { passive: true })
+    update()
+    const frame = window.requestAnimationFrame(update)
+    const timeout = window.setTimeout(update, 120)
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null
+    ro?.observe(bar)
+    window.addEventListener('resize', update, { passive: true })
     return () => {
       window.cancelAnimationFrame(frame)
       window.clearTimeout(timeout)
-      resizeObserver?.disconnect()
-      window.removeEventListener('resize', updateNavbarHeight)
+      ro?.disconnect()
+      window.removeEventListener('resize', update)
       root.style.removeProperty('--app-navbar-height')
     }
   }, [])
 
+  // ── Derived state ──────────────────────────────────────────────────────────
   const active = (target: string) =>
     target === '/' ? pathname === '/' : pathname.startsWith(target)
 
@@ -214,60 +252,91 @@ export default function Navbar() {
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent'
 
   const firstName = currentUser?.name?.split(' ')[0] || 'User'
-
-  // ── Hero mode: transparent nav floating above the homepage hero ──
   const isHome = pathname === '/'
   const heroMode = isHome && !scrolled
 
-  // ── Full-width bar background ──
+  // ── Nav bar background ────────────────────────────────────────────────────
   const navBarBg = scrolled
     ? isDark
-      ? 'border-b border-white/[0.07] bg-[rgba(3,5,14,0.92)] backdrop-blur-2xl shadow-[0_1px_32px_rgba(0,0,0,0.45)]'
-      : 'border-b border-violet-200/50 bg-white/95 backdrop-blur-xl shadow-sm'
+      ? 'border-b border-white/[0.06] bg-[rgba(3,5,14,0.94)] backdrop-blur-2xl shadow-[0_1px_40px_rgba(0,0,0,0.5)]'
+      : 'border-b border-violet-200/40 bg-white/96 backdrop-blur-xl shadow-[0_1px_20px_rgba(124,58,237,0.06)]'
     : isHome
-      ? '' // fully transparent on hero
+      ? ''
       : isDark
         ? 'border-b border-white/[0.04] bg-[rgba(3,5,14,0.82)] backdrop-blur-lg'
         : 'border-b border-violet-100/40 bg-white/80 backdrop-blur-md'
 
-  // ── Utility button surface (search, login, etc.) ──
-  const utilitySurface = heroMode
-    ? 'border-white/[0.13] bg-white/[0.07] text-white/78 hover:border-white/[0.22] hover:bg-white/[0.13] hover:text-white'
+  // ── Utility pill (search, login) ───────────────────────────────────────────
+  const utilityPill = heroMode
+    ? 'border-white/[0.14] bg-white/[0.08] text-white/78 hover:border-white/[0.24] hover:bg-white/[0.14] hover:text-white'
     : isDark
-      ? 'border-white/10 bg-white/[0.04] text-white/75 hover:border-violet-300/18 hover:bg-white/[0.07] hover:text-white'
-      : 'border-violet-200/70 bg-white/82 text-gray-800 hover:border-violet-300 hover:bg-white'
+      ? 'border-white/[0.09] bg-white/[0.04] text-white/72 hover:border-violet-300/20 hover:bg-white/[0.07] hover:text-white'
+      : 'border-violet-200/65 bg-white/85 text-gray-700 hover:border-violet-300 hover:bg-white hover:text-gray-900'
 
-  // ── Mobile menu tiles ──
-  const mobileTile = isDark
-    ? 'border-white/10 bg-white/[0.05] text-purple-100/80 hover:text-white hover:bg-white/[0.08]'
-    : 'border-violet-200/70 bg-white/80 text-gray-700 hover:text-gray-900 hover:bg-white'
-
-  // ── Desktop nav item text color ──
-  const menuLink = (isActive: boolean) =>
+  // ── Desktop nav link text ──────────────────────────────────────────────────
+  const navLinkColor = (isActive: boolean) =>
     isActive
-      ? heroMode ? 'text-white' : isDark ? 'text-white' : 'text-gray-900'
+      ? heroMode || isDark ? 'text-white' : 'text-gray-900'
       : heroMode
-        ? 'text-white/62 hover:text-white'
-        : isDark ? 'text-purple-100/65 hover:text-white' : 'text-gray-500 hover:text-gray-900'
+        ? 'text-white/58 hover:text-white'
+        : isDark
+          ? 'text-purple-100/62 hover:text-white'
+          : 'text-gray-500 hover:text-gray-900'
 
-  const desktopTriggerClass = (isActive: boolean, isOpen: boolean) =>
+  const navTriggerColor = (isActive: boolean, isOpen: boolean) =>
     isActive || isOpen
-      ? heroMode ? 'text-white' : isDark ? 'text-white' : 'text-gray-900'
+      ? heroMode || isDark ? 'text-white' : 'text-gray-900'
       : heroMode
-        ? 'text-white/62 hover:text-white'
-        : isDark ? 'text-purple-100/65 hover:text-white' : 'text-gray-500 hover:text-gray-900'
+        ? 'text-white/58 hover:text-white'
+        : isDark
+          ? 'text-purple-100/62 hover:text-white'
+          : 'text-gray-500 hover:text-gray-900'
 
-  // ── Active nav item pill ──
+  // ── Active pill ────────────────────────────────────────────────────────────
   const navActivePill = heroMode
-    ? 'bg-white/10 border border-white/[0.15]'
+    ? 'bg-white/[0.11] border border-white/[0.16]'
     : isDark
-      ? 'bg-violet-500/[0.14] border border-violet-400/[0.18]'
+      ? 'bg-violet-500/[0.13] border border-violet-400/[0.17]'
       : 'bg-violet-50 border border-violet-200/70'
 
-  // ── Logo colors ──
-  const logoText = isDark || heroMode ? 'text-white' : 'text-gray-900'
-  const logoMeta = heroMode ? 'text-white/38' : isDark ? 'text-purple-100/52' : 'text-violet-600/70'
+  // ── Mobile tile ────────────────────────────────────────────────────────────
+  const mobileTile = isDark
+    ? 'border-white/[0.09] bg-white/[0.04] text-purple-100/78 hover:text-white hover:bg-white/[0.08]'
+    : 'border-violet-200/60 bg-white/80 text-gray-700 hover:text-gray-900 hover:bg-white'
 
+  const mobileActiveTile = isDark
+    ? 'border-violet-300/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.08),rgba(34,211,238,0.06))] text-white'
+    : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.06),rgba(34,211,238,0.06))] text-gray-900'
+
+  // ── Cart / Quote surfaces ──────────────────────────────────────────────────
+  const cartItemCount = rentalCart.itemCount
+  const cartHasItems = cartItemCount > 0
+  const cartCountLabel = cartItemCount > 99 ? '99+' : String(cartItemCount)
+  const cartActive = pathname.startsWith('/rental-cart') || pathname.startsWith('/checkout')
+  const quoteItemCount = purchaseQuote.itemCount
+  const quoteHasItems = quoteItemCount > 0
+  const quoteCountLabel = quoteItemCount > 99 ? '99+' : String(quoteItemCount)
+  const quoteActive = pathname.startsWith('/purchase-quote')
+
+  const cartSurface = cartActive
+    ? isDark
+      ? 'border-cyan-300/28 bg-[linear-gradient(135deg,rgba(8,30,44,0.95),rgba(11,18,38,0.98))] text-white shadow-[0_16px_48px_rgba(2,8,18,0.46)]'
+      : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(245,243,255,0.94))] text-gray-900 shadow-[0_12px_32px_rgba(124,58,237,0.14)]'
+    : cartHasItems
+      ? isDark
+        ? 'border-cyan-300/18 bg-[linear-gradient(135deg,rgba(8,25,38,0.9),rgba(13,18,34,0.94))] text-white hover:border-cyan-300/30'
+        : 'border-violet-300/35 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(245,243,255,0.92))] text-gray-900 hover:border-violet-300/55'
+      : utilityPill
+
+  const quoteSurface = quoteActive
+    ? isDark
+      ? 'border-fuchsia-300/24 bg-[linear-gradient(135deg,rgba(39,15,57,0.96),rgba(16,14,36,0.98))] text-white shadow-[0_16px_48px_rgba(17,5,28,0.42)]'
+      : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(250,244,255,0.94))] text-gray-900 shadow-[0_12px_32px_rgba(168,85,247,0.12)]'
+    : isDark
+      ? 'border-fuchsia-300/16 bg-[linear-gradient(135deg,rgba(31,14,42,0.92),rgba(14,14,31,0.96))] text-white hover:border-fuchsia-300/28'
+      : 'border-violet-300/30 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(250,244,255,0.92))] text-gray-900 hover:border-violet-300/50'
+
+  // ── Desktop nav data ────────────────────────────────────────────────────────
   const desktopNav = useMemo<DesktopNavItem[]>(
     () => [
       { key: 'home', label: 'Home', to: '/' },
@@ -360,65 +429,66 @@ export default function Navbar() {
     [clearDesktopTimers]
   )
 
-  const cartItemCount = rentalCart.itemCount
-  const cartHasItems = cartItemCount > 0
-  const cartCountLabel = cartItemCount > 99 ? '99+' : String(cartItemCount)
-  const cartActive = pathname.startsWith('/rental-cart') || pathname.startsWith('/checkout')
-  const quoteItemCount = purchaseQuote.itemCount
-  const quoteHasItems = quoteItemCount > 0
-  const quoteCountLabel = quoteItemCount > 99 ? '99+' : String(quoteItemCount)
-  const quoteActive = pathname.startsWith('/purchase-quote')
+  // ── Badge count pill ────────────────────────────────────────────────────────
+  function CountBadge({ count, color }: { count: string; color: 'cyan' | 'pink' }) {
+    return (
+      <span
+        className={`absolute -right-1.5 -top-1.5 inline-flex min-w-[1.1rem] items-center justify-center rounded-full px-1 py-[2px] text-[8px] font-mono font-bold leading-none shadow-md ${
+          color === 'cyan'
+            ? isDark
+              ? 'bg-[linear-gradient(135deg,#22d3ee,#7c3aed)] text-slate-950 shadow-cyan-400/30'
+              : 'bg-[linear-gradient(135deg,#7c3aed,#22d3ee)] text-white shadow-violet-400/25'
+            : isDark
+              ? 'bg-[linear-gradient(135deg,#f472b6,#8b5cf6)] text-slate-950 shadow-pink-400/30'
+              : 'bg-[linear-gradient(135deg,#ec4899,#7c3aed)] text-white shadow-pink-400/20'
+        }`}
+      >
+        {count}
+      </span>
+    )
+  }
 
-  const cartSurface = cartActive
-    ? isDark
-      ? 'border-cyan-300/24 bg-[linear-gradient(135deg,rgba(8,30,44,0.94),rgba(11,18,38,0.98))] text-white shadow-[0_18px_54px_rgba(2,8,18,0.46)]'
-      : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(245,243,255,0.94))] text-gray-900 shadow-[0_16px_40px_rgba(124,58,237,0.14)]'
-    : cartHasItems
-      ? isDark
-        ? 'border-cyan-300/18 bg-[linear-gradient(135deg,rgba(8,25,38,0.9),rgba(13,18,34,0.94))] text-white hover:border-cyan-300/30'
-        : 'border-violet-300/35 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(245,243,255,0.92))] text-gray-900 hover:border-violet-300/55'
-      : utilitySurface
-
-  const quoteSurface = quoteActive
-    ? isDark
-      ? 'border-fuchsia-300/24 bg-[linear-gradient(135deg,rgba(39,15,57,0.96),rgba(16,14,36,0.98))] text-white shadow-[0_18px_54px_rgba(17,5,28,0.42)]'
-      : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(250,244,255,0.94))] text-gray-900 shadow-[0_16px_40px_rgba(168,85,247,0.12)]'
-    : isDark
-      ? 'border-fuchsia-300/16 bg-[linear-gradient(135deg,rgba(31,14,42,0.92),rgba(14,14,31,0.96))] text-white hover:border-fuchsia-300/28'
-      : 'border-violet-300/30 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(250,244,255,0.92))] text-gray-900 hover:border-violet-300/50'
+  // ── Shared icon circle (navbar action buttons) ─────────────────────────────
+  function IconCircle({
+    children,
+    active: isActive = false,
+    colorScheme = 'neutral',
+  }: {
+    children: React.ReactNode
+    active?: boolean
+    colorScheme?: 'neutral' | 'cyan' | 'pink'
+  }) {
+    const base = 'relative flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-full border'
+    if (heroMode) return <span className={`${base} border-white/12 bg-white/[0.06]`}>{children}</span>
+    if (colorScheme === 'cyan' && isActive)
+      return <span className={`${base} ${isDark ? 'border-cyan-300/22 bg-cyan-500/10' : 'border-violet-200/80 bg-white/80'}`}>{children}</span>
+    if (colorScheme === 'pink' && isActive)
+      return <span className={`${base} ${isDark ? 'border-fuchsia-300/20 bg-fuchsia-500/10' : 'border-violet-200/80 bg-white/80'}`}>{children}</span>
+    return <span className={`${base} ${isDark ? 'border-white/10 bg-white/[0.04]' : 'border-violet-200/70 bg-white/70'}`}>{children}</span>
+  }
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 w-full">
-      {/* ── Main bar: full-width, transitions based on scroll + heroMode ── */}
+      {/* ══════════════════════ MAIN BAR ══════════════════════ */}
       <div className={`pointer-events-auto w-full transition-all duration-500 ${navBarBg}`}>
         <div className="relative mx-auto max-w-[90rem]">
 
-          {/* ═══ NAV BAR CONTENT ═══ */}
+          {/* ─── Nav bar row ─── */}
           <div
             ref={navbarBarRef}
             className="flex h-[3.75rem] items-center justify-between px-4 sm:h-[4.25rem] sm:px-6 lg:px-10"
           >
+
             {/* ── Logo ── */}
             <Link
               to="/"
-              className={`flex min-w-0 items-center gap-3 transition-opacity hover:opacity-90 lg:min-w-[160px] ${focus}`}
+              className={`flex min-w-0 items-center transition-opacity hover:opacity-88 lg:min-w-[160px] ${focus}`}
             >
-              <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[13px] border border-white/12 bg-[linear-gradient(145deg,#7c3aed_0%,#d946ef_48%,#22d3ee_112%)] shadow-[0_16px_36px_rgba(76,29,149,0.38)]">
-                <div className="absolute inset-x-2 top-1.5 h-3.5 rounded-full bg-white/22 blur-md" />
-                <span className="relative text-[11px] font-black tracking-[0.22em] text-white">BL</span>
-              </div>
-              <div className="hidden min-w-0 leading-none sm:block">
-                <div className={`font-display text-[11px] font-bold uppercase tracking-[0.2em] transition-colors duration-500 ${logoText}`}>
-                  Bike <span className="text-violet-300">Land</span>
-                </div>
-                <div className={`mt-1 text-[9px] uppercase tracking-[0.16em] transition-colors duration-500 ${logoMeta}`}>
-                  Marketplace
-                </div>
-              </div>
+              <EventiesLogo heroMode={heroMode} isDark={isDark} />
             </Link>
 
-            {/* ── Desktop Nav (center) ── */}
-            <div className="hidden flex-1 justify-center lg:flex">
+            {/* ── Desktop nav (center) ── */}
+            <nav className="hidden flex-1 items-center justify-center lg:flex" aria-label="Main navigation">
               <div className="flex items-center gap-0.5">
                 {desktopNav.map(item => {
                   const isCurrent = getDesktopNavActive(item, active)
@@ -431,7 +501,7 @@ export default function Navbar() {
                         key={item.key}
                         to={item.to}
                         aria-current={isCurrent ? 'page' : undefined}
-                        className={`relative inline-flex h-10 items-center justify-center rounded-[13px] px-4 text-[12.5px] font-medium tracking-[-0.01em] transition-all duration-300 ${menuLink(isCurrent)} ${focus}`}
+                        className={`relative inline-flex h-[2.375rem] items-center justify-center rounded-[13px] px-4 text-[12.5px] font-medium tracking-[-0.01em] transition-all duration-300 ${navLinkColor(isCurrent)} ${focus}`}
                       >
                         {showPill && (
                           <motion.div
@@ -454,19 +524,18 @@ export default function Navbar() {
                       onMouseEnter={() => openDesktopMenu(item.key)}
                       onMouseLeave={() => scheduleDesktopClose()}
                       onFocus={() => openDesktopMenu(item.key)}
-                      onKeyDown={event => {
-                        if (event.key === 'Escape') { scheduleDesktopClose(true); return }
-                        if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown') {
-                          event.preventDefault()
-                          if (isOpen) {
-                            desktopPanelFirstLinkRef.current?.focus()
-                          } else {
+                      onKeyDown={e => {
+                        if (e.key === 'Escape') { scheduleDesktopClose(true); return }
+                        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+                          e.preventDefault()
+                          if (isOpen) desktopPanelFirstLinkRef.current?.focus()
+                          else {
                             openDesktopMenu(item.key)
                             window.setTimeout(() => desktopPanelFirstLinkRef.current?.focus(), 60)
                           }
                         }
                       }}
-                      className={`relative inline-flex h-10 items-center justify-center gap-2 rounded-[13px] px-4 text-[12.5px] font-medium tracking-[-0.01em] transition-all duration-300 ${desktopTriggerClass(isCurrent, isOpen)} ${focus}`}
+                      className={`relative inline-flex h-[2.375rem] items-center justify-center gap-1.5 rounded-[13px] px-4 text-[12.5px] font-medium tracking-[-0.01em] transition-all duration-300 ${navTriggerColor(isCurrent, isOpen)} ${focus}`}
                     >
                       {showPill && (
                         <motion.div
@@ -478,57 +547,60 @@ export default function Navbar() {
                       <span className="relative z-10">{item.label}</span>
                       <ChevronDown
                         className={`relative z-10 h-3 w-3 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-                        strokeWidth={2}
+                        strokeWidth={2.2}
                       />
                     </button>
                   )
                 })}
               </div>
-            </div>
+            </nav>
 
-            {/* ── Actions (right) ── */}
+            {/* ── Right actions ── */}
             <div className="flex items-center justify-end gap-1.5 sm:gap-2 lg:min-w-[160px]">
-              {/* Search compact */}
+
+              {/* Search compact (sm–xl) */}
               <button
                 onClick={() => setSearchOpen(true)}
-                className={`hidden h-9 items-center gap-2 rounded-[12px] border px-3 text-[12px] font-medium transition-all sm:inline-flex xl:hidden ${utilitySurface} ${focus}`}
+                className={`hidden h-[2.375rem] items-center gap-2 rounded-[12px] border px-3 text-[12px] font-medium transition-all sm:inline-flex xl:hidden ${utilityPill} ${focus}`}
                 aria-label="Search (Ctrl+K)"
               >
                 <Search className="h-3.5 w-3.5" strokeWidth={2} />
               </button>
 
-              {/* Search with label */}
+              {/* Search with label (xl+) */}
               <button
                 onClick={() => setSearchOpen(true)}
-                className={`hidden h-9 items-center gap-2.5 rounded-[12px] border px-3.5 text-[12px] font-medium transition-all xl:inline-flex ${utilitySurface} ${focus}`}
+                className={`hidden h-[2.375rem] items-center gap-2 rounded-[12px] border px-3.5 text-[12px] font-medium transition-all xl:inline-flex ${utilityPill} ${focus}`}
                 aria-label="Search (Ctrl+K)"
               >
                 <Search className="h-3.5 w-3.5" strokeWidth={2} />
                 <span>Search</span>
-                <span className={`rounded-md border px-2 py-0.5 text-[8.5px] font-mono tracking-[0.1em] ${
+                <kbd className={`rounded-md border px-2 py-0.5 text-[8.5px] font-mono tracking-[0.1em] ${
                   heroMode
                     ? 'border-white/12 bg-white/[0.06] text-white/38'
                     : isDark
-                      ? 'border-white/10 bg-white/[0.05] text-purple-100/46'
+                      ? 'border-white/10 bg-white/[0.04] text-purple-100/44'
                       : 'border-violet-200 bg-violet-50/80 text-violet-500'
                 }`}>
                   ⌘K
-                </span>
+                </kbd>
               </button>
 
-              {/* Login / User */}
+              {/* User / Login */}
               {isLoggedIn ? (
                 <div ref={userMenuAnchorRef} className="relative hidden sm:block">
                   <button
                     onClick={() => { if (!userMenu) updateUserMenuPosition(); setUserMenu(v => !v) }}
-                    className={`inline-flex h-9 items-center gap-2 rounded-[12px] border pl-2 pr-3 transition-all ${utilitySurface} ${focus}`}
+                    className={`inline-flex h-[2.375rem] items-center gap-2 rounded-[12px] border pl-2 pr-3 transition-all ${utilityPill} ${focus}`}
+                    aria-label="User menu"
+                    aria-expanded={userMenu}
                   >
-                    <div className={`flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-full border ${
+                    <div className={`flex h-[1.75rem] w-[1.75rem] items-center justify-center rounded-full border ${
                       heroMode
                         ? 'border-white/18 bg-white/10 text-white'
                         : isDark
-                          ? 'border-violet-300/20 bg-[linear-gradient(135deg,rgba(124,58,237,0.22),rgba(236,72,153,0.12))] text-white'
-                          : 'border-violet-300/40 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(236,72,153,0.08))] text-violet-700'
+                          ? 'border-violet-300/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.22),rgba(236,72,153,0.12))] text-white'
+                          : 'border-violet-300/38 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(236,72,153,0.08))] text-violet-700'
                     }`}>
                       <UserAvatar
                         name={currentUser?.name}
@@ -548,17 +620,17 @@ export default function Navbar() {
                     </div>
                     <span className="hidden text-[12px] font-medium md:inline">{firstName}</span>
                     <ChevronDown
-                      className={`h-3 w-3 transition-transform ${userMenu ? 'rotate-180' : ''} ${
-                        heroMode ? 'text-white/45' : isDark ? 'text-purple-100/46' : 'text-violet-600/56'
+                      className={`h-3 w-3 transition-transform duration-200 ${userMenu ? 'rotate-180' : ''} ${
+                        heroMode ? 'text-white/45' : isDark ? 'text-purple-100/44' : 'text-violet-600/55'
                       }`}
-                      strokeWidth={2}
+                      strokeWidth={2.2}
                     />
                   </button>
                 </div>
               ) : (
                 <Link
                   to="/login"
-                  className={`hidden h-9 items-center rounded-[12px] border px-4 text-[12px] font-medium transition-all sm:inline-flex ${utilitySurface} ${focus}`}
+                  className={`hidden h-[2.375rem] items-center rounded-[12px] border px-4 text-[12px] font-medium transition-all sm:inline-flex ${utilityPill} ${focus}`}
                 >
                   Login
                 </Link>
@@ -567,49 +639,27 @@ export default function Navbar() {
               {/* Cart */}
               <Link
                 to="/rental-cart"
-                className={`relative inline-flex h-9 items-center gap-2 rounded-[12px] border px-2.5 transition-all sm:px-3 ${cartSurface} ${focus}`}
+                className={`relative inline-flex h-[2.375rem] items-center gap-2 rounded-[12px] border px-2.5 transition-all sm:px-3 ${cartSurface} ${focus}`}
                 aria-label={cartHasItems ? `Cart · ${cartItemCount}` : 'Cart'}
               >
-                <span className={`relative flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-full border ${
-                  heroMode
-                    ? 'border-white/12 bg-white/[0.05]'
-                    : isDark ? 'border-cyan-300/18 bg-white/[0.05]' : 'border-violet-200/80 bg-white/80'
-                }`}>
+                <IconCircle active={cartHasItems || cartActive} colorScheme="cyan">
                   <ShoppingCart className="h-3.5 w-3.5" strokeWidth={2} />
-                  {cartHasItems && (
-                    <span className={`absolute -right-1.5 -top-1.5 inline-flex min-w-[1.1rem] items-center justify-center rounded-full px-1 py-[2px] text-[8.5px] font-mono font-bold leading-none ${
-                      isDark
-                        ? 'bg-[linear-gradient(135deg,#22d3ee,#7c3aed)] text-slate-950 shadow-[0_8px_18px_rgba(34,211,238,0.35)]'
-                        : 'bg-[linear-gradient(135deg,#7c3aed,#22d3ee)] text-white shadow-[0_8px_16px_rgba(124,58,237,0.28)]'
-                    }`}>
-                      {cartCountLabel}
-                    </span>
-                  )}
-                </span>
+                  {cartHasItems && <CountBadge count={cartCountLabel} color="cyan" />}
+                </IconCircle>
                 <span className="hidden text-[12px] font-medium sm:inline">Cart</span>
               </Link>
 
-              {/* Quote draft */}
+              {/* Purchase quote */}
               {(quoteHasItems || quoteActive) && (
                 <Link
                   to="/purchase-quote"
-                  className={`relative hidden h-9 items-center gap-2 rounded-[12px] border px-3 transition-all lg:inline-flex ${quoteSurface} ${focus}`}
+                  className={`relative hidden h-[2.375rem] items-center gap-2 rounded-[12px] border px-3 transition-all lg:inline-flex ${quoteSurface} ${focus}`}
                   aria-label={quoteHasItems ? `Quote · ${quoteItemCount}` : 'Quote draft'}
                 >
-                  <span className={`relative flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-full border ${
-                    isDark ? 'border-fuchsia-300/16 bg-white/[0.05]' : 'border-violet-200/80 bg-white/80'
-                  }`}>
+                  <IconCircle active={quoteHasItems || quoteActive} colorScheme="pink">
                     <FileText className="h-3.5 w-3.5" strokeWidth={2} />
-                    {quoteHasItems && (
-                      <span className={`absolute -right-1.5 -top-1.5 inline-flex min-w-[1.1rem] items-center justify-center rounded-full px-1 py-[2px] text-[8.5px] font-mono font-bold leading-none ${
-                        isDark
-                          ? 'bg-[linear-gradient(135deg,#f472b6,#8b5cf6)] text-slate-950 shadow-[0_8px_18px_rgba(244,114,182,0.3)]'
-                          : 'bg-[linear-gradient(135deg,#ec4899,#7c3aed)] text-white'
-                      }`}>
-                        {quoteCountLabel}
-                      </span>
-                    )}
-                  </span>
+                    {quoteHasItems && <CountBadge count={quoteCountLabel} color="pink" />}
+                  </IconCircle>
                   <span className="text-[12px] font-medium">Quote</span>
                 </Link>
               )}
@@ -617,239 +667,451 @@ export default function Navbar() {
               {/* Hamburger */}
               <button
                 onClick={() => setOpen(v => !v)}
-                className={`inline-flex h-9 w-9 items-center justify-center rounded-[12px] border transition-all lg:hidden ${utilitySurface} ${focus}`}
-                aria-label="Menu"
+                className={`inline-flex h-[2.375rem] w-[2.375rem] items-center justify-center rounded-[12px] border transition-all lg:hidden ${
+                  open
+                    ? isDark
+                      ? 'border-violet-400/22 bg-violet-500/12 text-white'
+                      : 'border-violet-300/45 bg-violet-50 text-violet-800'
+                    : utilityPill
+                } ${focus}`}
+                aria-label={open ? 'Close menu' : 'Open menu'}
                 aria-expanded={open}
               >
-                {open ? <X className="h-4 w-4" strokeWidth={2} /> : <Menu className="h-4 w-4" strokeWidth={2} />}
+                <AnimatePresence mode="wait" initial={false}>
+                  {open ? (
+                    <motion.span
+                      key="x"
+                      initial={{ rotate: -45, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: 45, opacity: 0 }}
+                      transition={{ duration: 0.14 }}
+                    >
+                      <X className="h-4 w-4" strokeWidth={2} />
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="menu"
+                      initial={{ rotate: 45, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: -45, opacity: 0 }}
+                      transition={{ duration: 0.14 }}
+                    >
+                      <Menu className="h-4 w-4" strokeWidth={2} />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </button>
             </div>
           </div>
 
-          {/* ═══ MOBILE MENU ═══ */}
+          {/* ══════════════════════ MOBILE MENU ══════════════════════ */}
           <AnimatePresence>
             {open && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
                 className="overflow-hidden lg:hidden"
               >
                 <div
-                  className={`mx-3 mb-3 overflow-y-auto rounded-[22px] border p-3.5 backdrop-blur-2xl ${
+                  className={`mx-3 mb-3 overflow-y-auto rounded-[22px] border ${
                     isDark
-                      ? 'border-white/10 bg-[linear-gradient(180deg,rgba(6,8,22,0.97),rgba(4,6,18,0.97))]'
-                      : 'border-violet-200/70 bg-white/94'
+                      ? 'border-white/[0.09] bg-[linear-gradient(180deg,rgba(6,8,22,0.98),rgba(4,6,18,0.98))] shadow-[0_20px_72px_rgba(1,3,14,0.6)]'
+                      : 'border-violet-200/65 bg-white/96 shadow-[0_12px_40px_rgba(124,58,237,0.1)]'
                   }`}
-                  style={{ maxHeight: 'calc(100dvh - 5.5rem)', paddingBottom: 'max(0.875rem, env(safe-area-inset-bottom))' }}
+                  style={{
+                    backdropFilter: 'blur(28px)',
+                    WebkitBackdropFilter: 'blur(28px)',
+                    maxHeight: 'calc(100dvh - 5.5rem)',
+                    paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+                  }}
                 >
-                  <div className={`mb-2 text-[9px] font-semibold uppercase tracking-[0.22em] ${isDark ? 'text-purple-100/38' : 'text-violet-600/62'}`}>
-                    Navigate
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {MOBILE_NAV.map(item => {
-                      const isCurrent = active(item.to)
-                      return (
-                        <Link
-                          key={item.to}
-                          to={item.to}
-                          className={`inline-flex min-h-[46px] items-center justify-center rounded-[15px] border px-4 text-[13px] font-medium transition-all ${
-                            isCurrent
-                              ? isDark
-                                ? 'border-violet-300/20 bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.08),rgba(34,211,238,0.06))] text-white'
-                                : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.06),rgba(34,211,238,0.06))] text-gray-900'
-                              : mobileTile
-                          } ${focus}`}
-                        >
-                          {item.label}
-                        </Link>
-                      )
-                    })}
-                  </div>
-
-                  <div className={`mt-3 border-t pt-3 ${isDark ? 'border-white/8' : 'border-violet-200/60'}`}>
-                    <div className={`mb-2 text-[9px] font-semibold uppercase tracking-[0.22em] ${isDark ? 'text-purple-100/38' : 'text-violet-600/62'}`}>
-                      Account & Tools
+                  {/* ─── Brand stripe ─── */}
+                  <div className={`flex items-center gap-3 px-4 py-4 ${
+                    isDark ? 'border-b border-white/[0.06]' : 'border-b border-violet-100/80'
+                  }`}>
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[13px] border border-white/14 bg-[linear-gradient(145deg,#7c3aed_0%,#d946ef_48%,#22d3ee_112%)] shadow-[0_8px_24px_rgba(124,58,237,0.38)]">
+                      <span className="text-[10.5px] font-black tracking-[0.12em] text-white">Ev</span>
                     </div>
+                    <div className="leading-none">
+                      <div className={`font-display text-[13px] font-bold tracking-[-0.01em] ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        Eventies
+                      </div>
+                      <div className={`mt-0.5 text-[9px] uppercase tracking-[0.16em] ${isDark ? 'text-purple-100/45' : 'text-violet-600/65'}`}>
+                        Marketplace
+                      </div>
+                    </div>
+                  </div>
 
-                    <div className="grid grid-cols-2 gap-1.5">
-                      <button
-                        onClick={() => { setOpen(false); setSearchOpen(true) }}
-                        className={`inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
-                      >
-                        <Search className="h-3.5 w-3.5" strokeWidth={2} />
-                        Search
-                      </button>
+                  <div className="space-y-3 px-3 pt-3">
 
+                    {/* ─── Home ─── */}
+                    <div>
                       <Link
-                        to="/rental-cart"
-                        className={`inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-semibold transition-all ${
-                          cartActive
-                            ? isDark
-                              ? 'border-cyan-300/24 bg-[linear-gradient(135deg,rgba(8,30,44,0.94),rgba(11,18,38,0.98))] text-white'
-                              : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(34,211,238,0.06))] text-gray-900'
-                            : mobileTile
+                        to="/"
+                        className={`inline-flex w-full min-h-[48px] items-center gap-3 rounded-[15px] border px-4 text-[13px] font-semibold tracking-[-0.01em] transition-all duration-300 ${
+                          active('/') ? mobileActiveTile : mobileTile
                         } ${focus}`}
                       >
-                        <ShoppingCart className="h-3.5 w-3.5" strokeWidth={2} />
-                        Cart
-                        {cartHasItems && (
-                          <span className={`inline-flex min-w-[1.3rem] items-center justify-center rounded-full px-1 py-[2px] text-[9px] font-mono font-bold leading-none ${
-                            isDark ? 'bg-[linear-gradient(135deg,#22d3ee,#7c3aed)] text-slate-950' : 'bg-[linear-gradient(135deg,#7c3aed,#22d3ee)] text-white'
-                          }`}>{cartCountLabel}</span>
-                        )}
+                        <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] ${
+                          isDark ? 'bg-white/[0.06] border border-white/[0.08]' : 'bg-violet-50 border border-violet-200/60'
+                        }`}>
+                          <LayoutGrid className="h-3.5 w-3.5 opacity-75" strokeWidth={2} />
+                        </div>
+                        <div>
+                          <div>Home</div>
+                          <div className={`text-[10px] font-normal tracking-normal ${isDark ? 'text-purple-100/38' : 'text-gray-400'}`}>
+                            Back to start
+                          </div>
+                        </div>
                       </Link>
+                    </div>
 
-                      {(quoteHasItems || quoteActive) && (
+                    {/* ─── Explore ─── */}
+                    <div>
+                      <div className={`mb-2 px-1 text-[9px] font-bold uppercase tracking-[0.22em] ${isDark ? 'text-purple-100/36' : 'text-violet-600/58'}`}>
+                        Explore
+                      </div>
+                      <div className="grid grid-cols-2 gap-1.5">
                         <Link
-                          to="/purchase-quote"
-                          className={`inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${
-                            quoteActive
-                              ? isDark
-                                ? 'border-fuchsia-300/22 bg-[linear-gradient(135deg,rgba(39,15,57,0.96),rgba(16,14,36,0.98))] text-white'
-                                : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.06))] text-gray-900'
-                              : mobileTile
+                          to="/products"
+                          className={`inline-flex min-h-[56px] flex-col items-center justify-center gap-1.5 rounded-[15px] border px-3 text-[12.5px] font-medium tracking-[-0.01em] transition-all duration-300 ${
+                            active('/products') ? mobileActiveTile : mobileTile
                           } ${focus}`}
                         >
-                          <FileText className="h-3.5 w-3.5" strokeWidth={2} />
-                          Quote Draft
-                          {quoteHasItems && (
-                            <span className={`inline-flex min-w-[1.3rem] items-center justify-center rounded-full px-1 py-[2px] text-[9px] font-mono font-bold leading-none ${
-                              isDark ? 'bg-[linear-gradient(135deg,#f472b6,#8b5cf6)] text-slate-950' : 'bg-[linear-gradient(135deg,#ec4899,#7c3aed)] text-white'
-                            }`}>{quoteCountLabel}</span>
+                          <LayoutGrid className="h-4 w-4 opacity-70" strokeWidth={2} />
+                          <span>Products</span>
+                        </Link>
+                        <Link
+                          to="/customers"
+                          className={`inline-flex min-h-[56px] flex-col items-center justify-center gap-1.5 rounded-[15px] border px-3 text-[12.5px] font-medium tracking-[-0.01em] transition-all duration-300 ${
+                            active('/customers') ? mobileActiveTile : mobileTile
+                          } ${focus}`}
+                        >
+                          <Users className="h-4 w-4 opacity-70" strokeWidth={2} />
+                          <span>Customers</span>
+                        </Link>
+                        <Link
+                          to="/gallery"
+                          className={`col-span-2 inline-flex min-h-[48px] items-center justify-center gap-2.5 rounded-[15px] border px-4 text-[13px] font-medium tracking-[-0.01em] transition-all duration-300 ${
+                            active('/gallery') ? mobileActiveTile : mobileTile
+                          } ${focus}`}
+                        >
+                          <GalleryVerticalEnd className="h-4 w-4 opacity-70" strokeWidth={2} />
+                          Gallery
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* ─── Company ─── */}
+                    <div>
+                      <div className={`mb-2 px-1 text-[9px] font-bold uppercase tracking-[0.22em] ${isDark ? 'text-purple-100/36' : 'text-violet-600/58'}`}>
+                        Company
+                      </div>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <Link
+                          to="/about"
+                          className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium tracking-[-0.01em] transition-all duration-300 ${
+                            active('/about') ? mobileActiveTile : mobileTile
+                          } ${focus}`}
+                        >
+                          <ShieldCheck className="h-4 w-4 opacity-70" strokeWidth={2} />
+                          About
+                        </Link>
+                        <Link
+                          to="/contact"
+                          className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium tracking-[-0.01em] transition-all duration-300 ${
+                            active('/contact') ? mobileActiveTile : mobileTile
+                          } ${focus}`}
+                        >
+                          <MessageCircleMore className="h-4 w-4 opacity-70" strokeWidth={2} />
+                          Contact
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* ─── Account & Tools ─── */}
+                    <div className={`pb-1 pt-0 ${isDark ? 'border-t border-white/[0.06]' : 'border-t border-violet-100/70'}`}>
+                      <div className={`mb-2 mt-3 px-1 text-[9px] font-bold uppercase tracking-[0.22em] ${isDark ? 'text-purple-100/36' : 'text-violet-600/58'}`}>
+                        Account &amp; Tools
+                      </div>
+                      <div className="grid grid-cols-2 gap-1.5">
+
+                        {/* Search */}
+                        <button
+                          type="button"
+                          onClick={() => { setOpen(false); setSearchOpen(true) }}
+                          className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+                        >
+                          <Search className="h-4 w-4 opacity-70" strokeWidth={2} />
+                          Search
+                        </button>
+
+                        {/* Cart */}
+                        <Link
+                          to="/rental-cart"
+                          className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-semibold transition-all ${
+                            cartActive ? mobileActiveTile : mobileTile
+                          } ${focus}`}
+                        >
+                          <ShoppingCart className="h-4 w-4 opacity-70" strokeWidth={2} />
+                          Cart
+                          {cartHasItems && (
+                            <span className={`inline-flex min-w-[1.3rem] items-center justify-center rounded-full px-1 py-[2px] text-[8.5px] font-mono font-bold leading-none ${
+                              isDark
+                                ? 'bg-[linear-gradient(135deg,#22d3ee,#7c3aed)] text-slate-950'
+                                : 'bg-[linear-gradient(135deg,#7c3aed,#22d3ee)] text-white'
+                            }`}>
+                              {cartCountLabel}
+                            </span>
                           )}
                         </Link>
-                      )}
 
-                      {isLoggedIn ? (
-                        <>
-                          <Link to="/my-requests" className={`inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}>
-                            <FileText className="h-3.5 w-3.5" strokeWidth={2} />
-                            My Requests
-                          </Link>
-                          <Link to="/profile" className={`inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}>
-                            <User2 className="h-3.5 w-3.5" strokeWidth={2} />
-                            {firstName}
-                          </Link>
-                          {isAuth && (
-                            <Link to="/admin" className={`inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}>
-                              <ShieldCheck className="h-3.5 w-3.5" strokeWidth={2} />
-                              Admin
-                            </Link>
-                          )}
-                          <button
-                            onClick={() => void logout()}
-                            className={`inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${
-                              isDark ? 'border-red-400/18 bg-red-500/10 text-red-300' : 'border-red-200 bg-red-50 text-red-600'
+                        {/* Quote (when exists) */}
+                        {(quoteHasItems || quoteActive) && (
+                          <Link
+                            to="/purchase-quote"
+                            className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${
+                              quoteActive ? mobileActiveTile : mobileTile
                             } ${focus}`}
                           >
-                            <LogOut className="h-3.5 w-3.5" strokeWidth={2} />
-                            Logout
-                          </button>
-                        </>
-                      ) : (
-                        <Link to="/login" className={`inline-flex min-h-[46px] items-center justify-center rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}>
-                          Login
-                        </Link>
-                      )}
+                            <FileText className="h-4 w-4 opacity-70" strokeWidth={2} />
+                            Quote
+                            {quoteHasItems && (
+                              <span className={`inline-flex min-w-[1.3rem] items-center justify-center rounded-full px-1 py-[2px] text-[8.5px] font-mono font-bold leading-none ${
+                                isDark
+                                  ? 'bg-[linear-gradient(135deg,#f472b6,#8b5cf6)] text-slate-950'
+                                  : 'bg-[linear-gradient(135deg,#ec4899,#7c3aed)] text-white'
+                              }`}>
+                                {quoteCountLabel}
+                              </span>
+                            )}
+                          </Link>
+                        )}
+
+                        {/* Authenticated */}
+                        {isLoggedIn ? (
+                          <>
+                            <Link
+                              to="/my-requests"
+                              className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+                            >
+                              <FileText className="h-4 w-4 opacity-70" strokeWidth={2} />
+                              Requests
+                            </Link>
+                            <Link
+                              to="/profile"
+                              className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+                            >
+                              <User2 className="h-4 w-4 opacity-70" strokeWidth={2} />
+                              {firstName}
+                            </Link>
+                            {isAuth && (
+                              <Link
+                                to="/admin"
+                                className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+                              >
+                                <ShieldCheck className="h-4 w-4 opacity-70" strokeWidth={2} />
+                                Admin
+                              </Link>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => void logout()}
+                              className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${
+                                isDark
+                                  ? 'border-red-400/20 bg-red-500/10 text-red-300 hover:bg-red-500/16'
+                                  : 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100'
+                              } ${focus}`}
+                            >
+                              <LogOut className="h-4 w-4 opacity-80" strokeWidth={2} />
+                              Logout
+                            </button>
+                          </>
+                        ) : (
+                          <Link
+                            to="/login"
+                            className={`col-span-2 inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-[15px] border px-4 text-[13px] font-semibold transition-all ${
+                              isDark
+                                ? 'border-violet-400/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.08))] text-white hover:border-violet-400/35'
+                                : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.08),rgba(236,72,153,0.04))] text-violet-800 hover:border-violet-300/65'
+                            } ${focus}`}
+                          >
+                            <User2 className="h-4 w-4" strokeWidth={2} />
+                            Login to your account
+                            <ArrowRight className="h-3.5 w-3.5 opacity-60" strokeWidth={2} />
+                          </Link>
+                        )}
+                      </div>
                     </div>
+
                   </div>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* ═══ DESKTOP DROPDOWN PANEL ═══ */}
+          {/* ══════════════════════ DESKTOP DROPDOWN ══════════════════════ */}
           <AnimatePresence>
             {activeDesktopItem?.children && (
               <motion.div
-                initial={{ opacity: 0, y: -8, scale: 0.985 }}
+                initial={{ opacity: 0, y: -10, scale: 0.982 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.985 }}
+                exit={{ opacity: 0, y: -10, scale: 0.982 }}
                 transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                 onMouseEnter={clearDesktopTimers}
                 onMouseLeave={() => scheduleDesktopClose()}
-                onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); scheduleDesktopClose(true) } }}
-                className="absolute left-1/2 top-full z-[70] hidden w-full max-w-[54rem] -translate-x-1/2 px-4 pt-2 lg:block"
+                onKeyDown={e => { if (e.key === 'Escape') { e.preventDefault(); scheduleDesktopClose(true) } }}
+                className="absolute left-1/2 top-full z-[70] hidden w-full max-w-[52rem] -translate-x-1/2 px-4 pt-2 lg:block"
+                role="menu"
+                aria-label={`${activeDesktopItem.label} menu`}
               >
+                {/* Invisible hover bridge */}
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-4" />
-                <div className={`relative overflow-hidden rounded-[26px] border backdrop-blur-2xl ${
-                  isDark
-                    ? 'border-white/10 bg-[linear-gradient(180deg,rgba(8,10,24,0.97),rgba(5,7,18,0.96))] shadow-[0_24px_90px_rgba(1,3,12,0.65)]'
-                    : 'border-violet-200/80 bg-white/95 shadow-xl shadow-violet-500/12'
-                }`}>
-                  <div className={`grid gap-px ${isDark ? 'bg-white/8 md:grid-cols-[0.88fr_1.12fr]' : 'bg-violet-200/60 md:grid-cols-[0.88fr_1.12fr]'}`}>
-                    <div className={`relative px-6 py-5 ${isDark ? 'bg-slate-950/96' : 'bg-violet-50/94'}`}>
-                      <div className={`text-[9px] font-semibold uppercase tracking-[0.22em] ${isDark ? 'text-cyan-200/68' : 'text-violet-700/70'}`}>
-                        {activeDesktopItem.eyebrow}
+
+                <div
+                  className={`relative overflow-hidden rounded-[24px] border ${
+                    isDark
+                      ? 'border-white/[0.09] bg-[linear-gradient(180deg,rgba(8,10,24,0.98),rgba(5,7,18,0.97))] shadow-[0_28px_100px_rgba(1,3,12,0.68),inset_0_1px_0_rgba(255,255,255,0.04)]'
+                      : 'border-violet-200/70 bg-white/97 shadow-[0_20px_80px_rgba(124,58,237,0.14),0_4px_20px_rgba(0,0,0,0.06)]'
+                  }`}
+                  style={{ backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)' }}
+                >
+                  {/* Top accent line */}
+                  <div
+                    className="absolute inset-x-0 top-0 h-px"
+                    style={{
+                      background: isDark
+                        ? 'linear-gradient(90deg, transparent 5%, rgba(124,58,237,0.45) 35%, rgba(6,182,212,0.35) 65%, transparent 95%)'
+                        : 'linear-gradient(90deg, transparent 5%, rgba(124,58,237,0.2) 35%, rgba(6,182,212,0.15) 65%, transparent 95%)',
+                    }}
+                  />
+
+                  <div className={`grid ${isDark ? 'divide-x divide-white/[0.06]' : 'divide-x divide-violet-100'} md:grid-cols-[0.9fr_1.1fr]`}>
+
+                    {/* ── Left panel: title + CTA ── */}
+                    <div className={`relative flex flex-col justify-between px-7 py-6 ${
+                      isDark
+                        ? 'bg-[linear-gradient(160deg,rgba(14,10,30,0.96),rgba(8,9,20,0.88))]'
+                        : 'bg-[linear-gradient(160deg,rgba(249,246,255,0.98),rgba(243,240,255,0.94))]'
+                    }`}>
+                      {/* Corner accent glow */}
+                      {isDark && (
+                        <div
+                          className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full blur-3xl"
+                          style={{ background: 'rgba(124,58,237,0.10)' }}
+                        />
+                      )}
+
+                      <div className="relative">
+                        <div className={`text-[9px] font-bold uppercase tracking-[0.24em] ${
+                          isDark ? 'text-violet-300/68' : 'text-violet-600/72'
+                        }`}>
+                          {activeDesktopItem.eyebrow}
+                        </div>
+                        <h3 className={`mt-2 font-display text-[1.12rem] font-bold leading-tight tracking-[-0.03em] ${
+                          isDark ? 'text-white' : 'text-gray-900'
+                        }`}>
+                          {activeDesktopItem.title}
+                        </h3>
+                        <p className={`mt-2.5 max-w-[15rem] text-[11.5px] leading-[1.52] ${
+                          isDark ? 'text-purple-100/52' : 'text-gray-500'
+                        }`}>
+                          {activeDesktopItem.body}
+                        </p>
                       </div>
-                      <div className={`mt-2 font-display text-[1.12rem] font-bold leading-tight tracking-[-0.04em] ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {activeDesktopItem.title}
-                      </div>
-                      <p className={`mt-2.5 max-w-[16rem] text-[11.5px] leading-[1.5] ${isDark ? 'text-purple-100/55' : 'text-gray-600'}`}>
-                        {activeDesktopItem.body}
-                      </p>
+
                       {activeDesktopItem.ctaTo && activeDesktopItem.ctaLabel && (
                         <Link
                           to={activeDesktopItem.ctaTo}
                           onClick={() => scheduleDesktopClose(true)}
-                          className={`mt-5 inline-flex items-center gap-2 rounded-[14px] border px-4 py-2.5 text-[11px] font-semibold transition-all ${
+                          className={`mt-5 inline-flex w-fit items-center gap-2 rounded-[13px] border px-4 py-2.5 text-[11px] font-semibold transition-all duration-300 hover:-translate-y-0.5 ${
                             isDark
-                              ? 'border-white/12 bg-white/[0.05] text-white hover:bg-white/[0.09]'
-                              : 'border-violet-200/80 bg-white/90 text-gray-900 hover:bg-white'
+                              ? 'border-white/[0.11] bg-white/[0.05] text-white hover:border-violet-400/22 hover:bg-white/[0.08]'
+                              : 'border-violet-200/80 bg-white text-gray-800 shadow-sm hover:border-violet-300 hover:bg-violet-50/60 hover:text-violet-800'
                           } ${focus}`}
                         >
                           {activeDesktopItem.ctaLabel}
-                          <ArrowRight className="h-3 w-3" strokeWidth={2} />
+                          <ArrowRight className="h-3 w-3" strokeWidth={2.2} />
                         </Link>
                       )}
                     </div>
 
-                    <div className={`grid gap-2 p-3 ${activeDesktopItem.children.length > 2 ? 'md:grid-cols-2' : 'grid-cols-1'} ${
-                      isDark ? 'bg-[linear-gradient(180deg,rgba(6,8,20,0.88),rgba(5,7,16,0.80))]' : 'bg-white/94'
+                    {/* ── Right panel: nav items ── */}
+                    <div className={`p-3 ${
+                      isDark
+                        ? 'bg-[linear-gradient(180deg,rgba(6,8,20,0.90),rgba(5,7,16,0.82))]'
+                        : 'bg-white/95'
                     }`}>
-                      {activeDesktopItem.children.map((child, index) => {
-                        const isCurrent = active(child.to)
-                        const Icon = child.icon
-                        return (
-                          <Link
-                            key={child.to}
-                            ref={index === 0 ? desktopPanelFirstLinkRef : undefined}
-                            to={child.to}
-                            onClick={() => scheduleDesktopClose(true)}
-                            className={`group relative overflow-hidden rounded-[18px] border px-4 py-3.5 transition-all ${
-                              isCurrent
-                                ? isDark
-                                  ? 'border-violet-300/22 bg-[linear-gradient(145deg,rgba(124,58,237,0.16),rgba(236,72,153,0.08),rgba(34,211,238,0.08))]'
-                                  : 'border-violet-300/40 bg-[linear-gradient(145deg,rgba(124,58,237,0.08),rgba(236,72,153,0.04),rgba(34,211,238,0.05))]'
-                                : isDark
-                                  ? 'border-white/[0.07] bg-white/[0.02] hover:border-violet-300/16 hover:bg-white/[0.05]'
-                                  : 'border-violet-100 bg-white hover:border-violet-200 hover:bg-violet-50/60'
-                            } ${focus}`}
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[13px] border ${
-                                isDark
-                                  ? 'border-white/10 bg-[linear-gradient(145deg,rgba(124,58,237,0.18),rgba(236,72,153,0.08),rgba(34,211,238,0.08))] text-white'
-                                  : 'border-violet-200/80 bg-[linear-gradient(145deg,rgba(124,58,237,0.10),rgba(236,72,153,0.05),rgba(34,211,238,0.06))] text-violet-700'
+                      <div className={`grid gap-2 ${activeDesktopItem.children.length > 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                        {activeDesktopItem.children.map((child, index) => {
+                          const isCurrent = active(child.to)
+                          const Icon = child.icon
+                          return (
+                            <Link
+                              key={child.to}
+                              ref={index === 0 ? desktopPanelFirstLinkRef : undefined}
+                              to={child.to}
+                              onClick={() => scheduleDesktopClose(true)}
+                              role="menuitem"
+                              className={`group relative flex items-start gap-3.5 overflow-hidden rounded-[17px] border p-4 transition-all duration-300 ${
+                                isCurrent
+                                  ? isDark
+                                    ? 'border-violet-300/24 bg-[linear-gradient(148deg,rgba(124,58,237,0.16),rgba(236,72,153,0.07),rgba(34,211,238,0.07))]'
+                                    : 'border-violet-300/40 bg-[linear-gradient(148deg,rgba(124,58,237,0.08),rgba(236,72,153,0.04),rgba(34,211,238,0.04))]'
+                                  : isDark
+                                    ? 'border-white/[0.06] bg-white/[0.02] hover:border-violet-400/18 hover:bg-white/[0.05]'
+                                    : 'border-violet-100/80 bg-white/60 hover:border-violet-200 hover:bg-violet-50/60'
+                              } ${focus}`}
+                            >
+                              {/* Hover glow on item */}
+                              {isDark && !isCurrent && (
+                                <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-400 group-hover:opacity-100"
+                                  style={{ background: 'radial-gradient(ellipse 90% 70% at 20% 50%, rgba(124,58,237,0.08) 0%, transparent 70%)' }}
+                                />
+                              )}
+
+                              {/* Icon */}
+                              <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border transition-transform duration-300 group-hover:scale-105 ${
+                                isCurrent
+                                  ? isDark
+                                    ? 'border-violet-400/28 bg-[linear-gradient(145deg,rgba(124,58,237,0.28),rgba(236,72,153,0.14))] text-violet-200'
+                                    : 'border-violet-300/55 bg-[linear-gradient(145deg,rgba(124,58,237,0.14),rgba(236,72,153,0.07))] text-violet-700'
+                                  : isDark
+                                    ? 'border-white/[0.09] bg-white/[0.05] text-white/75 group-hover:border-violet-400/22 group-hover:text-white'
+                                    : 'border-violet-200/65 bg-violet-50/80 text-violet-600 group-hover:border-violet-300 group-hover:bg-violet-100/70'
                               }`}>
                                 <Icon className="h-4 w-4" strokeWidth={2} />
                               </div>
-                              <div className="min-w-0 flex-1">
+
+                              {/* Text */}
+                              <div className="relative min-w-0 flex-1">
                                 <div className="flex items-center justify-between gap-2">
-                                  <span className={`text-[12px] font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{child.label}</span>
-                                  <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[8.5px] font-semibold uppercase tracking-[0.12em] ${
-                                    isDark ? 'border-white/10 bg-white/[0.05] text-cyan-200/60' : 'border-violet-200/80 bg-violet-50/80 text-violet-600/70'
-                                  }`}>{child.meta}</span>
+                                  <span className={`text-[12.5px] font-semibold tracking-[-0.01em] transition-colors ${
+                                    isDark ? 'text-white/90 group-hover:text-white' : 'text-gray-800 group-hover:text-gray-900'
+                                  }`}>
+                                    {child.label}
+                                  </span>
+                                  <span className={`shrink-0 rounded-full border px-2 py-[3px] text-[8px] font-bold uppercase tracking-[0.12em] ${
+                                    isDark
+                                      ? 'border-white/[0.09] bg-white/[0.04] text-cyan-200/58'
+                                      : 'border-violet-200/70 bg-violet-50/80 text-violet-600/65'
+                                  }`}>
+                                    {child.meta}
+                                  </span>
                                 </div>
-                                <p className={`mt-1.5 text-[11px] leading-[1.45] ${isDark ? 'text-purple-100/50' : 'text-gray-500'}`}>{child.description}</p>
+                                <p className={`mt-1.5 text-[11px] leading-[1.48] ${
+                                  isDark ? 'text-purple-100/48 group-hover:text-purple-100/65' : 'text-gray-500'
+                                }`}>
+                                  {child.description}
+                                </p>
                               </div>
-                            </div>
-                          </Link>
-                        )
-                      })}
+                            </Link>
+                          )
+                        })}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -860,7 +1122,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* ═══ USER MENU PORTAL ═══ */}
+      {/* ══════════════════════ USER MENU PORTAL ══════════════════════ */}
       {typeof document !== 'undefined' &&
         createPortal(
           <AnimatePresence>
@@ -871,37 +1133,97 @@ export default function Navbar() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: userMenuPosition.placement === 'bottom' ? -8 : 8, scale: 0.97 }}
                 transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-                className={`fixed z-[90] w-[276px] overflow-hidden rounded-[22px] border backdrop-blur-2xl ${
+                className={`fixed z-[90] w-[280px] overflow-hidden rounded-[22px] border ${
                   isDark
-                    ? 'border-white/10 bg-[linear-gradient(180deg,rgba(8,10,24,0.97),rgba(5,7,18,0.97))] shadow-[0_22px_80px_rgba(1,3,12,0.62)]'
-                    : 'border-violet-200/80 bg-white/95 shadow-xl shadow-violet-500/12'
+                    ? 'border-white/[0.09] bg-[linear-gradient(180deg,rgba(9,11,26,0.98),rgba(6,8,20,0.98))] shadow-[0_24px_80px_rgba(1,3,12,0.65),inset_0_1px_0_rgba(255,255,255,0.04)]'
+                    : 'border-violet-200/70 bg-white/97 shadow-[0_16px_60px_rgba(124,58,237,0.14),0_4px_16px_rgba(0,0,0,0.06)]'
                 } ${userMenuPosition.placement === 'bottom' ? 'origin-top-right' : 'origin-bottom-right'}`}
-                style={{ top: `${userMenuPosition.top}px`, left: `${userMenuPosition.left}px` }}
+                style={{
+                  top: `${userMenuPosition.top}px`,
+                  left: `${userMenuPosition.left}px`,
+                  backdropFilter: 'blur(28px)',
+                  WebkitBackdropFilter: 'blur(28px)',
+                }}
               >
-                <div className={`border-b px-4 py-4 ${isDark ? 'border-white/8' : 'border-violet-100'}`}>
-                  <div className={`text-[13px] font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{currentUser?.name || 'User'}</div>
-                  <div className={`mt-0.5 text-[11px] ${isDark ? 'text-purple-100/40' : 'text-gray-500'}`}>{currentUser?.email || ''}</div>
+                {/* Top accent */}
+                <div
+                  className="absolute inset-x-0 top-0 h-px"
+                  style={{
+                    background: isDark
+                      ? 'linear-gradient(90deg, transparent 10%, rgba(124,58,237,0.5) 50%, transparent 90%)'
+                      : 'linear-gradient(90deg, transparent 10%, rgba(124,58,237,0.2) 50%, transparent 90%)',
+                  }}
+                />
+
+                {/* User header */}
+                <div className={`flex items-center gap-3 px-4 py-4 ${isDark ? 'border-b border-white/[0.07]' : 'border-b border-violet-100'}`}>
+                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${
+                    isDark
+                      ? 'border-violet-300/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.28),rgba(236,72,153,0.16))]'
+                      : 'border-violet-200/60 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(236,72,153,0.08))]'
+                  }`}>
+                    <UserAvatar
+                      name={currentUser?.name}
+                      email={currentUser?.email}
+                      avatarUrl={currentUser?.avatarUrl}
+                      avatarStyle={currentUser?.avatarStyle}
+                      avatarSeed={currentUser?.avatarSeed}
+                      avatarOptions={currentUser?.avatarOptions}
+                      className="h-full w-full rounded-full"
+                      fallbackClassName={
+                        isDark
+                          ? 'bg-[linear-gradient(135deg,rgba(124,58,237,0.52),rgba(236,72,153,0.35))] text-white text-[11px]'
+                          : 'bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.12))] text-violet-700 text-[11px]'
+                      }
+                      imageClassName="object-cover"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className={`truncate text-[13px] font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      {currentUser?.name || 'User'}
+                    </div>
+                    <div className={`truncate text-[11px] ${isDark ? 'text-purple-100/42' : 'text-gray-400'}`}>
+                      {currentUser?.email || ''}
+                    </div>
+                  </div>
                 </div>
+
+                {/* Menu items */}
                 <div className="p-2">
-                  <Link to="/my-requests" className={`flex items-center gap-3 rounded-[14px] px-3 py-2.5 text-[12px] font-medium transition-all ${isDark ? 'text-purple-100/72 hover:bg-white/[0.06] hover:text-white' : 'text-gray-700 hover:bg-violet-50 hover:text-gray-900'}`}>
-                    <FileText className="h-3.5 w-3.5 opacity-65" strokeWidth={2} />
-                    My Requests
-                  </Link>
-                  <Link to="/profile" className={`flex items-center gap-3 rounded-[14px] px-3 py-2.5 text-[12px] font-medium transition-all ${isDark ? 'text-purple-100/72 hover:bg-white/[0.06] hover:text-white' : 'text-gray-700 hover:bg-violet-50 hover:text-gray-900'}`}>
-                    <User2 className="h-3.5 w-3.5 opacity-65" strokeWidth={2} />
-                    Profile
-                  </Link>
-                  {isAuth && (
-                    <Link to="/admin" className={`flex items-center gap-3 rounded-[14px] px-3 py-2.5 text-[12px] font-medium transition-all ${isDark ? 'text-purple-100/72 hover:bg-white/[0.06] hover:text-white' : 'text-gray-700 hover:bg-violet-50 hover:text-gray-900'}`}>
-                      <ShieldCheck className="h-3.5 w-3.5 opacity-65" strokeWidth={2} />
-                      Admin Panel
-                    </Link>
-                  )}
+                  {[
+                    { to: '/my-requests', label: 'My Requests', icon: FileText },
+                    { to: '/profile', label: 'Profile', icon: User2 },
+                    ...(isAuth ? [{ to: '/admin', label: 'Admin Panel', icon: ShieldCheck }] : []),
+                  ].map(item => {
+                    const Icon = item.icon
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        className={`flex items-center gap-3 rounded-[13px] px-3 py-2.5 text-[12px] font-medium transition-all duration-200 ${
+                          isDark
+                            ? 'text-purple-100/70 hover:bg-white/[0.06] hover:text-white'
+                            : 'text-gray-600 hover:bg-violet-50 hover:text-gray-900'
+                        } ${focus}`}
+                      >
+                        <Icon className={`h-3.5 w-3.5 ${isDark ? 'text-white/38' : 'text-violet-400/70'}`} strokeWidth={2} />
+                        {item.label}
+                      </Link>
+                    )
+                  })}
+
+                  <div className={`my-1.5 h-px ${isDark ? 'bg-white/[0.06]' : 'bg-violet-100'}`} />
+
                   <button
+                    type="button"
                     onClick={() => { setUserMenu(false); void logout() }}
-                    className={`flex w-full items-center gap-3 rounded-[14px] px-3 py-2.5 text-left text-[12px] font-medium transition-all ${isDark ? 'text-red-300/72 hover:bg-red-500/10 hover:text-red-200' : 'text-red-600 hover:bg-red-50'}`}
+                    className={`flex w-full items-center gap-3 rounded-[13px] px-3 py-2.5 text-left text-[12px] font-medium transition-all duration-200 ${
+                      isDark
+                        ? 'text-red-300/72 hover:bg-red-500/[0.10] hover:text-red-200'
+                        : 'text-red-600 hover:bg-red-50 hover:text-red-700'
+                    } ${focus}`}
                   >
-                    <LogOut className="h-3.5 w-3.5 opacity-65" strokeWidth={2} />
+                    <LogOut className={`h-3.5 w-3.5 ${isDark ? 'text-red-300/55' : 'text-red-400/70'}`} strokeWidth={2} />
                     Logout
                   </button>
                 </div>

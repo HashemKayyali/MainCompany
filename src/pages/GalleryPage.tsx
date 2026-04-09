@@ -11,7 +11,7 @@ import Chip from '../components/ui/Chip'
 export default function GalleryPage() {
   const { galleryAlbums } = useData()
   const { isDark } = useTheme()
-  usePageMeta({ title: 'Gallery', description: 'Browse photos and videos from Bike Land events — LED races, smoothie bikes, VR cycling activations and more.' })
+  usePageMeta({ title: 'Gallery', description: 'Browse photos and videos from Eventies events — premium activations, standout setups, and memorable experiences across Jordan.' })
   const [cat, setCat] = useState('All')
   const [album, setAlbum] = useState<GalleryAlbum | null>(null)
 

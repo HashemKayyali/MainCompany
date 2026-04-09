@@ -25,9 +25,8 @@ export default function PageContainer({ children }: { children: ReactNode }) {
         Skip to content
       </a>
 
-      {!isHome && (
-        <AnimatedBackground position="absolute" className="z-0 overflow-hidden" />
-      )}
+      {/* Global branded background — fixed, always behind all content */}
+      <AnimatedBackground position="fixed" className="z-0" />
 
       <div
         className="relative z-10 flex min-h-screen min-w-0 flex-col"

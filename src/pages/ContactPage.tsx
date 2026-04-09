@@ -40,7 +40,7 @@ const contactCards = [
 export default function ContactPage() {
   usePageMeta({
     title: 'Contact',
-    description: 'Talk with Bike Land about rental requests, purchase quotes, and event planning support.',
+    description: 'Talk with Eventies about rental requests, purchase quotes, and event planning support.',
   })
 
   const { isDark } = useTheme()

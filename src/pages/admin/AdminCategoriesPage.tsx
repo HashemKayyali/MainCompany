@@ -17,7 +17,7 @@ import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../component
 import { cn } from '../../utils/cn'
 
 const empty: Category = { id: '', name: '', slug: '', icon: '', description: '', image: '' }
-
+
 
 function makeSlug(name: string) {
   return name
@@ -436,7 +436,7 @@ export default function AdminCategoriesPage() {
               <div className="relative z-[1] grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <label className={cn('mb-1.5 block text-[12px] font-medium', sub)}>
-                    Name * (e.g. "The Terminal VR", "Bike Land")
+                    Name * (e.g. "The Terminal VR", "Eventies")
                   </label>
                   <input
                     className="form-field"
