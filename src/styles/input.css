@@ -807,6 +807,51 @@
     }
   }
 
+  /* ─── Logo cloud marquee ─── */
+  .logo-cloud-row {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .logo-cloud-row--fwd {
+    animation: logo-cloud-fwd 36s linear infinite;
+  }
+
+  .logo-cloud-row--rev {
+    animation: logo-cloud-rev 40s linear infinite;
+  }
+
+  @media (hover: hover) {
+    .logo-cloud-track:hover .logo-cloud-row {
+      animation-play-state: paused;
+    }
+  }
+
+  html.perf-low .logo-cloud-row {
+    animation: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .logo-cloud-row {
+      animation: none !important;
+    }
+  }
+
+  /* RTL: content enters from right, exits left → translate 0 → -50% */
+  @keyframes logo-cloud-fwd {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* Second row moves opposite direction for visual depth */
+  @keyframes logo-cloud-rev {
+    from { transform: translateX(-50%); }
+    to   { transform: translateX(0); }
+  }
+
   /* ─── Pricing card accent header ─── */
   .pricing-header-gradient {
     background: linear-gradient(135deg,

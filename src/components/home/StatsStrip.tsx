@@ -36,11 +36,13 @@ export default function StatsStrip() {
       className="relative"
       aria-label="Our partners and customers"
     >
-      {/* Top separator */}
-      <div
-        className="absolute inset-x-0 top-0 h-px"
-        style={{ background: isDark ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.055), transparent)' : 'linear-gradient(90deg, transparent, rgba(124,58,237,0.1), transparent)' }}
-      />
+      {/* Top separator — subtle only in light mode, invisible in dark to avoid hard divider */}
+      {!isDark && (
+        <div
+          className="absolute inset-x-0 top-0 h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(124,58,237,0.08), transparent)' }}
+        />
+      )}
 
       <div className="py-7 sm:py-8">
         <div className="site-container">
@@ -85,11 +87,13 @@ export default function StatsStrip() {
         </div>
       </div>
 
-      {/* Bottom separator */}
-      <div
-        className="absolute inset-x-0 bottom-0 h-px"
-        style={{ background: isDark ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent)' : 'linear-gradient(90deg, transparent, rgba(124,58,237,0.08), transparent)' }}
-      />
+      {/* Bottom separator — subtle only in light mode */}
+      {!isDark && (
+        <div
+          className="absolute inset-x-0 bottom-0 h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(124,58,237,0.07), transparent)' }}
+        />
+      )}
     </section>
   )
 }

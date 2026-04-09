@@ -258,12 +258,12 @@ export default function Navbar() {
   // ── Nav bar background ────────────────────────────────────────────────────
   const navBarBg = scrolled
     ? isDark
-      ? 'border-b border-white/[0.06] bg-[rgba(3,5,14,0.94)] backdrop-blur-2xl shadow-[0_1px_40px_rgba(0,0,0,0.5)]'
-      : 'border-b border-violet-200/40 bg-white/96 backdrop-blur-xl shadow-[0_1px_20px_rgba(124,58,237,0.06)]'
+      ? 'border-b border-white/[0.05] bg-[rgba(2,4,12,0.96)] backdrop-blur-2xl shadow-[0_2px_48px_rgba(0,0,0,0.55),inset_0_-1px_0_rgba(124,58,237,0.06)]'
+      : 'border-b border-violet-200/35 bg-white/97 backdrop-blur-xl shadow-[0_2px_24px_rgba(124,58,237,0.07)]'
     : isHome
       ? ''
       : isDark
-        ? 'border-b border-white/[0.04] bg-[rgba(3,5,14,0.82)] backdrop-blur-lg'
+        ? 'border-b border-white/[0.04] bg-[rgba(3,5,14,0.80)] backdrop-blur-lg'
         : 'border-b border-violet-100/40 bg-white/80 backdrop-blur-md'
 
   // ── Utility pill (search, login) ───────────────────────────────────────────
@@ -473,11 +473,9 @@ export default function Navbar() {
       <div className={`pointer-events-auto w-full transition-all duration-500 ${navBarBg}`}>
         <div className="relative mx-auto max-w-[90rem]">
 
-          {/* ─── Nav bar row ─── */}
-          <div
-            ref={navbarBarRef}
-            className="flex h-[3.75rem] items-center justify-between px-4 sm:h-[4.25rem] sm:px-6 lg:px-10"
-          >
+          {/* ─── Nav bar rows (ref covers both rows so --app-navbar-height includes chip row) ─── */}
+          <div ref={navbarBarRef}>
+          <div className="flex h-[3.75rem] items-center justify-between px-4 sm:h-[4.25rem] sm:px-6 lg:px-10">
 
             {/* ── Logo ── */}
             <Link
@@ -704,6 +702,44 @@ export default function Navbar() {
             </div>
           </div>
 
+          {/* ── Mobile nav chip row (row 2 — only shows below lg breakpoint) ── */}
+          <div
+            className="flex gap-1.5 overflow-x-auto px-4 pb-2.5 lg:hidden"
+            style={{ scrollbarWidth: 'none' }}
+          >
+            {(
+              [
+                { to: '/', label: 'Home' },
+                { to: '/products', label: 'Explore' },
+                { to: '/customers', label: 'Customers' },
+                { to: '/gallery', label: 'Gallery' },
+                { to: '/about', label: 'Company' },
+              ] as const
+            ).map(chip => {
+              const isChipActive = active(chip.to)
+              return (
+                <Link
+                  key={chip.to}
+                  to={chip.to}
+                  className={`inline-flex h-[1.875rem] shrink-0 items-center rounded-full border px-3.5 text-[11.5px] font-medium whitespace-nowrap transition-all duration-300 ${
+                    isChipActive
+                      ? heroMode || isDark
+                        ? 'border-violet-400/28 bg-violet-500/[0.20] text-white'
+                        : 'border-violet-300/55 bg-violet-100/80 text-violet-800'
+                      : heroMode
+                        ? 'border-white/[0.13] bg-white/[0.07] text-white/68 hover:text-white hover:bg-white/[0.12]'
+                        : isDark
+                          ? 'border-white/[0.09] bg-white/[0.04] text-purple-100/62 hover:text-white hover:bg-white/[0.07]'
+                          : 'border-violet-200/60 bg-white/80 text-gray-600 hover:text-gray-900 hover:bg-white'
+                  }`}
+                >
+                  {chip.label}
+                </Link>
+              )
+            })}
+          </div>
+          </div>{/* closes navbarBarRef wrapper */}
+
           {/* ══════════════════════ MOBILE MENU ══════════════════════ */}
           <AnimatePresence>
             {open && (
@@ -717,14 +753,14 @@ export default function Navbar() {
                 <div
                   className={`mx-3 mb-3 overflow-y-auto rounded-[22px] border ${
                     isDark
-                      ? 'border-white/[0.09] bg-[linear-gradient(180deg,rgba(6,8,22,0.98),rgba(4,6,18,0.98))] shadow-[0_20px_72px_rgba(1,3,14,0.6)]'
-                      : 'border-violet-200/65 bg-white/96 shadow-[0_12px_40px_rgba(124,58,237,0.1)]'
+                      ? 'border-white/[0.08] bg-[linear-gradient(180deg,rgba(5,7,20,0.99),rgba(3,5,16,0.99))] shadow-[0_24px_80px_rgba(0,2,12,0.65),inset_0_1px_0_rgba(255,255,255,0.04)]'
+                      : 'border-violet-200/65 bg-white/97 shadow-[0_16px_48px_rgba(97,40,178,0.11)]'
                   }`}
                   style={{
-                    backdropFilter: 'blur(28px)',
-                    WebkitBackdropFilter: 'blur(28px)',
+                    backdropFilter: 'blur(32px)',
+                    WebkitBackdropFilter: 'blur(32px)',
                     maxHeight: 'calc(100dvh - 5.5rem)',
-                    paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+                    paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))',
                   }}
                 >
 
@@ -972,12 +1008,12 @@ export default function Navbar() {
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-4" />
 
                 <div
-                  className={`relative overflow-hidden rounded-[24px] border ${
+                  className={`relative overflow-hidden rounded-[22px] border ${
                     isDark
-                      ? 'border-white/[0.09] bg-[linear-gradient(180deg,rgba(8,10,24,0.98),rgba(5,7,18,0.97))] shadow-[0_28px_100px_rgba(1,3,12,0.68),inset_0_1px_0_rgba(255,255,255,0.04)]'
-                      : 'border-violet-200/70 bg-white/97 shadow-[0_20px_80px_rgba(124,58,237,0.14),0_4px_20px_rgba(0,0,0,0.06)]'
+                      ? 'border-white/[0.08] bg-[linear-gradient(170deg,rgba(7,9,22,0.99),rgba(4,6,16,0.98))] shadow-[0_32px_110px_rgba(0,2,10,0.72),inset_0_1px_0_rgba(255,255,255,0.05)]'
+                      : 'border-violet-200/65 bg-white/98 shadow-[0_24px_88px_rgba(97,40,178,0.13),0_4px_20px_rgba(0,0,0,0.05)]'
                   }`}
-                  style={{ backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)' }}
+                  style={{ backdropFilter: 'blur(36px)', WebkitBackdropFilter: 'blur(36px)' }}
                 >
                   {/* Top accent line */}
                   <div
@@ -1133,10 +1169,10 @@ export default function Navbar() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: userMenuPosition.placement === 'bottom' ? -8 : 8, scale: 0.97 }}
                 transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-                className={`fixed z-[90] w-[280px] overflow-hidden rounded-[22px] border ${
+                className={`fixed z-[90] w-[280px] overflow-hidden rounded-[20px] border ${
                   isDark
-                    ? 'border-white/[0.09] bg-[linear-gradient(180deg,rgba(9,11,26,0.98),rgba(6,8,20,0.98))] shadow-[0_24px_80px_rgba(1,3,12,0.65),inset_0_1px_0_rgba(255,255,255,0.04)]'
-                    : 'border-violet-200/70 bg-white/97 shadow-[0_16px_60px_rgba(124,58,237,0.14),0_4px_16px_rgba(0,0,0,0.06)]'
+                    ? 'border-white/[0.08] bg-[linear-gradient(170deg,rgba(7,9,22,0.99),rgba(4,6,16,0.99))] shadow-[0_28px_90px_rgba(0,2,10,0.68),inset_0_1px_0_rgba(255,255,255,0.05)]'
+                    : 'border-violet-200/65 bg-white/98 shadow-[0_20px_68px_rgba(97,40,178,0.13),0_4px_16px_rgba(0,0,0,0.05)]'
                 } ${userMenuPosition.placement === 'bottom' ? 'origin-top-right' : 'origin-bottom-right'}`}
                 style={{
                   top: `${userMenuPosition.top}px`,

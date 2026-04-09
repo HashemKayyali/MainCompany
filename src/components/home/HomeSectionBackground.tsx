@@ -8,56 +8,53 @@ function sr(seed: number): number {
   return x - Math.floor(x)
 }
 
-const STAR_COUNT = 160
+const STAR_COUNT = 140
 const STARS = Array.from({ length: STAR_COUNT }, (_, i) => ({
   id: i,
   x: sr(i) * 100,
   y: sr(i + 100) * 100,
-  size: sr(i + 200) * 2.6 + 0.5,      // 0.5 – 3.1 px
-  delay: sr(i + 300) * 8,              // 0 – 8 s
-  duration: sr(i + 400) * 3.5 + 2,    // 2 – 5.5 s
+  size: sr(i + 200) * 2.2 + 0.5,
+  delay: sr(i + 300) * 8,
+  duration: sr(i + 400) * 3.5 + 2,
   variant: i % 3 as 0 | 1 | 2,
-  color: i % 9 === 0 ? 'v'            // violet
-       : i % 7 === 0 ? 'c'            // cyan
-       : i % 13 === 0 ? 'p'           // pink/magenta
-       : i % 11 === 0 ? 'g'           // gold
-       : 'w',                          // white
+  color: i % 9 === 0 ? 'v'
+       : i % 7 === 0 ? 'c'
+       : i % 13 === 0 ? 'p'
+       : i % 11 === 0 ? 'g'
+       : 'w',
 }))
 
 const STAR_BG: Record<string, string> = {
-  v: 'rgba(167,139,250,1)',
-  c: 'rgba(103,232,249,1)',
-  p: 'rgba(240,90,200,1)',
-  g: 'rgba(251,211,141,1)',
-  w: 'rgba(255,255,255,1)',
+  v: 'rgba(167,139,250,0.92)',
+  c: 'rgba(103,232,249,0.88)',
+  p: 'rgba(220,80,180,0.85)',
+  g: 'rgba(251,211,141,0.80)',
+  w: 'rgba(255,255,255,0.90)',
 }
 
-// Glow intensity per star color
 const STAR_GLOW: Record<string, string> = {
-  v: '0 0 5px 2px rgba(167,139,250,0.7)',
-  c: '0 0 5px 2px rgba(103,232,249,0.7)',
-  p: '0 0 5px 2px rgba(240,90,200,0.7)',
-  g: '0 0 4px 1.5px rgba(251,211,141,0.6)',
-  w: '0 0 4px 1.5px rgba(255,255,255,0.6)',
+  v: '0 0 4px 1.5px rgba(167,139,250,0.50)',
+  c: '0 0 4px 1.5px rgba(103,232,249,0.50)',
+  p: '0 0 4px 1.5px rgba(220,80,180,0.48)',
+  g: '0 0 3px 1px rgba(251,211,141,0.42)',
+  w: '0 0 3px 1px rgba(255,255,255,0.42)',
 }
 
 const ANIM_NAMES = ['hs-star-a', 'hs-star-b', 'hs-star-c'] as const
 
-// Subtle cosmic dust particles
-const PARTICLE_COUNT = 28
+const PARTICLE_COUNT = 22
 const PARTICLES = Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
   id: i,
   x: sr(i + 700) * 100,
   y: sr(i + 800) * 100,
-  size: sr(i + 900) * 3 + 1.5,        // 1.5 – 4.5 px
+  size: sr(i + 900) * 3 + 1.5,
   delay: sr(i + 1000) * 12,
-  duration: sr(i + 1100) * 6 + 8,    // 8 – 14 s
-  color: i % 3 === 0 ? 'rgba(167,139,250,0.22)'
-       : i % 3 === 1 ? 'rgba(103,232,249,0.18)'
-       :                'rgba(240,90,200,0.15)',
+  duration: sr(i + 1100) * 6 + 8,
+  color: i % 3 === 0 ? 'rgba(139,92,246,0.16)'
+       : i % 3 === 1 ? 'rgba(6,182,212,0.13)'
+       :                'rgba(220,80,180,0.11)',
 }))
 
-// Meteors — violet & cyan variants
 const METEORS = [
   { id: 0,  top: '4%',  left: '88%', delay: '0s',    dur: '6.5s',  color: 'violet' },
   { id: 1,  top: '18%', left: '72%', delay: '2.6s',  dur: '5.8s',  color: 'cyan'   },
@@ -83,48 +80,57 @@ export default function HomeSectionBackground({ children }: { children: ReactNod
       >
         {isDark ? (
           <>
+            {/* ── Hero-to-section seamless fade ── */}
+            <div
+              className="absolute inset-x-0 top-0 z-20"
+              style={{
+                height: '100px',
+                background: 'linear-gradient(to bottom, #030610 0%, rgba(3,6,16,0.6) 55%, transparent 100%)',
+              }}
+            />
+
             {/* ── Deep space base tone ── */}
             <div
               className="absolute inset-0"
               style={{
                 background:
-                  'radial-gradient(ellipse 120% 80% at 50% 0%, rgba(15,5,40,0.72) 0%, transparent 70%)',
+                  'radial-gradient(ellipse 120% 80% at 50% 0%, rgba(10,3,28,0.55) 0%, transparent 70%)',
               }}
             />
 
-            {/* ── Nebula core — violet sweep upper-left ── */}
+            {/* ── Nebula — violet sweep upper-left ── */}
             <div
               className="absolute"
               style={{
                 top: '-8%', left: '-18%',
                 width: '72%', height: '62%',
                 background:
-                  'radial-gradient(ellipse, rgba(139,58,255,0.42) 0%, rgba(109,40,217,0.22) 32%, rgba(76,29,149,0.10) 58%, transparent 78%)',
-                filter: 'blur(60px)',
+                  'radial-gradient(ellipse, rgba(97,40,178,0.29) 0%, rgba(76,28,152,0.15) 32%, rgba(53,20,104,0.07) 58%, transparent 78%)',
+                filter: 'blur(65px)',
               }}
             />
 
-            {/* ── Nebula core — cyan right arc ── */}
+            {/* ── Nebula — cyan right arc ── */}
             <div
               className="absolute"
               style={{
                 top: '14%', right: '-18%',
                 width: '62%', height: '56%',
                 background:
-                  'radial-gradient(ellipse, rgba(6,210,240,0.32) 0%, rgba(6,182,212,0.16) 38%, rgba(8,145,178,0.07) 62%, transparent 78%)',
-                filter: 'blur(70px)',
+                  'radial-gradient(ellipse, rgba(4,147,168,0.22) 0%, rgba(5,127,149,0.11) 38%, rgba(6,102,125,0.05) 62%, transparent 78%)',
+                filter: 'blur(75px)',
               }}
             />
 
-            {/* ── Pink / magenta nebula — lower-center ── */}
+            {/* ── Nebula — pink/magenta lower-center ── */}
             <div
               className="absolute"
               style={{
                 bottom: '8%', left: '18%',
                 width: '66%', height: '48%',
                 background:
-                  'radial-gradient(ellipse, rgba(220,50,180,0.28) 0%, rgba(236,72,153,0.14) 42%, transparent 68%)',
-                filter: 'blur(80px)',
+                  'radial-gradient(ellipse, rgba(154,35,126,0.20) 0%, rgba(165,50,107,0.10) 42%, transparent 68%)',
+                filter: 'blur(85px)',
               }}
             />
 
@@ -135,8 +141,8 @@ export default function HomeSectionBackground({ children }: { children: ReactNod
                 bottom: '18%', right: '2%',
                 width: '48%', height: '42%',
                 background:
-                  'radial-gradient(ellipse, rgba(139,92,246,0.28) 0%, rgba(124,58,237,0.12) 44%, transparent 68%)',
-                filter: 'blur(64px)',
+                  'radial-gradient(ellipse, rgba(97,64,172,0.20) 0%, rgba(87,40,166,0.09) 44%, transparent 68%)',
+                filter: 'blur(68px)',
               }}
             />
 
@@ -147,20 +153,20 @@ export default function HomeSectionBackground({ children }: { children: ReactNod
                 top: '36%', left: '12%',
                 width: '50%', height: '40%',
                 background:
-                  'radial-gradient(ellipse, rgba(79,44,200,0.22) 0%, rgba(60,30,160,0.10) 50%, transparent 72%)',
-                filter: 'blur(88px)',
+                  'radial-gradient(ellipse, rgba(55,31,140,0.15) 0%, rgba(42,21,112,0.07) 50%, transparent 72%)',
+                filter: 'blur(92px)',
               }}
             />
 
-            {/* ── Bright cyan accent — upper-center ── */}
+            {/* ── Cyan accent — upper-center ── */}
             <div
               className="absolute"
               style={{
                 top: '-4%', left: '36%',
                 width: '38%', height: '32%',
                 background:
-                  'radial-gradient(ellipse, rgba(34,211,238,0.20) 0%, rgba(6,182,212,0.08) 50%, transparent 70%)',
-                filter: 'blur(50px)',
+                  'radial-gradient(ellipse, rgba(24,148,166,0.14) 0%, rgba(5,127,148,0.06) 50%, transparent 70%)',
+                filter: 'blur(54px)',
               }}
             />
 
@@ -171,8 +177,8 @@ export default function HomeSectionBackground({ children }: { children: ReactNod
                 top: '6%', right: '14%',
                 width: '30%', height: '28%',
                 background:
-                  'radial-gradient(ellipse, rgba(240,90,200,0.18) 0%, transparent 60%)',
-                filter: 'blur(44px)',
+                  'radial-gradient(ellipse, rgba(168,63,140,0.13) 0%, transparent 60%)',
+                filter: 'blur(48px)',
               }}
             />
 
@@ -183,7 +189,7 @@ export default function HomeSectionBackground({ children }: { children: ReactNod
                 width: '1px',
                 height: '72%',
                 background:
-                  'linear-gradient(180deg, transparent, rgba(167,139,250,0.18) 28%, rgba(167,139,250,0.10) 60%, transparent)',
+                  'linear-gradient(180deg, transparent, rgba(139,92,246,0.12) 28%, rgba(139,92,246,0.07) 60%, transparent)',
                 transform: 'rotate(-26deg) scaleX(280)',
                 filter: 'blur(0.5px)',
               }}
@@ -195,7 +201,7 @@ export default function HomeSectionBackground({ children }: { children: ReactNod
                 width: '1px',
                 height: '58%',
                 background:
-                  'linear-gradient(180deg, transparent, rgba(6,210,240,0.14) 36%, rgba(6,182,212,0.06) 68%, transparent)',
+                  'linear-gradient(180deg, transparent, rgba(6,182,212,0.10) 36%, rgba(6,182,212,0.04) 68%, transparent)',
                 transform: 'rotate(22deg) scaleX(180)',
                 filter: 'blur(0.5px)',
               }}
@@ -207,30 +213,29 @@ export default function HomeSectionBackground({ children }: { children: ReactNod
                 width: '1px',
                 height: '44%',
                 background:
-                  'linear-gradient(180deg, transparent, rgba(220,50,180,0.12) 40%, transparent)',
+                  'linear-gradient(180deg, transparent, rgba(154,35,126,0.09) 40%, transparent)',
                 transform: 'rotate(-14deg) scaleX(220)',
                 filter: 'blur(0.6px)',
               }}
             />
 
-            {/* ── Nebula mist overlay — adds depth/layering ── */}
+            {/* ── Nebula mist overlay ── */}
             <div
               className="absolute inset-0"
               style={{
                 background:
-                  'radial-gradient(ellipse 90% 50% at 28% 42%, rgba(124,58,237,0.09) 0%, transparent 55%), ' +
-                  'radial-gradient(ellipse 70% 60% at 78% 58%, rgba(6,182,212,0.08) 0%, transparent 52%)',
+                  'radial-gradient(ellipse 90% 50% at 28% 42%, rgba(87,40,166,0.06) 0%, transparent 55%), ' +
+                  'radial-gradient(ellipse 70% 60% at 78% 58%, rgba(5,127,148,0.06) 0%, transparent 52%)',
               }}
             />
           </>
         ) : (
-          /* Light mode: minimal atmospheric overlays */
           <div
             className="absolute inset-0"
             style={{
               background:
-                'radial-gradient(ellipse 82% 52% at 64% 22%, rgba(124,58,237,0.055) 0%, transparent 60%), ' +
-                'radial-gradient(ellipse 56% 42% at 18% 68%, rgba(6,182,212,0.04) 0%, transparent 55%)',
+                'radial-gradient(ellipse 82% 52% at 64% 22%, rgba(124,58,237,0.045) 0%, transparent 60%), ' +
+                'radial-gradient(ellipse 56% 42% at 18% 68%, rgba(6,182,212,0.03) 0%, transparent 55%)',
             }}
           />
         )}

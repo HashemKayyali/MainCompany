@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles } from 'lucide-react'
-import CustomersGrid from '../components/customer/CustomersGrid'
 import Hero from '../components/home/Hero'
 import FeaturedProducts from '../components/home/FeaturedProducts'
-import HomeSectionBackground from '../components/home/HomeSectionBackground'
+import LogoCloud from '../components/home/LogoCloud'
 import OfferSection from '../components/home/OfferSection'
 import StatsStrip from '../components/home/StatsStrip'
 import { useData } from '../contexts/DataContext'
@@ -29,63 +28,15 @@ export default function HomePage() {
       {/* Hero — untouched */}
       <Hero />
 
-      {/* ── All below-hero content wrapped in ambient background ── */}
-      <HomeSectionBackground>
-
+      {/* Pull StatsStrip into hero's fade zone for seamless blending */}
+      <div className="relative z-10 -mt-24 sm:-mt-28">
         <StatsStrip />
-        <OfferSection />
-        <FeaturedProducts />
+      </div>
 
-        {/* ── Partners / Customers ── */}
-        <section className="site-section">
-          <div className="site-container">
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, ease }}
-              className="mb-10 sm:mb-12"
-            >
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <div className="mb-3 flex items-center gap-2.5">
-                    <span className="section-label">// Partnerships</span>
-                    <div
-                      className="h-px w-8"
-                      style={{
-                        background: isDark ? 'rgba(124,58,237,0.28)' : 'rgba(124,58,237,0.25)',
-                      }}
-                    />
-                  </div>
-                  <h2 className={`section-title !mt-0 ${!isDark ? 'text-gray-900' : ''}`}>
-                    Trusted by industry{' '}
-                    <span className="text-glow">leaders</span>
-                  </h2>
-                  <p
-                    className={`mt-3 max-w-lg text-[0.93rem] leading-relaxed ${
-                      isDark ? 'text-purple-100/52' : 'text-gray-500'
-                    }`}
-                  >
-                    A growing network of premium brands that rely on our marketplace to power world-class events.
-                  </p>
-                </div>
+      <FeaturedProducts />
+      <OfferSection />
 
-                <Link
-                  to="/customers"
-                  className="btn-outline group inline-flex shrink-0 items-center gap-2 self-start sm:self-auto"
-                >
-                  <span>All {customers.length} partners</span>
-                  <ArrowRight
-                    className="h-4 w-4 transition-transform group-hover:translate-x-1"
-                    strokeWidth={2}
-                  />
-                </Link>
-              </div>
-            </motion.div>
-
-            <CustomersGrid customers={customers.slice(0, 12)} />
-          </div>
-        </section>
+      <LogoCloud customers={customers} />
 
         {/* ── CTA ── */}
         <section className="site-section">
@@ -194,7 +145,6 @@ export default function HomePage() {
           </div>
         </section>
 
-      </HomeSectionBackground>
     </>
   )
 }

@@ -145,18 +145,7 @@ export default function AdminLayout() {
       )}
       style={layoutVars}
     >
-      {isDark && (
-        <>
-          {/* Rich layered background for dark admin */}
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_50%_-5%,rgba(34,211,238,0.10)_0%,transparent_55%),radial-gradient(ellipse_60%_45%_at_90%_90%,rgba(236,72,153,0.09)_0%,transparent_50%),radial-gradient(ellipse_50%_40%_at_0%_60%,rgba(139,92,246,0.12)_0%,transparent_45%),linear-gradient(180deg,#060813_0%,#080e1c_50%,#060710_100%)]" aria-hidden="true" />
-          {/* Subtle grid */}
-          <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:52px_52px]" aria-hidden="true" />
-          {/* Ambient glows */}
-          <div className="pointer-events-none absolute left-[5%] top-20 h-80 w-80 rounded-full bg-cyan-500/[0.09] blur-[130px]" aria-hidden="true" />
-          <div className="pointer-events-none absolute right-[6%] top-10 h-96 w-96 rounded-full bg-fuchsia-500/[0.09] blur-[150px]" aria-hidden="true" />
-          <div className="pointer-events-none absolute bottom-[-6rem] left-[30%] h-[28rem] w-[28rem] rounded-full bg-violet-500/[0.09] blur-[160px]" aria-hidden="true" />
-        </>
-      )}
+      <AnimatedBackground position="absolute" className="z-0 overflow-hidden" />
 
       {open && (
         <div className="fixed inset-0 z-50 md:hidden">

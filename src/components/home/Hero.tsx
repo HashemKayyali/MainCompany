@@ -101,18 +101,18 @@ export default function Hero() {
         }}
       />
 
-      {/* Layer 4 – bottom fade to page background */}
+      {/* Layer 4 – bottom fade to page background (matches AnimatedBackground base #030511) */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-52"
-        style={{ background: 'linear-gradient(to top, #04040c 0%, transparent 100%)' }}
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-80"
+        style={{ background: 'linear-gradient(to top, rgba(3,5,17,0.98) 0%, rgba(3,5,17,0.84) 28%, rgba(3,5,17,0.42) 58%, transparent 100%)' }}
       />
 
       {/* ════ HERO CONTENT ════ */}
       <div
         className="site-container relative z-20 flex flex-1 flex-col"
-        style={{ paddingTop: 'calc(var(--app-navbar-height, 72px) + clamp(0.75rem, 3vw, 4.5rem))' }}
+        style={{ paddingTop: 'calc(var(--app-navbar-height, 72px) + clamp(0.25rem, 1.5vw, 2.5rem))' }}
       >
-        <div className="grid flex-1 grid-cols-1 items-center gap-10 pb-20 sm:pb-28 lg:grid-cols-[1fr_0.58fr] lg:gap-6 lg:pb-32 xl:gap-12">
+        <div className="grid flex-1 grid-cols-1 items-start gap-10 pb-20 pt-3 sm:pb-28 sm:pt-5 lg:grid-cols-[1fr_0.58fr] lg:items-center lg:gap-6 lg:pb-32 lg:pt-0 xl:gap-12">
 
           {/* ── LEFT: Text content ── */}
           <motion.div
