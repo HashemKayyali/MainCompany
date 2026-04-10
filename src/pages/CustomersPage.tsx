@@ -92,11 +92,12 @@ export default function CustomersPage() {
       <section className="site-container relative z-10">
         <motion.div {...toolbarReveal} className="mb-12 sm:mb-16">
           <div
-            className={`relative flex flex-col items-start justify-between gap-5 rounded-[24px] border p-4 backdrop-blur-xl sm:flex-row sm:items-center sm:p-5 ${
+            className={`relative flex flex-col items-start justify-between gap-5 rounded-[24px] border p-4 sm:flex-row sm:items-center sm:p-5 ${
               isDark
                 ? 'border-white/[0.06] bg-white/[0.02] shadow-[0_20px_40px_-20px_rgba(0,0,0,0.5)]'
                 : 'border-violet-100 bg-white/60 shadow-xl shadow-violet-100/40'
             }`}
+            style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
           >
             <div className="relative w-full sm:max-w-[280px]">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 opacity-50">

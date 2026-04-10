@@ -5,9 +5,9 @@ import CustomerCard from './CustomerCard'
 
 export default function CustomersGrid({ customers }: { customers: Customer[] }) {
   const { containerProps, itemProps } = useRevealGroup({
-    distance: 14,
-    stagger: 0.035,
-    delayChildren: 0.02,
+    distance: 12,
+    stagger: 0.018,
+    delayChildren: 0.01,
     margin: '-20px',
   })
 

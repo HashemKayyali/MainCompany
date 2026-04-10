@@ -13,9 +13,9 @@ export default function GalleryGrid({
 }) {
   const { isDark } = useTheme()
   const { containerProps, itemProps } = useRevealGroup({
-    distance: 16,
-    stagger: 0.05,
-    delayChildren: 0.03,
+    distance: 14,
+    stagger: 0.03,
+    delayChildren: 0.02,
     margin: '-28px',
   })
 

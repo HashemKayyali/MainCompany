@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ShoppingCart, FileText, MessageCircle, Check, X, ArrowRight } from 'lucide-react'
 import type { Product } from '../../data/products/types'
@@ -9,7 +9,7 @@ import { useToast } from '../../contexts/ToastContext'
 import Modal from '../ui/Modal'
 import { cn } from '../../utils/cn'
 
-export default function ProductCommerceActions({
+const ProductCommerceActions = memo(function ProductCommerceActions({
   product,
   variant = 'card',
   showContactLink = false,
@@ -250,7 +250,9 @@ export default function ProductCommerceActions({
       </Modal>
     </>
   )
-}
+})
+
+export default ProductCommerceActions
 
 // ── Extracted modal body to avoid duplication ────────────────────────────────
 function PurchaseQuoteModalBody({

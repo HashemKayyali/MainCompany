@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useData } from '../contexts/DataContext'
 import { galleryAlbums as staticAlbums, type GalleryAlbum } from '../data/gallery'
@@ -16,9 +16,19 @@ export default function GalleryPage() {
   const [album, setAlbum] = useState<GalleryAlbum | null>(null)
 
   // Use DB albums if available, fallback to static
-  const albums = galleryAlbums.length > 0 ? galleryAlbums : staticAlbums
-  const categories = ['All', ...Array.from(new Set(albums.map(a => a.category).filter(Boolean)))]
-  const filtered = cat === 'All' ? albums : albums.filter(a => a.category === cat)
+  const albums = useMemo(
+    () => (galleryAlbums.length > 0 ? galleryAlbums : staticAlbums),
+    [galleryAlbums]
+  )
+  const categories = useMemo(
+    () => ['All', ...Array.from(new Set(albums.map(a => a.category).filter(Boolean)))],
+    [albums]
+  )
+  const filtered = useMemo(
+    () => (cat === 'All' ? albums : albums.filter(a => a.category === cat)),
+    [albums, cat]
+  )
+  const handleAlbumClick = useCallback((a: GalleryAlbum) => setAlbum(a), [])
 
   return (
     <section className="site-section">
@@ -34,7 +44,7 @@ export default function GalleryPage() {
             <Chip key={c} active={cat === c} onClick={() => setCat(c)}>{c}</Chip>
           ))}
         </div>
-        <GalleryGrid albums={filtered} onAlbumClick={a => setAlbum(a)} />
+        <GalleryGrid albums={filtered} onAlbumClick={handleAlbumClick} />
         {filtered.length === 0 && (
           <div className={`py-10 text-center font-display text-[0.95rem] ${isDark ? 'text-purple-300/50' : 'text-gray-300'}`}>
             No albums match this filter.

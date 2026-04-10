@@ -260,8 +260,8 @@
     box-shadow:
       0 28px 80px rgba(2, 6, 16, 0.38),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   html.light .section-shell {

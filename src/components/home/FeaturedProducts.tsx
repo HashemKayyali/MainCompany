@@ -24,7 +24,7 @@ export default function FeaturedProducts() {
       opacity: 1,
       transition: reduceMotion
         ? { duration: 0 }
-        : { staggerChildren: 0.07, delayChildren: 0.06 },
+        : { staggerChildren: 0.05, delayChildren: 0.04 },
     },
   } as const
 
