@@ -55,8 +55,7 @@ interface UserCtx {
     name: string,
     email: string,
     phone: string,
-    pw: string,
-    avatar?: AvatarSelection | null
+    pw: string
   ) => Promise<AuthFlowResult>
   login: (email: string, pw: string, rememberMe?: boolean) => Promise<AuthFlowResult>
   logout: () => Promise<void>
@@ -293,8 +292,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       name: string,
       email: string,
       phone: string,
-      pw: string,
-      avatar?: AvatarSelection | null
+      pw: string
     ): Promise<AuthFlowResult> => {
       if (!isSupabaseConfigured()) {
         return { ok: false, message: 'Supabase not configured' }
@@ -313,9 +311,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
             data: {
               name,
               phone,
-              avatarStyle: avatar?.avatarStyle ?? null,
-              avatarSeed: avatar?.avatarSeed ?? null,
-              avatarOptions: avatar?.avatarOptions ?? null,
             },
           },
         })
@@ -335,7 +330,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 phone: phone || null,
                 name,
                 email,
-                ...avatarSelectionToProfileUpdate(avatar),
               } as ProfileUpdate)
               .eq('id', authData.user.id)
 

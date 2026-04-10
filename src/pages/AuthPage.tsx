@@ -1,17 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { ArrowLeft, Eye, EyeOff, Lock, Mail, Phone, RefreshCw, User } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Lock, Mail, Phone, User } from 'lucide-react'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import AuthCharacters from '../components/auth/AuthCharacters'
 import AnimatedBackground from '../components/theme/AnimatedBackground'
-import UserAvatar from '../components/ui/UserAvatar'
 import { useTheme } from '../contexts/ThemeContext'
 import { useUser } from '../contexts/UserContext'
 import { getSafeRedirectPath } from '../lib/auth-routing'
-import {
-  buildDefaultAvatarSelection,
-  type AvatarSelection,
-} from '../lib/avatar'
 import { cn } from '../utils/cn'
 
 type Mode = 'login' | 'register'
@@ -33,22 +28,22 @@ function AuthInput({
     <div className="relative">
       {Icon && (
         <Icon
-          size={14}
-          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/32"
+          size={13}
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/32"
         />
       )}
       <input
         {...props}
         className={cn(
-          'h-[46px] w-full rounded-[13px] border bg-white/[0.07] text-[13.5px] font-medium text-white',
+          'h-[44px] w-full rounded-[13px] border bg-white/[0.07] text-[13px] font-medium text-white',
           'placeholder:text-white/28 backdrop-blur-sm',
           'transition-all duration-300',
           'focus:outline-none focus:bg-white/[0.10] focus:ring-2 focus:ring-violet-400/30',
           error
             ? 'border-red-400/40 focus:border-red-400/60'
             : 'border-white/[0.12] focus:border-violet-400/55',
-          Icon ? 'pl-10 pr-4' : 'px-4',
-          right ? '!pr-11' : ''
+          Icon ? 'pl-9 pr-3.5' : 'px-3.5',
+          right ? '!pr-10' : ''
         )}
       />
       {right && (
@@ -59,7 +54,7 @@ function AuthInput({
 }
 
 const labelClass =
-  'mb-[5px] block text-[10px] font-bold uppercase tracking-[0.14em] text-white/48'
+  'mb-1 block text-[9.5px] font-bold uppercase tracking-[0.14em] text-white/48'
 
 function LeftPanel({
   isTyping,
@@ -202,11 +197,17 @@ export default function AuthPage() {
   const [switchDirection, setSwitchDirection] = useState<1 | -1>(
     routeMode === 'register' ? 1 : -1
   )
-  const fadeMs = reduceMotion ? 0 : 260
+  const fadeMs = reduceMotion ? 0 : 280
   const motionEase = [0.22, 1, 0.36, 1] as const
   const cardTransition = reduceMotion
     ? { duration: 0 }
     : { duration: 0.34, ease: motionEase }
+  const contentTransition = reduceMotion
+    ? { duration: 0 }
+    : { duration: 0.28, ease: motionEase }
+  const tabTransition = reduceMotion
+    ? { duration: 0 }
+    : { duration: 0.24, ease: motionEase }
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -214,14 +215,6 @@ export default function AuthPage() {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [confirm, setConfirm] = useState('')
-  const [avatarSelection, setAvatarSelection] = useState<AvatarSelection>(() =>
-    buildDefaultAvatarSelection('guest')
-  )
-
-  const shuffleAvatar = useCallback(() => {
-    const seed = Math.random().toString(36).slice(2, 10)
-    setAvatarSelection(buildDefaultAvatarSelection(seed))
-  }, [])
 
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -331,8 +324,7 @@ export default function AuthPage() {
       name.trim(),
       email.trim(),
       phone.trim(),
-      password,
-      avatarSelection
+      password
     )
     setBusy(false)
     if (result.ok) {
@@ -348,18 +340,18 @@ export default function AuthPage() {
     setError(result.message || 'Register failed')
   }
 
-  const fadeVariants = {
+  const contentVariants = {
     hidden: (direction: number) => ({
       opacity: 0,
-      x: reduceMotion ? 0 : direction > 0 ? 28 : -28,
-      y: reduceMotion ? 0 : 2,
+      x: reduceMotion ? 0 : direction > 0 ? 22 : -22,
+      y: reduceMotion ? 0 : 8,
       scale: reduceMotion ? 1 : 0.988,
     }),
     show: { opacity: 1, x: 0, y: 0, scale: 1 },
     exit: (direction: number) => ({
       opacity: 0,
-      x: reduceMotion ? 0 : direction > 0 ? -18 : 18,
-      y: reduceMotion ? 0 : -2,
+      x: reduceMotion ? 0 : direction > 0 ? -16 : 16,
+      y: reduceMotion ? 0 : -6,
       scale: reduceMotion ? 1 : 0.992,
     }),
   }
@@ -392,7 +384,7 @@ export default function AuthPage() {
         />
       </div>
 
-      <div className="relative z-[2] flex flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-6">
+      <div className="relative z-[2] flex flex-1 items-center justify-center px-4 py-12 sm:px-5 sm:py-9 lg:px-8 lg:py-6">
         <div className="absolute left-5 top-6 flex items-center gap-2.5 lg:hidden">
           <div
             className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[11px]"
@@ -413,7 +405,7 @@ export default function AuthPage() {
           initial={skipCardIntro || reduceMotion ? false : { opacity: 0, y: 18, scale: 0.984 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={cardTransition}
-          className="relative w-full max-w-[474px] overflow-hidden rounded-[26px] transform-gpu xl:max-w-[492px]"
+          className="relative my-5 w-full max-w-[448px] overflow-hidden rounded-[26px] transform-gpu sm:my-3 xl:max-w-[462px]"
           style={{
             background: 'rgba(9,7,22,0.84)',
             backdropFilter: 'blur(28px) saturate(1.4)',
@@ -428,11 +420,13 @@ export default function AuthPage() {
 
           <motion.div
             layout
-            transition={cardTransition}
-            className="px-6 pt-6 pb-1.5 sm:px-7 sm:pt-7"
+            transition={contentTransition}
+            className="px-5 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6"
           >
             <div
-              className="mb-5 flex gap-1 rounded-[13px] p-1"
+              role="tablist"
+              aria-label="Authentication mode"
+              className="flex gap-1 rounded-[13px] p-[3px]"
               style={{
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.08)',
@@ -443,189 +437,251 @@ export default function AuthPage() {
                   key={mode}
                   type="button"
                   onClick={() => switchTo(mode)}
+                  id={mode === 'login' ? 'auth-tab-login' : 'auth-tab-register'}
+                  role="tab"
+                  aria-selected={uiMode === mode}
+                  aria-controls={mode === 'login' ? 'auth-panel-login' : 'auth-panel-register'}
+                  tabIndex={uiMode === mode ? 0 : -1}
                   className={cn(
-                    'flex-1 rounded-[10px] py-2 text-[12px] font-bold transition-all duration-300',
+                    'relative flex-1 overflow-hidden rounded-[10px] py-[9px] text-[11.5px] font-bold transition-all duration-300',
                     uiMode === mode
-                      ? 'text-white shadow-[0_4px_14px_rgba(124,58,237,0.38)]'
+                      ? 'text-white'
                       : 'text-white/44 hover:text-white/68'
                   )}
-                  style={
-                    uiMode === mode
-                      ? {
-                          background:
-                            'linear-gradient(135deg,#7c3aed 0%,#b832e1 60%,#ec4899 100%)',
-                        }
-                      : {}
-                  }
                 >
-                  {mode === 'login' ? 'Sign In' : 'Sign Up'}
+                  {uiMode === mode && (
+                    <motion.span
+                      layoutId="auth-active-tab"
+                      className="absolute inset-0 rounded-[10px]"
+                      transition={tabTransition}
+                      style={{
+                        background:
+                          'linear-gradient(135deg,#7c3aed 0%,#b832e1 60%,#ec4899 100%)',
+                        boxShadow: '0 4px 14px rgba(124,58,237,0.38)',
+                      }}
+                    />
+                  )}
+                  <span className="relative z-[1]">
+                    {mode === 'login' ? 'Sign In' : 'Sign Up'}
+                  </span>
                 </button>
               ))}
             </div>
 
-            <h1 className="font-display text-[1.68rem] font-extrabold leading-tight tracking-[-0.04em] text-white sm:text-[1.74rem]">
-              {uiMode === 'login' ? 'Welcome back' : 'Join Eventies'}
-            </h1>
-            <p className="mt-1 text-[12.75px] font-medium leading-relaxed text-white/48 sm:text-[13px]">
-              {uiMode === 'login'
-                ? 'Sign in to browse our catalog, request rentals, and manage your events.'
-                : 'Create your account to start booking equipment and services for your events.'}
-            </p>
-          </motion.div>
-
-          <motion.div layout transition={cardTransition} className="px-6 sm:px-7">
-            <AnimatePresence initial={false}>
-              {success && (
-                <motion.div
-                  layout
-                  key="success"
-                  initial={{ opacity: 0, y: -8, scale: 0.985 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -6, scale: 0.985 }}
-                  transition={cardTransition}
-                  className="mt-3 flex items-start gap-2.5 rounded-[12px] border border-emerald-300/22 bg-emerald-400/12 px-4 py-3 text-[12.5px] font-semibold text-emerald-100"
-                >
-                  <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
-                  {success}
-                </motion.div>
-              )}
-              {error && (
-                <motion.div
-                  layout
-                  key="error"
-                  initial={{ opacity: 0, y: -8, scale: 0.985 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -6, scale: 0.985 }}
-                  transition={cardTransition}
-                  className="mt-3 flex items-start gap-2.5 rounded-[12px] border border-red-300/20 bg-red-400/10 px-4 py-3 text-[12.5px] font-semibold text-red-100"
-                >
-                  <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-red-400" />
-                  {error}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-
-          <motion.div
-            layout
-            transition={cardTransition}
-            className="px-6 pb-5 sm:px-7 sm:pb-6"
-          >
-            <AnimatePresence mode="wait" initial={false} custom={switchDirection}>
-              {uiMode === 'login' ? (
-                <motion.div
-                  layout
-                  key="login"
-                  variants={fadeVariants}
-                  custom={switchDirection}
-                  initial="hidden"
-                  animate="show"
-                  exit="exit"
-                  transition={cardTransition}
-                  className="will-change-transform"
-                  style={{ transformOrigin: 'top center' }}
-                >
-                  <form onSubmit={handleLogin} className="mt-4 space-y-3.5">
-                    <div>
-                      <label className={labelClass}>Email</label>
-                      <AuthInput
-                        type="email"
-                        icon={Mail}
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        onFocus={() => setIsTyping(true)}
-                        onBlur={() => setIsTyping(false)}
-                        placeholder="you@company.com"
-                        autoComplete="email"
-                        inputMode="email"
-                      />
+            <motion.div
+              layout
+              transition={contentTransition}
+              className="relative mt-[18px] overflow-hidden"
+            >
+              <AnimatePresence mode="popLayout" initial={false} custom={switchDirection}>
+                {uiMode === 'login' ? (
+                  <motion.section
+                    layout
+                    id="auth-panel-login"
+                    role="tabpanel"
+                    aria-labelledby="auth-tab-login"
+                    key="login"
+                    variants={contentVariants}
+                    custom={switchDirection}
+                    initial="hidden"
+                    animate="show"
+                    exit="exit"
+                    transition={contentTransition}
+                    className="space-y-3.5 will-change-transform"
+                    style={{ transformOrigin: 'top center' }}
+                  >
+                    <div className="space-y-1.5">
+                      <h1 className="font-display text-[1.5rem] font-extrabold leading-tight tracking-[-0.04em] text-white sm:text-[1.58rem]">
+                        Welcome back
+                      </h1>
+                      <p className="text-[12px] font-medium leading-relaxed text-white/48 sm:text-[12.2px]">
+                        Sign in to browse our catalog, request rentals, and manage your
+                        events.
+                      </p>
                     </div>
 
-                    <div>
-                      <label className={labelClass}>Password</label>
-                      <AuthInput
-                        type={showPassword ? 'text' : 'password'}
-                        icon={Lock}
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        onFocus={() => setIsTyping(true)}
-                        onBlur={() => setIsTyping(false)}
-                        placeholder="Your password"
-                        autoComplete="current-password"
-                        required
-                        right={
-                          <EyeToggle
-                            show={showPassword}
-                            onToggle={() => setShowPassword(v => !v)}
-                          />
-                        }
-                      />
-                    </div>
+                    <AnimatePresence initial={false}>
+                      {success && (
+                        <motion.div
+                          layout
+                          key="login-success"
+                          initial={{ opacity: 0, y: -8, scale: 0.985 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -6, scale: 0.985 }}
+                          transition={contentTransition}
+                          role="status"
+                          className="flex items-start gap-2 rounded-[12px] border border-emerald-300/22 bg-emerald-400/12 px-3.5 py-2.5 text-[12px] font-semibold text-emerald-100"
+                        >
+                          <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
+                          {success}
+                        </motion.div>
+                      )}
+                      {error && (
+                        <motion.div
+                          layout
+                          key="login-error"
+                          initial={{ opacity: 0, y: -8, scale: 0.985 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -6, scale: 0.985 }}
+                          transition={contentTransition}
+                          role="alert"
+                          className="flex items-start gap-2 rounded-[12px] border border-red-300/20 bg-red-400/10 px-3.5 py-2.5 text-[12px] font-semibold text-red-100"
+                        >
+                          <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-red-400" />
+                          {error}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
-                    <div className="flex items-center justify-between gap-3">
-                      <label className="flex cursor-pointer select-none items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={rememberMe}
-                          onChange={e => setRememberMe(e.target.checked)}
-                          className="h-[14px] w-[14px] rounded-[4px] border-white/20 bg-white/10 text-violet-500 focus:ring-2 focus:ring-violet-400/30 focus:ring-offset-0"
+                    <form onSubmit={handleLogin} className="space-y-2.5">
+                      <div>
+                        <label className={labelClass}>Email</label>
+                        <AuthInput
+                          type="email"
+                          icon={Mail}
+                          value={email}
+                          onChange={e => setEmail(e.target.value)}
+                          onFocus={() => setIsTyping(true)}
+                          onBlur={() => setIsTyping(false)}
+                          placeholder="you@company.com"
+                          autoComplete="email"
+                          inputMode="email"
                         />
-                        <span className="text-[12px] font-medium text-white/50 transition-colors hover:text-white/70">
-                          Remember me
-                        </span>
-                      </label>
+                      </div>
+
+                      <div>
+                        <label className={labelClass}>Password</label>
+                        <AuthInput
+                          type={showPassword ? 'text' : 'password'}
+                          icon={Lock}
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          onFocus={() => setIsTyping(true)}
+                          onBlur={() => setIsTyping(false)}
+                          placeholder="Your password"
+                          autoComplete="current-password"
+                          required
+                          right={
+                            <EyeToggle
+                              show={showPassword}
+                              onToggle={() => setShowPassword(v => !v)}
+                            />
+                          }
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3">
+                        <label className="flex cursor-pointer select-none items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={rememberMe}
+                            onChange={e => setRememberMe(e.target.checked)}
+                            className="h-[14px] w-[14px] rounded-[4px] border-white/20 bg-white/10 text-violet-500 focus:ring-2 focus:ring-violet-400/30 focus:ring-offset-0"
+                          />
+                          <span className="text-[11.5px] font-medium text-white/50 transition-colors hover:text-white/70">
+                            Remember me
+                          </span>
+                        </label>
+                        <button
+                          type="button"
+                          className="text-[11.5px] font-semibold text-violet-300/80 transition-colors hover:text-violet-200 focus:outline-none focus-visible:underline"
+                          onClick={() => {
+                            /* forgot-password */
+                          }}
+                        >
+                          Forgot password?
+                        </button>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={busy || !!success}
+                        className="btn-primary pc-cta mt-0.5 w-full !min-h-[44px] !rounded-[14px] !text-[13px] disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {busy ? 'Signing in...' : success ? 'Redirecting...' : 'Sign In ->'}
+                      </button>
+
                       <button
                         type="button"
-                        className="text-[12px] font-semibold text-violet-300/80 transition-colors hover:text-violet-200 focus:outline-none focus-visible:underline"
-                        onClick={() => {
-                          /* forgot-password */
-                        }}
+                        onClick={() => switchTo('register')}
+                        className="flex h-[44px] w-full items-center justify-center rounded-[13px] border border-white/[0.12] bg-white/[0.05] px-4 text-[12px] font-semibold text-white/55 transition-all hover:bg-white/[0.09] hover:text-white/82"
                       >
-                        Forgot password?
+                        Don't have an account?{' '}
+                        <span className="text-violet-300">Sign up free</span>
                       </button>
+
+                      <Link
+                        to="/"
+                        className="flex items-center justify-center gap-1.5 pt-1 text-[11px] font-medium text-white/30 transition-colors hover:text-white/60"
+                      >
+                        <ArrowLeft size={11} />
+                        Back to site
+                      </Link>
+                    </form>
+                    <p className="pt-1 text-center text-[10px] font-medium text-white/24">
+                      (c) {new Date().getFullYear()} Eventies - Event Services Marketplace
+                    </p>
+                  </motion.section>
+                ) : (
+                  <motion.section
+                    layout
+                    id="auth-panel-register"
+                    role="tabpanel"
+                    aria-labelledby="auth-tab-register"
+                    key="register"
+                    variants={contentVariants}
+                    custom={switchDirection}
+                    initial="hidden"
+                    animate="show"
+                    exit="exit"
+                    transition={contentTransition}
+                    className="space-y-3.5 will-change-transform"
+                    style={{ transformOrigin: 'top center' }}
+                  >
+                    <div className="space-y-1.5">
+                      <h1 className="font-display text-[1.5rem] font-extrabold leading-tight tracking-[-0.04em] text-white sm:text-[1.58rem]">
+                        Join Eventies
+                      </h1>
+                      <p className="text-[12px] font-medium leading-relaxed text-white/48 sm:text-[12.2px]">
+                        Create your account to start booking equipment and services for your
+                        events.
+                      </p>
                     </div>
 
-                    <button
-                      type="submit"
-                      disabled={busy || !!success}
-                      className="btn-primary pc-cta mt-0.5 w-full !min-h-[46px] !rounded-[14px] !text-[13.5px] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {busy ? 'Signing in...' : success ? 'Redirecting...' : 'Sign In ->'}
-                    </button>
+                    <AnimatePresence initial={false}>
+                      {success && (
+                        <motion.div
+                          layout
+                          key="register-success"
+                          initial={{ opacity: 0, y: -8, scale: 0.985 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -6, scale: 0.985 }}
+                          transition={contentTransition}
+                          role="status"
+                          className="flex items-start gap-2 rounded-[12px] border border-emerald-300/22 bg-emerald-400/12 px-3.5 py-2.5 text-[12px] font-semibold text-emerald-100"
+                        >
+                          <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
+                          {success}
+                        </motion.div>
+                      )}
+                      {error && (
+                        <motion.div
+                          layout
+                          key="register-error"
+                          initial={{ opacity: 0, y: -8, scale: 0.985 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -6, scale: 0.985 }}
+                          transition={contentTransition}
+                          role="alert"
+                          className="flex items-start gap-2 rounded-[12px] border border-red-300/20 bg-red-400/10 px-3.5 py-2.5 text-[12px] font-semibold text-red-100"
+                        >
+                          <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-red-400" />
+                          {error}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
-                    <button
-                      type="button"
-                      onClick={() => switchTo('register')}
-                      className="flex h-[46px] w-full items-center justify-center rounded-[13px] border border-white/[0.12] bg-white/[0.05] px-4 text-[12.5px] font-semibold text-white/55 transition-all hover:bg-white/[0.09] hover:text-white/82"
-                    >
-                      Don't have an account?{' '}
-                      <span className="text-violet-300">Sign up free</span>
-                    </button>
-
-                    <Link
-                      to="/"
-                      className="flex items-center justify-center gap-1.5 pt-0.5 text-[11.5px] font-medium text-white/30 transition-colors hover:text-white/60"
-                    >
-                      <ArrowLeft size={11} />
-                      Back to site
-                    </Link>
-                  </form>
-                </motion.div>
-              ) : (
-                <motion.div
-                  layout
-                  key="register"
-                  variants={fadeVariants}
-                  custom={switchDirection}
-                  initial="hidden"
-                  animate="show"
-                  exit="exit"
-                  transition={cardTransition}
-                  className="will-change-transform"
-                  style={{ transformOrigin: 'top center' }}
-                >
-                  <form onSubmit={handleRegister} className="mt-4 space-y-3">
-                    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_176px] sm:items-end">
+                    <form onSubmit={handleRegister} className="space-y-2.5">
                       <div>
                         <label className={labelClass}>Full Name *</label>
                         <AuthInput
@@ -640,74 +696,45 @@ export default function AuthPage() {
                         />
                       </div>
 
-                      <div>
-                        <label className={labelClass}>Profile Avatar</label>
-                        <div className="flex h-[46px] items-center gap-2.5 rounded-[13px] border border-white/[0.10] bg-white/[0.05] px-2.5">
-                          <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full">
-                            <UserAvatar
-                              avatarStyle={avatarSelection.avatarStyle}
-                              avatarSeed={avatarSelection.avatarSeed}
-                              avatarOptions={avatarSelection.avatarOptions}
-                              size={36}
-                              className="h-9 w-9"
-                            />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-[10.5px] font-semibold text-white/62">
-                              Random starter avatar
-                            </p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={shuffleAvatar}
-                            aria-label="Shuffle avatar"
-                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-white/[0.12] bg-white/[0.07] text-white/50 transition-all hover:bg-white/[0.14] hover:text-white/90 active:scale-95"
-                          >
-                            <RefreshCw size={13} />
-                          </button>
+                      <div className="grid gap-2.5 sm:grid-cols-2">
+                        <div>
+                          <label className={labelClass}>Email *</label>
+                          <AuthInput
+                            type="email"
+                            icon={Mail}
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            onFocus={() => setIsTyping(true)}
+                            onBlur={() => setIsTyping(false)}
+                            placeholder="you@company.com"
+                            autoComplete="email"
+                            inputMode="email"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className={labelClass}>
+                            Phone{' '}
+                            <span className="normal-case tracking-normal text-white/28">
+                              optional
+                            </span>
+                          </label>
+                          <AuthInput
+                            type="tel"
+                            icon={Phone}
+                            value={phone}
+                            onChange={e => setPhone(e.target.value)}
+                            onFocus={() => setIsTyping(true)}
+                            onBlur={() => setIsTyping(false)}
+                            placeholder="+962..."
+                            autoComplete="tel"
+                            inputMode="tel"
+                          />
                         </div>
                       </div>
-                    </div>
 
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div>
-                        <label className={labelClass}>Email *</label>
-                        <AuthInput
-                          type="email"
-                          icon={Mail}
-                          value={email}
-                          onChange={e => setEmail(e.target.value)}
-                          onFocus={() => setIsTyping(true)}
-                          onBlur={() => setIsTyping(false)}
-                          placeholder="you@company.com"
-                          autoComplete="email"
-                          inputMode="email"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className={labelClass}>
-                          Phone{' '}
-                          <span className="normal-case tracking-normal text-white/28">
-                            optional
-                          </span>
-                        </label>
-                        <AuthInput
-                          type="tel"
-                          icon={Phone}
-                          value={phone}
-                          onChange={e => setPhone(e.target.value)}
-                          onFocus={() => setIsTyping(true)}
-                          onBlur={() => setIsTyping(false)}
-                          placeholder="+962..."
-                          autoComplete="tel"
-                          inputMode="tel"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid gap-2.5 sm:grid-cols-2">
                       <div>
                         <label className={labelClass}>Password *</label>
                         <AuthInput
@@ -754,18 +781,18 @@ export default function AuthPage() {
                       </div>
                     </div>
 
-                    <div className="grid gap-3 pt-0.5 sm:grid-cols-2">
+                    <div className="grid gap-2.5 pt-0.5 sm:grid-cols-2">
                       <button
                         type="submit"
                         disabled={busy || !!success}
-                        className="btn-primary pc-cta !min-h-[46px] !rounded-[14px] !text-[13px] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="btn-primary pc-cta !min-h-[44px] !rounded-[14px] !text-[12.75px] disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {busy ? 'Creating...' : success ? 'Check email' : 'Create Account ->'}
                       </button>
                       <button
                         type="button"
                         onClick={() => switchTo('login')}
-                        className="h-[46px] rounded-[13px] border border-white/[0.12] bg-white/[0.05] px-3 text-[12px] font-semibold text-white/52 transition-all hover:bg-white/[0.09] hover:text-white/78"
+                        className="h-[44px] rounded-[13px] border border-white/[0.12] bg-white/[0.05] px-3 text-[11.75px] font-semibold text-white/52 transition-all hover:bg-white/[0.09] hover:text-white/78"
                       >
                         Back to sign in
                       </button>
@@ -773,19 +800,19 @@ export default function AuthPage() {
 
                     <Link
                       to="/"
-                      className="flex items-center justify-center gap-1.5 pt-0.5 text-[11.5px] font-medium text-white/30 transition-colors hover:text-white/60"
+                      className="flex items-center justify-center gap-1.5 pt-1 text-[11px] font-medium text-white/30 transition-colors hover:text-white/60"
                     >
                       <ArrowLeft size={11} />
                       Back to site
                     </Link>
-                  </form>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <p className="mt-4 text-center text-[10.5px] font-medium text-white/24">
-              (c) {new Date().getFullYear()} Eventies - Event Services Marketplace
-            </p>
+                    </form>
+                    <p className="pt-1 text-center text-[10px] font-medium text-white/24">
+                      (c) {new Date().getFullYear()} Eventies - Event Services Marketplace
+                    </p>
+                  </motion.section>
+                )}
+              </AnimatePresence>
+            </motion.div>
           </motion.div>
         </motion.div>
       </div>

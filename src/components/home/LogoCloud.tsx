@@ -112,7 +112,7 @@ export default function LogoCloud({ customers }: Props) {
               />
             </div>
             <h2 className={`section-title !mt-0 !text-left ${!isDark ? 'text-gray-900' : ''}`}>
-              Trusted by industry <span className="text-glow">leaders</span>
+              Trusted by leading brands, organizations, and institutions
             </h2>
             <p
               className={`mt-3 max-w-lg text-[0.90rem] leading-relaxed ${

@@ -458,7 +458,7 @@ export default function OfferSection() {
                 <div className={cn('h-px w-8', isDark ? 'bg-violet-500/28' : 'bg-violet-300/45')} />
               </div>
               <h2 className={cn('section-title', !isDark && 'text-gray-900')}>
-                What We <span className="text-glow">Offer</span>
+                What We Offer
               </h2>
               <p className={cn('mt-4 max-w-xl text-[14.5px] leading-[1.72]', isDark ? 'text-slate-300/70' : 'text-slate-500')}>
                 Browse our hand-picked service categories. Select any category below to reveal tailored services, packages, and event-ready solutions.

@@ -70,7 +70,7 @@ export default function FeaturedProducts() {
                 <div className={cn('h-px w-8', isDark ? 'bg-violet-500/25' : 'bg-violet-300/45')} />
               </div>
               <h2 className={cn('section-title !mt-0 !text-left', !isDark && 'text-gray-900')}>
-                What We <span className="text-glow">Build</span>
+                What We Build
               </h2>
               <p className={cn('mt-3 max-w-lg text-[14px] leading-relaxed', isDark ? 'text-slate-300/65' : 'text-slate-500')}>
                 Hand-selected showcase of our finest productions — each one a real event delivered for real clients.
