@@ -3,6 +3,8 @@ import { createBrowserRouter, Navigate, useLocation } from 'react-router-dom'
 import App from './App'
 import AdminGuard from './components/AdminGuard'
 import PageLoader from './components/ui/PageLoader'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
 const ProductsPage = lazy(() => import('./pages/ProductsPage'))
@@ -11,8 +13,6 @@ const CustomersPage = lazy(() => import('./pages/CustomersPage'))
 const GalleryPage = lazy(() => import('./pages/GalleryPage'))
 const AboutPage = lazy(() => import('./pages/AboutPage'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
-const LoginPage = lazy(() => import('./pages/LoginPage'))
-const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 const AuthCallback = lazy(() => import('./pages/AuthCallback'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
@@ -72,9 +72,9 @@ export const router = createBrowserRouter([
 
   { path: '/auth/callback', element: <S><AuthCallback /></S> },
 
-  { path: '/login', element: <S><LoginPage /></S> },
+  { path: '/login', element: <LoginPage /> },
   { path: '/user-login', element: <UserLoginRedirect /> },
-  { path: '/register', element: <S><RegisterPage /></S> },
+  { path: '/register', element: <RegisterPage /> },
 
   {
     path: '/admin',

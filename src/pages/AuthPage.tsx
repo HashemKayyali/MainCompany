@@ -1,23 +1,24 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { Eye, EyeOff, Lock, Mail, Phone, User } from 'lucide-react'
-import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { ArrowLeft, Eye, EyeOff, Lock, Mail, Phone, RefreshCw, User } from 'lucide-react'
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import AuthCharacters from '../components/auth/AuthCharacters'
 import AnimatedBackground from '../components/theme/AnimatedBackground'
-import AvatarPicker from '../components/ui/AvatarPicker'
+import UserAvatar from '../components/ui/UserAvatar'
 import { useTheme } from '../contexts/ThemeContext'
 import { useUser } from '../contexts/UserContext'
 import { getSafeRedirectPath } from '../lib/auth-routing'
 import {
-  avatarIdentitySeed,
   buildDefaultAvatarSelection,
   type AvatarSelection,
 } from '../lib/avatar'
 import { cn } from '../utils/cn'
 
 type Mode = 'login' | 'register'
+type AuthLocationState = {
+  authModeSwitch?: boolean
+}
 
-// ── Shared glass input ─────────────────────────────────────────────────────
 function AuthInput({
   icon: Icon,
   error,
@@ -39,7 +40,7 @@ function AuthInput({
       <input
         {...props}
         className={cn(
-          'w-full rounded-[13px] border bg-white/[0.07] py-3 text-[13.5px] font-medium text-white',
+          'h-[46px] w-full rounded-[13px] border bg-white/[0.07] text-[13.5px] font-medium text-white',
           'placeholder:text-white/28 backdrop-blur-sm',
           'transition-all duration-300',
           'focus:outline-none focus:bg-white/[0.10] focus:ring-2 focus:ring-violet-400/30',
@@ -58,9 +59,8 @@ function AuthInput({
 }
 
 const labelClass =
-  'mb-1.5 block text-[10.5px] font-bold uppercase tracking-[0.14em] text-white/48'
+  'mb-[5px] block text-[10px] font-bold uppercase tracking-[0.14em] text-white/48'
 
-// ── Left panel ─────────────────────────────────────────────────────────────
 function LeftPanel({
   isTyping,
   passwordHidden,
@@ -72,7 +72,6 @@ function LeftPanel({
 }) {
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden">
-      {/* Deep panel fill */}
       <div
         className="absolute inset-0"
         style={{
@@ -81,7 +80,6 @@ function LeftPanel({
         }}
       />
 
-      {/* Ambient brand orbs */}
       <div
         className="pointer-events-none absolute left-[-18%] top-[-6%] h-[52%] w-[72%] rounded-full opacity-60"
         style={{
@@ -107,7 +105,6 @@ function LeftPanel({
         }}
       />
 
-      {/* Subtle grid */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.025]"
         style={{
@@ -117,7 +114,6 @@ function LeftPanel({
         }}
       />
 
-      {/* Right edge shimmer */}
       <div
         className="pointer-events-none absolute inset-y-0 right-0 w-px"
         style={{
@@ -126,7 +122,6 @@ function LeftPanel({
         }}
       />
 
-      {/* Brand mark */}
       <div className="relative z-10 flex items-center gap-3 p-8 pb-0">
         <div
           className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[14px]"
@@ -136,22 +131,21 @@ function LeftPanel({
           }}
         >
           <div className="absolute inset-x-2 top-1.5 h-3 rounded-full bg-white/20 blur-md" />
-          <span className="relative text-[10px] font-black tracking-[0.22em] text-white">BL</span>
+          <span className="relative text-[10px] font-black tracking-[0.22em] text-white">EV</span>
         </div>
         <div>
           <div className="font-display text-[11px] font-bold uppercase tracking-[0.22em] text-white/90">
-            Bike <span className="text-violet-300">Land</span>
+            <span className="text-violet-300">Eventies</span>
           </div>
           <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-white/38">
-            Event Equipment Rental
+            Event Services Marketplace
           </div>
         </div>
       </div>
 
-      {/* Headline copy */}
       <div className="relative z-10 mt-auto px-8 pb-5">
         <p className="font-display text-[1.88rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-white">
-          Premium gear,
+          Everything your
           <br />
           <span
             style={{
@@ -161,15 +155,14 @@ function LeftPanel({
               backgroundClip: 'text',
             }}
           >
-            delivered to you.
+            event needs.
           </span>
         </p>
         <p className="mt-2.5 text-[12.5px] font-medium leading-relaxed text-white/42">
-          Browse, request, and manage professional event equipment — all in one place.
+          Discover rentals, services, and trusted event partners - all in one place.
         </p>
       </div>
 
-      {/* Characters */}
       <div className="relative z-10 flex w-full items-end justify-center pb-0 pt-3">
         <AuthCharacters
           isTyping={isTyping}
@@ -178,9 +171,8 @@ function LeftPanel({
         />
       </div>
 
-      {/* Footer */}
       <div className="relative z-10 flex gap-5 px-8 py-4 text-[10px] font-medium text-white/26">
-        <span>© {new Date().getFullYear()} Eventies</span>
+        <span>(c) {new Date().getFullYear()} Eventies</span>
         <a href="#" className="transition-colors hover:text-white/52">Privacy</a>
         <a href="#" className="transition-colors hover:text-white/52">Terms</a>
       </div>
@@ -188,10 +180,10 @@ function LeftPanel({
   )
 }
 
-// ── Main page ──────────────────────────────────────────────────────────────
 export default function AuthPage() {
   const { isDark } = useTheme()
-  const { pathname } = useLocation()
+  const location = useLocation()
+  const { pathname } = location
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const reduceMotion = useReducedMotion()
@@ -204,10 +196,18 @@ export default function AuthPage() {
   const defaultDestination = redirectTarget || (isAdmin ? '/admin' : '/')
 
   const routeMode: Mode = pathname.includes('register') ? 'register' : 'login'
+  const locationState = location.state as AuthLocationState | null
+  const skipCardIntro = Boolean(locationState?.authModeSwitch)
   const [uiMode, setUiMode] = useState<Mode>(routeMode)
-  const fadeMs = reduceMotion ? 0 : 220
+  const [switchDirection, setSwitchDirection] = useState<1 | -1>(
+    routeMode === 'register' ? 1 : -1
+  )
+  const fadeMs = reduceMotion ? 0 : 260
+  const motionEase = [0.22, 1, 0.36, 1] as const
+  const cardTransition = reduceMotion
+    ? { duration: 0 }
+    : { duration: 0.34, ease: motionEase }
 
-  // ── Form state (preserved exactly) ──────────────────────────────────────
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
@@ -217,11 +217,15 @@ export default function AuthPage() {
   const [avatarSelection, setAvatarSelection] = useState<AvatarSelection>(() =>
     buildDefaultAvatarSelection('guest')
   )
+
+  const shuffleAvatar = useCallback(() => {
+    const seed = Math.random().toString(36).slice(2, 10)
+    setAvatarSelection(buildDefaultAvatarSelection(seed))
+  }, [])
+
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [busy, setBusy] = useState(false)
-
-  // ── Character interaction state ─────────────────────────────────────────
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
@@ -235,24 +239,23 @@ export default function AuthPage() {
       ? password.length > 0 && showPassword
       : (password.length > 0 && showPassword) || (confirm.length > 0 && showConfirm)
 
-  const registerAvatarIdentitySeed = useMemo(
-    () => avatarIdentitySeed([name, email]),
-    [email, name]
-  )
-
   const pendingRedirectRef = useRef(false)
   const pendingTimerRef = useRef<number | null>(null)
-  const isSwitchingRef = useRef(false)
 
-  // ── Effects (preserved exactly) ─────────────────────────────────────────
   useEffect(() => {
-    if (isSwitchingRef.current) return
     setUiMode(routeMode)
   }, [routeMode])
 
   useEffect(() => {
-    if (authError) { setError(authError); setSuccess(''); return }
-    if (notice) { setSuccess(notice); setError('') }
+    if (authError) {
+      setError(authError)
+      setSuccess('')
+      return
+    }
+    if (notice) {
+      setSuccess(notice)
+      setError('')
+    }
   }, [authError, notice])
 
   useEffect(
@@ -275,15 +278,15 @@ export default function AuthPage() {
 
   if (isLoggedIn && !userLoading) return <Navigate to={defaultDestination} replace />
 
-  // ── Mode switch (preserved exactly) ─────────────────────────────────────
   const switchTo = (next: Mode) => {
+    if (next === uiMode) return
+    setSwitchDirection(next === 'register' ? 1 : -1)
     setError('')
     setSuccess('')
     setShowPassword(false)
     setShowConfirm(false)
     pendingRedirectRef.current = false
     if (pendingTimerRef.current) window.clearTimeout(pendingTimerRef.current)
-    isSwitchingRef.current = true
     setUiMode(next)
     pendingTimerRef.current = window.setTimeout(() => {
       const nextPath = next === 'login' ? '/login' : '/register'
@@ -291,12 +294,13 @@ export default function AuthPage() {
         redirectTarget && redirectTarget !== '/'
           ? `?redirect=${encodeURIComponent(redirectTarget)}`
           : ''
-      navigate(`${nextPath}${suffix}`, { replace: false })
-      window.setTimeout(() => { isSwitchingRef.current = false }, 60)
+      navigate(`${nextPath}${suffix}`, {
+        replace: false,
+        state: { authModeSwitch: true },
+      })
     }, fadeMs)
   }
 
-  // ── Submit handlers (preserved exactly) ─────────────────────────────────
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault()
     setError('')
@@ -306,7 +310,11 @@ export default function AuthPage() {
     setBusy(true)
     const result = await login(email.trim(), password, rememberMe)
     setBusy(false)
-    if (result.ok) { pendingRedirectRef.current = true; setSuccess(result.message); return }
+    if (result.ok) {
+      pendingRedirectRef.current = true
+      setSuccess(result.message)
+      return
+    }
     pendingRedirectRef.current = false
     setError(result.message || 'Login failed')
   }
@@ -319,26 +327,43 @@ export default function AuthPage() {
     if (password.length < 6) return setError('Password must be at least 6 characters')
     if (password !== confirm) return setError('Passwords do not match')
     setBusy(true)
-    const result = await register(name.trim(), email.trim(), phone.trim(), password, avatarSelection)
+    const result = await register(
+      name.trim(),
+      email.trim(),
+      phone.trim(),
+      password,
+      avatarSelection
+    )
     setBusy(false)
     if (result.ok) {
       pendingRedirectRef.current = result.sessionReady
       setSuccess(result.message)
-      if (result.requiresEmailConfirmation) { setPassword(''); setConfirm('') }
+      if (result.requiresEmailConfirmation) {
+        setPassword('')
+        setConfirm('')
+      }
       return
     }
     pendingRedirectRef.current = false
     setError(result.message || 'Register failed')
   }
 
-  // ── Animation variants ───────────────────────────────────────────────────
   const fadeVariants = {
-    hidden: { opacity: 0, y: reduceMotion ? 0 : 8 },
-    show: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: reduceMotion ? 0 : -6 },
+    hidden: (direction: number) => ({
+      opacity: 0,
+      x: reduceMotion ? 0 : direction > 0 ? 28 : -28,
+      y: reduceMotion ? 0 : 2,
+      scale: reduceMotion ? 1 : 0.988,
+    }),
+    show: { opacity: 1, x: 0, y: 0, scale: 1 },
+    exit: (direction: number) => ({
+      opacity: 0,
+      x: reduceMotion ? 0 : direction > 0 ? -18 : 18,
+      y: reduceMotion ? 0 : -2,
+      scale: reduceMotion ? 1 : 0.992,
+    }),
   }
 
-  // ── Eye toggle button ────────────────────────────────────────────────────
   const EyeToggle = ({ show, onToggle }: { show: boolean; onToggle: () => void }) => (
     <button
       type="button"
@@ -351,19 +376,15 @@ export default function AuthPage() {
     </button>
   )
 
-  // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="relative flex min-h-[100dvh] overflow-hidden">
-      {/* Full-screen animated cosmos background */}
+    <div className="relative flex min-h-[100dvh] overflow-x-hidden">
       {!reduceMotion && <AnimatedBackground position="absolute" className="z-0" />}
-      {/* Dark overlay */}
       <div
         className="pointer-events-none absolute inset-0 z-[1]"
         style={{ background: isDark ? 'rgba(2,3,10,0.52)' : 'rgba(2,3,10,0.38)' }}
       />
 
-      {/* Left characters panel (desktop only) */}
-      <div className="relative z-[2] hidden lg:block lg:w-[44%] xl:w-[42%] shrink-0 min-h-[100dvh]">
+      <div className="relative z-[2] hidden shrink-0 lg:block lg:min-h-[100dvh] lg:w-[44%] xl:w-[42%]">
         <LeftPanel
           isTyping={isTyping}
           passwordHidden={passwordHidden}
@@ -371,10 +392,8 @@ export default function AuthPage() {
         />
       </div>
 
-      {/* Right form panel */}
-      <div className="relative z-[2] flex flex-1 items-center justify-center px-4 py-12 sm:px-8">
-        {/* Mobile brand mark */}
-        <div className="lg:hidden absolute top-6 left-5 flex items-center gap-2.5">
+      <div className="relative z-[2] flex flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-6">
+        <div className="absolute left-5 top-6 flex items-center gap-2.5 lg:hidden">
           <div
             className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[11px]"
             style={{
@@ -382,19 +401,19 @@ export default function AuthPage() {
               boxShadow: '0 6px 18px rgba(124,58,237,0.4)',
             }}
           >
-            <span className="text-[9px] font-black tracking-[0.22em] text-white">BL</span>
+            <span className="text-[9px] font-black tracking-[0.22em] text-white">EV</span>
           </div>
           <span className="font-display text-[10.5px] font-bold uppercase tracking-[0.2em] text-white/80">
-            Bike <span className="text-violet-300">Land</span>
+            <span className="text-violet-300">Eventies</span>
           </span>
         </div>
 
-        {/* Glass card */}
         <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.984 }}
+          layout
+          initial={skipCardIntro || reduceMotion ? false : { opacity: 0, y: 18, scale: 0.984 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: reduceMotion ? 0 : 0.38, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-[440px] overflow-hidden rounded-[26px]"
+          transition={cardTransition}
+          className="relative w-full max-w-[474px] overflow-hidden rounded-[26px] transform-gpu xl:max-w-[492px]"
           style={{
             background: 'rgba(9,7,22,0.84)',
             backdropFilter: 'blur(28px) saturate(1.4)',
@@ -404,16 +423,16 @@ export default function AuthPage() {
               '0 32px 80px rgba(0,0,0,0.62), 0 0 0 1px rgba(139,92,246,0.06), inset 0 1px 0 rgba(255,255,255,0.07)',
           }}
         >
-          {/* Top shimmer */}
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/22 to-transparent" />
-          {/* Left shimmer */}
           <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-violet-400/16 to-transparent" />
 
-          {/* Card header */}
-          <div className="px-6 pt-7 pb-2 sm:px-8 sm:pt-8">
-            {/* Mode toggle pills */}
+          <motion.div
+            layout
+            transition={cardTransition}
+            className="px-6 pt-6 pb-1.5 sm:px-7 sm:pt-7"
+          >
             <div
-              className="mb-6 flex gap-1 rounded-[13px] p-1"
+              className="mb-5 flex gap-1 rounded-[13px] p-1"
               style={{
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.08)',
@@ -444,26 +463,27 @@ export default function AuthPage() {
               ))}
             </div>
 
-            <h1 className="font-display text-[1.72rem] font-extrabold leading-tight tracking-[-0.04em] text-white">
-              {uiMode === 'login' ? 'Welcome back' : 'Create your account'}
+            <h1 className="font-display text-[1.68rem] font-extrabold leading-tight tracking-[-0.04em] text-white sm:text-[1.74rem]">
+              {uiMode === 'login' ? 'Welcome back' : 'Join Eventies'}
             </h1>
-            <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-white/48">
+            <p className="mt-1 text-[12.75px] font-medium leading-relaxed text-white/48 sm:text-[13px]">
               {uiMode === 'login'
-                ? 'Sign in to manage requests and track your rentals.'
-                : 'Join to request quotes, track orders, and manage event gear.'}
+                ? 'Sign in to browse our catalog, request rentals, and manage your events.'
+                : 'Create your account to start booking equipment and services for your events.'}
             </p>
-          </div>
+          </motion.div>
 
-          {/* Alerts */}
-          <div className="px-6 sm:px-8">
-            <AnimatePresence>
+          <motion.div layout transition={cardTransition} className="px-6 sm:px-7">
+            <AnimatePresence initial={false}>
               {success && (
                 <motion.div
+                  layout
                   key="success"
-                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                  animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
-                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                  className="flex items-start gap-2.5 rounded-[12px] border border-emerald-300/22 bg-emerald-400/12 px-4 py-3 text-[12.5px] font-semibold text-emerald-100"
+                  initial={{ opacity: 0, y: -8, scale: 0.985 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.985 }}
+                  transition={cardTransition}
+                  className="mt-3 flex items-start gap-2.5 rounded-[12px] border border-emerald-300/22 bg-emerald-400/12 px-4 py-3 text-[12.5px] font-semibold text-emerald-100"
                 >
                   <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
                   {success}
@@ -471,32 +491,41 @@ export default function AuthPage() {
               )}
               {error && (
                 <motion.div
+                  layout
                   key="error"
-                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                  animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
-                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                  className="flex items-start gap-2.5 rounded-[12px] border border-red-300/20 bg-red-400/10 px-4 py-3 text-[12.5px] font-semibold text-red-100"
+                  initial={{ opacity: 0, y: -8, scale: 0.985 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.985 }}
+                  transition={cardTransition}
+                  className="mt-3 flex items-start gap-2.5 rounded-[12px] border border-red-300/20 bg-red-400/10 px-4 py-3 text-[12.5px] font-semibold text-red-100"
                 >
                   <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-red-400" />
                   {error}
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
 
-          {/* Forms */}
-          <div className="px-6 pb-7 sm:px-8">
-            <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            layout
+            transition={cardTransition}
+            className="px-6 pb-5 sm:px-7 sm:pb-6"
+          >
+            <AnimatePresence mode="wait" initial={false} custom={switchDirection}>
               {uiMode === 'login' ? (
                 <motion.div
+                  layout
                   key="login"
                   variants={fadeVariants}
+                  custom={switchDirection}
                   initial="hidden"
                   animate="show"
                   exit="exit"
-                  transition={{ duration: fadeMs / 1000, ease: [0.22, 1, 0.36, 1] }}
+                  transition={cardTransition}
+                  className="will-change-transform"
+                  style={{ transformOrigin: 'top center' }}
                 >
-                  <form onSubmit={handleLogin} className="mt-5 space-y-4">
+                  <form onSubmit={handleLogin} className="mt-4 space-y-3.5">
                     <div>
                       <label className={labelClass}>Email</label>
                       <AuthInput
@@ -548,7 +577,9 @@ export default function AuthPage() {
                       <button
                         type="button"
                         className="text-[12px] font-semibold text-violet-300/80 transition-colors hover:text-violet-200 focus:outline-none focus-visible:underline"
-                        onClick={() => {/* forgot-password: wire to supabase.auth.resetPasswordForEmail */}}
+                        onClick={() => {
+                          /* forgot-password */
+                        }}
                       >
                         Forgot password?
                       </button>
@@ -557,90 +588,126 @@ export default function AuthPage() {
                     <button
                       type="submit"
                       disabled={busy || !!success}
-                      className="btn-primary pc-cta mt-1 w-full !min-h-[48px] !rounded-[14px] !text-[13.5px] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="btn-primary pc-cta mt-0.5 w-full !min-h-[46px] !rounded-[14px] !text-[13.5px] disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {busy ? 'Signing in…' : success ? 'Redirecting…' : 'Sign In →'}
+                      {busy ? 'Signing in...' : success ? 'Redirecting...' : 'Sign In ->'}
                     </button>
 
                     <button
                       type="button"
                       onClick={() => switchTo('register')}
-                      className="w-full rounded-[13px] border border-white/[0.12] bg-white/[0.05] px-4 py-3 text-[12.5px] font-semibold text-white/55 transition-all hover:bg-white/[0.09] hover:text-white/82"
+                      className="flex h-[46px] w-full items-center justify-center rounded-[13px] border border-white/[0.12] bg-white/[0.05] px-4 text-[12.5px] font-semibold text-white/55 transition-all hover:bg-white/[0.09] hover:text-white/82"
                     >
                       Don't have an account?{' '}
                       <span className="text-violet-300">Sign up free</span>
                     </button>
+
+                    <Link
+                      to="/"
+                      className="flex items-center justify-center gap-1.5 pt-0.5 text-[11.5px] font-medium text-white/30 transition-colors hover:text-white/60"
+                    >
+                      <ArrowLeft size={11} />
+                      Back to site
+                    </Link>
                   </form>
                 </motion.div>
               ) : (
                 <motion.div
+                  layout
                   key="register"
                   variants={fadeVariants}
+                  custom={switchDirection}
                   initial="hidden"
                   animate="show"
                   exit="exit"
-                  transition={{ duration: fadeMs / 1000, ease: [0.22, 1, 0.36, 1] }}
+                  transition={cardTransition}
+                  className="will-change-transform"
+                  style={{ transformOrigin: 'top center' }}
                 >
-                  <form onSubmit={handleRegister} className="mt-5 space-y-3.5">
-                    <AvatarPicker
-                      compact
-                      value={avatarSelection}
-                      onChange={setAvatarSelection}
-                      identitySeed={registerAvatarIdentitySeed}
-                      description="Choose an avatar. You can update it from your profile later."
-                    />
+                  <form onSubmit={handleRegister} className="mt-4 space-y-3">
+                    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_176px] sm:items-end">
+                      <div>
+                        <label className={labelClass}>Full Name *</label>
+                        <AuthInput
+                          icon={User}
+                          value={name}
+                          onChange={e => setName(e.target.value)}
+                          onFocus={() => setIsTyping(true)}
+                          onBlur={() => setIsTyping(false)}
+                          placeholder="Your full name"
+                          autoComplete="name"
+                          required
+                        />
+                      </div>
 
-                    <div>
-                      <label className={labelClass}>Full Name *</label>
-                      <AuthInput
-                        icon={User}
-                        value={name}
-                        onChange={e => setName(e.target.value)}
-                        onFocus={() => setIsTyping(true)}
-                        onBlur={() => setIsTyping(false)}
-                        placeholder="Your full name"
-                        autoComplete="name"
-                        required
-                      />
+                      <div>
+                        <label className={labelClass}>Profile Avatar</label>
+                        <div className="flex h-[46px] items-center gap-2.5 rounded-[13px] border border-white/[0.10] bg-white/[0.05] px-2.5">
+                          <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full">
+                            <UserAvatar
+                              avatarStyle={avatarSelection.avatarStyle}
+                              avatarSeed={avatarSelection.avatarSeed}
+                              avatarOptions={avatarSelection.avatarOptions}
+                              size={36}
+                              className="h-9 w-9"
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[10.5px] font-semibold text-white/62">
+                              Random starter avatar
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={shuffleAvatar}
+                            aria-label="Shuffle avatar"
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-white/[0.12] bg-white/[0.07] text-white/50 transition-all hover:bg-white/[0.14] hover:text-white/90 active:scale-95"
+                          >
+                            <RefreshCw size={13} />
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <label className={labelClass}>Email *</label>
-                      <AuthInput
-                        type="email"
-                        icon={Mail}
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        onFocus={() => setIsTyping(true)}
-                        onBlur={() => setIsTyping(false)}
-                        placeholder="you@company.com"
-                        autoComplete="email"
-                        inputMode="email"
-                        required
-                      />
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className={labelClass}>Email *</label>
+                        <AuthInput
+                          type="email"
+                          icon={Mail}
+                          value={email}
+                          onChange={e => setEmail(e.target.value)}
+                          onFocus={() => setIsTyping(true)}
+                          onBlur={() => setIsTyping(false)}
+                          placeholder="you@company.com"
+                          autoComplete="email"
+                          inputMode="email"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className={labelClass}>
+                          Phone{' '}
+                          <span className="normal-case tracking-normal text-white/28">
+                            optional
+                          </span>
+                        </label>
+                        <AuthInput
+                          type="tel"
+                          icon={Phone}
+                          value={phone}
+                          onChange={e => setPhone(e.target.value)}
+                          onFocus={() => setIsTyping(true)}
+                          onBlur={() => setIsTyping(false)}
+                          placeholder="+962..."
+                          autoComplete="tel"
+                          inputMode="tel"
+                        />
+                      </div>
                     </div>
 
-                    <div>
-                      <label className={labelClass}>
-                        Phone{' '}
-                        <span className="normal-case tracking-normal text-white/28">
-                          optional
-                        </span>
-                      </label>
-                      <AuthInput
-                        type="tel"
-                        icon={Phone}
-                        value={phone}
-                        onChange={e => setPhone(e.target.value)}
-                        onFocus={() => setIsTyping(true)}
-                        onBlur={() => setIsTyping(false)}
-                        placeholder="+962…"
-                        autoComplete="tel"
-                        inputMode="tel"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-3 sm:grid-cols-2">
                       <div>
                         <label className={labelClass}>Password *</label>
                         <AuthInput
@@ -687,31 +754,39 @@ export default function AuthPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 pt-0.5">
+                    <div className="grid gap-3 pt-0.5 sm:grid-cols-2">
                       <button
                         type="submit"
                         disabled={busy || !!success}
-                        className="btn-primary pc-cta !min-h-[48px] !rounded-[14px] !text-[13px] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="btn-primary pc-cta !min-h-[46px] !rounded-[14px] !text-[13px] disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {busy ? 'Creating…' : success ? 'Check email' : 'Create Account →'}
+                        {busy ? 'Creating...' : success ? 'Check email' : 'Create Account ->'}
                       </button>
                       <button
                         type="button"
                         onClick={() => switchTo('login')}
-                        className="rounded-[13px] border border-white/[0.12] bg-white/[0.05] px-3 py-3 text-[12px] font-semibold text-white/52 transition-all hover:bg-white/[0.09] hover:text-white/78"
+                        className="h-[46px] rounded-[13px] border border-white/[0.12] bg-white/[0.05] px-3 text-[12px] font-semibold text-white/52 transition-all hover:bg-white/[0.09] hover:text-white/78"
                       >
-                        Already have an account?
+                        Back to sign in
                       </button>
                     </div>
+
+                    <Link
+                      to="/"
+                      className="flex items-center justify-center gap-1.5 pt-0.5 text-[11.5px] font-medium text-white/30 transition-colors hover:text-white/60"
+                    >
+                      <ArrowLeft size={11} />
+                      Back to site
+                    </Link>
                   </form>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <p className="mt-6 text-center text-[10.5px] font-medium text-white/24">
-              © {new Date().getFullYear()} Eventies — Event Services Marketplace
+            <p className="mt-4 text-center text-[10.5px] font-medium text-white/24">
+              (c) {new Date().getFullYear()} Eventies - Event Services Marketplace
             </p>
-          </div>
+          </motion.div>
         </motion.div>
       </div>
     </div>

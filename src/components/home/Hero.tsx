@@ -146,22 +146,28 @@ export default function Hero() {
 
             {/* Main heading */}
             <h1
-              className="font-display text-[clamp(2.7rem,6.2vw,5.1rem)] font-extrabold leading-[0.92] tracking-[-0.055em] text-white"
-              style={{ textRendering: 'optimizeLegibility' }}
+              className="font-sans text-[clamp(2.7rem,6.2vw,5.1rem)] font-extrabold leading-[0.95] tracking-[-0.04em] text-white"
+              style={{
+                fontFamily: '"Alexandria", system-ui, sans-serif',
+                fontKerning: 'normal',
+                textRendering: 'optimizeLegibility',
+              }}
             >
               <span className="block opacity-90">Book Everything</span>
-              <span className="relative mt-2 block pb-[0.06em] tracking-[-0.045em]">
+              <span className="relative isolate mt-2 block pb-[0.06em] tracking-[-0.028em]">
                 <span
-                  className="relative inline-block bg-clip-text text-transparent"
+                  className="relative z-10 inline-block bg-clip-text text-transparent"
                   style={{
                     backgroundImage: 'linear-gradient(95deg, #c4b5fd 0%, #f0abfc 30%, #67e8f9 65%, #c4b5fd 100%)',
+                    WebkitTextFillColor: 'transparent',
                   }}
                 >
                   Your Event Needs
                 </span>
                 <span
-                  className="pointer-events-none absolute inset-x-0 -bottom-2 h-8 rounded-full blur-2xl"
-                  style={{ background: 'linear-gradient(90deg, rgba(124,58,237,0.45), rgba(236,72,153,0.30), rgba(34,211,238,0.20))' }}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-[5%] bottom-[0.02em] z-0 h-[0.24em] rounded-full opacity-75 blur-3xl"
+                  style={{ background: 'linear-gradient(90deg, rgba(124,58,237,0.42), rgba(236,72,153,0.28), rgba(34,211,238,0.18))' }}
                 />
               </span>
             </h1>

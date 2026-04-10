@@ -220,3 +220,12 @@ img.framed-image--revealed.framed-image--reveal-crisp {
 @media (prefers-reduced-motion: reduce) {
   .spotlight-glow { transition: none; }
 }
+
+/* ── Auth characters: idle float ─────────────────────────────────────────── */
+@keyframes ac-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-9px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ac-float-wrap { animation: none !important; }
+}

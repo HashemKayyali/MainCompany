@@ -156,6 +156,12 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [desktopMenu, setDesktopMenu] = useState<string | null>(null)
+  const [desktopMenuPosition, setDesktopMenuPosition] = useState<{
+    top: number
+    left: number
+    width: number
+    compact: boolean
+  } | null>(null)
   const [userMenu, setUserMenu] = useState(false)
   const [userMenuPosition, setUserMenuPosition] = useState<{
     top: number
@@ -165,10 +171,13 @@ export default function Navbar() {
 
   const userMenuAnchorRef = useRef<HTMLDivElement>(null)
   const userMenuPopoverRef = useRef<HTMLDivElement>(null)
+  const desktopMenuPopoverRef = useRef<HTMLDivElement>(null)
   const navbarBarRef = useRef<HTMLDivElement>(null)
   const desktopPanelFirstLinkRef = useRef<HTMLAnchorElement>(null)
+  const desktopTriggerRefs = useRef<Record<string, HTMLElement | null>>({})
   const desktopOpenTimerRef = useRef<number | null>(null)
   const desktopCloseTimerRef = useRef<number | null>(null)
+  const [canHoverDesktopNav, setCanHoverDesktopNav] = useState(true)
 
   useBodyScrollLock(open)
 
@@ -216,6 +225,23 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const media = window.matchMedia('(hover: hover) and (pointer: fine)')
+    const update = () => setCanHoverDesktopNav(media.matches)
+
+    update()
+
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', update)
+      return () => media.removeEventListener('change', update)
+    }
+
+    media.addListener(update)
+    return () => media.removeListener(update)
+  }, [])
+
+  useEffect(() => {
     let ticking = false
     const onScroll = () => {
       if (ticking) return
@@ -247,7 +273,7 @@ export default function Navbar() {
 
   useEffect(() => {
     if (!userMenu) return
-    const handleOutsideClick = (e: MouseEvent) => {
+    const handleOutsideClose = (e: Event) => {
       const target = e.target as Node
       if (
         !userMenuAnchorRef.current?.contains(target) &&
@@ -256,8 +282,13 @@ export default function Navbar() {
         setUserMenu(false)
       }
     }
-    document.addEventListener('mousedown', handleOutsideClick)
-    return () => document.removeEventListener('mousedown', handleOutsideClick)
+    // mousedown for mouse; touchstart for iPad/touch devices (mousedown never fires on tap)
+    document.addEventListener('mousedown', handleOutsideClose)
+    document.addEventListener('touchstart', handleOutsideClose, { passive: true })
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClose)
+      document.removeEventListener('touchstart', handleOutsideClose)
+    }
   }, [userMenu])
 
   const updateUserMenuPosition = useCallback(() => {
@@ -374,26 +405,26 @@ export default function Navbar() {
     isActive
       ? heroMode || isDark ? 'text-white' : 'text-gray-900'
       : heroMode
-        ? 'text-white/58 hover:text-white'
+        ? 'text-white/66 hover:text-white'
         : isDark
-          ? 'text-purple-100/62 hover:text-white'
+          ? 'text-purple-100/68 hover:text-white'
           : 'text-gray-500 hover:text-gray-900'
 
   const navTriggerColor = (isActive: boolean, isOpen: boolean) =>
     isActive || isOpen
       ? heroMode || isDark ? 'text-white' : 'text-gray-900'
       : heroMode
-        ? 'text-white/58 hover:text-white'
+        ? 'text-white/66 hover:text-white'
         : isDark
-          ? 'text-purple-100/62 hover:text-white'
+          ? 'text-purple-100/68 hover:text-white'
           : 'text-gray-500 hover:text-gray-900'
 
   // ── Active pill ────────────────────────────────────────────────────────────
   const navActivePill = heroMode
-    ? 'bg-white/[0.11] border border-white/[0.16]'
+    ? 'bg-white/[0.08] border border-white/[0.14]'
     : isDark
-      ? 'bg-violet-500/[0.13] border border-violet-400/[0.17]'
-      : 'bg-violet-50 border border-violet-200/70'
+      ? 'bg-white/[0.05] border border-white/[0.09]'
+      : 'bg-white border border-violet-200/80 shadow-[0_6px_18px_rgba(124,58,237,0.08)]'
 
   // ── Mobile tile ────────────────────────────────────────────────────────────
   const mobileTile = isDark
@@ -439,11 +470,6 @@ export default function Navbar() {
       {
         key: 'explore',
         label: 'Explore',
-        eyebrow: 'Explore',
-        title: 'Marketplace paths',
-        body: 'Products, trusted brands, and visual highlights in one cleaner discovery flow.',
-        ctaLabel: 'Products',
-        ctaTo: '/products',
         children: [
           {
             to: '/products',
@@ -471,11 +497,6 @@ export default function Navbar() {
       {
         key: 'company',
         label: 'Company',
-        eyebrow: 'Company',
-        title: 'About, support, and planning',
-        body: 'Understand the platform and reach the team for tailored help.',
-        ctaLabel: 'Contact',
-        ctaTo: '/contact',
         children: [
           {
             to: '/about',
@@ -502,50 +523,149 @@ export default function Navbar() {
     [desktopMenu, desktopNav]
   )
 
+  const setDesktopTriggerRef = useCallback((key: string, node: HTMLElement | null) => {
+    desktopTriggerRefs.current[key] = node
+  }, [])
+
+  const updateDesktopMenuPosition = useCallback(
+    (key: string) => {
+      if (typeof window === 'undefined' || window.innerWidth < 1024) return
+      const trigger = desktopTriggerRefs.current[key]
+      const item = desktopNav.find(entry => entry.key === key)
+      if (!trigger || !item?.children?.length) return
+
+      const rect = trigger.getBoundingClientRect()
+      const pad = 16
+      const compact = window.innerWidth < 1360
+      const preferredWidth =
+        key === 'explore'
+          ? compact
+            ? 400
+            : 470
+          : compact
+            ? 360
+            : 420
+      const width = Math.min(window.innerWidth - pad * 2, preferredWidth)
+      const rawLeft =
+        key === 'company'
+          ? rect.right - width + (compact ? 0 : 10)
+          : compact
+            ? rect.left - 20
+            : rect.left + rect.width / 2 - width / 2
+      const left = Math.min(
+        window.innerWidth - pad - width,
+        Math.max(pad, rawLeft)
+      )
+      const top = rect.bottom + 4
+
+      setDesktopMenuPosition({ top, left, width, compact })
+    },
+    [desktopNav]
+  )
+
   const clearDesktopTimers = useCallback(() => {
     if (desktopOpenTimerRef.current) { window.clearTimeout(desktopOpenTimerRef.current); desktopOpenTimerRef.current = null }
     if (desktopCloseTimerRef.current) { window.clearTimeout(desktopCloseTimerRef.current); desktopCloseTimerRef.current = null }
   }, [])
 
   const openDesktopMenu = useCallback(
-    (key: string) => {
+    (key: string, immediate = false) => {
       if (typeof window !== 'undefined' && window.innerWidth < 1024) return
       clearDesktopTimers()
-      desktopOpenTimerRef.current = window.setTimeout(() => setDesktopMenu(key), 36)
+      const show = () => {
+        setDesktopMenu(key)
+        window.requestAnimationFrame(() => updateDesktopMenuPosition(key))
+      }
+
+      if (immediate) {
+        show()
+        return
+      }
+
+      desktopOpenTimerRef.current = window.setTimeout(show, 36)
     },
-    [clearDesktopTimers]
+    [clearDesktopTimers, updateDesktopMenuPosition]
   )
 
   const scheduleDesktopClose = useCallback(
     (immediate = false) => {
       clearDesktopTimers()
-      if (immediate) { setDesktopMenu(null); return }
-      desktopCloseTimerRef.current = window.setTimeout(() => setDesktopMenu(null), 140)
+      if (immediate) {
+        setDesktopMenu(null)
+        setDesktopMenuPosition(null)
+        return
+      }
+      desktopCloseTimerRef.current = window.setTimeout(() => {
+        setDesktopMenu(null)
+        setDesktopMenuPosition(null)
+      }, 140)
     },
     [clearDesktopTimers]
   )
+
+  useEffect(() => {
+    if (!desktopMenu) {
+      setDesktopMenuPosition(null)
+      return
+    }
+    if (typeof window === 'undefined' || window.innerWidth < 1024) {
+      setDesktopMenuPosition(null)
+      return
+    }
+
+    const update = () => updateDesktopMenuPosition(desktopMenu)
+    const frame = window.requestAnimationFrame(update)
+    window.addEventListener('resize', update)
+    window.addEventListener('scroll', update, true)
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', update, true)
+    }
+  }, [desktopMenu, updateDesktopMenuPosition])
+
+  useEffect(() => {
+    if (!desktopMenu) return
+
+    const handleOutsidePointer = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node
+
+      if (desktopMenuPopoverRef.current?.contains(target)) return
+      if (Object.values(desktopTriggerRefs.current).some(node => node?.contains(target))) return
+
+      scheduleDesktopClose(true)
+    }
+
+    document.addEventListener('mousedown', handleOutsidePointer)
+    document.addEventListener('touchstart', handleOutsidePointer, { passive: true })
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsidePointer)
+      document.removeEventListener('touchstart', handleOutsidePointer)
+    }
+  }, [desktopMenu, scheduleDesktopClose])
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 w-full">
       {/* ══════════════════════ MAIN BAR ══════════════════════ */}
       <div className={`pointer-events-auto w-full transition-all duration-500 ${navBarBg}`}>
-        <div className="relative mx-auto max-w-[90rem]">
+        <div className="relative mx-auto max-w-[84rem]">
 
           {/* ─── Nav bar rows (ref covers both rows so --app-navbar-height includes chip row) ─── */}
           <div ref={navbarBarRef}>
-          <div className="flex h-[3.75rem] items-center justify-between px-4 sm:h-[4.25rem] sm:px-6 lg:px-10">
+          <div className="flex h-[3.75rem] items-center justify-between px-4 sm:h-[4.25rem] sm:px-6 lg:mx-auto lg:h-14 lg:max-w-[78rem] lg:px-4">
 
             {/* ── Logo ── */}
             <Link
               to="/"
-              className={`flex min-w-0 items-center transition-opacity hover:opacity-88 lg:min-w-[160px] ${focus}`}
+              className={`flex min-w-0 items-center transition-opacity hover:opacity-88 lg:min-w-[180px] ${focus}`}
             >
               <EventiesLogo heroMode={heroMode} isDark={isDark} />
             </Link>
 
             {/* ── Desktop nav (center) ── */}
             <nav className="hidden flex-1 items-center justify-center lg:flex" aria-label="Main navigation">
-              <div className="flex items-center gap-0.5">
+              <div className="flex items-center gap-0.5 rounded-xl px-1">
                 {desktopNav.map(item => {
                   const isCurrent = getDesktopNavActive(item, active)
                   const isOpen = desktopMenu === item.key
@@ -555,14 +675,15 @@ export default function Navbar() {
                     return (
                       <Link
                         key={item.key}
+                        ref={node => setDesktopTriggerRef(item.key, node)}
                         to={item.to}
                         aria-current={isCurrent ? 'page' : undefined}
-                        className={`relative inline-flex h-[2.375rem] items-center justify-center rounded-[13px] px-4 text-[12.5px] font-medium tracking-[-0.01em] transition-all duration-300 ${navLinkColor(isCurrent)} ${focus}`}
+                        className={`relative inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium tracking-[-0.01em] transition-all duration-200 ${navLinkColor(isCurrent)} ${focus}`}
                       >
                         {showPill && (
                           <motion.div
                             layoutId="desktop-nav-active"
-                            className={`absolute inset-0 rounded-[13px] ${navActivePill}`}
+                            className={`absolute inset-0 rounded-md ${navActivePill}`}
                             transition={{ type: 'spring', stiffness: 420, damping: 34 }}
                           />
                         )}
@@ -574,29 +695,46 @@ export default function Navbar() {
                   return (
                     <button
                       key={item.key}
+                      ref={node => setDesktopTriggerRef(item.key, node)}
                       type="button"
                       aria-expanded={isOpen}
                       aria-haspopup="menu"
-                      onMouseEnter={() => openDesktopMenu(item.key)}
-                      onMouseLeave={() => scheduleDesktopClose()}
-                      onFocus={() => openDesktopMenu(item.key)}
+                      onMouseEnter={() => {
+                        if (canHoverDesktopNav) openDesktopMenu(item.key)
+                      }}
+                      onMouseLeave={() => {
+                        if (canHoverDesktopNav) scheduleDesktopClose()
+                      }}
+                      onClick={e => {
+                        // On touch/non-hover devices: tap toggles the dropdown
+                        if (!canHoverDesktopNav) {
+                          e.preventDefault()
+                          if (isOpen) scheduleDesktopClose(true)
+                          else openDesktopMenu(item.key, true)
+                          return
+                        }
+                        // On hover-capable devices: click also toggles (handles
+                        // edge cases like click-to-dismiss after hover-open)
+                        if (isOpen) scheduleDesktopClose(true)
+                        else openDesktopMenu(item.key, true)
+                      }}
                       onKeyDown={e => {
                         if (e.key === 'Escape') { scheduleDesktopClose(true); return }
                         if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
                           e.preventDefault()
                           if (isOpen) desktopPanelFirstLinkRef.current?.focus()
                           else {
-                            openDesktopMenu(item.key)
+                            openDesktopMenu(item.key, true)
                             window.setTimeout(() => desktopPanelFirstLinkRef.current?.focus(), 60)
                           }
                         }
                       }}
-                      className={`relative inline-flex h-[2.375rem] items-center justify-center gap-1.5 rounded-[13px] px-4 text-[12.5px] font-medium tracking-[-0.01em] transition-all duration-300 ${navTriggerColor(isCurrent, isOpen)} ${focus}`}
+                      className={`relative inline-flex h-10 items-center justify-center gap-1.5 rounded-md px-4 text-sm font-medium tracking-[-0.01em] transition-all duration-200 ${navTriggerColor(isCurrent, isOpen)} ${focus}`}
                     >
                       {showPill && (
                         <motion.div
                           layoutId="desktop-nav-active"
-                          className={`absolute inset-0 rounded-[13px] ${navActivePill}`}
+                          className={`absolute inset-0 rounded-md ${navActivePill}`}
                           transition={{ type: 'spring', stiffness: 420, damping: 34 }}
                         />
                       )}
@@ -617,7 +755,7 @@ export default function Navbar() {
               {/* Search compact (sm–xl) */}
               <button
                 onClick={openSearchDialog}
-                className={`hidden h-[2.375rem] items-center gap-2 rounded-[12px] border px-3 text-[12px] font-medium transition-all sm:inline-flex xl:hidden ${utilityPill} ${focus}`}
+                className={`hidden h-10 items-center gap-2 rounded-md border px-3 text-[12px] font-medium transition-all sm:inline-flex xl:hidden ${utilityPill} ${focus}`}
                 aria-label="Search (Ctrl+K)"
               >
                 <Search className="h-3.5 w-3.5" strokeWidth={2} />
@@ -626,7 +764,7 @@ export default function Navbar() {
               {/* Search with label (xl+) */}
               <button
                 onClick={openSearchDialog}
-                className={`hidden h-[2.375rem] items-center gap-2 rounded-[12px] border px-3.5 text-[12px] font-medium transition-all xl:inline-flex ${utilityPill} ${focus}`}
+                className={`hidden h-10 items-center gap-2 rounded-md border px-3.5 text-[12px] font-medium transition-all xl:inline-flex ${utilityPill} ${focus}`}
                 aria-label="Search (Ctrl+K)"
               >
                 <Search className="h-3.5 w-3.5" strokeWidth={2} />
@@ -647,7 +785,7 @@ export default function Navbar() {
                 <div ref={userMenuAnchorRef} className="relative hidden sm:block">
                   <button
                     onClick={() => { if (!userMenu) updateUserMenuPosition(); setUserMenu(v => !v) }}
-                    className={`inline-flex h-[2.375rem] items-center gap-2 rounded-[12px] border pl-2 pr-3 transition-all ${utilityPill} ${focus}`}
+                    className={`inline-flex h-10 items-center gap-2 rounded-md border pl-2 pr-3 transition-all ${utilityPill} ${focus}`}
                     aria-label="User menu"
                     aria-expanded={userMenu}
                   >
@@ -686,7 +824,7 @@ export default function Navbar() {
               ) : (
                 <Link
                   to="/login"
-                  className={`hidden h-[2.375rem] items-center rounded-[12px] border px-4 text-[12px] font-medium transition-all sm:inline-flex ${utilityPill} ${focus}`}
+                  className={`hidden h-10 items-center rounded-md border px-4 text-[12px] font-medium transition-all sm:inline-flex ${utilityPill} ${focus}`}
                 >
                   Login
                 </Link>
@@ -695,7 +833,7 @@ export default function Navbar() {
               {/* Cart */}
               <Link
                 to="/rental-cart"
-                className={`relative inline-flex h-[2.375rem] items-center gap-2 rounded-[12px] border px-2.5 transition-all sm:px-3 ${cartSurface} ${focus}`}
+                className={`relative inline-flex h-10 items-center gap-2 rounded-md border px-2.5 transition-all sm:px-3 ${cartSurface} ${focus}`}
                 aria-label={cartHasItems ? `Cart · ${cartItemCount}` : 'Cart'}
               >
                 <IconCircle active={cartHasItems || cartActive} colorScheme="cyan" isDark={isDark} heroMode={heroMode}>
@@ -709,7 +847,7 @@ export default function Navbar() {
               {(quoteHasItems || quoteActive) && (
                 <Link
                   to="/purchase-quote"
-                  className={`relative hidden h-[2.375rem] items-center gap-2 rounded-[12px] border px-3 transition-all lg:inline-flex ${quoteSurface} ${focus}`}
+                  className={`relative hidden h-10 items-center gap-2 rounded-md border px-3 transition-all lg:inline-flex ${quoteSurface} ${focus}`}
                   aria-label={quoteHasItems ? `Quote · ${quoteItemCount}` : 'Quote draft'}
                 >
                   <IconCircle active={quoteHasItems || quoteActive} colorScheme="pink" isDark={isDark} heroMode={heroMode}>
@@ -1049,29 +1187,40 @@ export default function Navbar() {
 
           {/* ══════════════════════ DESKTOP DROPDOWN ══════════════════════ */}
           <AnimatePresence>
-            {activeDesktopItem?.children && (
+            {activeDesktopItem?.children && desktopMenuPosition && (
               <motion.div
+                ref={desktopMenuPopoverRef}
                 initial={{ opacity: 0, y: -10, scale: 0.982 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.982 }}
                 transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                onMouseEnter={clearDesktopTimers}
-                onMouseLeave={() => scheduleDesktopClose()}
+                onMouseEnter={() => {
+                  if (canHoverDesktopNav) clearDesktopTimers()
+                }}
+                onMouseLeave={() => {
+                  if (canHoverDesktopNav) scheduleDesktopClose()
+                }}
                 onKeyDown={e => { if (e.key === 'Escape') { e.preventDefault(); scheduleDesktopClose(true) } }}
-                className="absolute left-1/2 top-full z-[70] hidden w-full max-w-[52rem] -translate-x-1/2 px-4 pt-2 lg:block"
+                className="fixed z-[70] hidden lg:block"
                 role="menu"
                 aria-label={`${activeDesktopItem.label} menu`}
+                style={{
+                  top: desktopMenuPosition.top,
+                  left: desktopMenuPosition.left,
+                  width: desktopMenuPosition.width,
+                }}
               >
-                {/* Invisible hover bridge */}
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-4" />
+                {/* Hover bridge — keeps menu open while mouse travels from trigger to panel.
+                    pointer-events-none on touch devices so it doesn't intercept taps. */}
+                <div className={`absolute inset-x-0 -top-4 h-5 ${canHoverDesktopNav ? 'pointer-events-auto' : 'pointer-events-none'}`} />
 
                 <div
-                  className={`relative overflow-hidden rounded-[22px] border ${
+                  className={`relative overflow-hidden rounded-[18px] border ${
                     isDark
-                      ? 'border-white/[0.08] bg-[linear-gradient(170deg,rgba(7,9,22,0.99),rgba(4,6,16,0.98))] shadow-[0_32px_110px_rgba(0,2,10,0.72),inset_0_1px_0_rgba(255,255,255,0.05)]'
-                      : 'border-violet-200/65 bg-white/98 shadow-[0_24px_88px_rgba(97,40,178,0.13),0_4px_20px_rgba(0,0,0,0.05)]'
+                      ? 'border-white/[0.08] bg-[rgba(7,9,22,0.92)] shadow-[0_24px_72px_rgba(0,2,10,0.56),inset_0_1px_0_rgba(255,255,255,0.04)]'
+                      : 'border-violet-200/75 bg-white/94 shadow-[0_18px_56px_rgba(97,40,178,0.10),0_4px_18px_rgba(0,0,0,0.03)]'
                   }`}
-                  style={{ backdropFilter: 'blur(36px)', WebkitBackdropFilter: 'blur(36px)' }}
+                  style={{ backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)' }}
                 >
                   {/* Top accent line */}
                   <div
@@ -1083,13 +1232,13 @@ export default function Navbar() {
                     }}
                   />
 
-                  <div className={`grid ${isDark ? 'divide-x divide-white/[0.06]' : 'divide-x divide-violet-100'} md:grid-cols-[0.9fr_1.1fr]`}>
+                  <div>
 
                     {/* ── Left panel: title + CTA ── */}
-                    <div className={`relative flex flex-col justify-between px-7 py-6 ${
+                    <div className={`relative flex flex-col justify-between px-6 py-5 ${
                       isDark
-                        ? 'bg-[linear-gradient(160deg,rgba(14,10,30,0.96),rgba(8,9,20,0.88))]'
-                        : 'bg-[linear-gradient(160deg,rgba(249,246,255,0.98),rgba(243,240,255,0.94))]'
+                        ? 'bg-[linear-gradient(160deg,rgba(12,10,28,0.96),rgba(8,9,20,0.9))]'
+                        : 'bg-[linear-gradient(160deg,rgba(250,247,255,0.98),rgba(245,242,255,0.94))]'
                     }`}>
                       {/* Corner accent glow */}
                       {isDark && (
@@ -1105,12 +1254,12 @@ export default function Navbar() {
                         }`}>
                           {activeDesktopItem.eyebrow}
                         </div>
-                        <h3 className={`mt-2 font-display text-[1.12rem] font-bold leading-tight tracking-[-0.03em] ${
+                        <h3 className={`mt-2 font-display text-[1.04rem] font-bold leading-tight tracking-[-0.025em] ${
                           isDark ? 'text-white' : 'text-gray-900'
                         }`}>
                           {activeDesktopItem.title}
                         </h3>
-                        <p className={`mt-2.5 max-w-[15rem] text-[11.5px] leading-[1.52] ${
+                        <p className={`mt-2.5 max-w-[14rem] text-[11px] leading-[1.55] ${
                           isDark ? 'text-purple-100/52' : 'text-gray-500'
                         }`}>
                           {activeDesktopItem.body}
@@ -1121,7 +1270,7 @@ export default function Navbar() {
                         <Link
                           to={activeDesktopItem.ctaTo}
                           onClick={() => scheduleDesktopClose(true)}
-                          className={`mt-5 inline-flex w-fit items-center gap-2 rounded-[13px] border px-4 py-2.5 text-[11px] font-semibold transition-all duration-300 hover:-translate-y-0.5 ${
+                          className={`mt-5 inline-flex h-10 w-fit items-center gap-2 rounded-md border px-4 text-[11px] font-semibold transition-all duration-200 hover:-translate-y-0.5 ${
                             isDark
                               ? 'border-white/[0.11] bg-white/[0.05] text-white hover:border-violet-400/22 hover:bg-white/[0.08]'
                               : 'border-violet-200/80 bg-white text-gray-800 shadow-sm hover:border-violet-300 hover:bg-violet-50/60 hover:text-violet-800'
@@ -1134,12 +1283,20 @@ export default function Navbar() {
                     </div>
 
                     {/* ── Right panel: nav items ── */}
-                    <div className={`p-3 ${
+                    <div className={`p-2.5 ${
                       isDark
-                        ? 'bg-[linear-gradient(180deg,rgba(6,8,20,0.90),rgba(5,7,16,0.82))]'
+                        ? 'bg-[linear-gradient(180deg,rgba(6,8,20,0.9),rgba(5,7,16,0.84))]'
                         : 'bg-white/95'
                     }`}>
-                      <div className={`grid gap-2 ${activeDesktopItem.children.length > 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                      <div
+                        className={`grid gap-2 ${
+                          desktopMenuPosition.compact
+                            ? 'grid-cols-1'
+                            : activeDesktopItem.children.length > 2
+                              ? 'grid-cols-2'
+                              : 'grid-cols-1'
+                        }`}
+                      >
                         {activeDesktopItem.children.map((child, index) => {
                           const isCurrent = active(child.to)
                           const Icon = child.icon
@@ -1150,7 +1307,7 @@ export default function Navbar() {
                               to={child.to}
                               onClick={() => scheduleDesktopClose(true)}
                               role="menuitem"
-                              className={`group relative flex items-start gap-3.5 overflow-hidden rounded-[17px] border p-4 transition-all duration-300 ${
+                              className={`group relative flex items-start gap-3 overflow-hidden rounded-[14px] border p-3 transition-all duration-200 ${
                                 isCurrent
                                   ? isDark
                                     ? 'border-violet-300/24 bg-[linear-gradient(148deg,rgba(124,58,237,0.16),rgba(236,72,153,0.07),rgba(34,211,238,0.07))]'
@@ -1168,7 +1325,7 @@ export default function Navbar() {
                               )}
 
                               {/* Icon */}
-                              <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border transition-transform duration-300 group-hover:scale-105 ${
+                              <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-md border transition-transform duration-200 group-hover:scale-105 ${
                                 isCurrent
                                   ? isDark
                                     ? 'border-violet-400/28 bg-[linear-gradient(145deg,rgba(124,58,237,0.28),rgba(236,72,153,0.14))] text-violet-200'
@@ -1183,12 +1340,12 @@ export default function Navbar() {
                               {/* Text */}
                               <div className="relative min-w-0 flex-1">
                                 <div className="flex items-center justify-between gap-2">
-                                  <span className={`text-[12.5px] font-semibold tracking-[-0.01em] transition-colors ${
+                                  <span className={`text-[12px] font-semibold tracking-[-0.01em] transition-colors ${
                                     isDark ? 'text-white/90 group-hover:text-white' : 'text-gray-800 group-hover:text-gray-900'
                                   }`}>
                                     {child.label}
                                   </span>
-                                  <span className={`shrink-0 rounded-full border px-2 py-[3px] text-[8px] font-bold uppercase tracking-[0.12em] ${
+                                  <span className={`shrink-0 rounded-full border px-2 py-[3px] text-[7.5px] font-bold uppercase tracking-[0.12em] ${
                                     isDark
                                       ? 'border-white/[0.09] bg-white/[0.04] text-cyan-200/58'
                                       : 'border-violet-200/70 bg-violet-50/80 text-violet-600/65'
@@ -1196,7 +1353,7 @@ export default function Navbar() {
                                     {child.meta}
                                   </span>
                                 </div>
-                                <p className={`mt-1.5 text-[11px] leading-[1.48] ${
+                                <p className={`mt-1.5 text-[10.5px] leading-[1.48] ${
                                   isDark ? 'text-purple-100/48 group-hover:text-purple-100/65' : 'text-gray-500'
                                 }`}>
                                   {child.description}
