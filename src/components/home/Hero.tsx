@@ -145,11 +145,14 @@ export default function Hero() {
             </motion.div>
 
             {/* Main heading */}
-            <h1 className="font-display text-[clamp(2.7rem,6.2vw,5.1rem)] font-black leading-[0.88] tracking-[-0.07em] text-white">
+            <h1
+              className="font-display text-[clamp(2.7rem,6.2vw,5.1rem)] font-extrabold leading-[0.92] tracking-[-0.055em] text-white"
+              style={{ textRendering: 'optimizeLegibility' }}
+            >
               <span className="block opacity-90">Book Everything</span>
-              <span className="relative mt-2 block">
+              <span className="relative mt-2 block pb-[0.06em] tracking-[-0.045em]">
                 <span
-                  className="relative bg-clip-text text-transparent"
+                  className="relative inline-block bg-clip-text text-transparent"
                   style={{
                     backgroundImage: 'linear-gradient(95deg, #c4b5fd 0%, #f0abfc 30%, #67e8f9 65%, #c4b5fd 100%)',
                   }}

@@ -28,8 +28,14 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
 
   const rentalEnabled = product.rentalEnabled !== false
   const saleEnabled = product.saleEnabled !== false
-  const isInRentalCart = rentalCart.items.some(item => item.productSlug === product.slug)
-  const productAlreadyInDraft = purchaseQuote.items.some(item => item.productSlug === product.slug)
+  const isInRentalCart = useMemo(
+    () => rentalCart.items.some(item => item.productSlug === product.slug),
+    [rentalCart.items, product.slug]
+  )
+  const productAlreadyInDraft = useMemo(
+    () => purchaseQuote.items.some(item => item.productSlug === product.slug),
+    [purchaseQuote.items, product.slug]
+  )
 
   // ── Detail variant button classes (unchanged) ──────────────────────────────
   const detailClass = {

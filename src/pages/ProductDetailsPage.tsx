@@ -88,8 +88,8 @@ export default function ProductDetailsPage() {
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         {isDark && (
           <>
-            <div className="absolute -top-32 right-[10%] h-[480px] w-[480px] rounded-full bg-violet-600/[0.08] blur-[120px]" />
-            <div className="absolute top-1/2 -left-24 h-[320px] w-[320px] rounded-full bg-cyan-500/[0.05] blur-[100px]" />
+            <div className="absolute -top-32 right-[10%] h-[480px] w-[480px] rounded-full bg-violet-600/[0.10] blur-[60px]" />
+            <div className="absolute top-1/2 -left-24 h-[320px] w-[320px] rounded-full bg-cyan-500/[0.07] blur-[50px]" />
           </>
         )}
       </div>

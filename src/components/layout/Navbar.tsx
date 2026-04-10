@@ -101,6 +101,48 @@ function EventiesLogo({
   )
 }
 
+// ── Badge count pill (module-level to avoid re-creation on every Navbar render) ─
+function CountBadge({ count, color, isDark }: { count: string; color: 'cyan' | 'pink'; isDark: boolean }) {
+  return (
+    <span
+      className={`absolute -right-1.5 -top-1.5 inline-flex min-w-[1.1rem] items-center justify-center rounded-full px-1 py-[2px] text-[8px] font-mono font-bold leading-none shadow-md ${
+        color === 'cyan'
+          ? isDark
+            ? 'bg-[linear-gradient(135deg,#22d3ee,#7c3aed)] text-slate-950 shadow-cyan-400/30'
+            : 'bg-[linear-gradient(135deg,#7c3aed,#22d3ee)] text-white shadow-violet-400/25'
+          : isDark
+            ? 'bg-[linear-gradient(135deg,#f472b6,#8b5cf6)] text-slate-950 shadow-pink-400/30'
+            : 'bg-[linear-gradient(135deg,#ec4899,#7c3aed)] text-white shadow-pink-400/20'
+      }`}
+    >
+      {count}
+    </span>
+  )
+}
+
+// ── Shared icon circle (module-level to avoid re-creation on every Navbar render) ─
+function IconCircle({
+  children,
+  active: isActive = false,
+  colorScheme = 'neutral',
+  isDark,
+  heroMode,
+}: {
+  children: React.ReactNode
+  active?: boolean
+  colorScheme?: 'neutral' | 'cyan' | 'pink'
+  isDark: boolean
+  heroMode: boolean
+}) {
+  const base = 'relative flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-full border'
+  if (heroMode) return <span className={`${base} border-white/12 bg-white/[0.06]`}>{children}</span>
+  if (colorScheme === 'cyan' && isActive)
+    return <span className={`${base} ${isDark ? 'border-cyan-300/22 bg-cyan-500/10' : 'border-violet-200/80 bg-white/80'}`}>{children}</span>
+  if (colorScheme === 'pink' && isActive)
+    return <span className={`${base} ${isDark ? 'border-fuchsia-300/20 bg-fuchsia-500/10' : 'border-violet-200/80 bg-white/80'}`}>{children}</span>
+  return <span className={`${base} ${isDark ? 'border-white/10 bg-white/[0.04]' : 'border-violet-200/70 bg-white/70'}`}>{children}</span>
+}
+
 export default function Navbar() {
   const { pathname } = useLocation()
   const { isDark } = useTheme()
@@ -483,44 +525,6 @@ export default function Navbar() {
     [clearDesktopTimers]
   )
 
-  // ── Badge count pill ────────────────────────────────────────────────────────
-  function CountBadge({ count, color }: { count: string; color: 'cyan' | 'pink' }) {
-    return (
-      <span
-        className={`absolute -right-1.5 -top-1.5 inline-flex min-w-[1.1rem] items-center justify-center rounded-full px-1 py-[2px] text-[8px] font-mono font-bold leading-none shadow-md ${
-          color === 'cyan'
-            ? isDark
-              ? 'bg-[linear-gradient(135deg,#22d3ee,#7c3aed)] text-slate-950 shadow-cyan-400/30'
-              : 'bg-[linear-gradient(135deg,#7c3aed,#22d3ee)] text-white shadow-violet-400/25'
-            : isDark
-              ? 'bg-[linear-gradient(135deg,#f472b6,#8b5cf6)] text-slate-950 shadow-pink-400/30'
-              : 'bg-[linear-gradient(135deg,#ec4899,#7c3aed)] text-white shadow-pink-400/20'
-        }`}
-      >
-        {count}
-      </span>
-    )
-  }
-
-  // ── Shared icon circle (navbar action buttons) ─────────────────────────────
-  function IconCircle({
-    children,
-    active: isActive = false,
-    colorScheme = 'neutral',
-  }: {
-    children: React.ReactNode
-    active?: boolean
-    colorScheme?: 'neutral' | 'cyan' | 'pink'
-  }) {
-    const base = 'relative flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-full border'
-    if (heroMode) return <span className={`${base} border-white/12 bg-white/[0.06]`}>{children}</span>
-    if (colorScheme === 'cyan' && isActive)
-      return <span className={`${base} ${isDark ? 'border-cyan-300/22 bg-cyan-500/10' : 'border-violet-200/80 bg-white/80'}`}>{children}</span>
-    if (colorScheme === 'pink' && isActive)
-      return <span className={`${base} ${isDark ? 'border-fuchsia-300/20 bg-fuchsia-500/10' : 'border-violet-200/80 bg-white/80'}`}>{children}</span>
-    return <span className={`${base} ${isDark ? 'border-white/10 bg-white/[0.04]' : 'border-violet-200/70 bg-white/70'}`}>{children}</span>
-  }
-
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 w-full">
       {/* ══════════════════════ MAIN BAR ══════════════════════ */}
@@ -694,9 +698,9 @@ export default function Navbar() {
                 className={`relative inline-flex h-[2.375rem] items-center gap-2 rounded-[12px] border px-2.5 transition-all sm:px-3 ${cartSurface} ${focus}`}
                 aria-label={cartHasItems ? `Cart · ${cartItemCount}` : 'Cart'}
               >
-                <IconCircle active={cartHasItems || cartActive} colorScheme="cyan">
+                <IconCircle active={cartHasItems || cartActive} colorScheme="cyan" isDark={isDark} heroMode={heroMode}>
                   <ShoppingCart className="h-3.5 w-3.5" strokeWidth={2} />
-                  {cartHasItems && <CountBadge count={cartCountLabel} color="cyan" />}
+                  {cartHasItems && <CountBadge count={cartCountLabel} color="cyan" isDark={isDark} />}
                 </IconCircle>
                 <span className="hidden text-[12px] font-medium sm:inline">Cart</span>
               </Link>
@@ -708,9 +712,9 @@ export default function Navbar() {
                   className={`relative hidden h-[2.375rem] items-center gap-2 rounded-[12px] border px-3 transition-all lg:inline-flex ${quoteSurface} ${focus}`}
                   aria-label={quoteHasItems ? `Quote · ${quoteItemCount}` : 'Quote draft'}
                 >
-                  <IconCircle active={quoteHasItems || quoteActive} colorScheme="pink">
+                  <IconCircle active={quoteHasItems || quoteActive} colorScheme="pink" isDark={isDark} heroMode={heroMode}>
                     <FileText className="h-3.5 w-3.5" strokeWidth={2} />
-                    {quoteHasItems && <CountBadge count={quoteCountLabel} color="pink" />}
+                    {quoteHasItems && <CountBadge count={quoteCountLabel} color="pink" isDark={isDark} />}
                   </IconCircle>
                   <span className="text-[12px] font-medium">Quote</span>
                 </Link>
@@ -811,8 +815,8 @@ export default function Navbar() {
                       : 'border-violet-200/65 bg-white/97 shadow-[0_16px_48px_rgba(97,40,178,0.11)]'
                   }`}
                   style={{
-                    backdropFilter: 'blur(32px)',
-                    WebkitBackdropFilter: 'blur(32px)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
                     maxHeight: 'calc(100dvh - 5.5rem)',
                     paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))',
                   }}

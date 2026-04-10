@@ -100,27 +100,27 @@ export default function AnimatedBackground({ position = 'fixed', className = '' 
         <div className="absolute inset-0 opacity-45" style={lightGridStyle} />
         {/* Atmospheric glows */}
         <div
-          className="absolute inset-x-[-18%] top-[-4%] h-[44%] blur-[160px]"
+          className="absolute inset-x-[-18%] top-[-4%] h-[44%] blur-[80px]"
           style={{
             background:
-              'radial-gradient(60% 80% at 22% 16%, rgba(124,58,237,0.10) 0%, transparent 72%), ' +
-              'radial-gradient(48% 66% at 80% 20%, rgba(34,211,238,0.07) 0%, transparent 68%), ' +
-              'radial-gradient(38% 54% at 56% 32%, rgba(236,72,153,0.05) 0%, transparent 60%)',
+              'radial-gradient(60% 80% at 22% 16%, rgba(124,58,237,0.14) 0%, transparent 72%), ' +
+              'radial-gradient(48% 66% at 80% 20%, rgba(34,211,238,0.10) 0%, transparent 68%), ' +
+              'radial-gradient(38% 54% at 56% 32%, rgba(236,72,153,0.07) 0%, transparent 60%)',
           }}
         />
         <div
-          className="absolute inset-x-[-14%] top-[38%] h-[36%] blur-[140px]"
+          className="absolute inset-x-[-14%] top-[38%] h-[36%] blur-[70px]"
           style={{
             background:
-              'radial-gradient(52% 72% at 28% 36%, rgba(236,72,153,0.06) 0%, transparent 72%), ' +
-              'radial-gradient(54% 78% at 74% 48%, rgba(124,58,237,0.07) 0%, transparent 70%)',
+              'radial-gradient(52% 72% at 28% 36%, rgba(236,72,153,0.08) 0%, transparent 72%), ' +
+              'radial-gradient(54% 78% at 74% 48%, rgba(124,58,237,0.10) 0%, transparent 70%)',
           }}
         />
         <div
-          className="absolute inset-x-[-10%] bottom-[-6%] h-[32%] blur-[120px]"
+          className="absolute inset-x-[-10%] bottom-[-6%] h-[32%] blur-[60px]"
           style={{
             background:
-              'radial-gradient(48% 68% at 50% 60%, rgba(34,211,238,0.045) 0%, transparent 66%)',
+              'radial-gradient(48% 68% at 50% 60%, rgba(34,211,238,0.06) 0%, transparent 66%)',
           }}
         />
       </div>
