@@ -26,12 +26,6 @@ function AuthInput({
 }) {
   return (
     <div className="relative">
-      {Icon && (
-        <Icon
-          size={13}
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/32"
-        />
-      )}
       <input
         {...props}
         className={cn(
@@ -42,12 +36,20 @@ function AuthInput({
           error
             ? 'border-red-400/40 focus:border-red-400/60'
             : 'border-white/[0.12] focus:border-violet-400/55',
-          Icon ? 'pl-9 pr-3.5' : 'px-3.5',
+          Icon ? 'pl-10 pr-3.5' : 'px-3.5',
           right ? '!pr-10' : ''
         )}
       />
+      {Icon && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center text-white/40"
+        >
+          <Icon size={14} strokeWidth={2.05} absoluteStrokeWidth />
+        </span>
+      )}
       {right && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">{right}</div>
+        <div className="absolute inset-y-0 right-3 z-10 flex items-center">{right}</div>
       )}
     </div>
   )

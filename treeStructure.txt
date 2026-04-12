@@ -1,0 +1,256 @@
+Project Structure Report
+Root: Main-Site
+Excluded directories: node_modules, dist, build, .git, .next, coverage, .vercel, .claude
+
+Main-Site/
+|-- public/
+|   |-- assets/
+|   |   |-- brand/
+|   |   |   \-- .gitkeep
+|   |   |-- customers/
+|   |   |   \-- .gitkeep
+|   |   |-- gallery/
+|   |   |   |-- behind-the-scenes/
+|   |   |   |   \-- .gitkeep
+|   |   |   |-- events-2025-amman/
+|   |   |   |   \-- .gitkeep
+|   |   |   \-- product-shots/
+|   |   |       \-- .gitkeep
+|   |   |-- products/
+|   |   |   |-- bike-beam/
+|   |   |   |   \-- .gitkeep
+|   |   |   |-- bike-blender/
+|   |   |   |   \-- .gitkeep
+|   |   |   |-- bike-branding/
+|   |   |   |   \-- .gitkeep
+|   |   |   |-- bike-race/
+|   |   |   |   \-- .gitkeep
+|   |   |   |-- bike-tower/
+|   |   |   |   \-- .gitkeep
+|   |   |   \-- bike-vr/
+|   |   |       \-- .gitkeep
+|   |   \-- videos/
+|   |       \-- .gitkeep
+|   |-- images/
+|   |   \-- hero-bg-event.png
+|   |-- _redirects
+|   \-- robots.txt
+|-- src/
+|   |-- components/
+|   |   |-- admin/
+|   |   |   |-- AdminActionButton.tsx
+|   |   |   |-- AdminAvatarEditor.tsx
+|   |   |   |-- AdminDetailModal.tsx
+|   |   |   |-- AdminEditorWorkspace.tsx
+|   |   |   |-- AdminEntityCard.tsx
+|   |   |   |-- AdminPageHeader.tsx
+|   |   |   |-- AdminStatCard.tsx
+|   |   |   |-- AdminViewToggle.tsx
+|   |   |   |-- Sidebar.tsx
+|   |   |   \-- useAdminCardView.ts
+|   |   |-- auth/
+|   |   |   \-- AuthCharacters.tsx
+|   |   |-- contact/
+|   |   |   |-- ContactActions.tsx
+|   |   |   \-- ContactForm.tsx
+|   |   |-- customer/
+|   |   |   |-- CustomerCard.tsx
+|   |   |   \-- CustomersGrid.tsx
+|   |   |-- gallery/
+|   |   |   |-- AlbumCard.tsx
+|   |   |   |-- GalleryGrid.tsx
+|   |   |   \-- Lightbox.tsx
+|   |   |-- home/
+|   |   |   |-- FeaturedProducts.tsx
+|   |   |   |-- Hero.tsx
+|   |   |   |-- LogoCloud.tsx
+|   |   |   |-- OfferSection.tsx
+|   |   |   \-- StatsStrip.tsx
+|   |   |-- layout/
+|   |   |   |-- Footer.tsx
+|   |   |   |-- Navbar.tsx
+|   |   |   \-- PageContainer.tsx
+|   |   |-- product/
+|   |   |   |-- ProductCard.tsx
+|   |   |   |-- ProductCommerceActions.tsx
+|   |   |   |-- ProductFeatures.tsx
+|   |   |   |-- ProductGallery.tsx
+|   |   |   \-- ProductOptions.tsx
+|   |   |-- requests/
+|   |   |   |-- RequestContactFields.tsx
+|   |   |   |-- RequestListCard.tsx
+|   |   |   \-- RequestStatusBadge.tsx
+|   |   |-- store/
+|   |   |   \-- PricingCard.tsx
+|   |   |-- theme/
+|   |   |   |-- AnimatedBackground.tsx
+|   |   |   \-- ThemeToggle.tsx
+|   |   |-- ui/
+|   |   |   |-- AvatarPicker.tsx
+|   |   |   |-- Badge.tsx
+|   |   |   |-- Button.tsx
+|   |   |   |-- Chip.tsx
+|   |   |   |-- FramedImage.tsx
+|   |   |   |-- FramedVideo.tsx
+|   |   |   |-- header-3.tsx
+|   |   |   |-- ImageUploader.tsx
+|   |   |   |-- Input.tsx
+|   |   |   |-- MediaPlacementModal.tsx
+|   |   |   |-- menu-toggle-icon.tsx
+|   |   |   |-- Modal.tsx
+|   |   |   |-- navigation-menu.tsx
+|   |   |   |-- PageLoader.tsx
+|   |   |   |-- ProductSkeleton.tsx
+|   |   |   |-- SearchDialog.tsx
+|   |   |   |-- Select.tsx
+|   |   |   |-- spotlight-card.tsx
+|   |   |   |-- Textarea.tsx
+|   |   |   |-- UserAvatar.tsx
+|   |   |   \-- VideoUploader.tsx
+|   |   |-- AdminGuard.tsx
+|   |   |-- ErrorBoundary.tsx
+|   |   \-- PerfClass.tsx
+|   |-- contexts/
+|   |   |-- AuthContext.tsx
+|   |   |-- DataContext.tsx
+|   |   |-- DialogContext.tsx
+|   |   |-- PurchaseQuoteContext.tsx
+|   |   |-- RentalCartContext.tsx
+|   |   |-- SessionContext.tsx
+|   |   |-- ThemeContext.tsx
+|   |   |-- ToastContext.tsx
+|   |   \-- UserContext.tsx
+|   |-- data/
+|   |   |-- products/
+|   |   |   |-- index.ts
+|   |   |   \-- types.ts
+|   |   |-- customers.ts
+|   |   |-- defaults.ts
+|   |   |-- events.ts
+|   |   |-- gallery.ts
+|   |   |-- locations.ts
+|   |   |-- social.ts
+|   |   \-- testimonials.ts
+|   |-- hooks/
+|   |   |-- useBodyScrollLock.ts
+|   |   |-- useLocalStorage.ts
+|   |   |-- useMotionEnabled.ts
+|   |   |-- usePageMeta.ts
+|   |   |-- usePerfMode.ts
+|   |   |-- useRateLimit.ts
+|   |   |-- useRequireAuthAction.ts
+|   |   |-- useReveal.ts
+|   |   \-- useSmoothScroll.ts
+|   |-- lib/
+|   |   |-- auth-routing.ts
+|   |   |-- avatar.ts
+|   |   |-- database.types.ts
+|   |   |-- errors.ts
+|   |   |-- profile-sync.ts
+|   |   \-- supabase.ts
+|   |-- pages/
+|   |   |-- admin/
+|   |   |   |-- AdminAdminsPage.tsx
+|   |   |   |-- AdminCategoriesPage.tsx
+|   |   |   |-- AdminCustomersPage.tsx
+|   |   |   |-- AdminGalleryPage.tsx
+|   |   |   |-- AdminLayout.tsx
+|   |   |   |-- AdminLogsPage.tsx
+|   |   |   |-- AdminPartsPage.tsx
+|   |   |   |-- AdminProductsPage.tsx
+|   |   |   |-- AdminRequestDetailsPage.tsx
+|   |   |   |-- AdminRequestsPage.tsx
+|   |   |   |-- AdminUsersPage.tsx
+|   |   |   \-- DashboardPage.tsx
+|   |   |-- AboutPage.tsx
+|   |   |-- AuthCallback.tsx
+|   |   |-- AuthPage.tsx
+|   |   |-- CheckoutPage.tsx
+|   |   |-- ContactPage.tsx
+|   |   |-- CustomersPage.tsx
+|   |   |-- GalleryPage.tsx
+|   |   |-- HomePage.tsx
+|   |   |-- LoginPage.tsx
+|   |   |-- MyRequestDetailsPage.tsx
+|   |   |-- MyRequestsPage.tsx
+|   |   |-- NotFoundPage.tsx
+|   |   |-- OrderSummaryPage.tsx
+|   |   |-- ProductDetailsPage.tsx
+|   |   |-- ProductsPage.tsx
+|   |   |-- ProfilePage.tsx
+|   |   |-- PurchaseQuotePage.tsx
+|   |   |-- RegisterPage.tsx
+|   |   |-- RentalCartPage.tsx
+|   |   \-- ResetPasswordPage.tsx
+|   |-- services/
+|   |   |-- admin-requests.service.ts
+|   |   |-- availability.service.ts
+|   |   |-- categories.service.ts
+|   |   |-- contact.service.ts
+|   |   |-- customers.service.ts
+|   |   |-- gallery.service.ts
+|   |   |-- logs.service.ts
+|   |   |-- parts.service.ts
+|   |   |-- products.service.ts
+|   |   |-- profile.service.ts
+|   |   |-- purchase-quotes.service.ts
+|   |   |-- rental-requests.service.ts
+|   |   |-- request-counts.service.ts
+|   |   |-- request-history.service.ts
+|   |   \-- storage.service.ts
+|   |-- styles/
+|   |   |-- input.css
+|   |   \-- site.css
+|   |-- types/
+|   |   \-- commerce.ts
+|   |-- utils/
+|   |   |-- cn.ts
+|   |   |-- commerce.ts
+|   |   |-- format.ts
+|   |   |-- media-frame.ts
+|   |   |-- product-order.ts
+|   |   |-- scroll.ts
+|   |   \-- validators.ts
+|   |-- App.tsx
+|   |-- components.zip
+|   |-- main.tsx
+|   |-- router.tsx
+|   \-- vite-env.d.ts
+|-- supabase/
+|   |-- functions/
+|   |   |-- invite-admin/
+|   |   |   \-- index.ts
+|   |   \-- remove-admin/
+|   |       \-- index.ts
+|   |-- migrations/
+|   |   |-- 20260401_contact_submissions_general_inquiry.sql
+|   |   |-- 20260401_profiles_avatar_auth_fix.sql
+|   |   |-- 20260401_profiles_avatar_url_support.sql
+|   |   |-- 20260401_rental_commerce.sql
+|   |   |-- 20260401_request_approval_and_admin_avatar_fix.sql
+|   |   \-- 20260402_auth_admin_rpc_and_contact_rls.sql
+|   |-- migration.sql
+|   |-- rental-commerce.sql
+|   |-- rls-policies.sql
+|   \-- schema.sql
+|-- .env
+|-- .gitignore
+|-- dropdown-desktop-hover.png
+|-- dropdown-tablet-hover.png
+|-- hero-page.png
+|-- hero-page-after.png
+|-- index.html
+|-- main.tsx
+|-- navbar-desktop-after.png
+|-- package.json
+|-- package-lock.json
+|-- postcss.config.js
+|-- preview.log
+|-- README.md
+|-- router.tsx
+|-- tailwind.config.js
+|-- treeStructure.txt
+|-- tsconfig.app.json
+|-- tsconfig.json
+|-- vite.config.ts
+\-- vite-env.d.ts
