@@ -1,4 +1,37 @@
-export default function PageLoader() {
+import { useEffect, useState } from 'react'
+
+export default function PageLoader({
+  mode = 'page',
+  delayMs = 0,
+}: {
+  mode?: 'page' | 'route'
+  delayMs?: number
+}) {
+  const [ready, setReady] = useState(delayMs === 0)
+
+  useEffect(() => {
+    if (delayMs === 0) {
+      setReady(true)
+      return
+    }
+
+    setReady(false)
+    const timeout = window.setTimeout(() => setReady(true), delayMs)
+    return () => window.clearTimeout(timeout)
+  }, [delayMs])
+
+  if (!ready) return null
+
+  if (mode === 'route') {
+    return (
+      <div className="pointer-events-none sticky top-[var(--app-navbar-height,0px)] z-20 -mt-1 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto h-1.5 max-w-[78rem] overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/8">
+          <div className="route-loader-bar h-full rounded-full bg-[linear-gradient(90deg,#7c3aed,#d946ef,#22d3ee)]" />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="text-center">

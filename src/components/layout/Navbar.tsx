@@ -385,13 +385,13 @@ export default function Navbar() {
   // ── Nav bar background ────────────────────────────────────────────────────
   const navBarBg = scrolled
     ? isDark
-      ? 'border-b border-white/[0.05] bg-[rgba(2,4,12,0.96)] backdrop-blur-2xl shadow-[0_2px_48px_rgba(0,0,0,0.55),inset_0_-1px_0_rgba(124,58,237,0.06)]'
-      : 'border-b border-violet-200/35 bg-white/97 backdrop-blur-xl shadow-[0_2px_24px_rgba(124,58,237,0.07)]'
+      ? 'border-b border-white/[0.05] bg-[rgba(2,4,12,0.94)] backdrop-blur-xl shadow-[0_2px_40px_rgba(0,0,0,0.5),inset_0_-1px_0_rgba(124,58,237,0.05)]'
+      : 'border-b border-violet-200/35 bg-white/96 backdrop-blur-md shadow-[0_2px_20px_rgba(124,58,237,0.06)]'
     : isHome
       ? ''
       : isDark
-        ? 'border-b border-white/[0.04] bg-[rgba(3,5,14,0.80)] backdrop-blur-lg'
-        : 'border-b border-violet-100/40 bg-white/80 backdrop-blur-md'
+        ? 'border-b border-white/[0.04] bg-[rgba(3,5,14,0.78)] backdrop-blur-md'
+        : 'border-b border-violet-100/40 bg-white/78 backdrop-blur-sm'
 
   // ── Utility pill (search, login) ───────────────────────────────────────────
   const utilityPill = heroMode
@@ -953,8 +953,8 @@ export default function Navbar() {
                       : 'border-violet-200/65 bg-white/97 shadow-[0_16px_48px_rgba(97,40,178,0.11)]'
                   }`}
                   style={{
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
                     maxHeight: 'calc(100dvh - 5.5rem)',
                     paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))',
                   }}
@@ -1220,7 +1220,7 @@ export default function Navbar() {
                       ? 'border-white/[0.08] bg-[rgba(7,9,22,0.92)] shadow-[0_24px_72px_rgba(0,2,10,0.56),inset_0_1px_0_rgba(255,255,255,0.04)]'
                       : 'border-violet-200/75 bg-white/94 shadow-[0_18px_56px_rgba(97,40,178,0.10),0_4px_18px_rgba(0,0,0,0.03)]'
                   }`}
-                  style={{ backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)' }}
+                  style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
                 >
                   {/* Top accent line */}
                   <div
@@ -1392,8 +1392,8 @@ export default function Navbar() {
                 style={{
                   top: `${userMenuPosition.top}px`,
                   left: `${userMenuPosition.left}px`,
-                  backdropFilter: 'blur(28px)',
-                  WebkitBackdropFilter: 'blur(28px)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
                 }}
               >
                 {/* Top accent */}

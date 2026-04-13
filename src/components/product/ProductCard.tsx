@@ -1,11 +1,11 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Play } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { Product } from '../../data/products/types'
 import { useMotionEnabled } from '../../hooks/useMotionEnabled'
-import { useReveal } from '../../hooks/useReveal'
+import { useRevealWithMotion } from '../../hooks/useReveal'
 import FramedImage from '../ui/FramedImage'
 import FramedVideo from '../ui/FramedVideo'
 import ProductCommerceActions from './ProductCommerceActions'
@@ -17,19 +17,25 @@ const CARD_IMAGE_SIZES = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25v
 const ProductCard = memo(function ProductCard({
   product,
   index = 0,
+  revealOnScroll = true,
+  imageLoading = 'lazy',
+  imageFetchPriority = 'auto',
 }: {
   product: Product
   index?: number
+  revealOnScroll?: boolean
+  imageLoading?: 'eager' | 'lazy'
+  imageFetchPriority?: 'high' | 'auto'
 }) {
   const { isDark } = useTheme()
-  const reducedMotion = useReducedMotion()
   const motionEnabled = useMotionEnabled()
-  const reveal = useReveal({
+  const reveal = useRevealWithMotion(motionEnabled, {
     distance: 18,
-    duration: 0.46,
+    duration: 0.4,
     delay: Math.min(index * 0.04, 0.16),
-    margin: '-18px',
+    margin: '0px 0px 10% 0px',
   })
+  const revealProps = revealOnScroll ? reveal : { initial: false as const }
 
   const cardRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -38,7 +44,6 @@ const ProductCard = memo(function ProductCard({
   const [isPlaying, setIsPlaying] = useState(false)
 
   const hasVideo = Boolean(product.videoUrl)
-  const allowPreviewMotion = motionEnabled && !reducedMotion
 
   const isTouchDevice = useMemo(
     () =>
@@ -75,7 +80,7 @@ const ProductCard = memo(function ProductCard({
   }, [hasVideo])
 
   const startPreview = () => {
-    if (!hasVideo || isTouchDevice || reducedMotion) return
+    if (!hasVideo || isTouchDevice || !motionEnabled) return
 
     const video = videoRef.current
     if (!video) return
@@ -97,7 +102,7 @@ const ProductCard = memo(function ProductCard({
 
   return (
     <motion.article
-      {...reveal}
+      {...revealProps}
       ref={cardRef}
       onMouseEnter={startPreview}
       onMouseLeave={stopPreview}
@@ -109,7 +114,6 @@ const ProductCard = memo(function ProductCard({
           ? 'border border-white/[0.08] bg-[linear-gradient(168deg,rgba(16,13,34,0.97),rgba(9,9,26,0.98))] hover:border-violet-400/[0.26] hover:shadow-[0_28px_64px_-18px_rgba(124,58,237,0.3),0_0_0_1px_rgba(124,58,237,0.10)]'
           : 'border border-slate-200/80 bg-white hover:border-violet-300/65 hover:shadow-[0_24px_52px_-16px_rgba(139,92,246,0.22)]'
       )}
-      style={{ willChange: allowPreviewMotion ? 'transform' : 'auto' }}
     >
       <SpotlightOverlay ref={spotlight.overlayRef} className="z-[11]" />
 
@@ -131,7 +135,8 @@ const ProductCard = memo(function ProductCard({
         <FramedImage
           media={product.heroImage}
           alt={product.name}
-          loading="lazy"
+          loading={imageLoading}
+          fetchPriority={imageFetchPriority}
           sizes={CARD_IMAGE_SIZES}
           revealMode="crisp"
           className={cn(

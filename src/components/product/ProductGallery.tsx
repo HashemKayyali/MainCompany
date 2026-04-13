@@ -93,7 +93,8 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
                 <FramedImage
                   media={images[activeImageIndex]}
                   alt={`${name} — photo ${activeImageIndex + 1}`}
-                  loading="lazy"
+                  loading="eager"
+                  fetchPriority="high"
                   className="h-full w-full object-cover"
                   fallbackTransform={{ fit: 'cover' }}
                   onError={e => {

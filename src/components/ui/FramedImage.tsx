@@ -47,7 +47,7 @@ const FramedImage = memo(
       media = '',
       fallbackTransform,
       extraScale,
-      revealMode = 'soft',
+      revealMode = 'crisp',
       style,
       className,
       loading = 'lazy',

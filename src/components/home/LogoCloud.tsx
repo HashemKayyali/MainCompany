@@ -97,8 +97,8 @@ export default function LogoCloud({ customers }: Props) {
           dir="ltr"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          viewport={{ once: true, margin: '0px 0px 10% 0px' }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="mb-9 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
         >
           <div>
@@ -141,8 +141,8 @@ export default function LogoCloud({ customers }: Props) {
           dir="ltr"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: '-40px' }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          viewport={{ once: true, margin: '0px 0px 8% 0px' }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className={`relative overflow-hidden rounded-[22px] border py-6 sm:py-7 ${
             isDark
               ? 'border-white/[0.07] bg-[linear-gradient(180deg,rgba(10,8,26,0.72),rgba(6,6,18,0.54))] shadow-[0_24px_72px_rgba(2,2,14,0.32),inset_0_1px_0_rgba(255,255,255,0.03)]'

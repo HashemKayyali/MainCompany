@@ -146,8 +146,8 @@
   /* ─── Glass surface ─── */
   .glass {
     border-radius: 16px;
-    backdrop-filter: blur(10px) saturate(1.2);
-    -webkit-backdrop-filter: blur(10px) saturate(1.2);
+    backdrop-filter: blur(8px) saturate(1.15);
+    -webkit-backdrop-filter: blur(8px) saturate(1.15);
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
@@ -699,7 +699,6 @@
   .card-surface {
     border-radius: 22px;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    will-change: transform;
   }
 
   html.dark .card-surface {
@@ -775,8 +774,7 @@
   .stats-marquee__inner {
     display: flex;
     width: max-content;
-    animation: stats-marquee-scroll 28s linear infinite;
-    will-change: transform;
+    animation: stats-marquee-scroll 36s linear infinite;
   }
 
   @media (hover: hover) {
@@ -815,7 +813,6 @@
   .logo-cloud-row {
     display: flex;
     width: max-content;
-    will-change: transform;
     user-select: none;
     -webkit-user-select: none;
     transform: translate3d(0, 0, 0);
@@ -823,11 +820,11 @@
   }
 
   .logo-cloud-row--fwd {
-    animation: logo-cloud-fwd 36s linear infinite;
+    animation: logo-cloud-fwd 48s linear infinite;
   }
 
   .logo-cloud-row--rev {
-    animation: logo-cloud-rev 40s linear infinite;
+    animation: logo-cloud-rev 52s linear infinite;
   }
 
   @media (hover: hover) {
@@ -838,30 +835,30 @@
 
   @media (max-width: 640px) {
     .logo-cloud-row--fwd {
-      animation-duration: 42s;
+      animation-duration: 54s;
     }
 
     .logo-cloud-row--rev {
-      animation-duration: 46s;
+      animation-duration: 58s;
     }
   }
 
   /* Keep the logo cloud alive on low-end/mobile devices, but slow it down. */
   html.perf-low .logo-cloud-row--fwd {
-    animation-duration: 48s;
+    animation-duration: 60s;
   }
 
   html.perf-low .logo-cloud-row--rev {
-    animation-duration: 54s;
+    animation-duration: 66s;
   }
 
   @media (max-width: 640px) {
     html.perf-low .logo-cloud-row--fwd {
-      animation-duration: 52s;
+      animation-duration: 64s;
     }
 
     html.perf-low .logo-cloud-row--rev {
-      animation-duration: 58s;
+      animation-duration: 72s;
     }
   }
 

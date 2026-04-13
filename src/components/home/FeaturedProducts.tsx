@@ -62,8 +62,8 @@ export default function FeaturedProducts() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
-              transition={{ duration: 0.6, ease }}
+              viewport={{ once: true, margin: '0px 0px 12% 0px' }}
+              transition={{ duration: 0.5, ease }}
             >
               <div className="mb-3 flex items-center gap-2.5">
                 <span className="section-label">// Featured</span>
@@ -96,12 +96,18 @@ export default function FeaturedProducts() {
             variants={container}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true, margin: '-80px' }}
+            viewport={{ once: true, margin: '0px 0px 12% 0px' }}
             className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:gap-5"
           >
             {items.map((p, i) => (
               <motion.div key={p.slug} variants={item} className="h-full">
-                <ProductCard product={p} index={i} />
+                <ProductCard
+                  product={p}
+                  index={i}
+                  revealOnScroll={false}
+                  imageLoading={i < 3 ? 'eager' : 'lazy'}
+                  imageFetchPriority={i < 3 ? 'high' : 'auto'}
+                />
               </motion.div>
             ))}
           </motion.div>

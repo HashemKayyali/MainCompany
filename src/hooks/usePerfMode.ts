@@ -1,46 +1,95 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 
-/**
- * Lightweight heuristic to switch UI into "low" mode.
- * هدفها: تقليل استهلاك CPU/GPU (خصوصاً على الموبايل/اللابتوبات الضعيفة).
- */
+type PerfModeSnapshot = {
+  perfLow: boolean
+  prefersReducedMotion: boolean
+  saveData: boolean
+}
+
+const DEFAULT_SNAPSHOT: PerfModeSnapshot = {
+  perfLow: false,
+  prefersReducedMotion: false,
+  saveData: false,
+}
+
+let snapshot = DEFAULT_SNAPSHOT
+let initialized = false
+
+const listeners = new Set<() => void>()
+
+function computeSnapshot(): PerfModeSnapshot {
+  if (typeof window === 'undefined') return DEFAULT_SNAPSHOT
+
+  const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
+  const prefersReducedMotion = !!mq?.matches
+
+  const nav: any = navigator
+  const conn: any = nav?.connection
+  const saveData = !!conn?.saveData
+  const dm = Number(nav?.deviceMemory || 0)
+  const hc = Number(nav?.hardwareConcurrency || 0)
+  const eff = String(conn?.effectiveType || '')
+
+  const lowCPU = hc > 0 && hc <= 4
+  const lowRAM = dm > 0 && dm <= 4
+  const slowNet = /2g/.test(eff)
+
+  return {
+    prefersReducedMotion,
+    saveData,
+    perfLow: prefersReducedMotion || saveData || lowCPU || lowRAM || slowNet,
+  }
+}
+
+function emitSnapshot(nextSnapshot: PerfModeSnapshot) {
+  if (
+    snapshot.perfLow === nextSnapshot.perfLow &&
+    snapshot.prefersReducedMotion === nextSnapshot.prefersReducedMotion &&
+    snapshot.saveData === nextSnapshot.saveData
+  ) {
+    return
+  }
+
+  snapshot = nextSnapshot
+  listeners.forEach(listener => listener())
+}
+
+function ensureInitialized() {
+  if (initialized || typeof window === 'undefined') return
+  initialized = true
+
+  const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
+  const conn: any = (navigator as any)?.connection
+  const updateSnapshot = () => emitSnapshot(computeSnapshot())
+
+  updateSnapshot()
+
+  if (typeof mq?.addEventListener === 'function') {
+    mq.addEventListener('change', updateSnapshot)
+  } else {
+    mq?.addListener?.(updateSnapshot)
+  }
+
+  conn?.addEventListener?.('change', updateSnapshot)
+}
+
+function subscribe(listener: () => void) {
+  ensureInitialized()
+  listeners.add(listener)
+  return () => {
+    listeners.delete(listener)
+  }
+}
+
+function getSnapshot() {
+  ensureInitialized()
+  return snapshot
+}
+
+function getServerSnapshot() {
+  return DEFAULT_SNAPSHOT
+}
+
 export function usePerfMode() {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
-  const [saveData, setSaveData] = useState(false)
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
-    const onMQ = () => setPrefersReducedMotion(!!mq?.matches)
-    onMQ()
-    mq?.addEventListener?.('change', onMQ)
-
-    const conn: any = (navigator as any).connection
-    const onConn = () => setSaveData(!!conn?.saveData)
-    onConn()
-    conn?.addEventListener?.('change', onConn)
-
-    return () => {
-      mq?.removeEventListener?.('change', onMQ)
-      conn?.removeEventListener?.('change', onConn)
-    }
-  }, [])
-
-  const perfLow = useMemo(() => {
-    if (typeof window === 'undefined') return false
-    const nav: any = navigator
-    const dm = Number(nav?.deviceMemory || 0) // GB (Chrome/Edge)
-    const hc = Number(nav?.hardwareConcurrency || 0)
-    const conn: any = nav?.connection
-    const eff = String(conn?.effectiveType || '')
-
-    const lowCPU = hc > 0 && hc <= 4
-    const lowRAM = dm > 0 && dm <= 4
-    const slowNet = /2g/.test(eff)
-
-    return prefersReducedMotion || saveData || lowCPU || lowRAM || slowNet
-  }, [prefersReducedMotion, saveData])
-
-  return { perfLow, prefersReducedMotion, saveData }
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }

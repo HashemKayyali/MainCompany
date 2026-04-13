@@ -74,8 +74,8 @@ export default function AboutPage() {
   const anim = (delay = 0) => ({
     initial: { opacity: 0, y: 24 } as const,
     whileInView: { opacity: 1, y: 0 } as const,
-    viewport: { once: true, margin: '-80px' } as const,
-    transition: { duration: 0.65, delay, ease },
+    viewport: { once: true, margin: '0px 0px 10% 0px' } as const,
+    transition: { duration: 0.5, delay, ease },
   })
 
   return (

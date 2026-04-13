@@ -1,6 +1,5 @@
 import { type CSSProperties, type ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import Navbar from './Navbar'
 import Footer from './Footer'
 import AnimatedBackground from '../theme/AnimatedBackground'
@@ -34,17 +33,13 @@ export default function PageContainer({ children }: { children: ReactNode }) {
       >
         <Navbar />
 
-        <motion.main
+        <main
           id="main-content"
-          key={pathname}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="flex-1 min-w-0 overflow-y-visible"
           style={{ paddingTop: isHome ? 0 : 'var(--app-header-offset)' }}
         >
           {children}
-        </motion.main>
+        </main>
 
         <Footer />
       </div>

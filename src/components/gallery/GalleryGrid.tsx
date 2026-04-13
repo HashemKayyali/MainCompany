@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { GalleryAlbum } from '../../data/gallery'
-import { getDeferredRenderStyle, useRevealGroup } from '../../hooks/useReveal'
+import { useRevealGroup } from '../../hooks/useReveal'
 import FramedImage from '../ui/FramedImage'
 
 export default function GalleryGrid({
@@ -14,16 +14,15 @@ export default function GalleryGrid({
   const { isDark } = useTheme()
   const { containerProps, itemProps } = useRevealGroup({
     distance: 14,
-    stagger: 0.03,
-    delayChildren: 0.02,
-    margin: '-28px',
+    stagger: 0.02,
+    delayChildren: 0,
+    margin: '0px 0px 10% 0px',
   })
 
   return (
     <motion.div
       {...containerProps}
       className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
-      style={getDeferredRenderStyle('860px')}
     >
       {albums.map(album => (
         <motion.div key={album.slug} {...itemProps}>

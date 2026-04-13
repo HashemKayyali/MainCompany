@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { useLocation, useNavigationType } from 'react-router-dom'
 import Lenis from 'lenis'
 import { usePerfMode } from './usePerfMode'
 
@@ -10,11 +10,14 @@ declare global {
 }
 
 const smoothEase = (t: number) => 1 - Math.pow(1 - t, 3.2)
+const scrollPositions = new Map<string, number>()
 
 export function useSmoothScroll(enabled = true) {
-  const { pathname } = useLocation()
+  const location = useLocation()
+  const navigationType = useNavigationType()
   const { perfLow, prefersReducedMotion } = usePerfMode()
   const shouldEnable = enabled && !perfLow && !prefersReducedMotion
+  const previousKeyRef = useRef(location.key)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -29,13 +32,13 @@ export function useSmoothScroll(enabled = true) {
       autoRaf: true,
       smoothWheel: true,
       syncTouch: false,
-      duration: 1.05,
-      lerp: 0.082,
+      duration: 0.72,
+      lerp: 0.14,
       easing: smoothEase,
-      wheelMultiplier: 0.92,
+      wheelMultiplier: 1,
       touchMultiplier: 1,
       overscroll: true,
-      anchors: { duration: 0.85, easing: smoothEase },
+      anchors: { duration: 0.55, easing: smoothEase },
       stopInertiaOnNavigate: true,
       prevent: node =>
         Boolean(node.closest('[data-native-scroll], [data-lenis-prevent], [role="dialog"]')),
@@ -76,22 +79,30 @@ export function useSmoothScroll(enabled = true) {
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    if (!shouldEnable || !window.__appLenis) {
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
-      return
+    const previousKey = previousKeyRef.current
+    if (previousKey !== location.key) {
+      scrollPositions.set(previousKey, window.scrollY)
+      previousKeyRef.current = location.key
     }
 
-    const scrollToTop = () => {
-      window.__appLenis?.scrollTo(0, { immediate: true, force: true })
+    const restoreScroll = (top: number) => {
+      if (shouldEnable && window.__appLenis) {
+        window.__appLenis.scrollTo(top, { immediate: true, force: true })
+        return
+      }
+
+      window.scrollTo({ top, left: 0, behavior: 'auto' })
     }
 
-    scrollToTop()
-    const frame = window.requestAnimationFrame(scrollToTop)
-    const timeout = window.setTimeout(scrollToTop, 50)
+    const nextTop =
+      navigationType === 'POP'
+        ? scrollPositions.get(location.key) ?? 0
+        : 0
+
+    const frame = window.requestAnimationFrame(() => restoreScroll(nextTop))
 
     return () => {
       window.cancelAnimationFrame(frame)
-      window.clearTimeout(timeout)
     }
-  }, [pathname, shouldEnable])
+  }, [location.key, navigationType, shouldEnable])
 }

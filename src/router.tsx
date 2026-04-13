@@ -38,7 +38,7 @@ const AdminRequestsPage = lazy(() => import('./pages/admin/AdminRequestsPage'))
 const AdminRequestDetailsPage = lazy(() => import('./pages/admin/AdminRequestDetailsPage'))
 
 function S({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={<PageLoader />}>{children}</Suspense>
+  return <Suspense fallback={<PageLoader mode="route" delayMs={140} />}>{children}</Suspense>
 }
 
 function UserLoginRedirect() {

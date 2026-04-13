@@ -8,7 +8,7 @@ function sr(seed: number): number {
   return x - Math.floor(x)
 }
 
-const STAR_COUNT = 160
+const STAR_COUNT = 96
 const STARS = Array.from({ length: STAR_COUNT }, (_, i) => ({
   id: i,
   x: sr(i) * 100,
@@ -49,10 +49,6 @@ const METEORS = [
   { id: 2, top: '2%',  left: '56%', delay: '5.2s',   dur: '7.6s',  color: 'violet' },
   { id: 3, top: '28%', left: '93%', delay: '7.8s',   dur: '6.4s',  color: 'cyan'   },
   { id: 4, top: '11%', left: '44%', delay: '10.8s',  dur: '7s',    color: 'violet' },
-  { id: 5, top: '38%', left: '81%', delay: '14s',    dur: '5.4s',  color: 'cyan'   },
-  { id: 6, top: '6%',  left: '31%', delay: '17.2s',  dur: '6.8s',  color: 'violet' },
-  { id: 7, top: '22%', left: '62%', delay: '20s',    dur: '7.2s',  color: 'cyan'   },
-  { id: 8, top: '45%', left: '95%', delay: '23.5s',  dur: '5.9s',  color: 'violet' },
 ]
 
 // ── Grid textures ──────────────────────────────────────────────────────────
@@ -142,7 +138,7 @@ export default function AnimatedBackground({ position = 'fixed', className = '' 
           width: '72%', height: '62%',
           background:
             'radial-gradient(ellipse, rgba(139,58,255,0.38) 0%, rgba(109,40,217,0.18) 32%, rgba(76,29,149,0.08) 58%, transparent 78%)',
-          filter: 'blur(60px)',
+          filter: 'blur(44px)',
         }}
       />
       {/* Cyan arc — right */}
@@ -153,7 +149,7 @@ export default function AnimatedBackground({ position = 'fixed', className = '' 
           width: '62%', height: '56%',
           background:
             'radial-gradient(ellipse, rgba(6,210,240,0.28) 0%, rgba(6,182,212,0.13) 38%, rgba(8,145,178,0.06) 62%, transparent 78%)',
-          filter: 'blur(70px)',
+          filter: 'blur(52px)',
         }}
       />
       {/* Pink/magenta — lower-center */}
@@ -164,7 +160,7 @@ export default function AnimatedBackground({ position = 'fixed', className = '' 
           width: '66%', height: '48%',
           background:
             'radial-gradient(ellipse, rgba(220,50,180,0.22) 0%, rgba(236,72,153,0.10) 42%, transparent 68%)',
-          filter: 'blur(80px)',
+          filter: 'blur(60px)',
         }}
       />
       {/* Violet accent — lower-right */}
@@ -175,7 +171,7 @@ export default function AnimatedBackground({ position = 'fixed', className = '' 
           width: '48%', height: '42%',
           background:
             'radial-gradient(ellipse, rgba(139,92,246,0.22) 0%, rgba(124,58,237,0.09) 44%, transparent 68%)',
-          filter: 'blur(64px)',
+          filter: 'blur(48px)',
         }}
       />
       {/* Indigo bloom — center-left */}
@@ -186,7 +182,7 @@ export default function AnimatedBackground({ position = 'fixed', className = '' 
           width: '50%', height: '40%',
           background:
             'radial-gradient(ellipse, rgba(79,44,200,0.18) 0%, rgba(60,30,160,0.08) 50%, transparent 72%)',
-          filter: 'blur(88px)',
+          filter: 'blur(64px)',
         }}
       />
       {/* Bright cyan — upper-center */}
@@ -197,7 +193,7 @@ export default function AnimatedBackground({ position = 'fixed', className = '' 
           width: '38%', height: '32%',
           background:
             'radial-gradient(ellipse, rgba(34,211,238,0.16) 0%, rgba(6,182,212,0.07) 50%, transparent 70%)',
-          filter: 'blur(50px)',
+          filter: 'blur(36px)',
         }}
       />
       {/* Rose accent — upper-right */}
@@ -208,7 +204,7 @@ export default function AnimatedBackground({ position = 'fixed', className = '' 
           width: '30%', height: '28%',
           background:
             'radial-gradient(ellipse, rgba(240,90,200,0.14) 0%, transparent 60%)',
-          filter: 'blur(44px)',
+          filter: 'blur(32px)',
         }}
       />
 

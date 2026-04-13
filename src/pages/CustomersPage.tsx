@@ -4,15 +4,15 @@ import { Link } from 'react-router-dom'
 import CustomersGrid from '../components/customer/CustomersGrid'
 import { useData } from '../contexts/DataContext'
 import { useTheme } from '../contexts/ThemeContext'
-import { getDeferredRenderStyle, useReveal } from '../hooks/useReveal'
+import { useReveal } from '../hooks/useReveal'
 import { usePageMeta } from '../hooks/usePageMeta'
 
 export default function CustomersPage() {
   const { customers } = useData()
   const { isDark } = useTheme()
-  const heroReveal = useReveal({ distance: 24, duration: 0.64, margin: '-32px' })
-  const toolbarReveal = useReveal({ delay: 0.06, distance: 18, duration: 0.46, margin: '-16px' })
-  const ctaReveal = useReveal({ distance: 20, duration: 0.54, margin: '-24px' })
+  const heroReveal = useReveal({ distance: 20, duration: 0.52, margin: '0px 0px 12% 0px' })
+  const toolbarReveal = useReveal({ delay: 0.03, distance: 14, duration: 0.38, margin: '0px 0px 8% 0px' })
+  const ctaReveal = useReveal({ distance: 16, duration: 0.42, margin: '0px 0px 10% 0px' })
 
   usePageMeta({
     title: 'Global Partners | Elite Network',
@@ -168,7 +168,6 @@ export default function CustomersPage() {
           <div
             className="rounded-[32px] border border-white/5 bg-white/[0.01] p-4 sm:p-8 md:p-12"
             style={{
-              ...getDeferredRenderStyle('780px'),
               boxShadow: isDark ? 'inset 0 1px 0 rgba(255,255,255,0.02)' : '',
             }}
           >
