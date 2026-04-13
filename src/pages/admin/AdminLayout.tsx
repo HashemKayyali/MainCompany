@@ -145,7 +145,7 @@ export default function AdminLayout() {
       )}
       style={layoutVars}
     >
-      <AnimatedBackground position="absolute" className="z-0 overflow-hidden" />
+      <AnimatedBackground position="absolute" className="z-0 overflow-hidden" variant="rich" />
 
       {open && (
         <div className="fixed inset-0 z-50 md:hidden">

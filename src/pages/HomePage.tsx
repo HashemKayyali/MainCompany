@@ -1,17 +1,16 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import Hero from '../components/home/Hero'
 import FeaturedProducts from '../components/home/FeaturedProducts'
 import LogoCloud from '../components/home/LogoCloud'
 import OfferSection from '../components/home/OfferSection'
 import StatsStrip from '../components/home/StatsStrip'
-import { useData } from '../contexts/DataContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { social } from '../data/social'
 import { usePageMeta } from '../hooks/usePageMeta'
-
-const ease = [0.16, 1, 0.3, 1] as const
+import { useReveal } from '../hooks/useReveal'
+import { preloadRoute } from '../utils/route-preload'
 
 export default function HomePage() {
   usePageMeta({
@@ -20,8 +19,8 @@ export default function HomePage() {
       'Premium event services marketplace in Jordan for discovering, comparing, and booking trusted vendors across categories.',
   })
 
-  const { customers } = useData()
   const { isDark } = useTheme()
+  const ctaReveal = useReveal({ distance: 18, duration: 0.42, margin: '0px 0px 16% 0px' })
 
   return (
     <>
@@ -36,30 +35,23 @@ export default function HomePage() {
       <FeaturedProducts />
       <OfferSection />
 
-      <LogoCloud customers={customers} />
+      <LogoCloud />
 
         {/* ── CTA ── */}
         <section className="site-section">
           <div className="mx-auto max-w-4xl px-4 sm:px-5">
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, ease }}
-            >
+            <motion.div {...ctaReveal}>
               <div
                 className={`relative overflow-hidden rounded-[28px] border px-6 py-11 text-center sm:px-10 sm:py-16 ${
                   isDark
-                    ? 'border-white/[0.08] bg-[linear-gradient(165deg,rgba(16,12,36,0.90),rgba(8,8,22,0.72))]'
+                    ? 'border-white/[0.08] bg-[linear-gradient(165deg,rgba(16,12,36,0.94),rgba(8,8,22,0.88))]'
                     : 'border-violet-100 bg-white'
                 }`}
                 style={
                   isDark
                     ? {
-                        backdropFilter: 'blur(10px)',
-                        WebkitBackdropFilter: 'blur(10px)',
                         boxShadow:
-                          '0 30px 80px rgba(2,6,18,0.38), inset 0 1px 0 rgba(255,255,255,0.05)',
+                          '0 24px 64px rgba(2,6,18,0.24), inset 0 1px 0 rgba(255,255,255,0.05)',
                       }
                     : { boxShadow: '0 20px 56px rgba(15,23,42,0.07)' }
                 }
@@ -126,6 +118,8 @@ export default function HomePage() {
                   <div className="mt-8 flex flex-wrap justify-center gap-3">
                     <Link
                       to="/contact"
+                      onMouseEnter={() => preloadRoute('/contact')}
+                      onFocus={() => preloadRoute('/contact')}
                       className="btn-primary !min-h-[48px] !rounded-[16px] !px-8 !text-[12px]"
                     >
                       Plan Your Event

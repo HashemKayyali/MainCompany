@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { createPortal } from 'react-dom'
@@ -24,7 +24,6 @@ import { useAuth } from '../../contexts/AuthContext'
 import { usePurchaseQuote } from '../../contexts/PurchaseQuoteContext'
 import { useRentalCart } from '../../contexts/RentalCartContext'
 import { useUser } from '../../contexts/UserContext'
-import { useData } from '../../contexts/DataContext'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import SearchDialog from '../ui/SearchDialog'
 import UserAvatar from '../ui/UserAvatar'
@@ -56,6 +55,75 @@ const MOBILE_NAV = [
   { to: '/gallery', label: 'Gallery' },
   { to: '/about', label: 'About' },
   { to: '/contact', label: 'Contact' },
+]
+
+const MOBILE_CHIPS = [
+  { to: '/', label: 'Home' },
+  { to: '/products', label: 'Explore' },
+  { to: '/customers', label: 'Customers' },
+  { to: '/gallery', label: 'Gallery' },
+  { to: '/about', label: 'Company' },
+] as const
+
+const DESKTOP_NAV: DesktopNavItem[] = [
+  { key: 'home', label: 'Home', to: '/' },
+  {
+    key: 'explore',
+    label: 'Explore',
+    children: [
+      {
+        to: '/products',
+        label: 'Products',
+        description: 'Rental-ready activations and premium event setups.',
+        icon: LayoutGrid,
+        meta: 'Catalog',
+      },
+      {
+        to: '/customers',
+        label: 'Customers',
+        description: 'Trusted brands, partners, and credibility highlights.',
+        icon: Users,
+        meta: 'Trusted',
+      },
+      {
+        to: '/gallery',
+        label: 'Gallery',
+        description: 'Recent visuals, setups, and standout moments.',
+        icon: GalleryVerticalEnd,
+        meta: 'Highlights',
+      },
+    ],
+    eyebrow: 'Discover',
+    title: 'Explore the marketplace',
+    body: 'Browse products, customer success, and real event visuals from a single polished surface.',
+    ctaLabel: 'See all services',
+    ctaTo: '/products',
+  },
+  {
+    key: 'company',
+    label: 'Company',
+    children: [
+      {
+        to: '/about',
+        label: 'About',
+        description: 'How the marketplace works and what shapes the experience.',
+        icon: ShieldCheck,
+        meta: 'Overview',
+      },
+      {
+        to: '/contact',
+        label: 'Contact',
+        description: 'Talk with our team about planning, procurement, and event execution.',
+        icon: MessageCircleMore,
+        meta: 'Reach us',
+      },
+    ],
+    eyebrow: 'Connect',
+    title: 'Meet the team behind Eventies',
+    body: 'Learn how we curate premium event services and how to get in touch for your next project.',
+    ctaLabel: 'Contact us',
+    ctaTo: '/contact',
+  },
 ]
 
 function getDesktopNavActive(
@@ -143,11 +211,165 @@ function IconCircle({
   return <span className={`${base} ${isDark ? 'border-white/10 bg-white/[0.04]' : 'border-violet-200/70 bg-white/70'}`}>{children}</span>
 }
 
+const DesktopPrimaryNav = memo(function DesktopPrimaryNav({
+  active,
+  canHoverDesktopNav,
+  desktopMenu,
+  desktopPanelFirstLinkRef,
+  focus,
+  navActivePill,
+  navLinkColor,
+  navTriggerColor,
+  openDesktopMenu,
+  scheduleDesktopClose,
+  setDesktopTriggerRef,
+}: {
+  active: (target: string) => boolean
+  canHoverDesktopNav: boolean
+  desktopMenu: string | null
+  desktopPanelFirstLinkRef: React.RefObject<HTMLAnchorElement | null>
+  focus: string
+  navActivePill: string
+  navLinkColor: (isActive: boolean) => string
+  navTriggerColor: (isActive: boolean, isOpen: boolean) => string
+  openDesktopMenu: (key: string, immediate?: boolean) => void
+  scheduleDesktopClose: (immediate?: boolean) => void
+  setDesktopTriggerRef: (key: string, node: HTMLElement | null) => void
+}) {
+  return (
+    <nav className="hidden flex-1 items-center justify-center lg:flex" aria-label="Main navigation">
+      <div className="flex items-center gap-0.5 rounded-xl px-1">
+        {DESKTOP_NAV.map(item => {
+          const isCurrent = getDesktopNavActive(item, active)
+          const isOpen = desktopMenu === item.key
+          const showPill = desktopMenu ? isOpen : isCurrent
+
+          if (item.to) {
+            return (
+              <Link
+                key={item.key}
+                ref={node => setDesktopTriggerRef(item.key, node)}
+                to={item.to}
+                aria-current={isCurrent ? 'page' : undefined}
+                className={`relative inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium tracking-[-0.01em] transition-all duration-200 ${navLinkColor(isCurrent)} ${focus}`}
+              >
+                {showPill && (
+                  <motion.div
+                    layoutId="desktop-nav-active"
+                    className={`absolute inset-0 rounded-md ${navActivePill}`}
+                    transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                  />
+                )}
+                <span className="relative z-10">{item.label}</span>
+              </Link>
+            )
+          }
+
+          return (
+            <button
+              key={item.key}
+              ref={node => setDesktopTriggerRef(item.key, node)}
+              type="button"
+              aria-expanded={isOpen}
+              aria-haspopup="menu"
+              onMouseEnter={() => {
+                if (canHoverDesktopNav) openDesktopMenu(item.key)
+              }}
+              onMouseLeave={() => {
+                if (canHoverDesktopNav) scheduleDesktopClose()
+              }}
+              onClick={e => {
+                if (!canHoverDesktopNav) {
+                  e.preventDefault()
+                  if (isOpen) scheduleDesktopClose(true)
+                  else openDesktopMenu(item.key, true)
+                  return
+                }
+
+                if (isOpen) scheduleDesktopClose(true)
+                else openDesktopMenu(item.key, true)
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Escape') {
+                  scheduleDesktopClose(true)
+                  return
+                }
+
+                if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+                  e.preventDefault()
+                  if (isOpen) desktopPanelFirstLinkRef.current?.focus()
+                  else {
+                    openDesktopMenu(item.key, true)
+                    window.setTimeout(() => desktopPanelFirstLinkRef.current?.focus(), 60)
+                  }
+                }
+              }}
+              className={`relative inline-flex h-10 items-center justify-center gap-1.5 rounded-md px-4 text-sm font-medium tracking-[-0.01em] transition-all duration-200 ${navTriggerColor(isCurrent, isOpen)} ${focus}`}
+            >
+              {showPill && (
+                <motion.div
+                  layoutId="desktop-nav-active"
+                  className={`absolute inset-0 rounded-md ${navActivePill}`}
+                  transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                />
+              )}
+              <span className="relative z-10">{item.label}</span>
+              <ChevronDown
+                className={`relative z-10 h-3 w-3 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                strokeWidth={2.2}
+              />
+            </button>
+          )
+        })}
+      </div>
+    </nav>
+  )
+})
+
+const MobileTopChips = memo(function MobileTopChips({
+  active,
+  heroMode,
+  isDark,
+}: {
+  active: (target: string) => boolean
+  heroMode: boolean
+  isDark: boolean
+}) {
+  return (
+    <div
+      className="flex gap-1.5 overflow-x-auto px-4 pb-2.5 lg:hidden"
+      style={{ scrollbarWidth: 'none' }}
+    >
+      {MOBILE_CHIPS.map(chip => {
+        const isChipActive = active(chip.to)
+        return (
+          <Link
+            key={chip.to}
+            to={chip.to}
+            className={`inline-flex h-[1.875rem] shrink-0 items-center rounded-full border px-3.5 text-[11.5px] font-medium whitespace-nowrap transition-all duration-300 ${
+              isChipActive
+                ? heroMode || isDark
+                  ? 'border-violet-400/28 bg-violet-500/[0.20] text-white'
+                  : 'border-violet-300/55 bg-violet-100/80 text-violet-800'
+                : heroMode
+                  ? 'border-white/[0.13] bg-white/[0.07] text-white/68 hover:text-white hover:bg-white/[0.12]'
+                  : isDark
+                    ? 'border-white/[0.09] bg-white/[0.04] text-purple-100/62 hover:text-white hover:bg-white/[0.07]'
+                    : 'border-violet-200/60 bg-white/80 text-gray-600 hover:text-gray-900 hover:bg-white'
+            }`}
+          >
+            {chip.label}
+          </Link>
+        )
+      })}
+    </div>
+  )
+})
+
 export default function Navbar() {
   const { pathname } = useLocation()
   const { isDark } = useTheme()
   const { isAuth } = useAuth()
-  const { products, customers, galleryAlbums } = useData()
   const purchaseQuote = usePurchaseQuote()
   const rentalCart = useRentalCart()
   const { isLoggedIn, currentUser, logout } = useUser()
@@ -372,8 +594,10 @@ export default function Navbar() {
   }, [])
 
   // ── Derived state ──────────────────────────────────────────────────────────
-  const active = (target: string) =>
-    target === '/' ? pathname === '/' : pathname.startsWith(target)
+  const active = useCallback(
+    (target: string) => (target === '/' ? pathname === '/' : pathname.startsWith(target)),
+    [pathname]
+  )
 
   const focus =
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent'
@@ -401,23 +625,29 @@ export default function Navbar() {
       : 'border-violet-200/65 bg-white/85 text-gray-700 hover:border-violet-300 hover:bg-white hover:text-gray-900'
 
   // ── Desktop nav link text ──────────────────────────────────────────────────
-  const navLinkColor = (isActive: boolean) =>
-    isActive
-      ? heroMode || isDark ? 'text-white' : 'text-gray-900'
-      : heroMode
-        ? 'text-white/66 hover:text-white'
-        : isDark
-          ? 'text-purple-100/68 hover:text-white'
-          : 'text-gray-500 hover:text-gray-900'
+  const navLinkColor = useCallback(
+    (isActive: boolean) =>
+      isActive
+        ? heroMode || isDark ? 'text-white' : 'text-gray-900'
+        : heroMode
+          ? 'text-white/66 hover:text-white'
+          : isDark
+            ? 'text-purple-100/68 hover:text-white'
+            : 'text-gray-500 hover:text-gray-900',
+    [heroMode, isDark]
+  )
 
-  const navTriggerColor = (isActive: boolean, isOpen: boolean) =>
-    isActive || isOpen
-      ? heroMode || isDark ? 'text-white' : 'text-gray-900'
-      : heroMode
-        ? 'text-white/66 hover:text-white'
-        : isDark
-          ? 'text-purple-100/68 hover:text-white'
-          : 'text-gray-500 hover:text-gray-900'
+  const navTriggerColor = useCallback(
+    (isActive: boolean, isOpen: boolean) =>
+      isActive || isOpen
+        ? heroMode || isDark ? 'text-white' : 'text-gray-900'
+        : heroMode
+          ? 'text-white/66 hover:text-white'
+          : isDark
+            ? 'text-purple-100/68 hover:text-white'
+            : 'text-gray-500 hover:text-gray-900',
+    [heroMode, isDark]
+  )
 
   // ── Active pill ────────────────────────────────────────────────────────────
   const navActivePill = heroMode
@@ -464,63 +694,10 @@ export default function Navbar() {
       : 'border-violet-300/30 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(250,244,255,0.92))] text-gray-900 hover:border-violet-300/50'
 
   // ── Desktop nav data ────────────────────────────────────────────────────────
-  const desktopNav = useMemo<DesktopNavItem[]>(
-    () => [
-      { key: 'home', label: 'Home', to: '/' },
-      {
-        key: 'explore',
-        label: 'Explore',
-        children: [
-          {
-            to: '/products',
-            label: 'Products',
-            description: 'Rental-ready activations and premium event setups.',
-            icon: LayoutGrid,
-            meta: `${products.length}+ items`,
-          },
-          {
-            to: '/customers',
-            label: 'Customers',
-            description: 'Trusted brands, partners, and credibility highlights.',
-            icon: Users,
-            meta: `${customers.length}+ brands`,
-          },
-          {
-            to: '/gallery',
-            label: 'Gallery',
-            description: 'Recent visuals, setups, and standout moments.',
-            icon: GalleryVerticalEnd,
-            meta: galleryAlbums.length > 0 ? `${galleryAlbums.length} albums` : 'Highlights',
-          },
-        ],
-      },
-      {
-        key: 'company',
-        label: 'Company',
-        children: [
-          {
-            to: '/about',
-            label: 'About',
-            description: 'How the marketplace works and what shapes the experience.',
-            icon: ShieldCheck,
-            meta: 'Overview',
-          },
-          {
-            to: '/contact',
-            label: 'Contact',
-            description: 'Talk to the team about a brief, timeline, or recommendation.',
-            icon: MessageCircleMore,
-            meta: 'Support',
-          },
-        ],
-      },
-    ],
-    [customers.length, galleryAlbums.length, products.length]
-  )
 
   const activeDesktopItem = useMemo(
-    () => desktopNav.find(item => item.key === desktopMenu) ?? null,
-    [desktopMenu, desktopNav]
+    () => DESKTOP_NAV.find(item => item.key === desktopMenu) ?? null,
+    [desktopMenu]
   )
 
   const setDesktopTriggerRef = useCallback((key: string, node: HTMLElement | null) => {
@@ -531,7 +708,7 @@ export default function Navbar() {
     (key: string) => {
       if (typeof window === 'undefined' || window.innerWidth < 1024) return
       const trigger = desktopTriggerRefs.current[key]
-      const item = desktopNav.find(entry => entry.key === key)
+      const item = DESKTOP_NAV.find(entry => entry.key === key)
       if (!trigger || !item?.children?.length) return
 
       const rect = trigger.getBoundingClientRect()
@@ -560,7 +737,7 @@ export default function Navbar() {
 
       setDesktopMenuPosition({ top, left, width, compact })
     },
-    [desktopNav]
+    []
   )
 
   const clearDesktopTimers = useCallback(() => {
@@ -664,90 +841,19 @@ export default function Navbar() {
             </Link>
 
             {/* ── Desktop nav (center) ── */}
-            <nav className="hidden flex-1 items-center justify-center lg:flex" aria-label="Main navigation">
-              <div className="flex items-center gap-0.5 rounded-xl px-1">
-                {desktopNav.map(item => {
-                  const isCurrent = getDesktopNavActive(item, active)
-                  const isOpen = desktopMenu === item.key
-                  const showPill = desktopMenu ? isOpen : isCurrent
-
-                  if (item.to) {
-                    return (
-                      <Link
-                        key={item.key}
-                        ref={node => setDesktopTriggerRef(item.key, node)}
-                        to={item.to}
-                        aria-current={isCurrent ? 'page' : undefined}
-                        className={`relative inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium tracking-[-0.01em] transition-all duration-200 ${navLinkColor(isCurrent)} ${focus}`}
-                      >
-                        {showPill && (
-                          <motion.div
-                            layoutId="desktop-nav-active"
-                            className={`absolute inset-0 rounded-md ${navActivePill}`}
-                            transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-                          />
-                        )}
-                        <span className="relative z-10">{item.label}</span>
-                      </Link>
-                    )
-                  }
-
-                  return (
-                    <button
-                      key={item.key}
-                      ref={node => setDesktopTriggerRef(item.key, node)}
-                      type="button"
-                      aria-expanded={isOpen}
-                      aria-haspopup="menu"
-                      onMouseEnter={() => {
-                        if (canHoverDesktopNav) openDesktopMenu(item.key)
-                      }}
-                      onMouseLeave={() => {
-                        if (canHoverDesktopNav) scheduleDesktopClose()
-                      }}
-                      onClick={e => {
-                        // On touch/non-hover devices: tap toggles the dropdown
-                        if (!canHoverDesktopNav) {
-                          e.preventDefault()
-                          if (isOpen) scheduleDesktopClose(true)
-                          else openDesktopMenu(item.key, true)
-                          return
-                        }
-                        // On hover-capable devices: click also toggles (handles
-                        // edge cases like click-to-dismiss after hover-open)
-                        if (isOpen) scheduleDesktopClose(true)
-                        else openDesktopMenu(item.key, true)
-                      }}
-                      onKeyDown={e => {
-                        if (e.key === 'Escape') { scheduleDesktopClose(true); return }
-                        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
-                          e.preventDefault()
-                          if (isOpen) desktopPanelFirstLinkRef.current?.focus()
-                          else {
-                            openDesktopMenu(item.key, true)
-                            window.setTimeout(() => desktopPanelFirstLinkRef.current?.focus(), 60)
-                          }
-                        }
-                      }}
-                      className={`relative inline-flex h-10 items-center justify-center gap-1.5 rounded-md px-4 text-sm font-medium tracking-[-0.01em] transition-all duration-200 ${navTriggerColor(isCurrent, isOpen)} ${focus}`}
-                    >
-                      {showPill && (
-                        <motion.div
-                          layoutId="desktop-nav-active"
-                          className={`absolute inset-0 rounded-md ${navActivePill}`}
-                          transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-                        />
-                      )}
-                      <span className="relative z-10">{item.label}</span>
-                      <ChevronDown
-                        className={`relative z-10 h-3 w-3 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-                        strokeWidth={2.2}
-                      />
-                    </button>
-                  )
-                })}
-              </div>
-            </nav>
+            <DesktopPrimaryNav
+              active={active}
+              canHoverDesktopNav={canHoverDesktopNav}
+              desktopMenu={desktopMenu}
+              desktopPanelFirstLinkRef={desktopPanelFirstLinkRef}
+              focus={focus}
+              navActivePill={navActivePill}
+              navLinkColor={navLinkColor}
+              navTriggerColor={navTriggerColor}
+              openDesktopMenu={openDesktopMenu}
+              scheduleDesktopClose={scheduleDesktopClose}
+              setDesktopTriggerRef={setDesktopTriggerRef}
+            />
 
             {/* ── Right actions ── */}
             <div className="flex items-center justify-end gap-1.5 sm:gap-2 lg:min-w-[160px]">
@@ -899,41 +1005,7 @@ export default function Navbar() {
           </div>
 
           {/* ── Mobile nav chip row (row 2 — only shows below lg breakpoint) ── */}
-          <div
-            className="flex gap-1.5 overflow-x-auto px-4 pb-2.5 lg:hidden"
-            style={{ scrollbarWidth: 'none' }}
-          >
-            {(
-              [
-                { to: '/', label: 'Home' },
-                { to: '/products', label: 'Explore' },
-                { to: '/customers', label: 'Customers' },
-                { to: '/gallery', label: 'Gallery' },
-                { to: '/about', label: 'Company' },
-              ] as const
-            ).map(chip => {
-              const isChipActive = active(chip.to)
-              return (
-                <Link
-                  key={chip.to}
-                  to={chip.to}
-                  className={`inline-flex h-[1.875rem] shrink-0 items-center rounded-full border px-3.5 text-[11.5px] font-medium whitespace-nowrap transition-all duration-300 ${
-                    isChipActive
-                      ? heroMode || isDark
-                        ? 'border-violet-400/28 bg-violet-500/[0.20] text-white'
-                        : 'border-violet-300/55 bg-violet-100/80 text-violet-800'
-                      : heroMode
-                        ? 'border-white/[0.13] bg-white/[0.07] text-white/68 hover:text-white hover:bg-white/[0.12]'
-                        : isDark
-                          ? 'border-white/[0.09] bg-white/[0.04] text-purple-100/62 hover:text-white hover:bg-white/[0.07]'
-                          : 'border-violet-200/60 bg-white/80 text-gray-600 hover:text-gray-900 hover:bg-white'
-                  }`}
-                >
-                  {chip.label}
-                </Link>
-              )
-            })}
-          </div>
+          <MobileTopChips active={active} heroMode={heroMode} isDark={isDark} />
           </div>{/* closes navbarBarRef wrapper */}
 
           {/* ══════════════════════ MOBILE MENU ══════════════════════ */}

@@ -18,11 +18,12 @@ import type { CSSProperties, PointerEvent } from 'react'
  *   {children}
  * </div>
  */
-export function useSpotlight() {
+export function useSpotlight(enabled = true) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const rafId = useRef<number>(0)
 
   const onPointerMove = useCallback((e: PointerEvent<Element>) => {
+    if (!enabled) return
     cancelAnimationFrame(rafId.current)
     const { clientX, clientY } = e
     const card = e.currentTarget as HTMLElement
@@ -31,16 +32,18 @@ export function useSpotlight() {
       card.style.setProperty('--sx', `${clientX - rect.left}px`)
       card.style.setProperty('--sy', `${clientY - rect.top}px`)
     })
-  }, [])
+  }, [enabled])
 
   const onPointerEnter = useCallback(() => {
+    if (!enabled) return
     if (overlayRef.current) overlayRef.current.style.opacity = '1'
-  }, [])
+  }, [enabled])
 
   const onPointerLeave = useCallback(() => {
+    if (!enabled) return
     if (overlayRef.current) overlayRef.current.style.opacity = '0'
     cancelAnimationFrame(rafId.current)
-  }, [])
+  }, [enabled])
 
   return { overlayRef, handlers: { onPointerMove, onPointerEnter, onPointerLeave } } as const
 }

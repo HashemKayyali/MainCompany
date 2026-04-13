@@ -805,6 +805,13 @@
     }
   }
 
+  @media (max-width: 1023px) {
+    .stats-marquee__inner {
+      animation: none;
+      transform: translateX(0);
+    }
+  }
+
   /* ─── Logo cloud marquee ─── */
   .logo-cloud-track {
     touch-action: pan-y;
@@ -863,6 +870,13 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .logo-cloud-row {
+      animation: none !important;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @media (max-width: 1023px) {
     .logo-cloud-row {
       animation: none !important;
       transform: translate3d(0, 0, 0);

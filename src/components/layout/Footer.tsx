@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTheme } from '../../contexts/ThemeContext'
-import { useData } from '../../contexts/DataContext'
+import { useProductsData } from '../../contexts/DataContext'
 import { social, socialLinks } from '../../data/social'
 
 export default function Footer() {
   const { isDark } = useTheme()
-  const { products } = useData()
+  const { products } = useProductsData()
 
   const pages = useMemo(
     () => [

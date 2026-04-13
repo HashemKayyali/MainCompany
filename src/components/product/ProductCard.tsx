@@ -1,10 +1,12 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Play } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { Product } from '../../data/products/types'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useMotionEnabled } from '../../hooks/useMotionEnabled'
+import { usePerfMode } from '../../hooks/usePerfMode'
 import { useRevealWithMotion } from '../../hooks/useReveal'
 import FramedImage from '../ui/FramedImage'
 import FramedVideo from '../ui/FramedVideo'
@@ -28,29 +30,26 @@ const ProductCard = memo(function ProductCard({
   imageFetchPriority?: 'high' | 'auto'
 }) {
   const { isDark } = useTheme()
+  const { perfLow } = usePerfMode()
   const motionEnabled = useMotionEnabled()
+  const coarsePointer = useMediaQuery('(pointer: coarse)')
   const reveal = useRevealWithMotion(motionEnabled, {
-    distance: 18,
-    duration: 0.4,
-    delay: Math.min(index * 0.04, 0.16),
-    margin: '0px 0px 10% 0px',
+    distance: 14,
+    duration: 0.34,
+    delay: Math.min(index * 0.03, 0.12),
+    margin: '0px 0px 14% 0px',
   })
   const revealProps = revealOnScroll ? reveal : { initial: false as const }
 
   const cardRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
-  const spotlight = useSpotlight()
+  const reducedCardEffects = perfLow || coarsePointer || !motionEnabled
 
   const [isPlaying, setIsPlaying] = useState(false)
 
   const hasVideo = Boolean(product.videoUrl)
-
-  const isTouchDevice = useMemo(
-    () =>
-      typeof window !== 'undefined' &&
-      ('ontouchstart' in window || navigator.maxTouchPoints > 0),
-    []
-  )
+  const spotlight = useSpotlight(!reducedCardEffects)
+  const interactivePreviewEnabled = hasVideo && !reducedCardEffects
 
   const categoryLabel = product.categoryTags[0] || 'Marketplace'
   const showRentalPrice = product.rentalEnabled !== false && product.showPrice !== false
@@ -62,7 +61,7 @@ const ProductCard = memo(function ProductCard({
   // Pause and reset the video when the card scrolls out of the viewport.
   // Never autoplay — on desktop, hover events handle playback; on mobile, no autoplay at all.
   useEffect(() => {
-    if (!hasVideo || !cardRef.current) return
+    if (!interactivePreviewEnabled || !cardRef.current) return
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -77,10 +76,10 @@ const ProductCard = memo(function ProductCard({
 
     observer.observe(cardRef.current)
     return () => observer.disconnect()
-  }, [hasVideo])
+  }, [interactivePreviewEnabled])
 
   const startPreview = () => {
-    if (!hasVideo || isTouchDevice || !motionEnabled) return
+    if (!interactivePreviewEnabled) return
 
     const video = videoRef.current
     if (!video) return
@@ -90,7 +89,7 @@ const ProductCard = memo(function ProductCard({
   }
 
   const stopPreview = () => {
-    if (isTouchDevice) return
+    if (!interactivePreviewEnabled) return
 
     const video = videoRef.current
     if (!video) return
@@ -115,17 +114,19 @@ const ProductCard = memo(function ProductCard({
           : 'border border-slate-200/80 bg-white hover:border-violet-300/65 hover:shadow-[0_24px_52px_-16px_rgba(139,92,246,0.22)]'
       )}
     >
-      <SpotlightOverlay ref={spotlight.overlayRef} className="z-[11]" />
+      {!reducedCardEffects && <SpotlightOverlay ref={spotlight.overlayRef} className="z-[11]" />}
 
-      <div
-        className={cn(
-          'pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100',
-          isDark
-            ? 'bg-[radial-gradient(ellipse_80%_55%_at_50%_0%,rgba(124,58,237,0.14)_0%,transparent_65%)]'
-            : 'bg-[radial-gradient(ellipse_80%_55%_at_50%_0%,rgba(124,58,237,0.05)_0%,transparent_65%)]'
-        )}
-        aria-hidden="true"
-      />
+      {!reducedCardEffects && (
+        <div
+          className={cn(
+            'pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100',
+            isDark
+              ? 'bg-[radial-gradient(ellipse_80%_55%_at_50%_0%,rgba(124,58,237,0.14)_0%,transparent_65%)]'
+              : 'bg-[radial-gradient(ellipse_80%_55%_at_50%_0%,rgba(124,58,237,0.05)_0%,transparent_65%)]'
+          )}
+          aria-hidden="true"
+        />
+      )}
 
       <Link
         to={`/products/${product.slug}`}
@@ -141,13 +142,15 @@ const ProductCard = memo(function ProductCard({
           revealMode="crisp"
           className={cn(
             'h-full w-full object-cover transition-transform duration-700 ease-out',
-            isPlaying ? 'opacity-0 scale-[1.06]' : 'opacity-100 group-hover:scale-[1.05]'
+            interactivePreviewEnabled
+              ? isPlaying ? 'opacity-0 scale-[1.06]' : 'opacity-100 group-hover:scale-[1.05]'
+              : 'opacity-100'
           )}
           fallbackTransform={{ fit: 'cover' }}
           draggable={false}
         />
 
-        {hasVideo && (
+        {interactivePreviewEnabled && (
           <FramedVideo
             ref={videoRef}
             media={product.videoUrl}
@@ -171,20 +174,29 @@ const ProductCard = memo(function ProductCard({
 
         <div className="absolute left-2 top-2 z-20 flex flex-wrap gap-1 sm:left-3 sm:top-3 sm:gap-1.5">
           {product.featured && (
-            <span className="inline-flex items-center rounded-[8px] border border-cyan-400/40 bg-cyan-500/90 px-2.5 py-1 text-[9.5px] font-bold tracking-wide text-white backdrop-blur-sm shadow-[0_4px_12px_rgba(34,211,238,0.3)]">
+            <span className={cn(
+              'inline-flex items-center rounded-[8px] border border-cyan-400/40 bg-cyan-500/90 px-2.5 py-1 text-[9.5px] font-bold tracking-wide text-white shadow-[0_4px_12px_rgba(34,211,238,0.3)]',
+              reducedCardEffects ? '' : 'backdrop-blur-sm'
+            )}>
               Featured
             </span>
           )}
           {product.badge && (
-            <span className="inline-flex items-center rounded-[8px] border border-white/20 bg-black/50 px-2.5 py-1 text-[9.5px] font-medium text-white/90 backdrop-blur-sm">
+            <span className={cn(
+              'inline-flex items-center rounded-[8px] border border-white/20 bg-black/50 px-2.5 py-1 text-[9.5px] font-medium text-white/90',
+              reducedCardEffects ? '' : 'backdrop-blur-sm'
+            )}>
               {product.badge}
             </span>
           )}
         </div>
 
-        {hasVideo && !isPlaying && !isTouchDevice && (
+        {interactivePreviewEnabled && !isPlaying && (
           <div className="absolute right-3 top-3 z-20">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/25 bg-black/45 text-white backdrop-blur-md transition-transform duration-300 group-hover:scale-110">
+            <div className={cn(
+              'flex h-8 w-8 items-center justify-center rounded-full border border-white/25 bg-black/45 text-white transition-transform duration-300 group-hover:scale-110',
+              reducedCardEffects ? '' : 'backdrop-blur-md'
+            )}>
               <Play size={12} fill="currentColor" className="ml-0.5" />
             </div>
           </div>

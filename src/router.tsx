@@ -1,44 +1,46 @@
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
 import { createBrowserRouter, Navigate, useLocation } from 'react-router-dom'
 import App from './App'
 import AdminGuard from './components/AdminGuard'
 import PageLoader from './components/ui/PageLoader'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import { lazyRoutes } from './utils/route-preload'
 
-const HomePage = lazy(() => import('./pages/HomePage'))
-const ProductsPage = lazy(() => import('./pages/ProductsPage'))
-const ProductDetailsPage = lazy(() => import('./pages/ProductDetailsPage'))
-const CustomersPage = lazy(() => import('./pages/CustomersPage'))
-const GalleryPage = lazy(() => import('./pages/GalleryPage'))
-const AboutPage = lazy(() => import('./pages/AboutPage'))
-const ContactPage = lazy(() => import('./pages/ContactPage'))
-const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
-const AuthCallback = lazy(() => import('./pages/AuthCallback'))
-const ProfilePage = lazy(() => import('./pages/ProfilePage'))
-const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'))
-const RentalCartPage = lazy(() => import('./pages/RentalCartPage'))
-const CheckoutPage = lazy(() => import('./pages/CheckoutPage'))
-const OrderSummaryPage = lazy(() => import('./pages/OrderSummaryPage'))
-const PurchaseQuotePage = lazy(() => import('./pages/PurchaseQuotePage'))
-const MyRequestsPage = lazy(() => import('./pages/MyRequestsPage'))
-const MyRequestDetailsPage = lazy(() => import('./pages/MyRequestDetailsPage'))
-
-const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
-const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
-const AdminProductsPage = lazy(() => import('./pages/admin/AdminProductsPage'))
-const AdminPartsPage = lazy(() => import('./pages/admin/AdminPartsPage'))
-const AdminCustomersPage = lazy(() => import('./pages/admin/AdminCustomersPage'))
-const AdminCategoriesPage = lazy(() => import('./pages/admin/AdminCategoriesPage'))
-const AdminAdminsPage = lazy(() => import('./pages/admin/AdminAdminsPage'))
-const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage'))
-const AdminLogsPage = lazy(() => import('./pages/admin/AdminLogsPage'))
-const AdminGalleryPage = lazy(() => import('./pages/admin/AdminGalleryPage'))
-const AdminRequestsPage = lazy(() => import('./pages/admin/AdminRequestsPage'))
-const AdminRequestDetailsPage = lazy(() => import('./pages/admin/AdminRequestDetailsPage'))
+const {
+  HomePage,
+  ProductsPage,
+  ProductDetailsPage,
+  CustomersPage,
+  GalleryPage,
+  AboutPage,
+  ContactPage,
+  NotFoundPage,
+  AuthCallback,
+  ProfilePage,
+  ResetPasswordPage,
+  RentalCartPage,
+  CheckoutPage,
+  OrderSummaryPage,
+  PurchaseQuotePage,
+  MyRequestsPage,
+  MyRequestDetailsPage,
+  AdminLayout,
+  DashboardPage,
+  AdminProductsPage,
+  AdminPartsPage,
+  AdminCustomersPage,
+  AdminCategoriesPage,
+  AdminAdminsPage,
+  AdminUsersPage,
+  AdminLogsPage,
+  AdminGalleryPage,
+  AdminRequestsPage,
+  AdminRequestDetailsPage,
+} = lazyRoutes
 
 function S({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={<PageLoader mode="route" delayMs={140} />}>{children}</Suspense>
+  return <Suspense fallback={<PageLoader mode="route" delayMs={90} />}>{children}</Suspense>
 }
 
 function UserLoginRedirect() {

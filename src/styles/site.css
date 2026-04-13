@@ -232,6 +232,10 @@ img.framed-image--revealed.framed-image--reveal-crisp {
   .spotlight-glow { display: none; }
 }
 
+html.perf-low .spotlight-glow {
+  display: none;
+}
+
 /* Instant show/hide for users who prefer no motion */
 @media (prefers-reduced-motion: reduce) {
   .spotlight-glow { transition: none; }

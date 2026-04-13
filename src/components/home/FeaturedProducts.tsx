@@ -1,39 +1,25 @@
-import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
-import { useData } from '../../contexts/DataContext'
+import { useProductsData } from '../../contexts/DataContext'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useReveal, useRevealGroup } from '../../hooks/useReveal'
 import ProductCard from '../product/ProductCard'
 import { cn } from '../../utils/cn'
 
-const ease = [0.16, 1, 0.3, 1] as const
-
 export default function FeaturedProducts() {
-  const { featuredProducts } = useData()
+  const { featuredProducts } = useProductsData()
   const { isDark } = useTheme()
-  const reduceMotion = useReducedMotion()
-
-  const items = useMemo(() => featuredProducts ?? [], [featuredProducts])
+  const headerReveal = useReveal({ distance: 16, duration: 0.42, margin: '0px 0px 16% 0px' })
+  const { containerProps, itemProps } = useRevealGroup({
+    distance: 14,
+    duration: 0.34,
+    margin: '0px 0px 16% 0px',
+    stagger: 0.035,
+  })
+  const items = featuredProducts ?? []
 
   if (items.length === 0) return null
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: reduceMotion
-        ? { duration: 0 }
-        : { staggerChildren: 0.05, delayChildren: 0.04 },
-    },
-  } as const
-
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: reduceMotion
-      ? { opacity: 1, y: 0, transition: { duration: 0 } }
-      : { opacity: 1, y: 0, transition: { duration: 0.6, ease } },
-  } as const
 
   return (
     <section className="site-section">
@@ -44,7 +30,7 @@ export default function FeaturedProducts() {
           className={cn(
             'relative overflow-hidden rounded-[26px] border px-5 py-9 sm:px-7 sm:py-11 lg:px-10 lg:py-13',
             isDark
-              ? 'border-white/[0.07] bg-[linear-gradient(180deg,rgba(14,12,32,0.72),rgba(8,8,20,0.54))] shadow-[0_28px_84px_rgba(2,4,16,0.38),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-sm'
+              ? 'border-white/[0.07] bg-[linear-gradient(180deg,rgba(14,12,32,0.82),rgba(8,8,20,0.72))] shadow-[0_24px_68px_rgba(2,4,16,0.26),inset_0_1px_0_rgba(255,255,255,0.04)]'
               : 'border-violet-100/80 bg-white/93 shadow-[0_24px_64px_rgba(15,23,42,0.07)]'
           )}
         >
@@ -59,12 +45,7 @@ export default function FeaturedProducts() {
 
           {/* ── Section header ── */}
           <div className="relative mb-9 flex flex-col gap-3.5 lg:flex-row lg:items-end lg:justify-between">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '0px 0px 12% 0px' }}
-              transition={{ duration: 0.5, ease }}
-            >
+            <motion.div {...headerReveal}>
               <div className="mb-3 flex items-center gap-2.5">
                 <span className="section-label">// Featured</span>
                 <div className={cn('h-px w-8', isDark ? 'bg-violet-500/25' : 'bg-violet-300/45')} />
@@ -92,15 +73,9 @@ export default function FeaturedProducts() {
           </div>
 
           {/* ── Products grid ── */}
-          <motion.div
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: '0px 0px 12% 0px' }}
-            className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:gap-5"
-          >
+          <motion.div {...containerProps} className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:gap-5">
             {items.map((p, i) => (
-              <motion.div key={p.slug} variants={item} className="h-full">
+              <motion.div key={p.slug} {...itemProps} className="h-full">
                 <ProductCard
                   product={p}
                   index={i}

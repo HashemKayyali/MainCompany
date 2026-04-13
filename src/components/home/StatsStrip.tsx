@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
-import { useData } from '../../contexts/DataContext'
+import { useCustomersData } from '../../contexts/DataContext'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
+import { usePerfMode } from '../../hooks/usePerfMode'
 
 const FALLBACK = [
   'Abdali Hospital', 'AMAZON', 'Amman Academy', 'AstraZeneca', 'City Mall',
@@ -18,18 +20,24 @@ const ACCENTS = [
 
 export default function StatsStrip() {
   const { isDark } = useTheme()
-  const { customers } = useData()
+  const { customers } = useCustomersData()
+  const { perfLow } = usePerfMode()
+  const compactViewport = useMediaQuery('(max-width: 1023px)')
 
   const names = useMemo(() => {
     if (customers.length > 0) return customers.map(c => c.name)
     return FALLBACK
   }, [customers])
 
+  const staticItems = useMemo(() => names.slice(0, 8), [names])
+
   const loop = useMemo(() => {
     const repeated: string[] = []
-    for (let i = 0; i < 4; i++) repeated.push(...names)
+    for (let i = 0; i < 2; i++) repeated.push(...names)
     return repeated
   }, [names])
+
+  const useStaticStrip = perfLow || compactViewport || names.length < 6
 
   return (
     <section
@@ -62,27 +70,45 @@ export default function StatsStrip() {
             <div className={`hidden h-10 w-px shrink-0 sm:block ${isDark ? 'bg-white/8' : 'bg-violet-200/60'}`} />
 
             {/* Marquee */}
-            <div
-              className="stats-marquee min-w-0 flex-1"
-              style={{
-                maskImage: 'linear-gradient(90deg, transparent, black 4%, black 96%, transparent)',
-                WebkitMaskImage: 'linear-gradient(90deg, transparent, black 4%, black 96%, transparent)',
-              }}
-            >
-              <div className="stats-marquee__inner">
-                {loop.map((item, i) => {
-                  const a = ACCENTS[i % ACCENTS.length]
-                  return (
-                    <div key={`${item}-${i}`} className="flex shrink-0 items-center gap-3 px-4">
-                      <span className={`whitespace-nowrap font-display text-[10.5px] font-semibold uppercase tracking-[0.18em] ${isDark ? a.text : 'text-violet-600'}`}>
-                        {item}
-                      </span>
-                      <span className={`h-1 w-1 shrink-0 rounded-full ${isDark ? a.dot : 'bg-violet-400/60'}`} aria-hidden="true" />
-                    </div>
-                  )
-                })}
+            {useStaticStrip ? (
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
+                  {staticItems.map((item, i) => {
+                    const accent = ACCENTS[i % ACCENTS.length]
+                    return (
+                      <div key={item} className="flex items-center gap-2.5">
+                        <span className={`whitespace-nowrap font-display text-[10.5px] font-semibold uppercase tracking-[0.18em] ${isDark ? accent.text : 'text-violet-600'}`}>
+                          {item}
+                        </span>
+                        <span className={`h-1 w-1 shrink-0 rounded-full ${isDark ? accent.dot : 'bg-violet-400/60'}`} aria-hidden="true" />
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div
+                className="stats-marquee min-w-0 flex-1"
+                style={{
+                  maskImage: 'linear-gradient(90deg, transparent, black 4%, black 96%, transparent)',
+                  WebkitMaskImage: 'linear-gradient(90deg, transparent, black 4%, black 96%, transparent)',
+                }}
+              >
+                <div className="stats-marquee__inner">
+                  {loop.map((item, i) => {
+                    const a = ACCENTS[i % ACCENTS.length]
+                    return (
+                      <div key={`${item}-${i}`} className="flex shrink-0 items-center gap-3 px-4">
+                        <span className={`whitespace-nowrap font-display text-[10.5px] font-semibold uppercase tracking-[0.18em] ${isDark ? a.text : 'text-violet-600'}`}>
+                          {item}
+                        </span>
+                        <span className={`h-1 w-1 shrink-0 rounded-full ${isDark ? a.dot : 'bg-violet-400/60'}`} aria-hidden="true" />
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

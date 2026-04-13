@@ -1,12 +1,15 @@
-import { type CSSProperties, type ReactNode } from 'react'
+import { useEffect, type CSSProperties, type ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import Navbar from './Navbar'
 import Footer from './Footer'
 import AnimatedBackground from '../theme/AnimatedBackground'
 import { useSmoothScroll } from '../../hooks/useSmoothScroll'
+import { usePerfMode } from '../../hooks/usePerfMode'
+import { warmCommonRoutes } from '../../utils/route-preload'
 
 export default function PageContainer({ children }: { children: ReactNode }) {
   const { pathname } = useLocation()
+  const { perfLow, saveData } = usePerfMode()
   useSmoothScroll()
 
   const isHome = pathname === '/'
@@ -14,6 +17,11 @@ export default function PageContainer({ children }: { children: ReactNode }) {
   const pageShellStyle = {
     '--app-header-offset': 'var(--app-navbar-height)',
   } as CSSProperties
+
+  useEffect(() => {
+    if (perfLow || saveData || pathname !== '/') return
+    warmCommonRoutes()
+  }, [pathname, perfLow, saveData])
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-clip">
@@ -25,7 +33,7 @@ export default function PageContainer({ children }: { children: ReactNode }) {
       </a>
 
       {/* Global branded background — fixed, always behind all content */}
-      <AnimatedBackground position="fixed" className="z-0" />
+      <AnimatedBackground position="fixed" className="z-0" variant="lightweight" />
 
       <div
         className="relative z-10 flex min-h-screen min-w-0 flex-col"

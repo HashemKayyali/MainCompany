@@ -12,8 +12,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext'
 import { socialLinks } from '../data/social'
 import { usePageMeta } from '../hooks/usePageMeta'
-
-const ease = [0.16, 1, 0.3, 1] as const
+import { useReveal } from '../hooks/useReveal'
 
 const tags = ['Malls', 'Schools', 'Corporate', 'Community']
 
@@ -70,18 +69,16 @@ export default function AboutPage() {
 
   const txt = isDark ? 'text-white' : 'text-gray-900'
   const sub = isDark ? 'text-purple-200/75' : 'text-gray-500'
-
-  const anim = (delay = 0) => ({
-    initial: { opacity: 0, y: 24 } as const,
-    whileInView: { opacity: 1, y: 0 } as const,
-    viewport: { once: true, margin: '0px 0px 10% 0px' } as const,
-    transition: { duration: 0.5, delay, ease },
-  })
+  const introReveal = useReveal({ distance: 18, duration: 0.42, margin: '0px 0px 16% 0px' })
+  const experiencesReveal = useReveal({ delay: 0.04, distance: 16, duration: 0.4, margin: '0px 0px 16% 0px' })
+  const processReveal = useReveal({ delay: 0.08, distance: 16, duration: 0.4, margin: '0px 0px 16% 0px' })
+  const socialReveal = useReveal({ delay: 0.1, distance: 14, duration: 0.36, margin: '0px 0px 16% 0px' })
+  const statsReveal = useReveal({ delay: 0.12, distance: 14, duration: 0.36, margin: '0px 0px 16% 0px' })
 
   return (
     <section className="site-section relative">
       <div className="site-container">
-        <motion.div {...anim(0)} className="max-w-3xl">
+        <motion.div {...introReveal} className="max-w-3xl">
           <span className="section-label">// About</span>
 
           <h1
@@ -115,7 +112,7 @@ export default function AboutPage() {
           </div>
         </motion.div>
 
-        <motion.div {...anim(0.08)} className="mt-10">
+        <motion.div {...experiencesReveal} className="mt-10">
           <div className="mb-5">
             <span className="section-label">// Experiences</span>
             <h2 className={`section-title !text-left ${txt}`}>
@@ -167,7 +164,7 @@ export default function AboutPage() {
           </div>
         </motion.div>
 
-        <motion.div {...anim(0.14)} className="mt-10">
+        <motion.div {...processReveal} className="mt-10">
           <span className="section-label">// Process</span>
           <h2 className={`section-title !text-left mb-5 ${txt}`}>
             How it <span className="text-glow">works</span>
@@ -236,7 +233,7 @@ export default function AboutPage() {
           </div>
         </motion.div>
 
-        <motion.div {...anim(0.2)} className="mt-6 flex flex-wrap gap-2">
+        <motion.div {...socialReveal} className="mt-6 flex flex-wrap gap-2">
           {socialLinks.map((item) => (
             <a
               key={item.platform}
@@ -250,7 +247,7 @@ export default function AboutPage() {
           ))}
         </motion.div>
 
-        <motion.div {...anim(0.28)} className="mt-8 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+        <motion.div {...statsReveal} className="mt-8 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
           {stats.map((item) => (
             <div
               key={item.l}

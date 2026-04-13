@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight, LayoutGrid, Sparkles } from 'lucide-react'
 import ProductCard from '../product/ProductCard'
-import { useData } from '../../contexts/DataContext'
+import { useCategoriesData, useDataMeta, useProductsData } from '../../contexts/DataContext'
+import { useReveal, useRevealGroup } from '../../hooks/useReveal'
 import { useTheme } from '../../contexts/ThemeContext'
 import { parseMediaValue } from '../../utils/media-frame'
 import { scrollToPosition } from '../../utils/scroll'
@@ -23,26 +24,20 @@ type CategoryItem = {
 const CategoryTile = memo(function CategoryTile({
   category,
   active,
-  index,
   isDark,
   onClick,
 }: {
   category: CategoryItem
   active: boolean
-  index: number
   isDark: boolean
   onClick: () => void
 }) {
   const imageSrc = category.image ? parseMediaValue(category.image).src : ''
 
   return (
-    <motion.button
+    <button
       type="button"
       onClick={onClick}
-      initial={{ opacity: 0, y: 22 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.52, delay: index * 0.055, ease }}
       className="group relative w-full cursor-pointer text-left focus:outline-none"
     >
       <div
@@ -161,12 +156,11 @@ const CategoryTile = memo(function CategoryTile({
           />
         )}
       </div>
-    </motion.button>
+    </button>
   )
 }, (prev, next) =>
   prev.active === next.active &&
   prev.isDark === next.isDark &&
-  prev.index === next.index &&
   prev.category.id === next.category.id &&
   prev.category.count === next.category.count &&
   prev.category.name === next.category.name &&
@@ -174,14 +168,9 @@ const CategoryTile = memo(function CategoryTile({
 )
 
 // ── "View All" tile ───────────────────────────────────────────────────────────
-function ViewAllTile({ isDark, delay }: { isDark: boolean; delay: number }) {
+function ViewAllTile({ isDark }: { isDark: boolean }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 22 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.52, delay, ease }}
-    >
+    <div>
       <Link
         to="/products"
         className={cn(
@@ -267,7 +256,7 @@ function ViewAllTile({ isDark, delay }: { isDark: boolean; delay: number }) {
           </h3>
         </div>
       </Link>
-    </motion.div>
+    </div>
   )
 }
 
@@ -360,10 +349,31 @@ function SelectedCategoryHeader({
 
 // ── Main section ──────────────────────────────────────────────────────────────
 export default function OfferSection() {
-  const { products, categories, loading } = useData()
+  const { products } = useProductsData()
+  const { categories } = useCategoriesData()
+  const { loading } = useDataMeta()
   const { isDark } = useTheme()
   const [activeTab, setActiveTab] = useState('')
   const selectedCategoryRef = useRef<HTMLDivElement | null>(null)
+  const headerReveal = useReveal({ distance: 16, duration: 0.42, margin: '0px 0px 16% 0px' })
+  const { containerProps: categoryGridRevealProps, itemProps: categoryGridItemProps } = useRevealGroup({
+    distance: 14,
+    duration: 0.34,
+    margin: '0px 0px 14% 0px',
+    stagger: 0.03,
+  })
+
+  const productsByCategory = useMemo(() => {
+    const next = new Map<string, typeof products>()
+
+    for (const product of products) {
+      const existing = next.get(product.categoryId)
+      if (existing) existing.push(product)
+      else next.set(product.categoryId, [product])
+    }
+
+    return next
+  }, [products])
 
   const categoryItems = useMemo(
     () =>
@@ -373,11 +383,11 @@ export default function OfferSection() {
           name: category.name,
           description: category.description,
           image: category.image,
-          count: products.filter(product => product.categoryId === category.id).length,
+          count: productsByCategory.get(category.id)?.length ?? 0,
         }))
         .filter(c => c.count > 0)
         .sort((a, b) => b.count - a.count),
-    [categories, products]
+    [categories, productsByCategory]
   )
 
   const activeCat = useMemo(
@@ -385,8 +395,8 @@ export default function OfferSection() {
     [categoryItems, activeTab]
   )
   const filtered = useMemo(
-    () => (activeCat ? products.filter(product => product.categoryId === activeCat.id) : []),
-    [activeCat, products]
+    () => (activeCat ? productsByCategory.get(activeCat.id) ?? [] : []),
+    [activeCat, productsByCategory]
   )
 
   const handleCategoryClick = useCallback((id: string) => {
@@ -431,27 +441,21 @@ export default function OfferSection() {
           className={cn(
             'relative overflow-hidden rounded-[26px] border px-5 py-9 sm:px-7 sm:py-11 lg:px-10 lg:py-13',
             isDark
-              ? 'border-white/[0.07] bg-[linear-gradient(180deg,rgba(14,12,32,0.76),rgba(8,8,20,0.58))] shadow-[0_28px_84px_rgba(2,4,16,0.42),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-sm'
+              ? 'border-white/[0.07] bg-[linear-gradient(180deg,rgba(14,12,32,0.84),rgba(8,8,20,0.72))] shadow-[0_24px_68px_rgba(2,4,16,0.28),inset_0_1px_0_rgba(255,255,255,0.04)]'
               : 'border-violet-100/80 bg-white/93 shadow-[0_24px_64px_rgba(15,23,42,0.07)]'
           )}
         >
           {/* Corner glow */}
           {isDark && (
             <div
-              className="pointer-events-none absolute -right-28 -top-28 h-72 w-72 rounded-full blur-[90px]"
-              style={{ background: 'rgba(124,58,237,0.07)' }}
+              className="pointer-events-none absolute -right-24 -top-24 h-60 w-60 rounded-full blur-[72px]"
+              style={{ background: 'rgba(124,58,237,0.06)' }}
               aria-hidden="true"
             />
           )}
 
           {/* ── Section header ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 22 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.68, ease }}
-            className="relative mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"
-          >
+          <motion.div {...headerReveal} className="relative mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
               <div className="mb-3 flex items-center gap-2.5">
                 <span className="section-label">// Marketplace Core</span>
@@ -480,27 +484,29 @@ export default function OfferSection() {
           </motion.div>
 
           {/* ── Category grid ── */}
-          <div className="relative mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+          <motion.div {...categoryGridRevealProps} className="relative mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
             {loading
               ? Array.from({ length: 5 }).map((_, i) => (
                   <CategoryTileSkeleton key={`skel-${i}`} index={i} isDark={isDark} />
                 ))
               : (
                 <>
-                  {categoryItems.map((category, index) => (
-                    <CategoryTile
-                      key={category.id}
-                      category={category}
-                      active={activeCat?.id === category.id}
-                      index={index}
-                      isDark={isDark}
-                      onClick={() => handleCategoryClick(category.id)}
-                    />
+                  {categoryItems.map(category => (
+                    <motion.div key={category.id} {...categoryGridItemProps}>
+                      <CategoryTile
+                        category={category}
+                        active={activeCat?.id === category.id}
+                        isDark={isDark}
+                        onClick={() => handleCategoryClick(category.id)}
+                      />
+                    </motion.div>
                   ))}
-                  <ViewAllTile isDark={isDark} delay={categoryItems.length * 0.055} />
+                  <motion.div {...categoryGridItemProps}>
+                    <ViewAllTile isDark={isDark} />
+                  </motion.div>
                 </>
               )}
-          </div>
+          </motion.div>
 
           {/* ── Expanded category products ── */}
           <AnimatePresence mode="wait">

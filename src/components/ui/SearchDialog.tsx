@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Package, Search, Users, X } from 'lucide-react'
-import { useData } from '../../contexts/DataContext'
+import { useCustomersData, useProductsData } from '../../contexts/DataContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 
@@ -41,7 +41,8 @@ function getResultIndexFromElement(element: HTMLElement | null, resultsListId: s
 }
 
 export default function SearchDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { products, customers } = useData()
+  const { products } = useProductsData()
+  const { customers } = useCustomersData()
   const { isDark } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()

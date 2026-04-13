@@ -372,7 +372,7 @@ export default function AuthPage() {
 
   return (
     <div className="relative flex min-h-[100dvh] overflow-x-hidden">
-      {!reduceMotion && <AnimatedBackground position="absolute" className="z-0" />}
+      {!reduceMotion && <AnimatedBackground position="absolute" className="z-0" variant="rich" />}
       <div
         className="pointer-events-none absolute inset-0 z-[1]"
         style={{ background: isDark ? 'rgba(2,3,10,0.52)' : 'rgba(2,3,10,0.38)' }}

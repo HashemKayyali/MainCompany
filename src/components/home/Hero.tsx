@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowRight, Building2, Sparkles } from 'lucide-react'
 import { usePerfMode } from '../../hooks/usePerfMode'
+import { preloadRoute } from '../../utils/route-preload'
 
 const ease = [0.16, 1, 0.3, 1] as const
 
@@ -203,6 +204,8 @@ export default function Hero() {
             >
               <Link
                 to="/products"
+                onMouseEnter={() => preloadRoute('/products')}
+                onFocus={() => preloadRoute('/products')}
                 className="btn-primary group relative !min-h-[50px] !overflow-hidden !rounded-[18px] !px-6 !text-[12px]"
               >
                 <span className="pointer-events-none absolute inset-0 -translate-x-full skew-x-[-20deg] bg-white/10 transition-transform duration-700 group-hover:translate-x-[200%]" />
@@ -212,6 +215,8 @@ export default function Hero() {
 
               <Link
                 to="/contact"
+                onMouseEnter={() => preloadRoute('/contact')}
+                onFocus={() => preloadRoute('/contact')}
                 className="inline-flex min-h-[50px] items-center gap-2 rounded-[18px] border border-white/[0.13] bg-white/[0.07] px-6 text-[12px] font-semibold tracking-[0.01em] text-white backdrop-blur-sm transition-all hover:border-white/[0.22] hover:bg-white/[0.12]"
               >
                 Talk to the Team

@@ -3,7 +3,11 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useCustomersData } from '../../contexts/DataContext'
 import type { Customer } from '../../data/customers'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
+import { usePerfMode } from '../../hooks/usePerfMode'
+import { useReveal } from '../../hooks/useReveal'
 import FramedImage from '../ui/FramedImage'
 
 // Splits customers into two rows as evenly as possible
@@ -13,7 +17,7 @@ function splitRows<T>(arr: T[]): [T[], T[]] {
 }
 
 // Repeat items until we have at least `min` for a seamless loop
-function loopItems<T>(arr: T[], min = 12): T[] {
+function loopItems<T>(arr: T[], min = 8): T[] {
   if (arr.length === 0) return []
   const result = [...arr]
   while (result.length < min) result.push(...arr)
@@ -24,7 +28,7 @@ function loopItems<T>(arr: T[], min = 12): T[] {
 const LogoCell = memo(function LogoCell({ customer, isDark }: { customer: Customer; isDark: boolean }) {
   return (
     <div
-      className={`group mx-1.5 flex h-[68px] w-[130px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-[14px] border px-3 transition-all duration-300 sm:mx-2 sm:h-[72px] sm:w-[148px] lg:mx-2.5 lg:h-[76px] lg:w-[160px] ${
+      className={`group relative mx-1.5 flex h-[68px] w-[130px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-[14px] border px-3 transition-all duration-300 sm:mx-2 sm:h-[72px] sm:w-[148px] lg:mx-2.5 lg:h-[76px] lg:w-[160px] ${
         isDark
           ? 'border-white/[0.07] bg-white/[0.025] hover:border-violet-400/[0.20] hover:bg-white/[0.05]'
           : 'border-violet-100/70 bg-white/70 hover:border-violet-200/90 hover:bg-white hover:shadow-[0_6px_20px_rgba(124,58,237,0.10)]'
@@ -75,16 +79,19 @@ const LogoCell = memo(function LogoCell({ customer, isDark }: { customer: Custom
   )
 })
 
-type Props = {
-  customers: Customer[]
-}
-
-export default function LogoCloud({ customers }: Props) {
+export default function LogoCloud() {
   const { isDark } = useTheme()
+  const { customers } = useCustomersData()
+  const { perfLow } = usePerfMode()
+  const compactViewport = useMediaQuery('(max-width: 1023px)')
+  const headerReveal = useReveal({ distance: 16, duration: 0.42, margin: '0px 0px 16% 0px' })
+  const shellReveal = useReveal({ distance: 14, duration: 0.38, margin: '0px 0px 14% 0px' })
 
   const [rowA, rowB] = useMemo(() => splitRows(customers), [customers])
-  const loopA = useMemo(() => loopItems(rowA, 10), [rowA])
-  const loopB = useMemo(() => loopItems(rowB, 10), [rowB])
+  const loopA = useMemo(() => loopItems(rowA, 8), [rowA])
+  const loopB = useMemo(() => loopItems(rowB, 8), [rowB])
+  const staticCustomers = useMemo(() => customers.slice(0, 10), [customers])
+  const useStaticLayout = perfLow || compactViewport || customers.length < 8
 
   if (customers.length === 0) return null
 
@@ -95,10 +102,7 @@ export default function LogoCloud({ customers }: Props) {
         {/* ── Section header (LTR for text readability) ── */}
         <motion.div
           dir="ltr"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '0px 0px 10% 0px' }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          {...headerReveal}
           className="mb-9 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
         >
           <div>
@@ -139,28 +143,24 @@ export default function LogoCloud({ customers }: Props) {
         {/* ── Marquee shell ── */}
         <motion.div
           dir="ltr"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: '0px 0px 8% 0px' }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          {...shellReveal}
           className={`relative overflow-hidden rounded-[22px] border py-6 sm:py-7 ${
             isDark
-              ? 'border-white/[0.07] bg-[linear-gradient(180deg,rgba(10,8,26,0.72),rgba(6,6,18,0.54))] shadow-[0_24px_72px_rgba(2,2,14,0.32),inset_0_1px_0_rgba(255,255,255,0.03)]'
+              ? 'border-white/[0.07] bg-[linear-gradient(180deg,rgba(10,8,26,0.82),rgba(6,6,18,0.74))] shadow-[0_22px_64px_rgba(2,2,14,0.24),inset_0_1px_0_rgba(255,255,255,0.03)]'
               : 'border-violet-100/80 bg-white/80 shadow-[0_16px_48px_rgba(124,58,237,0.07)]'
           }`}
-          style={{ backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
         >
           {/* Ambient corner glow */}
-          {isDark && (
+          {isDark && !useStaticLayout && (
             <>
               <div
-                className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full blur-[60px]"
-                style={{ background: 'rgba(124,58,237,0.08)' }}
+                className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full blur-[42px]"
+                style={{ background: 'rgba(124,58,237,0.06)' }}
                 aria-hidden="true"
               />
               <div
-                className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full blur-[60px]"
-                style={{ background: 'rgba(6,182,212,0.06)' }}
+                className="pointer-events-none absolute -bottom-12 -left-12 h-36 w-36 rounded-full blur-[42px]"
+                style={{ background: 'rgba(6,182,212,0.05)' }}
                 aria-hidden="true"
               />
             </>
@@ -186,27 +186,35 @@ export default function LogoCloud({ customers }: Props) {
             aria-hidden="true"
           />
 
-          {/* Row A — forward (right to left) */}
-          <div className="logo-cloud-track mb-3 overflow-hidden sm:mb-3.5">
-            <div className="logo-cloud-row logo-cloud-row--fwd" aria-hidden="true">
-              {loopA.map((c, i) => (
-                <div key={`a-${c.slug}-${i}`} className="relative">
-                  <LogoCell customer={c} isDark={isDark} />
-                </div>
+          {useStaticLayout ? (
+            <div className="grid grid-cols-2 justify-items-center gap-2.5 px-3 sm:grid-cols-3 lg:grid-cols-5">
+              {staticCustomers.map(customer => (
+                <LogoCell key={customer.slug} customer={customer} isDark={isDark} />
               ))}
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="logo-cloud-track mb-3 overflow-hidden sm:mb-3.5">
+                <div className="logo-cloud-row logo-cloud-row--fwd" aria-hidden="true">
+                  {loopA.map((c, i) => (
+                    <div key={`a-${c.slug}-${i}`} className="relative">
+                      <LogoCell customer={c} isDark={isDark} />
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-          {/* Row B — reverse (left to right) */}
-          <div className="logo-cloud-track overflow-hidden">
-            <div className="logo-cloud-row logo-cloud-row--rev" aria-hidden="true">
-              {loopB.map((c, i) => (
-                <div key={`b-${c.slug}-${i}`} className="relative">
-                  <LogoCell customer={c} isDark={isDark} />
+              <div className="logo-cloud-track overflow-hidden">
+                <div className="logo-cloud-row logo-cloud-row--rev" aria-hidden="true">
+                  {loopB.map((c, i) => (
+                    <div key={`b-${c.slug}-${i}`} className="relative">
+                      <LogoCell customer={c} isDark={isDark} />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            </>
+          )}
         </motion.div>
 
       </div>

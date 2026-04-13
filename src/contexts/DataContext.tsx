@@ -63,6 +63,35 @@ interface DataCtx {
   resetToDefaults: () => void
 }
 
+type ProductDataCtx = Pick<
+  DataCtx,
+  'products' | 'getProductBySlug' | 'getProductsByCategory' | 'featuredProducts' | 'allCategoryTags'
+>
+
+type PartDataCtx = Pick<DataCtx, 'parts' | 'getPartsByProduct'>
+type CustomerDataCtx = Pick<DataCtx, 'customers'>
+type CategoryDataCtx = Pick<DataCtx, 'categories'>
+type GalleryDataCtx = Pick<DataCtx, 'galleryAlbums'>
+type DataMetaCtx = Pick<DataCtx, 'loading' | 'error' | 'refreshAll' | 'resetToDefaults'>
+type DataActionsCtx = Pick<
+  DataCtx,
+  | 'addProduct'
+  | 'updateProduct'
+  | 'deleteProduct'
+  | 'addPart'
+  | 'updatePart'
+  | 'deletePart'
+  | 'addCustomer'
+  | 'updateCustomer'
+  | 'deleteCustomer'
+  | 'addCategory'
+  | 'updateCategory'
+  | 'deleteCategory'
+  | 'addGalleryAlbum'
+  | 'updateGalleryAlbum'
+  | 'deleteGalleryAlbum'
+>
+
 type DataSnapshot = {
   products: Product[]
   parts: ProductPart[]
@@ -77,6 +106,13 @@ type CachedDataSnapshot = DataSnapshot & {
 }
 
 const Ctx = createContext<DataCtx>({} as DataCtx)
+const ProductsCtx = createContext<ProductDataCtx>({} as ProductDataCtx)
+const PartsCtx = createContext<PartDataCtx>({} as PartDataCtx)
+const CustomersCtx = createContext<CustomerDataCtx>({} as CustomerDataCtx)
+const CategoriesCtx = createContext<CategoryDataCtx>({} as CategoryDataCtx)
+const GalleryCtx = createContext<GalleryDataCtx>({} as GalleryDataCtx)
+const DataMetaCtx = createContext<DataMetaCtx>({} as DataMetaCtx)
+const DataActionsCtx = createContext<DataActionsCtx>({} as DataActionsCtx)
 
 const CACHE_KEY = 'eventies:data-cache:v1'
 const CACHE_VERSION = 1 as const
@@ -599,14 +635,47 @@ export function DataProvider({ children }: { children: ReactNode }) {
     applySnapshot(DEFAULT_SNAPSHOT, null, false)
   }, [applySnapshot])
 
-  const value = useMemo(
+  const productValue = useMemo<ProductDataCtx>(
     () => ({
       products,
+      getProductBySlug,
+      getProductsByCategory,
+      featuredProducts,
+      allCategoryTags,
+    }),
+    [
+      allCategoryTags,
+      featuredProducts,
+      getProductBySlug,
+      getProductsByCategory,
+      products,
+    ]
+  )
+
+  const partValue = useMemo<PartDataCtx>(
+    () => ({
       parts,
-      customers,
-      categories,
+      getPartsByProduct,
+    }),
+    [getPartsByProduct, parts]
+  )
+
+  const customerValue = useMemo<CustomerDataCtx>(() => ({ customers }), [customers])
+  const categoryValue = useMemo<CategoryDataCtx>(() => ({ categories }), [categories])
+  const galleryValue = useMemo<GalleryDataCtx>(() => ({ galleryAlbums }), [galleryAlbums])
+
+  const metaValue = useMemo<DataMetaCtx>(
+    () => ({
       loading,
       error,
+      refreshAll,
+      resetToDefaults,
+    }),
+    [error, loading, refreshAll, resetToDefaults]
+  )
+
+  const actionsValue = useMemo<DataActionsCtx>(
+    () => ({
       addProduct,
       updateProduct,
       deleteProduct,
@@ -619,17 +688,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       addCategory,
       updateCategory,
       deleteCategory,
-      galleryAlbums,
       addGalleryAlbum,
       updateGalleryAlbum,
       deleteGalleryAlbum,
-      getProductBySlug,
-      getPartsByProduct,
-      getProductsByCategory,
-      featuredProducts,
-      allCategoryTags,
-      refreshAll,
-      resetToDefaults,
     }),
     [
       addCategory,
@@ -637,25 +698,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
       addGalleryAlbum,
       addPart,
       addProduct,
-      allCategoryTags,
-      categories,
-      customers,
       deleteCategory,
       deleteCustomer,
       deleteGalleryAlbum,
       deletePart,
       deleteProduct,
-      error,
-      featuredProducts,
-      galleryAlbums,
-      getPartsByProduct,
-      getProductBySlug,
-      getProductsByCategory,
-      loading,
-      parts,
-      products,
-      refreshAll,
-      resetToDefaults,
       updateCategory,
       updateCustomer,
       updateGalleryAlbum,
@@ -664,7 +711,43 @@ export function DataProvider({ children }: { children: ReactNode }) {
     ]
   )
 
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>
+  const value = useMemo<DataCtx>(
+    () => ({
+      ...productValue,
+      ...partValue,
+      ...customerValue,
+      ...categoryValue,
+      ...galleryValue,
+      ...metaValue,
+      ...actionsValue,
+    }),
+    [actionsValue, categoryValue, customerValue, galleryValue, metaValue, partValue, productValue]
+  )
+
+  return (
+    <ProductsCtx.Provider value={productValue}>
+      <PartsCtx.Provider value={partValue}>
+        <CustomersCtx.Provider value={customerValue}>
+          <CategoriesCtx.Provider value={categoryValue}>
+            <GalleryCtx.Provider value={galleryValue}>
+              <DataMetaCtx.Provider value={metaValue}>
+                <DataActionsCtx.Provider value={actionsValue}>
+                  <Ctx.Provider value={value}>{children}</Ctx.Provider>
+                </DataActionsCtx.Provider>
+              </DataMetaCtx.Provider>
+            </GalleryCtx.Provider>
+          </CategoriesCtx.Provider>
+        </CustomersCtx.Provider>
+      </PartsCtx.Provider>
+    </ProductsCtx.Provider>
+  )
 }
 
 export const useData = () => useContext(Ctx)
+export const useProductsData = () => useContext(ProductsCtx)
+export const usePartsData = () => useContext(PartsCtx)
+export const useCustomersData = () => useContext(CustomersCtx)
+export const useCategoriesData = () => useContext(CategoriesCtx)
+export const useGalleryData = () => useContext(GalleryCtx)
+export const useDataMeta = () => useContext(DataMetaCtx)
+export const useDataActions = () => useContext(DataActionsCtx)
