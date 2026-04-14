@@ -12,6 +12,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext'
 import { socialLinks } from '../data/social'
 import { usePageMeta } from '../hooks/usePageMeta'
+import { usePerfMode } from '../hooks/usePerfMode'
 import { useReveal } from '../hooks/useReveal'
 
 const tags = ['Malls', 'Schools', 'Corporate', 'Community']
@@ -60,6 +61,7 @@ const stats = [
 
 export default function AboutPage() {
   const { isDark } = useTheme()
+  const { perfLow } = usePerfMode()
 
   usePageMeta({
     title: 'About',
@@ -74,6 +76,7 @@ export default function AboutPage() {
   const processReveal = useReveal({ delay: 0.08, distance: 16, duration: 0.4, margin: '0px 0px 16% 0px' })
   const socialReveal = useReveal({ delay: 0.1, distance: 14, duration: 0.36, margin: '0px 0px 16% 0px' })
   const statsReveal = useReveal({ delay: 0.12, distance: 14, duration: 0.36, margin: '0px 0px 16% 0px' })
+  const glassChipClass = perfLow ? '' : 'backdrop-blur-lg'
 
   return (
     <section className="site-section relative">
@@ -100,7 +103,7 @@ export default function AboutPage() {
             {tags.map((tag) => (
               <span
                 key={tag}
-                className={`inline-flex items-center rounded-full border px-3 py-1.5 text-[10px] font-semibold backdrop-blur-xl ${
+                className={`inline-flex items-center rounded-full border px-3 py-1.5 text-[10px] font-semibold ${glassChipClass} ${
                   isDark
                     ? 'border-white/12 bg-white/[0.04] text-white/70'
                     : 'border-violet-200/70 bg-white/70 text-gray-700'
@@ -131,14 +134,16 @@ export default function AboutPage() {
                     isDark ? 'border-white/10' : 'border-violet-200/60'
                   }`}
                 >
-                  <div
-                    className="pointer-events-none absolute -inset-1 opacity-0 transition-opacity duration-500 hover:opacity-100"
-                    style={{
-                      background: isDark
-                        ? 'radial-gradient(circle at 30% 20%, rgba(34,211,238,0.12), transparent 55%), radial-gradient(circle at 80% 80%, rgba(124,58,237,0.16), transparent 55%)'
-                        : 'radial-gradient(circle at 50% 40%, rgba(124,58,237,0.10), transparent 65%)',
-                    }}
-                  />
+                  {!perfLow && (
+                    <div
+                      className="pointer-events-none absolute -inset-1 opacity-0 transition-opacity duration-500 hover:opacity-100"
+                      style={{
+                        background: isDark
+                          ? 'radial-gradient(circle at 30% 20%, rgba(34,211,238,0.12), transparent 55%), radial-gradient(circle at 80% 80%, rgba(124,58,237,0.16), transparent 55%)'
+                          : 'radial-gradient(circle at 50% 40%, rgba(124,58,237,0.10), transparent 65%)',
+                      }}
+                    />
+                  )}
 
                   <div className="relative flex items-start gap-3.5">
                     <div
@@ -213,7 +218,7 @@ export default function AboutPage() {
               return (
                 <div
                   key={item.label}
-                  className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 backdrop-blur-xl ${
+                  className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 ${glassChipClass} ${
                     isDark
                       ? 'border-white/10 bg-white/[0.03] text-white/70'
                       : 'border-violet-200/60 bg-white/70 text-gray-700'

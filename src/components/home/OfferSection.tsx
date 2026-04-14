@@ -5,6 +5,7 @@ import { ArrowUpRight, LayoutGrid, Sparkles } from 'lucide-react'
 import ProductCard from '../product/ProductCard'
 import { useCategoriesData, useDataMeta, useProductsData } from '../../contexts/DataContext'
 import { useReveal, useRevealGroup } from '../../hooks/useReveal'
+import { usePerfMode } from '../../hooks/usePerfMode'
 import { useTheme } from '../../contexts/ThemeContext'
 import { parseMediaValue } from '../../utils/media-frame'
 import { scrollToPosition } from '../../utils/scroll'
@@ -26,11 +27,13 @@ const CategoryTile = memo(function CategoryTile({
   active,
   isDark,
   onClick,
+  reducedVisualEffects,
 }: {
   category: CategoryItem
   active: boolean
   isDark: boolean
   onClick: () => void
+  reducedVisualEffects: boolean
 }) {
   const imageSrc = category.image ? parseMediaValue(category.image).src : ''
 
@@ -42,7 +45,8 @@ const CategoryTile = memo(function CategoryTile({
     >
       <div
         className={cn(
-          'relative overflow-hidden rounded-[18px] transition-all duration-400',
+          'relative overflow-hidden rounded-[18px]',
+          !reducedVisualEffects && 'transition-all duration-400',
           isDark
             ? cn(
                 'bg-[linear-gradient(168deg,rgba(15,12,32,0.97),rgba(9,8,22,0.98))]',
@@ -59,7 +63,7 @@ const CategoryTile = memo(function CategoryTile({
         )}
       >
         {/* Hover glow */}
-        {isDark && (
+        {isDark && !reducedVisualEffects && (
           <div
             className="pointer-events-none absolute inset-0 z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
             style={{
@@ -78,13 +82,14 @@ const CategoryTile = memo(function CategoryTile({
               loading="lazy"
               draggable={false}
               className={cn(
-                'absolute inset-0 h-full w-full select-none object-cover object-center transition-transform duration-700 ease-out',
-                active ? 'scale-[1.08]' : 'scale-100 group-hover:scale-[1.06]'
+                'absolute inset-0 h-full w-full select-none object-cover object-center',
+                !reducedVisualEffects && 'transition-transform duration-700 ease-out',
+                active ? 'scale-[1.08]' : reducedVisualEffects ? 'scale-100' : 'scale-100 group-hover:scale-[1.06]'
               )}
             />
           ) : (
             <div
-              className="absolute inset-0 transition-transform duration-700 group-hover:scale-[1.06]"
+              className={cn('absolute inset-0', !reducedVisualEffects && 'transition-transform duration-700 group-hover:scale-[1.06]')}
               style={{
                 background: isDark
                   ? 'linear-gradient(148deg, rgba(91,33,182,0.78), rgba(12,12,28,0.94) 55%, rgba(8,47,73,0.82))'
@@ -168,7 +173,7 @@ const CategoryTile = memo(function CategoryTile({
 )
 
 // ── "View All" tile ───────────────────────────────────────────────────────────
-function ViewAllTile({ isDark }: { isDark: boolean }) {
+function ViewAllTile({ isDark, reducedVisualEffects }: { isDark: boolean; reducedVisualEffects: boolean }) {
   return (
     <div>
       <Link
@@ -202,7 +207,8 @@ function ViewAllTile({ isDark }: { isDark: boolean }) {
           <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
             <div
               className={cn(
-                'mb-3.5 flex h-12 w-12 items-center justify-center rounded-[14px] border transition-all duration-400 group-hover:scale-105 group-hover:-rotate-6',
+                'mb-3.5 flex h-12 w-12 items-center justify-center rounded-[14px] border',
+                !reducedVisualEffects && 'transition-all duration-400 group-hover:scale-105 group-hover:-rotate-6',
                 isDark
                   ? 'border-white/[0.12] bg-white/[0.07] text-white'
                   : 'border-violet-200 bg-violet-50 text-violet-700'
@@ -353,6 +359,7 @@ export default function OfferSection() {
   const { categories } = useCategoriesData()
   const { loading } = useDataMeta()
   const { isDark } = useTheme()
+  const { perfLow } = usePerfMode()
   const [activeTab, setActiveTab] = useState('')
   const selectedCategoryRef = useRef<HTMLDivElement | null>(null)
   const headerReveal = useReveal({ distance: 16, duration: 0.42, margin: '0px 0px 16% 0px' })
@@ -446,7 +453,7 @@ export default function OfferSection() {
           )}
         >
           {/* Corner glow */}
-          {isDark && (
+          {isDark && !perfLow && (
             <div
               className="pointer-events-none absolute -right-24 -top-24 h-60 w-60 rounded-full blur-[72px]"
               style={{ background: 'rgba(124,58,237,0.06)' }}
@@ -498,11 +505,12 @@ export default function OfferSection() {
                         active={activeCat?.id === category.id}
                         isDark={isDark}
                         onClick={() => handleCategoryClick(category.id)}
+                        reducedVisualEffects={perfLow}
                       />
                     </motion.div>
                   ))}
                   <motion.div {...categoryGridItemProps}>
-                    <ViewAllTile isDark={isDark} />
+                    <ViewAllTile isDark={isDark} reducedVisualEffects={perfLow} />
                   </motion.div>
                 </>
               )}

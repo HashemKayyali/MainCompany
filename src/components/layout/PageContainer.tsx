@@ -13,15 +13,16 @@ export default function PageContainer({ children }: { children: ReactNode }) {
   useSmoothScroll()
 
   const isHome = pathname === '/'
+  const isAdminRoute = pathname.startsWith('/admin')
 
   const pageShellStyle = {
     '--app-header-offset': 'var(--app-navbar-height)',
   } as CSSProperties
 
   useEffect(() => {
-    if (perfLow || saveData || pathname !== '/') return
+    if (perfLow || saveData || isAdminRoute) return
     warmCommonRoutes()
-  }, [pathname, perfLow, saveData])
+  }, [isAdminRoute, perfLow, saveData])
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-clip">

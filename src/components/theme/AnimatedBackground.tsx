@@ -7,7 +7,7 @@ function sr(seed: number): number {
   return x - Math.floor(x)
 }
 
-const RICH_STAR_COUNT = 36
+const RICH_STAR_COUNT = 24
 
 const RICH_STARS = Array.from({ length: RICH_STAR_COUNT }, (_, i) => ({
   id: i,
@@ -42,7 +42,6 @@ const ANIM_NAMES = ['hs-star-a', 'hs-star-b', 'hs-star-c'] as const
 
 const RICH_METEORS = [
   { id: 0, top: '10%', left: '76%', delay: '1.2s', dur: '7.2s', tone: 'violet' },
-  { id: 1, top: '18%', left: '58%', delay: '6.5s', dur: '7.8s', tone: 'cyan' },
 ]
 
 const darkGridStyle: CSSProperties = {

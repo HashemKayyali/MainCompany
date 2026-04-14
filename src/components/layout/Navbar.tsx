@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { createPortal } from 'react-dom'
@@ -25,6 +25,8 @@ import { usePurchaseQuote } from '../../contexts/PurchaseQuoteContext'
 import { useRentalCart } from '../../contexts/RentalCartContext'
 import { useUser } from '../../contexts/UserContext'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
+import { usePerfMode } from '../../hooks/usePerfMode'
+import { preloadRoute } from '../../utils/route-preload'
 import SearchDialog from '../ui/SearchDialog'
 import UserAvatar from '../ui/UserAvatar'
 
@@ -132,6 +134,15 @@ function getDesktopNavActive(
 ) {
   if (item.to) return isRouteActive(item.to)
   return item.children?.some(child => isRouteActive(child.to)) ?? false
+}
+
+function preloadDesktopNavItem(item: DesktopNavItem) {
+  if (item.to) {
+    preloadRoute(item.to)
+    return
+  }
+
+  item.children?.forEach(child => preloadRoute(child.to))
 }
 
 // ── Logo wordmark ─────────────────────────────────────────────────────────────
@@ -250,6 +261,8 @@ const DesktopPrimaryNav = memo(function DesktopPrimaryNav({
                 key={item.key}
                 ref={node => setDesktopTriggerRef(item.key, node)}
                 to={item.to}
+                onMouseEnter={() => preloadRoute(item.to!)}
+                onFocus={() => preloadRoute(item.to!)}
                 aria-current={isCurrent ? 'page' : undefined}
                 className={`relative inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium tracking-[-0.01em] transition-all duration-200 ${navLinkColor(isCurrent)} ${focus}`}
               >
@@ -273,11 +286,13 @@ const DesktopPrimaryNav = memo(function DesktopPrimaryNav({
               aria-expanded={isOpen}
               aria-haspopup="menu"
               onMouseEnter={() => {
+                preloadDesktopNavItem(item)
                 if (canHoverDesktopNav) openDesktopMenu(item.key)
               }}
               onMouseLeave={() => {
                 if (canHoverDesktopNav) scheduleDesktopClose()
               }}
+              onFocus={() => preloadDesktopNavItem(item)}
               onClick={e => {
                 if (!canHoverDesktopNav) {
                   e.preventDefault()
@@ -346,6 +361,8 @@ const MobileTopChips = memo(function MobileTopChips({
           <Link
             key={chip.to}
             to={chip.to}
+            onMouseEnter={() => preloadRoute(chip.to)}
+            onFocus={() => preloadRoute(chip.to)}
             className={`inline-flex h-[1.875rem] shrink-0 items-center rounded-full border px-3.5 text-[11.5px] font-medium whitespace-nowrap transition-all duration-300 ${
               isChipActive
                 ? heroMode || isDark
@@ -366,13 +383,409 @@ const MobileTopChips = memo(function MobileTopChips({
   )
 })
 
+const NavbarAccountActions = memo(function NavbarAccountActions({
+  focus,
+  heroMode,
+  isDark,
+  pathname,
+  utilityPill,
+  userMenu,
+  userMenuAnchorRef,
+  onToggleUserMenu,
+}: {
+  focus: string
+  heroMode: boolean
+  isDark: boolean
+  pathname: string
+  utilityPill: string
+  userMenu: boolean
+  userMenuAnchorRef: React.RefObject<HTMLDivElement | null>
+  onToggleUserMenu: () => void
+}) {
+  const purchaseQuote = usePurchaseQuote()
+  const rentalCart = useRentalCart()
+  const { isLoggedIn, currentUser } = useUser()
+  const deferredUser = useDeferredValue(currentUser)
+  const cartItemCount = useDeferredValue(rentalCart.itemCount)
+  const quoteItemCount = useDeferredValue(purchaseQuote.itemCount)
+
+  const firstName = deferredUser?.name?.split(' ')[0] || 'User'
+  const cartHasItems = cartItemCount > 0
+  const cartCountLabel = cartItemCount > 99 ? '99+' : String(cartItemCount)
+  const cartActive = pathname.startsWith('/rental-cart') || pathname.startsWith('/checkout')
+  const quoteHasItems = quoteItemCount > 0
+  const quoteCountLabel = quoteItemCount > 99 ? '99+' : String(quoteItemCount)
+  const quoteActive = pathname.startsWith('/purchase-quote')
+
+  const cartSurface = cartActive
+    ? isDark
+      ? 'border-cyan-300/28 bg-[linear-gradient(135deg,rgba(8,30,44,0.95),rgba(11,18,38,0.98))] text-white shadow-[0_16px_48px_rgba(2,8,18,0.46)]'
+      : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(245,243,255,0.94))] text-gray-900 shadow-[0_12px_32px_rgba(124,58,237,0.14)]'
+    : cartHasItems
+      ? isDark
+        ? 'border-cyan-300/18 bg-[linear-gradient(135deg,rgba(8,25,38,0.9),rgba(13,18,34,0.94))] text-white hover:border-cyan-300/30'
+        : 'border-violet-300/35 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(245,243,255,0.92))] text-gray-900 hover:border-violet-300/55'
+      : utilityPill
+
+  const quoteSurface = quoteActive
+    ? isDark
+      ? 'border-fuchsia-300/24 bg-[linear-gradient(135deg,rgba(39,15,57,0.96),rgba(16,14,36,0.98))] text-white shadow-[0_16px_48px_rgba(17,5,28,0.42)]'
+      : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(250,244,255,0.94))] text-gray-900 shadow-[0_12px_32px_rgba(168,85,247,0.12)]'
+    : isDark
+      ? 'border-fuchsia-300/16 bg-[linear-gradient(135deg,rgba(31,14,42,0.92),rgba(14,14,31,0.96))] text-white hover:border-fuchsia-300/28'
+      : 'border-violet-300/30 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(250,244,255,0.92))] text-gray-900 hover:border-violet-300/50'
+
+  return (
+    <>
+      {isLoggedIn ? (
+        <div ref={userMenuAnchorRef} className="relative hidden sm:block">
+          <button
+            onClick={onToggleUserMenu}
+            className={`inline-flex h-10 items-center gap-2 rounded-md border pl-2 pr-3 transition-all ${utilityPill} ${focus}`}
+            aria-label="User menu"
+            aria-expanded={userMenu}
+          >
+            <div className={`flex h-[1.75rem] w-[1.75rem] items-center justify-center rounded-full border ${
+              heroMode
+                ? 'border-white/18 bg-white/10 text-white'
+                : isDark
+                  ? 'border-violet-300/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.22),rgba(236,72,153,0.12))] text-white'
+                  : 'border-violet-300/38 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(236,72,153,0.08))] text-violet-700'
+            }`}>
+              <UserAvatar
+                name={deferredUser?.name}
+                email={deferredUser?.email}
+                avatarUrl={deferredUser?.avatarUrl}
+                avatarStyle={deferredUser?.avatarStyle}
+                avatarSeed={deferredUser?.avatarSeed}
+                avatarOptions={deferredUser?.avatarOptions}
+                className="h-full w-full rounded-full"
+                fallbackClassName={
+                  isDark
+                    ? 'bg-[linear-gradient(135deg,rgba(124,58,237,0.52),rgba(236,72,153,0.35))] text-white'
+                    : 'bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.12))] text-violet-700'
+                }
+                imageClassName="object-cover"
+              />
+            </div>
+            <span className="hidden text-[12px] font-medium md:inline">{firstName}</span>
+            <ChevronDown
+              className={`h-3 w-3 transition-transform duration-200 ${userMenu ? 'rotate-180' : ''} ${
+                heroMode ? 'text-white/45' : isDark ? 'text-purple-100/44' : 'text-violet-600/55'
+              }`}
+              strokeWidth={2.2}
+            />
+          </button>
+        </div>
+      ) : (
+        <Link
+          to="/login"
+          className={`hidden h-10 items-center rounded-md border px-4 text-[12px] font-medium transition-all sm:inline-flex ${utilityPill} ${focus}`}
+        >
+          Login
+        </Link>
+      )}
+
+      <Link
+        to="/rental-cart"
+        className={`relative inline-flex h-10 items-center gap-2 rounded-md border px-2.5 transition-all sm:px-3 ${cartSurface} ${focus}`}
+        aria-label={cartHasItems ? `Cart · ${cartItemCount}` : 'Cart'}
+      >
+        <IconCircle active={cartHasItems || cartActive} colorScheme="cyan" isDark={isDark} heroMode={heroMode}>
+          <ShoppingCart className="h-3.5 w-3.5" strokeWidth={2} />
+          {cartHasItems && <CountBadge count={cartCountLabel} color="cyan" isDark={isDark} />}
+        </IconCircle>
+        <span className="hidden text-[12px] font-medium sm:inline">Cart</span>
+      </Link>
+
+      {(quoteHasItems || quoteActive) && (
+        <Link
+          to="/purchase-quote"
+          className={`relative hidden h-10 items-center gap-2 rounded-md border px-3 transition-all lg:inline-flex ${quoteSurface} ${focus}`}
+          aria-label={quoteHasItems ? `Quote · ${quoteItemCount}` : 'Quote draft'}
+        >
+          <IconCircle active={quoteHasItems || quoteActive} colorScheme="pink" isDark={isDark} heroMode={heroMode}>
+            <FileText className="h-3.5 w-3.5" strokeWidth={2} />
+            {quoteHasItems && <CountBadge count={quoteCountLabel} color="pink" isDark={isDark} />}
+          </IconCircle>
+          <span className="text-[12px] font-medium">Quote</span>
+        </Link>
+      )}
+    </>
+  )
+})
+
+const NavbarMobileUtilityGrid = memo(function NavbarMobileUtilityGrid({
+  focus,
+  isDark,
+  mobileActiveTile,
+  mobileTile,
+  openSearchDialog,
+  pathname,
+}: {
+  focus: string
+  isDark: boolean
+  mobileActiveTile: string
+  mobileTile: string
+  openSearchDialog: () => void
+  pathname: string
+}) {
+  const { isAuth } = useAuth()
+  const { isLoggedIn, currentUser, logout } = useUser()
+  const purchaseQuote = usePurchaseQuote()
+  const rentalCart = useRentalCart()
+  const deferredUser = useDeferredValue(currentUser)
+  const firstName = deferredUser?.name?.split(' ')[0] || 'User'
+  const cartItemCount = useDeferredValue(rentalCart.itemCount)
+  const quoteItemCount = useDeferredValue(purchaseQuote.itemCount)
+  const cartHasItems = cartItemCount > 0
+  const cartCountLabel = cartItemCount > 99 ? '99+' : String(cartItemCount)
+  const cartActive = pathname.startsWith('/rental-cart') || pathname.startsWith('/checkout')
+  const quoteHasItems = quoteItemCount > 0
+  const quoteCountLabel = quoteItemCount > 99 ? '99+' : String(quoteItemCount)
+  const quoteActive = pathname.startsWith('/purchase-quote')
+
+  return (
+    <div className="grid grid-cols-2 gap-1.5">
+      <button
+        type="button"
+        onClick={openSearchDialog}
+        className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+      >
+        <Search className="h-4 w-4 opacity-70" strokeWidth={2} />
+        Search
+      </button>
+
+      <Link
+        to="/rental-cart"
+        className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-semibold transition-all ${
+          cartActive ? mobileActiveTile : mobileTile
+        } ${focus}`}
+      >
+        <ShoppingCart className="h-4 w-4 opacity-70" strokeWidth={2} />
+        Cart
+        {cartHasItems && (
+          <span className={`inline-flex min-w-[1.3rem] items-center justify-center rounded-full px-1 py-[2px] text-[8.5px] font-mono font-bold leading-none ${
+            isDark
+              ? 'bg-[linear-gradient(135deg,#22d3ee,#7c3aed)] text-slate-950'
+              : 'bg-[linear-gradient(135deg,#7c3aed,#22d3ee)] text-white'
+          }`}>
+            {cartCountLabel}
+          </span>
+        )}
+      </Link>
+
+      {(quoteHasItems || quoteActive) && (
+        <Link
+          to="/purchase-quote"
+          className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${
+            quoteActive ? mobileActiveTile : mobileTile
+          } ${focus}`}
+        >
+          <FileText className="h-4 w-4 opacity-70" strokeWidth={2} />
+          Quote
+          {quoteHasItems && (
+            <span className={`inline-flex min-w-[1.3rem] items-center justify-center rounded-full px-1 py-[2px] text-[8.5px] font-mono font-bold leading-none ${
+              isDark
+                ? 'bg-[linear-gradient(135deg,#f472b6,#8b5cf6)] text-slate-950'
+                : 'bg-[linear-gradient(135deg,#ec4899,#7c3aed)] text-white'
+            }`}>
+              {quoteCountLabel}
+            </span>
+          )}
+        </Link>
+      )}
+
+      {isLoggedIn ? (
+        <>
+          <Link
+            to="/my-requests"
+            className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+          >
+            <FileText className="h-4 w-4 opacity-70" strokeWidth={2} />
+            Requests
+          </Link>
+          <Link
+            to="/profile"
+            className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+          >
+            <User2 className="h-4 w-4 opacity-70" strokeWidth={2} />
+            {firstName}
+          </Link>
+          {isAuth && (
+            <Link
+              to="/admin"
+              className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+            >
+              <ShieldCheck className="h-4 w-4 opacity-70" strokeWidth={2} />
+              Admin
+            </Link>
+          )}
+          <button
+            type="button"
+            onClick={() => void logout()}
+            className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${
+              isDark
+                ? 'border-red-400/20 bg-red-500/10 text-red-300 hover:bg-red-500/16'
+                : 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100'
+            } ${focus}`}
+          >
+            <LogOut className="h-4 w-4 opacity-80" strokeWidth={2} />
+            Logout
+          </button>
+        </>
+      ) : (
+        <Link
+          to="/login"
+          className={`col-span-2 inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-[15px] border px-4 text-[13px] font-semibold transition-all ${
+            isDark
+              ? 'border-violet-400/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.08))] text-white hover:border-violet-400/35'
+              : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.08),rgba(236,72,153,0.04))] text-violet-800 hover:border-violet-300/65'
+          } ${focus}`}
+        >
+          <User2 className="h-4 w-4" strokeWidth={2} />
+          Login to your account
+          <ArrowRight className="h-3.5 w-3.5 opacity-60" strokeWidth={2} />
+        </Link>
+      )}
+    </div>
+  )
+})
+
+const NavbarUserMenuPortal = memo(function NavbarUserMenuPortal({
+  focus,
+  isDark,
+  onClose,
+  userMenu,
+  userMenuPopoverRef,
+  userMenuPosition,
+}: {
+  focus: string
+  isDark: boolean
+  onClose: () => void
+  userMenu: boolean
+  userMenuPopoverRef: React.RefObject<HTMLDivElement | null>
+  userMenuPosition: { top: number; left: number; placement: 'top' | 'bottom' } | null
+}) {
+  const { isAuth } = useAuth()
+  const { currentUser, logout } = useUser()
+  const deferredUser = useDeferredValue(currentUser)
+
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
+    <AnimatePresence>
+      {userMenu && userMenuPosition && (
+        <motion.div
+          ref={userMenuPopoverRef}
+          initial={{ opacity: 0, y: userMenuPosition.placement === 'bottom' ? -8 : 8, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: userMenuPosition.placement === 'bottom' ? -8 : 8, scale: 0.97 }}
+          transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+          className={`fixed z-[90] w-[280px] overflow-hidden rounded-[20px] border ${
+            isDark
+              ? 'border-white/[0.08] bg-[linear-gradient(170deg,rgba(7,9,22,0.995),rgba(4,6,16,0.995))] shadow-[0_28px_90px_rgba(0,2,10,0.68),inset_0_1px_0_rgba(255,255,255,0.05)]'
+              : 'border-violet-200/65 bg-white/98 shadow-[0_20px_68px_rgba(97,40,178,0.13),0_4px_16px_rgba(0,0,0,0.05)]'
+          } ${userMenuPosition.placement === 'bottom' ? 'origin-top-right' : 'origin-bottom-right'}`}
+          style={{
+            top: `${userMenuPosition.top}px`,
+            left: `${userMenuPosition.left}px`,
+          }}
+        >
+          <div
+            className="absolute inset-x-0 top-0 h-px"
+            style={{
+              background: isDark
+                ? 'linear-gradient(90deg, transparent 10%, rgba(124,58,237,0.5) 50%, transparent 90%)'
+                : 'linear-gradient(90deg, transparent 10%, rgba(124,58,237,0.2) 50%, transparent 90%)',
+            }}
+          />
+
+          <div className={`flex items-center gap-3 px-4 py-4 ${isDark ? 'border-b border-white/[0.07]' : 'border-b border-violet-100'}`}>
+            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${
+              isDark
+                ? 'border-violet-300/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.28),rgba(236,72,153,0.16))]'
+                : 'border-violet-200/60 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(236,72,153,0.08))]'
+            }`}>
+              <UserAvatar
+                name={deferredUser?.name}
+                email={deferredUser?.email}
+                avatarUrl={deferredUser?.avatarUrl}
+                avatarStyle={deferredUser?.avatarStyle}
+                avatarSeed={deferredUser?.avatarSeed}
+                avatarOptions={deferredUser?.avatarOptions}
+                className="h-full w-full rounded-full"
+                fallbackClassName={
+                  isDark
+                    ? 'bg-[linear-gradient(135deg,rgba(124,58,237,0.52),rgba(236,72,153,0.35))] text-white text-[11px]'
+                    : 'bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.12))] text-violet-700 text-[11px]'
+                }
+                imageClassName="object-cover"
+              />
+            </div>
+            <div className="min-w-0">
+              <div className={`truncate text-[13px] font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {deferredUser?.name || 'User'}
+              </div>
+              <div className={`truncate text-[11px] ${isDark ? 'text-purple-100/42' : 'text-gray-400'}`}>
+                {deferredUser?.email || ''}
+              </div>
+            </div>
+          </div>
+
+          <div className="p-2">
+            {[
+              { to: '/my-requests', label: 'My Requests', icon: FileText },
+              { to: '/profile', label: 'Profile', icon: User2 },
+              ...(isAuth ? [{ to: '/admin', label: 'Admin Panel', icon: ShieldCheck }] : []),
+            ].map(item => {
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={onClose}
+                  className={`flex items-center gap-3 rounded-[13px] px-3 py-2.5 text-[12px] font-medium transition-all duration-200 ${
+                    isDark
+                      ? 'text-purple-100/70 hover:bg-white/[0.06] hover:text-white'
+                      : 'text-gray-600 hover:bg-violet-50 hover:text-gray-900'
+                  } ${focus}`}
+                >
+                  <Icon className={`h-3.5 w-3.5 ${isDark ? 'text-white/38' : 'text-violet-400/70'}`} strokeWidth={2} />
+                  {item.label}
+                </Link>
+              )
+            })}
+
+            <div className={`my-1.5 h-px ${isDark ? 'bg-white/[0.06]' : 'bg-violet-100'}`} />
+
+            <button
+              type="button"
+              onClick={() => {
+                onClose()
+                void logout()
+              }}
+              className={`flex w-full items-center gap-3 rounded-[13px] px-3 py-2.5 text-left text-[12px] font-medium transition-all duration-200 ${
+                isDark
+                  ? 'text-red-300/72 hover:bg-red-500/[0.10] hover:text-red-200'
+                  : 'text-red-600 hover:bg-red-50 hover:text-red-700'
+              } ${focus}`}
+            >
+              <LogOut className={`h-3.5 w-3.5 ${isDark ? 'text-red-300/55' : 'text-red-400/70'}`} strokeWidth={2} />
+              Logout
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body
+  )
+})
+
 export default function Navbar() {
   const { pathname } = useLocation()
   const { isDark } = useTheme()
-  const { isAuth } = useAuth()
-  const purchaseQuote = usePurchaseQuote()
-  const rentalCart = useRentalCart()
-  const { isLoggedIn, currentUser, logout } = useUser()
+  const { perfLow } = usePerfMode()
 
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -399,6 +812,7 @@ export default function Navbar() {
   const desktopTriggerRefs = useRef<Record<string, HTMLElement | null>>({})
   const desktopOpenTimerRef = useRef<number | null>(null)
   const desktopCloseTimerRef = useRef<number | null>(null)
+  const scrolledRef = useRef(false)
   const [canHoverDesktopNav, setCanHoverDesktopNav] = useState(true)
 
   useBodyScrollLock(open)
@@ -469,10 +883,15 @@ export default function Navbar() {
       if (ticking) return
       ticking = true
       window.requestAnimationFrame(() => {
-        setScrolled(window.scrollY > 18)
+        const nextScrolled = window.scrollY > 18
+        if (scrolledRef.current !== nextScrolled) {
+          scrolledRef.current = nextScrolled
+          setScrolled(nextScrolled)
+        }
         ticking = false
       })
     }
+    onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
@@ -528,18 +947,39 @@ export default function Navbar() {
     )
     const rawTop = shouldAbove ? rect.top - menuH - 10 : rect.bottom + 10
     const top = Math.max(pad, Math.min(rawTop, window.innerHeight - pad - menuH))
-    setUserMenuPosition({ top, left, placement: shouldAbove ? 'top' : 'bottom' })
+    const placement = shouldAbove ? 'top' : 'bottom'
+
+    setUserMenuPosition(prev =>
+      prev && prev.top === top && prev.left === left && prev.placement === placement
+        ? prev
+        : { top, left, placement }
+    )
   }, [])
+
+  const toggleUserMenu = useCallback(() => {
+    if (!userMenu) updateUserMenuPosition()
+    setUserMenu(value => !value)
+  }, [updateUserMenuPosition, userMenu])
 
   useEffect(() => {
     if (!userMenu) { setUserMenuPosition(null); return }
-    const frame = window.requestAnimationFrame(() => updateUserMenuPosition())
-    window.addEventListener('resize', updateUserMenuPosition)
-    window.addEventListener('scroll', updateUserMenuPosition, true)
+
+    let frame = 0
+    const scheduleUpdate = () => {
+      if (frame) return
+      frame = window.requestAnimationFrame(() => {
+        frame = 0
+        updateUserMenuPosition()
+      })
+    }
+
+    scheduleUpdate()
+    window.addEventListener('resize', scheduleUpdate, { passive: true })
+    window.addEventListener('scroll', scheduleUpdate, true)
     return () => {
-      window.cancelAnimationFrame(frame)
-      window.removeEventListener('resize', updateUserMenuPosition)
-      window.removeEventListener('scroll', updateUserMenuPosition, true)
+      if (frame) window.cancelAnimationFrame(frame)
+      window.removeEventListener('resize', scheduleUpdate)
+      window.removeEventListener('scroll', scheduleUpdate, true)
     }
   }, [updateUserMenuPosition, userMenu])
 
@@ -602,20 +1042,27 @@ export default function Navbar() {
   const focus =
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent'
 
-  const firstName = currentUser?.name?.split(' ')[0] || 'User'
   const isHome = pathname === '/'
   const heroMode = isHome && !scrolled
 
   // ── Nav bar background ────────────────────────────────────────────────────
   const navBarBg = scrolled
     ? isDark
-      ? 'border-b border-white/[0.05] bg-[rgba(2,4,12,0.94)] backdrop-blur-xl shadow-[0_2px_40px_rgba(0,0,0,0.5),inset_0_-1px_0_rgba(124,58,237,0.05)]'
-      : 'border-b border-violet-200/35 bg-white/96 backdrop-blur-md shadow-[0_2px_20px_rgba(124,58,237,0.06)]'
+      ? perfLow
+        ? 'border-b border-white/[0.05] bg-[rgba(2,4,12,0.98)] shadow-[0_2px_32px_rgba(0,0,0,0.44),inset_0_-1px_0_rgba(124,58,237,0.05)]'
+        : 'border-b border-white/[0.05] bg-[rgba(2,4,12,0.94)] backdrop-blur-lg shadow-[0_2px_40px_rgba(0,0,0,0.5),inset_0_-1px_0_rgba(124,58,237,0.05)]'
+      : perfLow
+        ? 'border-b border-violet-200/35 bg-white/98 shadow-[0_2px_18px_rgba(124,58,237,0.05)]'
+        : 'border-b border-violet-200/35 bg-white/96 backdrop-blur-sm shadow-[0_2px_20px_rgba(124,58,237,0.06)]'
     : isHome
       ? ''
       : isDark
-        ? 'border-b border-white/[0.04] bg-[rgba(3,5,14,0.78)] backdrop-blur-md'
-        : 'border-b border-violet-100/40 bg-white/78 backdrop-blur-sm'
+        ? perfLow
+          ? 'border-b border-white/[0.04] bg-[rgba(3,5,14,0.92)]'
+          : 'border-b border-white/[0.04] bg-[rgba(3,5,14,0.82)] backdrop-blur-sm'
+        : perfLow
+          ? 'border-b border-violet-100/40 bg-white/92'
+          : 'border-b border-violet-100/40 bg-white/82 backdrop-blur-[2px]'
 
   // ── Utility pill (search, login) ───────────────────────────────────────────
   const utilityPill = heroMode
@@ -666,33 +1113,6 @@ export default function Navbar() {
     : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.06),rgba(34,211,238,0.06))] text-gray-900'
 
   // ── Cart / Quote surfaces ──────────────────────────────────────────────────
-  const cartItemCount = rentalCart.itemCount
-  const cartHasItems = cartItemCount > 0
-  const cartCountLabel = cartItemCount > 99 ? '99+' : String(cartItemCount)
-  const cartActive = pathname.startsWith('/rental-cart') || pathname.startsWith('/checkout')
-  const quoteItemCount = purchaseQuote.itemCount
-  const quoteHasItems = quoteItemCount > 0
-  const quoteCountLabel = quoteItemCount > 99 ? '99+' : String(quoteItemCount)
-  const quoteActive = pathname.startsWith('/purchase-quote')
-
-  const cartSurface = cartActive
-    ? isDark
-      ? 'border-cyan-300/28 bg-[linear-gradient(135deg,rgba(8,30,44,0.95),rgba(11,18,38,0.98))] text-white shadow-[0_16px_48px_rgba(2,8,18,0.46)]'
-      : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(245,243,255,0.94))] text-gray-900 shadow-[0_12px_32px_rgba(124,58,237,0.14)]'
-    : cartHasItems
-      ? isDark
-        ? 'border-cyan-300/18 bg-[linear-gradient(135deg,rgba(8,25,38,0.9),rgba(13,18,34,0.94))] text-white hover:border-cyan-300/30'
-        : 'border-violet-300/35 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(245,243,255,0.92))] text-gray-900 hover:border-violet-300/55'
-      : utilityPill
-
-  const quoteSurface = quoteActive
-    ? isDark
-      ? 'border-fuchsia-300/24 bg-[linear-gradient(135deg,rgba(39,15,57,0.96),rgba(16,14,36,0.98))] text-white shadow-[0_16px_48px_rgba(17,5,28,0.42)]'
-      : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(250,244,255,0.94))] text-gray-900 shadow-[0_12px_32px_rgba(168,85,247,0.12)]'
-    : isDark
-      ? 'border-fuchsia-300/16 bg-[linear-gradient(135deg,rgba(31,14,42,0.92),rgba(14,14,31,0.96))] text-white hover:border-fuchsia-300/28'
-      : 'border-violet-300/30 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(250,244,255,0.92))] text-gray-900 hover:border-violet-300/50'
-
   // ── Desktop nav data ────────────────────────────────────────────────────────
 
   const activeDesktopItem = useMemo(
@@ -735,7 +1155,15 @@ export default function Navbar() {
       )
       const top = rect.bottom + 4
 
-      setDesktopMenuPosition({ top, left, width, compact })
+      setDesktopMenuPosition(prev =>
+        prev &&
+        prev.top === top &&
+        prev.left === left &&
+        prev.width === width &&
+        prev.compact === compact
+          ? prev
+          : { top, left, width, compact }
+      )
     },
     []
   )
@@ -790,14 +1218,22 @@ export default function Navbar() {
       return
     }
 
-    const update = () => updateDesktopMenuPosition(desktopMenu)
-    const frame = window.requestAnimationFrame(update)
-    window.addEventListener('resize', update)
-    window.addEventListener('scroll', update, true)
+    let frame = 0
+    const scheduleUpdate = () => {
+      if (frame) return
+      frame = window.requestAnimationFrame(() => {
+        frame = 0
+        updateDesktopMenuPosition(desktopMenu)
+      })
+    }
+
+    scheduleUpdate()
+    window.addEventListener('resize', scheduleUpdate, { passive: true })
+    window.addEventListener('scroll', scheduleUpdate, true)
     return () => {
-      window.cancelAnimationFrame(frame)
-      window.removeEventListener('resize', update)
-      window.removeEventListener('scroll', update, true)
+      if (frame) window.cancelAnimationFrame(frame)
+      window.removeEventListener('resize', scheduleUpdate)
+      window.removeEventListener('scroll', scheduleUpdate, true)
     }
   }, [desktopMenu, updateDesktopMenuPosition])
 
@@ -886,83 +1322,16 @@ export default function Navbar() {
                 </kbd>
               </button>
 
-              {/* User / Login */}
-              {isLoggedIn ? (
-                <div ref={userMenuAnchorRef} className="relative hidden sm:block">
-                  <button
-                    onClick={() => { if (!userMenu) updateUserMenuPosition(); setUserMenu(v => !v) }}
-                    className={`inline-flex h-10 items-center gap-2 rounded-md border pl-2 pr-3 transition-all ${utilityPill} ${focus}`}
-                    aria-label="User menu"
-                    aria-expanded={userMenu}
-                  >
-                    <div className={`flex h-[1.75rem] w-[1.75rem] items-center justify-center rounded-full border ${
-                      heroMode
-                        ? 'border-white/18 bg-white/10 text-white'
-                        : isDark
-                          ? 'border-violet-300/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.22),rgba(236,72,153,0.12))] text-white'
-                          : 'border-violet-300/38 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(236,72,153,0.08))] text-violet-700'
-                    }`}>
-                      <UserAvatar
-                        name={currentUser?.name}
-                        email={currentUser?.email}
-                        avatarUrl={currentUser?.avatarUrl}
-                        avatarStyle={currentUser?.avatarStyle}
-                        avatarSeed={currentUser?.avatarSeed}
-                        avatarOptions={currentUser?.avatarOptions}
-                        className="h-full w-full rounded-full"
-                        fallbackClassName={
-                          isDark
-                            ? 'bg-[linear-gradient(135deg,rgba(124,58,237,0.52),rgba(236,72,153,0.35))] text-white'
-                            : 'bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.12))] text-violet-700'
-                        }
-                        imageClassName="object-cover"
-                      />
-                    </div>
-                    <span className="hidden text-[12px] font-medium md:inline">{firstName}</span>
-                    <ChevronDown
-                      className={`h-3 w-3 transition-transform duration-200 ${userMenu ? 'rotate-180' : ''} ${
-                        heroMode ? 'text-white/45' : isDark ? 'text-purple-100/44' : 'text-violet-600/55'
-                      }`}
-                      strokeWidth={2.2}
-                    />
-                  </button>
-                </div>
-              ) : (
-                <Link
-                  to="/login"
-                  className={`hidden h-10 items-center rounded-md border px-4 text-[12px] font-medium transition-all sm:inline-flex ${utilityPill} ${focus}`}
-                >
-                  Login
-                </Link>
-              )}
-
-              {/* Cart */}
-              <Link
-                to="/rental-cart"
-                className={`relative inline-flex h-10 items-center gap-2 rounded-md border px-2.5 transition-all sm:px-3 ${cartSurface} ${focus}`}
-                aria-label={cartHasItems ? `Cart · ${cartItemCount}` : 'Cart'}
-              >
-                <IconCircle active={cartHasItems || cartActive} colorScheme="cyan" isDark={isDark} heroMode={heroMode}>
-                  <ShoppingCart className="h-3.5 w-3.5" strokeWidth={2} />
-                  {cartHasItems && <CountBadge count={cartCountLabel} color="cyan" isDark={isDark} />}
-                </IconCircle>
-                <span className="hidden text-[12px] font-medium sm:inline">Cart</span>
-              </Link>
-
-              {/* Purchase quote */}
-              {(quoteHasItems || quoteActive) && (
-                <Link
-                  to="/purchase-quote"
-                  className={`relative hidden h-10 items-center gap-2 rounded-md border px-3 transition-all lg:inline-flex ${quoteSurface} ${focus}`}
-                  aria-label={quoteHasItems ? `Quote · ${quoteItemCount}` : 'Quote draft'}
-                >
-                  <IconCircle active={quoteHasItems || quoteActive} colorScheme="pink" isDark={isDark} heroMode={heroMode}>
-                    <FileText className="h-3.5 w-3.5" strokeWidth={2} />
-                    {quoteHasItems && <CountBadge count={quoteCountLabel} color="pink" isDark={isDark} />}
-                  </IconCircle>
-                  <span className="text-[12px] font-medium">Quote</span>
-                </Link>
-              )}
+              <NavbarAccountActions
+                focus={focus}
+                heroMode={heroMode}
+                isDark={isDark}
+                pathname={pathname}
+                utilityPill={utilityPill}
+                userMenu={userMenu}
+                userMenuAnchorRef={userMenuAnchorRef}
+                onToggleUserMenu={toggleUserMenu}
+              />
 
               {/* Hamburger */}
               <button
@@ -1025,8 +1394,6 @@ export default function Navbar() {
                       : 'border-violet-200/65 bg-white/97 shadow-[0_16px_48px_rgba(97,40,178,0.11)]'
                   }`}
                   style={{
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
                     maxHeight: 'calc(100dvh - 5.5rem)',
                     paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))',
                   }}
@@ -1141,114 +1508,14 @@ export default function Navbar() {
                       <div className={`mb-2 mt-3 px-1 text-[9px] font-bold uppercase tracking-[0.22em] ${isDark ? 'text-purple-100/36' : 'text-violet-600/58'}`}>
                         Account &amp; Tools
                       </div>
-                      <div className="grid grid-cols-2 gap-1.5">
-
-                        {/* Search */}
-                        <button
-                          type="button"
-                          onClick={openSearchDialog}
-                          className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
-                        >
-                          <Search className="h-4 w-4 opacity-70" strokeWidth={2} />
-                          Search
-                        </button>
-
-                        {/* Cart */}
-                        <Link
-                          to="/rental-cart"
-                          className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-semibold transition-all ${
-                            cartActive ? mobileActiveTile : mobileTile
-                          } ${focus}`}
-                        >
-                          <ShoppingCart className="h-4 w-4 opacity-70" strokeWidth={2} />
-                          Cart
-                          {cartHasItems && (
-                            <span className={`inline-flex min-w-[1.3rem] items-center justify-center rounded-full px-1 py-[2px] text-[8.5px] font-mono font-bold leading-none ${
-                              isDark
-                                ? 'bg-[linear-gradient(135deg,#22d3ee,#7c3aed)] text-slate-950'
-                                : 'bg-[linear-gradient(135deg,#7c3aed,#22d3ee)] text-white'
-                            }`}>
-                              {cartCountLabel}
-                            </span>
-                          )}
-                        </Link>
-
-                        {/* Quote (when exists) */}
-                        {(quoteHasItems || quoteActive) && (
-                          <Link
-                            to="/purchase-quote"
-                            className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${
-                              quoteActive ? mobileActiveTile : mobileTile
-                            } ${focus}`}
-                          >
-                            <FileText className="h-4 w-4 opacity-70" strokeWidth={2} />
-                            Quote
-                            {quoteHasItems && (
-                              <span className={`inline-flex min-w-[1.3rem] items-center justify-center rounded-full px-1 py-[2px] text-[8.5px] font-mono font-bold leading-none ${
-                                isDark
-                                  ? 'bg-[linear-gradient(135deg,#f472b6,#8b5cf6)] text-slate-950'
-                                  : 'bg-[linear-gradient(135deg,#ec4899,#7c3aed)] text-white'
-                              }`}>
-                                {quoteCountLabel}
-                              </span>
-                            )}
-                          </Link>
-                        )}
-
-                        {/* Authenticated */}
-                        {isLoggedIn ? (
-                          <>
-                            <Link
-                              to="/my-requests"
-                              className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
-                            >
-                              <FileText className="h-4 w-4 opacity-70" strokeWidth={2} />
-                              Requests
-                            </Link>
-                            <Link
-                              to="/profile"
-                              className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
-                            >
-                              <User2 className="h-4 w-4 opacity-70" strokeWidth={2} />
-                              {firstName}
-                            </Link>
-                            {isAuth && (
-                              <Link
-                                to="/admin"
-                                className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
-                              >
-                                <ShieldCheck className="h-4 w-4 opacity-70" strokeWidth={2} />
-                                Admin
-                              </Link>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => void logout()}
-                              className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${
-                                isDark
-                                  ? 'border-red-400/20 bg-red-500/10 text-red-300 hover:bg-red-500/16'
-                                  : 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100'
-                              } ${focus}`}
-                            >
-                              <LogOut className="h-4 w-4 opacity-80" strokeWidth={2} />
-                              Logout
-                            </button>
-                          </>
-                        ) : (
-                          <Link
-                            to="/login"
-                            className={`col-span-2 inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-[15px] border px-4 text-[13px] font-semibold transition-all ${
-                              isDark
-                                ? 'border-violet-400/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.08))] text-white hover:border-violet-400/35'
-                                : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.08),rgba(236,72,153,0.04))] text-violet-800 hover:border-violet-300/65'
-                            } ${focus}`}
-                          >
-                            <User2 className="h-4 w-4" strokeWidth={2} />
-                            Login to your account
-                            <ArrowRight className="h-3.5 w-3.5 opacity-60" strokeWidth={2} />
-                          </Link>
-                        )}
-                      </div>
+                      <NavbarMobileUtilityGrid
+                        focus={focus}
+                        isDark={isDark}
+                        mobileActiveTile={mobileActiveTile}
+                        mobileTile={mobileTile}
+                        openSearchDialog={openSearchDialog}
+                        pathname={pathname}
+                      />
                     </div>
 
                   </div>
@@ -1292,7 +1559,6 @@ export default function Navbar() {
                       ? 'border-white/[0.08] bg-[rgba(7,9,22,0.92)] shadow-[0_24px_72px_rgba(0,2,10,0.56),inset_0_1px_0_rgba(255,255,255,0.04)]'
                       : 'border-violet-200/75 bg-white/94 shadow-[0_18px_56px_rgba(97,40,178,0.10),0_4px_18px_rgba(0,0,0,0.03)]'
                   }`}
-                  style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
                 >
                   {/* Top accent line */}
                   <div
@@ -1377,6 +1643,8 @@ export default function Navbar() {
                               key={child.to}
                               ref={index === 0 ? desktopPanelFirstLinkRef : undefined}
                               to={child.to}
+                              onMouseEnter={() => preloadRoute(child.to)}
+                              onFocus={() => preloadRoute(child.to)}
                               onClick={() => scheduleDesktopClose(true)}
                               role="menuitem"
                               className={`group relative flex items-start gap-3 overflow-hidden rounded-[14px] border p-3 transition-all duration-200 ${
@@ -1446,115 +1714,14 @@ export default function Navbar() {
       </div>
 
       {/* ══════════════════════ USER MENU PORTAL ══════════════════════ */}
-      {typeof document !== 'undefined' &&
-        createPortal(
-          <AnimatePresence>
-            {userMenu && userMenuPosition && (
-              <motion.div
-                ref={userMenuPopoverRef}
-                initial={{ opacity: 0, y: userMenuPosition.placement === 'bottom' ? -8 : 8, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: userMenuPosition.placement === 'bottom' ? -8 : 8, scale: 0.97 }}
-                transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-                className={`fixed z-[90] w-[280px] overflow-hidden rounded-[20px] border ${
-                  isDark
-                    ? 'border-white/[0.08] bg-[linear-gradient(170deg,rgba(7,9,22,0.99),rgba(4,6,16,0.99))] shadow-[0_28px_90px_rgba(0,2,10,0.68),inset_0_1px_0_rgba(255,255,255,0.05)]'
-                    : 'border-violet-200/65 bg-white/98 shadow-[0_20px_68px_rgba(97,40,178,0.13),0_4px_16px_rgba(0,0,0,0.05)]'
-                } ${userMenuPosition.placement === 'bottom' ? 'origin-top-right' : 'origin-bottom-right'}`}
-                style={{
-                  top: `${userMenuPosition.top}px`,
-                  left: `${userMenuPosition.left}px`,
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                }}
-              >
-                {/* Top accent */}
-                <div
-                  className="absolute inset-x-0 top-0 h-px"
-                  style={{
-                    background: isDark
-                      ? 'linear-gradient(90deg, transparent 10%, rgba(124,58,237,0.5) 50%, transparent 90%)'
-                      : 'linear-gradient(90deg, transparent 10%, rgba(124,58,237,0.2) 50%, transparent 90%)',
-                  }}
-                />
-
-                {/* User header */}
-                <div className={`flex items-center gap-3 px-4 py-4 ${isDark ? 'border-b border-white/[0.07]' : 'border-b border-violet-100'}`}>
-                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${
-                    isDark
-                      ? 'border-violet-300/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.28),rgba(236,72,153,0.16))]'
-                      : 'border-violet-200/60 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(236,72,153,0.08))]'
-                  }`}>
-                    <UserAvatar
-                      name={currentUser?.name}
-                      email={currentUser?.email}
-                      avatarUrl={currentUser?.avatarUrl}
-                      avatarStyle={currentUser?.avatarStyle}
-                      avatarSeed={currentUser?.avatarSeed}
-                      avatarOptions={currentUser?.avatarOptions}
-                      className="h-full w-full rounded-full"
-                      fallbackClassName={
-                        isDark
-                          ? 'bg-[linear-gradient(135deg,rgba(124,58,237,0.52),rgba(236,72,153,0.35))] text-white text-[11px]'
-                          : 'bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.12))] text-violet-700 text-[11px]'
-                      }
-                      imageClassName="object-cover"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className={`truncate text-[13px] font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      {currentUser?.name || 'User'}
-                    </div>
-                    <div className={`truncate text-[11px] ${isDark ? 'text-purple-100/42' : 'text-gray-400'}`}>
-                      {currentUser?.email || ''}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Menu items */}
-                <div className="p-2">
-                  {[
-                    { to: '/my-requests', label: 'My Requests', icon: FileText },
-                    { to: '/profile', label: 'Profile', icon: User2 },
-                    ...(isAuth ? [{ to: '/admin', label: 'Admin Panel', icon: ShieldCheck }] : []),
-                  ].map(item => {
-                    const Icon = item.icon
-                    return (
-                      <Link
-                        key={item.to}
-                        to={item.to}
-                        className={`flex items-center gap-3 rounded-[13px] px-3 py-2.5 text-[12px] font-medium transition-all duration-200 ${
-                          isDark
-                            ? 'text-purple-100/70 hover:bg-white/[0.06] hover:text-white'
-                            : 'text-gray-600 hover:bg-violet-50 hover:text-gray-900'
-                        } ${focus}`}
-                      >
-                        <Icon className={`h-3.5 w-3.5 ${isDark ? 'text-white/38' : 'text-violet-400/70'}`} strokeWidth={2} />
-                        {item.label}
-                      </Link>
-                    )
-                  })}
-
-                  <div className={`my-1.5 h-px ${isDark ? 'bg-white/[0.06]' : 'bg-violet-100'}`} />
-
-                  <button
-                    type="button"
-                    onClick={() => { setUserMenu(false); void logout() }}
-                    className={`flex w-full items-center gap-3 rounded-[13px] px-3 py-2.5 text-left text-[12px] font-medium transition-all duration-200 ${
-                      isDark
-                        ? 'text-red-300/72 hover:bg-red-500/[0.10] hover:text-red-200'
-                        : 'text-red-600 hover:bg-red-50 hover:text-red-700'
-                    } ${focus}`}
-                  >
-                    <LogOut className={`h-3.5 w-3.5 ${isDark ? 'text-red-300/55' : 'text-red-400/70'}`} strokeWidth={2} />
-                    Logout
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>,
-          document.body
-        )}
+      <NavbarUserMenuPortal
+        focus={focus}
+        isDark={isDark}
+        onClose={() => setUserMenu(false)}
+        userMenu={userMenu}
+        userMenuPopoverRef={userMenuPopoverRef}
+        userMenuPosition={userMenuPosition}
+      />
 
       <SearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>

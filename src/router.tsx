@@ -40,7 +40,7 @@ const {
 } = lazyRoutes
 
 function S({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={<PageLoader mode="route" delayMs={90} />}>{children}</Suspense>
+  return <Suspense fallback={<PageLoader mode="route" delayMs={70} />}>{children}</Suspense>
 }
 
 function UserLoginRedirect() {

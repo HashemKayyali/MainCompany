@@ -80,6 +80,9 @@ const PUBLIC_ROUTE_PRELOADERS: Record<string, (() => Promise<unknown>) | undefin
   '/contact': routeImporters.contact,
 }
 
+const PRIORITY_PUBLIC_PATHS = ['/products', '/contact'] as const
+const SECONDARY_PUBLIC_PATHS = ['/customers', '/gallery', '/about'] as const
+
 const warmedPaths = new Set<string>()
 let commonRoutesWarmed = false
 
@@ -94,24 +97,25 @@ export function preloadRoute(path: string) {
   })
 }
 
+export function preloadRoutes(paths: readonly string[]) {
+  paths.forEach(preloadRoute)
+}
+
 export function warmCommonRoutes() {
   if (commonRoutesWarmed || typeof window === 'undefined') return
   commonRoutesWarmed = true
 
-  const run = () => {
-    preloadRoute('/products')
-    preloadRoute('/customers')
-    preloadRoute('/gallery')
-    preloadRoute('/about')
-    preloadRoute('/contact')
-  }
+  const warmPriority = () => preloadRoutes(PRIORITY_PUBLIC_PATHS)
+  const warmSecondary = () => preloadRoutes(SECONDARY_PUBLIC_PATHS)
+
+  window.setTimeout(warmPriority, 120)
 
   if ('requestIdleCallback' in window) {
     ;(window as Window & {
       requestIdleCallback: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number
-    }).requestIdleCallback(() => run(), { timeout: 1400 })
+    }).requestIdleCallback(() => warmSecondary(), { timeout: 1400 })
     return
   }
 
-  window.setTimeout(run, 320)
+  window.setTimeout(warmSecondary, 360)
 }

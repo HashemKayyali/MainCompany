@@ -1,8 +1,10 @@
+import { motion } from 'framer-motion'
 import { useMemo } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useCustomersData } from '../../contexts/DataContext'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { usePerfMode } from '../../hooks/usePerfMode'
+import { useReveal } from '../../hooks/useReveal'
 
 const FALLBACK = [
   'Abdali Hospital', 'AMAZON', 'Amman Academy', 'AstraZeneca', 'City Mall',
@@ -23,6 +25,7 @@ export default function StatsStrip() {
   const { customers } = useCustomersData()
   const { perfLow } = usePerfMode()
   const compactViewport = useMediaQuery('(max-width: 1023px)')
+  const stripReveal = useReveal({ distance: 12, duration: 0.32, margin: '0px 0px 18% 0px' })
 
   const names = useMemo(() => {
     if (customers.length > 0) return customers.map(c => c.name)
@@ -54,7 +57,7 @@ export default function StatsStrip() {
 
       <div className="py-7 sm:py-8">
         <div className="site-container">
-          <div className="flex items-center gap-4 sm:gap-6">
+          <motion.div {...stripReveal} className="flex items-center gap-4 sm:gap-6">
 
             {/* Left label */}
             <div className="hidden shrink-0 sm:block">
@@ -109,7 +112,7 @@ export default function StatsStrip() {
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
         </div>
       </div>
 

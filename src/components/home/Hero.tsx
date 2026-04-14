@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowRight, Building2, Sparkles } from 'lucide-react'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { usePerfMode } from '../../hooks/usePerfMode'
 import { preloadRoute } from '../../utils/route-preload'
 
@@ -22,7 +23,10 @@ const journeySteps = [
 export default function Hero() {
   const reducedMotion = useReducedMotion()
   const { perfLow } = usePerfMode()
+  const compactViewport = useMediaQuery('(max-width: 1023px)')
   const motionEnabled = !reducedMotion && !perfLow
+  const richHeroAtmosphere = !perfLow && !compactViewport
+  const glassEnabled = !compactViewport && !perfLow
   const [heroImageReady, setHeroImageReady] = useState(false)
 
   return (
@@ -51,23 +55,26 @@ export default function Hero() {
         <div
           className="absolute inset-0"
           style={{
-            background: 'linear-gradient(180deg, rgba(3,6,16,0.55) 0%, rgba(3,6,16,0.2) 35%, rgba(3,6,16,0.7) 75%, rgba(3,6,16,1) 100%)',
+            background:
+              'linear-gradient(180deg, rgba(3,6,16,0.64) 0%, rgba(3,6,16,0.26) 34%, rgba(3,6,16,0.72) 74%, rgba(3,6,16,1) 100%), ' +
+              'radial-gradient(44% 34% at 18% 16%, rgba(124,58,237,0.14) 0%, transparent 72%), ' +
+              'radial-gradient(38% 28% at 84% 18%, rgba(6,182,212,0.10) 0%, transparent 70%)',
           }}
         />
       </div>
 
       {/* Layer 2 – atmospheric light orbs */}
-      {!perfLow && (
+      {richHeroAtmosphere ? (
         <>
           {/* Violet orb – upper left */}
           <div
             className={`pointer-events-none absolute -z-20${motionEnabled ? ' animate-hero-orb-violet' : ''}`}
             style={{
-              left: '-5%', top: '-10%',
-              width: '60%', height: '70%',
-              opacity: 0.32,
-              background: 'radial-gradient(circle, rgba(124,58,237,0.30) 0%, rgba(124,58,237,0.10) 40%, transparent 68%)',
-              filter: 'blur(56px)',
+              left: '-6%', top: '-10%',
+              width: '54%', height: '62%',
+              opacity: 0.24,
+              background: 'radial-gradient(circle, rgba(124,58,237,0.26) 0%, rgba(124,58,237,0.08) 42%, transparent 70%)',
+              filter: 'blur(40px)',
             }}
           />
 
@@ -75,26 +82,25 @@ export default function Hero() {
           <div
             className={`pointer-events-none absolute -z-20${motionEnabled ? ' animate-hero-orb-cyan' : ''}`}
             style={{
-              right: '-8%', top: '-15%',
-              width: '50%', height: '60%',
-              opacity: 0.18,
-              background: 'radial-gradient(circle, rgba(6,182,212,0.22) 0%, rgba(6,182,212,0.07) 38%, transparent 65%)',
-              filter: 'blur(48px)',
+              right: '-6%', top: '-12%',
+              width: '44%', height: '54%',
+              opacity: 0.14,
+              background: 'radial-gradient(circle, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.06) 40%, transparent 68%)',
+              filter: 'blur(34px)',
             }}
           />
 
           {/* Pink orb – lower center */}
-          <div
-            className={`pointer-events-none absolute -z-20${motionEnabled ? ' animate-hero-orb-pink' : ''}`}
-            style={{
-              left: '25%', bottom: '0%',
-              width: '50%', height: '50%',
-              opacity: 0.14,
-              background: 'radial-gradient(circle, rgba(236,72,153,0.20) 0%, rgba(236,72,153,0.06) 40%, transparent 68%)',
-              filter: 'blur(60px)',
-            }}
-          />
         </>
+      ) : (
+        <div
+          className="pointer-events-none absolute inset-x-[-8%] top-[-4%] -z-20 h-[34%]"
+          style={{
+            background:
+              'radial-gradient(40% 75% at 22% 16%, rgba(124,58,237,0.13) 0%, transparent 76%), ' +
+              'radial-gradient(34% 70% at 78% 18%, rgba(6,182,212,0.08) 0%, transparent 74%)',
+          }}
+        />
       )}
 
       {/* Layer 3 – subtle dot grid texture */}
@@ -134,10 +140,10 @@ export default function Hero() {
               transition={motionEnabled ? { duration: 0.5, delay: 0.06, ease } : undefined}
               className="mb-4 inline-flex w-fit sm:mb-6"
             >
-              <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/22 bg-violet-500/10 px-3 py-1.5 backdrop-blur-sm sm:gap-2.5 sm:px-4 sm:py-2">
+              <div className={`inline-flex items-center gap-2 rounded-full border border-violet-400/22 bg-violet-500/10 px-3 py-1.5 ${glassEnabled ? 'backdrop-blur-sm' : ''} sm:gap-2.5 sm:px-4 sm:py-2`}>
                 <span
                   className="h-1.5 w-1.5 shrink-0 rounded-full bg-violet-400"
-                  style={{ boxShadow: '0 0 8px rgba(167,139,250,0.95), 0 0 18px rgba(167,139,250,0.45)' }}
+                  style={{ boxShadow: richHeroAtmosphere ? '0 0 8px rgba(167,139,250,0.95), 0 0 18px rgba(167,139,250,0.45)' : '0 0 6px rgba(167,139,250,0.72)' }}
                 />
                 <span className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-violet-200/82 sm:text-[10.5px] sm:tracking-[0.18em]">
                   Event Services Marketplace
@@ -167,7 +173,7 @@ export default function Hero() {
                 </span>
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-[5%] bottom-[0.02em] z-0 h-[0.24em] rounded-full opacity-75 blur-3xl"
+                  className={`pointer-events-none absolute inset-x-[5%] bottom-[0.02em] z-0 h-[0.24em] rounded-full ${richHeroAtmosphere ? 'opacity-75 blur-3xl' : 'opacity-55 blur-xl'}`}
                   style={{ background: 'linear-gradient(90deg, rgba(124,58,237,0.42), rgba(236,72,153,0.28), rgba(34,211,238,0.18))' }}
                 />
               </span>
@@ -187,7 +193,7 @@ export default function Hero() {
                   initial={motionEnabled ? { opacity: 0, x: -12 } : false}
                   animate={motionEnabled ? { opacity: 1, x: 0 } : undefined}
                   transition={motionEnabled ? { duration: 0.42, delay: 0.22 + index * 0.07, ease } : undefined}
-                  className="inline-flex items-center gap-2.5 rounded-full border border-white/[0.08] bg-white/[0.05] px-3.5 py-1.5 backdrop-blur-sm"
+                  className={`inline-flex items-center gap-2.5 rounded-full border border-white/[0.08] bg-white/[0.05] px-3.5 py-1.5 ${glassEnabled ? 'backdrop-blur-sm' : ''}`}
                 >
                   <span className="text-[10px] font-bold tracking-[0.12em] text-violet-300/72">{step.num}</span>
                   <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/65">{step.label}</span>
@@ -217,7 +223,7 @@ export default function Hero() {
                 to="/contact"
                 onMouseEnter={() => preloadRoute('/contact')}
                 onFocus={() => preloadRoute('/contact')}
-                className="inline-flex min-h-[50px] items-center gap-2 rounded-[18px] border border-white/[0.13] bg-white/[0.07] px-6 text-[12px] font-semibold tracking-[0.01em] text-white backdrop-blur-sm transition-all hover:border-white/[0.22] hover:bg-white/[0.12]"
+                className={`inline-flex min-h-[50px] items-center gap-2 rounded-[18px] border border-white/[0.13] bg-white/[0.07] px-6 text-[12px] font-semibold tracking-[0.01em] text-white transition-all hover:border-white/[0.22] hover:bg-white/[0.12] ${glassEnabled ? 'backdrop-blur-sm' : ''}`}
               >
                 Talk to the Team
               </Link>
@@ -249,7 +255,7 @@ export default function Hero() {
           </motion.div>
 
           {/* ── RIGHT: Floating card composition (desktop only) ── */}
-          <div className="relative hidden h-full min-h-[480px] lg:block">
+          {!perfLow && <div className="relative hidden h-full min-h-[480px] lg:block">
 
             {/* Card 1: For Clients – upper right */}
             <motion.div
@@ -259,7 +265,7 @@ export default function Hero() {
               transition={motionEnabled ? { duration: 0.9, delay: 0.35, ease } : undefined}
             >
               <div
-                className={`w-[258px] rounded-[24px] border border-white/[0.1] bg-[rgba(8,6,22,0.76)] p-5 backdrop-blur-lg${motionEnabled ? ' animate-hero-float-up' : ''}`}
+                className={`w-[258px] rounded-[24px] border border-white/[0.1] bg-[rgba(8,6,22,0.84)] p-5 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-up' : ''}`}
                 style={{ boxShadow: '0 32px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05)' }}
               >
                 <div
@@ -303,7 +309,7 @@ export default function Hero() {
               transition={motionEnabled ? { duration: 0.9, delay: 0.55, ease } : undefined}
             >
               <div
-                className={`w-[200px] rounded-[20px] border border-cyan-400/[0.12] bg-[rgba(5,20,32,0.72)] p-4 backdrop-blur-lg${motionEnabled ? ' animate-hero-float-down' : ''}`}
+                className={`w-[200px] rounded-[20px] border border-cyan-400/[0.12] bg-[rgba(5,20,32,0.82)] p-4 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-down' : ''}`}
                 style={{ boxShadow: '0 20px 56px rgba(0,0,0,0.48), inset 0 1px 0 rgba(34,211,238,0.1)' }}
               >
                 <div
@@ -330,13 +336,13 @@ export default function Hero() {
 
             {/* Card 3: For Providers – middle left */}
             <motion.div
-              className="absolute left-0 top-[36%]"
+              className="absolute left-0 top-[36%] hidden xl:block"
               initial={motionEnabled ? { opacity: 0 } : false}
               animate={motionEnabled ? { opacity: 1 } : undefined}
               transition={motionEnabled ? { duration: 0.9, delay: 0.72, ease } : undefined}
             >
               <div
-                className={`w-[226px] rounded-[20px] border border-white/[0.08] bg-[rgba(6,8,22,0.68)] p-4 backdrop-blur-lg${motionEnabled ? ' animate-hero-float-up-sm' : ''}`}
+                className={`w-[226px] rounded-[20px] border border-white/[0.08] bg-[rgba(6,8,22,0.8)] p-4 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-up-sm' : ''}`}
                 style={{ boxShadow: '0 20px 52px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.04)' }}
               >
                 <div
@@ -368,7 +374,7 @@ export default function Hero() {
               </div>
             </motion.div>
 
-          </div>
+          </div>}
         </div>
       </div>
     </section>

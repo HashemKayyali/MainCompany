@@ -33,6 +33,7 @@ const ProductCard = memo(function ProductCard({
   const { perfLow } = usePerfMode()
   const motionEnabled = useMotionEnabled()
   const coarsePointer = useMediaQuery('(pointer: coarse)')
+  const compactViewport = useMediaQuery('(max-width: 1023px)')
   const reveal = useRevealWithMotion(motionEnabled, {
     distance: 14,
     duration: 0.34,
@@ -43,9 +44,11 @@ const ProductCard = memo(function ProductCard({
 
   const cardRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
-  const reducedCardEffects = perfLow || coarsePointer || !motionEnabled
+  const reducedCardEffects = perfLow || coarsePointer || compactViewport || !motionEnabled
 
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  const [videoRequested, setVideoRequested] = useState(false)
 
   const hasVideo = Boolean(product.videoUrl)
   const spotlight = useSpotlight(!reducedCardEffects)
@@ -61,7 +64,7 @@ const ProductCard = memo(function ProductCard({
   // Pause and reset the video when the card scrolls out of the viewport.
   // Never autoplay — on desktop, hover events handle playback; on mobile, no autoplay at all.
   useEffect(() => {
-    if (!interactivePreviewEnabled || !cardRef.current) return
+    if (!interactivePreviewEnabled || !videoRequested || !cardRef.current) return
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -76,21 +79,28 @@ const ProductCard = memo(function ProductCard({
 
     observer.observe(cardRef.current)
     return () => observer.disconnect()
-  }, [interactivePreviewEnabled])
+  }, [interactivePreviewEnabled, videoRequested])
 
-  const startPreview = () => {
-    if (!interactivePreviewEnabled) return
+  useEffect(() => {
+    if (!interactivePreviewEnabled || !videoRequested || !isHovered) return
 
     const video = videoRef.current
     if (!video) return
 
     video.currentTime = 0
     void video.play().catch(() => undefined)
+  }, [interactivePreviewEnabled, isHovered, videoRequested])
+
+  const startPreview = () => {
+    if (!interactivePreviewEnabled) return
+    setIsHovered(true)
+    setVideoRequested(true)
   }
 
   const stopPreview = () => {
     if (!interactivePreviewEnabled) return
 
+    setIsHovered(false)
     const video = videoRef.current
     if (!video) return
 
@@ -110,8 +120,12 @@ const ProductCard = memo(function ProductCard({
         'group relative flex h-full flex-col overflow-hidden rounded-[22px]',
         'transition-[border-color,box-shadow] duration-350',
         isDark
-          ? 'border border-white/[0.08] bg-[linear-gradient(168deg,rgba(16,13,34,0.97),rgba(9,9,26,0.98))] hover:border-violet-400/[0.26] hover:shadow-[0_28px_64px_-18px_rgba(124,58,237,0.3),0_0_0_1px_rgba(124,58,237,0.10)]'
-          : 'border border-slate-200/80 bg-white hover:border-violet-300/65 hover:shadow-[0_24px_52px_-16px_rgba(139,92,246,0.22)]'
+          ? reducedCardEffects
+            ? 'border border-white/[0.08] bg-[linear-gradient(168deg,rgba(16,13,34,0.97),rgba(9,9,26,0.98))]'
+            : 'border border-white/[0.08] bg-[linear-gradient(168deg,rgba(16,13,34,0.97),rgba(9,9,26,0.98))] hover:border-violet-400/[0.26] hover:shadow-[0_28px_64px_-18px_rgba(124,58,237,0.3),0_0_0_1px_rgba(124,58,237,0.10)]'
+          : reducedCardEffects
+            ? 'border border-slate-200/80 bg-white'
+            : 'border border-slate-200/80 bg-white hover:border-violet-300/65 hover:shadow-[0_24px_52px_-16px_rgba(139,92,246,0.22)]'
       )}
     >
       {!reducedCardEffects && <SpotlightOverlay ref={spotlight.overlayRef} className="z-[11]" />}
@@ -141,7 +155,8 @@ const ProductCard = memo(function ProductCard({
           sizes={CARD_IMAGE_SIZES}
           revealMode="crisp"
           className={cn(
-            'h-full w-full object-cover transition-transform duration-700 ease-out',
+            'h-full w-full object-cover',
+            !reducedCardEffects && 'transition-transform duration-700 ease-out',
             interactivePreviewEnabled
               ? isPlaying ? 'opacity-0 scale-[1.06]' : 'opacity-100 group-hover:scale-[1.05]'
               : 'opacity-100'
@@ -150,7 +165,7 @@ const ProductCard = memo(function ProductCard({
           draggable={false}
         />
 
-        {interactivePreviewEnabled && (
+        {interactivePreviewEnabled && videoRequested && (
           <FramedVideo
             ref={videoRef}
             media={product.videoUrl}
@@ -194,7 +209,8 @@ const ProductCard = memo(function ProductCard({
         {interactivePreviewEnabled && !isPlaying && (
           <div className="absolute right-3 top-3 z-20">
             <div className={cn(
-              'flex h-8 w-8 items-center justify-center rounded-full border border-white/25 bg-black/45 text-white transition-transform duration-300 group-hover:scale-110',
+              'flex h-8 w-8 items-center justify-center rounded-full border border-white/25 bg-black/45 text-white',
+              !reducedCardEffects && 'transition-transform duration-300 group-hover:scale-110',
               reducedCardEffects ? '' : 'backdrop-blur-md'
             )}>
               <Play size={12} fill="currentColor" className="ml-0.5" />
