@@ -784,8 +784,7 @@
   }
 
   html.perf-low .stats-marquee__inner {
-    animation: none;
-    transform: translateX(0);
+    animation-duration: 44s;
   }
 
   @keyframes stats-marquee-scroll {
@@ -799,13 +798,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .stats-marquee__inner {
-      animation: none;
-      transform: translateX(0);
-    }
-  }
-
-  @media (max-width: 1023px) {
     .stats-marquee__inner {
       animation: none;
       transform: translateX(0);
@@ -840,16 +832,6 @@
     }
   }
 
-  @media (max-width: 640px) {
-    .logo-cloud-row--fwd {
-      animation-duration: 54s;
-    }
-
-    .logo-cloud-row--rev {
-      animation-duration: 58s;
-    }
-  }
-
   /* Keep the logo cloud alive on low-end/mobile devices, but slow it down. */
   html.perf-low .logo-cloud-row--fwd {
     animation-duration: 60s;
@@ -870,13 +852,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .logo-cloud-row {
-      animation: none !important;
-      transform: translate3d(0, 0, 0);
-    }
-  }
-
-  @media (max-width: 1023px) {
     .logo-cloud-row {
       animation: none !important;
       transform: translate3d(0, 0, 0);

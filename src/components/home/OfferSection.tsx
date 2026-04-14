@@ -21,7 +21,6 @@ type CategoryItem = {
   count: number
 }
 
-// ── Premium neon/glass category card ─────────────────────────────────────────
 const CategoryTile = memo(function CategoryTile({
   category,
   active,
@@ -62,7 +61,6 @@ const CategoryTile = memo(function CategoryTile({
               )
         )}
       >
-        {/* Hover glow */}
         {isDark && !reducedVisualEffects && (
           <div
             className="pointer-events-none absolute inset-0 z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
@@ -73,7 +71,6 @@ const CategoryTile = memo(function CategoryTile({
           />
         )}
 
-        {/* ── Image area ── */}
         <div className="relative aspect-[4/3] overflow-hidden">
           {imageSrc ? (
             <img
@@ -89,7 +86,10 @@ const CategoryTile = memo(function CategoryTile({
             />
           ) : (
             <div
-              className={cn('absolute inset-0', !reducedVisualEffects && 'transition-transform duration-700 group-hover:scale-[1.06]')}
+              className={cn(
+                'absolute inset-0',
+                !reducedVisualEffects && 'transition-transform duration-700 group-hover:scale-[1.06]'
+              )}
               style={{
                 background: isDark
                   ? 'linear-gradient(148deg, rgba(91,33,182,0.78), rgba(12,12,28,0.94) 55%, rgba(8,47,73,0.82))'
@@ -98,7 +98,6 @@ const CategoryTile = memo(function CategoryTile({
             />
           )}
 
-          {/* Gradient overlay — bottom fade into info section */}
           <div
             className="pointer-events-none absolute inset-0"
             style={{
@@ -108,7 +107,6 @@ const CategoryTile = memo(function CategoryTile({
             }}
           />
 
-          {/* Active indicator */}
           {active && (
             <div className="absolute right-2.5 top-2.5 z-20">
               <div className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-500 shadow-[0_0_14px_rgba(124,58,237,0.85)]">
@@ -118,14 +116,12 @@ const CategoryTile = memo(function CategoryTile({
           )}
         </div>
 
-        {/* ── Info area ── */}
         <div
           className={cn(
             'px-3.5 py-3 transition-colors duration-300',
             isDark ? 'bg-[rgba(9,8,22,0.97)]' : 'bg-white'
           )}
         >
-          {/* Service count label */}
           <div
             className={cn(
               'mb-0.5 text-[9px] font-bold uppercase tracking-[0.20em] transition-colors duration-300',
@@ -139,7 +135,6 @@ const CategoryTile = memo(function CategoryTile({
             {category.count} Service{category.count !== 1 ? 's' : ''}
           </div>
 
-          {/* Category name */}
           <h3
             className={cn(
               'font-display text-[0.96rem] font-bold leading-tight tracking-[-0.02em] line-clamp-1',
@@ -150,7 +145,6 @@ const CategoryTile = memo(function CategoryTile({
           </h3>
         </div>
 
-        {/* Active bottom accent line */}
         {active && (
           <div
             className="absolute inset-x-0 bottom-0 h-[2px]"
@@ -172,7 +166,6 @@ const CategoryTile = memo(function CategoryTile({
   prev.category.image === next.category.image
 )
 
-// ── "View All" tile ───────────────────────────────────────────────────────────
 function ViewAllTile({ isDark, reducedVisualEffects }: { isDark: boolean; reducedVisualEffects: boolean }) {
   return (
     <div>
@@ -193,7 +186,6 @@ function ViewAllTile({ isDark, reducedVisualEffects }: { isDark: boolean; reduce
               : 'linear-gradient(148deg, rgba(124,58,237,0.06), rgba(240,237,255,0.96) 50%, rgba(34,211,238,0.04))',
           }}
         >
-          {/* Dot pattern */}
           <div
             className="absolute inset-0 opacity-[0.22]"
             style={{
@@ -241,23 +233,21 @@ function ViewAllTile({ isDark, reducedVisualEffects }: { isDark: boolean; reduce
           </div>
         </div>
 
-        {/* Info area — matches CategoryTile height */}
-        <div
-          className={cn(
-            'px-3.5 py-3',
-            isDark ? 'bg-[rgba(9,8,22,0.97)]' : 'bg-white'
-          )}
-        >
-          <div className={cn(
-            'mb-0.5 text-[9px] font-bold uppercase tracking-[0.20em]',
-            isDark ? 'text-violet-400/52' : 'text-violet-500/60'
-          )}>
+        <div className={cn('px-3.5 py-3', isDark ? 'bg-[rgba(9,8,22,0.97)]' : 'bg-white')}>
+          <div
+            className={cn(
+              'mb-0.5 text-[9px] font-bold uppercase tracking-[0.20em]',
+              isDark ? 'text-violet-400/52' : 'text-violet-500/60'
+            )}
+          >
             All Categories
           </div>
-          <h3 className={cn(
-            'font-display text-[0.96rem] font-bold leading-tight tracking-[-0.02em]',
-            isDark ? 'text-white/92' : 'text-slate-900'
-          )}>
+          <h3
+            className={cn(
+              'font-display text-[0.96rem] font-bold leading-tight tracking-[-0.02em]',
+              isDark ? 'text-white/92' : 'text-slate-900'
+            )}
+          >
             Marketplace
           </h3>
         </div>
@@ -266,7 +256,6 @@ function ViewAllTile({ isDark, reducedVisualEffects }: { isDark: boolean; reduce
   )
 }
 
-// ── Skeleton ──────────────────────────────────────────────────────────────────
 function CategoryTileSkeleton({ index, isDark }: { index: number; isDark: boolean }) {
   return (
     <motion.div
@@ -278,9 +267,7 @@ function CategoryTileSkeleton({ index, isDark }: { index: number; isDark: boolea
         isDark ? 'border-white/[0.08] bg-white/[0.03]' : 'border-slate-200 bg-slate-100'
       )}
     >
-      {/* Image skeleton */}
       <div className="aspect-[4/3] animate-pulse bg-gradient-to-tr from-transparent via-white/5 to-transparent" />
-      {/* Info skeleton */}
       <div className={cn('px-3.5 py-3', isDark ? 'bg-[rgba(9,8,22,0.97)]' : 'bg-white')}>
         <div className={cn('mb-1.5 h-2 w-10 rounded-full', isDark ? 'bg-white/10' : 'bg-slate-300')} />
         <div className={cn('h-3.5 w-3/4 rounded-full', isDark ? 'bg-white/16' : 'bg-slate-400')} />
@@ -289,7 +276,6 @@ function CategoryTileSkeleton({ index, isDark }: { index: number; isDark: boolea
   )
 }
 
-// ── Selected category header ──────────────────────────────────────────────────
 function SelectedCategoryHeader({
   category,
   count,
@@ -353,7 +339,6 @@ function SelectedCategoryHeader({
   )
 }
 
-// ── Main section ──────────────────────────────────────────────────────────────
 export default function OfferSection() {
   const { products } = useProductsData()
   const { categories } = useCategoriesData()
@@ -442,8 +427,6 @@ export default function OfferSection() {
   return (
     <section className="site-section">
       <div className="site-container">
-
-        {/* ── Section shell ── */}
         <div
           className={cn(
             'relative overflow-hidden rounded-[26px] border px-5 py-9 sm:px-7 sm:py-11 lg:px-10 lg:py-13',
@@ -452,7 +435,6 @@ export default function OfferSection() {
               : 'border-violet-100/80 bg-white/93 shadow-[0_24px_64px_rgba(15,23,42,0.07)]'
           )}
         >
-          {/* Corner glow */}
           {isDark && !perfLow && (
             <div
               className="pointer-events-none absolute -right-24 -top-24 h-60 w-60 rounded-full blur-[72px]"
@@ -461,7 +443,6 @@ export default function OfferSection() {
             />
           )}
 
-          {/* ── Section header ── */}
           <motion.div {...headerReveal} className="relative mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
               <div className="mb-3 flex items-center gap-2.5">
@@ -490,11 +471,10 @@ export default function OfferSection() {
             </Link>
           </motion.div>
 
-          {/* ── Category grid ── */}
           <motion.div {...categoryGridRevealProps} className="relative mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
             {loading
-              ? Array.from({ length: 5 }).map((_, i) => (
-                  <CategoryTileSkeleton key={`skel-${i}`} index={i} isDark={isDark} />
+              ? Array.from({ length: 5 }).map((_, index) => (
+                  <CategoryTileSkeleton key={`skel-${index}`} index={index} isDark={isDark} />
                 ))
               : (
                 <>
@@ -516,7 +496,6 @@ export default function OfferSection() {
               )}
           </motion.div>
 
-          {/* ── Expanded category products ── */}
           <AnimatePresence mode="wait">
             {activeCat && (
               <motion.div
@@ -554,7 +533,6 @@ export default function OfferSection() {
               </motion.div>
             )}
           </AnimatePresence>
-
         </div>
       </div>
     </section>

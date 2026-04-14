@@ -5,23 +5,18 @@ import { ArrowRight } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useCustomersData } from '../../contexts/DataContext'
 import type { Customer } from '../../data/customers'
-import { useMediaQuery } from '../../hooks/useMediaQuery'
-import { usePerfMode } from '../../hooks/usePerfMode'
 import { useReveal } from '../../hooks/useReveal'
 import FramedImage from '../ui/FramedImage'
 
-// Splits customers into two rows as evenly as possible
 function splitRows<T>(arr: T[]): [T[], T[]] {
   const mid = Math.ceil(arr.length / 2)
   return [arr.slice(0, mid), arr.slice(mid)]
 }
 
-// Repeat items until we have at least `min` for a seamless loop
 function loopItems<T>(arr: T[], min = 8): T[] {
   if (arr.length === 0) return []
   const result = [...arr]
   while (result.length < min) result.push(...arr)
-  // duplicate so CSS -50% creates a seamless loop
   return [...result, ...result]
 }
 
@@ -39,7 +34,6 @@ const LogoCell = memo(function LogoCell({ customer, isDark }: { customer: Custom
           : undefined
       }
     >
-      {/* Shimmer top line */}
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-[14px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
@@ -49,7 +43,6 @@ const LogoCell = memo(function LogoCell({ customer, isDark }: { customer: Custom
         }}
       />
 
-      {/* Logo */}
       <div className="flex h-8 w-full items-center justify-center">
         <FramedImage
           media={customer.logo}
@@ -65,7 +58,6 @@ const LogoCell = memo(function LogoCell({ customer, isDark }: { customer: Custom
         />
       </div>
 
-      {/* Name */}
       <div
         className={`text-center text-[9px] font-semibold uppercase tracking-[0.10em] transition-colors duration-300 ${
           isDark
@@ -82,24 +74,18 @@ const LogoCell = memo(function LogoCell({ customer, isDark }: { customer: Custom
 export default function LogoCloud() {
   const { isDark } = useTheme()
   const { customers } = useCustomersData()
-  const { perfLow } = usePerfMode()
-  const compactViewport = useMediaQuery('(max-width: 1023px)')
   const headerReveal = useReveal({ distance: 16, duration: 0.42, margin: '0px 0px 16% 0px' })
   const shellReveal = useReveal({ distance: 14, duration: 0.38, margin: '0px 0px 14% 0px' })
 
   const [rowA, rowB] = useMemo(() => splitRows(customers), [customers])
-  const loopA = useMemo(() => loopItems(rowA, 8), [rowA])
-  const loopB = useMemo(() => loopItems(rowB, 8), [rowB])
-  const staticCustomers = useMemo(() => customers.slice(0, 10), [customers])
-  const useStaticLayout = perfLow || compactViewport || customers.length < 8
+  const loopA = useMemo(() => loopItems(rowA.length > 0 ? rowA : customers, 8), [customers, rowA])
+  const loopB = useMemo(() => loopItems(rowB.length > 0 ? rowB : rowA, 8), [rowA, rowB])
 
   if (customers.length === 0) return null
 
   return (
     <section className="site-section" dir="rtl">
       <div className="site-container">
-
-        {/* ── Section header (LTR for text readability) ── */}
         <motion.div
           dir="ltr"
           {...headerReveal}
@@ -140,7 +126,6 @@ export default function LogoCloud() {
           </Link>
         </motion.div>
 
-        {/* ── Marquee shell ── */}
         <motion.div
           dir="ltr"
           {...shellReveal}
@@ -150,8 +135,7 @@ export default function LogoCloud() {
               : 'border-violet-100/80 bg-white/80 shadow-[0_16px_48px_rgba(124,58,237,0.07)]'
           }`}
         >
-          {/* Ambient corner glow */}
-          {isDark && !useStaticLayout && (
+          {isDark && (
             <>
               <div
                 className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full blur-[42px]"
@@ -166,7 +150,6 @@ export default function LogoCloud() {
             </>
           )}
 
-          {/* Edge fade masks */}
           <div
             className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 sm:w-32"
             style={{
@@ -186,37 +169,26 @@ export default function LogoCloud() {
             aria-hidden="true"
           />
 
-          {useStaticLayout ? (
-            <div className="grid grid-cols-2 justify-items-center gap-2.5 px-3 sm:grid-cols-3 lg:grid-cols-5">
-              {staticCustomers.map(customer => (
-                <LogoCell key={customer.slug} customer={customer} isDark={isDark} />
+          <div className="logo-cloud-track mb-3 overflow-hidden sm:mb-3.5">
+            <div className="logo-cloud-row logo-cloud-row--fwd" aria-hidden="true">
+              {loopA.map((customer, index) => (
+                <div key={`a-${customer.slug}-${index}`} className="relative">
+                  <LogoCell customer={customer} isDark={isDark} />
+                </div>
               ))}
             </div>
-          ) : (
-            <>
-              <div className="logo-cloud-track mb-3 overflow-hidden sm:mb-3.5">
-                <div className="logo-cloud-row logo-cloud-row--fwd" aria-hidden="true">
-                  {loopA.map((c, i) => (
-                    <div key={`a-${c.slug}-${i}`} className="relative">
-                      <LogoCell customer={c} isDark={isDark} />
-                    </div>
-                  ))}
-                </div>
-              </div>
+          </div>
 
-              <div className="logo-cloud-track overflow-hidden">
-                <div className="logo-cloud-row logo-cloud-row--rev" aria-hidden="true">
-                  {loopB.map((c, i) => (
-                    <div key={`b-${c.slug}-${i}`} className="relative">
-                      <LogoCell customer={c} isDark={isDark} />
-                    </div>
-                  ))}
+          <div className="logo-cloud-track overflow-hidden">
+            <div className="logo-cloud-row logo-cloud-row--rev" aria-hidden="true">
+              {loopB.map((customer, index) => (
+                <div key={`b-${customer.slug}-${index}`} className="relative">
+                  <LogoCell customer={customer} isDark={isDark} />
                 </div>
-              </div>
-            </>
-          )}
+              ))}
+            </div>
+          </div>
         </motion.div>
-
       </div>
     </section>
   )

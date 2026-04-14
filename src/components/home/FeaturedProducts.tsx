@@ -24,8 +24,6 @@ export default function FeaturedProducts() {
   return (
     <section className="site-section">
       <div className="site-container">
-
-        {/* ── Section shell — mirrors OfferSection container ── */}
         <div
           className={cn(
             'relative overflow-hidden rounded-[26px] border px-5 py-9 sm:px-7 sm:py-11 lg:px-10 lg:py-13',
@@ -34,7 +32,6 @@ export default function FeaturedProducts() {
               : 'border-violet-100/80 bg-white/93 shadow-[0_24px_64px_rgba(15,23,42,0.07)]'
           )}
         >
-          {/* Corner glow */}
           {isDark && (
             <div
               className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full blur-[80px]"
@@ -43,7 +40,6 @@ export default function FeaturedProducts() {
             />
           )}
 
-          {/* ── Section header ── */}
           <div className="relative mb-9 flex flex-col gap-3.5 lg:flex-row lg:items-end lg:justify-between">
             <motion.div {...headerReveal}>
               <div className="mb-3 flex items-center gap-2.5">
@@ -54,7 +50,7 @@ export default function FeaturedProducts() {
                 What We Build
               </h2>
               <p className={cn('mt-3 max-w-lg text-[14px] leading-relaxed', isDark ? 'text-slate-300/65' : 'text-slate-500')}>
-                Hand-selected showcase of our finest productions — each one a real event delivered for real clients.
+                Hand-selected showcase of our finest productions - each one a real event delivered for real clients.
               </p>
             </motion.div>
 
@@ -72,22 +68,20 @@ export default function FeaturedProducts() {
             </Link>
           </div>
 
-          {/* ── Products grid ── */}
           <motion.div {...containerProps} className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:gap-5">
-            {items.map((p, i) => (
-              <motion.div key={p.slug} {...itemProps} className="h-full">
+            {items.map((product, index) => (
+              <motion.div key={product.slug} {...itemProps} className="h-full">
                 <ProductCard
-                  product={p}
-                  index={i}
+                  product={product}
+                  index={index}
                   revealOnScroll={false}
-                  imageLoading={i < 3 ? 'eager' : 'lazy'}
-                  imageFetchPriority={i < 3 ? 'high' : 'auto'}
+                  imageLoading={index < 3 ? 'eager' : 'lazy'}
+                  imageFetchPriority={index < 3 ? 'high' : 'auto'}
                 />
               </motion.div>
             ))}
           </motion.div>
 
-          {/* ── Mobile "All Products" link ── */}
           <div className="mt-7 flex justify-center lg:hidden">
             <Link
               to="/products"
@@ -102,7 +96,6 @@ export default function FeaturedProducts() {
               <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
             </Link>
           </div>
-
         </div>
       </div>
     </section>

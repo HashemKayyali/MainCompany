@@ -1,0 +1,64 @@
+[2m11:40:34 AM[22m [31m[1m[vite][22m[39m [31mInternal server error: C:\Users\PC\Desktop\Main-Site\src\components\home\LogoCloud.tsx: Unexpected token (8:0)
+
+[0m [90m  6 |[31m [36mimport[31m { useCustomersData } [36mfrom[31m [32m'../../contexts/DataContext'[31m
+ [90m  7 |[31m [36mimport[31m type { [33mCustomer[31m } [36mfrom[31m [32m'../../data/customers'[31m
+[31m[1m>[22m[31m[90m  8 |[31m [33m<<[31m[33m<<[31m[33m<<[31m[33m<[31m ours
+ [90m    |[31m [31m[1m^[22m[31m
+ [90m  9 |[31m [36mimport[31m { useMediaQuery } [36mfrom[31m [32m'../../hooks/useMediaQuery'[31m
+ [90m 10 |[31m [36mimport[31m { usePerfMode } [36mfrom[31m [32m'../../hooks/usePerfMode'[31m
+ [90m 11 |[31m [33m===[31m[33m===[31m[33m=[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mC:/Users/PC/Desktop/Main-Site/src/components/home/LogoCloud.tsx[39m:8:0
+[33m  6  |  import { useCustomersData } from '../../contexts/DataContext'
+  7  |  import type { Customer } from '../../data/customers'
+  8  |  <<<<<<< ours
+     |         ^
+  9  |  import { useMediaQuery } from '../../hooks/useMediaQuery'
+  10 |  import { usePerfMode } from '../../hooks/usePerfMode'[39m
+      at constructor (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:6599:19)
+      at TypeScriptParserMixin.unexpected (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:6619:16)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:11442:22)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:4764:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:11081:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:11066:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:11046:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:9837:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:10899:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:10904:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:10881:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:10831:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:9786:20)
+      at TypeScriptParserMixin.parseExpressionBase (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:10784:23)
+      at C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:10780:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:12421:16)
+      at TypeScriptParserMixin.parseExpression (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:10780:17)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:12895:23)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:9508:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:12767:17)
+      at TypeScriptParserMixin.parseModuleItem (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:12744:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:13316:36)
+      at TypeScriptParserMixin.parseBlockBody (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:13309:10)
+      at TypeScriptParserMixin.parseProgram (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:12622:10)
+      at TypeScriptParserMixin.parseTopLevel (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:12612:25)
+      at TypeScriptParserMixin.parse (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:14488:25)
+      at TypeScriptParserMixin.parse (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:10126:18)
+      at parse (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\parser\lib\index.js:14522:38)
+      at parser (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\core\lib\parser\index.js:41:34)
+      at parser.next (<anonymous>)
+      at normalizeFile (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\core\lib\transformation\normalize-file.js:64:37)
+      at normalizeFile.next (<anonymous>)
+      at run (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\core\lib\transformation\index.js:22:50)
+      at run.next (<anonymous>)
+      at transform (C:\Users\PC\Desktop\Main-Site\node_modules\@babel\core\lib\transform.js:22:33)
+      at transform.next (<anonymous>)
+      at step (C:\Users\PC\Desktop\Main-Site\node_modules\gensync\index.js:261:32)
+      at C:\Users\PC\Desktop\Main-Site\node_modules\gensync\index.js:273:13
+      at async.call.result.err.err (C:\Users\PC\Desktop\Main-Site\node_modules\gensync\index.js:223:11)
+      at C:\Users\PC\Desktop\Main-Site\node_modules\gensync\index.js:189:28
+      at C:\Users\PC\Desktop\Main-Site\node_modules\@babel\core\lib\gensync-utils\async.js:67:7
+      at C:\Users\PC\Desktop\Main-Site\node_modules\gensync\index.js:113:33
+      at step (C:\Users\PC\Desktop\Main-Site\node_modules\gensync\index.js:287:14)
+      at C:\Users\PC\Desktop\Main-Site\node_modules\gensync\index.js:273:13
+      at async.call.result.err.err (C:\Users\PC\Desktop\Main-Site\node_modules\gensync\index.js:223:11)
+^C^C
