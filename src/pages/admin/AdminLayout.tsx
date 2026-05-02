@@ -141,7 +141,7 @@ export default function AdminLayout() {
     <div
       className={cn(
         'relative min-h-screen overflow-x-clip',
-        isDark ? 'bg-[#060914] text-white' : 'bg-gray-50 text-gray-900'
+        'bg-[#fbf8ff] text-ink-900'
       )}
       style={layoutVars}
     >
@@ -149,7 +149,7 @@ export default function AdminLayout() {
 
       {open && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setOpen(false)} aria-hidden="true" />
+          <div className="absolute inset-0 bg-violet-950/40 backdrop-blur-sm" onClick={() => setOpen(false)} aria-hidden="true" />
           <div className="absolute inset-y-0 left-0">
             <Sidebar variant="drawer" onNavigate={() => setOpen(false)} />
           </div>

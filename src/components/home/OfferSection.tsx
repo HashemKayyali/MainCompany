@@ -101,9 +101,8 @@ const CategoryTile = memo(function CategoryTile({
           <div
             className="pointer-events-none absolute inset-0"
             style={{
-              background: isDark
-                ? 'linear-gradient(to bottom, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.18) 55%, rgba(10,8,22,0.97) 100%)'
-                : 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 55%, rgba(255,255,255,0.96) 100%)',
+              background:
+                'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(15,8,40,0.18) 50%, rgba(15,8,40,0.62) 82%, rgba(15,8,40,0.86) 100%)',
             }}
           />
 

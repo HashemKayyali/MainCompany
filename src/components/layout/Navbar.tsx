@@ -147,32 +147,25 @@ function preloadDesktopNavItem(item: DesktopNavItem) {
 
 // ── Logo wordmark ─────────────────────────────────────────────────────────────
 function EventiesLogo({
-  heroMode,
-  isDark,
+  heroMode: _heroMode,
+  isDark: _isDark,
 }: {
   heroMode: boolean
   isDark: boolean
 }) {
-  const textColor = isDark || heroMode ? 'text-white' : 'text-gray-900'
-  const metaColor = heroMode
-    ? 'text-white/38'
-    : isDark
-      ? 'text-purple-100/50'
-      : 'text-violet-600/70'
-
   return (
     <div className="flex items-center gap-2.5">
       {/* Badge */}
-      <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[13px] border border-white/14 bg-[linear-gradient(145deg,#7c3aed_0%,#d946ef_48%,#22d3ee_112%)] shadow-[0_12px_32px_rgba(124,58,237,0.42)]">
-        <div className="absolute inset-x-2 top-1.5 h-3 rounded-full bg-white/20 blur-sm" />
+      <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[13px] border border-white/40 bg-[linear-gradient(145deg,#7c3aed_0%,#a855f7_48%,#c026d3_112%)] shadow-[0_12px_32px_-6px_rgba(124,58,237,0.55)]">
+        <div className="absolute inset-x-2 top-1.5 h-3 rounded-full bg-white/30 blur-sm" />
         <span className="relative text-[10.5px] font-black tracking-[0.12em] text-white">Ev</span>
       </div>
       {/* Text mark */}
       <div className="min-w-0 leading-none">
-        <div className={`font-display text-[12.5px] font-bold tracking-[-0.01em] transition-colors duration-500 sm:text-[13px] ${textColor}`}>
+        <div className="font-display text-[12.5px] font-bold tracking-[-0.01em] text-ink-900 sm:text-[13px]" style={{ color: '#1a0b3d' }}>
           Eventies
         </div>
-        <div className={`mt-[3px] text-[8.5px] uppercase tracking-[0.15em] transition-colors duration-500 sm:text-[9px] sm:tracking-[0.18em] ${metaColor}`}>
+        <div className="mt-[3px] text-[8.5px] uppercase tracking-[0.15em] text-violet-600/85 sm:text-[9px] sm:tracking-[0.18em]">
           Marketplace
         </div>
       </div>
@@ -204,22 +197,19 @@ function IconCircle({
   children,
   active: isActive = false,
   colorScheme = 'neutral',
-  isDark,
-  heroMode,
 }: {
   children: React.ReactNode
   active?: boolean
   colorScheme?: 'neutral' | 'cyan' | 'pink'
-  isDark: boolean
-  heroMode: boolean
+  isDark?: boolean
+  heroMode?: boolean
 }) {
   const base = 'relative flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-full border'
-  if (heroMode) return <span className={`${base} border-white/12 bg-white/[0.06]`}>{children}</span>
   if (colorScheme === 'cyan' && isActive)
-    return <span className={`${base} ${isDark ? 'border-cyan-300/22 bg-cyan-500/10' : 'border-violet-200/80 bg-white/80'}`}>{children}</span>
+    return <span className={`${base} border-violet-300/85 bg-[linear-gradient(135deg,rgba(124,58,237,0.10),rgba(168,85,247,0.06))]`}>{children}</span>
   if (colorScheme === 'pink' && isActive)
-    return <span className={`${base} ${isDark ? 'border-fuchsia-300/20 bg-fuchsia-500/10' : 'border-violet-200/80 bg-white/80'}`}>{children}</span>
-  return <span className={`${base} ${isDark ? 'border-white/10 bg-white/[0.04]' : 'border-violet-200/70 bg-white/70'}`}>{children}</span>
+    return <span className={`${base} border-fuchsia-300/85 bg-[linear-gradient(135deg,rgba(192,38,211,0.10),rgba(168,85,247,0.06))]`}>{children}</span>
+  return <span className={`${base} border-violet-200/75 bg-white/75`}>{children}</span>
 }
 
 const DesktopPrimaryNav = memo(function DesktopPrimaryNav({
@@ -365,14 +355,8 @@ const MobileTopChips = memo(function MobileTopChips({
             onFocus={() => preloadRoute(chip.to)}
             className={`inline-flex h-[1.875rem] shrink-0 items-center rounded-full border px-3.5 text-[11.5px] font-medium whitespace-nowrap transition-all duration-300 ${
               isChipActive
-                ? heroMode || isDark
-                  ? 'border-violet-400/28 bg-violet-500/[0.20] text-white'
-                  : 'border-violet-300/55 bg-violet-100/80 text-violet-800'
-                : heroMode
-                  ? 'border-white/[0.13] bg-white/[0.07] text-white/68 hover:text-white hover:bg-white/[0.12]'
-                  : isDark
-                    ? 'border-white/[0.09] bg-white/[0.04] text-purple-100/62 hover:text-white hover:bg-white/[0.07]'
-                    : 'border-violet-200/60 bg-white/80 text-gray-600 hover:text-gray-900 hover:bg-white'
+                ? 'border-violet-300/85 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(168,85,247,0.06))] text-violet-900 shadow-[0_4px_14px_-4px_rgba(124,58,237,0.28)]'
+                : 'border-violet-200/65 bg-white/85 text-violet-700 hover:text-violet-900 hover:bg-white hover:border-violet-300/85'
             }`}
           >
             {chip.label}
@@ -1043,74 +1027,53 @@ export default function Navbar() {
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent'
 
   const isHome = pathname === '/'
-  const heroMode = isHome && !scrolled
+  // Hero is now light/purple, so the navbar uses the same light treatment over hero
+  const heroMode = false
 
   // ── Nav bar background ────────────────────────────────────────────────────
   const navBarBg = scrolled
-    ? isDark
-      ? perfLow
-        ? 'border-b border-white/[0.05] bg-[rgba(2,4,12,0.98)] shadow-[0_2px_32px_rgba(0,0,0,0.44),inset_0_-1px_0_rgba(124,58,237,0.05)]'
-        : 'border-b border-white/[0.05] bg-[rgba(2,4,12,0.94)] backdrop-blur-lg shadow-[0_2px_40px_rgba(0,0,0,0.5),inset_0_-1px_0_rgba(124,58,237,0.05)]'
-      : perfLow
-        ? 'border-b border-violet-200/35 bg-white/98 shadow-[0_2px_18px_rgba(124,58,237,0.05)]'
-        : 'border-b border-violet-200/35 bg-white/96 backdrop-blur-sm shadow-[0_2px_20px_rgba(124,58,237,0.06)]'
+    ? perfLow
+      ? 'border-b border-violet-200/45 bg-white/[0.96] shadow-[0_2px_22px_rgba(124,58,237,0.10)]'
+      : 'border-b border-violet-200/45 bg-white/[0.82] backdrop-blur-xl shadow-[0_2px_28px_rgba(124,58,237,0.10)]'
     : isHome
-      ? ''
-      : isDark
-        ? perfLow
-          ? 'border-b border-white/[0.04] bg-[rgba(3,5,14,0.92)]'
-          : 'border-b border-white/[0.04] bg-[rgba(3,5,14,0.82)] backdrop-blur-sm'
-        : perfLow
-          ? 'border-b border-violet-100/40 bg-white/92'
-          : 'border-b border-violet-100/40 bg-white/82 backdrop-blur-[2px]'
+      ? perfLow
+        ? 'bg-transparent'
+        : 'bg-white/[0.32] backdrop-blur-[6px]'
+      : perfLow
+        ? 'border-b border-violet-100/55 bg-white/[0.92]'
+        : 'border-b border-violet-100/55 bg-white/[0.72] backdrop-blur-[8px]'
 
   // ── Utility pill (search, login) ───────────────────────────────────────────
-  const utilityPill = heroMode
-    ? 'border-white/[0.14] bg-white/[0.08] text-white/78 hover:border-white/[0.24] hover:bg-white/[0.14] hover:text-white'
-    : isDark
-      ? 'border-white/[0.09] bg-white/[0.04] text-white/72 hover:border-violet-300/20 hover:bg-white/[0.07] hover:text-white'
-      : 'border-violet-200/65 bg-white/85 text-gray-700 hover:border-violet-300 hover:bg-white hover:text-gray-900'
+  const utilityPill =
+    'border-violet-200/70 bg-white/85 text-violet-800 hover:border-violet-400/60 hover:bg-white hover:text-violet-900 hover:shadow-[0_8px_22px_-8px_rgba(124,58,237,0.22)]'
 
   // ── Desktop nav link text ──────────────────────────────────────────────────
   const navLinkColor = useCallback(
     (isActive: boolean) =>
       isActive
-        ? heroMode || isDark ? 'text-white' : 'text-gray-900'
-        : heroMode
-          ? 'text-white/66 hover:text-white'
-          : isDark
-            ? 'text-purple-100/68 hover:text-white'
-            : 'text-gray-500 hover:text-gray-900',
-    [heroMode, isDark]
+        ? 'text-violet-900'
+        : 'text-violet-700/72 hover:text-violet-900',
+    []
   )
 
   const navTriggerColor = useCallback(
     (isActive: boolean, isOpen: boolean) =>
       isActive || isOpen
-        ? heroMode || isDark ? 'text-white' : 'text-gray-900'
-        : heroMode
-          ? 'text-white/66 hover:text-white'
-          : isDark
-            ? 'text-purple-100/68 hover:text-white'
-            : 'text-gray-500 hover:text-gray-900',
-    [heroMode, isDark]
+        ? 'text-violet-900'
+        : 'text-violet-700/72 hover:text-violet-900',
+    []
   )
 
   // ── Active pill ────────────────────────────────────────────────────────────
-  const navActivePill = heroMode
-    ? 'bg-white/[0.08] border border-white/[0.14]'
-    : isDark
-      ? 'bg-white/[0.05] border border-white/[0.09]'
-      : 'bg-white border border-violet-200/80 shadow-[0_6px_18px_rgba(124,58,237,0.08)]'
+  const navActivePill =
+    'bg-white border border-violet-200/85 shadow-[0_8px_22px_-8px_rgba(124,58,237,0.22)]'
 
   // ── Mobile tile ────────────────────────────────────────────────────────────
-  const mobileTile = isDark
-    ? 'border-white/[0.09] bg-white/[0.04] text-purple-100/78 hover:text-white hover:bg-white/[0.08]'
-    : 'border-violet-200/60 bg-white/80 text-gray-700 hover:text-gray-900 hover:bg-white'
+  const mobileTile =
+    'border-violet-200/65 bg-white/80 text-violet-800 hover:text-violet-900 hover:bg-white hover:border-violet-300/85'
 
-  const mobileActiveTile = isDark
-    ? 'border-violet-300/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.08),rgba(34,211,238,0.06))] text-white'
-    : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.06),rgba(34,211,238,0.06))] text-gray-900'
+  const mobileActiveTile =
+    'border-violet-300/65 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(168,85,247,0.06),rgba(217,70,239,0.06))] text-violet-900 shadow-[0_4px_16px_-6px_rgba(124,58,237,0.22)]'
 
   // ── Cart / Quote surfaces ──────────────────────────────────────────────────
   // ── Desktop nav data ────────────────────────────────────────────────────────

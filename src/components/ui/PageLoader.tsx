@@ -25,8 +25,8 @@ export default function PageLoader({
   if (mode === 'route') {
     return (
       <div className="pointer-events-none sticky top-[var(--app-navbar-height,0px)] z-20 -mt-1 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto h-1.5 max-w-[78rem] overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/8">
-          <div className="route-loader-bar h-full rounded-full bg-[linear-gradient(90deg,#7c3aed,#d946ef,#22d3ee)]" />
+        <div className="mx-auto h-1.5 max-w-[78rem] overflow-hidden rounded-full bg-violet-100/85">
+          <div className="route-loader-bar h-full rounded-full bg-[linear-gradient(90deg,#7c3aed,#a855f7,#c026d3)]" />
         </div>
       </div>
     )
@@ -36,10 +36,10 @@ export default function PageLoader({
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="text-center">
         <div className="relative mx-auto w-12 h-12 mb-4">
-          <div className="absolute inset-0 rounded-full border-2 border-purple-500/20" />
-          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-purple-500 animate-spin" />
+          <div className="absolute inset-0 rounded-full border-2 border-violet-300/40" />
+          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-violet-600 animate-spin" />
         </div>
-        <p className="text-sm font-mono tracking-wider text-purple-300/50">Loading…</p>
+        <p className="text-sm font-mono tracking-wider text-violet-600/70">Loading…</p>
       </div>
     </div>
   )

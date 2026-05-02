@@ -10,14 +10,15 @@ html.lenis-root body {
 
 /* ── Focus Styles ── */
 :focus-visible {
-  outline: 2px solid rgba(124,58,237,0.7);
+  outline: 2px solid rgba(124, 58, 237, 0.7);
   outline-offset: 3px;
   border-radius: 8px;
 }
 
 /* ── Performance / Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
-  .animate-aurora, .animate-orbit { animation: none !important; }
+  .animate-aurora,
+  .animate-orbit { animation: none !important; }
 }
 
 html.perf-low .animate-aurora,
@@ -25,9 +26,9 @@ html.perf-low .animate-orbit {
   animation: none !important;
 }
 
-/* ── Light Mode Dot Pattern ── */
-html.light .dot-pattern {
-  background-image: radial-gradient(rgba(124,58,237,0.08) 1px, transparent 1px);
+/* ── Light dot pattern overlay ── */
+.dot-pattern {
+  background-image: radial-gradient(rgba(124, 58, 237, 0.10) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -50,20 +51,20 @@ img {
   image-rendering: -webkit-optimize-contrast;
 }
 
-/* ── Better selection ── */
+/* ── Selection ── */
 ::selection {
-  background: rgba(124, 58, 237, 0.35);
-  color: white;
+  background: rgba(124, 58, 237, 0.22);
+  color: #3b0e7c;
 }
 
 /* ── Smooth card elevation on hover ── */
 .card-hover {
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Product gallery thumbnail hover ── */
 .gallery-thumb-active {
-  box-shadow: 0 0 0 2px rgba(124,58,237,0.7);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.7);
 }
 
 /* ── Typography refinements for long-form content ── */
@@ -75,23 +76,6 @@ img {
 /* ── Admin sidebar transitions ── */
 .sidebar-link-transition {
   transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-/* ── Better input autofill style for dark theme ── */
-html.dark input:-webkit-autofill,
-html.dark input:-webkit-autofill:hover,
-html.dark input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #e8e4f8;
-  -webkit-box-shadow: 0 0 0px 1000px rgba(20, 14, 46, 0.95) inset;
-  transition: background-color 5000s ease-in-out 0s;
-}
-
-html.light input:-webkit-autofill,
-html.light input:-webkit-autofill:hover,
-html.light input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #1e1b4b;
-  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.98) inset;
-  transition: background-color 5000s ease-in-out 0s;
 }
 
 /* Shared media reveal */
@@ -122,51 +106,47 @@ img.framed-image--revealed.framed-image--reveal-crisp {
 }
 
 @keyframes framed-image-clarify {
-  from {
-    filter: blur(12px) saturate(0.92);
-  }
-
-  to {
-    filter: blur(0) saturate(1);
-  }
+  from { filter: blur(12px) saturate(0.92); }
+  to { filter: blur(0) saturate(1); }
 }
 
-/* ── Hero background orb pulses (CSS-driven, zero JS overhead) ── */
+/* ── Hero background orb pulses (CSS-driven, light/violet) ── */
 @keyframes hero-orb-violet {
   0%, 100% { opacity: 0.32; transform: scale(1); }
-  50%       { opacity: 0.52; transform: scale(1.07); }
-}
-@keyframes hero-orb-cyan {
-  0%, 100% { opacity: 0.18; transform: scale(1); }
-  50%       { opacity: 0.34; transform: scale(1.09); }
+  50% { opacity: 0.55; transform: scale(1.07); }
 }
 @keyframes hero-orb-pink {
-  0%, 100% { opacity: 0.14; transform: scale(1); }
-  50%       { opacity: 0.26; transform: scale(1.06); }
+  0%, 100% { opacity: 0.20; transform: scale(1); }
+  50% { opacity: 0.36; transform: scale(1.09); }
+}
+@keyframes hero-orb-light {
+  0%, 100% { opacity: 0.16; transform: scale(1); }
+  50% { opacity: 0.30; transform: scale(1.06); }
 }
 
 .animate-hero-orb-violet {
   animation: hero-orb-violet 9s ease-in-out infinite;
 }
 .animate-hero-orb-cyan {
-  animation: hero-orb-cyan 11s ease-in-out 2.5s infinite;
+  /* alias preserved for legacy refs; now light pink */
+  animation: hero-orb-pink 11s ease-in-out 2.5s infinite;
 }
 .animate-hero-orb-pink {
-  animation: hero-orb-pink 13s ease-in-out 5s infinite;
+  animation: hero-orb-light 13s ease-in-out 5s infinite;
 }
 
-/* ── Hero floating card animations (CSS-driven) ── */
+/* ── Hero floating card animations ── */
 @keyframes hero-float-up {
   0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-10px); }
+  50% { transform: translateY(-10px); }
 }
 @keyframes hero-float-down {
   0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(9px); }
+  50% { transform: translateY(9px); }
 }
 @keyframes hero-float-up-sm {
   0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-7px); }
+  50% { transform: translateY(-7px); }
 }
 
 .animate-hero-float-up {
@@ -185,20 +165,9 @@ img.framed-image--revealed.framed-image--reveal-crisp {
 }
 
 @keyframes route-loader-sweep {
-  0% {
-    transform: translateX(-100%) scaleX(0.24);
-    opacity: 0.5;
-  }
-
-  45% {
-    transform: translateX(-10%) scaleX(0.72);
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateX(115%) scaleX(0.3);
-    opacity: 0.65;
-  }
+  0% { transform: translateX(-100%) scaleX(0.24); opacity: 0.5; }
+  45% { transform: translateX(-10%) scaleX(0.72); opacity: 1; }
+  100% { transform: translateX(115%) scaleX(0.3); opacity: 0.65; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -213,21 +182,18 @@ img.framed-image--revealed.framed-image--reveal-crisp {
   }
 }
 
-/* ── Spotlight hover glow ─────────────────────────────────────────── */
-/* Cursor-tracking radial glow. --sx/--sy are set via JS (useSpotlight hook).  */
-/* opacity is toggled directly on the DOM node — zero React re-renders.        */
+/* ── Spotlight hover glow (purple-tinted) ── */
 .spotlight-glow {
   opacity: 0;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.4s ease;
   z-index: 2;
   background: radial-gradient(
-    var(--ss, 220px) circle at var(--sx, 50%) var(--sy, 50%),
-    var(--sc, rgba(124, 58, 237, 0.11)),
+    var(--ss, 240px) circle at var(--sx, 50%) var(--sy, 50%),
+    var(--sc, rgba(124, 58, 237, 0.13)),
     transparent 70%
   );
 }
 
-/* Touch devices have no persistent hover — hide unconditionally */
 @media (pointer: coarse) {
   .spotlight-glow { display: none; }
 }
@@ -236,16 +202,123 @@ html.perf-low .spotlight-glow {
   display: none;
 }
 
-/* Instant show/hide for users who prefer no motion */
 @media (prefers-reduced-motion: reduce) {
   .spotlight-glow { transition: none; }
 }
 
-/* ── Auth characters: idle float ─────────────────────────────────────────── */
+/* ── Auth characters: idle float ── */
 @keyframes ac-float {
   0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-9px); }
+  50% { transform: translateY(-9px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .ac-float-wrap { animation: none !important; }
+}
+
+/* ── Glow pulse (general) ── */
+@keyframes glow-pulse-soft {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(1.04); }
+}
+
+.animate-glow-pulse-soft {
+  animation: glow-pulse-soft 4.5s ease-in-out infinite;
+}
+
+/* ── Sparkle particles (replaces dark-mode meteor trails) ── */
+.meteor-trail {
+  position: absolute;
+  pointer-events: none;
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  opacity: 0;
+  animation-timing-function: ease-out;
+  animation-iteration-count: infinite;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.95) 0%, rgba(168, 85, 247, 0.4) 50%, transparent 100%);
+  box-shadow: 0 0 12px 3px rgba(168, 85, 247, 0.5);
+  animation-name: hs-sparkle-pulse;
+}
+
+.meteor-trail--violet {
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.95) 0%, rgba(124, 58, 237, 0.4) 50%, transparent 100%);
+  box-shadow: 0 0 12px 3px rgba(124, 58, 237, 0.5);
+}
+
+.meteor-trail--cyan {
+  background: radial-gradient(circle, rgba(217, 70, 239, 0.85) 0%, rgba(217, 70, 239, 0.35) 50%, transparent 100%);
+  box-shadow: 0 0 12px 3px rgba(217, 70, 239, 0.45);
+}
+
+@keyframes hs-sparkle-pulse {
+  0%, 100% { opacity: 0; transform: scale(0.6); }
+  50% { opacity: 1; transform: scale(1.25); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meteor-trail {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}
+
+/* ── Gradient ring accent (for cards, avatars) ── */
+.gradient-ring {
+  position: relative;
+}
+
+.gradient-ring::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.6), rgba(217, 70, 239, 0.4), rgba(124, 58, 237, 0.6));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ── Chip pill ── */
+.chip-violet {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.10), rgba(168, 85, 247, 0.06));
+  border: 1px solid rgba(124, 58, 237, 0.20);
+  color: #6d28d9;
+}
+
+/* ── Gradient divider ── */
+.divider-gradient {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.32), transparent);
+}
+
+/* ── Hover lift utility ── */
+.hover-lift {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px -14px rgba(124, 58, 237, 0.22);
+}
+
+/* ── Soft purple glow for accent elements ── */
+.glow-purple {
+  box-shadow:
+    0 0 0 1px rgba(124, 58, 237, 0.16),
+    0 12px 32px -8px rgba(124, 58, 237, 0.22);
+}
+
+.glow-purple-strong {
+  box-shadow:
+    0 0 0 1px rgba(124, 58, 237, 0.24),
+    0 18px 48px -8px rgba(124, 58, 237, 0.34);
 }

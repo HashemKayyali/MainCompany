@@ -35,33 +35,33 @@ export default class ErrorBoundary extends Component<Props, State> {
     if (this.props.fallback) return this.props.fallback
 
     return (
-      <div className="min-h-screen flex items-center justify-center px-6 bg-[#060613]">
+      <div className="min-h-screen flex items-center justify-center px-6 bg-[#fbf8ff]">
         <div className="max-w-md w-full text-center">
           {/* Glow */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                'radial-gradient(ellipse at 50% 40%, rgba(239,68,68,0.08), transparent 65%)',
+                'radial-gradient(ellipse at 50% 40%, rgba(239,68,68,0.08), transparent 65%), radial-gradient(ellipse at 50% 60%, rgba(168,85,247,0.10), transparent 70%)',
             }}
           />
 
           {/* Icon */}
-          <div className="relative mx-auto w-20 h-20 rounded-3xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-8">
+          <div className="relative mx-auto w-20 h-20 rounded-3xl bg-red-50 border border-red-200 flex items-center justify-center mb-8">
             <span className="text-4xl">⚡</span>
           </div>
 
-          <h1 className="font-display text-3xl font-extrabold text-white tracking-tight">
-            Something went <span className="text-red-400">wrong</span>
+          <h1 className="font-display text-3xl font-extrabold tracking-tight" style={{ color: '#1a0b3d' }}>
+            Something went <span className="text-red-500">wrong</span>
           </h1>
 
-          <p className="mt-4 text-purple-200/60 text-sm leading-relaxed">
+          <p className="mt-4 text-sm leading-relaxed" style={{ color: 'rgba(61, 35, 112, 0.78)' }}>
             An unexpected error occurred. Don't worry — your data is safe.
           </p>
 
           {/* Error details (dev only) */}
           {import.meta.env.DEV && this.state.error && (
-            <pre className="mt-6 p-4 rounded-xl bg-red-500/[0.07] border border-red-500/20 text-left text-[11px] font-mono text-red-300/80 overflow-auto max-h-40">
+            <pre className="mt-6 p-4 rounded-xl bg-red-50 border border-red-200 text-left text-[11px] font-mono text-red-600 overflow-auto max-h-40">
               {this.state.error.message}
             </pre>
           )}

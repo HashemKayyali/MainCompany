@@ -29,21 +29,22 @@ function AuthInput({
       <input
         {...props}
         className={cn(
-          'h-[44px] w-full rounded-[13px] border bg-white/[0.07] text-[13px] font-medium text-white',
-          'placeholder:text-white/28 backdrop-blur-sm',
+          'h-[46px] w-full rounded-[13px] border bg-white text-[13px] font-medium text-ink-900',
+          'placeholder:text-violet-400/55',
           'transition-all duration-300',
-          'focus:outline-none focus:bg-white/[0.10] focus:ring-2 focus:ring-violet-400/30',
+          'focus:outline-none focus:bg-white focus:ring-2 focus:ring-violet-400/40',
           error
-            ? 'border-red-400/40 focus:border-red-400/60'
-            : 'border-white/[0.12] focus:border-violet-400/55',
+            ? 'border-red-300 focus:border-red-400'
+            : 'border-violet-200/85 focus:border-violet-500',
           Icon ? 'pl-10 pr-3.5' : 'px-3.5',
           right ? '!pr-10' : ''
         )}
+        style={{ color: '#1a0b3d' }}
       />
       {Icon && (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center text-white/40"
+          className="pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center text-violet-500/65"
         >
           <Icon size={14} strokeWidth={2.05} absoluteStrokeWidth />
         </span>
@@ -56,7 +57,7 @@ function AuthInput({
 }
 
 const labelClass =
-  'mb-1 block text-[9.5px] font-bold uppercase tracking-[0.14em] text-white/48'
+  'mb-1.5 block text-[9.5px] font-bold uppercase tracking-[0.18em] text-violet-700/85'
 
 function LeftPanel({
   isTyping,
@@ -73,40 +74,40 @@ function LeftPanel({
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(180deg,rgba(6,4,18,0.97) 0%,rgba(10,6,24,0.96) 50%,rgba(8,5,18,0.98) 100%)',
+            'linear-gradient(180deg,#f4eeff 0%,#e9defc 50%,#f1e8ff 100%)',
         }}
       />
 
       <div
-        className="pointer-events-none absolute left-[-18%] top-[-6%] h-[52%] w-[72%] rounded-full opacity-60"
+        className="pointer-events-none absolute left-[-18%] top-[-6%] h-[52%] w-[72%] rounded-full opacity-80"
         style={{
           background:
-            'radial-gradient(ellipse,rgba(124,58,237,0.28) 0%,rgba(109,40,217,0.12) 38%,transparent 68%)',
+            'radial-gradient(ellipse,rgba(168,85,247,0.40) 0%,rgba(124,58,237,0.18) 38%,transparent 68%)',
           filter: 'blur(60px)',
         }}
       />
       <div
-        className="pointer-events-none absolute bottom-[10%] right-[-16%] h-[44%] w-[64%] rounded-full opacity-50"
+        className="pointer-events-none absolute bottom-[10%] right-[-16%] h-[44%] w-[64%] rounded-full opacity-60"
         style={{
           background:
-            'radial-gradient(ellipse,rgba(6,182,212,0.22) 0%,rgba(8,145,178,0.08) 44%,transparent 70%)',
+            'radial-gradient(ellipse,rgba(217,70,239,0.30) 0%,rgba(168,85,247,0.10) 44%,transparent 70%)',
           filter: 'blur(70px)',
         }}
       />
       <div
-        className="pointer-events-none absolute left-[20%] top-[40%] h-[36%] w-[60%] rounded-full opacity-40"
+        className="pointer-events-none absolute left-[20%] top-[40%] h-[36%] w-[60%] rounded-full opacity-50"
         style={{
           background:
-            'radial-gradient(ellipse,rgba(236,72,153,0.18) 0%,transparent 62%)',
+            'radial-gradient(ellipse,rgba(196,165,255,0.36) 0%,transparent 62%)',
           filter: 'blur(80px)',
         }}
       />
 
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.025]"
+        className="pointer-events-none absolute inset-0 opacity-[0.18]"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)',
+            'linear-gradient(rgba(124,58,237,0.18) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,0.14) 1px,transparent 1px)',
           backgroundSize: '80px 80px',
         }}
       />
@@ -115,38 +116,41 @@ function LeftPanel({
         className="pointer-events-none absolute inset-y-0 right-0 w-px"
         style={{
           background:
-            'linear-gradient(180deg,transparent,rgba(124,58,237,0.22) 30%,rgba(139,92,246,0.14) 70%,transparent)',
+            'linear-gradient(180deg,transparent,rgba(124,58,237,0.32) 30%,rgba(168,85,247,0.20) 70%,transparent)',
         }}
       />
 
       <div className="relative z-10 flex items-center gap-3 p-8 pb-0">
         <div
-          className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[14px]"
+          className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[14px]"
           style={{
-            background: 'linear-gradient(145deg,#7c3aed 0%,#d946ef 48%,#22d3ee 112%)',
-            boxShadow: '0 8px 24px rgba(124,58,237,0.45)',
+            background: 'linear-gradient(145deg,#7c3aed 0%,#a855f7 48%,#c026d3 112%)',
+            boxShadow: '0 12px 32px -6px rgba(124,58,237,0.55)',
           }}
         >
-          <div className="absolute inset-x-2 top-1.5 h-3 rounded-full bg-white/20 blur-md" />
-          <span className="relative text-[10px] font-black tracking-[0.22em] text-white">EV</span>
+          <div className="absolute inset-x-2 top-1.5 h-3 rounded-full bg-white/30 blur-md" />
+          <span className="relative text-[10.5px] font-black tracking-[0.22em] text-white">EV</span>
         </div>
         <div>
-          <div className="font-display text-[11px] font-bold uppercase tracking-[0.22em] text-white/90">
-            <span className="text-violet-300">Eventies</span>
+          <div className="font-display text-[12px] font-bold uppercase tracking-[0.22em]" style={{ color: '#1a0b3d' }}>
+            <span className="text-violet-700">Eventies</span>
           </div>
-          <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-white/38">
+          <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-violet-600/72">
             Event Services Marketplace
           </div>
         </div>
       </div>
 
       <div className="relative z-10 mt-auto px-8 pb-5">
-        <p className="font-display text-[1.88rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-white">
+        <p
+          className="font-display text-[1.92rem] font-extrabold leading-[1.08] tracking-[-0.04em]"
+          style={{ color: '#1a0b3d' }}
+        >
           Everything your
           <br />
           <span
             style={{
-              background: 'linear-gradient(135deg,#a78bfa 0%,#ec4899 46%,#22d3ee 100%)',
+              background: 'linear-gradient(135deg,#7c3aed 0%,#a855f7 46%,#c026d3 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -155,8 +159,8 @@ function LeftPanel({
             event needs.
           </span>
         </p>
-        <p className="mt-2.5 text-[12.5px] font-medium leading-relaxed text-white/42">
-          Discover rentals, services, and trusted event partners - all in one place.
+        <p className="mt-3 text-[12.5px] font-medium leading-relaxed" style={{ color: 'rgba(61,35,112,0.78)' }}>
+          Discover rentals, services, and trusted event partners — all in one place.
         </p>
       </div>
 
@@ -168,10 +172,10 @@ function LeftPanel({
         />
       </div>
 
-      <div className="relative z-10 flex gap-5 px-8 py-4 text-[10px] font-medium text-white/26">
-        <span>(c) {new Date().getFullYear()} Eventies</span>
-        <a href="#" className="transition-colors hover:text-white/52">Privacy</a>
-        <a href="#" className="transition-colors hover:text-white/52">Terms</a>
+      <div className="relative z-10 flex gap-5 px-8 py-4 text-[10px] font-semibold uppercase tracking-[0.14em] text-violet-600/65">
+        <span>&copy; {new Date().getFullYear()} Eventies</span>
+        <a href="#" className="transition-colors hover:text-violet-800">Privacy</a>
+        <a href="#" className="transition-colors hover:text-violet-800">Terms</a>
       </div>
     </div>
   )
@@ -364,18 +368,21 @@ export default function AuthPage() {
       onClick={onToggle}
       tabIndex={-1}
       aria-label={show ? 'Hide password' : 'Show password'}
-      className="flex items-center justify-center text-white/35 transition-colors hover:text-white/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50"
+      className="flex items-center justify-center text-violet-500/65 transition-colors hover:text-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50"
     >
       {show ? <EyeOff size={15} /> : <Eye size={15} />}
     </button>
   )
+
+  // Note: isDark is referenced from useTheme but always false; kept for future-proofing.
+  void isDark
 
   return (
     <div className="relative flex min-h-[100dvh] overflow-x-hidden">
       {!reduceMotion && <AnimatedBackground position="absolute" className="z-0" variant="lightweight" />}
       <div
         className="pointer-events-none absolute inset-0 z-[1]"
-        style={{ background: isDark ? 'rgba(2,3,10,0.52)' : 'rgba(2,3,10,0.38)' }}
+        style={{ background: 'rgba(251,248,255,0.18)' }}
       />
 
       <div className="relative z-[2] hidden shrink-0 lg:block lg:min-h-[100dvh] lg:w-[44%] xl:w-[42%]">
@@ -391,14 +398,14 @@ export default function AuthPage() {
           <div
             className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[11px]"
             style={{
-              background: 'linear-gradient(145deg,#7c3aed 0%,#d946ef 48%,#22d3ee 112%)',
-              boxShadow: '0 6px 18px rgba(124,58,237,0.4)',
+              background: 'linear-gradient(145deg,#7c3aed 0%,#a855f7 48%,#c026d3 112%)',
+              boxShadow: '0 8px 22px -4px rgba(124,58,237,0.55)',
             }}
           >
             <span className="text-[9px] font-black tracking-[0.22em] text-white">EV</span>
           </div>
-          <span className="font-display text-[10.5px] font-bold uppercase tracking-[0.2em] text-white/80">
-            <span className="text-violet-300">Eventies</span>
+          <span className="font-display text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: '#1a0b3d' }}>
+            <span className="text-violet-700">Eventies</span>
           </span>
         </div>
 
@@ -407,18 +414,18 @@ export default function AuthPage() {
           initial={skipCardIntro || reduceMotion ? false : { opacity: 0, y: 18, scale: 0.984 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={cardTransition}
-          className="relative my-5 w-full max-w-[448px] overflow-hidden rounded-[26px] transform-gpu sm:my-3 xl:max-w-[462px]"
+          className="relative my-5 w-full max-w-[448px] overflow-hidden rounded-[28px] transform-gpu sm:my-3 xl:max-w-[462px]"
           style={{
-            background: 'rgba(9,7,22,0.84)',
-            backdropFilter: 'blur(28px) saturate(1.4)',
-            WebkitBackdropFilter: 'blur(28px) saturate(1.4)',
-            border: '1px solid rgba(255,255,255,0.10)',
+            background: 'rgba(255,255,255,0.92)',
+            backdropFilter: 'blur(20px) saturate(1.4)',
+            WebkitBackdropFilter: 'blur(20px) saturate(1.4)',
+            border: '1px solid rgba(124,58,237,0.16)',
             boxShadow:
-              '0 32px 80px rgba(0,0,0,0.62), 0 0 0 1px rgba(139,92,246,0.06), inset 0 1px 0 rgba(255,255,255,0.07)',
+              '0 32px 80px -22px rgba(124,58,237,0.32), 0 8px 24px -8px rgba(124,58,237,0.18), inset 0 1px 0 rgba(255,255,255,0.95)',
           }}
         >
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/22 to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-violet-400/16 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/55 to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-violet-400/30 to-transparent" />
 
           <motion.div
             layout
@@ -430,8 +437,8 @@ export default function AuthPage() {
               aria-label="Authentication mode"
               className="flex gap-1 rounded-[13px] p-[3px]"
               style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'rgba(244,238,255,0.88)',
+                border: '1px solid rgba(124,58,237,0.14)',
               }}
             >
               {(['login', 'register'] as const).map(mode => (
@@ -445,10 +452,10 @@ export default function AuthPage() {
                   aria-controls={mode === 'login' ? 'auth-panel-login' : 'auth-panel-register'}
                   tabIndex={uiMode === mode ? 0 : -1}
                   className={cn(
-                    'relative flex-1 overflow-hidden rounded-[10px] py-[9px] text-[11.5px] font-bold transition-all duration-300',
+                    'relative flex-1 overflow-hidden rounded-[10px] py-[10px] text-[11.5px] font-bold transition-all duration-300',
                     uiMode === mode
                       ? 'text-white'
-                      : 'text-white/44 hover:text-white/68'
+                      : 'text-violet-700/70 hover:text-violet-800'
                   )}
                 >
                   {uiMode === mode && (
@@ -458,8 +465,8 @@ export default function AuthPage() {
                       transition={tabTransition}
                       style={{
                         background:
-                          'linear-gradient(135deg,#7c3aed 0%,#b832e1 60%,#ec4899 100%)',
-                        boxShadow: '0 4px 14px rgba(124,58,237,0.38)',
+                          'linear-gradient(135deg,#7c3aed 0%,#a855f7 60%,#c026d3 100%)',
+                        boxShadow: '0 6px 18px -4px rgba(124,58,237,0.55)',
                       }}
                     />
                   )}
@@ -493,10 +500,10 @@ export default function AuthPage() {
                     style={{ transformOrigin: 'top center' }}
                   >
                     <div className="space-y-1.5">
-                      <h1 className="font-display text-[1.5rem] font-extrabold leading-tight tracking-[-0.04em] text-white sm:text-[1.58rem]">
+                      <h1 className="font-display text-[1.5rem] font-extrabold leading-tight tracking-[-0.04em] sm:text-[1.58rem]" style={{ color: '#1a0b3d' }}>
                         Welcome back
                       </h1>
-                      <p className="text-[12px] font-medium leading-relaxed text-white/48 sm:text-[12.2px]">
+                      <p className="text-[12px] font-medium leading-relaxed text-violet-700/72 sm:text-[12.2px]">
                         Sign in to browse our catalog, request rentals, and manage your
                         events.
                       </p>
@@ -512,7 +519,7 @@ export default function AuthPage() {
                           exit={{ opacity: 0, y: -6, scale: 0.985 }}
                           transition={contentTransition}
                           role="status"
-                          className="flex items-start gap-2 rounded-[12px] border border-emerald-300/22 bg-emerald-400/12 px-3.5 py-2.5 text-[12px] font-semibold text-emerald-100"
+                          className="flex items-start gap-2 rounded-[12px] border border-emerald-300 bg-emerald-50/85 px-3.5 py-2.5 text-[12px] font-semibold text-emerald-700"
                         >
                           <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
                           {success}
@@ -527,7 +534,7 @@ export default function AuthPage() {
                           exit={{ opacity: 0, y: -6, scale: 0.985 }}
                           transition={contentTransition}
                           role="alert"
-                          className="flex items-start gap-2 rounded-[12px] border border-red-300/20 bg-red-400/10 px-3.5 py-2.5 text-[12px] font-semibold text-red-100"
+                          className="flex items-start gap-2 rounded-[12px] border border-red-300 bg-red-50/85 px-3.5 py-2.5 text-[12px] font-semibold text-red-700"
                         >
                           <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-red-400" />
                           {error}
@@ -578,15 +585,15 @@ export default function AuthPage() {
                             type="checkbox"
                             checked={rememberMe}
                             onChange={e => setRememberMe(e.target.checked)}
-                            className="h-[14px] w-[14px] rounded-[4px] border-white/20 bg-white/10 text-violet-500 focus:ring-2 focus:ring-violet-400/30 focus:ring-offset-0"
+                            className="h-[15px] w-[15px] rounded-[4px] border-violet-300 bg-white text-violet-600 accent-violet-600 focus:ring-2 focus:ring-violet-400/30 focus:ring-offset-0"
                           />
-                          <span className="text-[11.5px] font-medium text-white/50 transition-colors hover:text-white/70">
+                          <span className="text-[11.5px] font-medium text-violet-700/85 transition-colors hover:text-violet-900">
                             Remember me
                           </span>
                         </label>
                         <button
                           type="button"
-                          className="text-[11.5px] font-semibold text-violet-300/80 transition-colors hover:text-violet-200 focus:outline-none focus-visible:underline"
+                          className="text-[11.5px] font-semibold text-violet-600 transition-colors hover:text-violet-800 focus:outline-none focus-visible:underline"
                           onClick={() => {
                             /* forgot-password */
                           }}
@@ -606,22 +613,22 @@ export default function AuthPage() {
                       <button
                         type="button"
                         onClick={() => switchTo('register')}
-                        className="flex h-[44px] w-full items-center justify-center rounded-[13px] border border-white/[0.12] bg-white/[0.05] px-4 text-[12px] font-semibold text-white/55 transition-all hover:bg-white/[0.09] hover:text-white/82"
+                        className="flex h-[46px] w-full items-center justify-center gap-1.5 rounded-[13px] border border-violet-200/85 bg-white px-4 text-[12px] font-semibold text-violet-700/80 transition-all hover:border-violet-400 hover:bg-violet-50/85 hover:text-violet-900"
                       >
                         Don't have an account?{' '}
-                        <span className="text-violet-300">Sign up free</span>
+                        <span className="text-violet-700">Sign up free</span>
                       </button>
 
                       <Link
                         to="/"
-                        className="flex items-center justify-center gap-1.5 pt-1 text-[11px] font-medium text-white/30 transition-colors hover:text-white/60"
+                        className="flex items-center justify-center gap-1.5 pt-1 text-[11px] font-medium text-violet-500/72 transition-colors hover:text-violet-700"
                       >
                         <ArrowLeft size={11} />
                         Back to site
                       </Link>
                     </form>
-                    <p className="pt-1 text-center text-[10px] font-medium text-white/24">
-                      (c) {new Date().getFullYear()} Eventies - Event Services Marketplace
+                    <p className="pt-1 text-center text-[10px] font-medium text-violet-500/65">
+                      &copy; {new Date().getFullYear()} Eventies — Event Services Marketplace
                     </p>
                   </motion.section>
                 ) : (
@@ -641,10 +648,10 @@ export default function AuthPage() {
                     style={{ transformOrigin: 'top center' }}
                   >
                     <div className="space-y-1.5">
-                      <h1 className="font-display text-[1.5rem] font-extrabold leading-tight tracking-[-0.04em] text-white sm:text-[1.58rem]">
+                      <h1 className="font-display text-[1.5rem] font-extrabold leading-tight tracking-[-0.04em] sm:text-[1.58rem]" style={{ color: '#1a0b3d' }}>
                         Join Eventies
                       </h1>
-                      <p className="text-[12px] font-medium leading-relaxed text-white/48 sm:text-[12.2px]">
+                      <p className="text-[12px] font-medium leading-relaxed text-violet-700/72 sm:text-[12.2px]">
                         Create your account to start booking equipment and services for your
                         events.
                       </p>
@@ -660,7 +667,7 @@ export default function AuthPage() {
                           exit={{ opacity: 0, y: -6, scale: 0.985 }}
                           transition={contentTransition}
                           role="status"
-                          className="flex items-start gap-2 rounded-[12px] border border-emerald-300/22 bg-emerald-400/12 px-3.5 py-2.5 text-[12px] font-semibold text-emerald-100"
+                          className="flex items-start gap-2 rounded-[12px] border border-emerald-300 bg-emerald-50/85 px-3.5 py-2.5 text-[12px] font-semibold text-emerald-700"
                         >
                           <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
                           {success}
@@ -675,7 +682,7 @@ export default function AuthPage() {
                           exit={{ opacity: 0, y: -6, scale: 0.985 }}
                           transition={contentTransition}
                           role="alert"
-                          className="flex items-start gap-2 rounded-[12px] border border-red-300/20 bg-red-400/10 px-3.5 py-2.5 text-[12px] font-semibold text-red-100"
+                          className="flex items-start gap-2 rounded-[12px] border border-red-300 bg-red-50/85 px-3.5 py-2.5 text-[12px] font-semibold text-red-700"
                         >
                           <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-red-400" />
                           {error}
@@ -718,7 +725,7 @@ export default function AuthPage() {
                         <div>
                           <label className={labelClass}>
                             Phone{' '}
-                            <span className="normal-case tracking-normal text-white/28">
+                            <span className="normal-case tracking-normal text-violet-500/55">
                               optional
                             </span>
                           </label>
@@ -794,7 +801,7 @@ export default function AuthPage() {
                       <button
                         type="button"
                         onClick={() => switchTo('login')}
-                        className="h-[44px] rounded-[13px] border border-white/[0.12] bg-white/[0.05] px-3 text-[11.75px] font-semibold text-white/52 transition-all hover:bg-white/[0.09] hover:text-white/78"
+                        className="h-[46px] rounded-[13px] border border-violet-200/85 bg-white px-3 text-[11.75px] font-semibold text-violet-700/80 transition-all hover:border-violet-400 hover:bg-violet-50/85 hover:text-violet-900"
                       >
                         Back to sign in
                       </button>
@@ -802,14 +809,14 @@ export default function AuthPage() {
 
                     <Link
                       to="/"
-                      className="flex items-center justify-center gap-1.5 pt-1 text-[11px] font-medium text-white/30 transition-colors hover:text-white/60"
+                      className="flex items-center justify-center gap-1.5 pt-1 text-[11px] font-medium text-violet-500/72 transition-colors hover:text-violet-700"
                     >
                       <ArrowLeft size={11} />
                       Back to site
                     </Link>
                     </form>
-                    <p className="pt-1 text-center text-[10px] font-medium text-white/24">
-                      (c) {new Date().getFullYear()} Eventies - Event Services Marketplace
+                    <p className="pt-1 text-center text-[10px] font-medium text-violet-500/65">
+                      &copy; {new Date().getFullYear()} Eventies — Event Services Marketplace
                     </p>
                   </motion.section>
                 )}

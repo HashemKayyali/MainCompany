@@ -60,9 +60,7 @@ export default function Modal({
   const topOffsetClass = 'pt-3 sm:pt-5 lg:pt-6'
   const bottomOffsetClass =
     'pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-[max(0.875rem,env(safe-area-inset-bottom))]'
-  const panelClass = isDark
-    ? 'bg-[linear-gradient(145deg,rgba(10,14,32,0.98),rgba(7,10,24,0.99))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_32px_96px_-62px_rgba(7,17,42,0.98)]'
-    : 'bg-white border border-gray-200 shadow-2xl'
+  const panelClass = 'bg-white border border-violet-200/65 shadow-[0_32px_96px_-22px_rgba(124,58,237,0.32),0_8px_28px_-8px_rgba(124,58,237,0.18)]'
 
   useBodyScrollLock(open)
 
@@ -161,7 +159,7 @@ export default function Modal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/58 backdrop-blur-[3px]"
+            className="absolute inset-0 bg-[rgba(45,18,108,0.42)] backdrop-blur-[4px]"
           />
 
           <div
@@ -181,17 +179,12 @@ export default function Modal({
               onClick={event => event.stopPropagation()}
             >
               <div
-                className={`sticky top-0 z-20 flex items-start justify-between gap-3 border-b px-3 pb-3 pt-3 sm:px-4 sm:pb-3.5 sm:pt-3.5 ${
-                  isDark
-                    ? 'border-cyan-400/10 bg-[linear-gradient(180deg,rgba(11,15,34,0.98),rgba(11,15,34,0.92))] backdrop-blur-xl'
-                    : 'border-gray-200 bg-white/92 backdrop-blur-xl'
-                }`}
+                className="sticky top-0 z-20 flex items-start justify-between gap-3 border-b border-violet-100 bg-white/95 px-3 pb-3 pt-3 backdrop-blur-xl sm:px-4 sm:pb-3.5 sm:pt-3.5"
               >
                 <h2
                   id={titleId}
-                  className={`font-display text-[0.98rem] font-bold sm:text-[1.04rem] ${
-                    isDark ? 'text-white' : 'text-gray-900'
-                  }`}
+                  className="font-display text-[0.98rem] font-bold sm:text-[1.04rem]"
+                  style={{ color: '#1a0b3d' }}
                 >
                   {title}
                 </h2>
@@ -200,11 +193,7 @@ export default function Modal({
                   ref={closeButtonRef}
                   type="button"
                   onClick={onClose}
-                  className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] transition ${
-                    isDark
-                      ? 'bg-[#101933]/92 text-purple-100/78 ring-1 ring-inset ring-cyan-400/10 hover:bg-[#132043] hover:text-white'
-                      : 'bg-gray-50 text-gray-500 ring-1 ring-inset ring-gray-200 hover:bg-white hover:text-gray-800'
-                  }`}
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200 transition hover:bg-violet-100 hover:text-violet-900"
                   aria-label="Close modal"
                 >
                   <X size={18} strokeWidth={2.2} />

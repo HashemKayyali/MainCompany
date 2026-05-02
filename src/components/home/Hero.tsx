@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
-import { ArrowRight, Building2, Sparkles } from 'lucide-react'
+import { ArrowRight, Building2, Sparkles, Stars } from 'lucide-react'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { usePerfMode } from '../../hooks/usePerfMode'
 import { preloadRoute } from '../../utils/route-preload'
@@ -34,10 +34,10 @@ export default function Hero() {
 
       {/* ════ BACKGROUND SYSTEM ════ */}
 
-      {/* Layer 0 – deep dark base */}
-      <div className="absolute inset-0 -z-40 bg-[#030610]" />
+      {/* Layer 0 – soft white/lavender base */}
+      <div className="absolute inset-0 -z-40 bg-[#faf6ff]" />
 
-      {/* Layer 1 – hero image (subdued atmosphere) */}
+      {/* Layer 1 – hero image (very subdued, faded into purple wash) */}
       <div className="absolute inset-0 -z-30">
         <img
           src="/images/hero-bg-event.png"
@@ -48,7 +48,7 @@ export default function Hero() {
           decoding="async"
           fetchPriority="high"
           className={`h-full w-full object-cover transition-opacity duration-700 ${
-            heroImageReady ? 'opacity-100' : 'opacity-0'
+            heroImageReady ? 'opacity-15' : 'opacity-0'
           }`}
           onLoad={() => setHeroImageReady(true)}
         />
@@ -56,9 +56,9 @@ export default function Hero() {
           className="absolute inset-0"
           style={{
             background:
-              'linear-gradient(180deg, rgba(3,6,16,0.64) 0%, rgba(3,6,16,0.26) 34%, rgba(3,6,16,0.72) 74%, rgba(3,6,16,1) 100%), ' +
-              'radial-gradient(44% 34% at 18% 16%, rgba(124,58,237,0.14) 0%, transparent 72%), ' +
-              'radial-gradient(38% 28% at 84% 18%, rgba(6,182,212,0.10) 0%, transparent 70%)',
+              'linear-gradient(180deg, rgba(250,246,255,0.78) 0%, rgba(244,238,255,0.62) 30%, rgba(241,232,255,0.86) 70%, rgba(251,248,255,1) 100%), ' +
+              'radial-gradient(60% 42% at 14% 12%, rgba(124,58,237,0.14) 0%, transparent 70%), ' +
+              'radial-gradient(48% 32% at 88% 16%, rgba(217,70,239,0.10) 0%, transparent 70%)',
           }}
         />
       </div>
@@ -66,39 +66,46 @@ export default function Hero() {
       {/* Layer 2 – atmospheric light orbs */}
       {richHeroAtmosphere ? (
         <>
-          {/* Violet orb – upper left */}
           <div
             className={`pointer-events-none absolute -z-20${motionEnabled ? ' animate-hero-orb-violet' : ''}`}
             style={{
-              left: '-6%', top: '-10%',
-              width: '54%', height: '62%',
-              opacity: 0.24,
-              background: 'radial-gradient(circle, rgba(124,58,237,0.26) 0%, rgba(124,58,237,0.08) 42%, transparent 70%)',
-              filter: 'blur(40px)',
+              left: '-8%', top: '-10%',
+              width: '58%', height: '64%',
+              opacity: 0.50,
+              background: 'radial-gradient(circle, rgba(168,85,247,0.45) 0%, rgba(124,58,237,0.12) 42%, transparent 70%)',
+              filter: 'blur(58px)',
             }}
           />
 
-          {/* Cyan orb – upper right */}
           <div
             className={`pointer-events-none absolute -z-20${motionEnabled ? ' animate-hero-orb-cyan' : ''}`}
             style={{
-              right: '-6%', top: '-12%',
-              width: '44%', height: '54%',
-              opacity: 0.14,
-              background: 'radial-gradient(circle, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.06) 40%, transparent 68%)',
-              filter: 'blur(34px)',
+              right: '-8%', top: '-12%',
+              width: '50%', height: '58%',
+              opacity: 0.32,
+              background: 'radial-gradient(circle, rgba(217,70,239,0.34) 0%, rgba(168,85,247,0.10) 40%, transparent 68%)',
+              filter: 'blur(54px)',
             }}
           />
 
-          {/* Pink orb – lower center */}
+          <div
+            className={`pointer-events-none absolute -z-20${motionEnabled ? ' animate-hero-orb-pink' : ''}`}
+            style={{
+              left: '30%', bottom: '-12%',
+              width: '46%', height: '52%',
+              opacity: 0.28,
+              background: 'radial-gradient(circle, rgba(196,165,255,0.40) 0%, rgba(168,85,247,0.10) 46%, transparent 72%)',
+              filter: 'blur(54px)',
+            }}
+          />
         </>
       ) : (
         <div
-          className="pointer-events-none absolute inset-x-[-8%] top-[-4%] -z-20 h-[34%]"
+          className="pointer-events-none absolute inset-x-[-8%] top-[-4%] -z-20 h-[42%]"
           style={{
             background:
-              'radial-gradient(40% 75% at 22% 16%, rgba(124,58,237,0.13) 0%, transparent 76%), ' +
-              'radial-gradient(34% 70% at 78% 18%, rgba(6,182,212,0.08) 0%, transparent 74%)',
+              'radial-gradient(40% 75% at 22% 16%, rgba(124,58,237,0.18) 0%, transparent 76%), ' +
+              'radial-gradient(34% 70% at 78% 18%, rgba(217,70,239,0.12) 0%, transparent 74%)',
           }}
         />
       )}
@@ -107,16 +114,21 @@ export default function Hero() {
       <div
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.75) 1px, transparent 1px)',
-          backgroundSize: '36px 36px',
-          opacity: 0.022,
+          backgroundImage: 'radial-gradient(rgba(124,58,237,0.20) 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
+          opacity: 0.10,
+          maskImage: 'radial-gradient(ellipse 70% 50% at 50% 50%, black 60%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 70% 50% at 50% 50%, black 60%, transparent 100%)',
         }}
       />
 
-      {/* Layer 4 – bottom fade to page background (matches AnimatedBackground base #030511) */}
+      {/* Layer 4 – bottom fade to page background */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-80"
-        style={{ background: 'linear-gradient(to top, rgba(3,5,17,0.98) 0%, rgba(3,5,17,0.84) 28%, rgba(3,5,17,0.42) 58%, transparent 100%)' }}
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-72"
+        style={{
+          background:
+            'linear-gradient(to top, rgba(251,248,255,1) 0%, rgba(251,248,255,0.92) 22%, rgba(251,248,255,0.5) 56%, transparent 100%)',
+        }}
       />
 
       {/* ════ HERO CONTENT ════ */}
@@ -138,65 +150,71 @@ export default function Hero() {
               initial={motionEnabled ? { opacity: 0, y: -10 } : false}
               animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
               transition={motionEnabled ? { duration: 0.5, delay: 0.06, ease } : undefined}
-              className="mb-4 inline-flex w-fit sm:mb-6"
+              className="mb-5 inline-flex w-fit sm:mb-7"
             >
-              <div className={`inline-flex items-center gap-2 rounded-full border border-violet-400/22 bg-violet-500/10 px-3 py-1.5 ${glassEnabled ? 'backdrop-blur-sm' : ''} sm:gap-2.5 sm:px-4 sm:py-2`}>
-                <span
-                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-violet-400"
-                  style={{ boxShadow: richHeroAtmosphere ? '0 0 8px rgba(167,139,250,0.95), 0 0 18px rgba(167,139,250,0.45)' : '0 0 6px rgba(167,139,250,0.72)' }}
-                />
-                <span className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-violet-200/82 sm:text-[10.5px] sm:tracking-[0.18em]">
+              <div
+                className={`inline-flex items-center gap-2.5 rounded-full border border-violet-400/30 bg-white/80 px-3.5 py-1.5 ${glassEnabled ? 'backdrop-blur-md' : ''} sm:px-4 sm:py-2 shadow-[0_8px_28px_-10px_rgba(124,58,237,0.22)]`}
+              >
+                <Stars className="h-3.5 w-3.5 text-violet-600" strokeWidth={2.2} />
+                <span className="text-[9.5px] font-semibold uppercase tracking-[0.16em] text-violet-700 sm:text-[10.5px] sm:tracking-[0.18em]">
                   Event Services Marketplace
                 </span>
+                <span
+                  className="ml-1 h-1.5 w-1.5 shrink-0 rounded-full bg-violet-500"
+                  style={{ boxShadow: '0 0 7px rgba(168,85,247,0.85)' }}
+                />
               </div>
             </motion.div>
 
             {/* Main heading */}
             <h1
-              className="font-sans text-[clamp(2.7rem,6.2vw,5.1rem)] font-extrabold leading-[0.95] tracking-[-0.04em] text-white"
+              className="font-sans text-[clamp(2.7rem,6.2vw,5.1rem)] font-extrabold leading-[0.95] tracking-[-0.04em] text-ink-900"
               style={{
                 fontFamily: '"Alexandria", system-ui, sans-serif',
                 fontKerning: 'normal',
                 textRendering: 'optimizeLegibility',
+                color: '#1a0b3d',
               }}
             >
-              <span className="block opacity-90">Book Everything</span>
+              <span className="block opacity-95">Book Everything</span>
               <span className="relative isolate mt-2 block pb-[0.06em] tracking-[-0.028em]">
                 <span
                   className="relative z-10 inline-block bg-clip-text text-transparent"
                   style={{
-                    backgroundImage: 'linear-gradient(95deg, #c4b5fd 0%, #f0abfc 30%, #67e8f9 65%, #c4b5fd 100%)',
+                    backgroundImage: 'linear-gradient(95deg, #7c3aed 0%, #a855f7 30%, #c026d3 65%, #7c3aed 100%)',
                     WebkitTextFillColor: 'transparent',
+                    backgroundSize: '200% auto',
+                    animation: motionEnabled ? 'text-glow-shift 8s ease-in-out infinite' : undefined,
                   }}
                 >
                   Your Event Needs
                 </span>
                 <span
                   aria-hidden="true"
-                  className={`pointer-events-none absolute inset-x-[5%] bottom-[0.02em] z-0 h-[0.24em] rounded-full ${richHeroAtmosphere ? 'opacity-75 blur-3xl' : 'opacity-55 blur-xl'}`}
-                  style={{ background: 'linear-gradient(90deg, rgba(124,58,237,0.42), rgba(236,72,153,0.28), rgba(34,211,238,0.18))' }}
+                  className={`pointer-events-none absolute inset-x-[5%] bottom-[0.02em] z-0 h-[0.24em] rounded-full ${richHeroAtmosphere ? 'opacity-60 blur-3xl' : 'opacity-45 blur-xl'}`}
+                  style={{ background: 'linear-gradient(90deg, rgba(124,58,237,0.42), rgba(217,70,239,0.32), rgba(168,85,247,0.22))' }}
                 />
               </span>
             </h1>
 
             {/* Description */}
-            <p className="mt-7 max-w-[36rem] text-[1rem] leading-[1.82] text-white/55 sm:text-[1.08rem]">
+            <p className="mt-7 max-w-[36rem] text-[1rem] leading-[1.82] text-ink-700/80 sm:text-[1.08rem]" style={{ color: 'rgba(61, 35, 112, 0.78)' }}>
               Find and book games, LED screens, performers, booths, rentals, and production
               services from trusted vendors — all in one place.
             </p>
 
             {/* Journey step pills */}
-            <div className="mt-6 flex flex-wrap items-center gap-2">
+            <div className="mt-7 flex flex-wrap items-center gap-2">
               {journeySteps.map((step, index) => (
                 <motion.div
                   key={step.label}
                   initial={motionEnabled ? { opacity: 0, x: -12 } : false}
                   animate={motionEnabled ? { opacity: 1, x: 0 } : undefined}
                   transition={motionEnabled ? { duration: 0.42, delay: 0.22 + index * 0.07, ease } : undefined}
-                  className={`inline-flex items-center gap-2.5 rounded-full border border-white/[0.08] bg-white/[0.05] px-3.5 py-1.5 ${glassEnabled ? 'backdrop-blur-sm' : ''}`}
+                  className={`inline-flex items-center gap-2.5 rounded-full border border-violet-300/50 bg-white/75 px-3.5 py-1.5 ${glassEnabled ? 'backdrop-blur-sm' : ''} shadow-[0_4px_14px_-6px_rgba(124,58,237,0.18)]`}
                 >
-                  <span className="text-[10px] font-bold tracking-[0.12em] text-violet-300/72">{step.num}</span>
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/65">{step.label}</span>
+                  <span className="text-[10px] font-bold tracking-[0.12em] text-violet-600">{step.num}</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-700" style={{ color: '#3d2370' }}>{step.label}</span>
                 </motion.div>
               ))}
             </div>
@@ -212,18 +230,18 @@ export default function Hero() {
                 to="/products"
                 onMouseEnter={() => preloadRoute('/products')}
                 onFocus={() => preloadRoute('/products')}
-                className="btn-primary group relative !min-h-[50px] !overflow-hidden !rounded-[18px] !px-6 !text-[12px]"
+                className="btn-primary group relative !min-h-[52px] !overflow-hidden !rounded-[18px] !px-7 !text-[12px]"
               >
-                <span className="pointer-events-none absolute inset-0 -translate-x-full skew-x-[-20deg] bg-white/10 transition-transform duration-700 group-hover:translate-x-[200%]" />
+                <span className="pointer-events-none absolute inset-0 -translate-x-full skew-x-[-20deg] bg-white/22 transition-transform duration-700 group-hover:translate-x-[200%]" />
                 Explore Services
-                <ArrowRight className="h-4 w-4" strokeWidth={1.9} />
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={2.2} />
               </Link>
 
               <Link
                 to="/contact"
                 onMouseEnter={() => preloadRoute('/contact')}
                 onFocus={() => preloadRoute('/contact')}
-                className={`inline-flex min-h-[50px] items-center gap-2 rounded-[18px] border border-white/[0.13] bg-white/[0.07] px-6 text-[12px] font-semibold tracking-[0.01em] text-white transition-all hover:border-white/[0.22] hover:bg-white/[0.12] ${glassEnabled ? 'backdrop-blur-sm' : ''}`}
+                className={`inline-flex min-h-[52px] items-center gap-2 rounded-[18px] border border-violet-300/55 bg-white/85 px-7 text-[12px] font-semibold tracking-[0.01em] text-violet-700 transition-all hover:border-violet-500/70 hover:bg-white hover:text-violet-800 hover:shadow-[0_12px_28px_-12px_rgba(124,58,237,0.32)] ${glassEnabled ? 'backdrop-blur-sm' : ''}`}
               >
                 Talk to the Team
               </Link>
@@ -239,13 +257,21 @@ export default function Hero() {
               {heroStats.map((stat, index) => (
                 <div key={stat.label} className="relative flex items-center">
                   {index > 0 && (
-                    <div className="mx-6 h-10 w-px bg-white/10 sm:mx-8" />
+                    <div className="mx-6 h-10 w-px bg-violet-300/60 sm:mx-8" />
                   )}
                   <div>
-                    <div className="font-display text-[clamp(1.6rem,3.8vw,2.1rem)] font-black leading-none tracking-[-0.07em] text-white">
+                    <div
+                      className="font-display text-[clamp(1.6rem,3.8vw,2.1rem)] font-black leading-none tracking-[-0.07em]"
+                      style={{
+                        background: 'linear-gradient(135deg, #1a0b3d 0%, #6d28d9 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                      }}
+                    >
                       {stat.value}
                     </div>
-                    <div className="mt-1.5 text-[9.5px] font-semibold uppercase tracking-[0.18em] text-violet-300/60">
+                    <div className="mt-1.5 text-[9.5px] font-semibold uppercase tracking-[0.18em] text-violet-700/80">
                       {stat.label}
                     </div>
                   </div>
@@ -255,46 +281,52 @@ export default function Hero() {
           </motion.div>
 
           {/* ── RIGHT: Floating card composition (desktop only) ── */}
-          {!perfLow && <div className="relative hidden h-full min-h-[480px] lg:block">
+          {!perfLow && <div className="relative hidden h-full min-h-[500px] lg:block">
 
             {/* Card 1: For Clients – upper right */}
             <motion.div
               className="absolute right-0 top-[2%]"
-              initial={motionEnabled ? { opacity: 0 } : false}
-              animate={motionEnabled ? { opacity: 1 } : undefined}
+              initial={motionEnabled ? { opacity: 0, y: 20 } : false}
+              animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
               transition={motionEnabled ? { duration: 0.9, delay: 0.35, ease } : undefined}
             >
               <div
-                className={`w-[258px] rounded-[24px] border border-white/[0.1] bg-[rgba(8,6,22,0.84)] p-5 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-up' : ''}`}
-                style={{ boxShadow: '0 32px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+                className={`w-[268px] rounded-[24px] border border-violet-200/70 bg-white/92 p-5 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-up' : ''}`}
+                style={{
+                  boxShadow:
+                    '0 32px 80px -20px rgba(124,58,237,0.32), 0 8px 22px -8px rgba(124,58,237,0.18), inset 0 1px 0 rgba(255,255,255,0.95)',
+                }}
               >
                 <div
                   className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-[24px]"
-                  style={{ background: 'linear-gradient(90deg, transparent 10%, rgba(167,139,250,0.65) 50%, transparent 90%)' }}
+                  style={{ background: 'linear-gradient(90deg, transparent 8%, rgba(124,58,237,0.7) 50%, transparent 92%)' }}
                 />
                 <div className="mb-5 flex items-center gap-3">
                   <div
-                    className="flex h-10 w-10 items-center justify-center rounded-[14px]"
-                    style={{ background: 'linear-gradient(135deg, #7c3aed, #d946ef)', boxShadow: '0 8px 24px rgba(124,58,237,0.42)' }}
+                    className="flex h-11 w-11 items-center justify-center rounded-[14px]"
+                    style={{
+                      background: 'linear-gradient(135deg, #7c3aed, #c026d3)',
+                      boxShadow: '0 10px 28px -8px rgba(124,58,237,0.55)',
+                    }}
                   >
-                    <Sparkles className="h-5 w-5 text-white" strokeWidth={1.9} />
+                    <Sparkles className="h-5 w-5 text-white" strokeWidth={2.0} />
                   </div>
                   <div>
-                    <div className="text-[9.5px] font-semibold uppercase tracking-[0.2em] text-violet-300/65">For Clients</div>
-                    <div className="text-[13px] font-bold text-white">Browse & Book</div>
+                    <div className="text-[9.5px] font-semibold uppercase tracking-[0.2em] text-violet-600">For Clients</div>
+                    <div className="text-[13.5px] font-bold" style={{ color: '#1a0b3d' }}>Browse &amp; Book</div>
                   </div>
                 </div>
                 <div className="space-y-2">
                   {['LED Screens & Displays', 'Games & Activations', 'Live Production'].map((item) => (
                     <div
                       key={item}
-                      className="flex items-center gap-2.5 rounded-[11px] border border-white/[0.06] bg-white/[0.04] px-3 py-2"
+                      className="flex items-center gap-2.5 rounded-[12px] border border-violet-200/60 bg-violet-50/55 px-3 py-2.5"
                     >
                       <div
-                        className="h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400"
-                        style={{ boxShadow: '0 0 7px rgba(34,211,238,0.85)' }}
+                        className="h-1.5 w-1.5 shrink-0 rounded-full bg-violet-500"
+                        style={{ boxShadow: '0 0 7px rgba(168,85,247,0.85)' }}
                       />
-                      <span className="text-[11px] text-white/62">{item}</span>
+                      <span className="text-[11.5px] font-medium" style={{ color: '#3d2370' }}>{item}</span>
                     </div>
                   ))}
                 </div>
@@ -304,28 +336,39 @@ export default function Hero() {
             {/* Card 2: Stats – lower right */}
             <motion.div
               className="absolute bottom-[6%] right-[8%]"
-              initial={motionEnabled ? { opacity: 0 } : false}
-              animate={motionEnabled ? { opacity: 1 } : undefined}
+              initial={motionEnabled ? { opacity: 0, y: 20 } : false}
+              animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
               transition={motionEnabled ? { duration: 0.9, delay: 0.55, ease } : undefined}
             >
               <div
-                className={`w-[200px] rounded-[20px] border border-cyan-400/[0.12] bg-[rgba(5,20,32,0.82)] p-4 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-down' : ''}`}
-                style={{ boxShadow: '0 20px 56px rgba(0,0,0,0.48), inset 0 1px 0 rgba(34,211,238,0.1)' }}
+                className={`w-[210px] rounded-[20px] border border-fuchsia-200/70 bg-white/92 p-4 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-down' : ''}`}
+                style={{
+                  boxShadow:
+                    '0 22px 56px -16px rgba(192,38,211,0.28), 0 6px 18px -6px rgba(124,58,237,0.18), inset 0 1px 0 rgba(255,255,255,0.95)',
+                }}
               >
                 <div
                   className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-[20px]"
-                  style={{ background: 'linear-gradient(90deg, transparent 10%, rgba(34,211,238,0.55) 50%, transparent 90%)' }}
+                  style={{ background: 'linear-gradient(90deg, transparent 8%, rgba(192,38,211,0.6) 50%, transparent 92%)' }}
                 />
-                <div className="mb-4 text-[9px] font-semibold uppercase tracking-[0.22em] text-cyan-300/58">
+                <div className="mb-4 text-[9px] font-semibold uppercase tracking-[0.22em] text-fuchsia-600">
                   Platform Stats
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   {heroStats.map(stat => (
                     <div key={stat.label} className="text-center">
-                      <div className="font-display text-[1.2rem] font-black leading-none tracking-[-0.06em] text-white">
+                      <div
+                        className="font-display text-[1.2rem] font-black leading-none tracking-[-0.06em]"
+                        style={{
+                          background: 'linear-gradient(135deg, #1a0b3d 0%, #7c3aed 100%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                        }}
+                      >
                         {stat.value}
                       </div>
-                      <div className="mt-1 text-[8px] uppercase tracking-[0.12em] text-violet-300/55">
+                      <div className="mt-1 text-[8px] uppercase tracking-[0.12em] text-violet-600/80">
                         {stat.label}
                       </div>
                     </div>
@@ -337,39 +380,45 @@ export default function Hero() {
             {/* Card 3: For Providers – middle left */}
             <motion.div
               className="absolute left-0 top-[36%] hidden xl:block"
-              initial={motionEnabled ? { opacity: 0 } : false}
-              animate={motionEnabled ? { opacity: 1 } : undefined}
+              initial={motionEnabled ? { opacity: 0, y: 20 } : false}
+              animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
               transition={motionEnabled ? { duration: 0.9, delay: 0.72, ease } : undefined}
             >
               <div
-                className={`w-[226px] rounded-[20px] border border-white/[0.08] bg-[rgba(6,8,22,0.8)] p-4 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-up-sm' : ''}`}
-                style={{ boxShadow: '0 20px 52px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.04)' }}
+                className={`w-[236px] rounded-[20px] border border-violet-200/70 bg-white/92 p-4 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-up-sm' : ''}`}
+                style={{
+                  boxShadow:
+                    '0 22px 52px -16px rgba(124,58,237,0.28), 0 6px 18px -6px rgba(124,58,237,0.16), inset 0 1px 0 rgba(255,255,255,0.95)',
+                }}
               >
                 <div
                   className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-[20px]"
-                  style={{ background: 'linear-gradient(90deg, transparent 10%, rgba(167,139,250,0.45) 50%, transparent 90%)' }}
+                  style={{ background: 'linear-gradient(90deg, transparent 8%, rgba(168,85,247,0.55) 50%, transparent 92%)' }}
                 />
                 <div className="mb-3 flex items-center gap-2.5">
                   <div
-                    className="flex h-9 w-9 items-center justify-center rounded-[12px]"
-                    style={{ background: 'linear-gradient(135deg, #06b6d4, #7c3aed)', boxShadow: '0 6px 18px rgba(6,182,212,0.38)' }}
+                    className="flex h-10 w-10 items-center justify-center rounded-[12px]"
+                    style={{
+                      background: 'linear-gradient(135deg, #a855f7, #7c3aed)',
+                      boxShadow: '0 8px 22px -6px rgba(168,85,247,0.55)',
+                    }}
                   >
-                    <Building2 className="h-4 w-4 text-white" strokeWidth={1.9} />
+                    <Building2 className="h-4 w-4 text-white" strokeWidth={2.0} />
                   </div>
                   <div>
-                    <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-300/65">For Providers</div>
-                    <div className="text-[12px] font-bold text-white">Grow with Us</div>
+                    <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-600">For Providers</div>
+                    <div className="text-[12.5px] font-bold" style={{ color: '#1a0b3d' }}>Grow with Us</div>
                   </div>
                 </div>
-                <p className="text-[11px] leading-[1.65] text-white/48">
+                <p className="text-[11.5px] leading-[1.65]" style={{ color: 'rgba(61, 35, 112, 0.7)' }}>
                   Showcase your services and receive inquiries from premium event organizers.
                 </p>
                 <div className="mt-3 flex items-center gap-2">
                   <div
-                    className="h-2 w-2 rounded-full bg-green-400"
-                    style={{ boxShadow: '0 0 7px rgba(74,222,128,0.85)' }}
+                    className="h-2 w-2 rounded-full bg-emerald-500"
+                    style={{ boxShadow: '0 0 8px rgba(16,185,129,0.85)' }}
                   />
-                  <span className="text-[10px] font-medium text-green-400/78">30+ Active Vendors</span>
+                  <span className="text-[10px] font-semibold text-emerald-600">30+ Active Vendors</span>
                 </div>
               </div>
             </motion.div>

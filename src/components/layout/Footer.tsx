@@ -1,11 +1,10 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { useTheme } from '../../contexts/ThemeContext'
+import { Mail, Phone, Sparkles } from 'lucide-react'
 import { useProductsData } from '../../contexts/DataContext'
 import { social, socialLinks } from '../../data/social'
 
 export default function Footer() {
-  const { isDark } = useTheme()
   const { products } = useProductsData()
 
   const pages = useMemo(
@@ -22,25 +21,23 @@ export default function Footer() {
 
   const topProducts = useMemo(() => (products || []).slice(0, 5), [products])
 
-  const subtle = isDark ? 'text-purple-100/50' : 'text-gray-400'
-  const linkClass = isDark
-    ? 'text-purple-100/70 hover:text-white transition-colors'
-    : 'text-gray-600 hover:text-gray-900 transition-colors'
+  const subtle = 'text-violet-600/65'
+  const linkClass = 'text-ink-700/85 hover:text-violet-700 transition-colors'
 
   return (
-    <footer className="relative pb-5 pt-5 sm:pb-4 sm:pt-4" role="contentinfo" aria-label="Site footer">
+    <footer className="relative pb-6 pt-6 sm:pb-5 sm:pt-5" role="contentinfo" aria-label="Site footer">
       <div className="site-container">
-        <div className="section-shell px-4 py-5 sm:px-5 lg:px-6 lg:py-6">
-          <div className="relative grid gap-6 md:grid-cols-2 lg:grid-cols-[1.1fr_0.7fr_0.7fr_0.9fr]">
+        <div className="section-shell px-5 py-6 sm:px-6 lg:px-8 lg:py-8">
+          <div className="relative grid gap-7 md:grid-cols-2 lg:grid-cols-[1.1fr_0.7fr_0.7fr_0.9fr]">
             {/* Brand */}
             <div className="max-w-md">
               <div className="flex items-center gap-3">
-                <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-[14px] border border-white/14 bg-[linear-gradient(145deg,#7c3aed_0%,#d946ef_48%,#22d3ee_115%)] shadow-md">
-                  <div className="absolute inset-x-2 top-1.5 h-2.5 rounded-full bg-white/18 blur-sm" />
-                  <span className="relative text-[10.5px] font-black tracking-[0.12em] text-white">Ev</span>
+                <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-[14px] border border-white/30 bg-[linear-gradient(145deg,#7c3aed_0%,#a855f7_48%,#c026d3_115%)] shadow-[0_12px_32px_-6px_rgba(124,58,237,0.55)]">
+                  <div className="absolute inset-x-2 top-1.5 h-3 rounded-full bg-white/30 blur-sm" />
+                  <span className="relative text-[11px] font-black tracking-[0.12em] text-white">Ev</span>
                 </div>
                 <div className="leading-none">
-                  <div className={`font-display text-[13px] font-bold tracking-[-0.01em] ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  <div className="font-display text-[14px] font-bold tracking-[-0.01em]" style={{ color: '#1a0b3d' }}>
                     Eventies
                   </div>
                   <div className={`mt-[3px] text-[9px] uppercase tracking-[0.18em] ${subtle}`}>
@@ -48,18 +45,26 @@ export default function Footer() {
                   </div>
                 </div>
               </div>
-              <p className={`mt-3 text-[12.5px] leading-6 ${isDark ? 'text-purple-100/60' : 'text-gray-500'}`}>
-                A premium marketplace for discovering, comparing, and booking trusted
-                event services — from first visit to final inquiry.
+              <p className="mt-4 text-[13px] leading-[1.7]" style={{ color: 'rgba(61, 35, 112, 0.78)' }}>
+                A premium marketplace for discovering, comparing, and booking trusted event services
+                — from first visit to final inquiry.
               </p>
+
+              {/* Subtle accent */}
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-violet-200/70 bg-violet-50/70 px-3 py-1.5">
+                <Sparkles className="h-3 w-3 text-violet-600" strokeWidth={2.4} />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-700">
+                  Trusted by 30+ vendors
+                </span>
+              </div>
             </div>
 
             {/* Navigation */}
             <div>
-              <div className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${subtle}`}>
+              <div className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${subtle}`}>
                 Navigate
               </div>
-              <div className="mt-3 flex flex-col gap-2">
+              <div className="mt-4 flex flex-col gap-2.5">
                 {pages.map((item) => (
                   <Link key={item.to} to={item.to} className={`text-[12.5px] font-medium ${linkClass}`}>
                     {item.label}
@@ -70,10 +75,10 @@ export default function Footer() {
 
             {/* Featured */}
             <div>
-              <div className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${subtle}`}>
+              <div className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${subtle}`}>
                 Featured
               </div>
-              <div className="mt-3 flex flex-col gap-2">
+              <div className="mt-4 flex flex-col gap-2.5">
                 {topProducts.map((item) => (
                   <Link
                     key={item.slug}
@@ -88,34 +93,40 @@ export default function Footer() {
 
             {/* Contact */}
             <div>
-              <div className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${subtle}`}>
+              <div className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${subtle}`}>
                 Connect
               </div>
-              <div className="mt-3 space-y-3">
-                <div>
-                  <div className={`text-[10px] uppercase tracking-[0.16em] ${subtle}`}>Email</div>
-                  <a href={`mailto:${social.email}`} className={`mt-1 block text-[13px] font-medium ${linkClass}`}>
-                    {social.email}
-                  </a>
+              <div className="mt-4 space-y-3.5">
+                <div className="flex items-start gap-2.5">
+                  <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-[10px] border border-violet-200/70 bg-violet-50/80">
+                    <Mail className="h-3.5 w-3.5 text-violet-600" strokeWidth={2.2} />
+                  </div>
+                  <div>
+                    <div className={`text-[10px] uppercase tracking-[0.16em] ${subtle}`}>Email</div>
+                    <a href={`mailto:${social.email}`} className={`mt-0.5 block text-[12.5px] font-medium ${linkClass}`}>
+                      {social.email}
+                    </a>
+                  </div>
                 </div>
-                <div>
-                  <div className={`text-[10px] uppercase tracking-[0.16em] ${subtle}`}>Phone</div>
-                  <a href={`tel:${social.phone}`} className={`mt-1 block text-[13px] font-medium ${linkClass}`}>
-                    {social.phoneFormatted}
-                  </a>
+                <div className="flex items-start gap-2.5">
+                  <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-[10px] border border-violet-200/70 bg-violet-50/80">
+                    <Phone className="h-3.5 w-3.5 text-violet-600" strokeWidth={2.2} />
+                  </div>
+                  <div>
+                    <div className={`text-[10px] uppercase tracking-[0.16em] ${subtle}`}>Phone</div>
+                    <a href={`tel:${social.phone}`} className={`mt-0.5 block text-[12.5px] font-medium ${linkClass}`}>
+                      {social.phoneFormatted}
+                    </a>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 pt-1">
                   {socialLinks.map((item) => (
                     <a
                       key={item.platform}
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-[11px] font-medium transition-colors ${
-                        isDark
-                          ? 'border-white/8 text-purple-100/60 hover:border-white/16 hover:text-white'
-                          : 'border-gray-200 text-gray-500 hover:border-violet-300 hover:text-gray-900'
-                      }`}
+                      className="inline-flex items-center rounded-lg border border-violet-200/70 bg-white/80 px-3 py-1.5 text-[10.5px] font-semibold tracking-wide text-violet-700 transition-all hover:border-violet-400/85 hover:bg-violet-50/80 hover:text-violet-900 hover:shadow-[0_4px_12px_-4px_rgba(124,58,237,0.22)]"
                       aria-label={`Follow us on ${item.platform}`}
                     >
                       {item.platform}
@@ -126,10 +137,14 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className={`relative mt-6 border-t pt-4 ${isDark ? 'border-white/8' : 'border-violet-200/60'}`}>
-            <p className={`text-[10px] uppercase tracking-[0.14em] ${subtle}`}>
+          <div className="relative mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-violet-100/85 pt-5">
+            <p className={`text-[10px] uppercase tracking-[0.16em] ${subtle}`}>
               &copy; {new Date().getFullYear()} Eventies &middot; Premium event services marketplace
             </p>
+            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-600/70">
+              <span className="h-1.5 w-1.5 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(168,85,247,0.7)]" />
+              Made in Jordan
+            </div>
           </div>
         </div>
       </div>
