@@ -19,6 +19,20 @@ function slugify(input: string) {
     .replace(/(^-|-$)/g, '')
 }
 
+// Resolve a product slug → uuid so writes can populate the parts.product_id FK.
+// Returns null if the slug is empty or the product is missing.
+async function resolveProductIdBySlug(slug: string | null | undefined): Promise<string | null> {
+  if (!slug) return null
+  const { data, error } = await supabase
+    .from('products')
+    .select('id')
+    .eq('slug', slug)
+    .maybeSingle()
+
+  if (error || !data) return null
+  return (data as { id: string }).id
+}
+
 function dbToApp(row: PartRow): ProductPart {
   return {
     id: row.id,
@@ -32,7 +46,7 @@ function dbToApp(row: PartRow): ProductPart {
   }
 }
 
-function appToDb(p: ProductPart): PartInsert {
+function buildBasePayload(p: ProductPart): PartInsert {
   const safeSlug = slugify(p.name) || `part-${Date.now()}`
   return {
     title: p.name,
@@ -73,7 +87,8 @@ export async function getByProduct(productSlug: string): Promise<ProductPart[]> 
 
 export async function create(part: ProductPart): Promise<ProductPart> {
   ensureSupabase()
-  const payload = appToDb(part)
+  const productId = await resolveProductIdBySlug(part.productSlug)
+  const payload: PartInsert = { ...buildBasePayload(part), product_id: productId }
 
   const { data, error } = await supabase
     .from('parts')
@@ -92,7 +107,10 @@ export async function update(id: string, part: Partial<ProductPart>): Promise<Pr
   const dbData: PartUpdate = {}
 
   if (part.name !== undefined) dbData.title = part.name
-  if (part.productSlug !== undefined) dbData.product_slug = part.productSlug
+  if (part.productSlug !== undefined) {
+    dbData.product_slug = part.productSlug
+    dbData.product_id = await resolveProductIdBySlug(part.productSlug)
+  }
   if (part.description !== undefined) dbData.description = part.description || null
   if (part.price !== undefined) dbData.price = part.price
   if (part.currency !== undefined) dbData.currency = part.currency

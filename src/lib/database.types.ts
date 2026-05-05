@@ -44,7 +44,14 @@ export interface Database {
           avatar_seed?: string | null
           avatar_options?: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'profiles_id_fkey'
+            columns: ['id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          }
+        ]
       }
 
       categories: {
@@ -146,6 +153,7 @@ export interface Database {
           price: number | null
           is_active: boolean
           created_at: string
+          product_id: string | null
           product_slug: string | null
           currency: string | null
           image: string | null
@@ -159,6 +167,7 @@ export interface Database {
           price?: number | null
           is_active?: boolean
           created_at?: string
+          product_id?: string | null
           product_slug?: string | null
           currency?: string | null
           image?: string | null
@@ -170,12 +179,20 @@ export interface Database {
           description?: string | null
           price?: number | null
           is_active?: boolean
+          product_id?: string | null
           product_slug?: string | null
           currency?: string | null
           image?: string | null
           in_stock?: boolean | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'parts_product_id_fkey'
+            columns: ['product_id']
+            referencedRelation: 'products'
+            referencedColumns: ['id']
+          }
+        ]
       }
 
       products: {
@@ -312,6 +329,7 @@ export interface Database {
             name: string
             email: string
             phone: string
+            product_id: string | null
             product_slug: string | null
             city: string
             address: string
@@ -324,6 +342,7 @@ export interface Database {
             name: string
             email: string
             phone: string
+            product_id?: string | null
             product_slug?: string | null
             city?: string
             address?: string
@@ -335,19 +354,27 @@ export interface Database {
           name?: string
           email?: string
           phone?: string
+          product_id?: string | null
           product_slug?: string
           city?: string
           address?: string
           message?: string
           status?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'contact_submissions_product_id_fkey'
+            columns: ['product_id']
+            referencedRelation: 'products'
+            referencedColumns: ['id']
+          }
+        ]
       }
 
       admin_logs: {
         Row: {
           id: string
-          admin_id: string
+          admin_id: string | null
           admin_name: string
           admin_email: string
           action: string
@@ -359,7 +386,7 @@ export interface Database {
         }
         Insert: {
           id?: string
-          admin_id: string
+          admin_id?: string | null
           admin_name: string
           admin_email: string
           action: string
@@ -370,6 +397,7 @@ export interface Database {
           created_at?: string
         }
         Update: {
+          admin_id?: string | null
           admin_name?: string
           admin_email?: string
           action?: string
@@ -378,7 +406,14 @@ export interface Database {
           entity_name?: string
           details?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'admin_logs_admin_id_fkey'
+            columns: ['admin_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
+        ]
       }
 
       rental_requests: {

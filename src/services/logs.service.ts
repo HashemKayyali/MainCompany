@@ -8,7 +8,7 @@ type AdminLogInsert = Database['public']['Tables']['admin_logs']['Insert']
 
 export interface AdminLog extends AvatarFields {
   id: string
-  admin_id: string
+  admin_id: string | null
   admin_name: string
   admin_email: string
   action: 'create' | 'update' | 'delete'
@@ -64,11 +64,13 @@ export async function getAllLogs(): Promise<AdminLog[]> {
     }
 
     const logs = (data || []).map(mapAdminLog)
-    const avatarMap = await fetchProfileAvatarMap(logs.map(log => log.admin_id))
+    const avatarMap = await fetchProfileAvatarMap(
+      logs.map(log => log.admin_id).filter((id): id is string => !!id)
+    )
 
     return logs.map(log => ({
       ...log,
-      ...(avatarMap[log.admin_id] || {}),
+      ...((log.admin_id && avatarMap[log.admin_id]) || {}),
     }))
   } catch (error) {
     console.warn('[Logs] Failed to fetch logs:', error)

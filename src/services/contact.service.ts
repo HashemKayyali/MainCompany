@@ -9,6 +9,7 @@ export interface ContactSubmission {
   name: string
   email: string
   phone: string
+  productId: string | null
   productSlug: string | null
   city: string
   address: string
@@ -23,12 +24,25 @@ function ensureSupabase() {
   }
 }
 
+async function resolveProductIdBySlug(slug: string | null | undefined): Promise<string | null> {
+  if (!slug) return null
+  const { data, error } = await supabase
+    .from('products')
+    .select('id')
+    .eq('slug', slug)
+    .maybeSingle()
+
+  if (error || !data) return null
+  return (data as { id: string }).id
+}
+
 function dbToApp(row: ContactSubmissionRow): ContactSubmission {
   return {
     id: row.id,
     name: row.name,
     email: row.email,
     phone: row.phone,
+    productId: row.product_id ?? null,
     productSlug: row.product_slug,
     city: row.city,
     address: row.address,
@@ -62,15 +76,17 @@ export async function create(submission: {
 }): Promise<ContactSubmission> {
   ensureSupabase()
 
+  const productId = await resolveProductIdBySlug(submission.productSlug)
+
   const payload: ContactInsert = {
     name: submission.name,
     email: submission.email,
     phone: submission.phone,
+    product_id: productId,
     product_slug: submission.productSlug || null,
     city: submission.city,
     address: submission.address,
     message: submission.message,
-    // status + created_at عندك إلهم defaults بالـ DB (حسب schema)
   }
 
   const { data, error } = await supabase
