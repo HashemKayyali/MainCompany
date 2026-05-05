@@ -1,4 +1,22 @@
+# Environment files
 .env
 .env.*
-node_modules
-dist
+!.env.example
+
+# Logs
+*.log
+.vite-dev.*.log
+dev-server.*.log
+preview.log
+
+# Archives
+*.zip
+
+# Local / generated files
+treeStructure.txt
+.claude/
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
