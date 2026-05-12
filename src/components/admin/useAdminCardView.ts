@@ -37,7 +37,14 @@ function readStoredView(storageKey: string, fallback: AdminCardView): AdminCardV
 
 export function getAdminCardsLayoutClass(view: AdminCardView) {
   if (view === 'list') return 'flex flex-col gap-2.5'
-  return 'grid grid-cols-1 gap-3 min-[560px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 min-[1760px]:grid-cols-6'
+  // Card grid density:
+  //  - mobile (<640): 1 col
+  //  - sm (>=640): 2 cols
+  //  - lg (>=1024): 2 cols (avoid squeezing 3 narrow cards in a 1024-wide viewport)
+  //  - xl (>=1280): 3 cols
+  //  - 2xl (>=1536): 4 cols
+  //  - ultrawide (>=1760): 4 cols (kept; 5+ makes cards too small for slug/products boxes)
+  return 'grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'
 }
 
 export function getAdminEntityVariant(view: AdminCardView): 'grid' | 'list' {

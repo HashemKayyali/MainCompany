@@ -9,40 +9,45 @@
     --app-header-gap: clamp(0.75rem, 1.6vw, 1.25rem);
 
     /* ─── Brand palette: Purple + White (light-only) ─── */
-    --brand-50:  #faf6ff;
-    --brand-100: #f1e8ff;
-    --brand-200: #e3d2ff;
-    --brand-300: #cdb1ff;
-    --brand-400: #b385ff;
-    --brand-500: #9a5cff;
-    --brand-600: #7c3aed;
-    --brand-700: #6d28d9;
-    --brand-800: #5b21b6;
-    --brand-900: #3b0e7c;
-    --brand-950: #1f0658;
+    /* Slightly more saturated and richer than the previous wash. */
+    --brand-50:  #f7f1ff;
+    --brand-100: #ecdcff;
+    --brand-200: #d8bdff;
+    --brand-300: #bb96ff;
+    --brand-400: #9d6bff;
+    --brand-500: #8344f5;
+    --brand-600: #7126e3;
+    --brand-700: #5d18c4;
+    --brand-800: #4912a0;
+    --brand-900: #2e0a72;
+    --brand-950: #190453;
 
-    --ink-900: #1a0b3d;
-    --ink-800: #2a1659;
-    --ink-700: #3d2370;
-    --ink-600: #5b3aa3;
-    --ink-500: #7a5fc2;
-    --ink-400: #9d83d6;
-    --ink-300: #c2afe6;
-    --ink-200: #ddd2f0;
-    --ink-100: #efe8f8;
+    /* Ink scale — deeper, navy-leaning purples for crisp text on lavender. */
+    --ink-900: #140832;   /* primary headings & critical text */
+    --ink-800: #211049;   /* strong body */
+    --ink-700: #31195f;   /* body / labels */
+    --ink-600: #4a2c8f;   /* secondary */
+    --ink-500: #6647b3;   /* tertiary */
+    --ink-400: #8c70cf;   /* muted */
+    --ink-300: #b59ce0;
+    --ink-200: #d4c4ec;
+    --ink-100: #ece2f6;
 
-    --bg-base:    #fbf8ff;
-    --bg-soft:    #f4eeff;
-    --bg-mid:     #ece2ff;
+    /* Background scale: still soft, but more confident lavender. */
+    --bg-base:    #f8f3ff;
+    --bg-soft:    #efe5ff;
+    --bg-mid:     #e4d3ff;
     --surface:    #ffffff;
-    --surface-2:  #fbf7ff;
+    --surface-2:  #fbf6ff;
+    --border-strong: rgba(113, 38, 227, 0.22);
+    --border-soft:   rgba(113, 38, 227, 0.14);
 
-    --shadow-violet-sm: 0 2px 8px rgba(124, 58, 237, 0.06);
-    --shadow-violet-md: 0 12px 32px -10px rgba(124, 58, 237, 0.18);
-    --shadow-violet-lg: 0 24px 60px -16px rgba(124, 58, 237, 0.28);
-    --shadow-violet-xl: 0 36px 80px -20px rgba(124, 58, 237, 0.32);
+    --shadow-violet-sm: 0 2px 10px rgba(89, 23, 196, 0.08);
+    --shadow-violet-md: 0 14px 36px -12px rgba(89, 23, 196, 0.22);
+    --shadow-violet-lg: 0 26px 68px -18px rgba(89, 23, 196, 0.32);
+    --shadow-violet-xl: 0 40px 90px -22px rgba(89, 23, 196, 0.38);
 
-    --ring-violet: 0 0 0 3px rgba(124, 58, 237, 0.16);
+    --ring-violet: 0 0 0 3px rgba(113, 38, 227, 0.22);
   }
 
   @media (min-width: 640px) {
@@ -76,9 +81,9 @@
     overflow-x: clip;
     background-color: var(--bg-base);
     background-image:
-      radial-gradient(ellipse 80% 50% at 14% -4%, rgba(124, 58, 237, 0.10) 0%, transparent 64%),
-      radial-gradient(ellipse 60% 40% at 92% 12%, rgba(168, 85, 247, 0.08) 0%, transparent 60%),
-      radial-gradient(ellipse 70% 45% at 50% 110%, rgba(196, 165, 255, 0.10) 0%, transparent 64%);
+      radial-gradient(ellipse 80% 50% at 14% -4%, rgba(113, 38, 227, 0.14) 0%, transparent 64%),
+      radial-gradient(ellipse 60% 40% at 92% 12%, rgba(168, 85, 247, 0.11) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 45% at 50% 110%, rgba(180, 145, 255, 0.13) 0%, transparent 64%);
     color: var(--ink-900);
   }
 
@@ -169,22 +174,22 @@
   /* ─── Glass surface ─── */
   .glass {
     border-radius: 18px;
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(124, 58, 237, 0.12);
-    backdrop-filter: blur(14px) saturate(1.18);
-    -webkit-backdrop-filter: blur(14px) saturate(1.18);
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(113, 38, 227, 0.18);
+    backdrop-filter: blur(16px) saturate(1.22);
+    -webkit-backdrop-filter: blur(16px) saturate(1.22);
     box-shadow:
-      0 1px 3px rgba(30, 27, 75, 0.04),
-      0 8px 28px rgba(124, 58, 237, 0.07);
+      0 1px 3px rgba(20, 8, 50, 0.05),
+      0 10px 32px rgba(89, 23, 196, 0.11);
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .glass:hover {
-    border-color: rgba(124, 58, 237, 0.26);
-    background: rgba(255, 255, 255, 0.86);
+    border-color: rgba(113, 38, 227, 0.34);
+    background: rgba(255, 255, 255, 0.95);
     box-shadow:
-      0 14px 38px rgba(124, 58, 237, 0.14),
-      0 1px 3px rgba(30, 27, 75, 0.05);
+      0 16px 42px rgba(89, 23, 196, 0.18),
+      0 1px 3px rgba(20, 8, 50, 0.06);
   }
 
   /* ─── Gradient text ─── */
@@ -231,10 +236,10 @@
   .section-label {
     font-family: 'Alexandria', system-ui, sans-serif;
     font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
+    font-weight: 800;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--brand-700);
+    color: var(--brand-800);
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -242,10 +247,10 @@
 
   .section-label::before {
     content: '';
-    width: 22px;
-    height: 1.5px;
+    width: 24px;
+    height: 2px;
     border-radius: 2px;
-    background: linear-gradient(90deg, var(--brand-600), var(--brand-400));
+    background: linear-gradient(90deg, var(--brand-700), var(--brand-500));
   }
 
   /* ─── Section title ─── */
@@ -265,11 +270,11 @@
     overflow: visible;
     border-radius: 28px;
     isolation: isolate;
-    border: 1px solid rgba(124, 58, 237, 0.10);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(252, 248, 255, 0.94) 100%);
+    border: 1px solid rgba(113, 38, 227, 0.16);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 245, 255, 0.96) 100%);
     box-shadow:
-      0 24px 60px -24px rgba(124, 58, 237, 0.18),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      0 26px 70px -26px rgba(89, 23, 196, 0.24),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
   }
@@ -280,8 +285,8 @@
     inset: 0;
     border-radius: inherit;
     background:
-      radial-gradient(50% 70% at 0% 0%, rgba(168, 85, 247, 0.07) 0%, transparent 60%),
-      radial-gradient(40% 60% at 100% 100%, rgba(124, 58, 237, 0.05) 0%, transparent 60%);
+      radial-gradient(50% 70% at 0% 0%, rgba(168, 85, 247, 0.10) 0%, transparent 60%),
+      radial-gradient(40% 60% at 100% 100%, rgba(113, 38, 227, 0.08) 0%, transparent 60%);
     pointer-events: none;
     z-index: -1;
   }
@@ -290,18 +295,18 @@
   .premium-card {
     border-radius: 22px;
     background: #ffffff;
-    border: 1px solid rgba(124, 58, 237, 0.10);
+    border: 1px solid rgba(113, 38, 227, 0.16);
     box-shadow:
-      0 2px 6px rgba(30, 27, 75, 0.04),
-      0 14px 40px -12px rgba(124, 58, 237, 0.10);
+      0 2px 6px rgba(20, 8, 50, 0.05),
+      0 16px 44px -14px rgba(89, 23, 196, 0.16);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .premium-card:hover {
-    border-color: rgba(124, 58, 237, 0.28);
+    border-color: rgba(113, 38, 227, 0.36);
     box-shadow:
-      0 18px 48px -12px rgba(124, 58, 237, 0.20),
-      0 2px 6px rgba(30, 27, 75, 0.04);
+      0 22px 54px -14px rgba(89, 23, 196, 0.26),
+      0 2px 6px rgba(20, 8, 50, 0.05);
     transform: translateY(-2px);
   }
 
@@ -470,27 +475,27 @@
     justify-content: center;
     gap: 8px;
     min-height: 44px;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 11.5px;
     font-family: 'Alexandria', sans-serif;
     padding: 10px 20px;
     border-radius: 14px;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     letter-spacing: 0.02em;
-    color: var(--brand-700);
-    border: 1px solid rgba(124, 58, 237, 0.22);
-    background: rgba(255, 255, 255, 0.95);
+    color: var(--brand-800);
+    border: 1px solid rgba(113, 38, 227, 0.32);
+    background: rgba(255, 255, 255, 0.98);
     box-shadow:
-      0 4px 12px -6px rgba(124, 58, 237, 0.14),
+      0 6px 16px -6px rgba(89, 23, 196, 0.18),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
     cursor: pointer;
   }
 
   .btn-outline:hover {
-    border-color: rgba(124, 58, 237, 0.45);
-    color: var(--brand-800);
-    background: rgba(250, 246, 255, 1);
-    box-shadow: 0 8px 22px -6px rgba(124, 58, 237, 0.22);
+    border-color: rgba(113, 38, 227, 0.6);
+    color: var(--brand-900);
+    background: rgba(248, 243, 255, 1);
+    box-shadow: 0 10px 26px -6px rgba(89, 23, 196, 0.28);
     transform: translateY(-1px);
   }
 
@@ -529,23 +534,27 @@
     transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     outline: none;
     background: #ffffff;
-    border: 1px solid rgba(124, 58, 237, 0.14);
+    border: 1px solid rgba(113, 38, 227, 0.22);
     color: var(--ink-900);
   }
 
+  .form-field {
+    color: #0a0419;
+  }
+
   .form-field::placeholder {
-    color: rgba(124, 58, 237, 0.42);
+    color: rgba(33, 16, 73, 0.62);
   }
 
   .form-field:hover {
-    border-color: rgba(124, 58, 237, 0.28);
+    border-color: rgba(113, 38, 227, 0.4);
   }
 
   .form-field:focus {
     border-color: var(--brand-600);
     box-shadow:
-      0 0 0 3px rgba(124, 58, 237, 0.14),
-      0 0 28px rgba(124, 58, 237, 0.08);
+      0 0 0 3px rgba(113, 38, 227, 0.22),
+      0 0 28px rgba(113, 38, 227, 0.12);
     background: #fefcff;
   }
 
@@ -608,18 +617,18 @@
   .card-surface {
     border-radius: 22px;
     background: #ffffff;
-    border: 1px solid rgba(124, 58, 237, 0.10);
+    border: 1px solid rgba(113, 38, 227, 0.16);
     box-shadow:
-      0 2px 6px rgba(30, 27, 75, 0.04),
-      0 14px 38px -14px rgba(124, 58, 237, 0.12);
+      0 2px 6px rgba(20, 8, 50, 0.05),
+      0 16px 42px -14px rgba(89, 23, 196, 0.18);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .card-surface:hover {
-    border-color: rgba(124, 58, 237, 0.26);
+    border-color: rgba(113, 38, 227, 0.36);
     box-shadow:
-      0 22px 56px -14px rgba(124, 58, 237, 0.22),
-      0 2px 6px rgba(30, 27, 75, 0.04);
+      0 24px 60px -14px rgba(89, 23, 196, 0.28),
+      0 2px 6px rgba(20, 8, 50, 0.05);
     transform: translateY(-3px);
   }
 
@@ -632,6 +641,98 @@
 
   .marquee-track:hover {
     animation-play-state: paused;
+  }
+
+  /* ─── Premium range slider (frame editor, etc.) ─── */
+  .frame-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(113, 38, 227, 0.85), rgba(168, 85, 247, 0.7));
+    background-clip: padding-box;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .frame-slider::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(113, 38, 227, 0.18), rgba(168, 85, 247, 0.12));
+  }
+
+  .frame-slider::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(113, 38, 227, 0.18), rgba(168, 85, 247, 0.12));
+  }
+
+  .frame-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    margin-top: -6px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #7126e3 0%, #a855f7 100%);
+    border: 2px solid #ffffff;
+    box-shadow: 0 4px 12px -2px rgba(89, 23, 196, 0.45), 0 0 0 1px rgba(89, 23, 196, 0.25);
+    cursor: grab;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .frame-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #7126e3 0%, #a855f7 100%);
+    border: 2px solid #ffffff;
+    box-shadow: 0 4px 12px -2px rgba(89, 23, 196, 0.45), 0 0 0 1px rgba(89, 23, 196, 0.25);
+    cursor: grab;
+  }
+
+  .frame-slider:hover::-webkit-slider-thumb,
+  .frame-slider:focus-visible::-webkit-slider-thumb {
+    transform: scale(1.08);
+    box-shadow: 0 6px 18px -2px rgba(89, 23, 196, 0.55), 0 0 0 4px rgba(113, 38, 227, 0.18);
+  }
+
+  .frame-slider:hover::-moz-range-thumb,
+  .frame-slider:focus-visible::-moz-range-thumb {
+    transform: scale(1.08);
+    box-shadow: 0 6px 18px -2px rgba(89, 23, 196, 0.55), 0 0 0 4px rgba(113, 38, 227, 0.18);
+  }
+
+  .frame-slider:active::-webkit-slider-thumb {
+    cursor: grabbing;
+  }
+
+  /* ─── Premium floating panel (dropdowns, popovers) ─── */
+  .surface-floating {
+    background: rgba(255, 255, 255, 0.99);
+    border: 1px solid rgba(113, 38, 227, 0.22);
+    box-shadow:
+      0 28px 64px -18px rgba(46, 10, 114, 0.28),
+      0 8px 22px -6px rgba(89, 23, 196, 0.14),
+      0 1px 2px rgba(20, 8, 50, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    backdrop-filter: blur(18px) saturate(1.2);
+  }
+
+  /* ─── Navbar bar surface (over hero / scrolled) ─── */
+  .surface-navbar {
+    background: rgba(255, 255, 255, 0.78);
+    border-bottom: 1px solid rgba(113, 38, 227, 0.16);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+    backdrop-filter: saturate(1.4) blur(14px);
+    box-shadow: 0 1px 0 rgba(113, 38, 227, 0.06), 0 4px 24px rgba(46, 10, 114, 0.06);
+  }
+  .surface-navbar--scrolled {
+    background: rgba(255, 255, 255, 0.92);
+    border-bottom-color: rgba(113, 38, 227, 0.22);
+    box-shadow: 0 2px 24px rgba(46, 10, 114, 0.12);
   }
 
   /* ─── Gradient HR ─── */
@@ -680,6 +781,8 @@
   /* ─── Logo cloud marquee ─── */
   .logo-cloud-track {
     touch-action: pan-y;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 9%, black 91%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, black 9%, black 91%, transparent 100%);
   }
 
   .logo-cloud-row {
@@ -758,29 +861,29 @@
   .auth-card {
     border-radius: 28px;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.94);
-    border: 1px solid rgba(124, 58, 237, 0.14);
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid rgba(113, 38, 227, 0.20);
     box-shadow:
-      0 32px 80px -20px rgba(124, 58, 237, 0.22),
-      0 8px 24px -8px rgba(124, 58, 237, 0.12),
+      0 34px 88px -20px rgba(89, 23, 196, 0.30),
+      0 10px 28px -8px rgba(89, 23, 196, 0.18),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
 
   /* ─── Contact info card ─── */
   .contact-info-card {
     border-radius: 22px;
     background: #ffffff;
-    border: 1px solid rgba(124, 58, 237, 0.10);
-    box-shadow: 0 4px 22px -8px rgba(124, 58, 237, 0.12);
+    border: 1px solid rgba(113, 38, 227, 0.16);
+    box-shadow: 0 6px 24px -8px rgba(89, 23, 196, 0.18);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .contact-info-card:hover {
-    border-color: rgba(124, 58, 237, 0.28);
+    border-color: rgba(113, 38, 227, 0.36);
     transform: translateY(-3px);
-    box-shadow: 0 18px 42px -12px rgba(124, 58, 237, 0.22);
+    box-shadow: 0 22px 48px -12px rgba(89, 23, 196, 0.28);
   }
 
   /* ─── Home section: cosmic dust particle drift (kept for compat) ─── */
@@ -861,4 +964,134 @@
       padding: 1.05rem;
     }
   }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Light-theme text-contrast overrides
+   ─────────────────────────────────────────────────────────────────────────
+   The site is locked to a light color-scheme. Tailwind's medium gray /
+   slate / zinc / neutral / stone text shades (300–500) look washed-out
+   over the lavender background. We remap *only the text utilities* —
+   bg-/border-/divide- variants are untouched — to a deep, near-black ink
+   scale so primary, secondary, and tertiary copy all read crisply.
+
+   The `html` prefix lifts specificity above Tailwind's single-class
+   utilities so source order does not matter.
+   ───────────────────────────────────────────────────────────────────── */
+
+/* True primary text — push to near-black. */
+html .text-gray-900,
+html .text-gray-950,
+html .text-slate-900,
+html .text-slate-950,
+html .text-zinc-900,
+html .text-zinc-950,
+html .text-neutral-900,
+html .text-neutral-950,
+html .text-stone-900,
+html .text-stone-950 {
+  color: #07041a;
+}
+
+/* Strong body / heading aliases. */
+html .text-gray-800,
+html .text-gray-700,
+html .text-slate-800,
+html .text-slate-700,
+html .text-zinc-800,
+html .text-zinc-700,
+html .text-neutral-800,
+html .text-neutral-700,
+html .text-stone-800,
+html .text-stone-700 {
+  color: #110725;
+}
+
+/* Mid grays — the worst offenders for "washed out" copy.
+   Bumped to deep ink for prices, labels, product names, descriptions. */
+html .text-gray-600,
+html .text-slate-600,
+html .text-zinc-600,
+html .text-neutral-600,
+html .text-stone-600 {
+  color: #1a0d3a;
+}
+
+html .text-gray-500,
+html .text-slate-500,
+html .text-zinc-500,
+html .text-neutral-500,
+html .text-stone-500 {
+  color: #211049;
+}
+
+html .text-gray-400,
+html .text-slate-400,
+html .text-zinc-400,
+html .text-neutral-400,
+html .text-stone-400 {
+  color: #31195f;
+}
+
+html .text-gray-300,
+html .text-slate-300,
+html .text-zinc-300,
+html .text-neutral-300,
+html .text-stone-300 {
+  color: #4a2c8f;
+}
+
+/* Hover variants — keep readable when nudged darker. */
+html .hover\:text-gray-900:hover,
+html .hover\:text-slate-900:hover,
+html .hover\:text-zinc-900:hover,
+html .hover\:text-neutral-900:hover,
+html .hover\:text-stone-900:hover {
+  color: #07041a;
+}
+
+html .hover\:text-gray-700:hover,
+html .hover\:text-slate-700:hover,
+html .hover\:text-zinc-700:hover,
+html .hover\:text-neutral-700:hover,
+html .hover\:text-stone-700:hover {
+  color: #110725;
+}
+
+/* Placeholders site-wide: stronger than the original 0.4 alpha defaults. */
+html input::placeholder,
+html textarea::placeholder,
+html select::placeholder {
+  color: rgba(33, 16, 73, 0.62);
+}
+
+/* Native date / time pickers — make their value text crisp. */
+html input[type='date'],
+html input[type='time'],
+html input[type='datetime-local'],
+html input[type='month'],
+html input[type='week'] {
+  color: #07041a;
+  font-weight: 600;
+}
+
+html input[type='date']::-webkit-datetime-edit,
+html input[type='time']::-webkit-datetime-edit,
+html input[type='datetime-local']::-webkit-datetime-edit {
+  color: #07041a;
+}
+
+html input[type='date']::-webkit-datetime-edit-text,
+html input[type='time']::-webkit-datetime-edit-text {
+  color: #211049;
+  padding: 0 2px;
+}
+
+/* Disabled inputs — still readable instead of ghostly. */
+html .form-field:disabled,
+html input:disabled,
+html textarea:disabled,
+html select:disabled {
+  color: #31195f;
+  -webkit-text-fill-color: #31195f;
 }

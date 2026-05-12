@@ -116,10 +116,10 @@ export default function RentalCartPage() {
               >
                 <ShoppingBag size={30} className={isDark ? 'text-violet-300/80' : 'text-violet-400'} />
               </div>
-              <h1 className={`font-display text-[1.85rem] font-black tracking-[-0.04em] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <h1 className={`font-display text-[1.95rem] font-black tracking-[-0.04em] ${isDark ? 'text-white' : 'text-[#07041a]'}`}>
                 Your cart is empty
               </h1>
-              <p className={`mx-auto mt-3 max-w-md text-[0.97rem] leading-[1.72] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              <p className={`mx-auto mt-3 max-w-md text-[0.98rem] font-medium leading-[1.72] ${isDark ? 'text-slate-400' : 'text-[#211049]'}`}>
                 Add event services from the catalog, choose your rental dates, and come back here to continue to checkout.
               </p>
               <div className="mt-8">
@@ -149,10 +149,10 @@ export default function RentalCartPage() {
             <span className="section-label">// Rental Cart</span>
             <div className={`h-px w-8 ${isDark ? 'bg-violet-500/30' : 'bg-violet-300/50'}`} />
           </div>
-          <h1 className={`section-title !text-left ${!isDark ? 'text-gray-900' : ''}`}>
+          <h1 className={`section-title !text-left ${!isDark ? 'text-[#07041a]' : ''}`}>
             Prepare Your <span className="text-glow">Request</span>
           </h1>
-          <p className={`mt-4 max-w-2xl text-[0.97rem] leading-[1.72] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+          <p className={`mt-4 max-w-2xl text-[0.97rem] font-medium leading-[1.72] ${isDark ? 'text-slate-400' : 'text-[#211049]'}`}>
             Set shared event dates for the whole cart, or switch to per-item mode. Availability is checked against your rental range.
           </p>
         </motion.div>
@@ -172,8 +172,8 @@ export default function RentalCartPage() {
             >
               <div className={`border-b px-5 py-4 ${isDark ? 'border-white/[0.07]' : 'border-violet-100/60'}`}>
                 <div className="flex items-center gap-2">
-                  <CalendarDays size={14} className={isDark ? 'text-cyan-400/80' : 'text-violet-500'} />
-                  <span className={`text-[9.5px] font-bold uppercase tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                  <CalendarDays size={14} className={isDark ? 'text-cyan-400/80' : 'text-violet-700'} />
+                  <span className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-[#140832]'}`}>
                     Event Dates
                   </span>
                 </div>
@@ -181,7 +181,7 @@ export default function RentalCartPage() {
 
               <div className="p-5">
                 {/* Toggle buttons */}
-                <div className={`mb-5 grid grid-cols-2 gap-1.5 rounded-[14px] p-1 ${isDark ? 'bg-white/[0.04]' : 'bg-slate-100'}`}>
+                <div className={`mb-5 grid grid-cols-2 gap-1.5 rounded-[14px] p-1 ${isDark ? 'bg-white/[0.04]' : 'bg-violet-50/80 border border-violet-100'}`}>
                   {[
                     { mode: 'shared' as const, label: 'Shared dates for all' },
                     { mode: 'per_item' as const, label: 'Per-item dates' },
@@ -191,14 +191,14 @@ export default function RentalCartPage() {
                       type="button"
                       onClick={() => rentalCart.setMode(mode)}
                       className={cn(
-                        'min-h-[42px] rounded-[11px] px-3 py-2.5 text-[12.5px] font-semibold transition-all duration-250',
+                        'min-h-[42px] rounded-[11px] px-3 py-2.5 text-[12.5px] font-bold transition-all duration-250',
                         rentalCart.mode === mode
                           ? isDark
                             ? 'bg-[linear-gradient(135deg,rgba(124,58,237,0.5),rgba(34,211,238,0.3))] text-white shadow-[0_4px_12px_rgba(0,0,0,0.3)]'
-                            : 'bg-white text-violet-700 shadow-[0_2px_8px_rgba(124,58,237,0.12)]'
+                            : 'bg-white text-[#07041a] shadow-[0_4px_14px_-4px_rgba(89,23,196,0.28)] border border-violet-200'
                           : isDark
                             ? 'text-slate-400 hover:text-white'
-                            : 'text-slate-500 hover:text-slate-700'
+                            : 'text-[#211049] hover:text-[#07041a]'
                       )}
                     >
                       {label}
@@ -210,7 +210,7 @@ export default function RentalCartPage() {
                 {rentalCart.mode === 'shared' && (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <label className={`mb-2 block text-[12px] font-semibold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                      <label className={`mb-2 block text-[12.5px] font-bold ${isDark ? 'text-slate-400' : 'text-[#07041a]'}`}>
                         Start Date
                       </label>
                       <input
@@ -221,7 +221,7 @@ export default function RentalCartPage() {
                       />
                     </div>
                     <div>
-                      <label className={`mb-2 block text-[12px] font-semibold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                      <label className={`mb-2 block text-[12.5px] font-bold ${isDark ? 'text-slate-400' : 'text-[#07041a]'}`}>
                         End Date
                       </label>
                       <input
@@ -254,19 +254,19 @@ export default function RentalCartPage() {
                   className={`overflow-hidden rounded-[22px] ${cardBase}`}
                 >
                   {/* Item header */}
-                  <div className={`flex items-center justify-between border-b px-4 py-3 ${isDark ? 'border-white/[0.07]' : 'border-violet-100/60'}`}>
-                    <span className={`text-[9.5px] font-bold uppercase tracking-[0.2em] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+                  <div className={`flex items-center justify-between border-b px-4 py-3 ${isDark ? 'border-white/[0.07]' : 'border-violet-200/70'}`}>
+                    <span className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? 'text-slate-600' : 'text-[#211049]'}`}>
                       Item {idx + 1} of {rentalCart.items.length}
                     </span>
                     <button
                       type="button"
                       onClick={() => rentalCart.removeItem(item.productSlug)}
                       className={cn(
-                        'inline-flex items-center gap-1.5 rounded-[10px] px-2.5 py-1.5 text-[11px] font-semibold transition-all',
-                        isDark ? 'bg-red-500/[0.10] text-red-400 hover:bg-red-500/[0.16]' : 'bg-red-50 text-red-500 hover:bg-red-100'
+                        'inline-flex items-center gap-1.5 rounded-[10px] px-2.5 py-1.5 text-[11.5px] font-bold transition-all',
+                        isDark ? 'bg-red-500/[0.10] text-red-400 hover:bg-red-500/[0.16]' : 'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800'
                       )}
                     >
-                      <Trash2 size={11} />
+                      <Trash2 size={11} strokeWidth={2.4} />
                       Remove
                     </button>
                   </div>
@@ -290,17 +290,19 @@ export default function RentalCartPage() {
 
                       {/* Product info */}
                       <div className="min-w-0 flex-1">
-                        <h3 className={`font-display text-[1.05rem] font-bold leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        <h3 className={`font-display text-[1.08rem] font-extrabold leading-tight tracking-[-0.02em] ${isDark ? 'text-white' : 'text-[#07041a]'}`}>
                           {item.productTitle}
                         </h3>
-                        <p className={`mt-1 text-[12.5px] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                          {item.unitPrice} {item.currency}/day · minimum {item.minimumRentalDays} day{item.minimumRentalDays !== 1 ? 's' : ''}
+                        <p className={`mt-1 text-[12.5px] font-semibold ${isDark ? 'text-slate-500' : 'text-[#211049]'}`}>
+                          <span className="text-[#07041a] font-bold">{item.unitPrice} {item.currency}/day</span>
+                          <span className="mx-1.5 text-violet-400">·</span>
+                          minimum {item.minimumRentalDays} day{item.minimumRentalDays !== 1 ? 's' : ''}
                         </p>
 
                         {/* Controls */}
                         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                           <div>
-                            <label className={`mb-1.5 block text-[11.5px] font-semibold ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                            <label className={`mb-1.5 block text-[12px] font-bold ${isDark ? 'text-slate-500' : 'text-[#07041a]'}`}>
                               Quantity
                             </label>
                             <input
@@ -313,19 +315,19 @@ export default function RentalCartPage() {
                             />
                           </div>
                           <div>
-                            <label className={`mb-1.5 block text-[11.5px] font-semibold ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                            <label className={`mb-1.5 block text-[12px] font-bold ${isDark ? 'text-slate-500' : 'text-[#07041a]'}`}>
                               Start Date
                             </label>
                             <input
                               type="date"
                               disabled={rentalCart.mode === 'shared'}
-                              className={cn('form-field', rentalCart.mode === 'shared' && 'opacity-50 cursor-not-allowed')}
+                              className={cn('form-field', rentalCart.mode === 'shared' && 'opacity-60 cursor-not-allowed')}
                               value={startDate}
                               onChange={e => rentalCart.setItemDates(item.productSlug, e.target.value, endDate)}
                             />
                           </div>
                           <div>
-                            <label className={`mb-1.5 block text-[11.5px] font-semibold ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                            <label className={`mb-1.5 block text-[12px] font-bold ${isDark ? 'text-slate-500' : 'text-[#07041a]'}`}>
                               End Date
                             </label>
                             <input
@@ -342,19 +344,19 @@ export default function RentalCartPage() {
                         <div className="mt-4 flex flex-wrap items-center gap-2">
                           {/* Days count */}
                           <div
-                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold ${
-                              isDark ? 'border border-white/[0.07] bg-white/[0.04] text-slate-400' : 'border border-slate-200 bg-slate-50 text-slate-500'
+                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11.5px] font-bold ${
+                              isDark ? 'border border-white/[0.07] bg-white/[0.04] text-slate-400' : 'border border-violet-200 bg-violet-50 text-[#140832]'
                             }`}
                           >
-                            <Clock size={11} />
+                            <Clock size={11} strokeWidth={2.4} />
                             {days ? `${days} day${days !== 1 ? 's' : ''}` : 'No dates'}
                           </div>
 
                           {/* Line total */}
                           {days > 0 && (
                             <div
-                              className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-bold ${
-                                isDark ? 'border border-violet-500/20 bg-violet-500/10 text-violet-300' : 'border border-violet-200 bg-violet-50 text-violet-700'
+                              className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11.5px] font-extrabold ${
+                                isDark ? 'border border-violet-500/20 bg-violet-500/10 text-violet-300' : 'border border-violet-300 bg-violet-100/90 text-[#2e0a72]'
                               }`}
                             >
                               {rentalCart.getItemLineTotal(item).toFixed(2)} {item.currency}
@@ -366,17 +368,17 @@ export default function RentalCartPage() {
                             availability ? (
                               <div
                                 className={cn(
-                                  'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold',
+                                  'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11.5px] font-bold',
                                   availOk
-                                    ? isDark ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-400' : 'border border-emerald-200 bg-emerald-50 text-emerald-600'
-                                    : isDark ? 'border border-red-500/20 bg-red-500/10 text-red-400' : 'border border-red-200 bg-red-50 text-red-500'
+                                    ? isDark ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-400' : 'border border-emerald-300 bg-emerald-50 text-emerald-800'
+                                    : isDark ? 'border border-red-500/20 bg-red-500/10 text-red-400' : 'border border-red-300 bg-red-50 text-red-800'
                                 )}
                               >
-                                {availOk ? <CheckCircle2 size={11} /> : <AlertTriangle size={11} />}
+                                {availOk ? <CheckCircle2 size={11} strokeWidth={2.4} /> : <AlertTriangle size={11} strokeWidth={2.4} />}
                                 {availOk ? `${availability.availableQuantity} available` : `Only ${availability.availableQuantity} in stock`}
                               </div>
                             ) : (
-                              <div className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-medium ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+                              <div className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11.5px] font-semibold ${isDark ? 'text-slate-600' : 'text-[#211049]'}`}>
                                 Checking...
                               </div>
                             )
@@ -410,8 +412,8 @@ export default function RentalCartPage() {
             className={`order-first h-fit rounded-[22px] xl:order-none xl:sticky xl:top-[calc(var(--app-navbar-height)+1.5rem)] ${cardBase}`}
           >
             {/* Summary header */}
-            <div className={`border-b px-5 py-4 ${isDark ? 'border-white/[0.07] bg-[linear-gradient(135deg,rgba(124,58,237,0.10),rgba(34,211,238,0.05))]' : 'border-violet-100/60 bg-gradient-to-r from-violet-50/70 to-cyan-50/40'}`}>
-              <span className={`text-[9.5px] font-bold uppercase tracking-[0.2em] ${isDark ? 'text-violet-300/70' : 'text-violet-500'}`}>
+            <div className={`border-b px-5 py-4 ${isDark ? 'border-white/[0.07] bg-[linear-gradient(135deg,rgba(124,58,237,0.10),rgba(34,211,238,0.05))]' : 'border-violet-200/70 bg-gradient-to-r from-violet-100/70 to-fuchsia-50/40'}`}>
+              <span className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? 'text-violet-300/70' : 'text-[#2e0a72]'}`}>
                 Cart Summary
               </span>
             </div>
@@ -419,23 +421,23 @@ export default function RentalCartPage() {
             <div className="p-5">
               {/* Item count */}
               <div className="mb-5 flex items-center justify-between">
-                <span className={`text-[13px] font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                <span className={`text-[13px] font-semibold ${isDark ? 'text-slate-400' : 'text-[#140832]'}`}>
                   {rentalCart.itemCount} item{rentalCart.itemCount !== 1 ? 's' : ''} in cart
                 </span>
-                <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${isDark ? 'bg-violet-500/15 text-violet-300' : 'bg-violet-100 text-violet-600'}`}>
+                <span className={`rounded-full px-2.5 py-1 text-[11.5px] font-extrabold ${isDark ? 'bg-violet-500/15 text-violet-300' : 'bg-violet-200 text-[#2e0a72]'}`}>
                   {rentalCart.itemCount}
                 </span>
               </div>
 
               {/* Total */}
-              <div className={`rounded-[16px] p-4 ${isDark ? 'bg-white/[0.04] border border-white/[0.06]' : 'bg-slate-50 border border-slate-200/60'}`}>
-                <div className={`text-[10.5px] font-bold uppercase tracking-[0.16em] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+              <div className={`rounded-[16px] p-4 ${isDark ? 'bg-white/[0.04] border border-white/[0.06]' : 'bg-violet-50/70 border border-violet-200'}`}>
+                <div className={`text-[10.5px] font-extrabold uppercase tracking-[0.16em] ${isDark ? 'text-slate-600' : 'text-[#2e0a72]'}`}>
                   Estimated Total
                 </div>
-                <div className={`mt-1.5 font-display text-[2.2rem] font-black leading-none tracking-[-0.04em] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <div className={`mt-1.5 font-display text-[2.25rem] font-black leading-none tracking-[-0.04em] ${isDark ? 'text-white' : 'text-[#07041a]'}`}>
                   {rentalCart.grandTotal.toFixed(2)}
                 </div>
-                <div className={`mt-1 text-[11.5px] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+                <div className={`mt-1 text-[11.5px] font-semibold ${isDark ? 'text-slate-600' : 'text-[#211049]'}`}>
                   Based on current day rates
                 </div>
               </div>
@@ -443,10 +445,10 @@ export default function RentalCartPage() {
               {/* Readiness status */}
               <div
                 className={cn(
-                  'mt-4 flex items-start gap-2.5 rounded-[14px] px-3.5 py-3 text-[12px] leading-[1.6]',
+                  'mt-4 flex items-start gap-2.5 rounded-[14px] px-3.5 py-3 text-[12.5px] font-semibold leading-[1.6]',
                   allItemsReady
-                    ? isDark ? 'bg-emerald-500/10 border border-emerald-500/18 text-emerald-300' : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-                    : isDark ? 'bg-amber-500/10 border border-amber-500/18 text-amber-300' : 'bg-amber-50 border border-amber-200 text-amber-700'
+                    ? isDark ? 'bg-emerald-500/10 border border-emerald-500/18 text-emerald-300' : 'bg-emerald-50 border border-emerald-300 text-emerald-900'
+                    : isDark ? 'bg-amber-500/10 border border-amber-500/18 text-amber-300' : 'bg-amber-50 border border-amber-300 text-amber-900'
                 )}
               >
                 {allItemsReady

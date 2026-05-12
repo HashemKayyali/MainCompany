@@ -293,7 +293,7 @@ export default function AdminLayout() {
             className="min-h-0 overflow-y-auto overflow-x-hidden"
             style={{ scrollPaddingTop: 'calc(var(--app-header-offset) + var(--app-header-gap))' }}
           >
-            <div className="mx-auto flex min-h-full w-full max-w-[1300px] flex-col px-4 py-5 sm:px-5 sm:py-6 md:px-6 md:py-7">
+            <div className="mx-auto flex min-h-full w-full max-w-[1680px] flex-col px-4 py-5 sm:px-5 sm:py-6 md:px-6 md:py-7 xl:px-7 2xl:px-8">
               <Outlet />
             </div>
           </main>

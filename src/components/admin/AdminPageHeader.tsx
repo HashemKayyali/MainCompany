@@ -13,7 +13,7 @@ export default function AdminPageHeader({
   const { isDark } = useTheme()
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <div className="min-w-0">
         <div className="flex min-w-0 items-start gap-3.5">
           <span
@@ -31,7 +31,7 @@ export default function AdminPageHeader({
               className={cn(
                 'font-display text-[1.24rem] font-extrabold tracking-[-0.04em] sm:text-[1.42rem]',
                 'lg:text-[1.56rem]',
-                isDark ? 'text-white drop-shadow-[0_6px_18px_rgba(6,12,30,0.45)]' : 'text-gray-950'
+                isDark ? 'text-white drop-shadow-[0_6px_18px_rgba(6,12,30,0.45)]' : 'text-[#07041a]'
               )}
             >
               {title}
@@ -49,7 +49,11 @@ export default function AdminPageHeader({
         </div>
       </div>
 
-      {actions && <div className="flex flex-col gap-2 min-[420px]:flex-row min-[420px]:flex-wrap min-[420px]:items-center">{actions}</div>}
+      {actions && (
+        <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:justify-end sm:gap-2.5">
+          {actions}
+        </div>
+      )}
     </div>
   )
 }

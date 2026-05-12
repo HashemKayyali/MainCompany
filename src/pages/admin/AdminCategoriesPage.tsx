@@ -14,6 +14,7 @@ import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminViewToggle from '../../components/admin/AdminViewToggle'
 import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
+import CategoryTileView from '../../components/home/CategoryTileView'
 import { cn } from '../../utils/cn'
 
 const empty: Category = { id: '', name: '', slug: '', icon: '', description: '', image: '' }
@@ -182,32 +183,23 @@ export default function AdminCategoriesPage() {
     const preview = { ...previewCategory, ...overrides }
     const linkedCount = preview.id ? countForCategory(preview.id) : 0
 
+    // Admin live preview uses the SAME presentational tile that the public
+    // homepage shows (OfferSection → CategoryTileView), so the admin editor
+    // can never drift from the customer-facing category card.
+    //
+    // The outer wrapper is non-interactive (aria-hidden + pointer-events-none)
+    // so hover effects render but clicks never fire while editing.
     return (
-      <div aria-hidden="true" className="mx-auto max-w-[320px] select-none">
-        <AdminEntityCard
-          variant="grid"
-          minHeightClassName="min-h-[216px]"
-          bodyClassName="gap-2 p-3"
-          media={
-            preview.image ? (
-              <div className={cn('aspect-[16/10] h-full w-full overflow-hidden rounded-[20px]', isDark ? 'bg-purple-500/10' : 'bg-gray-50')}>
-                <FramedImage media={preview.image} alt={preview.name} className="h-full w-full" fallbackTransform={{ fit: 'cover' }} />
-              </div>
-            ) : (
-              <div className={cn('flex h-full w-full items-center justify-center rounded-[20px]', isDark ? 'bg-purple-500/10' : 'bg-gray-50')}>
-                <div className={cn('text-[11px] font-mono uppercase tracking-[0.24em]', sub)}>No image</div>
-              </div>
-            )
-          }
-          title={preview.name || 'Category Name'}
-          subtitle={preview.description || undefined}
-          badges={
-            <>
-              <span className={cn('rounded-full border px-3 py-1 text-[11px] font-medium', linkedCount > 0 ? (isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700') : (isDark ? 'border-amber-400/15 bg-amber-400/10 text-amber-200' : 'border-amber-200 bg-amber-50 text-amber-700'))}>
-                {linkedCount > 0 ? 'In use' : 'Unused'}
-              </span>
-            </>
-          }
+      <div
+        aria-hidden="true"
+        className="mx-auto w-full max-w-[280px] select-none pointer-events-none"
+      >
+        <CategoryTileView
+          name={preview.name || 'Category Name'}
+          image={preview.image || undefined}
+          count={linkedCount}
+          active={false}
+          reducedVisualEffects
         />
       </div>
     )
@@ -229,10 +221,10 @@ export default function AdminCategoriesPage() {
 
       <div
         className={cn(
-          'min-h-0 flex flex-1 flex-col rounded-[22px] p-2.5',
+          'min-h-0 flex flex-1 flex-col rounded-[22px] p-3 sm:p-4',
           isDark
             ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(8,11,27,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_28px_90px_-58px_rgba(7,15,36,0.96)]'
-            : 'bg-white ring-1 ring-inset ring-gray-200'
+            : 'bg-white ring-1 ring-inset ring-violet-200/70 shadow-[0_18px_44px_-28px_rgba(89,23,196,0.18)]'
         )}
       >
         {catCards.length === 0 ? (
@@ -247,19 +239,19 @@ export default function AdminCategoriesPage() {
                 <AdminEntityCard
                 key={c.id}
                 variant={getAdminEntityVariant(displayCardView)}
-                minHeightClassName={displayCardView === 'grid' ? 'min-h-[226px]' : 'min-h-[96px]'}
-                bodyClassName={displayCardView === 'grid' ? 'gap-2 p-3' : 'gap-1.5 p-2.5'}
-                  listMediaWrapClassName="md:self-center"
+                minHeightClassName={displayCardView === 'grid' ? '' : 'min-h-[96px]'}
+                listMediaWrapClassName="md:self-center"
                 listMediaFrameClassName="!h-[76px] !w-[112px] md:!h-[76px] md:!w-[112px] !rounded-[18px] !bg-transparent !ring-0 !p-0"
                 factsWrapClassName={displayCardView === 'list' ? 'xl:w-[156px]' : undefined}
                 actionsWrapClassName={displayCardView === 'list' ? 'xl:w-[118px]' : undefined}
+                gridActionsPlacement="bottom"
                 media={
                   c.image ? (
-                    <div className={cn('aspect-[16/10] h-full w-full overflow-hidden rounded-[20px]', isDark ? 'bg-purple-500/10' : 'bg-gray-50')}>
+                    <div className={cn('aspect-[16/9] h-full w-full overflow-hidden rounded-[14px]', isDark ? 'bg-purple-500/10' : 'bg-violet-50')}>
                       <FramedImage
                         media={c.image}
                         alt={c.name}
-                        className="h-full w-full transition-transform duration-700 group-hover:scale-105"
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         fallbackTransform={{ fit: 'cover' }}
                         onError={e => {
                           ;(e.target as HTMLImageElement).style.display = 'none'
@@ -267,23 +259,23 @@ export default function AdminCategoriesPage() {
                       />
                     </div>
                   ) : (
-                    <div className={cn('flex h-full w-full items-center justify-center rounded-[20px]', isDark ? 'bg-purple-500/10' : 'bg-gray-50')}>
+                    <div className={cn('flex aspect-[16/9] h-full w-full items-center justify-center rounded-[14px]', isDark ? 'bg-purple-500/10' : 'bg-violet-50')}>
                       <div className={cn('text-[11px] font-mono uppercase tracking-[0.24em]', sub)}>No image</div>
                     </div>
                   )
                 }
                 title={c.name}
-                  subtitle={c.description || undefined}
+                subtitle={c.description || undefined}
                 badges={
                   <>
-                    <span className={cn('rounded-full border px-3 py-1 text-[11px] font-medium', count > 0 ? (isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700') : (isDark ? 'border-amber-400/15 bg-amber-400/10 text-amber-200' : 'border-amber-200 bg-amber-50 text-amber-700'))}>
+                    <span className={cn('rounded-full border px-3 py-1 text-[11px] font-bold', count > 0 ? (isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200' : 'border-violet-300 bg-violet-100/80 text-[#2e0a72]') : (isDark ? 'border-amber-400/15 bg-amber-400/10 text-amber-200' : 'border-amber-300 bg-amber-50 text-amber-900'))}>
                       {count > 0 ? 'In use' : 'Unused'}
                     </span>
                   </>
                 }
                 facts={[
-                  { label: 'Slug', value: <span className="block truncate text-xs font-mono">{c.slug}</span> },
-                  { label: 'Products', value: String(count) },
+                  { label: 'Slug', value: <span className="block truncate font-mono text-[0.85rem]" title={c.slug}>{c.slug || '—'}</span> },
+                  { label: 'Products', value: <span className="font-mono tabular-nums">{count}</span> },
                 ]}
                 actions={
                   <>

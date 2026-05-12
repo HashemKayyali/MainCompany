@@ -44,7 +44,7 @@ export default function AdminEntityCard({
   onClick,
   className,
   bodyClassName,
-  minHeightClassName = 'min-h-[164px]',
+  minHeightClassName,
   listMediaWrapClassName,
   listMediaFrameClassName,
   titleBlockClassName,
@@ -58,7 +58,12 @@ export default function AdminEntityCard({
   const { isDark } = useTheme()
   const clickable = typeof onClick === 'function'
   const isList = variant === 'list'
-  const effectiveMinHeightClass = minHeightClassName || (isList ? 'min-h-[96px]' : 'min-h-[164px]')
+  const effectiveMinHeightClass =
+    minHeightClassName !== undefined
+      ? minHeightClassName
+      : isList
+        ? 'min-h-[96px]'
+        : 'min-h-[164px]'
   const shellClass = isDark
     ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.98),rgba(7,10,24,0.99))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_28px_82px_-58px_rgba(6,12,30,0.96)]'
     : 'bg-white ring-1 ring-inset ring-gray-200 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.25)]'
@@ -85,9 +90,9 @@ export default function AdminEntityCard({
     'overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]'
   const gridFactShellClass = isDark
     ? 'bg-[linear-gradient(180deg,rgba(10,18,37,0.96),rgba(9,15,31,0.92))] ring-cyan-400/14 shadow-[0_16px_32px_-24px_rgba(8,145,178,0.45)]'
-    : 'bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,255,0.96))] ring-violet-200 shadow-[0_16px_30px_-26px_rgba(124,58,237,0.18)]'
-  const gridFactLabelClass = isDark ? 'text-cyan-100/46' : 'text-gray-400'
-  const gridFactValueClass = isDark ? 'text-white' : 'text-gray-800'
+    : 'bg-[linear-gradient(180deg,rgba(252,248,255,1),rgba(245,240,255,0.96))] ring-violet-200 shadow-[0_10px_22px_-20px_rgba(124,58,237,0.22)]'
+  const gridFactLabelClass = isDark ? 'text-cyan-100/46' : 'text-[#4a2c8f]'
+  const gridFactValueClass = isDark ? 'text-white' : 'text-[#07041a]'
   const hasChildren = Boolean(children)
   const hasFacts = facts.length > 0
   const hasActions = Boolean(actions)
@@ -224,7 +229,7 @@ export default function AdminEntityCard({
           : undefined
       }
       className={cn(
-        'group relative flex h-full flex-col overflow-hidden rounded-[15px] transition-[transform,box-shadow,background-color,opacity] duration-300',
+        'group relative flex h-full flex-col overflow-hidden rounded-[18px] transition-[transform,box-shadow,background-color,opacity] duration-300',
         shellClass,
         interactiveClass,
         effectiveMinHeightClass,
@@ -240,11 +245,11 @@ export default function AdminEntityCard({
       />
 
       {media && (
-          <div className={cn('relative px-2 pt-2')}>
+          <div className={cn('relative px-3 pt-3')}>
             <div
               className={cn(
-                'relative h-full overflow-hidden rounded-[11px] ring-1 ring-inset',
-              isDark ? 'bg-black/20 ring-cyan-400/10' : 'bg-gray-50 ring-gray-200'
+                'relative h-full overflow-hidden rounded-[14px] ring-1 ring-inset',
+              isDark ? 'bg-black/20 ring-cyan-400/10' : 'bg-violet-50/60 ring-violet-200/70'
             )}
           >
             {media}
@@ -255,36 +260,36 @@ export default function AdminEntityCard({
         </div>
       )}
 
-        <div className={cn('relative flex min-w-0 flex-1 flex-col gap-2 p-2.5', bodyClassName)}>
-          <div className={cn('space-y-0.5', titleBlockClassName)}>
-          <div className={cn(gridTitleClampClass, 'font-display text-[0.94rem] font-bold leading-tight', isDark ? 'text-white' : 'text-gray-900')}>
+        <div className={cn('relative flex min-w-0 flex-1 flex-col gap-3 p-3.5', bodyClassName)}>
+          <div className={cn('space-y-1', titleBlockClassName)}>
+          <div className={cn(gridTitleClampClass, 'font-display text-[1.02rem] font-extrabold leading-tight tracking-[-0.01em]', isDark ? 'text-white' : 'text-[#07041a]')}>
             {title}
           </div>
 
           {subtitle && (
-            <p className={cn(gridSubtitleClampClass, 'max-w-3xl text-[10px] leading-[1.4]', isDark ? 'text-purple-100/64' : 'text-gray-500')}>
+            <p className={cn(gridSubtitleClampClass, 'max-w-3xl text-[11.5px] font-medium leading-[1.5]', isDark ? 'text-purple-100/64' : 'text-[#31195f]')}>
               {subtitle}
             </p>
           )}
         </div>
 
-        {badges && <div className={cn('flex flex-wrap gap-1', badgesWrapClassName)}>{badges}</div>}
+        {badges && <div className={cn('flex flex-wrap gap-1.5', badgesWrapClassName)}>{badges}</div>}
 
         {facts.length > 0 && (
-          <div className={cn('grid grid-cols-2 gap-1', factsWrapClassName)}>
+          <div className={cn('grid grid-cols-2 gap-2', factsWrapClassName)}>
             {facts.map(fact => (
               <div
                 key={fact.label}
                 className={cn(
-                'relative overflow-hidden rounded-[12px] px-2.25 py-1.5 ring-1 ring-inset',
+                'relative min-w-0 overflow-hidden rounded-[12px] px-3 py-2.5 ring-1 ring-inset',
                   gridFactShellClass
                 )}
               >
-                <div className={cn('mb-2 h-px w-8 rounded-full', isDark ? 'bg-cyan-400/24' : 'bg-violet-200')} />
-                <div className={cn('text-[7.5px] font-mono font-semibold uppercase tracking-[0.12em]', gridFactLabelClass)}>
+                <div className={cn('mb-1.5 h-px w-7 rounded-full', isDark ? 'bg-cyan-400/24' : 'bg-violet-300/80')} />
+                <div className={cn('text-[8.5px] font-mono font-bold uppercase tracking-[0.14em]', gridFactLabelClass)}>
                   {fact.label}
                 </div>
-                <div className={cn('mt-1 min-h-[1rem] min-w-0 text-[0.86rem] font-display font-semibold leading-none', gridFactValueClass)}>
+                <div className={cn('mt-1 min-w-0 truncate text-[0.92rem] font-display font-bold leading-tight', gridFactValueClass)}>
                   {fact.value}
                 </div>
               </div>
@@ -297,11 +302,26 @@ export default function AdminEntityCard({
         {actions && (
           <div
             className={cn(
-              gridActionsPlacement === 'bottom' ? 'flex items-center gap-1.5 pt-2' : 'flex items-center gap-1.5 pt-1',
+              gridActionsPlacement === 'bottom' ? 'mt-auto pt-2' : 'pt-1',
               actionsWrapClassName
             )}
           >
-            <div className="flex flex-1 flex-wrap items-center gap-1">{actions}</div>
+            {/*
+              Stable two-row action grid:
+              - With 2 buttons: each fills one column.
+              - With 3 buttons (Details / Edit / Delete): first two share row one,
+                third button auto-spans both columns on row two. No flex-wrap
+                drama where the last button collapses to a tiny chip.
+            */}
+            <div
+              className={cn(
+                'grid grid-cols-2 gap-1.5',
+                '[&>*]:w-full [&>*]:min-w-0',
+                '[&>*:nth-child(3)]:col-span-2'
+              )}
+            >
+              {actions}
+            </div>
           </div>
         )}
       </div>

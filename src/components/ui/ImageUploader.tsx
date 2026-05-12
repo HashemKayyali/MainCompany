@@ -14,6 +14,12 @@ interface Props {
   removable?: boolean
   onRemove?: () => void
   compact?: boolean
+  /**
+   * Premium "logo management" layout: shows a small fixed thumbnail with
+   * always-visible Adjust / Replace / Remove actions on the side. Designed
+   * for square brand logos in admin editors.
+   */
+  variant?: 'default' | 'logo'
   frameAspect?: number
   defaultFit?: MediaFit
   frameTitle?: string
@@ -33,6 +39,7 @@ export default function ImageUploader({
   removable = false,
   onRemove,
   compact = false,
+  variant = 'default',
   frameAspect = 16 / 9,
   defaultFit = 'cover',
   frameTitle = 'Adjust Image Frame',
@@ -180,6 +187,105 @@ export default function ImageUploader({
             >
               <span className="text-lg">{uploading ? '...' : 'Add'}</span>
               <span className={`text-[9px] font-medium ${sub}`}>{uploading ? 'Uploading...' : 'Add Image'}</span>
+            </button>
+          )}
+        </div>
+
+        <MediaPlacementModal
+          open={editorOpen}
+          media={editorMedia}
+          title={frameTitle}
+          type="image"
+          aspectRatio={frameAspect}
+          defaultFit={defaultFit}
+          hint={frameHint}
+          contextPreview={renderFrameContextPreview}
+          contextPreviewTitle={frameContextTitle}
+          contextPreviewHint={frameContextHint}
+          onApply={commitEditorValue}
+          onClose={closeEditor}
+        />
+      </>
+    )
+  }
+
+  if (variant === 'logo') {
+    return (
+      <>
+        <div className={maxWidthClassName}>
+          {label && (
+            <label className="mb-1.5 block text-[12px] font-bold text-[#07041a]">
+              {label}
+            </label>
+          )}
+          <input ref={inputRef} type="file" accept="image/*" onChange={handleChange} className="hidden" />
+
+          {value ? (
+            <div className="flex items-stretch gap-3 rounded-[16px] border border-violet-200/80 bg-white p-2.5 shadow-[0_1px_2px_rgba(20,8,50,0.04),0_8px_20px_-10px_rgba(89,23,196,0.14)]">
+              {/* Thumbnail */}
+              <div className="flex h-[96px] w-[96px] shrink-0 items-center justify-center rounded-[12px] border border-violet-100 bg-violet-50/70">
+                <FramedImage
+                  media={value}
+                  alt="Logo"
+                  className="h-[72px] w-[72px] object-contain mix-blend-multiply"
+                  fallbackTransform={{ fit: 'contain' }}
+                  onError={e => {
+                    ;(e.target as HTMLImageElement).style.display = 'none'
+                  }}
+                />
+              </div>
+
+              {/* Always-visible action stack */}
+              <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => openFrameEditor(value)}
+                  className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-[10px] border border-violet-300/80 bg-violet-50 px-3 text-[11.5px] font-bold text-violet-800 transition hover:border-violet-500 hover:bg-violet-100 hover:text-violet-900"
+                >
+                  Adjust Logo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => inputRef.current?.click()}
+                  disabled={uploading}
+                  className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-[10px] border border-violet-200/80 bg-white px-3 text-[11.5px] font-semibold text-[#211049] transition hover:border-violet-400 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {uploading ? 'Uploading…' : 'Replace'}
+                </button>
+                {removable && onRemove && (
+                  <button
+                    type="button"
+                    onClick={onRemove}
+                    className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-[10px] border border-red-200 bg-red-50 px-3 text-[11.5px] font-bold text-red-700 transition hover:border-red-300 hover:bg-red-100 hover:text-red-800"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              disabled={uploading}
+              onDragOver={e => {
+                e.preventDefault()
+                setDragOver(true)
+              }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={handleDrop}
+              className={`flex w-full flex-col items-center justify-center gap-1.5 rounded-[16px] border-2 border-dashed py-7 transition-all ${
+                dragOver
+                  ? 'border-violet-500 bg-violet-50'
+                  : 'border-violet-300/70 bg-violet-50/40 hover:border-violet-400 hover:bg-violet-50/80'
+              }`}
+            >
+              <span className="text-[12.5px] font-bold text-[#07041a]">
+                {uploading ? 'Uploading…' : 'Click or drop logo'}
+              </span>
+              <span className="text-[10.5px] font-medium text-[#4a2c8f]">
+                PNG / SVG / JPG · transparent background recommended
+              </span>
             </button>
           )}
         </div>

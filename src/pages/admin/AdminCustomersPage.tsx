@@ -13,7 +13,7 @@ import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminViewToggle from '../../components/admin/AdminViewToggle'
 import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
-import CustomerCard from '../../components/customer/CustomerCard'
+import CustomerLogoCardView from '../../components/customer/CustomerLogoCardView'
 import { cn } from '../../utils/cn'
 
 const empty: Customer = { name: '', slug: '', logo: '', category: '' }
@@ -83,12 +83,16 @@ export default function AdminCustomersPage() {
     category: editing?.category || 'Category',
   }
 
+  // Live preview renders the SAME logo-only card the public homepage
+  // shows. No company name, no extra metadata — exactly what a customer
+  // would see in the logo cloud.
   const renderCustomerPreview = (overrides?: Partial<Customer>) => (
-    <div
-      aria-hidden="true"
-      className="mx-auto max-w-[236px] select-none [&_a]:pointer-events-none [&_button]:pointer-events-none"
-    >
-      <CustomerCard customer={{ ...previewCustomer, ...overrides }} />
+    <div aria-hidden="true" className="mx-auto flex w-full justify-center select-none">
+      <CustomerLogoCardView
+        customer={{ ...previewCustomer, ...overrides }}
+        variant="preview"
+        disableInteractions
+      />
     </div>
   )
 
@@ -173,78 +177,120 @@ export default function AdminCustomersPage() {
           </div>
         ) : (
           <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
-            <div className={cn('origin-top transition-[opacity,transform,filter] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform,filter]', viewTransitionClassName)}>
-            <div className={cardsLayoutClass}>
-              {filtered.map(customer => (
-                <AdminEntityCard
-                  key={customer.slug}
-                  variant={getAdminEntityVariant(displayCardView)}
-                  minHeightClassName={displayCardView === 'grid' ? 'min-h-[198px]' : 'min-h-[88px]'}
-                  bodyClassName={displayCardView === 'grid' ? 'gap-1.75 p-2.75' : 'gap-1.5 p-2.5'}
-                  listMediaWrapClassName="md:self-center"
-                  listMediaFrameClassName="!h-[72px] !w-[72px] md:!h-[72px] md:!w-[72px] p-1"
-                  actionsWrapClassName={displayCardView === 'list' ? 'xl:w-[108px] xl:self-center' : undefined}
-                  media={
-                    <div
-                      className={cn(
-                        'aspect-[4/3] h-full w-full rounded-[16px] p-1.5',
-                        isDark
-                          ? 'bg-[radial-gradient(circle,rgba(34,211,238,0.10),transparent_65%)]'
-                          : 'bg-[radial-gradient(circle,rgba(139,92,246,0.08),transparent_62%)]'
-                      )}
-                    >
-                      {customer.logo ? (
-                        <FramedImage
-                          media={customer.logo}
-                          alt={customer.name}
-                          className="h-full w-full"
-                          extraScale={1.16}
-                          fallbackTransform={{ fit: 'contain' }}
-                          onError={e => {
-                            ;(e.target as HTMLImageElement).style.display = 'none'
-                          }}
-                        />
-                      ) : (
-                        <div className={cn('text-[11px] font-mono uppercase tracking-[0.24em]', sub)}>No Logo</div>
-                      )}
-                    </div>
-                  }
-                  mediaOverlayLeft={
-                    <span className={cn('rounded-full px-2.5 py-1 text-[9px] font-mono uppercase tracking-[0.18em] ring-1 ring-inset', isDark ? 'bg-black/35 text-cyan-100/70 ring-cyan-400/10' : 'bg-white/90 text-gray-500 ring-gray-200')}>
-                      Customer
-                    </span>
-                  }
-                  title={customer.name}
-                  subtitle={undefined}
-                  badges={
-                    <span className={cn('rounded-full px-3 py-1 text-[10px] font-medium ring-1 ring-inset', isDark ? 'bg-cyan-400/10 text-cyan-200 ring-cyan-400/18' : 'border-violet-200 bg-violet-50 text-violet-700')}>
-                      {customer.category || 'Uncategorized'}
-                    </span>
-                  }
-                  actions={
-                    <>
-                      <AdminActionButton
-                        onClick={event => {
-                          event.stopPropagation()
-                          openEdit(customer)
-                        }}
-                      >
-                        Edit
-                      </AdminActionButton>
-                      <AdminActionButton
-                        tone="danger"
-                        onClick={event => {
-                          event.stopPropagation()
-                          void deleteItem(customer)
-                        }}
-                      >
-                        Delete
-                      </AdminActionButton>
-                    </>
-                  }
-                />
-              ))}
-            </div>
+            <div
+              className={cn(
+                'origin-top transition-[opacity,transform,filter] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform,filter]',
+                viewTransitionClassName
+              )}
+            >
+              {displayCardView === 'grid' ? (
+                // Compact admin grid: fixed-width tracks (220–240px) that
+                // auto-fill the available row. Wider screens add MORE
+                // columns instead of stretching each card.
+                <div className="grid justify-start gap-3 [grid-template-columns:repeat(auto-fill,minmax(220px,240px))]">
+                  {filtered.map(customer => (
+                    <CustomerLogoCardView
+                      key={customer.slug}
+                      customer={customer}
+                      variant="compactAdmin"
+                      actions={
+                        <>
+                          <AdminActionButton
+                            onClick={event => {
+                              event.stopPropagation()
+                              openEdit(customer)
+                            }}
+                          >
+                            Edit
+                          </AdminActionButton>
+                          <AdminActionButton
+                            tone="danger"
+                            onClick={event => {
+                              event.stopPropagation()
+                              void deleteItem(customer)
+                            }}
+                          >
+                            Delete
+                          </AdminActionButton>
+                        </>
+                      }
+                    />
+                  ))}
+                </div>
+              ) : (
+                // List mode keeps the shared admin row layout.
+                <div className={cardsLayoutClass}>
+                  {filtered.map(customer => (
+                    <AdminEntityCard
+                      key={customer.slug}
+                      variant={getAdminEntityVariant(displayCardView)}
+                      minHeightClassName="min-h-[88px]"
+                      bodyClassName="gap-1.5 p-2.5"
+                      listMediaWrapClassName="md:self-center"
+                      listMediaFrameClassName="!h-[72px] !w-[72px] md:!h-[72px] md:!w-[72px] p-1"
+                      actionsWrapClassName="xl:w-[108px] xl:self-center"
+                      media={
+                        <div
+                          className={cn(
+                            'aspect-[4/3] h-full w-full rounded-[16px] p-1.5',
+                            isDark
+                              ? 'bg-[radial-gradient(circle,rgba(34,211,238,0.10),transparent_65%)]'
+                              : 'bg-[radial-gradient(circle,rgba(139,92,246,0.08),transparent_62%)]'
+                          )}
+                        >
+                          {customer.logo ? (
+                            <FramedImage
+                              media={customer.logo}
+                              alt={customer.name}
+                              className="h-full w-full"
+                              extraScale={1.16}
+                              fallbackTransform={{ fit: 'contain' }}
+                              onError={e => {
+                                ;(e.target as HTMLImageElement).style.display = 'none'
+                              }}
+                            />
+                          ) : (
+                            <div className={cn('text-[11px] font-mono uppercase tracking-[0.24em]', sub)}>No Logo</div>
+                          )}
+                        </div>
+                      }
+                      mediaOverlayLeft={
+                        <span className={cn('rounded-full px-2.5 py-1 text-[9px] font-mono uppercase tracking-[0.18em] ring-1 ring-inset', isDark ? 'bg-black/35 text-cyan-100/70 ring-cyan-400/10' : 'bg-white/90 text-gray-500 ring-gray-200')}>
+                          Customer
+                        </span>
+                      }
+                      title={customer.name}
+                      subtitle={undefined}
+                      badges={
+                        <span className={cn('rounded-full px-3 py-1 text-[10px] font-medium ring-1 ring-inset', isDark ? 'bg-cyan-400/10 text-cyan-200 ring-cyan-400/18' : 'border-violet-200 bg-violet-50 text-violet-700')}>
+                          {customer.category || 'Uncategorized'}
+                        </span>
+                      }
+                      actions={
+                        <>
+                          <AdminActionButton
+                            onClick={event => {
+                              event.stopPropagation()
+                              openEdit(customer)
+                            }}
+                          >
+                            Edit
+                          </AdminActionButton>
+                          <AdminActionButton
+                            tone="danger"
+                            onClick={event => {
+                              event.stopPropagation()
+                              void deleteItem(customer)
+                            }}
+                          >
+                            Delete
+                          </AdminActionButton>
+                        </>
+                      }
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -313,25 +359,22 @@ export default function AdminCustomersPage() {
             </AdminEditorSection>
 
             <AdminEditorSection title="Logo" hint="Adjust the logo and inspect the actual rendered customer card result side by side.">
-              <div className="max-w-[15.5rem]">
-                <ImageUploader
-                  label="Logo"
-                  value={editing.logo}
-                  onChange={url => setEditing(e => (e ? { ...e, logo: url } : null))}
-                  removable
-                  onRemove={() => setEditing(e => (e ? { ...e, logo: '' } : null))}
-                  folder="customers"
-                  frameAspect={1}
-                  defaultFit="contain"
-                  frameTitle="Adjust Customer Logo"
-                  frameHint="Fit or crop the logo inside the square logo frame."
-                  previewAspectClass="aspect-square"
-                  renderFrameContextPreview={media => renderCustomerPreview({ logo: media })}
-                  frameContextTitle="Customer Card Result"
-                  frameContextHint="Check the actual customer card result while you refine the logo framing."
-                  maxWidthClassName="max-w-[15.5rem]"
-                />
-              </div>
+              <ImageUploader
+                variant="logo"
+                label="Logo"
+                value={editing.logo}
+                onChange={url => setEditing(e => (e ? { ...e, logo: url } : null))}
+                removable
+                onRemove={() => setEditing(e => (e ? { ...e, logo: '' } : null))}
+                folder="customers"
+                frameAspect={1}
+                defaultFit="contain"
+                frameTitle="Adjust Customer Logo"
+                frameHint="Fit or crop the logo inside the square logo frame."
+                renderFrameContextPreview={media => renderCustomerPreview({ logo: media })}
+                frameContextTitle="Customer Card Result"
+                frameContextHint="Check the actual customer card result while you refine the logo framing."
+              />
             </AdminEditorSection>
           </AdminEditorWorkspace>
         )}

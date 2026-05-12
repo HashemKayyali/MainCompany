@@ -35,9 +35,11 @@ export default function Hero() {
       {/* ════ BACKGROUND SYSTEM ════ */}
 
       {/* Layer 0 – soft white/lavender base */}
-      <div className="absolute inset-0 -z-40 bg-[#faf6ff]" />
+      <div className="absolute inset-0 -z-40 bg-[#f5edff]" />
 
-      {/* Layer 1 – hero image (very subdued, faded into purple wash) */}
+      {/* Layer 1 – hero image (prominent, tinted by a soft lavender wash
+          that protects text readability on the left, fades cleanly into
+          the page background at the bottom). */}
       <div className="absolute inset-0 -z-30">
         <img
           src="/images/hero-bg-event.png"
@@ -48,17 +50,21 @@ export default function Hero() {
           decoding="async"
           fetchPriority="high"
           className={`h-full w-full object-cover transition-opacity duration-700 ${
-            heroImageReady ? 'opacity-15' : 'opacity-0'
+            heroImageReady ? 'opacity-[0.72]' : 'opacity-0'
           }`}
           onLoad={() => setHeroImageReady(true)}
         />
+        {/* Readability scrim:
+            - Left side (where headline + CTA sit) gets a stronger lavender wash.
+            - Right side stays clearer so the event scene comes through.
+            - Bottom fades to the page background for a clean transition. */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              'linear-gradient(180deg, rgba(250,246,255,0.78) 0%, rgba(244,238,255,0.62) 30%, rgba(241,232,255,0.86) 70%, rgba(251,248,255,1) 100%), ' +
-              'radial-gradient(60% 42% at 14% 12%, rgba(124,58,237,0.14) 0%, transparent 70%), ' +
-              'radial-gradient(48% 32% at 88% 16%, rgba(217,70,239,0.10) 0%, transparent 70%)',
+              'linear-gradient(90deg, rgba(245,237,255,0.41) 0%, rgba(245,237,255,0.275) 38%, rgba(245,237,255,0.09) 70%, rgba(245,237,255,0.025) 100%), ' +
+              'linear-gradient(180deg, rgba(245,237,255,0.175) 0%, transparent 22%, transparent 72%, rgba(248,243,255,0.48) 100%), ' +
+              'radial-gradient(55% 42% at 14% 18%, rgba(113,38,227,0.18) 0%, transparent 70%)',
           }}
         />
       </div>
@@ -124,10 +130,10 @@ export default function Hero() {
 
       {/* Layer 4 – bottom fade to page background */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-72"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-80"
         style={{
           background:
-            'linear-gradient(to top, rgba(251,248,255,1) 0%, rgba(251,248,255,0.92) 22%, rgba(251,248,255,0.5) 56%, transparent 100%)',
+            'linear-gradient(to top, rgba(248,243,255,0.5) 0%, rgba(248,243,255,0.46) 28%, rgba(248,243,255,0.225) 62%, transparent 100%)',
         }}
       />
 
@@ -153,35 +159,35 @@ export default function Hero() {
               className="mb-5 inline-flex w-fit sm:mb-7"
             >
               <div
-                className={`inline-flex items-center gap-2.5 rounded-full border border-violet-400/30 bg-white/80 px-3.5 py-1.5 ${glassEnabled ? 'backdrop-blur-md' : ''} sm:px-4 sm:py-2 shadow-[0_8px_28px_-10px_rgba(124,58,237,0.22)]`}
+                className={`inline-flex items-center gap-2.5 rounded-full border border-violet-400/55 bg-white/95 px-3.5 py-1.5 ${glassEnabled ? 'backdrop-blur-md' : ''} sm:px-4 sm:py-2 shadow-[0_10px_30px_-10px_rgba(89,23,196,0.35)]`}
               >
-                <Stars className="h-3.5 w-3.5 text-violet-600" strokeWidth={2.2} />
-                <span className="text-[9.5px] font-semibold uppercase tracking-[0.16em] text-violet-700 sm:text-[10.5px] sm:tracking-[0.18em]">
+                <Stars className="h-3.5 w-3.5 text-violet-700" strokeWidth={2.4} />
+                <span className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-violet-800 sm:text-[10.5px] sm:tracking-[0.18em]">
                   Event Services Marketplace
                 </span>
                 <span
-                  className="ml-1 h-1.5 w-1.5 shrink-0 rounded-full bg-violet-500"
-                  style={{ boxShadow: '0 0 7px rgba(168,85,247,0.85)' }}
+                  className="ml-1 h-1.5 w-1.5 shrink-0 rounded-full bg-violet-600"
+                  style={{ boxShadow: '0 0 9px rgba(168,85,247,0.95)' }}
                 />
               </div>
             </motion.div>
 
             {/* Main heading */}
             <h1
-              className="font-sans text-[clamp(2.7rem,6.2vw,5.1rem)] font-extrabold leading-[0.95] tracking-[-0.04em] text-ink-900"
+              className="font-sans text-[clamp(2.6rem,6vw,4.9rem)] font-extrabold leading-[0.96] tracking-[-0.04em] text-ink-900"
               style={{
                 fontFamily: '"Alexandria", system-ui, sans-serif',
                 fontKerning: 'normal',
                 textRendering: 'optimizeLegibility',
-                color: '#1a0b3d',
+                color: '#140832',
               }}
             >
-              <span className="block opacity-95">Book Everything</span>
-              <span className="relative isolate mt-2 block pb-[0.06em] tracking-[-0.028em]">
+              <span className="block">Book Everything</span>
+              <span className="relative isolate mt-2 block pb-[0.08em] tracking-[-0.028em]">
                 <span
                   className="relative z-10 inline-block bg-clip-text text-transparent"
                   style={{
-                    backgroundImage: 'linear-gradient(95deg, #7c3aed 0%, #a855f7 30%, #c026d3 65%, #7c3aed 100%)',
+                    backgroundImage: 'linear-gradient(95deg, #5d18c4 0%, #8344f5 30%, #c026d3 65%, #5d18c4 100%)',
                     WebkitTextFillColor: 'transparent',
                     backgroundSize: '200% auto',
                     animation: motionEnabled ? 'text-glow-shift 8s ease-in-out infinite' : undefined,
@@ -191,14 +197,14 @@ export default function Hero() {
                 </span>
                 <span
                   aria-hidden="true"
-                  className={`pointer-events-none absolute inset-x-[5%] bottom-[0.02em] z-0 h-[0.24em] rounded-full ${richHeroAtmosphere ? 'opacity-60 blur-3xl' : 'opacity-45 blur-xl'}`}
-                  style={{ background: 'linear-gradient(90deg, rgba(124,58,237,0.42), rgba(217,70,239,0.32), rgba(168,85,247,0.22))' }}
+                  className={`pointer-events-none absolute inset-x-[5%] bottom-[0.02em] z-0 h-[0.24em] rounded-full ${richHeroAtmosphere ? 'opacity-55 blur-3xl' : 'opacity-40 blur-xl'}`}
+                  style={{ background: 'linear-gradient(90deg, rgba(113,38,227,0.5), rgba(217,70,239,0.36), rgba(168,85,247,0.26))' }}
                 />
               </span>
             </h1>
 
             {/* Description */}
-            <p className="mt-7 max-w-[36rem] text-[1rem] leading-[1.82] text-ink-700/80 sm:text-[1.08rem]" style={{ color: 'rgba(61, 35, 112, 0.78)' }}>
+            <p className="mt-7 max-w-[36rem] text-[1rem] font-medium leading-[1.78] text-ink-800 sm:text-[1.08rem]" style={{ color: '#31195f' }}>
               Find and book games, LED screens, performers, booths, rentals, and production
               services from trusted vendors — all in one place.
             </p>
@@ -211,10 +217,10 @@ export default function Hero() {
                   initial={motionEnabled ? { opacity: 0, x: -12 } : false}
                   animate={motionEnabled ? { opacity: 1, x: 0 } : undefined}
                   transition={motionEnabled ? { duration: 0.42, delay: 0.22 + index * 0.07, ease } : undefined}
-                  className={`inline-flex items-center gap-2.5 rounded-full border border-violet-300/50 bg-white/75 px-3.5 py-1.5 ${glassEnabled ? 'backdrop-blur-sm' : ''} shadow-[0_4px_14px_-6px_rgba(124,58,237,0.18)]`}
+                  className={`inline-flex items-center gap-2.5 rounded-full border border-violet-400/55 bg-white/95 px-3.5 py-1.5 ${glassEnabled ? 'backdrop-blur-sm' : ''} shadow-[0_6px_16px_-6px_rgba(89,23,196,0.28)]`}
                 >
-                  <span className="text-[10px] font-bold tracking-[0.12em] text-violet-600">{step.num}</span>
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-700" style={{ color: '#3d2370' }}>{step.label}</span>
+                  <span className="text-[10px] font-extrabold tracking-[0.12em] text-violet-700">{step.num}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: '#211049' }}>{step.label}</span>
                 </motion.div>
               ))}
             </div>
@@ -241,7 +247,7 @@ export default function Hero() {
                 to="/contact"
                 onMouseEnter={() => preloadRoute('/contact')}
                 onFocus={() => preloadRoute('/contact')}
-                className={`inline-flex min-h-[52px] items-center gap-2 rounded-[18px] border border-violet-300/55 bg-white/85 px-7 text-[12px] font-semibold tracking-[0.01em] text-violet-700 transition-all hover:border-violet-500/70 hover:bg-white hover:text-violet-800 hover:shadow-[0_12px_28px_-12px_rgba(124,58,237,0.32)] ${glassEnabled ? 'backdrop-blur-sm' : ''}`}
+                className={`inline-flex min-h-[52px] items-center gap-2 rounded-[18px] border border-violet-400/65 bg-white/95 px-7 text-[12px] font-bold tracking-[0.02em] text-violet-800 transition-all hover:border-violet-600 hover:bg-white hover:text-violet-900 hover:shadow-[0_14px_30px_-12px_rgba(89,23,196,0.36)] ${glassEnabled ? 'backdrop-blur-sm' : ''}`}
               >
                 Talk to the Team
               </Link>
@@ -257,13 +263,13 @@ export default function Hero() {
               {heroStats.map((stat, index) => (
                 <div key={stat.label} className="relative flex items-center">
                   {index > 0 && (
-                    <div className="mx-6 h-10 w-px bg-violet-300/60 sm:mx-8" />
+                    <div className="mx-6 h-10 w-px bg-violet-400/55 sm:mx-8" />
                   )}
                   <div>
                     <div
                       className="font-display text-[clamp(1.6rem,3.8vw,2.1rem)] font-black leading-none tracking-[-0.07em]"
                       style={{
-                        background: 'linear-gradient(135deg, #1a0b3d 0%, #6d28d9 100%)',
+                        background: 'linear-gradient(135deg, #140832 0%, #5d18c4 100%)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text',
@@ -271,7 +277,7 @@ export default function Hero() {
                     >
                       {stat.value}
                     </div>
-                    <div className="mt-1.5 text-[9.5px] font-semibold uppercase tracking-[0.18em] text-violet-700/80">
+                    <div className="mt-1.5 text-[9.5px] font-bold uppercase tracking-[0.18em] text-violet-800">
                       {stat.label}
                     </div>
                   </div>
@@ -291,10 +297,10 @@ export default function Hero() {
               transition={motionEnabled ? { duration: 0.9, delay: 0.35, ease } : undefined}
             >
               <div
-                className={`w-[268px] rounded-[24px] border border-violet-200/70 bg-white/92 p-5 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-up' : ''}`}
+                className={`w-[268px] rounded-[24px] border border-violet-300/70 bg-white p-5 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-up' : ''}`}
                 style={{
                   boxShadow:
-                    '0 32px 80px -20px rgba(124,58,237,0.32), 0 8px 22px -8px rgba(124,58,237,0.18), inset 0 1px 0 rgba(255,255,255,0.95)',
+                    '0 34px 84px -18px rgba(89,23,196,0.34), 0 10px 24px -8px rgba(89,23,196,0.20), inset 0 1px 0 rgba(255,255,255,0.95)',
                 }}
               >
                 <div
@@ -312,21 +318,21 @@ export default function Hero() {
                     <Sparkles className="h-5 w-5 text-white" strokeWidth={2.0} />
                   </div>
                   <div>
-                    <div className="text-[9.5px] font-semibold uppercase tracking-[0.2em] text-violet-600">For Clients</div>
-                    <div className="text-[13.5px] font-bold" style={{ color: '#1a0b3d' }}>Browse &amp; Book</div>
+                    <div className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-violet-700">For Clients</div>
+                    <div className="text-[13.5px] font-bold" style={{ color: '#140832' }}>Browse &amp; Book</div>
                   </div>
                 </div>
                 <div className="space-y-2">
                   {['LED Screens & Displays', 'Games & Activations', 'Live Production'].map((item) => (
                     <div
                       key={item}
-                      className="flex items-center gap-2.5 rounded-[12px] border border-violet-200/60 bg-violet-50/55 px-3 py-2.5"
+                      className="flex items-center gap-2.5 rounded-[12px] border border-violet-300/65 bg-violet-50/85 px-3 py-2.5"
                     >
                       <div
-                        className="h-1.5 w-1.5 shrink-0 rounded-full bg-violet-500"
-                        style={{ boxShadow: '0 0 7px rgba(168,85,247,0.85)' }}
+                        className="h-1.5 w-1.5 shrink-0 rounded-full bg-violet-600"
+                        style={{ boxShadow: '0 0 7px rgba(168,85,247,0.95)' }}
                       />
-                      <span className="text-[11.5px] font-medium" style={{ color: '#3d2370' }}>{item}</span>
+                      <span className="text-[11.5px] font-semibold" style={{ color: '#211049' }}>{item}</span>
                     </div>
                   ))}
                 </div>
@@ -341,17 +347,17 @@ export default function Hero() {
               transition={motionEnabled ? { duration: 0.9, delay: 0.55, ease } : undefined}
             >
               <div
-                className={`w-[210px] rounded-[20px] border border-fuchsia-200/70 bg-white/92 p-4 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-down' : ''}`}
+                className={`w-[210px] rounded-[20px] border border-fuchsia-300/70 bg-white p-4 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-down' : ''}`}
                 style={{
                   boxShadow:
-                    '0 22px 56px -16px rgba(192,38,211,0.28), 0 6px 18px -6px rgba(124,58,237,0.18), inset 0 1px 0 rgba(255,255,255,0.95)',
+                    '0 24px 60px -16px rgba(192,38,211,0.34), 0 8px 22px -8px rgba(89,23,196,0.22), inset 0 1px 0 rgba(255,255,255,0.95)',
                 }}
               >
                 <div
                   className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-[20px]"
                   style={{ background: 'linear-gradient(90deg, transparent 8%, rgba(192,38,211,0.6) 50%, transparent 92%)' }}
                 />
-                <div className="mb-4 text-[9px] font-semibold uppercase tracking-[0.22em] text-fuchsia-600">
+                <div className="mb-4 text-[9px] font-bold uppercase tracking-[0.22em] text-fuchsia-700">
                   Platform Stats
                 </div>
                 <div className="grid grid-cols-3 gap-2">
@@ -360,7 +366,7 @@ export default function Hero() {
                       <div
                         className="font-display text-[1.2rem] font-black leading-none tracking-[-0.06em]"
                         style={{
-                          background: 'linear-gradient(135deg, #1a0b3d 0%, #7c3aed 100%)',
+                          background: 'linear-gradient(135deg, #140832 0%, #7126e3 100%)',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
                           backgroundClip: 'text',
@@ -368,7 +374,7 @@ export default function Hero() {
                       >
                         {stat.value}
                       </div>
-                      <div className="mt-1 text-[8px] uppercase tracking-[0.12em] text-violet-600/80">
+                      <div className="mt-1 text-[8px] font-bold uppercase tracking-[0.12em] text-violet-700">
                         {stat.label}
                       </div>
                     </div>
@@ -385,10 +391,10 @@ export default function Hero() {
               transition={motionEnabled ? { duration: 0.9, delay: 0.72, ease } : undefined}
             >
               <div
-                className={`w-[236px] rounded-[20px] border border-violet-200/70 bg-white/92 p-4 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-up-sm' : ''}`}
+                className={`w-[236px] rounded-[20px] border border-violet-300/70 bg-white p-4 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-up-sm' : ''}`}
                 style={{
                   boxShadow:
-                    '0 22px 52px -16px rgba(124,58,237,0.28), 0 6px 18px -6px rgba(124,58,237,0.16), inset 0 1px 0 rgba(255,255,255,0.95)',
+                    '0 24px 58px -16px rgba(89,23,196,0.32), 0 8px 22px -8px rgba(89,23,196,0.20), inset 0 1px 0 rgba(255,255,255,0.95)',
                 }}
               >
                 <div
@@ -406,19 +412,19 @@ export default function Hero() {
                     <Building2 className="h-4 w-4 text-white" strokeWidth={2.0} />
                   </div>
                   <div>
-                    <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-600">For Providers</div>
-                    <div className="text-[12.5px] font-bold" style={{ color: '#1a0b3d' }}>Grow with Us</div>
+                    <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-700">For Providers</div>
+                    <div className="text-[12.5px] font-bold" style={{ color: '#140832' }}>Grow with Us</div>
                   </div>
                 </div>
-                <p className="text-[11.5px] leading-[1.65]" style={{ color: 'rgba(61, 35, 112, 0.7)' }}>
+                <p className="text-[11.5px] font-medium leading-[1.65]" style={{ color: '#31195f' }}>
                   Showcase your services and receive inquiries from premium event organizers.
                 </p>
                 <div className="mt-3 flex items-center gap-2">
                   <div
                     className="h-2 w-2 rounded-full bg-emerald-500"
-                    style={{ boxShadow: '0 0 8px rgba(16,185,129,0.85)' }}
+                    style={{ boxShadow: '0 0 8px rgba(16,185,129,0.95)' }}
                   />
-                  <span className="text-[10px] font-semibold text-emerald-600">30+ Active Vendors</span>
+                  <span className="text-[10px] font-bold text-emerald-700">30+ Active Vendors</span>
                 </div>
               </div>
             </motion.div>

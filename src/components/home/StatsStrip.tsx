@@ -29,7 +29,7 @@ export default function StatsStrip() {
       {/* Top separator */}
       <div
         className="absolute inset-x-0 top-0 h-px"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(124,58,237,0.18), transparent)' }}
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(113,38,227,0.32), transparent)' }}
       />
 
       <div className="relative py-8 sm:py-10">
@@ -47,10 +47,10 @@ export default function StatsStrip() {
 
             {/* Left label */}
             <div className="shrink-0">
-              <div className="text-[8.5px] font-semibold uppercase tracking-[0.2em] text-violet-600/75 sm:text-[9.5px] sm:tracking-[0.24em]">
+              <div className="text-[8.5px] font-bold uppercase tracking-[0.2em] text-violet-700 sm:text-[9.5px] sm:tracking-[0.24em]">
                 Trusted by
               </div>
-              <div className="mt-1 text-[10.75px] font-semibold sm:text-[12.5px]" style={{ color: '#1a0b3d' }}>
+              <div className="mt-1 text-[10.75px] font-bold sm:text-[12.5px]" style={{ color: '#140832' }}>
                 Top brands &amp; teams
               </div>
             </div>
@@ -58,7 +58,7 @@ export default function StatsStrip() {
             {/* Divider */}
             <div
               className="h-8 w-px shrink-0 sm:h-10"
-              style={{ background: 'linear-gradient(180deg, transparent, rgba(124,58,237,0.32), transparent)' }}
+              style={{ background: 'linear-gradient(180deg, transparent, rgba(113,38,227,0.42), transparent)' }}
             />
 
             {/* Marquee */}
@@ -72,12 +72,12 @@ export default function StatsStrip() {
               <div className="stats-marquee__inner">
                 {loop.map((item, i) => (
                   <div key={`${item}-${i}`} className="flex shrink-0 items-center gap-3 px-4">
-                    <span className="whitespace-nowrap font-display text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-700 sm:text-[10.5px] sm:tracking-[0.18em]">
+                    <span className="whitespace-nowrap font-display text-[10px] font-bold uppercase tracking-[0.16em] text-violet-800 sm:text-[10.5px] sm:tracking-[0.18em]">
                       {item}
                     </span>
                     <span
-                      className="h-1.5 w-1.5 shrink-0 rounded-full bg-violet-500/55"
-                      style={{ boxShadow: '0 0 6px rgba(168,85,247,0.55)' }}
+                      className="h-1.5 w-1.5 shrink-0 rounded-full bg-violet-600"
+                      style={{ boxShadow: '0 0 6px rgba(168,85,247,0.7)' }}
                       aria-hidden="true"
                     />
                   </div>
@@ -91,7 +91,7 @@ export default function StatsStrip() {
       {/* Bottom separator */}
       <div
         className="absolute inset-x-0 bottom-0 h-px"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(124,58,237,0.18), transparent)' }}
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(113,38,227,0.32), transparent)' }}
       />
     </section>
   )

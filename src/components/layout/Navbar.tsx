@@ -156,16 +156,16 @@ function EventiesLogo({
   return (
     <div className="flex items-center gap-2.5">
       {/* Badge */}
-      <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[13px] border border-white/40 bg-[linear-gradient(145deg,#7c3aed_0%,#a855f7_48%,#c026d3_112%)] shadow-[0_12px_32px_-6px_rgba(124,58,237,0.55)]">
-        <div className="absolute inset-x-2 top-1.5 h-3 rounded-full bg-white/30 blur-sm" />
+      <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[13px] border border-white/40 bg-[linear-gradient(145deg,#7126e3_0%,#a855f7_48%,#d946ef_112%)] shadow-[0_14px_34px_-6px_rgba(89,23,196,0.6)]">
+        <div className="absolute inset-x-2 top-1.5 h-3 rounded-full bg-white/35 blur-sm" />
         <span className="relative text-[10.5px] font-black tracking-[0.12em] text-white">Ev</span>
       </div>
       {/* Text mark */}
       <div className="min-w-0 leading-none">
-        <div className="font-display text-[12.5px] font-bold tracking-[-0.01em] text-ink-900 sm:text-[13px]" style={{ color: '#1a0b3d' }}>
+        <div className="font-display text-[12.75px] font-extrabold tracking-[-0.01em] sm:text-[13.5px]" style={{ color: '#140832' }}>
           Eventies
         </div>
-        <div className="mt-[3px] text-[8.5px] uppercase tracking-[0.15em] text-violet-600/85 sm:text-[9px] sm:tracking-[0.18em]">
+        <div className="mt-[3px] text-[8.5px] font-semibold uppercase tracking-[0.16em] text-violet-700 sm:text-[9px] sm:tracking-[0.18em]">
           Marketplace
         </div>
       </div>
@@ -206,10 +206,10 @@ function IconCircle({
 }) {
   const base = 'relative flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-full border'
   if (colorScheme === 'cyan' && isActive)
-    return <span className={`${base} border-violet-300/85 bg-[linear-gradient(135deg,rgba(124,58,237,0.10),rgba(168,85,247,0.06))]`}>{children}</span>
+    return <span className={`${base} border-violet-400/85 bg-[linear-gradient(135deg,rgba(113,38,227,0.18),rgba(168,85,247,0.10))] text-violet-800`}>{children}</span>
   if (colorScheme === 'pink' && isActive)
-    return <span className={`${base} border-fuchsia-300/85 bg-[linear-gradient(135deg,rgba(192,38,211,0.10),rgba(168,85,247,0.06))]`}>{children}</span>
-  return <span className={`${base} border-violet-200/75 bg-white/75`}>{children}</span>
+    return <span className={`${base} border-fuchsia-400/85 bg-[linear-gradient(135deg,rgba(192,38,211,0.18),rgba(168,85,247,0.10))] text-fuchsia-800`}>{children}</span>
+  return <span className={`${base} border-violet-300/75 bg-white/95 text-violet-700`}>{children}</span>
 }
 
 const DesktopPrimaryNav = memo(function DesktopPrimaryNav({
@@ -353,10 +353,10 @@ const MobileTopChips = memo(function MobileTopChips({
             to={chip.to}
             onMouseEnter={() => preloadRoute(chip.to)}
             onFocus={() => preloadRoute(chip.to)}
-            className={`inline-flex h-[1.875rem] shrink-0 items-center rounded-full border px-3.5 text-[11.5px] font-medium whitespace-nowrap transition-all duration-300 ${
+            className={`inline-flex h-[1.875rem] shrink-0 items-center rounded-full border px-3.5 text-[11.5px] font-semibold whitespace-nowrap transition-all duration-300 ${
               isChipActive
-                ? 'border-violet-300/85 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(168,85,247,0.06))] text-violet-900 shadow-[0_4px_14px_-4px_rgba(124,58,237,0.28)]'
-                : 'border-violet-200/65 bg-white/85 text-violet-700 hover:text-violet-900 hover:bg-white hover:border-violet-300/85'
+                ? 'border-violet-400/80 bg-[linear-gradient(135deg,rgba(113,38,227,0.18),rgba(168,85,247,0.10))] text-violet-950 shadow-[0_4px_14px_-4px_rgba(89,23,196,0.32)]'
+                : 'border-violet-300/60 bg-white/95 text-violet-800 hover:text-violet-950 hover:bg-white hover:border-violet-400/80'
             }`}
           >
             {chip.label}
@@ -404,20 +404,20 @@ const NavbarAccountActions = memo(function NavbarAccountActions({
   const cartSurface = cartActive
     ? isDark
       ? 'border-cyan-300/28 bg-[linear-gradient(135deg,rgba(8,30,44,0.95),rgba(11,18,38,0.98))] text-white shadow-[0_16px_48px_rgba(2,8,18,0.46)]'
-      : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(245,243,255,0.94))] text-gray-900 shadow-[0_12px_32px_rgba(124,58,237,0.14)]'
+      : 'border-violet-400/60 bg-[linear-gradient(135deg,rgba(255,255,255,1),rgba(244,234,255,0.98))] text-ink-900 shadow-[0_12px_32px_-10px_rgba(89,23,196,0.30)]'
     : cartHasItems
       ? isDark
         ? 'border-cyan-300/18 bg-[linear-gradient(135deg,rgba(8,25,38,0.9),rgba(13,18,34,0.94))] text-white hover:border-cyan-300/30'
-        : 'border-violet-300/35 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(245,243,255,0.92))] text-gray-900 hover:border-violet-300/55'
+        : 'border-violet-300/60 bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(245,238,255,0.96))] text-ink-900 hover:border-violet-400/80'
       : utilityPill
 
   const quoteSurface = quoteActive
     ? isDark
       ? 'border-fuchsia-300/24 bg-[linear-gradient(135deg,rgba(39,15,57,0.96),rgba(16,14,36,0.98))] text-white shadow-[0_16px_48px_rgba(17,5,28,0.42)]'
-      : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(250,244,255,0.94))] text-gray-900 shadow-[0_12px_32px_rgba(168,85,247,0.12)]'
+      : 'border-violet-400/60 bg-[linear-gradient(135deg,rgba(255,255,255,1),rgba(248,236,255,0.98))] text-ink-900 shadow-[0_12px_32px_-10px_rgba(168,85,247,0.28)]'
     : isDark
       ? 'border-fuchsia-300/16 bg-[linear-gradient(135deg,rgba(31,14,42,0.92),rgba(14,14,31,0.96))] text-white hover:border-fuchsia-300/28'
-      : 'border-violet-300/30 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(250,244,255,0.92))] text-gray-900 hover:border-violet-300/50'
+      : 'border-violet-300/55 bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(248,236,255,0.96))] text-ink-900 hover:border-violet-400/75'
 
   return (
     <>
@@ -472,13 +472,23 @@ const NavbarAccountActions = memo(function NavbarAccountActions({
 
       <Link
         to="/rental-cart"
-        className={`relative inline-flex h-10 items-center gap-2 rounded-md border px-2.5 transition-all sm:px-3 ${cartSurface} ${focus}`}
+        className={`relative inline-flex h-10 w-10 items-center justify-center rounded-md border transition-all sm:w-auto sm:justify-start sm:gap-2 sm:px-3 ${cartSurface} ${focus}`}
         aria-label={cartHasItems ? `Cart · ${cartItemCount}` : 'Cart'}
       >
-        <IconCircle active={cartHasItems || cartActive} colorScheme="cyan" isDark={isDark} heroMode={heroMode}>
-          <ShoppingCart className="h-3.5 w-3.5" strokeWidth={2} />
+        {/* Mobile: bare icon — keeps the button perfectly square so it
+            matches the hamburger next to it. The count badge is anchored
+            to the icon span. */}
+        <span className="relative sm:hidden">
+          <ShoppingCart className="h-4 w-4" strokeWidth={2.2} />
           {cartHasItems && <CountBadge count={cartCountLabel} color="cyan" isDark={isDark} />}
-        </IconCircle>
+        </span>
+        {/* Tablet+: framed icon circle inside the pill. */}
+        <span className="relative hidden sm:inline-flex">
+          <IconCircle active={cartHasItems || cartActive} colorScheme="cyan" isDark={isDark} heroMode={heroMode}>
+            <ShoppingCart className="h-3.5 w-3.5" strokeWidth={2} />
+            {cartHasItems && <CountBadge count={cartCountLabel} color="cyan" isDark={isDark} />}
+          </IconCircle>
+        </span>
         <span className="hidden text-[12px] font-medium sm:inline">Cart</span>
       </Link>
 
@@ -666,10 +676,10 @@ const NavbarUserMenuPortal = memo(function NavbarUserMenuPortal({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: userMenuPosition.placement === 'bottom' ? -8 : 8, scale: 0.97 }}
           transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-          className={`fixed z-[90] w-[280px] overflow-hidden rounded-[20px] border ${
+          className={`fixed z-[110] w-[288px] overflow-hidden rounded-[20px] border ${
             isDark
               ? 'border-white/[0.08] bg-[linear-gradient(170deg,rgba(7,9,22,0.995),rgba(4,6,16,0.995))] shadow-[0_28px_90px_rgba(0,2,10,0.68),inset_0_1px_0_rgba(255,255,255,0.05)]'
-              : 'border-violet-200/65 bg-white/98 shadow-[0_20px_68px_rgba(97,40,178,0.13),0_4px_16px_rgba(0,0,0,0.05)]'
+              : 'border-violet-300/70 bg-white shadow-[0_32px_80px_-18px_rgba(46,10,114,0.32),0_10px_28px_-8px_rgba(89,23,196,0.18),inset_0_1px_0_rgba(255,255,255,0.95)]'
           } ${userMenuPosition.placement === 'bottom' ? 'origin-top-right' : 'origin-bottom-right'}`}
           style={{
             top: `${userMenuPosition.top}px`,
@@ -685,11 +695,11 @@ const NavbarUserMenuPortal = memo(function NavbarUserMenuPortal({
             }}
           />
 
-          <div className={`flex items-center gap-3 px-4 py-4 ${isDark ? 'border-b border-white/[0.07]' : 'border-b border-violet-100'}`}>
-            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${
+          <div className={`flex items-center gap-3 px-4 py-4 ${isDark ? 'border-b border-white/[0.07]' : 'border-b border-violet-200/70 bg-gradient-to-b from-violet-50/60 to-transparent'}`}>
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${
               isDark
                 ? 'border-violet-300/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.28),rgba(236,72,153,0.16))]'
-                : 'border-violet-200/60 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(236,72,153,0.08))]'
+                : 'border-violet-300/60 bg-[linear-gradient(135deg,rgba(113,38,227,0.18),rgba(217,70,239,0.10))] shadow-[0_4px_12px_-4px_rgba(89,23,196,0.32)]'
             }`}>
               <UserAvatar
                 name={deferredUser?.name}
@@ -708,10 +718,10 @@ const NavbarUserMenuPortal = memo(function NavbarUserMenuPortal({
               />
             </div>
             <div className="min-w-0">
-              <div className={`truncate text-[13px] font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <div className={`truncate text-[13px] font-bold tracking-[-0.01em] ${isDark ? 'text-white' : 'text-ink-900'}`}>
                 {deferredUser?.name || 'User'}
               </div>
-              <div className={`truncate text-[11px] ${isDark ? 'text-purple-100/42' : 'text-gray-400'}`}>
+              <div className={`truncate text-[11px] ${isDark ? 'text-purple-100/42' : 'text-ink-500'}`}>
                 {deferredUser?.email || ''}
               </div>
             </div>
@@ -729,19 +739,19 @@ const NavbarUserMenuPortal = memo(function NavbarUserMenuPortal({
                   key={item.to}
                   to={item.to}
                   onClick={onClose}
-                  className={`flex items-center gap-3 rounded-[13px] px-3 py-2.5 text-[12px] font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-3 rounded-[13px] px-3 py-2.5 text-[12.5px] font-semibold transition-all duration-200 ${
                     isDark
                       ? 'text-purple-100/70 hover:bg-white/[0.06] hover:text-white'
-                      : 'text-gray-600 hover:bg-violet-50 hover:text-gray-900'
+                      : 'text-ink-800 hover:bg-violet-100/70 hover:text-violet-950'
                   } ${focus}`}
                 >
-                  <Icon className={`h-3.5 w-3.5 ${isDark ? 'text-white/38' : 'text-violet-400/70'}`} strokeWidth={2} />
+                  <Icon className={`h-3.5 w-3.5 ${isDark ? 'text-white/38' : 'text-violet-600'}`} strokeWidth={2} />
                   {item.label}
                 </Link>
               )
             })}
 
-            <div className={`my-1.5 h-px ${isDark ? 'bg-white/[0.06]' : 'bg-violet-100'}`} />
+            <div className={`my-1.5 h-px ${isDark ? 'bg-white/[0.06]' : 'bg-violet-200/70'}`} />
 
             <button
               type="button"
@@ -749,7 +759,7 @@ const NavbarUserMenuPortal = memo(function NavbarUserMenuPortal({
                 onClose()
                 void logout()
               }}
-              className={`flex w-full items-center gap-3 rounded-[13px] px-3 py-2.5 text-left text-[12px] font-medium transition-all duration-200 ${
+              className={`flex w-full items-center gap-3 rounded-[13px] px-3 py-2.5 text-left text-[12.5px] font-semibold transition-all duration-200 ${
                 isDark
                   ? 'text-red-300/72 hover:bg-red-500/[0.10] hover:text-red-200'
                   : 'text-red-600 hover:bg-red-50 hover:text-red-700'
@@ -792,6 +802,7 @@ export default function Navbar() {
   const userMenuPopoverRef = useRef<HTMLDivElement>(null)
   const desktopMenuPopoverRef = useRef<HTMLDivElement>(null)
   const navbarBarRef = useRef<HTMLDivElement>(null)
+  const navSurfaceRef = useRef<HTMLDivElement>(null)
   const desktopPanelFirstLinkRef = useRef<HTMLAnchorElement>(null)
   const desktopTriggerRefs = useRef<Record<string, HTMLElement | null>>({})
   const desktopOpenTimerRef = useRef<number | null>(null)
@@ -862,6 +873,9 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
+    // Binary "scrolled" flag used by non-home routes. The home page does
+    // not depend on this — it drives the navbar surface via a continuous
+    // scroll-based ramp (see the navSurfaceRef effect below).
     let ticking = false
     const onScroll = () => {
       if (ticking) return
@@ -879,6 +893,60 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  // ── Home: drive navbar surface continuously from scroll position ────────
+  // The bar starts fully transparent at scrollY = 0 and ramps to a solid
+  // white surface within the first ~60 px of scroll. Non-home routes keep
+  // their static class-based surface (see navBarBg).
+  useEffect(() => {
+    const el = navSurfaceRef.current
+    if (!el) return
+
+    if (!isHome) {
+      // Clear any inline styles left over from the home page.
+      el.style.backgroundColor = ''
+      el.style.borderBottomColor = ''
+      el.style.boxShadow = ''
+      el.style.backdropFilter = ''
+      ;(el.style as CSSStyleDeclaration & { webkitBackdropFilter?: string }).webkitBackdropFilter = ''
+      el.style.transition = ''
+      return
+    }
+
+    // Disable the wrapper's CSS transition while we're driving it via
+    // requestAnimationFrame — otherwise the transition would fight every
+    // frame and feel laggy. The ramp itself is already smooth.
+    el.style.transition = 'none'
+
+    let raf = 0
+    const apply = () => {
+      raf = 0
+      const y = window.scrollY
+      const p = Math.min(1, Math.max(0, y / 60)) // 0 → 1 over 60px
+
+      el.style.backgroundColor = `rgba(255, 255, 255, ${p * 0.92})`
+      el.style.borderBottomColor = `rgba(196, 165, 255, ${p * 0.55})`
+      el.style.boxShadow =
+        p > 0.04 ? `0 2px 28px rgba(46, 10, 114, ${p * 0.16})` : 'none'
+
+      const blur = `${(p * 16).toFixed(2)}px`
+      const filter = p > 0.04 ? `blur(${blur}) saturate(1.2)` : 'none'
+      el.style.backdropFilter = filter
+      ;(el.style as CSSStyleDeclaration & { webkitBackdropFilter?: string }).webkitBackdropFilter = filter
+    }
+
+    const onScroll = () => {
+      if (raf) return
+      raf = window.requestAnimationFrame(apply)
+    }
+
+    apply()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      if (raf) window.cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', onScroll)
+    }
+  }, [isHome])
 
   useEffect(() => {
     setOpen(false)
@@ -1031,49 +1099,53 @@ export default function Navbar() {
   const heroMode = false
 
   // ── Nav bar background ────────────────────────────────────────────────────
-  const navBarBg = scrolled
-    ? perfLow
-      ? 'border-b border-violet-200/45 bg-white/[0.96] shadow-[0_2px_22px_rgba(124,58,237,0.10)]'
-      : 'border-b border-violet-200/45 bg-white/[0.82] backdrop-blur-xl shadow-[0_2px_28px_rgba(124,58,237,0.10)]'
-    : isHome
+  // Home page: handled by the navSurfaceRef effect — surface ramps from
+  // transparent → white over the first 60 px of scroll. We leave the class
+  // empty here so the inline styles win cleanly.
+  //
+  // Other pages: keep the existing static white surface, with the
+  // "scrolled" variant kicking in after a tiny 18 px scroll.
+  const navBarBg = isHome
+    ? 'border-b border-transparent'
+    : scrolled
       ? perfLow
-        ? 'bg-transparent'
-        : 'bg-white/[0.32] backdrop-blur-[6px]'
+        ? 'border-b border-violet-300/55 bg-white/[0.97] shadow-[0_2px_28px_rgba(46,10,114,0.14)]'
+        : 'border-b border-violet-300/55 bg-white/[0.92] backdrop-blur-xl shadow-[0_2px_28px_rgba(46,10,114,0.14)]'
       : perfLow
-        ? 'border-b border-violet-100/55 bg-white/[0.92]'
-        : 'border-b border-violet-100/55 bg-white/[0.72] backdrop-blur-[8px]'
+        ? 'border-b border-violet-200/55 bg-white/[0.95]'
+        : 'border-b border-violet-200/55 bg-white/[0.86] backdrop-blur-xl shadow-[0_1px_22px_rgba(46,10,114,0.08)]'
 
   // ── Utility pill (search, login) ───────────────────────────────────────────
   const utilityPill =
-    'border-violet-200/70 bg-white/85 text-violet-800 hover:border-violet-400/60 hover:bg-white hover:text-violet-900 hover:shadow-[0_8px_22px_-8px_rgba(124,58,237,0.22)]'
+    'border-violet-300/70 bg-white/95 text-violet-900 hover:border-violet-500/70 hover:bg-white hover:text-violet-950 hover:shadow-[0_10px_26px_-10px_rgba(89,23,196,0.32)]'
 
   // ── Desktop nav link text ──────────────────────────────────────────────────
   const navLinkColor = useCallback(
     (isActive: boolean) =>
       isActive
-        ? 'text-violet-900'
-        : 'text-violet-700/72 hover:text-violet-900',
+        ? 'text-violet-950'
+        : 'text-ink-700 hover:text-violet-900',
     []
   )
 
   const navTriggerColor = useCallback(
     (isActive: boolean, isOpen: boolean) =>
       isActive || isOpen
-        ? 'text-violet-900'
-        : 'text-violet-700/72 hover:text-violet-900',
+        ? 'text-violet-950'
+        : 'text-ink-700 hover:text-violet-900',
     []
   )
 
   // ── Active pill ────────────────────────────────────────────────────────────
   const navActivePill =
-    'bg-white border border-violet-200/85 shadow-[0_8px_22px_-8px_rgba(124,58,237,0.22)]'
+    'bg-white border border-violet-300/80 shadow-[0_10px_24px_-10px_rgba(89,23,196,0.32)]'
 
   // ── Mobile tile ────────────────────────────────────────────────────────────
   const mobileTile =
-    'border-violet-200/65 bg-white/80 text-violet-800 hover:text-violet-900 hover:bg-white hover:border-violet-300/85'
+    'border-violet-300/55 bg-white/95 text-violet-900 hover:text-violet-950 hover:bg-white hover:border-violet-400/70'
 
   const mobileActiveTile =
-    'border-violet-300/65 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(168,85,247,0.06),rgba(217,70,239,0.06))] text-violet-900 shadow-[0_4px_16px_-6px_rgba(124,58,237,0.22)]'
+    'border-violet-400/70 bg-[linear-gradient(135deg,rgba(113,38,227,0.18),rgba(168,85,247,0.10),rgba(217,70,239,0.08))] text-violet-950 shadow-[0_6px_18px_-6px_rgba(89,23,196,0.32)]'
 
   // ── Cart / Quote surfaces ──────────────────────────────────────────────────
   // ── Desktop nav data ────────────────────────────────────────────────────────
@@ -1224,7 +1296,7 @@ export default function Navbar() {
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 w-full">
       {/* ══════════════════════ MAIN BAR ══════════════════════ */}
-      <div className={`pointer-events-auto w-full transition-all duration-500 ${navBarBg}`}>
+      <div ref={navSurfaceRef} className={`pointer-events-auto w-full transition-all duration-500 ${navBarBg}`}>
         <div className="relative mx-auto max-w-[84rem]">
 
           {/* ─── Nav bar rows (ref covers both rows so --app-navbar-height includes chip row) ─── */}
@@ -1257,13 +1329,14 @@ export default function Navbar() {
             {/* ── Right actions ── */}
             <div className="flex items-center justify-end gap-1.5 sm:gap-2 lg:min-w-[160px]">
 
-              {/* Search compact (sm–xl) */}
+              {/* Search compact (sm–xl) — same square footprint as Cart
+                  & hamburger so the right-side controls line up. */}
               <button
                 onClick={openSearchDialog}
-                className={`hidden h-10 items-center gap-2 rounded-md border px-3 text-[12px] font-medium transition-all sm:inline-flex xl:hidden ${utilityPill} ${focus}`}
+                className={`hidden h-10 w-10 items-center justify-center rounded-md border text-[12px] font-medium transition-all sm:inline-flex xl:hidden ${utilityPill} ${focus}`}
                 aria-label="Search (Ctrl+K)"
               >
-                <Search className="h-3.5 w-3.5" strokeWidth={2} />
+                <Search className="h-4 w-4" strokeWidth={2.2} />
               </button>
 
               {/* Search with label (xl+) */}
@@ -1296,14 +1369,16 @@ export default function Navbar() {
                 onToggleUserMenu={toggleUserMenu}
               />
 
-              {/* Hamburger */}
+              {/* Hamburger — matches the Cart button's mobile footprint
+                  exactly (h-10 w-10 rounded-md), so on phones the two
+                  right-side controls read as a tidy pair. */}
               <button
                 onClick={() => setOpen(v => !v)}
-                className={`inline-flex h-[2.375rem] w-[2.375rem] items-center justify-center rounded-[12px] border transition-all lg:hidden ${
+                className={`inline-flex h-10 w-10 items-center justify-center rounded-md border transition-all lg:hidden ${
                   open
                     ? isDark
-                      ? 'border-violet-400/22 bg-violet-500/12 text-white'
-                      : 'border-violet-300/45 bg-violet-50 text-violet-800'
+                      ? 'border-violet-400/30 bg-violet-500/14 text-white'
+                      : 'border-violet-400/70 bg-violet-50 text-violet-900'
                     : utilityPill
                 } ${focus}`}
                 aria-label={open ? 'Close menu' : 'Open menu'}
@@ -1354,7 +1429,7 @@ export default function Navbar() {
                   className={`mx-3 mb-3 overflow-y-auto rounded-[22px] border ${
                     isDark
                       ? 'border-white/[0.08] bg-[linear-gradient(180deg,rgba(5,7,20,0.99),rgba(3,5,16,0.99))] shadow-[0_24px_80px_rgba(0,2,12,0.65),inset_0_1px_0_rgba(255,255,255,0.04)]'
-                      : 'border-violet-200/65 bg-white/97 shadow-[0_16px_48px_rgba(97,40,178,0.11)]'
+                      : 'border-violet-300/70 bg-white shadow-[0_24px_64px_-12px_rgba(46,10,114,0.28),0_8px_22px_-6px_rgba(89,23,196,0.18),inset_0_1px_0_rgba(255,255,255,0.95)]'
                   }`}
                   style={{
                     maxHeight: 'calc(100dvh - 5.5rem)',
@@ -1503,7 +1578,7 @@ export default function Navbar() {
                   if (canHoverDesktopNav) scheduleDesktopClose()
                 }}
                 onKeyDown={e => { if (e.key === 'Escape') { e.preventDefault(); scheduleDesktopClose(true) } }}
-                className="fixed z-[70] hidden lg:block"
+                className="fixed z-[100] hidden lg:block"
                 role="menu"
                 aria-label={`${activeDesktopItem.label} menu`}
                 style={{
@@ -1520,7 +1595,7 @@ export default function Navbar() {
                   className={`relative overflow-hidden rounded-[18px] border ${
                     isDark
                       ? 'border-white/[0.08] bg-[rgba(7,9,22,0.92)] shadow-[0_24px_72px_rgba(0,2,10,0.56),inset_0_1px_0_rgba(255,255,255,0.04)]'
-                      : 'border-violet-200/75 bg-white/94 shadow-[0_18px_56px_rgba(97,40,178,0.10),0_4px_18px_rgba(0,0,0,0.03)]'
+                      : 'border-violet-300/70 bg-white shadow-[0_30px_80px_-18px_rgba(46,10,114,0.32),0_10px_28px_-8px_rgba(89,23,196,0.18),inset_0_1px_0_rgba(255,255,255,0.95)]'
                   }`}
                 >
                   {/* Top accent line */}
@@ -1539,7 +1614,7 @@ export default function Navbar() {
                     <div className={`relative flex flex-col justify-between px-6 py-5 ${
                       isDark
                         ? 'bg-[linear-gradient(160deg,rgba(12,10,28,0.96),rgba(8,9,20,0.9))]'
-                        : 'bg-[linear-gradient(160deg,rgba(250,247,255,0.98),rgba(245,242,255,0.94))]'
+                        : 'bg-[linear-gradient(160deg,rgba(247,241,255,1),rgba(241,231,255,0.96))] border-b border-violet-200/60'
                     }`}>
                       {/* Corner accent glow */}
                       {isDark && (
@@ -1551,17 +1626,17 @@ export default function Navbar() {
 
                       <div className="relative">
                         <div className={`text-[9px] font-bold uppercase tracking-[0.24em] ${
-                          isDark ? 'text-violet-300/68' : 'text-violet-600/72'
+                          isDark ? 'text-violet-300/68' : 'text-violet-800'
                         }`}>
                           {activeDesktopItem.eyebrow}
                         </div>
                         <h3 className={`mt-2 font-display text-[1.04rem] font-bold leading-tight tracking-[-0.025em] ${
-                          isDark ? 'text-white' : 'text-gray-900'
+                          isDark ? 'text-white' : 'text-ink-900'
                         }`}>
                           {activeDesktopItem.title}
                         </h3>
-                        <p className={`mt-2.5 max-w-[14rem] text-[11px] leading-[1.55] ${
-                          isDark ? 'text-purple-100/52' : 'text-gray-500'
+                        <p className={`mt-2.5 max-w-[14rem] text-[11.5px] leading-[1.55] ${
+                          isDark ? 'text-purple-100/52' : 'text-ink-600'
                         }`}>
                           {activeDesktopItem.body}
                         </p>
@@ -1571,10 +1646,10 @@ export default function Navbar() {
                         <Link
                           to={activeDesktopItem.ctaTo}
                           onClick={() => scheduleDesktopClose(true)}
-                          className={`mt-5 inline-flex h-10 w-fit items-center gap-2 rounded-md border px-4 text-[11px] font-semibold transition-all duration-200 hover:-translate-y-0.5 ${
+                          className={`mt-5 inline-flex h-10 w-fit items-center gap-2 rounded-md border px-4 text-[11px] font-bold transition-all duration-200 hover:-translate-y-0.5 ${
                             isDark
                               ? 'border-white/[0.11] bg-white/[0.05] text-white hover:border-violet-400/22 hover:bg-white/[0.08]'
-                              : 'border-violet-200/80 bg-white text-gray-800 shadow-sm hover:border-violet-300 hover:bg-violet-50/60 hover:text-violet-800'
+                              : 'border-violet-300/80 bg-white text-violet-800 shadow-[0_4px_14px_-6px_rgba(89,23,196,0.22)] hover:border-violet-500 hover:bg-violet-50 hover:text-violet-900'
                           } ${focus}`}
                         >
                           {activeDesktopItem.ctaLabel}
@@ -1584,10 +1659,10 @@ export default function Navbar() {
                     </div>
 
                     {/* ── Right panel: nav items ── */}
-                    <div className={`p-2.5 ${
+                    <div className={`p-3 ${
                       isDark
                         ? 'bg-[linear-gradient(180deg,rgba(6,8,20,0.9),rgba(5,7,16,0.84))]'
-                        : 'bg-white/95'
+                        : 'bg-white'
                     }`}>
                       <div
                         className={`grid gap-2 ${
@@ -1614,10 +1689,10 @@ export default function Navbar() {
                                 isCurrent
                                   ? isDark
                                     ? 'border-violet-300/24 bg-[linear-gradient(148deg,rgba(124,58,237,0.16),rgba(236,72,153,0.07),rgba(34,211,238,0.07))]'
-                                    : 'border-violet-300/40 bg-[linear-gradient(148deg,rgba(124,58,237,0.08),rgba(236,72,153,0.04),rgba(34,211,238,0.04))]'
+                                    : 'border-violet-400/60 bg-[linear-gradient(148deg,rgba(113,38,227,0.14),rgba(217,70,239,0.08))] shadow-[0_4px_14px_-6px_rgba(89,23,196,0.28)]'
                                   : isDark
                                     ? 'border-white/[0.06] bg-white/[0.02] hover:border-violet-400/18 hover:bg-white/[0.05]'
-                                    : 'border-violet-100/80 bg-white/60 hover:border-violet-200 hover:bg-violet-50/60'
+                                    : 'border-violet-200/70 bg-white hover:border-violet-400/60 hover:bg-violet-50/70 hover:shadow-[0_6px_18px_-8px_rgba(89,23,196,0.24)]'
                               } ${focus}`}
                             >
                               {/* Hover glow on item */}
@@ -1632,10 +1707,10 @@ export default function Navbar() {
                                 isCurrent
                                   ? isDark
                                     ? 'border-violet-400/28 bg-[linear-gradient(145deg,rgba(124,58,237,0.28),rgba(236,72,153,0.14))] text-violet-200'
-                                    : 'border-violet-300/55 bg-[linear-gradient(145deg,rgba(124,58,237,0.14),rgba(236,72,153,0.07))] text-violet-700'
+                                    : 'border-violet-400/70 bg-[linear-gradient(145deg,rgba(113,38,227,0.22),rgba(217,70,239,0.12))] text-violet-800'
                                   : isDark
                                     ? 'border-white/[0.09] bg-white/[0.05] text-white/75 group-hover:border-violet-400/22 group-hover:text-white'
-                                    : 'border-violet-200/65 bg-violet-50/80 text-violet-600 group-hover:border-violet-300 group-hover:bg-violet-100/70'
+                                    : 'border-violet-200/80 bg-violet-50 text-violet-700 group-hover:border-violet-400 group-hover:bg-violet-100'
                               }`}>
                                 <Icon className="h-4 w-4" strokeWidth={2} />
                               </div>
@@ -1643,21 +1718,21 @@ export default function Navbar() {
                               {/* Text */}
                               <div className="relative min-w-0 flex-1">
                                 <div className="flex items-center justify-between gap-2">
-                                  <span className={`text-[12px] font-semibold tracking-[-0.01em] transition-colors ${
-                                    isDark ? 'text-white/90 group-hover:text-white' : 'text-gray-800 group-hover:text-gray-900'
+                                  <span className={`text-[12.5px] font-bold tracking-[-0.01em] transition-colors ${
+                                    isDark ? 'text-white/90 group-hover:text-white' : 'text-ink-900 group-hover:text-violet-900'
                                   }`}>
                                     {child.label}
                                   </span>
                                   <span className={`shrink-0 rounded-full border px-2 py-[3px] text-[7.5px] font-bold uppercase tracking-[0.12em] ${
                                     isDark
                                       ? 'border-white/[0.09] bg-white/[0.04] text-cyan-200/58'
-                                      : 'border-violet-200/70 bg-violet-50/80 text-violet-600/65'
+                                      : 'border-violet-300/70 bg-violet-100/80 text-violet-800'
                                   }`}>
                                     {child.meta}
                                   </span>
                                 </div>
-                                <p className={`mt-1.5 text-[10.5px] leading-[1.48] ${
-                                  isDark ? 'text-purple-100/48 group-hover:text-purple-100/65' : 'text-gray-500'
+                                <p className={`mt-1.5 text-[11px] leading-[1.5] ${
+                                  isDark ? 'text-purple-100/48 group-hover:text-purple-100/65' : 'text-ink-600'
                                 }`}>
                                   {child.description}
                                 </p>
