@@ -49,7 +49,7 @@ export default function Hero() {
           loading="eager"
           decoding="async"
           fetchPriority="high"
-          className={`h-full w-full object-cover transition-opacity duration-700 ${
+          className={`h-full w-full object-cover object-right md:object-center transition-opacity duration-700 ${
             heroImageReady ? 'opacity-[0.72]' : 'opacity-0'
           }`}
           onLoad={() => setHeroImageReady(true)}

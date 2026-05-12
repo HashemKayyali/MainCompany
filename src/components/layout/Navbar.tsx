@@ -421,6 +421,22 @@ const NavbarAccountActions = memo(function NavbarAccountActions({
 
   return (
     <>
+      <Link
+        to="/rental-cart"
+        className={`relative inline-flex h-10 w-10 items-center justify-center rounded-md border transition-all sm:w-auto sm:justify-start sm:gap-2 sm:px-3.5 ${cartSurface} ${focus}`}
+        aria-label={cartHasItems ? `Cart · ${cartItemCount}` : 'Cart'}
+      >
+        {/* Unified pill content — same visual structure as Search / Login:
+            a 16-px outlined icon followed by the label. No coloured icon
+            circle, so the three nav buttons feel like one family. The
+            count badge anchors to the icon directly. */}
+        <span className="relative inline-flex">
+          <ShoppingCart className="h-4 w-4" strokeWidth={2.2} />
+          {cartHasItems && <CountBadge count={cartCountLabel} color="cyan" isDark={isDark} />}
+        </span>
+        <span className="hidden text-[12px] font-semibold sm:inline">Cart</span>
+      </Link>
+
       {isLoggedIn ? (
         <div ref={userMenuAnchorRef} className="relative hidden sm:block">
           <button
@@ -464,33 +480,12 @@ const NavbarAccountActions = memo(function NavbarAccountActions({
       ) : (
         <Link
           to="/login"
-          className={`hidden h-10 items-center rounded-md border px-4 text-[12px] font-medium transition-all sm:inline-flex ${utilityPill} ${focus}`}
+          className={`hidden h-10 items-center gap-2 rounded-md border px-3.5 text-[12px] font-semibold transition-all sm:inline-flex ${utilityPill} ${focus}`}
         >
-          Login
+          <User2 className="h-4 w-4" strokeWidth={2.2} />
+          <span>Login</span>
         </Link>
       )}
-
-      <Link
-        to="/rental-cart"
-        className={`relative inline-flex h-10 w-10 items-center justify-center rounded-md border transition-all sm:w-auto sm:justify-start sm:gap-2 sm:px-3 ${cartSurface} ${focus}`}
-        aria-label={cartHasItems ? `Cart · ${cartItemCount}` : 'Cart'}
-      >
-        {/* Mobile: bare icon — keeps the button perfectly square so it
-            matches the hamburger next to it. The count badge is anchored
-            to the icon span. */}
-        <span className="relative sm:hidden">
-          <ShoppingCart className="h-4 w-4" strokeWidth={2.2} />
-          {cartHasItems && <CountBadge count={cartCountLabel} color="cyan" isDark={isDark} />}
-        </span>
-        {/* Tablet+: framed icon circle inside the pill. */}
-        <span className="relative hidden sm:inline-flex">
-          <IconCircle active={cartHasItems || cartActive} colorScheme="cyan" isDark={isDark} heroMode={heroMode}>
-            <ShoppingCart className="h-3.5 w-3.5" strokeWidth={2} />
-            {cartHasItems && <CountBadge count={cartCountLabel} color="cyan" isDark={isDark} />}
-          </IconCircle>
-        </span>
-        <span className="hidden text-[12px] font-medium sm:inline">Cart</span>
-      </Link>
 
       {(quoteHasItems || quoteActive) && (
         <Link
@@ -780,6 +775,12 @@ export default function Navbar() {
   const { pathname } = useLocation()
   const { isDark } = useTheme()
   const { perfLow } = usePerfMode()
+
+  // ── Route-derived flags (declared up-front so any effect/state hook below
+  //    can reference them in deps arrays without hitting a TDZ in production).
+  const isHome = pathname === '/'
+  // Hero is now light/purple, so the navbar uses the same light treatment over hero
+  const heroMode = false
 
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -1094,10 +1095,6 @@ export default function Navbar() {
   const focus =
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent'
 
-  const isHome = pathname === '/'
-  // Hero is now light/purple, so the navbar uses the same light treatment over hero
-  const heroMode = false
-
   // ── Nav bar background ────────────────────────────────────────────────────
   // Home page: handled by the navSurfaceRef effect — surface ramps from
   // transparent → white over the first 60 px of scroll. We leave the class
@@ -1342,17 +1339,17 @@ export default function Navbar() {
               {/* Search with label (xl+) */}
               <button
                 onClick={openSearchDialog}
-                className={`hidden h-10 items-center gap-2 rounded-md border px-3.5 text-[12px] font-medium transition-all xl:inline-flex ${utilityPill} ${focus}`}
+                className={`hidden h-10 items-center gap-2 rounded-md border px-3.5 text-[12px] font-semibold transition-all xl:inline-flex ${utilityPill} ${focus}`}
                 aria-label="Search (Ctrl+K)"
               >
-                <Search className="h-3.5 w-3.5" strokeWidth={2} />
+                <Search className="h-4 w-4" strokeWidth={2.2} />
                 <span>Search</span>
-                <kbd className={`rounded-md border px-2 py-0.5 text-[8.5px] font-mono tracking-[0.1em] ${
+                <kbd className={`ml-0.5 rounded-md border px-1.5 py-0.5 text-[8.5px] font-mono tracking-[0.08em] ${
                   heroMode
                     ? 'border-white/12 bg-white/[0.06] text-white/38'
                     : isDark
                       ? 'border-white/10 bg-white/[0.04] text-purple-100/44'
-                      : 'border-violet-200 bg-violet-50/80 text-violet-500'
+                      : 'border-violet-200 bg-violet-50/80 text-violet-600'
                 }`}>
                   ⌘K
                 </kbd>
