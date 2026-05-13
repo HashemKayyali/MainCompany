@@ -1,9 +1,14 @@
-import { lazy, type ComponentType } from 'react'
+import type { ComponentType } from 'react'
+import { lazyWithRetry } from './lazyWithRetry'
 
 type RouteImporter<T extends ComponentType<any>> = () => Promise<{ default: T }>
 
 function lazyRoute<T extends ComponentType<any>>(importer: RouteImporter<T>) {
-  const Component = lazy(importer)
+  // lazyWithRetry adds: 1× retry on transient network failures, plus a
+  // single full-page reload when a chunk hash no longer exists (typical
+  // after a redeploy). Both are common causes of "the app didn't open
+  // on first try, then worked after refresh".
+  const Component = lazyWithRetry(importer as () => Promise<{ default: ComponentType<unknown> }>)
   return Object.assign(Component, { preload: importer })
 }
 
@@ -108,14 +113,19 @@ export function warmCommonRoutes() {
   const warmPriority = () => preloadRoutes(PRIORITY_PUBLIC_PATHS)
   const warmSecondary = () => preloadRoutes(SECONDARY_PUBLIC_PATHS)
 
-  window.setTimeout(warmPriority, 120)
+  setTimeout(warmPriority, 120)
 
-  if ('requestIdleCallback' in window) {
-    ;(window as Window & {
-      requestIdleCallback: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number
-    }).requestIdleCallback(() => warmSecondary(), { timeout: 1400 })
+  type WindowWithIdle = Window & {
+    requestIdleCallback?: (
+      callback: IdleRequestCallback,
+      options?: IdleRequestOptions
+    ) => number
+  }
+  const w = window as WindowWithIdle
+  if (typeof w.requestIdleCallback === 'function') {
+    w.requestIdleCallback(() => warmSecondary(), { timeout: 1400 })
     return
   }
 
-  window.setTimeout(warmSecondary, 360)
+  setTimeout(warmSecondary, 360)
 }

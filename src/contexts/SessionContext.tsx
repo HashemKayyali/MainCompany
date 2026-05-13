@@ -34,11 +34,36 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
     let unsubscribed = false
 
+    // Hard safety: if Supabase auth.getSession() hangs (slow Wi-Fi,
+    // corporate firewall blocking *.supabase.co, etc.) the whole app
+    // would otherwise stay frozen on the PageLoader forever. Treat any
+    // session lookup that takes longer than 7s as "no session" and
+    // unblock rendering. If the real session resolves later the
+    // onAuthStateChange listener below will pick it up and update state.
+    const SESSION_TIMEOUT_MS = 7000
+
     async function init() {
+      let settled = false
+      const timeout = new Promise<{ data: { session: null } }>(resolve => {
+        window.setTimeout(() => {
+          if (!settled) {
+            console.warn(
+              `[SessionContext] getSession() timed out after ${SESSION_TIMEOUT_MS}ms — assuming no session.`
+            )
+            resolve({ data: { session: null } })
+          }
+        }, SESSION_TIMEOUT_MS)
+      })
+
       try {
-        const { data } = await supabase.auth.getSession()
-        const u = data.session?.user ?? null
-        if (!unsubscribed && mounted.current) setAuthUser(u)
+        const result = await Promise.race([
+          supabase.auth.getSession().finally(() => {
+            settled = true
+          }),
+          timeout,
+        ])
+        const session = (result as { data: { session: { user: User } | null } }).data.session
+        if (!unsubscribed && mounted.current) setAuthUser(session?.user ?? null)
       } catch (e) {
         console.warn('[SessionContext] init error:', e)
         if (!unsubscribed && mounted.current) setAuthUser(null)
@@ -52,6 +77,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (unsubscribed || !mounted.current) return
       setAuthUser(session?.user ?? null)
+      // Also flip loading off in case the timeout fired before the real
+      // session arrived — the listener is the authoritative source.
+      setLoading(false)
     })
 
     return () => {

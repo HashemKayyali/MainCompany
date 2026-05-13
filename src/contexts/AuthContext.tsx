@@ -16,6 +16,7 @@ import {
   fetchProfileIdentityRow,
   mapProfileAvatarFields,
 } from '../services/profile.service'
+import { withTimeout } from '../utils/with-timeout'
 import { useSession } from './SessionContext'
 
 export type AdminRole = 'admin' | 'superadmin'
@@ -60,7 +61,14 @@ async function fetchProfileIdentity(
   avatarSeed: string | null
   avatarOptions: AvatarFields['avatarOptions']
 }> {
-  const data = await fetchProfileIdentityRow(userId)
+  // Cap the profile lookup so the admin-role check can never hang the
+  // entire admin route on a slow request.
+  const data = await withTimeout(
+    fetchProfileIdentityRow(userId),
+    8000,
+    null,
+    'AuthContext.fetchProfileIdentityRow'
+  )
 
   if (!data) {
     return {

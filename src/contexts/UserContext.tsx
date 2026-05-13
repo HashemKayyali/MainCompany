@@ -23,6 +23,7 @@ import {
   isMissingGeneratedAvatarColumnError,
   mapProfileAvatarFields,
 } from '../services/profile.service'
+import { withTimeout } from '../utils/with-timeout'
 import { useSession } from './SessionContext'
 
 export interface AppUser extends AvatarFields {
@@ -141,7 +142,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const fetchProfile = useCallback(
     async (authAccount: User): Promise<AppUser | null> => {
       try {
-        const data = await fetchProfileIdentityRow(authAccount.id)
+        // Hard ceiling: never let a slow profile fetch hold the entire
+        // UserContext (and therefore AdminGuard) in a loading state.
+        const data = await withTimeout(
+          fetchProfileIdentityRow(authAccount.id),
+          8000,
+          null,
+          'fetchProfileIdentityRow'
+        )
         return mapIdentityRowToUser(data)
       } catch (error) {
         console.warn('Failed to fetch profile:', error)

@@ -383,7 +383,11 @@ const NavbarAccountActions = memo(function NavbarAccountActions({
   pathname: string
   utilityPill: string
   userMenu: boolean
-  userMenuAnchorRef: React.RefObject<HTMLDivElement | null>
+  // Note: `useRef<HTMLDivElement>(null)` returns `RefObject<HTMLDivElement>`
+  // (not `RefObject<HTMLDivElement | null>`) under @types/react 18. Mirror
+  // that shape here so the value can be passed straight to a JSX `ref`
+  // prop without an invariance error.
+  userMenuAnchorRef: React.RefObject<HTMLDivElement>
   onToggleUserMenu: () => void
 }) {
   const purchaseQuote = usePurchaseQuote()
@@ -653,7 +657,7 @@ const NavbarUserMenuPortal = memo(function NavbarUserMenuPortal({
   isDark: boolean
   onClose: () => void
   userMenu: boolean
-  userMenuPopoverRef: React.RefObject<HTMLDivElement | null>
+  userMenuPopoverRef: React.RefObject<HTMLDivElement>
   userMenuPosition: { top: number; left: number; placement: 'top' | 'bottom' } | null
 }) {
   const { isAuth } = useAuth()
