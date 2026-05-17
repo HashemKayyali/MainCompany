@@ -37,14 +37,9 @@ export default function ContactForm() {
   }, [preselectedProduct])
 
   const update = (field: string, value: string) => {
-    const cleanedValue =
-      field === 'message'
-        ? sanitize(sanitizeInput(value, 2000))
-        : sanitize(sanitizeInput(value, 200))
-
+    const cleanedValue = sanitizeInput(value, field === 'message' ? 2000 : 200)
     setForm(current => ({ ...current, [field]: cleanedValue }))
     setErrors(current => ({ ...current, [field]: '', _global: '' }))
-
     if (saved) setSaved(false)
   }
 

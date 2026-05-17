@@ -18,6 +18,7 @@ import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
 import ProductCard from '../../components/product/ProductCard'
 import { slugify } from '../../utils/format'
+import { getErrorMessage } from '../../lib/errors'
 import type { Product } from '../../data/products/types'
 import { cn } from '../../utils/cn'
 import {
@@ -238,11 +239,11 @@ export default function AdminProductsPage() {
     try {
       await Promise.all(changedProducts.map(product => productsApi.update(product.slug, { displayOrder: product.displayOrder })))
       await refreshAll()
-    } catch (err: any) {
+    } catch (err: unknown) {
       setOptimisticProducts(null)
       dialog.alert({
         title: 'Reorder Failed',
-        message: err?.message || 'Failed to update product order.',
+        message: getErrorMessage(err, 'Failed to update product order.'),
         variant: 'danger',
       })
     } finally {
@@ -375,8 +376,8 @@ export default function AdminProductsPage() {
       await refreshAll()
       setOptimisticProducts(null)
       closeModal()
-    } catch (err: any) {
-      dialog.alert({ title: 'Error', message: err.message || 'Failed to save', variant: 'danger' })
+    } catch (err: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to save'), variant: 'danger' })
     } finally {
       setSaving(false)
     }
@@ -409,8 +410,8 @@ export default function AdminProductsPage() {
       await refreshAll()
       setOptimisticProducts(null)
       if (details?.slug === slug) setDetails(null)
-    } catch (err: any) {
-      dialog.alert({ title: 'Error', message: err.message || 'Failed to delete', variant: 'danger' })
+    } catch (err: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to delete'), variant: 'danger' })
     }
   }
 

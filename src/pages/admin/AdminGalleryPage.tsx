@@ -17,9 +17,10 @@ import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
 import AlbumCard from '../../components/gallery/AlbumCard'
 import { cn } from '../../utils/cn'
+import { getErrorMessage } from '../../lib/errors'
 
 const emptyAlbum: GalleryAlbum = { slug: '', title: '', cover: '', images: [], category: '' }
-
+
 
 export default function AdminGalleryPage() {
   const { galleryAlbums, addGalleryAlbum, updateGalleryAlbum, deleteGalleryAlbum } = useData()
@@ -71,8 +72,8 @@ export default function AdminGalleryPage() {
       if (isNew) await addGalleryAlbum(data)
       else await updateGalleryAlbum(editing.slug || slug, data)
       close()
-    } catch (err: any) {
-      dialog.alert({ title: 'Error', message: err.message || 'Failed to save', variant: 'danger' })
+    } catch (err: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to save'), variant: 'danger' })
     } finally {
       setSaving(false)
     }
@@ -82,8 +83,8 @@ export default function AdminGalleryPage() {
     try {
       await deleteGalleryAlbum(slug)
       if (details?.slug === slug) setDetails(null)
-    } catch (err: any) {
-      dialog.alert({ title: 'Error', message: err.message || 'Failed to delete', variant: 'danger' })
+    } catch (err: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to delete'), variant: 'danger' })
     }
     setConfirm(null)
   }

@@ -11,6 +11,7 @@ declare global {
 
 const smoothEase = (t: number) => 1 - Math.pow(1 - t, 3.2)
 const scrollPositions = new Map<string, number>()
+const MAX_SCROLL_HISTORY = 50
 
 export function useSmoothScroll(enabled = true) {
   const location = useLocation()
@@ -82,6 +83,10 @@ export function useSmoothScroll(enabled = true) {
     const previousKey = previousKeyRef.current
     if (previousKey !== location.key) {
       scrollPositions.set(previousKey, window.scrollY)
+      if (scrollPositions.size > MAX_SCROLL_HISTORY) {
+        const oldestKey = scrollPositions.keys().next().value
+        if (oldestKey !== undefined) scrollPositions.delete(oldestKey)
+      }
       previousKeyRef.current = location.key
     }
 

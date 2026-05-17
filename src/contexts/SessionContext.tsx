@@ -76,7 +76,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (unsubscribed || !mounted.current) return
-      setAuthUser(session?.user ?? null)
+      const nextUser = session?.user ?? null
+      // Keep the SAME object reference when the signed-in user has not
+      // actually changed (Supabase fires TOKEN_REFRESHED / SIGNED_IN on
+      // tab refocus). Emitting a fresh reference for the same user would
+      // cascade: UserContext re-runs and flips loading→true, AdminGuard
+      // swaps the page for <PageLoader/>, the page unmounts, and any open
+      // modal / unsaved form is destroyed. Only emit on a real change
+      // (sign-in / sign-out / account switch).
+      setAuthUser(prev =>
+        prev?.id && nextUser?.id && prev.id === nextUser.id ? prev : nextUser
+      )
       // Also flip loading off in case the timeout fired before the real
       // session arrived — the listener is the authoritative source.
       setLoading(false)

@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Trash2 } from 'lucide-react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { ArrowRight, FileText, Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react'
 import RequestContactFields from '../components/requests/RequestContactFields'
+import FramedImage from '../components/ui/FramedImage'
 import { useDialog } from '../contexts/DialogContext'
 import { usePurchaseQuote } from '../contexts/PurchaseQuoteContext'
 import { useRentalCart } from '../contexts/RentalCartContext'
@@ -12,7 +14,63 @@ import { usePageMeta } from '../hooks/usePageMeta'
 import { useRequireAuthAction } from '../hooks/useRequireAuthAction'
 import { createPurchaseQuoteRequest } from '../services/purchase-quotes.service'
 import { buildInitialRequestForm, combinePurchaseQuoteNotes } from '../utils/commerce'
+import { getErrorMessage } from '../lib/errors'
 import { cn } from '../utils/cn'
+
+const ease = [0.16, 1, 0.3, 1] as const
+
+// ── Reusable form-section wrapper (local to this page) ───────────────────────
+function QuoteSection({
+  index,
+  eyebrow,
+  title,
+  description,
+  motionEnabled,
+  delay = 0,
+  children,
+}: {
+  index: string
+  eyebrow: string
+  title: string
+  description: string
+  motionEnabled: boolean
+  delay?: number
+  children: ReactNode
+}) {
+  return (
+    <motion.section
+      initial={motionEnabled ? { opacity: 0, y: 20 } : false}
+      whileInView={motionEnabled ? { opacity: 1, y: 0 } : undefined}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={motionEnabled ? { duration: 0.5, ease, delay } : undefined}
+      className="glass !rounded-[22px] p-5 transition-shadow duration-300 hover:shadow-[0_18px_44px_-18px_rgba(89,23,196,0.28)] sm:p-6"
+    >
+      <div className="mb-5">
+        <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#7126e3]">
+          {index} — {eyebrow}
+        </div>
+        <h2 className="mt-2 font-display text-[1.35rem] font-black tracking-[-0.02em] text-[#1a0b3d] sm:text-[1.5rem]">
+          {title}
+        </h2>
+        <p className="mt-1.5 text-[0.9rem] leading-6 text-[#4b3a63]">{description}</p>
+      </div>
+      {children}
+    </motion.section>
+  )
+}
+
+// ── Centered status shell (empty / not-signed-in) ────────────────────────────
+function StatusShell({ children }: { children: ReactNode }) {
+  return (
+    <section className="site-section">
+      <div className="site-container max-w-2xl">
+        <div className="glass !rounded-[28px] px-6 py-12 text-center sm:px-10 sm:py-14">
+          {children}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 export default function PurchaseQuotePage() {
   usePageMeta({
@@ -21,6 +79,8 @@ export default function PurchaseQuotePage() {
     noIndex: true,
   })
 
+  const reducedMotion = useReducedMotion()
+  const motionEnabled = !reducedMotion
   const { isDark } = useTheme()
   const dialog = useDialog()
   const requireAuthAction = useRequireAuthAction()
@@ -80,209 +140,343 @@ export default function PurchaseQuotePage() {
       purchaseQuote.clearDraft()
       toast('Purchase quote request sent successfully.', 'success')
       navigate(`/my-requests/${response.requestNumber}`)
-    } catch (error: any) {
-      toast(error?.message || 'Could not submit purchase quote request.', 'error')
+    } catch (error: unknown) {
+      toast(getErrorMessage(error, 'Could not submit purchase quote request.'), 'error')
     } finally {
       setSaving(false)
     }
   }
 
+  // ── Empty draft ────────────────────────────────────────────────────────────
   if (!purchaseQuote.items.length) {
     return (
-      <section className="site-section">
-        <div className="site-container max-w-3xl">
-          <div className={cn('rounded-[24px] border p-6 sm:p-7 text-center', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-            <h1 className={cn('font-display text-3xl font-black', isDark ? 'text-white' : 'text-gray-900')}>
-              Purchase Quote
-            </h1>
-            <p className={cn('mt-4 text-sm leading-7', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
-              Your quote draft is empty. Add products from the catalog to prepare a multi-product RFQ.
-            </p>
-            <div className="mt-6">
-              <Link to="/products" className="btn-primary !rounded-xl !px-5 !py-3 !text-sm">
-                Browse Products
-              </Link>
-            </div>
-          </div>
+      <StatusShell>
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-[20px] border border-violet-200 bg-violet-50">
+          <FileText className="h-7 w-7 text-[#7126e3]" strokeWidth={2} />
         </div>
-      </section>
+        <span className="section-label justify-center">// Purchase Quote</span>
+        <h1 className="mt-3 font-display text-3xl font-black tracking-[-0.03em] text-[#1a0b3d] sm:text-4xl">
+          Your quote draft is empty
+        </h1>
+        <p className="mx-auto mt-3 max-w-md text-[0.95rem] leading-7 text-[#4b3a63]">
+          Add products from the catalog to prepare a multi-product RFQ. Drafts stay on this device until you send them.
+        </p>
+        <div className="mt-7 flex flex-col items-center gap-3">
+          <Link to="/products" className="btn-primary !rounded-[14px] !px-6 !py-3 !text-sm">
+            Browse Products
+            <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
+          </Link>
+          {rentalCart.itemCount > 0 && (
+            <Link
+              to="/rental-cart"
+              className="btn-outline !rounded-[12px] !px-4 !py-2 !text-[12px]"
+            >
+              <ShoppingCart className="h-3.5 w-3.5" strokeWidth={2} />
+              You have {rentalCart.itemCount} item{rentalCart.itemCount === 1 ? '' : 's'} in rental cart
+            </Link>
+          )}
+        </div>
+      </StatusShell>
     )
   }
 
+  // ── Not signed in ──────────────────────────────────────────────────────────
   if (!isLoggedIn) {
     return (
-      <section className="site-section">
-        <div className="site-container max-w-3xl">
-          <div className={cn('rounded-[24px] border p-6 sm:p-7 text-center', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-            <h1 className={cn('font-display text-3xl font-black', isDark ? 'text-white' : 'text-gray-900')}>
-              Sign in to Send Your Quote Request
-            </h1>
-            <p className={cn('mt-4 text-sm leading-7', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
-              Sign in or create an account to send this RFQ and track updates from My Requests later. Your quote draft will stay saved on this device.
-            </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <Link to="/products" className="btn-outline !rounded-xl !px-5 !py-3 !text-sm">
-                Back to Products
-              </Link>
-              <button
-                type="button"
-                onClick={() =>
-                  void dialog
-                    .alert({
-                      title: 'Sign in to continue',
-                      message:
-                        'Please sign in first. Your purchase quote draft will stay saved and you will return here right after login.',
-                      confirmLabel: 'Go to Login',
-                      variant: 'info',
-                    })
-                    .then(() => navigate(`/login?redirect=${encodeURIComponent('/purchase-quote')}`))
-                }
-                className="btn-primary !rounded-xl !px-5 !py-3 !text-sm"
-              >
-                Sign In
-              </button>
-            </div>
-          </div>
+      <StatusShell>
+        <span className="section-label justify-center">// Purchase Quote</span>
+        <h1 className="mt-3 font-display text-3xl font-black tracking-[-0.03em] text-[#1a0b3d] sm:text-4xl">
+          Sign in to send your quote request
+        </h1>
+        <p className="mx-auto mt-3 max-w-lg text-[0.95rem] leading-7 text-[#4b3a63]">
+          Sign in or create an account to send this RFQ and track updates from My Requests later. Your quote draft stays saved on this device.
+        </p>
+        <div className="mt-7 flex flex-wrap justify-center gap-3">
+          <Link to="/products" className="btn-outline !rounded-[14px] !px-5 !py-3 !text-sm">
+            Back to Products
+          </Link>
+          <button
+            type="button"
+            onClick={() =>
+              void dialog
+                .alert({
+                  title: 'Sign in to continue',
+                  message:
+                    'Please sign in first. Your purchase quote draft will stay saved and you will return here right after login.',
+                  confirmLabel: 'Go to Login',
+                  variant: 'info',
+                })
+                .then(() => navigate(`/login?redirect=${encodeURIComponent('/purchase-quote')}`))
+            }
+            className="btn-primary !rounded-[14px] !px-5 !py-3 !text-sm"
+          >
+            Sign In
+          </button>
         </div>
-      </section>
+      </StatusShell>
     )
   }
 
+  // ── Main ───────────────────────────────────────────────────────────────────
   return (
     <section className="site-section">
       <div className="site-container">
-        <div className="mb-6">
-          <span className="section-label">// Purchase Quote</span>
-          <h1 className={cn('section-title !text-left', !isDark && 'text-gray-900')}>Send a Purchase RFQ</h1>
-          <p className={cn('mt-2.5 max-w-2xl text-[0.95rem] leading-6.5', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
-            Review your selected products, fine-tune quantities, and send the request to the sales team. Until you submit it, this draft is saved locally on this device only.
+
+        {/* Hero header */}
+        <motion.div
+          initial={motionEnabled ? { opacity: 0, y: 20 } : false}
+          animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
+          transition={motionEnabled ? { duration: 0.6, ease } : undefined}
+          className="mx-auto mb-10 max-w-3xl text-center"
+        >
+          <span className="section-label justify-center">// Purchase Quote</span>
+          <h1 className="mt-3 font-display text-3xl font-black leading-[1.05] tracking-[-0.035em] sm:text-5xl">
+            <span className="text-glow">Send a Purchase RFQ</span>
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-[0.98rem] leading-7 text-[#4b3a63]">
+            Review your selected products, fine-tune quantities, and send the request to the
+            sales team. This draft is saved locally on this device until you submit it.
           </p>
-        </div>
+          <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-violet-300 to-transparent" />
+        </motion.div>
 
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="space-y-4">
-            <div className={cn('rounded-[22px] border p-4.5', isDark ? 'border-fuchsia-400/14 bg-[linear-gradient(180deg,rgba(34,12,45,0.74),rgba(10,10,22,0.94))]' : 'border-fuchsia-200 bg-white')}>
-              <div className={cn('text-[10px] font-mono uppercase tracking-[0.18em]', isDark ? 'text-fuchsia-100/72' : 'text-fuchsia-700/80')}>
-                Draft Destination
-              </div>
-              <h2 className={cn('mt-3 font-display text-[1.2rem] font-black', isDark ? 'text-white' : 'text-gray-900')}>
-                Saved locally until you send it
-              </h2>
-              <p className={cn('mt-3 text-[0.95rem] leading-6.5', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
-                This quote draft stays on this device and is available from the navbar draft button. After you send it, the submitted request appears in My Requests.
-              </p>
-              <div className="mt-4 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
-                <Link to="/my-requests" className="btn-outline !rounded-[14px] !px-4 !py-2 !text-[0.95rem]">
-                  Go to My Requests
-                </Link>
-                {rentalCart.itemCount > 0 && (
-                  <Link to="/rental-cart" className="btn-outline !rounded-[14px] !px-4 !py-2 !text-[0.95rem]">
-                    Open Rental Cart
-                  </Link>
-                )}
-              </div>
-            </div>
+        <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
 
-            <div className={cn('rounded-[22px] border p-4.5', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-              <RequestContactFields
-                form={form}
-                onChange={(field, value) => setForm(current => ({ ...current, [field]: value }))}
-              />
+          {/* LEFT — form column */}
+          <div className="space-y-8">
 
-              {validationMessage && (
-                <div className={cn('mt-4 rounded-[14px] px-4 py-3.5 text-[0.92rem] leading-5.5', isDark ? 'bg-amber-500/10 text-amber-200' : 'bg-amber-50 text-amber-700')}>
-                  {validationMessage}
-                </div>
-              )}
-            </div>
-
-            <div className={cn('rounded-[22px] border p-4.5', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-              <div className={cn('text-lg font-semibold', isDark ? 'text-white' : 'text-gray-900')}>Quote Draft Items</div>
-              <div className="mt-4 space-y-4">
+            {/* 01 — ITEMS */}
+            <QuoteSection
+              index="01"
+              eyebrow="ITEMS"
+              title="Quote draft items"
+              description="Adjust quantities or remove products. Each item can carry its own note."
+              motionEnabled={motionEnabled}
+            >
+              <div className="divide-y divide-violet-100">
                 {purchaseQuote.items.map(item => (
-                  <div key={item.productSlug} className={cn('rounded-[18px] border p-4', isDark ? 'border-white/8 bg-white/[0.02]' : 'border-gray-100 bg-gray-50')}>
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <div className={cn('font-semibold', isDark ? 'text-white' : 'text-gray-900')}>{item.productTitle}</div>
-                        <div className={cn('mt-1 text-sm', isDark ? 'text-purple-100/66' : 'text-gray-500')}>{item.productSlug}</div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => purchaseQuote.removeItem(item.productSlug)}
-                        className={cn('inline-flex min-h-[42px] items-center gap-2 rounded-[14px] px-3.5 py-2 text-[0.92rem]', isDark ? 'bg-red-500/10 text-red-200' : 'bg-red-50 text-red-600')}
-                      >
-                        <Trash2 size={14} />
-                        Remove
-                      </button>
+                  <div key={item.productSlug} className="flex flex-col gap-4 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-start">
+                    {/* Thumbnail */}
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-[14px] border border-violet-100 bg-violet-50">
+                      {item.productImage ? (
+                        <FramedImage
+                          media={item.productImage}
+                          alt={item.productTitle}
+                          className="h-full w-full object-cover"
+                          fallbackTransform={{ fit: 'cover' }}
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-[#7126e3]">
+                          <FileText className="h-5 w-5" strokeWidth={2} />
+                        </div>
+                      )}
                     </div>
 
-                    <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-[140px_minmax(0,1fr)]">
-                      <div>
-                        <label className={cn('mb-2 block text-[13px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
-                          Quantity
-                        </label>
-                        <input
-                          type="number"
-                          min={1}
-                          max={999}
-                          className="form-field"
-                          value={item.quantity}
-                          onChange={event => purchaseQuote.updateQuantity(item.productSlug, Number(event.target.value) || 1)}
-                        />
+                    {/* Body */}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="truncate font-display text-[1rem] font-bold text-[#1a0b3d]">
+                            {item.productTitle}
+                          </div>
+                          <div className="mt-0.5 truncate font-mono text-[11px] text-[#6b5a82]">
+                            {item.productSlug}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => purchaseQuote.removeItem(item.productSlug)}
+                          aria-label={`Remove ${item.productTitle}`}
+                          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100 hover:text-red-700"
+                        >
+                          <Trash2 size={15} strokeWidth={2} />
+                        </button>
                       </div>
 
-                      <div>
-                        <label className={cn('mb-2 block text-[13px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
-                          Item Note
-                        </label>
-                        <textarea
-                          rows={3}
-                          className="form-field resize-none"
-                          value={item.note}
-                          onChange={event => purchaseQuote.updateNote(item.productSlug, event.target.value)}
-                        />
+                      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-start">
+                        {/* Qty stepper */}
+                        <div>
+                          <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#4b3a63]">
+                            Quantity
+                          </label>
+                          <div className="inline-flex items-center rounded-[12px] border border-violet-200 bg-white">
+                            <button
+                              type="button"
+                              aria-label="Decrease quantity"
+                              disabled={item.quantity <= 1}
+                              onClick={() => purchaseQuote.updateQuantity(item.productSlug, item.quantity - 1)}
+                              className="inline-flex h-10 w-10 items-center justify-center rounded-l-[12px] text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
+                            >
+                              <Minus size={15} strokeWidth={2.4} />
+                            </button>
+                            <input
+                              type="number"
+                              min={1}
+                              max={999}
+                              inputMode="numeric"
+                              value={item.quantity}
+                              onChange={event =>
+                                purchaseQuote.updateQuantity(
+                                  item.productSlug,
+                                  Number(event.target.value) || 1
+                                )
+                              }
+                              onBlur={event => {
+                                const next = Math.max(1, Math.min(999, Number(event.target.value) || 1))
+                                purchaseQuote.updateQuantity(item.productSlug, next)
+                              }}
+                              className="h-10 w-14 border-x border-violet-200 bg-transparent text-center text-[14px] font-bold tabular-nums text-[#1a0b3d] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            />
+                            <button
+                              type="button"
+                              aria-label="Increase quantity"
+                              disabled={item.quantity >= 999}
+                              onClick={() => purchaseQuote.updateQuantity(item.productSlug, item.quantity + 1)}
+                              className="inline-flex h-10 w-10 items-center justify-center rounded-r-[12px] text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
+                            >
+                              <Plus size={15} strokeWidth={2.4} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Item note */}
+                        <div>
+                          <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#4b3a63]">
+                            Item note
+                          </label>
+                          <textarea
+                            rows={2}
+                            placeholder="Optional note for the sales team…"
+                            className="form-field resize-none"
+                            value={item.note}
+                            onChange={event => purchaseQuote.updateNote(item.productSlug, event.target.value)}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
+              <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+                <Link to="/products" className="btn-outline !rounded-[12px] !px-4 !py-2 !text-[12px]">
+                  Add more products
+                </Link>
                 <button
                   type="button"
                   onClick={() => {
                     purchaseQuote.clearDraft()
                     toast('Purchase quote draft cleared from this device.', 'success')
                   }}
-                  className="btn-outline !w-full !rounded-[14px] !px-5 !py-3 !text-[0.95rem] sm:!w-auto"
+                  className="btn-outline !rounded-[12px] !px-4 !py-2 !text-[12px]"
                 >
-                  Clear Draft
-                </button>
-                <Link to="/products" className="btn-outline !w-full !rounded-[14px] !px-5 !py-3 !text-[0.95rem] sm:!w-auto">
-                  Add More Products
-                </Link>
-                <button type="button" onClick={submit} disabled={saving || !!validationMessage} className="btn-primary !w-full !rounded-[14px] !px-5 !py-3 !text-[0.95rem] disabled:opacity-50 sm:!w-auto">
-                  {saving ? 'Submitting...' : 'Send Purchase Quote'}
+                  Clear draft
                 </button>
               </div>
-            </div>
+            </QuoteSection>
+
+            {/* 02 — CONTACT & DELIVERY */}
+            <QuoteSection
+              index="02"
+              eyebrow="CONTACT & DELIVERY"
+              title="Where should we reach you?"
+              description="The sales team uses these details to follow up on your RFQ."
+              motionEnabled={motionEnabled}
+              delay={0.08}
+            >
+              <RequestContactFields
+                form={form}
+                onChange={(field, value) => setForm(current => ({ ...current, [field]: value }))}
+              />
+            </QuoteSection>
           </div>
 
-          <div className={cn('order-first h-fit rounded-[22px] border p-4 xl:order-none xl:sticky xl:top-28', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-            <div className={cn('text-[11px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/50' : 'text-gray-400')}>
-              Draft Summary
-            </div>
-            <div className={cn('mt-2 text-3xl font-display font-black', isDark ? 'text-white' : 'text-gray-900')}>
-              {purchaseQuote.itemCount}
-            </div>
-            <div className={cn('mt-1 text-[0.95rem]', isDark ? 'text-purple-100/65' : 'text-gray-500')}>
-              total unit(s) across {purchaseQuote.items.length} selected product(s)
-            </div>
+          {/* RIGHT — sticky summary */}
+          <motion.aside
+            initial={motionEnabled ? { opacity: 0, x: 20 } : false}
+            animate={motionEnabled ? { opacity: 1, x: 0 } : undefined}
+            transition={motionEnabled ? { duration: 0.55, ease, delay: 0.1 } : undefined}
+            className="order-first xl:order-none"
+          >
+            <div className="glass !rounded-[22px] p-5 xl:sticky xl:top-24">
+              <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#7126e3]">
+                Quote Draft
+              </div>
 
-            <div className={cn('mt-4 rounded-[14px] px-4 py-3.5 text-[0.92rem] leading-5.5', isDark ? 'bg-white/[0.03] text-purple-100/72' : 'bg-gray-50 text-gray-600')}>
-              Submitted purchase quotes stay separate from rental approvals and do not reserve inventory. Drafts remain local until you send them.
+              <div className="mt-3 flex items-end gap-2">
+                <span className="font-display text-5xl font-black leading-none">
+                  <span className="text-glow">{purchaseQuote.itemCount}</span>
+                </span>
+                <span className="pb-1 text-[0.85rem] font-medium text-[#4b3a63]">
+                  total units
+                </span>
+              </div>
+              <div className="mt-1 text-[0.85rem] text-[#6b5a82]">
+                across {purchaseQuote.items.length} product{purchaseQuote.items.length === 1 ? '' : 's'}
+              </div>
+
+              {/* Breakdown — vertical mini-rows */}
+              <div className="mt-5 max-h-[15rem] divide-y divide-violet-100 overflow-y-auto pr-1 [scrollbar-width:thin]">
+                {purchaseQuote.items.map(item => (
+                  <div key={item.productSlug} className="flex items-center justify-between gap-3 py-2.5">
+                    <span className="min-w-0 truncate text-[0.88rem] font-semibold text-[#1a0b3d]">
+                      {item.productTitle}
+                    </span>
+                    <span className="shrink-0 text-[0.82rem] font-medium tabular-nums text-[#6b5a82]">
+                      × {item.quantity}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 rounded-[12px] bg-violet-50 px-3.5 py-3 text-[0.8rem] leading-5 text-[#4b3a63]">
+                Drafts stay local until you send. RFQs don't reserve inventory.
+              </div>
+
+              <div className="mt-5 space-y-2.5">
+                <button
+                  type="button"
+                  onClick={submit}
+                  disabled={saving || !!validationMessage}
+                  className="btn-primary !w-full !rounded-[14px] !py-3 !text-[13px] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {saving ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                      Sending…
+                    </>
+                  ) : (
+                    <>
+                      Send RFQ
+                      <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
+                    </>
+                  )}
+                </button>
+
+                {validationMessage && !saving && (
+                  <p className="text-center text-[11.5px] font-medium leading-5 text-amber-700">
+                    {validationMessage}
+                  </p>
+                )}
+
+                {rentalCart.itemCount > 0 && (
+                  <Link
+                    to="/rental-cart"
+                    className="btn-outline !w-full !rounded-[14px] !py-2.5 !text-[12px]"
+                  >
+                    <ShoppingCart className="h-3.5 w-3.5" strokeWidth={2} />
+                    Open Rental Cart
+                  </Link>
+                )}
+                <Link
+                  to="/my-requests"
+                  className="block text-center text-[12px] font-semibold text-[#7126e3] transition hover:text-[#1a0b3d]"
+                >
+                  Go to My Requests
+                </Link>
+              </div>
             </div>
-          </div>
+          </motion.aside>
         </div>
       </div>
     </section>

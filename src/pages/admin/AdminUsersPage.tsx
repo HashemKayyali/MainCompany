@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth, type AdminRole } from '../../contexts/AuthContext'
 import { useTheme } from '../../contexts/ThemeContext'
@@ -27,6 +27,7 @@ import UserAvatar from '../../components/ui/UserAvatar'
 import { emitProfileUpdated } from '../../lib/profile-sync'
 import { fetchProfileAvatarMap } from '../../services/profile.service'
 import { cn } from '../../utils/cn'
+import { getErrorMessage } from '../../lib/errors'
 
 interface UserProfile extends AvatarFields {
   id: string
@@ -215,8 +216,8 @@ export default function AdminUsersPage() {
       toast(`${editName || editUser.email} updated`, 'success')
       await fetchUsers()
       setEditUser(null)
-    } catch (err: any) {
-      toast(err?.message || 'Failed to update', 'error')
+    } catch (err: unknown) {
+      toast(getErrorMessage(err, 'Failed to update'), 'error')
     } finally {
       setEditSaving(false)
     }
@@ -249,8 +250,8 @@ export default function AdminUsersPage() {
       toast(`${editUser.name || editUser.email} -> ${editRole}`, 'success')
       await fetchUsers()
       setEditUser(null)
-    } catch (err: any) {
-      toast(err?.message || 'Failed', 'error')
+    } catch (err: unknown) {
+      toast(getErrorMessage(err, 'Failed'), 'error')
     } finally {
       setEditSaving(false)
     }
@@ -270,8 +271,8 @@ export default function AdminUsersPage() {
       })
       if (error) throw error
       toast(`Reset email sent to ${target.email}`, 'success')
-    } catch (err: any) {
-      toast(err?.message || 'Failed to send', 'error')
+    } catch (err: unknown) {
+      toast(getErrorMessage(err, 'Failed to send'), 'error')
     }
   }
 

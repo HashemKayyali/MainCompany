@@ -2,6 +2,7 @@ import { useRef, useState, type ReactNode } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useDialog } from '../../contexts/DialogContext'
 import { deleteVideo, uploadVideo } from '../../services/storage.service'
+import { getErrorMessage } from '../../lib/errors'
 import type { MediaFit } from '../../utils/media-frame'
 import FramedVideo from './FramedVideo'
 import MediaPlacementModal from './MediaPlacementModal'
@@ -106,11 +107,11 @@ export default function VideoUploader({
         onChange(url)
         openFrameEditor(url)
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Video upload failed:', err)
       dialog.alert({
         title: 'Upload Failed',
-        message: 'Failed to upload video: ' + (err?.message || 'Unknown error'),
+        message: 'Failed to upload video: ' + getErrorMessage(err, 'Unknown error'),
         variant: 'danger',
       })
       setProgress('')

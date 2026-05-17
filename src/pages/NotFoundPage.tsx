@@ -26,14 +26,7 @@ export default function NotFoundPage() {
               style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.34) 0%, transparent 70%)' }}
             />
             <div className="relative font-display text-7xl font-black sm:text-8xl">
-              <span
-                className="bg-clip-text text-transparent"
-                style={{
-                  backgroundImage: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c026d3 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
+              <span style={{ color: '#1a0b3d' }}>
                 404
               </span>
             </div>

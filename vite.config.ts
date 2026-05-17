@@ -14,7 +14,8 @@ export default defineConfig({
     strictPort: true,
   },
   esbuild: {
-    drop: ['console', 'debugger'],
+    pure: ['console.log', 'console.debug', 'console.trace'],
+    drop: ['debugger'],
   },
   build: {
     rollupOptions: {

@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
@@ -144,11 +145,17 @@ export default function Modal({
     if (!persistent) onClose()
   }
 
-  return (
+  // Portal to <body> so the overlay escapes any ancestor that establishes
+  // a containing block / clips it (e.g. ProductCard has `overflow-hidden`
+  // + framer-motion transforms — a nested `position: fixed` would be
+  // trapped inside the card instead of covering the viewport).
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
     <AnimatePresence>
       {open && (
         <div
-          className="fixed inset-0 z-50 overflow-y-auto"
+          className="fixed inset-0 z-[100] overflow-y-auto"
           onClick={handleBackdropClick}
           role="dialog"
           aria-modal="true"
@@ -213,6 +220,7 @@ export default function Modal({
           </div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   )
 }

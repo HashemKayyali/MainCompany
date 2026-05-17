@@ -16,6 +16,7 @@ import AdminViewToggle from '../../components/admin/AdminViewToggle'
 import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
 import { cn } from '../../utils/cn'
+import { getErrorMessage } from '../../lib/errors'
 
 const emptyPart: ProductPart = {
   id: '',
@@ -27,7 +28,7 @@ const emptyPart: ProductPart = {
   image: '',
   inStock: true,
 }
-
+
 
 export default function AdminPartsPage() {
   const { parts, products, addPart, updatePart, deletePart } = useData()
@@ -76,8 +77,8 @@ export default function AdminPartsPage() {
       if (isNew) await addPart(editing)
       else await updatePart(editing.id, editing)
       close()
-    } catch (err: any) {
-      dialog.alert({ title: 'Error', message: err.message || 'Failed to save', variant: 'danger' })
+    } catch (err: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to save'), variant: 'danger' })
     } finally {
       setSaving(false)
     }
@@ -95,8 +96,8 @@ export default function AdminPartsPage() {
     try {
       await deletePart(part.id)
       if (details?.id === part.id) setDetails(null)
-    } catch (e: any) {
-      dialog.alert({ title: 'Error', message: e.message || 'Failed to delete', variant: 'danger' })
+    } catch (e: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(e, 'Failed to delete'), variant: 'danger' })
     }
   }
 

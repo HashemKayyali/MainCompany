@@ -16,6 +16,7 @@ import { useSession } from './SessionContext'
 import { useToast } from './ToastContext'
 import { useUser } from './UserContext'
 import { isSupabaseConfigured } from '../lib/supabase'
+import { getErrorMessage } from '../lib/errors'
 import * as categoriesApi from '../services/categories.service'
 import * as customersApi from '../services/customers.service'
 import * as galleryApi from '../services/gallery.service'
@@ -290,11 +291,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const snapshot = await loadAllOnce()
         retryCount.current = 0
         applySnapshot(snapshot, null, false)
-      } catch (loadError: any) {
+      } catch (loadError: unknown) {
         console.error('Failed to load data from Supabase:', loadError)
 
         if (!keepVisibleContent) {
-          safeSet(() => setError(loadError?.message || 'Failed to load data'))
+          safeSet(() => setError(getErrorMessage(loadError, 'Failed to load data')))
         }
 
         if (retryCount.current < MAX_RETRIES) {
@@ -363,8 +364,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         safeSet(() => setProducts(prev => sortProductsForDisplay([...prev, created])))
         writeLog('create', 'product', created.slug, created.name || created.slug)
         toast(`${created.name} added`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to add product', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to add product'), 'error')
         throw actionError
       }
     },
@@ -382,8 +383,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         )
         writeLog('update', 'product', slug, updated.name || slug)
         toast(`${updated.name} updated`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to update product', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to update product'), 'error')
         throw actionError
       }
     },
@@ -401,8 +402,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         })
         writeLog('delete', 'product', slug, existing?.name || slug)
         toast(`${existing?.name || slug} deleted`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to delete product', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to delete product'), 'error')
         throw actionError
       }
     },
@@ -416,8 +417,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         safeSet(() => setParts(prev => [...prev, created]))
         writeLog('create', 'part', created.id, created.name || created.id)
         toast(`${created.name} added`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to add part', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to add part'), 'error')
         throw actionError
       }
     },
@@ -431,8 +432,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         safeSet(() => setParts(prev => prev.map(part => (part.id === id ? updated : part))))
         writeLog('update', 'part', id, updated.name || id)
         toast(`${updated.name} updated`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to update part', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to update part'), 'error')
         throw actionError
       }
     },
@@ -447,8 +448,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         safeSet(() => setParts(prev => prev.filter(part => part.id !== id)))
         writeLog('delete', 'part', id, existing?.name || id)
         toast(`${existing?.name || id} deleted`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to delete part', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to delete part'), 'error')
         throw actionError
       }
     },
@@ -462,8 +463,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         safeSet(() => setCustomers(prev => [...prev, created]))
         writeLog('create', 'customer', created.slug, created.name || created.slug)
         toast(`${created.name} added`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to add customer', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to add customer'), 'error')
         throw actionError
       }
     },
@@ -481,8 +482,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         )
         writeLog('update', 'customer', slug, updated.name || slug)
         toast(`${updated.name} updated`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to update customer', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to update customer'), 'error')
         throw actionError
       }
     },
@@ -497,8 +498,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         safeSet(() => setCustomers(prev => prev.filter(customer => customer.slug !== slug)))
         writeLog('delete', 'customer', slug, existing?.name || slug)
         toast(`${existing?.name || slug} deleted`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to delete customer', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to delete customer'), 'error')
         throw actionError
       }
     },
@@ -512,8 +513,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         safeSet(() => setCategories(prev => [...prev, created]))
         writeLog('create', 'category', created.id, created.name || created.id)
         toast(`${created.name} added`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to add category', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to add category'), 'error')
         throw actionError
       }
     },
@@ -531,8 +532,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         )
         writeLog('update', 'category', id, updated.name || id)
         toast(`${updated.name} updated`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to update category', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to update category'), 'error')
         throw actionError
       }
     },
@@ -547,8 +548,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         safeSet(() => setCategories(prev => prev.filter(category => category.id !== id)))
         writeLog('delete', 'category', id, existing?.name || id)
         toast(`${existing?.name || id} deleted`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to delete category', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to delete category'), 'error')
         throw actionError
       }
     },
@@ -562,8 +563,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         safeSet(() => setGalleryAlbums(prev => [...prev, created]))
         writeLog('create', 'gallery', created.slug, created.title || created.slug)
         toast(`${created.title} added`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to add album', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to add album'), 'error')
         throw actionError
       }
     },
@@ -581,8 +582,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         )
         writeLog('update', 'gallery', slug, updated.title || slug)
         toast(`${updated.title} updated`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to update album', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to update album'), 'error')
         throw actionError
       }
     },
@@ -597,8 +598,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         safeSet(() => setGalleryAlbums(prev => prev.filter(album => album.slug !== slug)))
         writeLog('delete', 'gallery', slug, existing?.title || slug)
         toast(`${existing?.title || slug} deleted`, 'success')
-      } catch (actionError: any) {
-        toast(actionError?.message || 'Failed to delete album', 'error')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to delete album'), 'error')
         throw actionError
       }
     },

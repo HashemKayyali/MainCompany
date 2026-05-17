@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import RequestContactFields from '../components/requests/RequestContactFields'
 import { useDialog } from '../contexts/DialogContext'
@@ -10,6 +10,7 @@ import { createRentalRequest } from '../services/rental-requests.service'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { useRequireAuthAction } from '../hooks/useRequireAuthAction'
 import { buildInitialRequestForm, hasValidDateRange } from '../utils/commerce'
+import { getErrorMessage } from '../lib/errors'
 import { cn } from '../utils/cn'
 
 export default function CheckoutPage() {
@@ -29,17 +30,18 @@ export default function CheckoutPage() {
   const [form, setForm] = useState(() => buildInitialRequestForm(currentUser || undefined))
   const [saving, setSaving] = useState(false)
 
+  const [contactSynced, setContactSynced] = useState(false)
+
   useEffect(() => {
+    if (contactSynced || !currentUser) return
     setForm(current => ({
       ...current,
-      ...buildInitialRequestForm(currentUser || undefined),
-      companyName: current.companyName,
-      city: current.city,
-      address: current.address,
-      eventName: current.eventName,
-      notes: current.notes,
+      customerName: current.customerName || currentUser.name || '',
+      email: current.email || currentUser.email || '',
+      phone: current.phone || currentUser.phone || '',
     }))
-  }, [currentUser])
+    setContactSynced(true)
+  }, [currentUser, contactSynced])
 
   const validationMessage = useMemo(() => {
     if (!rentalCart.items.length) return 'Your rental cart is empty.'
@@ -56,7 +58,7 @@ export default function CheckoutPage() {
     }
 
     return ''
-  }, [form, rentalCart])
+  }, [form, rentalCart.items, rentalCart.mode, rentalCart.sharedStartDate, rentalCart.sharedEndDate])
 
   const submit = async () => {
     const canContinue = await requireAuthAction({
@@ -91,8 +93,8 @@ export default function CheckoutPage() {
       rentalCart.clearCart()
       toast('Rental request submitted successfully.', 'success')
       navigate(`/order-summary/${response.requestNumber}`)
-    } catch (error: any) {
-      toast(error?.message || 'Could not submit rental request.', 'error')
+    } catch (error: unknown) {
+      toast(getErrorMessage(error, 'Could not submit rental request.'), 'error')
     } finally {
       setSaving(false)
     }

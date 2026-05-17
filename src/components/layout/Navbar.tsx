@@ -441,6 +441,20 @@ const NavbarAccountActions = memo(function NavbarAccountActions({
         <span className="hidden text-[12px] font-semibold sm:inline">Cart</span>
       </Link>
 
+      {(quoteHasItems || quoteActive) && (
+        <Link
+          to="/purchase-quote"
+          className={`relative hidden h-10 items-center gap-2 rounded-md border px-3 transition-all lg:inline-flex ${quoteSurface} ${focus}`}
+          aria-label={quoteHasItems ? `Quote · ${quoteItemCount}` : 'Quote draft'}
+        >
+          <IconCircle active={quoteHasItems || quoteActive} colorScheme="pink" isDark={isDark} heroMode={heroMode}>
+            <FileText className="h-3.5 w-3.5" strokeWidth={2} />
+            {quoteHasItems && <CountBadge count={quoteCountLabel} color="pink" isDark={isDark} />}
+          </IconCircle>
+          <span className="text-[12px] font-medium">Quote</span>
+        </Link>
+      )}
+
       {isLoggedIn ? (
         <div ref={userMenuAnchorRef} className="relative hidden sm:block">
           <button
@@ -488,20 +502,6 @@ const NavbarAccountActions = memo(function NavbarAccountActions({
         >
           <User2 className="h-4 w-4" strokeWidth={2.2} />
           <span>Login</span>
-        </Link>
-      )}
-
-      {(quoteHasItems || quoteActive) && (
-        <Link
-          to="/purchase-quote"
-          className={`relative hidden h-10 items-center gap-2 rounded-md border px-3 transition-all lg:inline-flex ${quoteSurface} ${focus}`}
-          aria-label={quoteHasItems ? `Quote · ${quoteItemCount}` : 'Quote draft'}
-        >
-          <IconCircle active={quoteHasItems || quoteActive} colorScheme="pink" isDark={isDark} heroMode={heroMode}>
-            <FileText className="h-3.5 w-3.5" strokeWidth={2} />
-            {quoteHasItems && <CountBadge count={quoteCountLabel} color="pink" isDark={isDark} />}
-          </IconCircle>
-          <span className="text-[12px] font-medium">Quote</span>
         </Link>
       )}
     </>

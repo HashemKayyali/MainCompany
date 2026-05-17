@@ -98,10 +98,10 @@ export default function AuthCallback() {
       <div className="site-container max-w-[30rem]">
         <div className="glass rounded-[28px] px-6 py-8 text-center">
           <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-violet-400/70 border-t-transparent" />
-          <h1 className="mt-5 font-display text-[1.8rem] font-black text-white">
+          <h1 className="mt-5 font-display text-[1.8rem] font-black" style={{ color: '#1a0b3d' }}>
             {phase === 'error' ? 'We could not complete that sign-in' : 'Finishing your sign-in'}
           </h1>
-          <p className="mt-3 text-sm leading-7 text-purple-100/68">
+          <p className="mt-3 text-sm leading-7" style={{ color: 'rgba(61, 35, 112, 0.78)' }}>
             {phase === 'error'
               ? 'We are taking you back to the login page with a clearer message.'
               : phase === 'redirecting'

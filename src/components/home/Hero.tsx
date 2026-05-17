@@ -182,12 +182,14 @@ export default function Hero() {
                 color: '#140832',
               }}
             >
-              <span className="block">Book Everything</span>
+              <span className="block" style={{ color: '#1a0b3d' }}>
+                Book Everything
+              </span>
               <span className="relative isolate mt-2 block pb-[0.08em] tracking-[-0.028em]">
                 <span
                   className="relative z-10 inline-block bg-clip-text text-transparent"
                   style={{
-                    backgroundImage: 'linear-gradient(95deg, #5d18c4 0%, #8344f5 30%, #c026d3 65%, #5d18c4 100%)',
+                    backgroundImage: 'linear-gradient(100deg, #6d28d9 0%, #7c3aed 45%, #9d6bff 100%)',
                     WebkitTextFillColor: 'transparent',
                     backgroundSize: '200% auto',
                     animation: motionEnabled ? 'text-glow-shift 8s ease-in-out infinite' : undefined,

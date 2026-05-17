@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { User } from '@supabase/supabase-js'
 import type { Database } from '../lib/database.types'
 import { getErrorMessage } from '../lib/errors'
@@ -585,22 +585,21 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const isLoggedIn = !!authUser
   const isAdmin = !!currentUser && isAdminRole(currentUser.role)
 
-  return (
-    <Ctx.Provider
-      value={{
-        currentUser,
-        isLoggedIn,
-        isAdmin,
-        loading,
-        register,
-        login,
-        logout,
-        updateProfile,
-      }}
-    >
-      {children}
-    </Ctx.Provider>
+  const value = useMemo<UserCtx>(
+    () => ({
+      currentUser,
+      isLoggedIn,
+      isAdmin,
+      loading,
+      register,
+      login,
+      logout,
+      updateProfile,
+    }),
+    [currentUser, isLoggedIn, isAdmin, loading, register, login, logout, updateProfile]
   )
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 
 export const useUser = () => useContext(Ctx)

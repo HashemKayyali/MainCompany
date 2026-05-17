@@ -16,6 +16,7 @@ import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
 import CategoryTileView from '../../components/home/CategoryTileView'
 import { cn } from '../../utils/cn'
+import { getErrorMessage } from '../../lib/errors'
 
 const empty: Category = { id: '', name: '', slug: '', icon: '', description: '', image: '' }
 
@@ -108,8 +109,8 @@ export default function AdminCategoriesPage() {
       if (isNew) await addCategory(data)
       else await updateCategory(data.id, data)
       close()
-    } catch (err: any) {
-      dialog.alert({ title: 'Error', message: err.message || 'Failed to save', variant: 'danger' })
+    } catch (err: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to save'), variant: 'danger' })
     } finally {
       setSaving(false)
     }
@@ -146,8 +147,8 @@ export default function AdminCategoriesPage() {
     try {
       await deleteCategory(category.id)
       if (details?.id === category.id) setDetails(null)
-    } catch (e: any) {
-      dialog.alert({ title: 'Error', message: e.message || 'Failed to delete', variant: 'danger' })
+    } catch (e: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(e, 'Failed to delete'), variant: 'danger' })
     }
   }
 

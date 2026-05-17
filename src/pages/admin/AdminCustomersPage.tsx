@@ -15,6 +15,7 @@ import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
 import CustomerLogoCardView from '../../components/customer/CustomerLogoCardView'
 import { cn } from '../../utils/cn'
+import { getErrorMessage } from '../../lib/errors'
 
 const empty: Customer = { name: '', slug: '', logo: '', category: '' }
 
@@ -107,8 +108,8 @@ export default function AdminCustomersPage() {
       if (isNew) await addCustomer(data)
       else await updateCustomer(data.slug, data)
       close()
-    } catch (err: any) {
-      dialog.alert({ title: 'Error', message: err.message || 'Failed to save', variant: 'danger' })
+    } catch (err: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to save'), variant: 'danger' })
     } finally {
       setSaving(false)
     }
@@ -125,8 +126,8 @@ export default function AdminCustomersPage() {
 
     try {
       await deleteCustomer(customer.slug)
-    } catch (e: any) {
-      dialog.alert({ title: 'Error', message: e.message || 'Failed to delete', variant: 'danger' })
+    } catch (e: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(e, 'Failed to delete'), variant: 'danger' })
     }
   }
 

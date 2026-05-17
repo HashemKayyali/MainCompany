@@ -73,6 +73,10 @@ export function usePageMeta({ title, description, ogImage, ogType, canonical, no
 
     if (ogImage) {
       setMeta('og:image', ogImage, 'property')
+      setMeta('twitter:image', ogImage)
+    } else {
+      document.querySelector('meta[property="og:image"]')?.remove()
+      document.querySelector('meta[name="twitter:image"]')?.remove()
     }
 
     // Twitter

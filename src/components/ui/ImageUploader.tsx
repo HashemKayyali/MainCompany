@@ -58,7 +58,14 @@ export default function ImageUploader({
   const [dragOver, setDragOver] = useState(false)
   const [editorOpen, setEditorOpen] = useState(false)
   const [editorMedia, setEditorMedia] = useState('')
-  const [pendingNewMedia, setPendingNewMedia] = useState<string | null>(null)
+  // Synchronous guard: MediaPlacementModal.apply() calls onApply() then
+  // onClose() in the same tick. setPendingNewMedia(null) inside
+  // commitEditorValue is async, so closeEditor would still read the stale
+  // pendingNewMedia and emit the raw image a SECOND time (→ image saved
+  // twice, especially for collection/gallery uploaders). A ref flips
+  // synchronously, so closeEditor can tell a commit already happened.
+  const committedRef = useRef(false)
+  const pendingRef = useRef<string | null>(null)
 
   const sub = isDark ? 'text-purple-300/80' : 'text-gray-500'
   const aspectClass = previewAspectClass || (compact ? 'aspect-square' : 'aspect-video')
@@ -66,26 +73,49 @@ export default function ImageUploader({
 
   const openFrameEditor = (media: string, pending = false) => {
     if (!media) return
+    committedRef.current = false
+    pendingRef.current = pending ? media : null
     setEditorMedia(media)
-    setPendingNewMedia(pending ? media : null)
     setEditorOpen(true)
   }
 
   const commitEditorValue = (nextValue: string) => {
+    committedRef.current = true
+    pendingRef.current = null
     onChange(nextValue)
-    setPendingNewMedia(null)
   }
 
   const closeEditor = () => {
-    if (pendingNewMedia) {
-      onChange(pendingNewMedia)
-      setPendingNewMedia(null)
+    // Only re-emit the raw uploaded media if the user closed WITHOUT
+    // applying (cancel / backdrop / Escape). If a commit already ran in
+    // this cycle, the framed value was emitted once — do not duplicate.
+    if (!committedRef.current && pendingRef.current) {
+      onChange(pendingRef.current)
     }
+    committedRef.current = false
+    pendingRef.current = null
     setEditorOpen(false)
   }
 
+  const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
+
   const handleFile = async (file: File) => {
-    if (!file.type.startsWith('image/')) return
+    if (!file.type.startsWith('image/') || file.type === 'image/svg+xml') {
+      dialog.alert({
+        title: 'Unsupported file',
+        message: 'Please upload a JPG, PNG, WebP, or GIF image.',
+        variant: 'warning',
+      })
+      return
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      dialog.alert({
+        title: 'Image too large',
+        message: `Image must be smaller than 10MB (yours is ${(file.size / 1024 / 1024).toFixed(1)}MB).`,
+        variant: 'warning',
+      })
+      return
+    }
 
     setUploading(true)
     try {
@@ -126,7 +156,7 @@ export default function ImageUploader({
     return (
       <>
         <div className="relative group">
-          <input ref={inputRef} type="file" accept="image/*" onChange={handleChange} className="hidden" />
+          <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleChange} className="hidden" />
 
           {value ? (
             <div className={`relative overflow-hidden rounded-xl ${aspectClass}`}>
@@ -218,7 +248,7 @@ export default function ImageUploader({
               {label}
             </label>
           )}
-          <input ref={inputRef} type="file" accept="image/*" onChange={handleChange} className="hidden" />
+          <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleChange} className="hidden" />
 
           {value ? (
             <div className="flex items-stretch gap-3 rounded-[16px] border border-violet-200/80 bg-white p-2.5 shadow-[0_1px_2px_rgba(20,8,50,0.04),0_8px_20px_-10px_rgba(89,23,196,0.14)]">
@@ -312,7 +342,7 @@ export default function ImageUploader({
     <>
       <div className={maxWidthClassName}>
         {label && <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>{label}</label>}
-        <input ref={inputRef} type="file" accept="image/*" onChange={handleChange} className="hidden" />
+        <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleChange} className="hidden" />
 
         {value ? (
           <div className="group relative overflow-hidden rounded-xl">

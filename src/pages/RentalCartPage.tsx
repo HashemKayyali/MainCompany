@@ -1,19 +1,348 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { CalendarDays, ShoppingBag, Trash2, AlertTriangle, CheckCircle2, Clock } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import {
+  AlertTriangle,
+  ArrowRight,
+  CalendarDays,
+  CheckCircle2,
+  Clock,
+  Minus,
+  Plus,
+  ShoppingBag,
+  Trash2,
+} from 'lucide-react'
+import FramedImage from '../components/ui/FramedImage'
 import { useDialog } from '../contexts/DialogContext'
 import { useRentalCart } from '../contexts/RentalCartContext'
-import { useTheme } from '../contexts/ThemeContext'
 import { useUser } from '../contexts/UserContext'
 import { useRequireAuthAction } from '../hooks/useRequireAuthAction'
 import { getRentalAvailability } from '../services/availability.service'
-import type { RentalAvailability } from '../types/commerce'
+import type { RentalAvailability, RentalCartItem } from '../types/commerce'
 import { hasValidDateRange } from '../utils/commerce'
 import { usePageMeta } from '../hooks/usePageMeta'
-import { cn } from '../utils/cn'
 
-const ease = [0.16, 1, 0.3, 1]
+const ease = [0.16, 1, 0.3, 1] as const
+
+const todayISO = () => new Date().toISOString().slice(0, 10)
+
+// ── Reusable form-section wrapper (local to this page) ───────────────────────
+function CartSection({
+  index,
+  eyebrow,
+  title,
+  description,
+  motionEnabled,
+  delay = 0,
+  children,
+}: {
+  index: string
+  eyebrow: string
+  title: string
+  description: string
+  motionEnabled: boolean
+  delay?: number
+  children: ReactNode
+}) {
+  return (
+    <motion.section
+      initial={motionEnabled ? { opacity: 0, y: 20 } : false}
+      whileInView={motionEnabled ? { opacity: 1, y: 0 } : undefined}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={motionEnabled ? { duration: 0.5, ease, delay } : undefined}
+      className="glass !rounded-[22px] p-5 transition-shadow duration-300 hover:shadow-[0_18px_44px_-18px_rgba(89,23,196,0.28)] sm:p-6"
+    >
+      <div className="mb-5">
+        <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#7126e3]">
+          {index} — {eyebrow}
+        </div>
+        <h2 className="mt-2 font-display text-[1.35rem] font-black tracking-[-0.02em] text-[#1a0b3d] sm:text-[1.5rem]">
+          {title}
+        </h2>
+        <p className="mt-1.5 text-[0.9rem] leading-6 text-[#4b3a63]">{description}</p>
+      </div>
+      {children}
+    </motion.section>
+  )
+}
+
+// ── Centered status shell (empty cart) ───────────────────────────────────────
+function StatusShell({ children }: { children: ReactNode }) {
+  return (
+    <section className="site-section">
+      <div className="site-container max-w-2xl">
+        <div className="glass !rounded-[28px] px-6 py-12 text-center sm:px-10 sm:py-14">
+          {children}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ── Date field with calendar icon + native picker ────────────────────────────
+function DateField({
+  label,
+  value,
+  min,
+  disabled,
+  onChange,
+}: {
+  label: string
+  value: string
+  min?: string
+  disabled?: boolean
+  onChange: (value: string) => void
+}) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#4b3a63]">
+        {label}
+      </label>
+      <div className="relative">
+        <CalendarDays
+          size={15}
+          strokeWidth={2}
+          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7126e3]"
+        />
+        <input
+          type="date"
+          value={value}
+          min={min}
+          disabled={disabled}
+          onChange={event => onChange(event.target.value)}
+          className="form-field !pl-10 disabled:cursor-not-allowed disabled:opacity-55"
+        />
+      </div>
+    </div>
+  )
+}
+
+// ── Quantity stepper (mirrors PurchaseQuotePage) ─────────────────────────────
+function QtyStepper({
+  quantity,
+  onChange,
+}: {
+  quantity: number
+  onChange: (next: number) => void
+}) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#4b3a63]">
+        Quantity
+      </label>
+      <div className="inline-flex items-center rounded-[12px] border border-violet-200 bg-white">
+        <button
+          type="button"
+          aria-label="Decrease quantity"
+          disabled={quantity <= 1}
+          onClick={() => onChange(quantity - 1)}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-l-[12px] text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
+        >
+          <Minus size={15} strokeWidth={2.4} />
+        </button>
+        <input
+          type="number"
+          min={1}
+          max={999}
+          inputMode="numeric"
+          value={quantity}
+          onChange={event => onChange(Number(event.target.value) || 1)}
+          onBlur={event => onChange(Math.max(1, Math.min(999, Number(event.target.value) || 1)))}
+          className="h-10 w-14 border-x border-violet-200 bg-transparent text-center text-[14px] font-bold tabular-nums text-[#1a0b3d] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        />
+        <button
+          type="button"
+          aria-label="Increase quantity"
+          disabled={quantity >= 999}
+          onClick={() => onChange(quantity + 1)}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-r-[12px] text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
+        >
+          <Plus size={15} strokeWidth={2.4} />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Availability sticker ─────────────────────────────────────────────────────
+function AvailabilitySticker({
+  dateRangeValid,
+  availability,
+  availOk,
+}: {
+  dateRangeValid: boolean
+  availability: RentalAvailability | null | undefined
+  availOk: boolean | null
+}) {
+  if (!dateRangeValid) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[11.5px] font-bold text-[#4b3a63]">
+        <CalendarDays size={11} strokeWidth={2.4} />
+        Pick dates
+      </span>
+    )
+  }
+  if (!availability) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[11.5px] font-semibold text-[#4b3a63]">
+        <span className="h-3 w-3 animate-spin rounded-full border-2 border-violet-300 border-t-[#7126e3]" />
+        Checking…
+      </span>
+    )
+  }
+  if (availOk) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-[11.5px] font-bold text-emerald-800">
+        <CheckCircle2 size={11} strokeWidth={2.4} />
+        {availability.availableQuantity} available
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-red-300 bg-red-50 px-3 py-1 text-[11.5px] font-bold text-red-800">
+      <AlertTriangle size={11} strokeWidth={2.4} />
+      Only {availability.availableQuantity} in stock
+    </span>
+  )
+}
+
+// ── Rental item card ─────────────────────────────────────────────────────────
+function RentalItemCard({
+  item,
+  index,
+  total,
+  perItem,
+  startDate,
+  endDate,
+  days,
+  dateRangeValid,
+  minDaysMissed,
+  availability,
+  availOk,
+  lineTotal,
+  motionEnabled,
+  onQty,
+  onDates,
+  onRemove,
+}: {
+  item: RentalCartItem
+  index: number
+  total: number
+  perItem: boolean
+  startDate: string
+  endDate: string
+  days: number
+  dateRangeValid: boolean
+  minDaysMissed: boolean
+  availability: RentalAvailability | null | undefined
+  availOk: boolean | null
+  lineTotal: number
+  motionEnabled: boolean
+  onQty: (next: number) => void
+  onDates: (start: string, end: string) => void
+  onRemove: () => void
+}) {
+  return (
+    <motion.div
+      initial={motionEnabled ? { opacity: 0, y: 14 } : false}
+      whileInView={motionEnabled ? { opacity: 1, y: 0 } : undefined}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={motionEnabled ? { duration: 0.4, ease, delay: index * 0.05 } : undefined}
+      className="rounded-[18px] border border-violet-100 bg-white p-4 shadow-[0_4px_20px_rgba(124,58,237,0.05)] sm:p-5"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#6b5a82]">
+          Item {index + 1} of {total}
+        </span>
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label={`Remove ${item.productTitle}`}
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100 hover:text-red-700"
+        >
+          <Trash2 size={15} strokeWidth={2} />
+        </button>
+      </div>
+
+      <div className="mt-3 flex gap-4">
+        <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[14px] border border-violet-100 bg-violet-50">
+          {item.productImage ? (
+            <FramedImage
+              media={item.productImage}
+              alt={item.productTitle}
+              className="h-full w-full object-cover"
+              fallbackTransform={{ fit: 'cover' }}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-[#7126e3]">
+              <ShoppingBag className="h-5 w-5" strokeWidth={2} />
+            </div>
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-display text-[1.05rem] font-extrabold leading-tight tracking-[-0.02em] text-[#1a0b3d]">
+            {item.productTitle}
+          </h3>
+          <p className="mt-1 text-[12.5px] font-semibold text-[#4b3a63]">
+            <span className="font-bold text-[#1a0b3d]">
+              {item.unitPrice} {item.currency}/day
+            </span>
+            <span className="mx-1.5 text-violet-400">·</span>
+            min {item.minimumRentalDays} day{item.minimumRentalDays === 1 ? '' : 's'}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-start gap-4">
+        <QtyStepper quantity={item.quantity} onChange={onQty} />
+
+        {perItem && (
+          <>
+            <DateField
+              label="Start date"
+              value={startDate}
+              min={todayISO()}
+              onChange={value => onDates(value, endDate)}
+            />
+            <DateField
+              label="End date"
+              value={endDate}
+              min={startDate || todayISO()}
+              onChange={value => onDates(startDate, value)}
+            />
+          </>
+        )}
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[11.5px] font-bold text-[#140832]">
+          <Clock size={11} strokeWidth={2.4} />
+          {days ? `${days} day${days === 1 ? '' : 's'}` : 'No dates'}
+        </span>
+
+        {days > 0 && (
+          <span className="inline-flex items-center gap-1 rounded-full border border-violet-300 bg-violet-100/90 px-3 py-1 text-[11.5px] font-extrabold tabular-nums text-[#2e0a72]">
+            {days} × {item.quantity} × {item.unitPrice} = {lineTotal.toFixed(2)} {item.currency}
+          </span>
+        )}
+
+        <AvailabilitySticker
+          dateRangeValid={dateRangeValid}
+          availability={availability}
+          availOk={availOk}
+        />
+      </div>
+
+      {minDaysMissed && (
+        <div className="mt-3 flex items-center gap-2 rounded-[12px] border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[12px] font-semibold text-amber-800">
+          <AlertTriangle size={13} strokeWidth={2} className="shrink-0" />
+          Minimum {item.minimumRentalDays} day{item.minimumRentalDays === 1 ? '' : 's'} required for this product.
+        </div>
+      )}
+    </motion.div>
+  )
+}
 
 export default function RentalCartPage() {
   usePageMeta({
@@ -22,7 +351,8 @@ export default function RentalCartPage() {
     noIndex: true,
   })
 
-  const { isDark } = useTheme()
+  const reducedMotion = useReducedMotion()
+  const motionEnabled = !reducedMotion
   const navigate = useNavigate()
   const dialog = useDialog()
   const { isLoggedIn } = useUser()
@@ -63,7 +393,12 @@ export default function RentalCartPage() {
         const days = rentalCart.getItemDays(item)
         return hasValidDateRange(startDate, endDate) && days >= item.minimumRentalDays
       }),
-    [rentalCart]
+    [
+      rentalCart.items,
+      rentalCart.mode,
+      rentalCart.sharedStartDate,
+      rentalCart.sharedEndDate,
+    ]
   )
 
   const handleCheckout = async () => {
@@ -87,403 +422,330 @@ export default function RentalCartPage() {
     navigate('/checkout')
   }
 
-  const cardBase = isDark
-    ? 'border border-white/[0.08] bg-[linear-gradient(180deg,rgba(16,13,32,0.96),rgba(10,9,24,0.98))]'
-    : 'border border-violet-100/70 bg-white shadow-[0_4px_20px_rgba(124,58,237,0.05)]'
+  const currency = rentalCart.items[0]?.currency || 'JOD'
+  const sharedDatesValid = hasValidDateRange(rentalCart.sharedStartDate, rentalCart.sharedEndDate)
+  const readinessMessage = allItemsReady
+    ? isLoggedIn
+      ? 'All items are ready for checkout.'
+      : 'All items ready. Sign in to confirm the request.'
+    : 'Set valid dates for every item before checkout.'
 
-  // ── Empty State ──
+  // ── Empty State ────────────────────────────────────────────────────────────
   if (!hasItems) {
     return (
-      <section className="site-section">
-        <div className="site-container max-w-3xl">
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, ease }}
-            className={`relative overflow-hidden rounded-[28px] border px-6 py-14 sm:py-18 text-center ${cardBase}`}
-          >
-            {/* Ambient glow */}
-            {isDark && (
-              <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-48 w-48 rounded-full bg-violet-500/[0.08] blur-[60px]" aria-hidden="true" />
-            )}
-            <div className="relative">
-              <div
-                className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-[24px] ${
-                  isDark
-                    ? 'bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(34,211,238,0.10))] border border-white/[0.08]'
-                    : 'bg-violet-50 border border-violet-100'
-                }`}
-              >
-                <ShoppingBag size={30} className={isDark ? 'text-violet-300/80' : 'text-violet-400'} />
-              </div>
-              <h1 className={`font-display text-[1.95rem] font-black tracking-[-0.04em] ${isDark ? 'text-white' : 'text-[#07041a]'}`}>
-                Your cart is empty
-              </h1>
-              <p className={`mx-auto mt-3 max-w-md text-[0.98rem] font-medium leading-[1.72] ${isDark ? 'text-slate-400' : 'text-[#211049]'}`}>
-                Add event services from the catalog, choose your rental dates, and come back here to continue to checkout.
-              </p>
-              <div className="mt-8">
-                <Link to="/products" className="btn-primary !rounded-[14px] !px-7 !py-3 !text-[13px]">
-                  Browse Products
-                </Link>
-              </div>
-            </div>
-          </motion.div>
+      <StatusShell>
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-[20px] border border-violet-200 bg-violet-50">
+          <ShoppingBag className="h-7 w-7 text-[#7126e3]" strokeWidth={2} />
         </div>
-      </section>
+        <span className="section-label justify-center">// Rental Cart</span>
+        <h1 className="mt-3 font-display text-3xl font-black tracking-[-0.03em] text-[#1a0b3d] sm:text-4xl">
+          Your rental cart is empty
+        </h1>
+        <p className="mx-auto mt-3 max-w-md text-[0.95rem] leading-7 text-[#4b3a63]">
+          Browse our event services and start building your request. Pick your dates and we'll
+          check availability for you.
+        </p>
+        <div className="mt-7">
+          <Link to="/products" className="btn-primary !rounded-[14px] !px-6 !py-3 !text-sm">
+            Browse Services
+            <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
+          </Link>
+        </div>
+      </StatusShell>
     )
   }
 
   return (
-    <section className="site-section">
-      <div className="site-container">
+    <>
+      <section className="site-section pb-28 lg:pb-0">
+        <div className="site-container">
 
-        {/* ── Page Header ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.58, ease }}
-          className="mb-9"
-        >
-          <div className="flex items-center gap-2.5 mb-3">
-            <span className="section-label">// Rental Cart</span>
-            <div className={`h-px w-8 ${isDark ? 'bg-violet-500/30' : 'bg-violet-300/50'}`} />
-          </div>
-          <h1 className={`section-title !text-left ${!isDark ? 'text-[#07041a]' : ''}`}>
-            Prepare Your <span className="text-glow">Request</span>
-          </h1>
-          <p className={`mt-4 max-w-2xl text-[0.97rem] font-medium leading-[1.72] ${isDark ? 'text-slate-400' : 'text-[#211049]'}`}>
-            Set shared event dates for the whole cart, or switch to per-item mode. Availability is checked against your rental range.
-          </p>
-        </motion.div>
+          {/* Hero header */}
+          <motion.div
+            initial={motionEnabled ? { opacity: 0, y: 20 } : false}
+            animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
+            transition={motionEnabled ? { duration: 0.6, ease } : undefined}
+            className="mx-auto mb-10 max-w-3xl text-center"
+          >
+            <span className="section-label justify-center">// Rental Cart</span>
+            <h1 className="mt-3 font-display text-3xl font-black leading-[1.05] tracking-[-0.035em] sm:text-5xl">
+              <span className="text-glow">Prepare Your Request</span>
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-[0.98rem] leading-7 text-[#4b3a63]">
+              Set shared event dates for the whole cart, or switch to per-item mode. We check
+              availability against your selected rental range.
+            </p>
+            <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-violet-300 to-transparent" />
+          </motion.div>
 
-        {/* ── Main Grid ── */}
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
 
-          {/* ── Left: Items ── */}
-          <div className="space-y-4">
+            {/* LEFT — sections */}
+            <div className="space-y-8">
 
-            {/* Date Mode Toggle */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.06, ease }}
-              className={`overflow-hidden rounded-[22px] ${cardBase}`}
-            >
-              <div className={`border-b px-5 py-4 ${isDark ? 'border-white/[0.07]' : 'border-violet-100/60'}`}>
-                <div className="flex items-center gap-2">
-                  <CalendarDays size={14} className={isDark ? 'text-cyan-400/80' : 'text-violet-700'} />
-                  <span className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-[#140832]'}`}>
-                    Event Dates
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-5">
-                {/* Toggle buttons */}
-                <div className={`mb-5 grid grid-cols-2 gap-1.5 rounded-[14px] p-1 ${isDark ? 'bg-white/[0.04]' : 'bg-violet-50/80 border border-violet-100'}`}>
+              {/* 01 — EVENT DATES */}
+              <CartSection
+                index="01"
+                eyebrow="EVENT DATES"
+                title="When is your event?"
+                description="Apply one date range to every item, or set dates per item."
+                motionEnabled={motionEnabled}
+              >
+                <div className="grid grid-cols-2 gap-1.5 rounded-[16px] border border-violet-100 bg-violet-50/50 p-1">
                   {[
                     { mode: 'shared' as const, label: 'Shared dates for all' },
                     { mode: 'per_item' as const, label: 'Per-item dates' },
-                  ].map(({ mode, label }) => (
-                    <button
-                      key={mode}
-                      type="button"
-                      onClick={() => rentalCart.setMode(mode)}
-                      className={cn(
-                        'min-h-[42px] rounded-[11px] px-3 py-2.5 text-[12.5px] font-bold transition-all duration-250',
-                        rentalCart.mode === mode
-                          ? isDark
-                            ? 'bg-[linear-gradient(135deg,rgba(124,58,237,0.5),rgba(34,211,238,0.3))] text-white shadow-[0_4px_12px_rgba(0,0,0,0.3)]'
-                            : 'bg-white text-[#07041a] shadow-[0_4px_14px_-4px_rgba(89,23,196,0.28)] border border-violet-200'
-                          : isDark
-                            ? 'text-slate-400 hover:text-white'
-                            : 'text-[#211049] hover:text-[#07041a]'
-                      )}
+                  ].map(({ mode, label }) => {
+                    const active = rentalCart.mode === mode
+                    return (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => rentalCart.setMode(mode)}
+                        className={
+                          'min-h-[42px] rounded-[12px] px-4 py-2.5 text-[12.5px] font-bold transition ' +
+                          (active
+                            ? 'border border-violet-200 bg-white text-[#1a0b3d] shadow-[0_4px_14px_-4px_rgba(89,23,196,0.28)]'
+                            : 'text-[#6b5a82] hover:text-[#1a0b3d]')
+                        }
+                        aria-pressed={active}
+                      >
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <AnimatePresence initial={false} mode="wait">
+                  {rentalCart.mode === 'shared' && (
+                    <motion.div
+                      key="shared-dates"
+                      initial={motionEnabled ? { opacity: 0, height: 0 } : false}
+                      animate={motionEnabled ? { opacity: 1, height: 'auto' } : undefined}
+                      exit={motionEnabled ? { opacity: 0, height: 0 } : undefined}
+                      transition={motionEnabled ? { duration: 0.28, ease } : undefined}
+                      className="overflow-hidden"
                     >
-                      {label}
-                    </button>
+                      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <DateField
+                          label="Start date"
+                          value={rentalCart.sharedStartDate}
+                          min={todayISO()}
+                          onChange={value => rentalCart.setSharedDates(value, rentalCart.sharedEndDate)}
+                        />
+                        <DateField
+                          label="End date"
+                          value={rentalCart.sharedEndDate}
+                          min={rentalCart.sharedStartDate || todayISO()}
+                          onChange={value => rentalCart.setSharedDates(rentalCart.sharedStartDate, value)}
+                        />
+                      </div>
+                      <div className="mt-3">
+                        {sharedDatesValid ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-300 bg-violet-100/90 px-3 py-1 text-[11.5px] font-bold text-[#2e0a72]">
+                            <Clock size={11} strokeWidth={2.4} />
+                            {Math.max(
+                              1,
+                              Math.round(
+                                (new Date(rentalCart.sharedEndDate).getTime() -
+                                  new Date(rentalCart.sharedStartDate).getTime()) /
+                                  86400000
+                              ) + 1
+                            )}{' '}
+                            day range applied to all items
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[11.5px] font-semibold text-[#4b3a63]">
+                            <CalendarDays size={11} strokeWidth={2.4} />
+                            Pick a start and end date
+                          </span>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </CartSection>
+
+              {/* 02 — ITEMS */}
+              <CartSection
+                index="02"
+                eyebrow="ITEMS"
+                title="Your selected services"
+                description={
+                  rentalCart.mode === 'per_item'
+                    ? 'Set dates per item and adjust quantities.'
+                    : 'Adjust quantities. Dates come from the shared range above.'
+                }
+                motionEnabled={motionEnabled}
+                delay={0.08}
+              >
+                <div className="space-y-4">
+                  {rentalCart.items.map((item, idx) => {
+                    const { startDate, endDate } = rentalCart.getItemDates(item)
+                    const days = rentalCart.getItemDays(item)
+                    const availability = availabilityMap[item.productSlug]
+                    const dateRangeValid = hasValidDateRange(startDate, endDate)
+                    const minDaysMissed = dateRangeValid && days < item.minimumRentalDays
+                    const availOk = availability
+                      ? availability.availableQuantity >= item.quantity
+                      : null
+
+                    return (
+                      <RentalItemCard
+                        key={item.productSlug}
+                        item={item}
+                        index={idx}
+                        total={rentalCart.items.length}
+                        perItem={rentalCart.mode === 'per_item'}
+                        startDate={startDate}
+                        endDate={endDate}
+                        days={days}
+                        dateRangeValid={dateRangeValid}
+                        minDaysMissed={minDaysMissed}
+                        availability={availability}
+                        availOk={availOk}
+                        lineTotal={rentalCart.getItemLineTotal(item)}
+                        motionEnabled={motionEnabled}
+                        onQty={next => rentalCart.updateQuantity(item.productSlug, next)}
+                        onDates={(start, end) => rentalCart.setItemDates(item.productSlug, start, end)}
+                        onRemove={() => rentalCart.removeItem(item.productSlug)}
+                      />
+                    )
+                  })}
+                </div>
+              </CartSection>
+            </div>
+
+            {/* RIGHT — summary (order-last on mobile, sticky on desktop) */}
+            <motion.aside
+              initial={motionEnabled ? { opacity: 0, x: 20 } : false}
+              animate={motionEnabled ? { opacity: 1, x: 0 } : undefined}
+              transition={motionEnabled ? { duration: 0.55, ease, delay: 0.1 } : undefined}
+              className="order-last xl:order-none"
+            >
+              <div className="glass !rounded-[22px] p-5 xl:sticky xl:top-24">
+                <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#7126e3]">
+                  Cart Summary
+                </div>
+
+                <div className="mt-3 flex items-end gap-2">
+                  <span className="font-display text-5xl font-black leading-none">
+                    <span className="text-glow">{rentalCart.itemCount}</span>
+                  </span>
+                  <span className="pb-1 text-[0.85rem] font-medium text-[#4b3a63]">
+                    item{rentalCart.itemCount === 1 ? '' : 's'}
+                  </span>
+                </div>
+                <div className="mt-1 text-[0.85rem] text-[#6b5a82]">
+                  across {rentalCart.items.length} product{rentalCart.items.length === 1 ? '' : 's'}
+                </div>
+
+                {/* Breakdown */}
+                <div className="mt-5 max-h-[15rem] divide-y divide-violet-100 overflow-y-auto pr-1 [scrollbar-width:thin]">
+                  {rentalCart.items.map(item => (
+                    <div key={item.productSlug} className="flex items-center justify-between gap-3 py-2.5">
+                      <span className="min-w-0 truncate text-[0.88rem] font-semibold text-[#1a0b3d]">
+                        {item.productTitle}
+                      </span>
+                      <span className="shrink-0 text-[0.82rem] font-medium tabular-nums text-[#6b5a82]">
+                        {item.quantity} × {item.unitPrice} {item.currency}
+                      </span>
+                    </div>
                   ))}
                 </div>
 
-                {/* Shared date inputs */}
-                {rentalCart.mode === 'shared' && (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <label className={`mb-2 block text-[12.5px] font-bold ${isDark ? 'text-slate-400' : 'text-[#07041a]'}`}>
-                        Start Date
-                      </label>
-                      <input
-                        type="date"
-                        className="form-field"
-                        value={rentalCart.sharedStartDate}
-                        onChange={e => rentalCart.setSharedDates(e.target.value, rentalCart.sharedEndDate)}
-                      />
-                    </div>
-                    <div>
-                      <label className={`mb-2 block text-[12.5px] font-bold ${isDark ? 'text-slate-400' : 'text-[#07041a]'}`}>
-                        End Date
-                      </label>
-                      <input
-                        type="date"
-                        className="form-field"
-                        value={rentalCart.sharedEndDate}
-                        onChange={e => rentalCart.setSharedDates(rentalCart.sharedStartDate, e.target.value)}
-                      />
-                    </div>
+                {/* Subtotal */}
+                <div className="mt-4 rounded-[16px] border border-violet-200 bg-violet-50/70 p-4">
+                  <div className="text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-[#2e0a72]">
+                    Estimated total
                   </div>
-                )}
-              </div>
-            </motion.div>
+                  <div className="mt-1.5 font-display text-[2.1rem] font-black leading-none tabular-nums tracking-[-0.04em] text-[#07041a]">
+                    {rentalCart.grandTotal.toFixed(2)}{' '}
+                    <span className="text-[1.1rem] font-bold text-[#4b3a63]">{currency}</span>
+                  </div>
+                  <div className="mt-1 text-[11.5px] font-semibold text-[#4b3a63]">
+                    {allItemsReady ? 'Based on current day rates' : 'Set dates to see the full total'}
+                  </div>
+                </div>
 
-            {/* Cart Items */}
-            {rentalCart.items.map((item, idx) => {
-              const { startDate, endDate } = rentalCart.getItemDates(item)
-              const days = rentalCart.getItemDays(item)
-              const availability = availabilityMap[item.productSlug]
-              const dateRangeValid = hasValidDateRange(startDate, endDate)
-              const minDaysMissed = dateRangeValid && days < item.minimumRentalDays
-              const availOk = availability ? availability.availableQuantity >= item.quantity : null
-
-              return (
-                <motion.div
-                  key={item.productSlug}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.45, delay: 0.08 + idx * 0.06, ease }}
-                  className={`overflow-hidden rounded-[22px] ${cardBase}`}
+                {/* Readiness */}
+                <div
+                  className={
+                    'mt-4 flex items-start gap-2.5 rounded-[14px] border px-3.5 py-3 text-[12.5px] font-semibold leading-[1.6] ' +
+                    (allItemsReady
+                      ? 'border-emerald-300 bg-emerald-50 text-emerald-900'
+                      : 'border-amber-300 bg-amber-50 text-amber-900')
+                  }
                 >
-                  {/* Item header */}
-                  <div className={`flex items-center justify-between border-b px-4 py-3 ${isDark ? 'border-white/[0.07]' : 'border-violet-200/70'}`}>
-                    <span className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? 'text-slate-600' : 'text-[#211049]'}`}>
-                      Item {idx + 1} of {rentalCart.items.length}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => rentalCart.removeItem(item.productSlug)}
-                      className={cn(
-                        'inline-flex items-center gap-1.5 rounded-[10px] px-2.5 py-1.5 text-[11.5px] font-bold transition-all',
-                        isDark ? 'bg-red-500/[0.10] text-red-400 hover:bg-red-500/[0.16]' : 'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800'
-                      )}
-                    >
-                      <Trash2 size={11} strokeWidth={2.4} />
-                      Remove
-                    </button>
-                  </div>
+                  {allItemsReady ? (
+                    <CheckCircle2 size={14} className="mt-0.5 shrink-0" />
+                  ) : (
+                    <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                  )}
+                  <span>{readinessMessage}</span>
+                </div>
 
-                  <div className="p-4 sm:p-5">
-                    <div className="flex flex-col gap-4 sm:flex-row">
-                      {/* Product image */}
-                      <div
-                        className={`h-24 w-full shrink-0 overflow-hidden rounded-[16px] sm:h-28 sm:w-28 lg:h-24 lg:w-24 ${
-                          isDark ? 'bg-white/[0.04] border border-white/[0.06]' : 'bg-slate-100 border border-slate-200/60'
-                        }`}
-                      >
-                        {item.productImage ? (
-                          <img src={item.productImage} alt={item.productTitle} className="h-full w-full object-cover" />
-                        ) : (
-                          <div className={`flex h-full items-center justify-center text-[11px] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
-                            No image
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Product info */}
-                      <div className="min-w-0 flex-1">
-                        <h3 className={`font-display text-[1.08rem] font-extrabold leading-tight tracking-[-0.02em] ${isDark ? 'text-white' : 'text-[#07041a]'}`}>
-                          {item.productTitle}
-                        </h3>
-                        <p className={`mt-1 text-[12.5px] font-semibold ${isDark ? 'text-slate-500' : 'text-[#211049]'}`}>
-                          <span className="text-[#07041a] font-bold">{item.unitPrice} {item.currency}/day</span>
-                          <span className="mx-1.5 text-violet-400">·</span>
-                          minimum {item.minimumRentalDays} day{item.minimumRentalDays !== 1 ? 's' : ''}
-                        </p>
-
-                        {/* Controls */}
-                        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                          <div>
-                            <label className={`mb-1.5 block text-[12px] font-bold ${isDark ? 'text-slate-500' : 'text-[#07041a]'}`}>
-                              Quantity
-                            </label>
-                            <input
-                              type="number"
-                              min={1}
-                              max={999}
-                              className="form-field"
-                              value={item.quantity}
-                              onChange={e => rentalCart.updateQuantity(item.productSlug, Number(e.target.value) || 1)}
-                            />
-                          </div>
-                          <div>
-                            <label className={`mb-1.5 block text-[12px] font-bold ${isDark ? 'text-slate-500' : 'text-[#07041a]'}`}>
-                              Start Date
-                            </label>
-                            <input
-                              type="date"
-                              disabled={rentalCart.mode === 'shared'}
-                              className={cn('form-field', rentalCart.mode === 'shared' && 'opacity-60 cursor-not-allowed')}
-                              value={startDate}
-                              onChange={e => rentalCart.setItemDates(item.productSlug, e.target.value, endDate)}
-                            />
-                          </div>
-                          <div>
-                            <label className={`mb-1.5 block text-[12px] font-bold ${isDark ? 'text-slate-500' : 'text-[#07041a]'}`}>
-                              End Date
-                            </label>
-                            <input
-                              type="date"
-                              disabled={rentalCart.mode === 'shared'}
-                              className={cn('form-field', rentalCart.mode === 'shared' && 'opacity-50 cursor-not-allowed')}
-                              value={endDate}
-                              onChange={e => rentalCart.setItemDates(item.productSlug, startDate, e.target.value)}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Status row */}
-                        <div className="mt-4 flex flex-wrap items-center gap-2">
-                          {/* Days count */}
-                          <div
-                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11.5px] font-bold ${
-                              isDark ? 'border border-white/[0.07] bg-white/[0.04] text-slate-400' : 'border border-violet-200 bg-violet-50 text-[#140832]'
-                            }`}
-                          >
-                            <Clock size={11} strokeWidth={2.4} />
-                            {days ? `${days} day${days !== 1 ? 's' : ''}` : 'No dates'}
-                          </div>
-
-                          {/* Line total */}
-                          {days > 0 && (
-                            <div
-                              className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11.5px] font-extrabold ${
-                                isDark ? 'border border-violet-500/20 bg-violet-500/10 text-violet-300' : 'border border-violet-300 bg-violet-100/90 text-[#2e0a72]'
-                              }`}
-                            >
-                              {rentalCart.getItemLineTotal(item).toFixed(2)} {item.currency}
-                            </div>
-                          )}
-
-                          {/* Availability */}
-                          {dateRangeValid && (
-                            availability ? (
-                              <div
-                                className={cn(
-                                  'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11.5px] font-bold',
-                                  availOk
-                                    ? isDark ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-400' : 'border border-emerald-300 bg-emerald-50 text-emerald-800'
-                                    : isDark ? 'border border-red-500/20 bg-red-500/10 text-red-400' : 'border border-red-300 bg-red-50 text-red-800'
-                                )}
-                              >
-                                {availOk ? <CheckCircle2 size={11} strokeWidth={2.4} /> : <AlertTriangle size={11} strokeWidth={2.4} />}
-                                {availOk ? `${availability.availableQuantity} available` : `Only ${availability.availableQuantity} in stock`}
-                              </div>
-                            ) : (
-                              <div className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11.5px] font-semibold ${isDark ? 'text-slate-600' : 'text-[#211049]'}`}>
-                                Checking...
-                              </div>
-                            )
-                          )}
-                        </div>
-
-                        {/* Min days warning */}
-                        {minDaysMissed && (
-                          <div
-                            className={`mt-3 flex items-center gap-2 rounded-[12px] px-3.5 py-2.5 text-[12px] font-medium ${
-                              isDark ? 'bg-amber-500/10 border border-amber-500/20 text-amber-300' : 'bg-amber-50 border border-amber-200 text-amber-700'
-                            }`}
-                          >
-                            <AlertTriangle size={13} className="shrink-0" />
-                            Minimum {item.minimumRentalDays} day{item.minimumRentalDays !== 1 ? 's' : ''} required for this product.
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )
-            })}
+                {/* CTAs */}
+                <div className="mt-5 space-y-2.5">
+                  <button
+                    type="button"
+                    onClick={() => void handleCheckout()}
+                    disabled={!allItemsReady}
+                    title={!allItemsReady ? readinessMessage : undefined}
+                    className="btn-primary !w-full !rounded-[14px] !py-3 !text-[13px] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isLoggedIn ? 'Continue to Checkout' : 'Sign In to Checkout'}
+                    <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
+                  </button>
+                  <Link
+                    to="/products"
+                    className="btn-outline !w-full !rounded-[14px] !py-2.5 !text-[12px]"
+                  >
+                    Keep Browsing
+                  </Link>
+                </div>
+              </div>
+            </motion.aside>
           </div>
+        </div>
+      </section>
 
-          {/* ── Right: Summary Sidebar ── */}
-          <motion.div
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.55, delay: 0.1, ease }}
-            className={`order-first h-fit rounded-[22px] xl:order-none xl:sticky xl:top-[calc(var(--app-navbar-height)+1.5rem)] ${cardBase}`}
+      {/* Mobile sticky footer */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-violet-100 bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(89,23,196,0.08)] backdrop-blur-md lg:hidden"
+        style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            {allItemsReady ? (
+              <>
+                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#6b5a82]">
+                  Total
+                </div>
+                <div className="font-display text-[1.15rem] font-black tabular-nums leading-tight text-[#07041a]">
+                  {rentalCart.grandTotal.toFixed(2)}{' '}
+                  <span className="text-[0.85rem] font-bold text-[#4b3a63]">{currency}</span>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center gap-1.5 text-[12px] font-semibold text-amber-700">
+                <AlertTriangle size={13} strokeWidth={2.2} className="shrink-0" />
+                Set dates to see total
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => void handleCheckout()}
+            disabled={!allItemsReady}
+            title={!allItemsReady ? readinessMessage : undefined}
+            className="btn-primary !shrink-0 !whitespace-nowrap !rounded-[14px] !px-5 !py-2.5 !text-[12.5px] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {/* Summary header */}
-            <div className={`border-b px-5 py-4 ${isDark ? 'border-white/[0.07] bg-[linear-gradient(135deg,rgba(124,58,237,0.10),rgba(34,211,238,0.05))]' : 'border-violet-200/70 bg-gradient-to-r from-violet-100/70 to-fuchsia-50/40'}`}>
-              <span className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? 'text-violet-300/70' : 'text-[#2e0a72]'}`}>
-                Cart Summary
-              </span>
-            </div>
-
-            <div className="p-5">
-              {/* Item count */}
-              <div className="mb-5 flex items-center justify-between">
-                <span className={`text-[13px] font-semibold ${isDark ? 'text-slate-400' : 'text-[#140832]'}`}>
-                  {rentalCart.itemCount} item{rentalCart.itemCount !== 1 ? 's' : ''} in cart
-                </span>
-                <span className={`rounded-full px-2.5 py-1 text-[11.5px] font-extrabold ${isDark ? 'bg-violet-500/15 text-violet-300' : 'bg-violet-200 text-[#2e0a72]'}`}>
-                  {rentalCart.itemCount}
-                </span>
-              </div>
-
-              {/* Total */}
-              <div className={`rounded-[16px] p-4 ${isDark ? 'bg-white/[0.04] border border-white/[0.06]' : 'bg-violet-50/70 border border-violet-200'}`}>
-                <div className={`text-[10.5px] font-extrabold uppercase tracking-[0.16em] ${isDark ? 'text-slate-600' : 'text-[#2e0a72]'}`}>
-                  Estimated Total
-                </div>
-                <div className={`mt-1.5 font-display text-[2.25rem] font-black leading-none tracking-[-0.04em] ${isDark ? 'text-white' : 'text-[#07041a]'}`}>
-                  {rentalCart.grandTotal.toFixed(2)}
-                </div>
-                <div className={`mt-1 text-[11.5px] font-semibold ${isDark ? 'text-slate-600' : 'text-[#211049]'}`}>
-                  Based on current day rates
-                </div>
-              </div>
-
-              {/* Readiness status */}
-              <div
-                className={cn(
-                  'mt-4 flex items-start gap-2.5 rounded-[14px] px-3.5 py-3 text-[12.5px] font-semibold leading-[1.6]',
-                  allItemsReady
-                    ? isDark ? 'bg-emerald-500/10 border border-emerald-500/18 text-emerald-300' : 'bg-emerald-50 border border-emerald-300 text-emerald-900'
-                    : isDark ? 'bg-amber-500/10 border border-amber-500/18 text-amber-300' : 'bg-amber-50 border border-amber-300 text-amber-900'
-                )}
-              >
-                {allItemsReady
-                  ? <CheckCircle2 size={14} className="mt-0.5 shrink-0" />
-                  : <AlertTriangle size={14} className="mt-0.5 shrink-0" />}
-                <span>
-                  {allItemsReady
-                    ? isLoggedIn
-                      ? 'All items are ready for checkout.'
-                      : 'All items ready. Sign in to confirm the request.'
-                    : 'Set valid dates for every item before checkout.'}
-                </span>
-              </div>
-
-              {/* CTAs */}
-              <div className="mt-5 space-y-2.5">
-                <button
-                  type="button"
-                  onClick={() => void handleCheckout()}
-                  disabled={!allItemsReady}
-                  className="btn-primary !block !w-full !rounded-[14px] !text-center !text-[13px] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isLoggedIn ? 'Continue to Checkout' : 'Sign In to Checkout'}
-                </button>
-                <Link
-                  to="/products"
-                  className="btn-outline !block !w-full !rounded-[14px] !text-center !text-[13px]"
-                >
-                  Keep Browsing
-                </Link>
-              </div>
-            </div>
-          </motion.div>
+            {isLoggedIn ? 'Continue' : 'Sign In'}
+            <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
+          </button>
         </div>
       </div>
-    </section>
+    </>
   )
 }

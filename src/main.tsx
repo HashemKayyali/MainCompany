@@ -14,14 +14,8 @@ import ErrorBoundary from './components/ErrorBoundary'
 import { ToastProvider } from './contexts/ToastContext'
 import { router } from './router'
 import PerfClass from './components/PerfClass'
-import { clearChunkReloadFlag } from './utils/lazyWithRetry'
 import './styles/input.css'
 import './styles/site.css'
-
-// The app made it past every top-level module init — clear the
-// "we already tried reloading once" guard so a future genuine
-// chunk-load failure can trigger the recovery reload again.
-clearChunkReloadFlag()
 
 const AppTree = (
   <ErrorBoundary>

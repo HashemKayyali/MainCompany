@@ -192,14 +192,10 @@
       0 1px 3px rgba(20, 8, 50, 0.06);
   }
 
-  /* ─── Gradient text ─── */
+  /* ─── Heading accent text (unified solid, no gradient) ─── */
   .text-glow {
-    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 38%, #c026d3 70%, #7c3aed 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    background-size: 200% auto;
-    animation: text-glow-shift 8s ease-in-out infinite;
+    color: #1a0b3d;
+    -webkit-text-fill-color: #1a0b3d;
   }
 
   @keyframes text-glow-shift {

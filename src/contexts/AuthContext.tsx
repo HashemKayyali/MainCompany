@@ -324,8 +324,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return true
       } catch (error) {
         console.error('[AuthContext] removeAdmin error:', error)
-        setAdmins(prev => prev.filter(admin => admin.id !== id))
-        return true
+        return false
       }
     },
     [fetchAllAdmins, user?.id]

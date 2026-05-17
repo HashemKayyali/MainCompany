@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
 import { useTheme } from '../contexts/ThemeContext'

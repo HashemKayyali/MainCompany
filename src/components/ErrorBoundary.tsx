@@ -23,10 +23,15 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('[ErrorBoundary]', error, info.componentStack)
+    // TODO: wire to Sentry or a Supabase logs table for production telemetry
   }
 
   private handleReset = () => {
-    this.setState({ hasError: false, error: null })
+    if (typeof window !== 'undefined') {
+      window.location.reload()
+    } else {
+      this.setState({ hasError: false, error: null })
+    }
   }
 
   render() {

@@ -1,6 +1,8 @@
 import {
   createContext,
   useContext,
+  useEffect,
+  useMemo,
   useState,
   useCallback,
   type ReactNode,
@@ -65,8 +67,10 @@ export function DialogProvider({ children }: { children: ReactNode }) {
     setDialog(null)
   }
 
+  const value = useMemo<DialogCtx>(() => ({ confirm, alert }), [confirm, alert])
+
   return (
-    <Ctx.Provider value={{ confirm, alert }}>
+    <Ctx.Provider value={value}>
       {children}
       <AnimatePresence>
         {dialog && (
@@ -95,6 +99,17 @@ function DialogOverlay({
   useBodyScrollLock(true)
 
   const isAlert = dialog.type === 'alert'
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isAlert) onConfirm()
+        else onCancel()
+      }
+    }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [isAlert, onCancel, onConfirm])
   const variant = dialog.variant || 'danger'
 
   const confirmLabel = dialog.confirmLabel || (isAlert ? 'OK' : 'Delete')
@@ -160,23 +175,23 @@ function DialogOverlay({
         </p>
 
         {/* Actions */}
-        <div className="flex items-center gap-3 mt-6">
-          <button
-            onClick={onConfirm}
-            className={`px-5 py-2.5 rounded-xl text-[13px] font-semibold border transition-all ${confirmCls}`}
-            autoFocus
-          >
-            {confirmLabel}
-          </button>
-
+        <div className="flex items-center gap-3 mt-6 justify-end">
           {!isAlert && (
             <button
               onClick={onCancel}
               className={`px-5 py-2.5 rounded-xl text-[13px] font-semibold border transition-all ${cancelCls}`}
+              autoFocus={variant === 'danger' || variant === 'warning'}
             >
               {cancelLabel}
             </button>
           )}
+
+          <button
+            onClick={onConfirm}
+            className={`px-5 py-2.5 rounded-xl text-[13px] font-semibold border transition-all ${confirmCls}`}
+          >
+            {confirmLabel}
+          </button>
         </div>
       </motion.div>
     </div>

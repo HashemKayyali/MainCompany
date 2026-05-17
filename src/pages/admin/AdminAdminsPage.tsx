@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useAuth, type AdminRole } from '../../contexts/AuthContext'
 import { useDialog } from '../../contexts/DialogContext'
 import { useTheme } from '../../contexts/ThemeContext'
@@ -15,6 +15,7 @@ import AdminViewToggle from '../../components/admin/AdminViewToggle'
 import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
 import { cn } from '../../utils/cn'
+import { getErrorMessage } from '../../lib/errors'
 
 type AdminMember = { id: string; name: string; email: string; role: AdminRole } & AvatarFields
 
@@ -57,8 +58,8 @@ export default function AdminAdminsPage() {
       setShowAdd(false)
       setAddEmail('')
       setAddRole('admin')
-    } catch (err: any) {
-      setAddError(err?.message || 'Failed to add admin')
+    } catch (err: unknown) {
+      setAddError(getErrorMessage(err, 'Failed to add admin'))
     } finally {
       setAddSaving(false)
     }
