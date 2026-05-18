@@ -184,103 +184,90 @@ export default function AdminAdminsPage() {
         ) : (
           <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
             <div className={cn('origin-top transition-[opacity,transform,filter] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform,filter]', viewTransitionClassName)}>
-            <div className={cardsLayoutClass}>
+            <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(250px,1fr))]">
               {admins.map(admin => {
-              const safeRole = admin.role === 'superadmin' ? 'superadmin' : 'admin'
-              const isYou = admin.id === user?.id
-              const member: AdminMember = {
-                id: admin.id,
-                name: admin.name,
-                email: admin.email,
-                role: safeRole,
-                avatarUrl: admin.avatarUrl,
-                avatarStyle: admin.avatarStyle,
-                avatarSeed: admin.avatarSeed,
-                avatarOptions: admin.avatarOptions,
-              }
+                const safeRole = admin.role === 'superadmin' ? 'superadmin' : 'admin'
+                const isYou = admin.id === user?.id
+                const member: AdminMember = {
+                  id: admin.id,
+                  name: admin.name,
+                  email: admin.email,
+                  role: safeRole,
+                  avatarUrl: admin.avatarUrl,
+                  avatarStyle: admin.avatarStyle,
+                  avatarSeed: admin.avatarSeed,
+                  avatarOptions: admin.avatarOptions,
+                }
+                const canManage = isSuperAdmin && !isYou && safeRole !== 'superadmin'
 
-              return (
-                <AdminEntityCard
-                  key={admin.id}
-                variant={getAdminEntityVariant(displayCardView)}
-                  minHeightClassName={displayCardView === 'grid' ? 'min-h-[212px]' : 'min-h-[96px]'}
-                  bodyClassName={displayCardView === 'grid' ? 'gap-2 p-3' : 'gap-1.5 p-2.5'}
-                  listMediaWrapClassName="md:self-center"
-                  listMediaFrameClassName="!h-[74px] !w-[74px] md:!h-[74px] md:!w-[74px] p-2"
-                  actionsWrapClassName={displayCardView === 'list' ? 'xl:w-[112px]' : undefined}
-                  media={
-                    <div className={cn('flex h-full w-full items-center justify-center rounded-[24px]', isDark ? 'bg-[radial-gradient(circle,rgba(34,211,238,0.12),transparent_58%)]' : 'bg-[radial-gradient(circle,rgba(139,92,246,0.08),transparent_55%)]')}>
+                return (
+                  <div
+                    key={admin.id}
+                    className="flex flex-col rounded-[16px] border border-violet-200/70 bg-white p-3.5 shadow-[0_8px_24px_-18px_rgba(89,23,196,0.20)] transition-shadow duration-200 hover:shadow-[0_14px_32px_-16px_rgba(89,23,196,0.30)]"
+                  >
+                    <div className="flex items-start gap-3">
                       <UserAvatar
                         name={admin.name}
                         email={admin.email}
-                        avatarUrl={admin.avatarUrl}
-                        avatarStyle={admin.avatarStyle}
-                        avatarSeed={admin.avatarSeed}
-                        avatarOptions={admin.avatarOptions}
-                        className="h-full w-full rounded-[22px]"
-                        fallbackClassName={cn(
-                          'text-[2rem] font-display font-bold shadow-lg',
+                        className={cn(
+                          'h-11 w-11 shrink-0 rounded-[12px] text-[0.95rem] font-display font-bold',
                           avatarClass(safeRole)
                         )}
                       />
-                    </div>
-                  }
-                  mediaOverlayRight={
-                    <span className={cn('rounded-full px-3 py-1 text-[10px] font-mono uppercase tracking-[0.22em] ring-1 ring-inset', cardRoleTone(safeRole))}>
-                      {safeRole}
-                    </span>
-                  }
-                  title={admin.name}
-                  subtitle={isYou ? 'This account is your current session.' : undefined}
-                  badges={
-                    <>
-                      {isYou && (
-                        <span className={cn('rounded-full px-3 py-1 text-[11px] font-medium ring-1 ring-inset', isDark ? 'bg-cyan-400/10 text-cyan-200 ring-cyan-400/18' : 'border-violet-200 bg-violet-50 text-violet-700')}>
-                          You
-                        </span>
-                      )}
-                      <span className={cn('rounded-full px-3 py-1 text-[11px] font-medium ring-1 ring-inset', isDark ? 'bg-[#0f1630]/92 text-purple-100/78 ring-cyan-400/10' : 'border-gray-200 bg-gray-50 text-gray-600')}>
-                        {admin.email}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate font-display text-[14px] font-extrabold text-[#1a0b3d]">
+                            {admin.name}
+                          </span>
+                          {isYou && (
+                            <span className="shrink-0 rounded-full border border-violet-300 bg-violet-100/80 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#2e0a72]">
+                              You
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-0.5 truncate text-[12px] font-medium text-[#6b5a82]">
+                          {admin.email}
+                        </div>
+                      </div>
+                      <span
+                        className={cn(
+                          'shrink-0 rounded-full border px-2.5 py-1 text-[9.5px] font-extrabold uppercase tracking-[0.14em] ring-1 ring-inset',
+                          cardRoleTone(safeRole)
+                        )}
+                      >
+                        {safeRole}
                       </span>
-                    </>
-                  }
-                  actions={
-                    <>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap gap-2">
                       <AdminActionButton
                         tone="primary"
-                        onClick={event => {
-                          event.stopPropagation()
-                          setDetails(member)
-                        }}
+                        className="!min-h-[34px] flex-1"
+                        onClick={() => setDetails(member)}
                       >
                         Details
                       </AdminActionButton>
-                      {isSuperAdmin && !isYou && safeRole !== 'superadmin' ? (
+                      {canManage && (
                         <>
                           <AdminActionButton
-                            onClick={event => {
-                              event.stopPropagation()
-                              openEdit(member)
-                            }}
+                            className="!min-h-[34px] flex-1"
+                            onClick={() => openEdit(member)}
                           >
                             Edit
                           </AdminActionButton>
                           <AdminActionButton
                             tone="danger"
-                            onClick={event => {
-                              event.stopPropagation()
-                              void handleRemove(member)
-                            }}
+                            className="!min-h-[34px] flex-1"
+                            onClick={() => void handleRemove(member)}
                           >
                             Remove
                           </AdminActionButton>
                         </>
-                      ) : null}
-                    </>
-                  }
-                />
-              )
-            })}
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
             </div>
           </div>

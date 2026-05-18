@@ -161,7 +161,7 @@ export default function MediaPlacementModal({
     <div
       className={cn(
         'relative mx-auto w-full overflow-hidden rounded-[18px] border',
-        interactive ? 'max-w-[20rem] sm:max-w-[22rem]' : 'max-w-[15rem] sm:max-w-[16rem]',
+        interactive ? 'max-w-[22rem] sm:max-w-[25rem]' : 'max-w-[15rem] sm:max-w-[16rem]',
         isDark
           ? 'border-white/10 bg-black/30'
           : 'border-violet-200/80 bg-[linear-gradient(135deg,rgba(250,247,255,1),rgba(244,236,255,0.92))] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.6),0_10px_28px_-14px_rgba(89,23,196,0.18)]',
@@ -272,28 +272,36 @@ export default function MediaPlacementModal({
         >
           {renderMediaFrame(true)}
 
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-            <button
-              type="button"
-              onClick={() => updateDraft({ fit: 'cover', scale: Math.max(draft.scale, 1) })}
-              className={cn(fitBtnBase, draft.fit === 'cover' ? fitBtnActive : fitBtnInactive)}
-            >
-              Fill Frame
-            </button>
-            <button
-              type="button"
-              onClick={() => updateDraft({ fit: 'contain' })}
-              className={cn(fitBtnBase, draft.fit === 'contain' ? fitBtnActive : fitBtnInactive)}
-            >
-              Fit Inside
-            </button>
-            <button
-              type="button"
-              onClick={() => updateDraft({ x: 50, y: 50 })}
-              className={cn(fitBtnBase, fitBtnInactive)}
-            >
-              Center
-            </button>
+          <div>
+            <div className={cn('mb-2 text-[10px] font-extrabold uppercase tracking-[0.16em]', isDark ? sub : 'text-[#7126e3]')}>
+              Fit Mode
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+              <button
+                type="button"
+                onClick={() => updateDraft({ fit: 'cover', scale: Math.max(draft.scale, 1) })}
+                className={cn(fitBtnBase, '!min-h-[42px] flex-col !gap-0', draft.fit === 'cover' ? fitBtnActive : fitBtnInactive)}
+              >
+                <span>Fill Frame</span>
+                <span className="text-[9px] font-semibold uppercase tracking-[0.1em] opacity-70">Edge to edge</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => updateDraft({ fit: 'contain' })}
+                className={cn(fitBtnBase, '!min-h-[42px] flex-col !gap-0', draft.fit === 'contain' ? fitBtnActive : fitBtnInactive)}
+              >
+                <span>Fit Inside</span>
+                <span className="text-[9px] font-semibold uppercase tracking-[0.1em] opacity-70">Show all</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => updateDraft({ x: 50, y: 50 })}
+                className={cn(fitBtnBase, '!min-h-[42px] flex-col !gap-0', fitBtnInactive)}
+              >
+                <span>Recenter</span>
+                <span className="text-[9px] font-semibold uppercase tracking-[0.1em] opacity-70">Reset position</span>
+              </button>
+            </div>
           </div>
         </AdminEditorSection>
 

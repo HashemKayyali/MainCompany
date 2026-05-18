@@ -1,4 +1,3 @@
-import { useTheme } from '../../contexts/ThemeContext'
 import type { AdminCardView } from './useAdminCardView'
 import { cn } from '../../utils/cn'
 
@@ -7,9 +6,9 @@ interface AdminViewToggleProps {
   onChange: (value: AdminCardView) => void
 }
 
+// Clean segmented control (light-only). Active = white pill on a soft
+// violet track; inactive = muted ink.
 export default function AdminViewToggle({ value, onChange }: AdminViewToggleProps) {
-  const { isDark } = useTheme()
-
   const options: Array<{ value: AdminCardView; label: string; short: string }> = [
     { value: 'grid', label: 'Adaptive Grid', short: 'Grid' },
     { value: 'list', label: 'List View', short: 'List' },
@@ -17,12 +16,7 @@ export default function AdminViewToggle({ value, onChange }: AdminViewToggleProp
 
   return (
     <div
-      className={cn(
-        'inline-flex items-center gap-1 rounded-[14px] p-0.75',
-        isDark
-          ? 'bg-[linear-gradient(145deg,rgba(9,13,30,0.98),rgba(11,16,35,0.99))] ring-1 ring-inset ring-cyan-400/14 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.9)]'
-          : 'bg-white ring-1 ring-inset ring-gray-200 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.22)]'
-      )}
+      className="inline-flex items-center gap-1 rounded-[14px] border border-violet-200 bg-violet-50/60 p-1"
       aria-label="Card layout"
     >
       {options.map(option => {
@@ -32,17 +26,14 @@ export default function AdminViewToggle({ value, onChange }: AdminViewToggleProp
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            className={cn(
-              'inline-flex min-h-[38px] min-w-[76px] items-center justify-center rounded-[12px] px-3 py-1.5 text-[10.5px] font-semibold transition active:translate-y-[1px] sm:min-h-[40px] sm:min-w-[82px]',
-              active
-                ? isDark
-                  ? 'bg-[linear-gradient(180deg,rgba(24,56,78,0.96),rgba(14,36,54,0.98))] text-cyan-100 ring-1 ring-inset ring-cyan-300/24 shadow-[0_12px_26px_-18px_rgba(34,211,238,0.3)]'
-                  : 'bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200 shadow-[0_10px_24px_-18px_rgba(124,58,237,0.22)]'
-                : isDark
-                  ? 'bg-[#0d1430]/68 text-purple-100/72 ring-1 ring-inset ring-cyan-400/10 hover:bg-[#111a39] hover:text-white'
-                  : 'bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-200 hover:bg-white'
-            )}
+            aria-pressed={active}
             title={option.label}
+            className={cn(
+              'inline-flex min-h-[36px] min-w-[78px] items-center justify-center rounded-[11px] px-3.5 text-[11.5px] font-bold transition active:translate-y-[1px]',
+              active
+                ? 'border border-violet-200 bg-white text-[#1a0b3d] shadow-[0_4px_14px_-6px_rgba(89,23,196,0.30)]'
+                : 'text-[#6b5a82] hover:text-[#1a0b3d]'
+            )}
           >
             {option.short}
           </button>

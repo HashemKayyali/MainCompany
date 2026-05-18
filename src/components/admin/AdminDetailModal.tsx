@@ -1,5 +1,4 @@
 import Modal from '../ui/Modal'
-import { useTheme } from '../../contexts/ThemeContext'
 import type { AdminFact } from './AdminEntityCard'
 import AdminActionButton from './AdminActionButton'
 import { cn } from '../../utils/cn'
@@ -24,6 +23,8 @@ interface AdminDetailModalProps {
   size?: 'lg' | 'xl' | '2xl'
 }
 
+// Light-only detail modal: clean media/summary header, readable facts
+// grid, organised sections, tidy footer (Cancel + custom actions).
 export default function AdminDetailModal({
   open,
   onClose,
@@ -36,31 +37,20 @@ export default function AdminDetailModal({
   actions,
   size = 'lg',
 }: AdminDetailModalProps) {
-  const { isDark } = useTheme()
-
   return (
     <Modal open={open} onClose={onClose} title={title} size={size}>
-      <div className="space-y-4">
+      <div className="admin-scope space-y-4">
         {(media || subtitle || badges) && (
-          <div
-            className={cn(
-              'overflow-hidden rounded-[26px]',
-              isDark
-                ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(9,13,30,0.98))] ring-1 ring-inset ring-cyan-400/12'
-                : 'bg-gray-50/70 ring-1 ring-inset ring-gray-200'
+          <div className="overflow-hidden rounded-[18px] border border-violet-200/70 bg-[linear-gradient(180deg,#ffffff,#faf6ff)]">
+            {media && <div className="border-b border-violet-100">{media}</div>}
+            {(subtitle || badges) && (
+              <div className="space-y-3 p-4 sm:p-5">
+                {subtitle && (
+                  <p className="max-w-3xl text-[13px] leading-6 text-[#4b3a63]">{subtitle}</p>
+                )}
+                {badges && <div className="flex flex-wrap gap-2">{badges}</div>}
+              </div>
             )}
-          >
-            {media && <div className={cn(isDark ? 'border-b border-cyan-400/10' : 'border-b border-gray-200')}>{media}</div>}
-
-            <div className="space-y-3 p-4 sm:p-5">
-              {subtitle && (
-                <p className={cn('max-w-3xl text-sm leading-6', isDark ? 'text-purple-200/72' : 'text-gray-500')}>
-                  {subtitle}
-                </p>
-              )}
-
-              {badges && <div className="flex flex-wrap gap-2">{badges}</div>}
-            </div>
           </div>
         )}
 
@@ -69,15 +59,12 @@ export default function AdminDetailModal({
             {summaryFacts.map(fact => (
               <div
                 key={fact.label}
-                className={cn(
-                  'rounded-2xl px-4 py-4',
-                  isDark ? 'bg-[#0e152f]/94 ring-1 ring-inset ring-cyan-400/10' : 'bg-gray-50/80 ring-1 ring-inset ring-gray-200'
-                )}
+                className="rounded-[14px] border border-violet-200/70 bg-white px-4 py-3.5"
               >
-                <div className={cn('text-[10px] font-mono font-semibold uppercase tracking-[0.16em]', isDark ? 'text-cyan-100/36' : 'text-gray-400')}>
+                <div className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#7126e3]">
                   {fact.label}
                 </div>
-                <div className={cn('mt-2 text-sm font-semibold leading-6', isDark ? 'text-white' : 'text-gray-900')}>
+                <div className="mt-1.5 text-[13.5px] font-bold leading-6 text-[#1a0b3d]">
                   {fact.value}
                 </div>
               </div>
@@ -90,18 +77,13 @@ export default function AdminDetailModal({
             {sections.map(section => (
               <section
                 key={section.title}
-                className={cn(
-                  'rounded-2xl p-4 sm:p-5',
-                  isDark
-                    ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(9,13,30,0.98))] ring-1 ring-inset ring-cyan-400/10'
-                    : 'bg-white ring-1 ring-inset ring-gray-200'
-                )}
+                className="rounded-[18px] border border-violet-200/70 bg-white p-4 shadow-[0_8px_24px_-18px_rgba(89,23,196,0.16)] sm:p-5"
               >
-                <h3 className={cn('font-display text-lg font-bold', isDark ? 'text-white' : 'text-gray-900')}>
+                <h3 className="font-display text-[1.05rem] font-extrabold text-[#1a0b3d]">
                   {section.title}
                 </h3>
                 {section.description && (
-                  <p className={cn('mt-1 text-sm', isDark ? 'text-purple-200/65' : 'text-gray-500')}>
+                  <p className="mt-1 text-[12.5px] leading-5 text-[#4b3a63]">
                     {section.description}
                   </p>
                 )}
@@ -110,10 +92,10 @@ export default function AdminDetailModal({
                   <div className="mt-4 space-y-3">
                     {section.facts.map(fact => (
                       <div key={fact.label} className="flex items-start justify-between gap-4">
-                        <div className={cn('text-[11px] font-mono font-semibold uppercase tracking-[0.14em]', isDark ? 'text-cyan-100/36' : 'text-gray-400')}>
+                        <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b5a82]">
                           {fact.label}
                         </div>
-                        <div className={cn('max-w-[70%] text-right text-sm leading-6', isDark ? 'text-white' : 'text-gray-800')}>
+                        <div className="max-w-[70%] text-right text-[13px] font-semibold leading-6 text-[#1a0b3d]">
                           {fact.value}
                         </div>
                       </div>
@@ -127,7 +109,7 @@ export default function AdminDetailModal({
           </div>
         )}
 
-        <div className="flex flex-wrap justify-end gap-2 pt-1">
+        <div className={cn('flex flex-wrap items-center justify-end gap-2 pt-1')}>
           <AdminActionButton onClick={onClose}>Cancel</AdminActionButton>
           {actions}
         </div>

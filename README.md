@@ -278,3 +278,9 @@ Recommended next steps based on the current repository state:
 - Media uploads are converted and uploaded in the browser via `src/services/storage.service.ts`.
 - `public/_redirects` is present for SPA-friendly hosting behavior.
 - If you are working on copy or demo data, review `src/data/defaults.ts` and the public pages carefully because some branding/content migration work is still in progress.
+
+
+git status
+git add .
+git commit -m "Update website "
+git push origin main

@@ -1,4 +1,3 @@
-import { useTheme } from '../../contexts/ThemeContext'
 import { cn } from '../../utils/cn'
 
 interface AdminStatCardProps {
@@ -8,51 +7,31 @@ interface AdminStatCardProps {
   className?: string
 }
 
+// Light-only stat card: strong contrast label + big near-black value,
+// soft violet top accent, premium glass surface.
 export default function AdminStatCard({
   label,
   value,
   accent,
   className,
 }: AdminStatCardProps) {
-  const { isDark } = useTheme()
-
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-[20px] px-4 py-3.5 min-h-[90px]',
-        isDark
-          ? 'bg-[linear-gradient(145deg,rgba(12,17,36,0.98),rgba(8,12,28,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_24px_80px_-58px_rgba(8,16,38,0.92)]'
-          : 'bg-white ring-1 ring-inset ring-gray-200',
+        'relative min-h-[92px] overflow-hidden rounded-[18px] border border-violet-200/70 bg-white px-4 py-3.5 shadow-[0_10px_28px_-18px_rgba(89,23,196,0.18)]',
         className
       )}
     >
-      {isDark && (
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.10),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(168,85,247,0.08),transparent_34%)]" />
-      )}
       <div
-        className="pointer-events-none absolute inset-x-4 top-0 h-px"
-        style={{
-          background: isDark
-            ? 'linear-gradient(90deg, transparent, rgba(34,211,238,0.28), rgba(168,85,247,0.20), transparent)'
-            : 'linear-gradient(90deg, transparent, rgba(124,58,237,0.24), transparent)',
-        }}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-4 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(124,58,237,0.35),transparent)]"
       />
       <div className="relative flex h-full items-start justify-between gap-3.5">
         <div className="space-y-2">
-          <div
-            className={cn(
-              'text-[9.5px] font-mono font-semibold uppercase tracking-[0.15em]',
-              isDark ? 'text-cyan-100/42' : 'text-gray-400'
-            )}
-          >
+          <div className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#7126e3]">
             {label}
           </div>
-          <div
-            className={cn(
-              'text-[1.34rem] font-display font-black leading-none tracking-[-0.04em] sm:text-[1.52rem]',
-              isDark ? 'text-white' : 'text-gray-900'
-            )}
-          >
+          <div className="font-display text-[1.5rem] font-black leading-none tracking-[-0.04em] text-[#1a0b3d] sm:text-[1.65rem]">
             {value}
           </div>
         </div>

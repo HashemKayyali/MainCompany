@@ -1,13 +1,22 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useMemo } from 'react'
-import { useTheme } from '../../contexts/ThemeContext'
 import { useData } from '../../contexts/DataContext'
 import { useUser } from '../../contexts/UserContext'
 import UserAvatar from '../ui/UserAvatar'
 import { cn } from '../../utils/cn'
 
 type SidebarVariant = 'desktop' | 'drawer'
-type IconName = 'home' | 'bike' | 'wrench' | 'users' | 'folder' | 'image' | 'shield' | 'log' | 'person' | 'clipboard'
+type IconName =
+  | 'home'
+  | 'bike'
+  | 'wrench'
+  | 'users'
+  | 'folder'
+  | 'image'
+  | 'shield'
+  | 'log'
+  | 'person'
+  | 'clipboard'
 
 type SidebarLink = {
   to: string
@@ -15,11 +24,9 @@ type SidebarLink = {
   icon: IconName
   exact?: boolean
 }
-
 
 function Icon({ name, className }: { name: IconName; className?: string }) {
-  const common = `h-5 w-5 ${className || ''}`
-
+  const common = `h-[18px] w-[18px] ${className || ''}`
   switch (name) {
     case 'home':
       return (
@@ -39,12 +46,7 @@ function Icon({ name, className }: { name: IconName; className?: string }) {
     case 'wrench':
       return (
         <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M14.3 6.2a4.6 4.6 0 0 0-5.8 5.9L4.4 16.2a1.6 1.6 0 0 0 2.3 2.3l4.1-4.1a4.6 4.6 0 0 0 5.9-5.8l-2.2 2.2-2.2-2.2 2-2.4Z"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinejoin="round"
-          />
+          <path d="M14.3 6.2a4.6 4.6 0 0 0-5.8 5.9L4.4 16.2a1.6 1.6 0 0 0 2.3 2.3l4.1-4.1a4.6 4.6 0 0 0 5.9-5.8l-2.2 2.2-2.2-2.2 2-2.4Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
         </svg>
       )
     case 'users':
@@ -59,12 +61,7 @@ function Icon({ name, className }: { name: IconName; className?: string }) {
     case 'folder':
       return (
         <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M3.5 7.5A2 2 0 0 1 5.5 5.5h4l2 2h7A2 2 0 0 1 20.5 9.5v9A2 2 0 0 1 18.5 20.5h-13A2 2 0 0 1 3.5 18.5v-11Z"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinejoin="round"
-          />
+          <path d="M3.5 7.5A2 2 0 0 1 5.5 5.5h4l2 2h7A2 2 0 0 1 20.5 9.5v9A2 2 0 0 1 18.5 20.5h-13A2 2 0 0 1 3.5 18.5v-11Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
         </svg>
       )
     case 'image':
@@ -139,7 +136,6 @@ export default function Sidebar({
   onNavigate?: () => void
 }) {
   const { pathname } = useLocation()
-  const { isDark } = useTheme()
   const { products, parts, customers, categories, galleryAlbums } = useData()
   const { currentUser } = useUser()
 
@@ -157,39 +153,83 @@ export default function Sidebar({
     [products, parts, customers, categories, galleryAlbums]
   )
 
-  const isActive = (to: string, exact?: boolean) => (exact ? pathname === to : pathname.startsWith(to))
+  const isActive = (to: string, exact?: boolean) =>
+    exact ? pathname === to : pathname.startsWith(to)
 
   const shellClass =
     variant === 'desktop'
       ? 'hidden h-full w-full shrink-0 md:block'
-      : 'block h-full w-[248px] max-w-[82vw] shrink-0'
+      : 'block h-full w-[270px] max-w-[84vw] shrink-0'
 
-  const panelClass = isDark
-    ? 'border-r border-cyan-400/10 bg-[linear-gradient(180deg,rgba(12,15,31,0.98),rgba(10,13,28,0.99)_38%,rgba(9,12,24,1)_100%)]'
-    : 'border-r border-gray-200 bg-white/94'
+  const renderLink = (link: SidebarLink) => {
+    const active = isActive(link.to, link.exact)
+    const count = counts[link.to]
 
-  const sectionLabelClass = isDark ? 'text-cyan-100/34' : 'text-violet-600/42'
-
-  return (
-    <aside className={cn('relative min-h-0', shellClass)}>
-      <div className={cn('relative flex h-full min-h-0 flex-col overflow-hidden', panelClass)}>
-        {isDark && (
-          <>
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.08),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(168,85,247,0.1),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_24%)]" />
-            <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:42px_42px]" />
-            <div className="pointer-events-none absolute left-[-3rem] top-20 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
-            <div className="pointer-events-none absolute bottom-10 left-4 h-32 w-32 rounded-full bg-fuchsia-500/10 blur-3xl" />
-          </>
+    return (
+      <Link
+        key={link.to}
+        to={link.to}
+        onClick={onNavigate}
+        aria-current={active ? 'page' : undefined}
+        className={cn(
+          'group relative flex items-center gap-3 rounded-[14px] py-2.5 pl-3 pr-2.5 transition-all duration-200',
+          active
+            ? 'bg-[linear-gradient(135deg,#7c3aed,#9d6bff)] text-white shadow-[0_14px_30px_-14px_rgba(157,107,255,0.8)]'
+            : 'text-violet-100/65 hover:bg-white/[0.07] hover:text-white'
         )}
-
-        <div
+      >
+        {active && (
+          <span
+            aria-hidden="true"
+            className="absolute -left-2.5 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-full bg-white/90"
+          />
+        )}
+        <span
           className={cn(
-            'relative shrink-0 border-b px-4 py-4',
-            isDark ? 'border-cyan-400/10' : 'border-gray-200'
+            'flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] transition',
+            active
+              ? 'bg-white/20 text-white'
+              : 'bg-white/[0.05] text-violet-100/70 group-hover:bg-white/[0.1] group-hover:text-white'
           )}
         >
-          <div className="flex items-center gap-3">
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[18px] bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber text-[11px] font-bold text-white shadow-[0_18px_40px_-26px_rgba(236,72,153,0.42)] ring-1 ring-inset ring-white/14">
+          <Icon name={link.icon} />
+        </span>
+        <span className="min-w-0 flex-1 truncate text-[12.5px] font-bold tracking-[-0.01em]">
+          {link.label}
+        </span>
+        {count !== undefined && (
+          <span
+            className={cn(
+              'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold tabular-nums',
+              active
+                ? 'bg-white/25 text-white'
+                : 'bg-white/[0.07] text-violet-100/55 group-hover:bg-white/[0.12] group-hover:text-white'
+            )}
+          >
+            {count}
+          </span>
+        )}
+      </Link>
+    )
+  }
+
+  return (
+    <aside className={cn('admin-scope relative min-h-0', shellClass)}>
+      <div className="relative flex h-full min-h-0 flex-col overflow-hidden bg-[linear-gradient(185deg,#1d0a40_0%,#170733_52%,#120527_100%)]">
+        {/* Ambient accents */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-16 top-10 h-44 w-44 rounded-full bg-violet-500/20 blur-[70px]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-20 bottom-0 h-52 w-52 rounded-full bg-fuchsia-500/15 blur-[80px]"
+        />
+
+        {/* Brand / profile */}
+        <div className="relative shrink-0 px-4 pb-4 pt-5">
+          <div className="flex items-center gap-3 rounded-[16px] border border-white/[0.08] bg-white/[0.04] p-3">
+            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[13px] bg-[linear-gradient(135deg,#7c3aed,#c026d3)] text-[11px] font-bold text-white shadow-[0_14px_30px_-12px_rgba(192,38,211,0.6)]">
               <UserAvatar
                 name={currentUser?.name || displayName}
                 email={currentUser?.email || null}
@@ -197,150 +237,49 @@ export default function Sidebar({
                 avatarStyle={currentUser?.avatarStyle}
                 avatarSeed={currentUser?.avatarSeed}
                 avatarOptions={currentUser?.avatarOptions}
-                className="h-full w-full rounded-[18px]"
-                fallbackClassName="bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber text-white"
+                className="h-full w-full rounded-[13px]"
+                fallbackClassName="bg-[linear-gradient(135deg,#7c3aed,#c026d3)] text-white"
               />
-              <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.28),transparent_48%)]" />
             </div>
-
             <div className="min-w-0 flex-1">
-              <div className={cn('truncate text-[10px] font-mono uppercase tracking-[0.18em]', isDark ? 'text-cyan-100/38' : 'text-violet-600/56')}>
+              <div className="truncate text-[9.5px] font-extrabold uppercase tracking-[0.2em] text-violet-300">
                 {displayRole}
               </div>
-              <div className={cn('mt-1 truncate font-display text-[14px] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>
+              <div className="mt-1 truncate font-display text-[14px] font-bold text-white">
                 {displayName}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="relative min-h-0 flex-1 overflow-hidden">
-          <div className="h-full min-h-0 overflow-y-auto overflow-x-hidden pl-2.5 pr-3 pt-3.5 [direction:rtl]">
-            <div className="space-y-5 pb-5 [direction:ltr]">
-              <section className="space-y-2">
-                <div className={cn('px-2 text-[10px] font-mono font-semibold uppercase tracking-[0.18em]', sectionLabelClass)}>
-                  Main
-                </div>
+        {/* Nav */}
+        <div className="relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 pb-6 [scrollbar-width:thin]">
+          <div className="space-y-6">
+            <section className="space-y-1.5">
+              <div className="px-3 pb-1 text-[9.5px] font-extrabold uppercase tracking-[0.22em] text-violet-300/55">
+                Main
+              </div>
+              <div className="space-y-1">{CONTENT_LINKS.map(renderLink)}</div>
+            </section>
 
-                <div className="space-y-1">
-                  {CONTENT_LINKS.map(link => {
-                    const active = isActive(link.to, link.exact)
-                    const count = counts[link.to]
+            <section className="space-y-1.5">
+              <div className="px-3 pb-1 text-[9.5px] font-extrabold uppercase tracking-[0.22em] text-violet-300/55">
+                Access
+              </div>
+              <div className="space-y-1">{ACCESS_LINKS.map(renderLink)}</div>
+            </section>
+          </div>
+        </div>
 
-                    return (
-                      <Link
-                        key={link.to}
-                        to={link.to}
-                        onClick={onNavigate}
-                        className={cn(
-                          'group relative flex items-center gap-2.5 rounded-[16px] px-2.5 py-2 transition duration-200',
-                          active
-                            ? isDark
-                              ? 'bg-[linear-gradient(135deg,rgba(17,39,72,0.96),rgba(14,28,54,0.98))] text-white ring-1 ring-inset ring-cyan-300/18 shadow-[0_18px_34px_-24px_rgba(34,211,238,0.24)]'
-                              : 'bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200'
-                            : isDark
-                              ? 'text-purple-100/74 ring-1 ring-inset ring-white/[0.03] hover:bg-white/[0.04] hover:text-white hover:ring-cyan-400/10'
-                              : 'text-gray-600 ring-1 ring-inset ring-transparent hover:bg-gray-50 hover:text-gray-900 hover:ring-gray-200'
-                        )}
-                      >
-                        {active && isDark ? (
-                          <span className="absolute left-0 top-1/2 h-10 w-[3px] -translate-y-1/2 rounded-r-full bg-gradient-to-b from-cyan-300 via-violet-400 to-fuchsia-400 shadow-[0_0_12px_rgba(34,211,238,0.4)]" />
-                        ) : null}
-
-                        <span
-                          className={cn(
-                            'flex h-9 w-9 shrink-0 items-center justify-center rounded-[13px] transition',
-                            active
-                              ? isDark
-                                ? 'bg-white/[0.08] text-cyan-100 ring-1 ring-inset ring-cyan-300/10'
-                                : 'bg-white text-violet-700'
-                              : isDark
-                                ? 'bg-white/[0.03] text-purple-100/68 ring-1 ring-inset ring-white/[0.04] group-hover:bg-white/[0.05]'
-                                : 'bg-gray-50 text-gray-500'
-                          )}
-                        >
-                          <Icon name={link.icon} />
-                        </span>
-
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate text-[11.5px] font-medium">{link.label}</div>
-                          </div>
-
-                        {count !== undefined ? (
-                          <span
-                            className={cn(
-                              'shrink-0 rounded-full px-2 py-0.5 text-[8px] font-mono font-semibold',
-                              active
-                                ? isDark
-                                  ? 'bg-cyan-400/12 text-cyan-200 ring-1 ring-inset ring-cyan-300/14'
-                                  : 'bg-violet-100 text-violet-700'
-                                : isDark
-                                  ? 'bg-white/[0.05] text-purple-100/60 ring-1 ring-inset ring-white/[0.04]'
-                                  : 'bg-gray-100 text-gray-500'
-                            )}
-                          >
-                            {count}
-                          </span>
-                        ) : null}
-                      </Link>
-                    )
-                  })}
-                </div>
-              </section>
-
-              <section className="space-y-2">
-                <div className={cn('px-2 text-[10px] font-mono font-semibold uppercase tracking-[0.18em]', sectionLabelClass)}>
-                  Access
-                </div>
-
-                <div className="space-y-1">
-                  {ACCESS_LINKS.map(link => {
-                    const active = isActive(link.to, link.exact)
-
-                    return (
-                      <Link
-                        key={link.to}
-                        to={link.to}
-                        onClick={onNavigate}
-                        className={cn(
-                          'group relative flex items-center gap-2.5 rounded-[16px] px-2.5 py-2 transition duration-200',
-                          active
-                            ? isDark
-                              ? 'bg-[linear-gradient(135deg,rgba(17,39,72,0.96),rgba(14,28,54,0.98))] text-white ring-1 ring-inset ring-cyan-300/18 shadow-[0_18px_34px_-24px_rgba(34,211,238,0.24)]'
-                              : 'bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200'
-                            : isDark
-                              ? 'text-purple-100/74 ring-1 ring-inset ring-white/[0.03] hover:bg-white/[0.04] hover:text-white hover:ring-cyan-400/10'
-                              : 'text-gray-600 ring-1 ring-inset ring-transparent hover:bg-gray-50 hover:text-gray-900 hover:ring-gray-200'
-                        )}
-                      >
-                        {active && isDark ? (
-                          <span className="absolute left-0 top-1/2 h-10 w-[3px] -translate-y-1/2 rounded-r-full bg-gradient-to-b from-cyan-300 via-violet-400 to-fuchsia-400 shadow-[0_0_12px_rgba(34,211,238,0.4)]" />
-                        ) : null}
-
-                        <span
-                          className={cn(
-                            'flex h-9 w-9 shrink-0 items-center justify-center rounded-[13px] transition',
-                            active
-                              ? isDark
-                                ? 'bg-white/[0.08] text-cyan-100 ring-1 ring-inset ring-cyan-300/10'
-                                : 'bg-white text-violet-700'
-                              : isDark
-                                ? 'bg-white/[0.03] text-purple-100/68 ring-1 ring-inset ring-white/[0.04] group-hover:bg-white/[0.05]'
-                                : 'bg-gray-50 text-gray-500'
-                          )}
-                        >
-                          <Icon name={link.icon} />
-                        </span>
-
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate text-[11.5px] font-medium">{link.label}</div>
-                        </div>
-                      </Link>
-                    )
-                  })}
-                </div>
-              </section>
-            </div>
+        {/* Footer brand mark */}
+        <div className="relative shrink-0 border-t border-white/[0.07] px-5 py-4">
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-[9px] bg-[linear-gradient(135deg,#7c3aed,#9d6bff)] text-[10px] font-black text-white">
+              Ev
+            </span>
+            <span className="text-[11px] font-bold tracking-[0.04em] text-violet-100/55">
+              Eventies Admin
+            </span>
           </div>
         </div>
       </div>

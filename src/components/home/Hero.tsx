@@ -42,7 +42,7 @@ export default function Hero() {
           the page background at the bottom). */}
       <div className="absolute inset-0 -z-30">
         <img
-          src="/images/hero-bg-event.png"
+          src="/images/hero-bg-event.webp"
           alt=""
           aria-hidden="true"
           draggable={false}

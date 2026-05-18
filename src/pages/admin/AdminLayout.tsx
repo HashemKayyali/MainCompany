@@ -1,6 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { useTheme } from '../../contexts/ThemeContext'
 import { useUser } from '../../contexts/UserContext'
 import Sidebar from '../../components/admin/Sidebar'
 import UserAvatar from '../../components/ui/UserAvatar'
@@ -9,7 +8,7 @@ import { cn } from '../../utils/cn'
 
 type Crumb = { label: string; to?: string }
 
-const ADMIN_HEADER_HEIGHT = 70
+const ADMIN_HEADER_HEIGHT = 72
 
 function usePageTitle(pathname: string) {
   return useMemo(() => {
@@ -74,8 +73,8 @@ function buildBreadcrumbs(pathname: string): Crumb[] {
   return crumbs
 }
 
-function Icon({ name, className }: { name: 'menu' | 'logout' | 'chev'; className?: string }) {
-  const cls = `h-5 w-5 ${className || ''}`
+function Icon({ name, className }: { name: 'menu' | 'logout' | 'chev' | 'external'; className?: string }) {
+  const cls = `h-[18px] w-[18px] ${className || ''}`
   switch (name) {
     case 'menu':
       return (
@@ -97,11 +96,17 @@ function Icon({ name, className }: { name: 'menu' | 'logout' | 'chev'; className
           <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )
+    case 'external':
+      return (
+        <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M14 5h5v5M19 5l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
   }
 }
 
 export default function AdminLayout() {
-  const { isDark } = useTheme()
   const { currentUser, logout } = useUser()
   const { pathname } = useLocation()
   const title = usePageTitle(pathname)
@@ -125,55 +130,43 @@ export default function AdminLayout() {
   }, [pathname])
 
   const displayName = currentUser?.name?.trim() || 'Admin'
+
   const quickLinkClass = (target: string) =>
     cn(
-      'inline-flex min-h-[42px] items-center justify-center rounded-[15px] px-4 py-2 text-[11.5px] font-semibold transition active:translate-y-[1px]',
+      'inline-flex min-h-[38px] items-center justify-center rounded-[12px] px-4 text-[12px] font-bold transition active:translate-y-[1px]',
       pathname.startsWith(target)
-        ? isDark
-          ? 'bg-[linear-gradient(180deg,rgba(17,39,72,0.96),rgba(14,28,54,0.98))] text-cyan-100 ring-1 ring-inset ring-cyan-300/18 shadow-[0_12px_26px_-18px_rgba(34,211,238,0.26)]'
-          : 'bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200 shadow-[0_10px_24px_-18px_rgba(124,58,237,0.18)]'
-        : isDark
-          ? 'bg-[#0d1430]/88 text-purple-100/76 ring-1 ring-inset ring-cyan-400/10 hover:text-white hover:ring-cyan-300/16'
-          : 'bg-white text-gray-600 ring-1 ring-inset ring-gray-200 hover:bg-gray-50 hover:text-gray-900'
+        ? 'border border-violet-200 bg-[linear-gradient(135deg,rgba(124,58,237,0.14),rgba(157,107,255,0.10))] text-[#2e0a72] shadow-[0_8px_22px_-12px_rgba(89,23,196,0.35)]'
+        : 'border border-violet-200/70 bg-white text-[#4b3a63] hover:border-violet-400 hover:text-[#1a0b3d]'
     )
 
   return (
     <div
-      className={cn(
-        'relative min-h-screen overflow-x-clip',
-        'bg-[#fbf8ff] text-ink-900'
-      )}
+      className="admin-scope relative h-screen overflow-hidden bg-[#f4eeff] text-ink-900"
       style={layoutVars}
     >
-      <AnimatedBackground position="absolute" className="z-0 overflow-hidden" variant="rich" />
+      <AnimatedBackground position="absolute" className="z-0 overflow-hidden" variant="lightweight" />
 
+      {/* Mobile drawer */}
       {open && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-violet-950/40 backdrop-blur-sm" onClick={() => setOpen(false)} aria-hidden="true" />
+          <div
+            className="absolute inset-0 bg-[#1a0b3d]/55 backdrop-blur-sm"
+            onClick={() => setOpen(false)}
+            aria-hidden="true"
+          />
           <div className="absolute inset-y-0 left-0">
             <Sidebar variant="drawer" onNavigate={() => setOpen(false)} />
           </div>
         </div>
       )}
 
-      <div className="relative z-10 grid min-h-screen grid-rows-[70px_minmax(0,1fr)]">
-        <header
-          className={cn(
-            'sticky top-0 z-30 border-b backdrop-blur-2xl',
-            isDark
-              ? 'border-cyan-400/[0.10] bg-[linear-gradient(180deg,rgba(8,12,28,0.97),rgba(7,11,25,0.92))] shadow-[0_1px_0_rgba(34,211,238,0.06),0_4px_24px_rgba(0,0,0,0.3)]'
-              : 'border-gray-200/80 bg-white/95 shadow-[0_1px_0_rgba(15,23,42,0.06)]'
-          )}
-        >
-          <div className="flex h-full items-center gap-3 px-4 sm:px-5 md:px-5.5">
+      <div className="relative z-10 grid h-full grid-rows-[72px_minmax(0,1fr)]">
+        {/* Topbar */}
+        <header className="sticky top-0 z-30 border-b border-violet-200/60 bg-white/85 backdrop-blur-xl">
+          <div className="flex h-full items-center gap-3 px-4 sm:px-5 md:px-6">
             <button
               onClick={() => setOpen(true)}
-              className={cn(
-                'inline-flex h-11 w-11 items-center justify-center rounded-[16px] transition active:translate-y-[1px] md:hidden',
-                isDark
-                  ? 'bg-[linear-gradient(180deg,rgba(20,29,56,0.98),rgba(13,20,42,0.98))] text-cyan-100 ring-1 ring-inset ring-cyan-400/16 shadow-[0_12px_24px_-18px_rgba(34,211,238,0.24)]'
-                  : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.14)]'
-              )}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-[12px] border border-violet-200 bg-white text-[#4b3a63] transition hover:border-violet-400 hover:text-[#1a0b3d] active:translate-y-[1px] md:hidden"
               aria-label="Open sidebar"
               title="Menu"
             >
@@ -181,39 +174,34 @@ export default function AdminLayout() {
             </button>
 
             <div className="min-w-0 flex-1">
-              <div className="min-w-0">
-                <div className={cn('truncate font-display text-[1.05rem] font-bold sm:text-[1.12rem]', isDark ? 'text-white' : 'text-gray-900')}>
-                  {title}
-                </div>
-                <div className="mt-1.5 hidden items-center gap-1.75 sm:flex">
-                  {crumbs.map((crumb, index) => {
-                    const last = index === crumbs.length - 1
-                    const tone = last
-                      ? isDark
-                        ? 'text-cyan-100/74'
-                        : 'text-gray-800'
-                      : isDark
-                        ? 'text-purple-100/40'
-                        : 'text-gray-500'
-
-                    return (
-                      <div key={`${crumb.label}-${index}`} className="flex items-center gap-1.75">
-                        {index > 0 && <Icon name="chev" className={isDark ? 'text-purple-100/26' : 'text-gray-400'} />}
-                        {crumb.to && !last ? (
-                      <Link to={crumb.to} className={cn('text-[11px] transition hover:text-cyan-200', tone)}>
-                            {crumb.label}
-                          </Link>
-                        ) : (
-                          <span className={cn('text-[11px]', tone)}>{crumb.label}</span>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
+              <div className="truncate font-display text-[1.15rem] font-extrabold tracking-[-0.03em] text-[#1a0b3d] sm:text-[1.28rem]">
+                {title}
+              </div>
+              <div className="mt-0.5 hidden items-center gap-1.5 sm:flex">
+                {crumbs.map((crumb, index) => {
+                  const last = index === crumbs.length - 1
+                  return (
+                    <div key={`${crumb.label}-${index}`} className="flex items-center gap-1.5">
+                      {index > 0 && (
+                        <Icon name="chev" className="h-3 w-3 text-violet-300" />
+                      )}
+                      {crumb.to && !last ? (
+                        <Link
+                          to={crumb.to}
+                          className="text-[11px] font-semibold text-[#6b5a82] transition hover:text-[#7126e3]"
+                        >
+                          {crumb.label}
+                        </Link>
+                      ) : (
+                        <span className="text-[11px] font-bold text-[#2e0a72]">{crumb.label}</span>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
 
-            <div className="hidden items-center gap-2.5 lg:flex">
+            <div className="hidden items-center gap-2 lg:flex">
               <Link to="/admin/requests" className={quickLinkClass('/admin/requests')}>
                 Requests
               </Link>
@@ -225,25 +213,14 @@ export default function AdminLayout() {
             <div className="hidden items-center gap-2.5 sm:flex">
               <Link
                 to="/"
-                className={cn(
-                  'inline-flex min-h-[38px] items-center justify-center rounded-[14px] px-3.5 py-1.75 text-[10.5px] font-semibold transition active:translate-y-[1px]',
-                  isDark
-                    ? 'bg-[linear-gradient(180deg,rgba(20,29,56,0.98),rgba(13,20,42,0.98))] text-purple-100/86 ring-1 ring-inset ring-cyan-400/14 shadow-[0_10px_24px_-18px_rgba(4,8,20,0.8)] hover:text-white'
-                    : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.14)]'
-                )}
+                className="inline-flex min-h-[38px] items-center gap-1.5 rounded-[12px] border border-violet-200/70 bg-white px-3.5 text-[11px] font-bold text-[#4b3a63] transition hover:border-violet-400 hover:text-[#1a0b3d] active:translate-y-[1px]"
               >
+                <Icon name="external" className="h-3.5 w-3.5" />
                 Open Site
               </Link>
 
-              <div
-                className={cn(
-                  'flex items-center gap-2.25 rounded-[15px] px-3 py-2',
-                  isDark
-                    ? 'bg-[#0d1430]/88 ring-1 ring-inset ring-cyan-400/10'
-                    : 'bg-white ring-1 ring-inset ring-gray-200'
-                )}
-              >
-                <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[11px] bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber text-[10px] font-bold text-white shadow-[0_0_24px_rgba(236,72,153,0.24)]">
+              <div className="flex items-center gap-2.5 rounded-[14px] border border-violet-200/70 bg-white px-3 py-1.5">
+                <div className="flex h-[34px] w-[34px] items-center justify-center overflow-hidden rounded-[11px] bg-[linear-gradient(135deg,#7c3aed,#c026d3)] text-[10px] font-bold text-white">
                   <UserAvatar
                     name={currentUser?.name || displayName}
                     email={currentUser?.email || null}
@@ -252,15 +229,12 @@ export default function AdminLayout() {
                     avatarSeed={currentUser?.avatarSeed}
                     avatarOptions={currentUser?.avatarOptions}
                     className="h-full w-full rounded-[11px]"
-                    fallbackClassName="bg-gradient-to-br from-prism-violet via-prism-pink to-prism-amber text-white"
+                    fallbackClassName="bg-[linear-gradient(135deg,#7c3aed,#c026d3)] text-white"
                   />
                 </div>
-
                 <div className="hidden leading-4 xl:block">
-                  <div className={cn('text-[11.5px] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>
-                    {displayName}
-                  </div>
-                  <div className={cn('mt-0.5 text-[10px]', isDark ? 'text-cyan-100/46' : 'text-gray-500')}>
+                  <div className="text-[11.5px] font-bold text-[#1a0b3d]">{displayName}</div>
+                  <div className="mt-0.5 text-[10px] font-semibold text-[#6b5a82]">
                     Control shell
                   </div>
                 </div>
@@ -270,12 +244,7 @@ export default function AdminLayout() {
                 onClick={() => {
                   void logout()
                 }}
-                className={cn(
-                  'inline-flex min-h-[38px] items-center gap-2 rounded-[14px] px-3.5 py-1.75 text-[10.5px] font-semibold transition active:translate-y-[1px]',
-                  isDark
-                    ? 'bg-[linear-gradient(180deg,rgba(82,24,36,0.98),rgba(52,15,24,0.98))] text-red-100 ring-1 ring-inset ring-red-300/24 shadow-[0_12px_28px_-18px_rgba(248,113,113,0.28)] hover:brightness-110'
-                    : 'bg-red-50 text-red-600 ring-1 ring-inset ring-red-200 shadow-[0_10px_24px_-18px_rgba(239,68,68,0.22)]'
-                )}
+                className="inline-flex min-h-[38px] items-center gap-2 rounded-[12px] border border-red-200 bg-red-50 px-3.5 text-[11px] font-bold text-red-700 transition hover:border-red-300 hover:bg-red-100 hover:text-red-800 active:translate-y-[1px]"
                 title="Logout"
               >
                 <Icon name="logout" className="h-4 w-4" />
@@ -285,7 +254,7 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <div className="min-h-0 md:grid md:grid-cols-[216px_minmax(0,1fr)]">
+        <div className="h-full min-h-0 overflow-hidden md:grid md:grid-cols-[270px_minmax(0,1fr)]">
           <Sidebar variant="desktop" />
 
           <main
@@ -293,7 +262,7 @@ export default function AdminLayout() {
             className="min-h-0 overflow-y-auto overflow-x-hidden"
             style={{ scrollPaddingTop: 'calc(var(--app-header-offset) + var(--app-header-gap))' }}
           >
-            <div className="mx-auto flex min-h-full w-full max-w-[1680px] flex-col px-4 py-5 sm:px-5 sm:py-6 md:px-6 md:py-7 xl:px-7 2xl:px-8">
+            <div className="admin-scope mx-auto flex h-full min-h-0 w-full max-w-[1640px] flex-col px-4 py-6 sm:px-6 sm:py-7 md:px-8 md:py-8 2xl:px-10">
               <Outlet />
             </div>
           </main>

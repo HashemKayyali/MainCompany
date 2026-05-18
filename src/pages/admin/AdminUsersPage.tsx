@@ -4,7 +4,6 @@ import { useAuth, type AdminRole } from '../../contexts/AuthContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useDialog } from '../../contexts/DialogContext'
-import AdminAvatarEditor from '../../components/admin/AdminAvatarEditor'
 import type { AvatarFields } from '../../lib/avatar'
 import {
   avatarIdentitySeed,
@@ -391,83 +390,76 @@ export default function AdminUsersPage() {
         ) : (
           <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
             <div className={cn('origin-top transition-[opacity,transform,filter] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform,filter]', viewTransitionClassName)}>
-            <div className={cardsLayoutClass}>
+            <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(250px,1fr))]">
               {displayed.map(user => {
-              const isYou = user.id === currentUser?.id
-              return (
-                <AdminEntityCard
-                  key={user.id}
-                variant={getAdminEntityVariant(displayCardView)}
-                  listMediaWrapClassName="md:self-center"
-                  minHeightClassName={displayCardView === 'grid' ? 'min-h-[188px]' : 'min-h-[90px]'}
-                  bodyClassName={displayCardView === 'grid' ? 'gap-2 p-3' : 'gap-1.5 p-2.5'}
-                  listMediaFrameClassName="!h-[70px] !w-[70px] md:!h-[72px] md:!w-[72px] p-1.5"
-                  factsWrapClassName={displayCardView === 'list' ? 'xl:w-[156px]' : undefined}
-                  actionsWrapClassName={displayCardView === 'list' ? 'xl:w-[112px]' : undefined}
-                  media={
-                    <div className={cn('flex h-full w-full items-center justify-center rounded-[24px]', isDark ? 'bg-[radial-gradient(circle,rgba(34,211,238,0.12),transparent_58%)]' : 'bg-[radial-gradient(circle,rgba(139,92,246,0.08),transparent_55%)]')}>
+                const isYou = user.id === currentUser?.id
+                return (
+                  <div
+                    key={user.id}
+                    className="flex flex-col rounded-[16px] border border-violet-200/70 bg-white p-3.5 shadow-[0_8px_24px_-18px_rgba(89,23,196,0.20)] transition-shadow duration-200 hover:shadow-[0_14px_32px_-16px_rgba(89,23,196,0.30)]"
+                  >
+                    <div className="flex items-start gap-3">
                       <UserAvatar
                         name={user.name}
                         email={user.email}
-                        avatarUrl={user.avatarUrl}
-                        avatarStyle={user.avatarStyle}
-                        avatarSeed={user.avatarSeed}
-                        avatarOptions={user.avatarOptions}
-                        className="h-full w-full rounded-[22px]"
-                        fallbackClassName={cn(
-                          'text-[2rem] font-display font-bold',
+                        className={cn(
+                          'h-11 w-11 shrink-0 rounded-[12px] text-[0.95rem] font-display font-bold',
                           avatarBg(user.role)
                         )}
                       />
-                    </div>
-                  }
-                mediaOverlayRight={
-                  <span className={cn('rounded-full px-3 py-1 text-[10px] font-mono uppercase tracking-[0.22em]', roleBadge(user.role))}>
-                    {user.role}
-                  </span>
-                }
-                  title={user.name || 'No name'}
-                  subtitle={isYou ? 'This is your current session.' : undefined}
-                  badges={
-                    <>
-                      <span className={cn('rounded-full px-3 py-1 text-[11px] font-medium ring-1 ring-inset', isDark ? 'bg-[#0f1630]/92 text-purple-100/78 ring-cyan-400/10' : 'border-gray-200 bg-white text-gray-700')}>
-                        {user.email}
-                      </span>
-                      {isYou && (
-                        <span className={cn('rounded-full px-3 py-1 text-[11px] font-medium ring-1 ring-inset', isDark ? 'bg-cyan-400/10 text-cyan-200 ring-cyan-400/18' : 'border-violet-200 bg-violet-50 text-violet-700')}>
-                          You
-                        </span>
-                      )}
-                    </>
-                  }
-                  facts={[
-                    { label: 'Phone', value: user.phone || 'Not set' },
-                    { label: 'Joined', value: formatDate(user.created_at) },
-                  ]}
-                  actions={
-                    <>
-                      <AdminActionButton
-                        tone="primary"
-                        onClick={event => {
-                          event.stopPropagation()
-                          setDetails(user)
-                        }}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate font-display text-[14px] font-extrabold text-[#1a0b3d]">
+                            {user.name || 'No name'}
+                          </span>
+                          {isYou && (
+                            <span className="shrink-0 rounded-full border border-violet-300 bg-violet-100/80 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#2e0a72]">
+                              You
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-0.5 truncate text-[12px] font-medium text-[#6b5a82]">
+                          {user.email}
+                        </div>
+                      </div>
+                      <span
+                        className={cn(
+                          'shrink-0 rounded-full border px-2.5 py-1 text-[9.5px] font-extrabold uppercase tracking-[0.14em]',
+                          roleBadge(user.role)
+                        )}
                       >
+                        {user.role}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      <div className="min-w-0 rounded-[10px] border border-violet-100 bg-violet-50/50 px-2.5 py-1.5">
+                        <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#7126e3]">
+                          Phone
+                        </div>
+                        <div className="mt-0.5 truncate text-[12px] font-bold text-[#1a0b3d]">
+                          {user.phone || 'Not set'}
+                        </div>
+                      </div>
+                      <div className="min-w-0 rounded-[10px] border border-violet-100 bg-violet-50/50 px-2.5 py-1.5">
+                        <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#7126e3]">
+                          Joined
+                        </div>
+                        <div className="mt-0.5 truncate text-[12px] font-bold text-[#1a0b3d]">
+                          {formatDate(user.created_at)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      <AdminActionButton tone="primary" onClick={() => setDetails(user)}>
                         Details
                       </AdminActionButton>
-                      <AdminActionButton
-                        onClick={event => {
-                          event.stopPropagation()
-                          openEdit(user)
-                        }}
-                      >
-                        Edit
-                      </AdminActionButton>
-                    </>
-                  }
-                />
-              )
-            })}
+                      <AdminActionButton onClick={() => openEdit(user)}>Edit</AdminActionButton>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
             </div>
           </div>
@@ -593,17 +585,6 @@ export default function AdminUsersPage() {
                 <input className="form-field !mb-0" type="tel" value={editPhone} onChange={e => setEditPhone(e.target.value)} placeholder="+962..." />
               </div>
             </div>
-
-            <AdminAvatarEditor
-              name={editName || editUser.name || editUser.email}
-              email={editUser.email}
-              avatarUrl={editAvatarUrl}
-              onAvatarUrlChange={setEditAvatarUrl}
-              avatarSelection={editAvatarSelection}
-              onAvatarSelectionChange={setEditAvatarSelection}
-              identitySeed={editIdentitySeed}
-              onReset={resetAvatarEditor}
-            />
 
             <button
               onClick={() => void handleResetPassword()}

@@ -1091,3 +1091,66 @@ html select:disabled {
   color: #31195f;
   -webkit-text-fill-color: #31195f;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Admin shell: cohesive violet surface language
+   ─────────────────────────────────────────────────────────────────────────
+   The admin pages were authored dark-mode-first; their light branch leans
+   on weak neutral grays (ring/border-gray-*) that read washed-out and
+   inconsistent next to the refreshed violet/ink design system. Scoped to
+   `.admin-scope` (the admin <main> wrapper) we gently retone ONLY the
+   neutral ring/border utilities to the brand violet — fills, status
+   colours (red/amber/emerald) and text are left untouched. The
+   double-class selector outranks Tailwind's single-class utilities, so
+   no per-page edits are required and nothing leaks outside admin.
+   ───────────────────────────────────────────────────────────────────── */
+
+.admin-scope .ring-gray-200,
+.admin-scope .hover\:ring-gray-300:hover {
+  --tw-ring-color: rgba(113, 38, 227, 0.20);
+}
+
+.admin-scope .ring-gray-200 {
+  --tw-ring-color: rgba(113, 38, 227, 0.18);
+}
+
+.admin-scope .border-gray-200 {
+  border-color: rgba(113, 38, 227, 0.18);
+}
+
+.admin-scope .border-gray-100 {
+  border-color: rgba(113, 38, 227, 0.10);
+}
+
+.admin-scope .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(113, 38, 227, 0.10);
+}
+
+/* Soft neutral panel fills → a barely-there lavender so cards/sections
+   sit on a coherent tint instead of flat cool gray. Kept very light to
+   preserve text contrast. */
+.admin-scope .bg-gray-50,
+.admin-scope .bg-gray-50\/70,
+.admin-scope .bg-gray-50\/80,
+.admin-scope .bg-gray-50\/90 {
+  background-color: rgba(247, 241, 255, 0.85);
+}
+
+/* Slightly stronger neutral fill (toggle tracks, inset wells). */
+.admin-scope .bg-gray-100 {
+  background-color: rgba(236, 220, 255, 0.7);
+}
+
+/* Stronger neutral border / ring variants used by inputs & toggles. */
+.admin-scope .border-gray-300,
+.admin-scope .hover\:border-gray-300:hover {
+  border-color: rgba(113, 38, 227, 0.30);
+}
+
+.admin-scope .ring-gray-300 {
+  --tw-ring-color: rgba(113, 38, 227, 0.30);
+}
+
+.admin-scope .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(113, 38, 227, 0.16);
+}

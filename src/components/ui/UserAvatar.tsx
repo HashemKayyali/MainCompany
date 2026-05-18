@@ -1,60 +1,51 @@
-import { useEffect, useMemo, useState } from 'react'
 import { cn } from '../../utils/cn'
-import {
-  avatarInitials,
-  buildAvatarDataUri,
-  normalizeAvatarUrl,
-  type AvatarFields,
-} from '../../lib/avatar'
 
-type UserAvatarProps = AvatarFields & {
+/**
+ * Avatar feature has been fully removed (no uploads, no generated
+ * avatars, no avatar columns in the database). This component now
+ * renders a simple, non-configurable initials chip purely so identity
+ * circles in the navbar / sidebar / admin lists do not collapse.
+ *
+ * The prop signature stays permissive (it still accepts the old
+ * avatarUrl / avatarStyle / avatarSeed / avatarOptions / imageClassName
+ * props) so every existing call site keeps compiling — those props are
+ * intentionally ignored.
+ */
+type UserAvatarProps = {
   name?: string | null
   email?: string | null
   alt?: string
   className?: string
-  imageClassName?: string
   fallbackClassName?: string
   size?: number
+  // Accepted but ignored (legacy avatar API):
+  avatarUrl?: string | null
+  avatarStyle?: string | null
+  avatarSeed?: string | null
+  avatarOptions?: unknown
+  imageClassName?: string
+}
+
+function initialsFrom(name?: string | null, email?: string | null) {
+  const source = (name || '').trim() || (email || '').trim()
+  if (!source) return 'U'
+  const parts = source.split(/[\s@._-]+/).filter(Boolean)
+  if (parts.length === 0) return source.slice(0, 2).toUpperCase()
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[1][0]).toUpperCase()
 }
 
 export default function UserAvatar({
   name,
   email,
-  avatarUrl,
-  avatarStyle,
-  avatarSeed,
-  avatarOptions,
   alt,
   className,
-  imageClassName,
   fallbackClassName,
   size,
 }: UserAvatarProps) {
-  const generatedDataUri = useMemo(
-    () =>
-      buildAvatarDataUri(
-        {
-          avatarUrl,
-          avatarStyle,
-          avatarSeed,
-          avatarOptions,
-        },
-        { size: size ?? 160, fallbackSeed: avatarInitials(name, email) }
-      ),
-    [avatarOptions, avatarSeed, avatarStyle, avatarUrl, email, name, size]
-  )
-  const resolvedAvatarUrl = useMemo(() => normalizeAvatarUrl(avatarUrl), [avatarUrl])
-  const [uploadedImageFailed, setUploadedImageFailed] = useState(false)
-
-  const initials = avatarInitials(name, email)
+  const initials = initialsFrom(name, email)
   const dimensionStyle = size ? { width: `${size}px`, height: `${size}px` } : undefined
-  const imageSrc = !uploadedImageFailed && resolvedAvatarUrl ? resolvedAvatarUrl : generatedDataUri
   const decorative = !alt
-  const resolvedAlt = alt || ''
-
-  useEffect(() => {
-    setUploadedImageFailed(false)
-  }, [resolvedAvatarUrl])
 
   return (
     <div
@@ -65,31 +56,16 @@ export default function UserAvatar({
       )}
       style={dimensionStyle}
       aria-hidden={decorative ? true : undefined}
+      aria-label={decorative ? undefined : alt}
     >
-      {imageSrc ? (
-        <img
-          src={imageSrc}
-          alt={resolvedAlt}
-          className={cn('block h-full w-full object-cover', imageClassName)}
-          draggable={false}
-          onError={() => {
-            if (resolvedAvatarUrl && !uploadedImageFailed) {
-              setUploadedImageFailed(true)
-            }
-          }}
-        />
-      ) : (
-        <span
-          className={cn(
-            'flex h-full w-full items-center justify-center text-[0.95em] font-display font-bold',
-            fallbackClassName ||
-              'bg-gradient-to-br from-prism-violet via-prism-pink to-prism-cyan text-white',
-            imageClassName
-          )}
-        >
-          {initials}
-        </span>
-      )}
+      <span
+        className={cn(
+          'flex h-full w-full items-center justify-center text-[0.95em] font-display font-bold',
+          fallbackClassName || 'bg-[linear-gradient(135deg,#7c3aed,#c026d3)] text-white'
+        )}
+      >
+        {initials}
+      </span>
     </div>
   )
 }

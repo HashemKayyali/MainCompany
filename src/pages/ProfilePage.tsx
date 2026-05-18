@@ -5,9 +5,6 @@ import { useTheme } from '../contexts/ThemeContext'
 import { useToast } from '../contexts/ToastContext'
 import { useUser } from '../contexts/UserContext'
 import { usePageMeta } from '../hooks/usePageMeta'
-import AvatarPicker from '../components/ui/AvatarPicker'
-import Modal from '../components/ui/Modal'
-import UserAvatar from '../components/ui/UserAvatar'
 import {
   avatarIdentitySeed,
   buildDefaultAvatarSelection,
@@ -422,40 +419,6 @@ export default function ProfilePage() {
             }}
           >
             <div className="space-y-8">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 items-center gap-4">
-                  <UserAvatar
-                    name={avatarDisplayName}
-                    email={accountEmail}
-                    avatarUrl={trimmedAvatarUrl}
-                    avatarStyle={avatarSelection.avatarStyle}
-                    avatarSeed={avatarSelection.avatarSeed}
-                    avatarOptions={avatarSelection.avatarOptions}
-                    alt={`${avatarDisplayName} avatar preview`}
-                    className={cn(
-                      'h-14 w-14 shrink-0 rounded-full border object-cover',
-                      isDark ? 'border-white/10' : 'border-gray-200'
-                    )}
-                  />
-
-                  <div className="min-w-0">
-                    <p className={cn('text-sm font-medium', isDark ? 'text-white' : 'text-gray-900')}>Avatar</p>
-                    <p className={cn('mt-1 text-sm', isDark ? 'text-white/60' : 'text-gray-600')}>
-                      Used anywhere your profile appears.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setAvatarPickerOpen(true)}
-                  aria-haspopup="dialog"
-                  className={cn(secondaryButtonClassName, 'w-full sm:w-auto')}
-                >
-                  Update avatar
-                </button>
-              </div>
-
               <div className="space-y-5">
                 <div>
                   <label htmlFor="profile-name" className={labelClassName}>
@@ -563,104 +526,6 @@ export default function ProfilePage() {
           </form>
         </div>
       </main>
-
-      <Modal
-        open={avatarPickerOpen}
-        onClose={() => setAvatarPickerOpen(false)}
-        title="Update avatar"
-        size="md"
-        bodyClassName="px-3 pb-3.5 pt-3 sm:px-3.5 sm:pb-4"
-      >
-        <div className="space-y-3.5">
-          <input
-            ref={avatarFileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={event => {
-              void handleAvatarFileChange(event)
-            }}
-            className="hidden"
-          />
-
-          <div
-            className={cn(
-              'rounded-[18px] border p-3',
-              isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-gray-50/80'
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <UserAvatar
-                name={avatarDisplayName}
-                email={accountEmail}
-                avatarUrl={trimmedAvatarUrl}
-                avatarStyle={avatarSelection.avatarStyle}
-                avatarSeed={avatarSelection.avatarSeed}
-                avatarOptions={avatarSelection.avatarOptions}
-                alt={`${avatarDisplayName} avatar preview`}
-                className={cn(
-                  'h-16 w-16 shrink-0 rounded-full border',
-                  isDark ? 'border-white/10' : 'border-gray-200'
-                )}
-              />
-
-              <div className="min-w-0 flex-1">
-                <p className={cn('text-sm font-medium', isDark ? 'text-white' : 'text-gray-900')}>
-                  {hasUploadedAvatar ? 'Uploaded photo active' : 'Generated avatar active'}
-                </p>
-                <p className={cn('mt-1 text-xs leading-5', isDark ? 'text-white/60' : 'text-gray-600')}>
-                  {hasUploadedAvatar
-                    ? 'Uploaded photos take priority. Remove it to switch back to your generated avatar.'
-                    : 'Upload a photo to override your generated avatar everywhere in the app.'}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-              <button
-                type="button"
-                onClick={() => avatarFileInputRef.current?.click()}
-                disabled={avatarUploading}
-                className={cn(secondaryButtonClassName, 'w-full sm:w-auto')}
-              >
-                {avatarUploading ? 'Uploading...' : hasUploadedAvatar ? 'Replace photo' : 'Upload photo'}
-              </button>
-
-              {hasUploadedAvatar ? (
-                <button
-                  type="button"
-                  onClick={handleRemoveAvatarPhoto}
-                  disabled={avatarUploading}
-                  className={cn(secondaryButtonClassName, 'w-full sm:w-auto')}
-                >
-                  Remove photo
-                </button>
-              ) : null}
-            </div>
-          </div>
-
-          <AvatarPicker
-            value={avatarSelection}
-            onChange={selection => {
-              setAvatarSelection(selection)
-              setSaveFeedback(null)
-            }}
-            identitySeed={pickerIdentitySeed}
-            title="Generated avatar"
-            description="Choose the fallback avatar that is used whenever you do not have an uploaded photo."
-            compact={true}
-          />
-
-          <div className="flex justify-end pt-1">
-            <button
-              type="button"
-              onClick={() => setAvatarPickerOpen(false)}
-              className={secondaryButtonClassName}
-            >
-              Done
-            </button>
-          </div>
-        </div>
-      </Modal>
     </>
   )
 }

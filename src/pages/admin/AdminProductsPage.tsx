@@ -149,16 +149,7 @@ export default function AdminProductsPage() {
     return index >= 0 ? index + 1 : orderedProducts.length + 1
   }
 
-  const tabCls = (t: TabKey) =>
-    `rounded-[14px] px-4 py-2.5 text-[13px] font-semibold transition-all sm:text-[13.5px] ${
-      tab === t
-        ? isDark
-          ? 'bg-prism-violet/15 text-prism-violet ring-1 ring-inset ring-prism-violet/30'
-          : 'border-violet-200 bg-violet-50 text-violet-700'
-        : isDark
-          ? 'bg-transparent text-purple-200/70 ring-1 ring-inset ring-transparent hover:bg-purple-500/[0.08]'
-          : 'border-transparent bg-transparent text-gray-500 hover:bg-gray-50'
-    }`
+  const TAB_ORDER: TabKey[] = ['basic', 'content', 'media', 'options', 'settings']
 
   const openNew = () => {
     setEdit(null)
@@ -454,8 +445,21 @@ export default function AdminProductsPage() {
       <div className="min-w-0">
         <div className={`text-[9px] font-mono font-semibold uppercase tracking-[0.18em] ${sub}`}>Day Price</div>
         {product.showPrice === false ? (
-          <div className={cn('mt-1 text-[0.96rem] font-display font-semibold leading-none', isDark ? 'text-purple-100/72' : 'text-slate-500')}>
-            Hidden
+          <div className="mt-1 flex items-end gap-2">
+            <div className="flex items-end gap-1.5 opacity-45">
+              <span className={cn('font-display text-[1.15rem] font-semibold leading-none', txt)}>
+                {product.rentalPricePerDay}
+              </span>
+              <span className={`pb-[1px] text-[9px] font-mono uppercase tracking-[0.16em] ${sub}`}>
+                {product.currency}/day
+              </span>
+            </div>
+            <span className={cn(
+              'mb-[1px] rounded-full px-2 py-[2px] text-[8.5px] font-mono font-bold uppercase tracking-[0.16em]',
+              isDark ? 'bg-purple-400/15 text-purple-200/80' : 'bg-violet-100 text-violet-600'
+            )}>
+              Hidden
+            </span>
           </div>
         ) : (
           <div className="mt-1 flex items-end gap-1.5">
@@ -471,14 +475,40 @@ export default function AdminProductsPage() {
     </div>
   )
 
-  const Step = ({ k, label, hint }: { k: TabKey; label: string; hint: string }) => (
-    <button onClick={() => setTab(k)} className={tabCls(k)} type="button">
-      <div className="flex flex-col items-start leading-4">
-        <span>{label}</span>
-        <span className={isDark ? 'text-[11px] text-purple-200/50' : 'text-[11px] text-gray-400'}>{hint}</span>
-      </div>
-    </button>
-  )
+  const Step = ({ k, label, hint }: { k: TabKey; label: string; hint: string }) => {
+    const active = tab === k
+    const stepIndex = TAB_ORDER.indexOf(k) + 1
+    return (
+      <button
+        onClick={() => setTab(k)}
+        type="button"
+        aria-current={active ? 'step' : undefined}
+        className={cn(
+          'group flex min-w-[150px] flex-1 items-center gap-2.5 rounded-[14px] px-3 py-2.5 text-left transition-all active:translate-y-[1px]',
+          active
+            ? 'bg-white shadow-[0_12px_26px_-16px_rgba(89,23,196,0.5)] ring-1 ring-inset ring-violet-300'
+            : 'bg-transparent hover:bg-white/70'
+        )}
+      >
+        <span
+          className={cn(
+            'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[12px] font-black tabular-nums transition-all',
+            active
+              ? 'bg-[linear-gradient(135deg,#7c3aed,#9d6bff)] text-white shadow-[0_6px_14px_-6px_rgba(124,58,237,0.65)]'
+              : 'bg-violet-100 text-[#7126e3] group-hover:bg-violet-200'
+          )}
+        >
+          {stepIndex}
+        </span>
+        <span className="min-w-0 leading-tight">
+          <span className={cn('block truncate text-[13px] font-extrabold', active ? 'text-[#1a0b3d]' : 'text-[#4b3a63]')}>
+            {label}
+          </span>
+          <span className="mt-0.5 block truncate text-[10.5px] font-semibold text-[#6b5a82]">{hint}</span>
+        </span>
+      </button>
+    )
+  }
 
   const BadgePill = ({ p }: { p: Product }) => {
     if (!p.badge) return null
@@ -599,7 +629,7 @@ export default function AdminProductsPage() {
               {filtered.length}/{products.length}
             </span>
           </div>
-          <span className={`text-[12.5px] leading-5 ${sub}`}>Use the arrows on each card to match homepage order</span>
+          <span className={`text-[12.5px] leading-5 ${sub}`}>Products are organized by category</span>
         </div>
 
         {filtered.length === 0 ? (
@@ -614,70 +644,7 @@ export default function AdminProductsPage() {
           <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
             <div className={cn('origin-top p-1 transition-[opacity,transform,filter] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform,filter] sm:p-2', viewTransitionClassName)}>
             <div className={cardsLayoutClass}>
-              {filtered.map((product, index) => {
-                const globalIndex = orderedProducts.findIndex(item => item.slug === product.slug)
-                const displayOrder = getProductDisplayOrder(product, globalIndex >= 0 ? globalIndex + 1 : index + 1)
-                const canMoveLeft = globalIndex > 0
-                const canMoveRight = globalIndex >= 0 && globalIndex < orderedProducts.length - 1
-                const isReordering = reorderingSlug === product.slug
-                const reorderingLocked = isReordering || !!q.trim()
-                const orderTone = isDark
-                  ? 'bg-[linear-gradient(180deg,rgba(10,18,38,0.96),rgba(8,14,30,0.98))] text-cyan-200 ring-cyan-400/14 shadow-[0_16px_28px_-24px_rgba(34,211,238,0.34)]'
-                  : 'bg-white/95 text-violet-700 ring-violet-200 shadow-[0_12px_24px_-22px_rgba(124,58,237,0.22)]'
-                const orderControls = (
-                  <div
-                    className={cn(
-                      'inline-flex items-center gap-2 rounded-full px-2.5 py-1.25 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] ring-1 ring-inset backdrop-blur-sm',
-                      orderTone
-                    )}
-                  >
-                    <span className="pl-0.5">Order</span>
-                    <button
-                      type="button"
-                      onClick={event => {
-                        event.stopPropagation()
-                        void moveProductCard(product.slug, -1)
-                      }}
-                      disabled={!canMoveLeft || reorderingLocked}
-                      className={cn(
-                        'flex h-7 w-7 items-center justify-center rounded-full text-[12px] transition ring-1 ring-inset',
-                        !canMoveLeft || reorderingLocked
-                          ? isDark
-                            ? 'text-white/25 ring-cyan-400/8'
-                            : 'text-gray-300 ring-gray-200'
-                          : isDark
-                            ? 'bg-cyan-400/10 text-cyan-100 ring-cyan-400/14 hover:bg-cyan-400/16'
-                            : 'bg-violet-50 text-violet-700 ring-violet-200 hover:bg-violet-100'
-                      )}
-                      aria-label="Move earlier"
-                    >
-                      {'<'}
-                    </button>
-                    <span className="min-w-[1.35rem] text-center text-[11px]">{displayOrder}</span>
-                    <button
-                      type="button"
-                      onClick={event => {
-                        event.stopPropagation()
-                        void moveProductCard(product.slug, 1)
-                      }}
-                      disabled={!canMoveRight || reorderingLocked}
-                      className={cn(
-                        'flex h-7 w-7 items-center justify-center rounded-full text-[12px] transition ring-1 ring-inset',
-                        !canMoveRight || reorderingLocked
-                          ? isDark
-                            ? 'text-white/25 ring-cyan-400/8'
-                            : 'text-gray-300 ring-gray-200'
-                          : isDark
-                            ? 'bg-cyan-400/10 text-cyan-100 ring-cyan-400/14 hover:bg-cyan-400/16'
-                            : 'bg-violet-50 text-violet-700 ring-violet-200 hover:bg-violet-100'
-                      )}
-                      aria-label="Move later"
-                    >
-                      {'>'}
-                    </button>
-                  </div>
-                )
-
+              {filtered.map((product) => {
                 return (
                   <div key={product.slug} className="relative">
                     <AdminEntityCard
@@ -734,12 +701,10 @@ export default function AdminProductsPage() {
                         displayCardView === 'grid' ? (
                           <div className="space-y-2">
                             {renderCardPrice(product)}
-                            <div className="pt-0.5">{orderControls}</div>
                           </div>
                         ) : (
                             <div className="flex flex-wrap items-center gap-2.5">
                               <div className="min-w-[162px] flex-1">{renderCardPrice(product)}</div>
-                              <div className="shrink-0">{orderControls}</div>
                             </div>
                           )
                         }
@@ -812,14 +777,7 @@ export default function AdminProductsPage() {
             </div>
           }
         >
-          <div
-            className={cn(
-              'grid gap-2 rounded-[16px] p-2 sm:grid-cols-2 xl:grid-cols-5',
-              isDark
-                ? 'border border-cyan-400/10 bg-[linear-gradient(180deg,rgba(10,14,31,0.82),rgba(8,12,24,0.9))]'
-                : 'border border-gray-200 bg-gray-50/80'
-            )}
-          >
+          <div className="flex flex-wrap gap-1.5 rounded-[18px] border border-violet-200/70 bg-[linear-gradient(180deg,#faf6ff,#f1e9ff)] p-1.5">
             <Step k="basic" label="Basic" hint="Name / Category / Badge" />
             <Step k="content" label="Content" hint="Descriptions / Notes" />
             <Step k="media" label={`Media (${(form.gallery || []).length}${form.videoUrl ? ' + video' : ''})`} hint="Images / Video" />
