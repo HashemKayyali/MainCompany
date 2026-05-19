@@ -18,72 +18,27 @@ type RevealGroupOptions = RevealOptions & {
 }
 
 function buildRevealProps(
-  motionEnabled: boolean,
-  {
-    delay = 0,
-    duration = 0.38,
-    distance = 14,
-    margin = '0px 0px 10% 0px',
-    once = true,
-    amount = 0.08,
-  }: RevealOptions = {}
+  _motionEnabled: boolean,
+  _options: RevealOptions = {}
 ) {
-  return motionEnabled
-    ? {
-        initial: { opacity: 0, y: distance },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once, margin, amount },
-        transition: { duration, delay, ease: REVEAL_EASE },
-      }
-    : { initial: false as const }
+  // Reveal-on-scroll entrance animations are intentionally disabled site-wide.
+  //
+  // Every consumer renders in its final visual state immediately. This keeps the
+  // settled layout/styling identical while removing the per-element
+  // IntersectionObserver + opacity/transform work that made content "disappear
+  // and reload" on fast scroll and added needless load on low-end devices.
+  return { initial: false as const }
 }
 
 function buildRevealGroupProps(
-  motionEnabled: boolean,
-  {
-    delay = 0,
-    duration = 0.38,
-    distance = 14,
-    margin = '0px 0px 10% 0px',
-    once = true,
-    amount = 0.08,
-    stagger = 0.04,
-    delayChildren = 0,
-  }: RevealGroupOptions = {}
+  _motionEnabled: boolean,
+  _options: RevealGroupOptions = {}
 ) {
-  if (!motionEnabled) {
-    return {
-      containerProps: { initial: false as const },
-      itemProps: {},
-    }
-  }
-
+  // Disabled site-wide for the same reason as buildRevealProps: render the
+  // final state immediately, no staggered scroll-in work.
   return {
-    containerProps: {
-      variants: {
-        hidden: { opacity: 1 },
-        show: {
-          opacity: 1,
-          transition: {
-            delayChildren: delay + delayChildren,
-            staggerChildren: stagger,
-          },
-        },
-      },
-      initial: 'hidden' as const,
-      whileInView: 'show' as const,
-      viewport: { once, margin, amount },
-    },
-    itemProps: {
-      variants: {
-        hidden: { opacity: 0, y: distance },
-        show: {
-          opacity: 1,
-          y: 0,
-          transition: { duration, ease: REVEAL_EASE },
-        },
-      },
-    },
+    containerProps: { initial: false as const },
+    itemProps: {},
   }
 }
 
