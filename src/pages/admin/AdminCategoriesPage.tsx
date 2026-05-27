@@ -566,11 +566,11 @@ export default function AdminCategoriesPage() {
                 removable
                 onRemove={() => setEditing(e => (e ? { ...e, image: '' } : null))}
                 folder="categories"
-                frameAspect={3}
+                frameAspect={4 / 3}
                 defaultFit="cover"
                 frameTitle="Adjust Category Image"
-                frameHint="Position the image inside the wide category banner frame."
-                previewAspectClass="aspect-[3/1]"
+                frameHint="Position the image inside the same category card frame used on the website."
+                previewAspectClass="aspect-[4/3]"
                 renderFrameContextPreview={media => renderCategoryPreview({ image: media })}
                 frameContextTitle="Category Card Result"
                 frameContextHint="Inspect the actual category card result while you refine the banner framing."

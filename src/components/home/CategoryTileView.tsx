@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
-import { parseMediaValue } from '../../utils/media-frame'
 import { cn } from '../../utils/cn'
+import FramedImage from '../ui/FramedImage'
 
 /**
  * Presentational category tile used by the public homepage (OfferSection)
@@ -41,7 +41,6 @@ const CategoryTileView = memo(function CategoryTileView({
 }: CategoryTileViewProps) {
   const themeCtx = useTheme()
   const isDark = isDarkOverride ?? themeCtx.isDark
-  const imageSrc = image ? parseMediaValue(image).src : ''
 
   return (
     <div
@@ -75,18 +74,23 @@ const CategoryTileView = memo(function CategoryTileView({
       )}
 
       <div className="relative aspect-[4/3] overflow-hidden">
-        {imageSrc ? (
-          <img
-            src={imageSrc}
-            alt={name}
-            loading="lazy"
-            draggable={false}
+        {image ? (
+          <div
             className={cn(
-              'absolute inset-0 h-full w-full select-none object-cover object-center',
+              'absolute inset-0',
               !reducedVisualEffects && 'transition-transform duration-700 ease-out',
               active ? 'scale-[1.08]' : reducedVisualEffects ? 'scale-100' : 'scale-100 group-hover:scale-[1.06]'
             )}
-          />
+          >
+            <FramedImage
+              media={image}
+              alt={name}
+              loading="lazy"
+              draggable={false}
+              fallbackTransform={{ fit: 'cover' }}
+              className="h-full w-full select-none object-cover object-center"
+            />
+          </div>
         ) : (
           <div
             className={cn(
@@ -101,14 +105,6 @@ const CategoryTileView = memo(function CategoryTileView({
           />
         )}
 
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(15,8,40,0.18) 50%, rgba(15,8,40,0.62) 82%, rgba(15,8,40,0.86) 100%)',
-          }}
-        />
-
         {active && (
           <div className="absolute right-2.5 top-2.5 z-20">
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-500 shadow-[0_0_14px_rgba(124,58,237,0.85)]">
@@ -117,6 +113,16 @@ const CategoryTileView = memo(function CategoryTileView({
           </div>
         )}
       </div>
+
+      <div
+        className={cn(
+          'h-px w-full',
+          isDark
+            ? 'bg-white/[0.08] shadow-[0_1px_8px_rgba(0,0,0,0.34)]'
+            : 'bg-violet-100/90 shadow-[0_1px_8px_rgba(124,58,237,0.16)]'
+        )}
+        aria-hidden="true"
+      />
 
       <div
         className={cn(
