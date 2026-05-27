@@ -156,7 +156,6 @@ export default function AdminProductsPage() {
     const g = parseGradient(EMPTY.badgeColor)
     setForm({
       ...EMPTY,
-      categoryTags: '',
       notes: '',
       featuresLeft: '',
       featuresRight: '',
@@ -183,7 +182,6 @@ export default function AdminProductsPage() {
     const g = parseGradient(product.badgeColor || EMPTY.badgeColor)
     setForm({
       ...product,
-      categoryTags: product.categoryTags.join(', '),
       notes: product.notes.join('\n'),
       featuresLeft: product.features.left.join('\n'),
       featuresRight: product.features.right.join('\n'),
@@ -271,11 +269,6 @@ export default function AdminProductsPage() {
   }, [orderedProducts, q, filterCat, categories])
 
   const save = async () => {
-    const tags =
-      typeof form.categoryTags === 'string'
-        ? form.categoryTags.split(',').map((tag: string) => tag.trim()).filter(Boolean)
-        : form.categoryTags
-
     const notes =
       typeof form.notes === 'string'
         ? form.notes.split('\n').map((note: string) => note.trim()).filter(Boolean)
@@ -305,7 +298,7 @@ export default function AdminProductsPage() {
       displayOrder: desiredOrder,
       badge: form.badge,
       badgeColor: form.badgeColor || EMPTY.badgeColor,
-      categoryTags: tags,
+      categoryTags: [],
       categoryId: form.categoryId || '',
       shortDescription: form.shortDescription || '',
       description: form.description || '',
@@ -525,10 +518,7 @@ export default function AdminProductsPage() {
     displayOrder: sanitizeProductDisplayOrder(form.displayOrder) ?? 1,
     badge: form.badge || '',
     badgeColor: form.badgeColor || EMPTY.badgeColor,
-    categoryTags:
-      typeof form.categoryTags === 'string'
-        ? form.categoryTags.split(',').map((tag: string) => tag.trim()).filter(Boolean)
-        : form.categoryTags || [],
+    categoryTags: [],
     categoryId: form.categoryId || '',
     shortDescription: form.shortDescription || 'Short description appears here as the live product card summary.',
     description: form.description || '',
@@ -848,13 +838,6 @@ export default function AdminProductsPage() {
                 </div>
 
              
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Category Tags</label>
-                    <input value={form.categoryTags || ''} onChange={e => setForm({ ...form, categoryTags: e.target.value })} className="form-field" placeholder="LED, VR, Party" />
-                  </div>
-                </div>
 
                 <div className="flex flex-wrap gap-3">
                   <label className="flex items-center gap-2">

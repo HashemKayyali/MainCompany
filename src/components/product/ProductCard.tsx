@@ -2,6 +2,7 @@ import { memo, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Play } from 'lucide-react'
+import { useCategoriesData } from '../../contexts/DataContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { Product } from '../../data/products/types'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
@@ -30,6 +31,7 @@ const ProductCard = memo(function ProductCard({
   imageFetchPriority?: 'high' | 'auto'
 }) {
   const { isDark } = useTheme()
+  const { categories } = useCategoriesData()
   const { perfLow } = usePerfMode()
   const motionEnabled = useMotionEnabled()
   const coarsePointer = useMediaQuery('(pointer: coarse)')
@@ -54,7 +56,8 @@ const ProductCard = memo(function ProductCard({
   const spotlight = useSpotlight(!reducedCardEffects)
   const interactivePreviewEnabled = hasVideo && !reducedCardEffects
 
-  const categoryLabel = product.categoryTags[0] || 'Marketplace'
+  const categoryLabel =
+    categories.find(category => category.id === product.categoryId)?.name || 'Marketplace'
   const showRentalPrice = product.rentalEnabled !== false && product.showPrice !== false
   const priceDisplay = showRentalPrice
     ? `${product.rentalPricePerDay} ${product.currency}`
@@ -121,11 +124,11 @@ const ProductCard = memo(function ProductCard({
         'transition-[border-color,box-shadow] duration-350',
         isDark
           ? reducedCardEffects
-            ? 'border border-white/[0.08] bg-[linear-gradient(168deg,rgba(16,13,34,0.97),rgba(9,9,26,0.98))]'
-            : 'border border-white/[0.08] bg-[linear-gradient(168deg,rgba(16,13,34,0.97),rgba(9,9,26,0.98))] hover:border-violet-400/[0.26] hover:shadow-[0_28px_64px_-18px_rgba(124,58,237,0.3),0_0_0_1px_rgba(124,58,237,0.10)]'
+            ? 'border border-white/[0.14] bg-[linear-gradient(168deg,rgba(16,13,34,0.97),rgba(9,9,26,0.98))] shadow-[0_26px_62px_-30px_rgba(0,0,0,0.78),0_12px_28px_-18px_rgba(0,0,0,0.56),0_0_0_1px_rgba(255,255,255,0.045)]'
+            : 'border border-white/[0.14] bg-[linear-gradient(168deg,rgba(16,13,34,0.97),rgba(9,9,26,0.98))] shadow-[0_26px_62px_-30px_rgba(0,0,0,0.78),0_12px_28px_-18px_rgba(0,0,0,0.56),0_0_0_1px_rgba(255,255,255,0.045)] hover:border-white/[0.22] hover:shadow-[0_34px_72px_-26px_rgba(0,0,0,0.62),0_16px_34px_-18px_rgba(0,0,0,0.60),0_0_0_1px_rgba(255,255,255,0.08)]'
           : reducedCardEffects
-            ? 'border border-slate-200/80 bg-white'
-            : 'border border-slate-200/80 bg-white hover:border-violet-300/65 hover:shadow-[0_24px_52px_-16px_rgba(139,92,246,0.22)]'
+            ? 'border border-black/[0.16] bg-white shadow-[0_26px_62px_-36px_rgba(15,23,42,0.50),0_11px_26px_-18px_rgba(15,23,42,0.24),0_0_0_1px_rgba(255,255,255,0.88)]'
+            : 'border border-black/[0.16] bg-white shadow-[0_26px_62px_-36px_rgba(15,23,42,0.50),0_11px_26px_-18px_rgba(15,23,42,0.24),0_0_0_1px_rgba(255,255,255,0.88)] hover:border-black/[0.26] hover:shadow-[0_32px_70px_-32px_rgba(15,23,42,0.50),0_14px_32px_-18px_rgba(15,23,42,0.28),0_0_0_1px_rgba(255,255,255,0.92)]'
       )}
     >
       {!reducedCardEffects && <SpotlightOverlay ref={spotlight.overlayRef} className="z-[11]" />}
@@ -184,7 +187,6 @@ const ProductCard = memo(function ProductCard({
           />
         )}
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[52%] bg-gradient-to-t from-black/75 via-black/22 to-transparent" />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[30%] bg-gradient-to-b from-black/28 to-transparent" />
 
         <div className="absolute left-2 top-2 z-20 flex flex-wrap gap-1 sm:left-3 sm:top-3 sm:gap-1.5">
@@ -218,6 +220,16 @@ const ProductCard = memo(function ProductCard({
           </div>
         )}
       </Link>
+
+      <div
+        className={cn(
+          'relative z-10 h-px w-full overflow-visible after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-2 after:bg-gradient-to-b after:to-transparent',
+          isDark
+            ? 'bg-white/[0.09] shadow-[0_5px_10px_-6px_rgba(0,0,0,0.62)] after:from-black/[0.18]'
+            : 'bg-black/[0.10] shadow-[0_6px_12px_-5px_rgba(15,23,42,0.34)] after:from-black/[0.07]'
+        )}
+        aria-hidden="true"
+      />
 
       <div className="relative z-10 flex flex-1 flex-col px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3.5 lg:px-5 lg:pb-5 lg:pt-4">
         <div className="mb-1.5 sm:mb-2.5">

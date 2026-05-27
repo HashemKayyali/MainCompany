@@ -51,14 +51,14 @@ const CategoryTileView = memo(function CategoryTileView({
           ? cn(
               'bg-[linear-gradient(168deg,rgba(15,12,32,0.97),rgba(9,8,22,0.98))]',
               active
-                ? 'border border-violet-400/55 shadow-[0_0_0_1px_rgba(124,58,237,0.28),0_0_36px_rgba(124,58,237,0.22),0_24px_56px_rgba(0,0,0,0.48)]'
-                : 'border border-white/[0.08] hover:border-violet-400/28 hover:shadow-[0_0_20px_rgba(124,58,237,0.13),0_14px_40px_rgba(0,0,0,0.38)]'
+                ? 'border border-white/[0.20] shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_28px_64px_-24px_rgba(0,0,0,0.58),0_12px_28px_-18px_rgba(0,0,0,0.50)]'
+                : 'border border-white/[0.14] shadow-[0_24px_58px_-28px_rgba(0,0,0,0.74),0_10px_24px_-18px_rgba(0,0,0,0.54),0_0_0_1px_rgba(255,255,255,0.045)] hover:border-white/[0.22] hover:shadow-[0_30px_68px_-24px_rgba(0,0,0,0.60),0_14px_30px_-18px_rgba(0,0,0,0.58),0_0_0_1px_rgba(255,255,255,0.08)]'
             )
           : cn(
               'bg-white',
               active
-                ? 'border border-violet-500/55 shadow-[0_0_0_1px_rgba(124,58,237,0.18),0_16px_40px_rgba(124,58,237,0.18)]'
-                : 'border border-slate-200/80 hover:border-violet-300/50 hover:shadow-[0_8px_32px_rgba(124,58,237,0.12)]'
+                ? 'border border-black/[0.28] shadow-[0_0_0_1px_rgba(15,23,42,0.08),0_24px_54px_-30px_rgba(15,23,42,0.48),0_10px_24px_-18px_rgba(15,23,42,0.24)]'
+                : 'border border-black/[0.16] shadow-[0_24px_58px_-34px_rgba(15,23,42,0.48),0_10px_24px_-17px_rgba(15,23,42,0.22),0_0_0_1px_rgba(255,255,255,0.88)] hover:border-black/[0.26] hover:shadow-[0_28px_64px_-30px_rgba(15,23,42,0.48),0_12px_28px_-18px_rgba(15,23,42,0.26),0_0_0_1px_rgba(255,255,255,0.92)]'
             ),
         className
       )}
@@ -116,10 +116,10 @@ const CategoryTileView = memo(function CategoryTileView({
 
       <div
         className={cn(
-          'h-px w-full',
+          'relative z-10 h-px w-full overflow-visible after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-2 after:bg-gradient-to-b after:to-transparent',
           isDark
-            ? 'bg-white/[0.08] shadow-[0_1px_8px_rgba(0,0,0,0.34)]'
-            : 'bg-violet-100/90 shadow-[0_1px_8px_rgba(124,58,237,0.16)]'
+            ? 'bg-white/[0.09] shadow-[0_5px_10px_-6px_rgba(0,0,0,0.62)] after:from-black/[0.18]'
+            : 'bg-black/[0.10] shadow-[0_6px_12px_-5px_rgba(15,23,42,0.34)] after:from-black/[0.07]'
         )}
         aria-hidden="true"
       />
