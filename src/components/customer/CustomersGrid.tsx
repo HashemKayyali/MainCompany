@@ -14,10 +14,10 @@ export default function CustomersGrid({ customers }: { customers: Customer[] }) 
   return (
     <motion.div
       {...containerProps}
-      className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+      className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 xl:gap-5"
     >
       {customers.map(c => (
-        <motion.div key={c.slug} {...itemProps} className="h-full">
+        <motion.div key={c.slug} {...itemProps} className="h-full min-w-0">
           <CustomerCard customer={c} />
         </motion.div>
       ))}

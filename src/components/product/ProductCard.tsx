@@ -31,7 +31,7 @@ const ProductCard = memo(function ProductCard({
   imageFetchPriority?: 'high' | 'auto'
 }) {
   const { isDark } = useTheme()
-  const { categories } = useCategoriesData()
+  const { categories = [] } = useCategoriesData()
   const { perfLow } = usePerfMode()
   const motionEnabled = useMotionEnabled()
   const coarsePointer = useMediaQuery('(pointer: coarse)')

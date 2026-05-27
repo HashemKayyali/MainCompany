@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -21,6 +21,7 @@ import ProductOptions from '../components/product/ProductOptions'
 import ProductFeatures from '../components/product/ProductFeatures'
 import PricingCard from '../components/store/PricingCard'
 import ProductCommerceActions from '../components/product/ProductCommerceActions'
+import ProductSuggestionsCarousel from '../components/product/ProductSuggestionsCarousel'
 import NotFoundPage from './NotFoundPage'
 import { usePageMeta } from '../hooks/usePageMeta'
 
@@ -34,7 +35,7 @@ const TRUST_BADGES = [
 
 export default function ProductDetailsPage() {
   const { slug } = useParams<{ slug: string }>()
-  const { getProductBySlug, getPartsByProduct } = useData()
+  const { categories, products, getProductBySlug, getPartsByProduct } = useData()
   const { isDark } = useTheme()
 
   const product = getProductBySlug(slug || '')
@@ -42,6 +43,10 @@ export default function ProductDetailsPage() {
   const [quoteOpen, setQuoteOpen] = useState(false)
 
   const showPrice = product ? product.showPrice !== false : true
+  const similarProducts = useMemo(() => {
+    if (!product?.categoryId) return []
+    return products.filter(item => item.categoryId === product.categoryId && item.slug !== product.slug)
+  }, [product?.categoryId, product?.slug, products])
 
   usePageMeta({
     title: product?.name || 'Product',
@@ -69,6 +74,9 @@ export default function ProductDetailsPage() {
   })
 
   if (!product) return <NotFoundPage />
+
+  const categoryName =
+    categories.find(category => category.id === product.categoryId)?.name || 'Marketplace'
 
   /* ── Theme tokens ── */
   const divider = isDark ? 'border-white/[0.07]' : 'border-violet-100/60'
@@ -116,10 +124,10 @@ export default function ProductDetailsPage() {
             All Products
           </Link>
 
-          {product.categoryTags[0] && (
+          {categoryName && (
             <>
               <ChevronRight size={11} className={`${isDark ? 'text-white/18' : 'text-slate-300'}`} />
-              <span className={`text-[11px] font-medium ${metaLabel}`}>{product.categoryTags[0]}</span>
+              <span className={`text-[11px] font-medium ${metaLabel}`}>{categoryName}</span>
             </>
           )}
           <ChevronRight size={11} className={`${isDark ? 'text-white/18' : 'text-slate-300'}`} />
@@ -170,7 +178,7 @@ export default function ProductDetailsPage() {
                     {product.badge}
                   </span>
                 )}
-                {product.categoryTags[0] && (
+                {categoryName && (
                   <span
                     className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-[9.5px] font-bold uppercase tracking-[0.14em] ${
                       isDark
@@ -179,7 +187,7 @@ export default function ProductDetailsPage() {
                     }`}
                   >
                     <CircleDot size={8} />
-                    {product.categoryTags[0]}
+                    {categoryName}
                   </span>
                 )}
               </div>
@@ -610,6 +618,8 @@ export default function ProductDetailsPage() {
             </div>
           </div>
         </div>
+
+        <ProductSuggestionsCarousel products={similarProducts} categoryName={categoryName} />
       </div>
 
       {/* ── Mobile Sticky Bottom Bar ── */}

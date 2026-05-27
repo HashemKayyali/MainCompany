@@ -776,9 +776,21 @@
 
   /* ─── Logo cloud marquee ─── */
   .logo-cloud-track {
+    margin-block: -10px;
+    padding-block: 10px;
     touch-action: pan-y;
     -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 9%, black 91%, transparent 100%);
     mask-image: linear-gradient(90deg, transparent 0%, black 9%, black 91%, transparent 100%);
+  }
+
+  .logo-cloud-track--spaced {
+    margin-bottom: calc(1.25rem - 10px);
+  }
+
+  @media (min-width: 640px) {
+    .logo-cloud-track--spaced {
+      margin-bottom: calc(1.5rem - 10px);
+    }
   }
 
   .logo-cloud-row {

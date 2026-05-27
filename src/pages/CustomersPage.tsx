@@ -1,245 +1,249 @@
 import { useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Building2, Search, SlidersHorizontal, UsersRound } from 'lucide-react'
 import CustomersGrid from '../components/customer/CustomersGrid'
+import Chip from '../components/ui/Chip'
 import { useData } from '../contexts/DataContext'
 import { useTheme } from '../contexts/ThemeContext'
-import { useReveal } from '../hooks/useReveal'
 import { usePageMeta } from '../hooks/usePageMeta'
 
-export default function CustomersPage() {
-  const { customers } = useData()
-  const { isDark } = useTheme()
-  const heroReveal = useReveal({ distance: 20, duration: 0.52, margin: '0px 0px 12% 0px' })
-  const toolbarReveal = useReveal({ delay: 0.03, distance: 14, duration: 0.38, margin: '0px 0px 8% 0px' })
-  const ctaReveal = useReveal({ distance: 16, duration: 0.42, margin: '0px 0px 10% 0px' })
+const ease = [0.16, 1, 0.3, 1]
 
+export default function CustomersPage() {
   usePageMeta({
-    title: 'Global Partners | Elite Network',
+    title: 'Customers',
     description: 'Trusted by leading premium brands, enterprises, and organizations across the region.',
   })
 
+  const { customers } = useData()
+  const { isDark } = useTheme()
   const [search, setSearch] = useState('')
   const [cat, setCat] = useState('All')
 
   const cats = useMemo(
-    () => Array.from(new Set(customers.map(customer => customer.category).filter(Boolean))) as string[],
+    () =>
+      Array.from(new Set(customers.map(customer => customer.category).filter(Boolean))).sort((a, b) =>
+        String(a).localeCompare(String(b))
+      ) as string[],
     [customers]
   )
 
-  const filtered = useMemo(
-    () =>
-      customers.filter(
-        customer =>
-          customer.name.toLowerCase().includes(search.toLowerCase()) &&
-          (cat === 'All' || customer.category === cat)
-      ),
-    [cat, customers, search]
-  )
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase()
+
+    return customers.filter(customer => {
+      const matchesCategory = cat === 'All' || customer.category === cat
+      if (!matchesCategory) return false
+      if (!needle) return true
+
+      return (
+        customer.name.toLowerCase().includes(needle) ||
+        (customer.category || '').toLowerCase().includes(needle)
+      )
+    })
+  }, [cat, customers, search])
+
+  const countForCat = (category: string) =>
+    customers.filter(customer => customer.category === category).length
+
+  const clearFilters = () => {
+    setSearch('')
+    setCat('All')
+  }
 
   return (
-    <div className="relative min-h-screen pb-24">
-      {isDark && (
+    <section className="site-section bg-transparent">
+      <div className="site-container">
         <div
-          className="pointer-events-none absolute inset-0 z-0"
-          aria-hidden="true"
-          style={{
-            background:
-              'radial-gradient(ellipse at 50% -10%, rgba(124,58,237,0.12) 0%, transparent 46%), radial-gradient(ellipse at 82% 78%, rgba(34,211,238,0.05) 0%, transparent 42%)',
-          }}
-        />
-      )}
-
-      <section className="relative overflow-hidden pt-32 pb-16 sm:pt-40 sm:pb-24 lg:pt-48 lg:pb-32">
-        <div className="site-container relative z-10 text-center">
-          <motion.div {...heroReveal} className="mx-auto max-w-4xl">
+          className={`relative overflow-hidden rounded-[28px] border px-5 py-9 sm:px-7 sm:py-11 lg:px-10 lg:py-13 ${
+            isDark
+              ? 'border-white/[0.07] bg-[linear-gradient(180deg,rgba(14,12,32,0.74),rgba(8,8,20,0.56))] shadow-[0_28px_84px_rgba(2,4,16,0.42),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-sm'
+              : 'border-violet-100/80 bg-white/93 shadow-[0_24px_64px_rgba(15,23,42,0.07)]'
+          }`}
+        >
+          {isDark && (
             <div
-              className={`mx-auto mb-6 inline-flex h-8 items-center rounded-full border px-4 text-[11px] font-bold uppercase tracking-[0.2em] shadow-2xl backdrop-blur-md ${
-                isDark
-                  ? 'border-white/[0.15] bg-white/[0.05] text-purple-100 shadow-[0_0_40px_rgba(124,58,237,0.2)]'
-                  : 'border-violet-200 bg-white/80 text-violet-700 shadow-violet-200/50'
-              }`}
-            >
-              <span
-                className={`mr-2.5 inline-block h-1.5 w-1.5 rounded-full ${
-                  isDark ? 'bg-cyan-400' : 'bg-violet-500'
-                } animate-pulse`}
-              />
-              Trusted by {customers.length} Elite Brands
-            </div>
+              className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-violet-600/[0.07] blur-[100px]"
+              aria-hidden="true"
+            />
+          )}
 
-            <h1
-              className={`font-display text-[2.75rem] font-black tracking-tight leading-[1.05] sm:text-[4rem] lg:text-[5rem] ${
-                !isDark ? 'text-gray-900' : 'text-white'
-              }`}
-            >
-              The network behind <br className="hidden sm:block" />
-              <span className="text-glow opacity-90 drop-shadow-xl">world-class events.</span>
-            </h1>
-
-            <p
-              className={`mx-auto mt-8 max-w-2xl text-[1.1rem] font-medium leading-relaxed sm:text-[1.35rem] ${
-                isDark ? 'text-purple-100/60' : 'text-gray-600'
-              }`}
-            >
-              From global enterprises to luxury brands, the most demanding clients trust us to
-              deliver flawless experiences.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="site-container relative z-10">
-        <motion.div {...toolbarReveal} className="mb-12 sm:mb-16">
-          <div
-            className={`relative flex flex-col items-start justify-between gap-5 rounded-[24px] border p-4 sm:flex-row sm:items-center sm:p-5 ${
-              isDark
-                ? 'border-white/[0.06] bg-white/[0.02] shadow-[0_20px_40px_-20px_rgba(0,0,0,0.5)]'
-                : 'border-violet-100 bg-white/60 shadow-xl shadow-violet-100/40'
-            }`}
-            style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+          <motion.div
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.62, ease }}
+            className="relative mb-10 flex flex-col gap-6 lg:mb-12 lg:flex-row lg:items-end lg:justify-between"
           >
-            <div className="relative w-full sm:max-w-[280px]">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 opacity-50">
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="M21 21l-4.3-4.3" />
-                </svg>
+            <div className="max-w-2xl">
+              <div className="mb-3 flex items-center gap-2.5">
+                <span className="section-label">// Partner Network</span>
+                <div className={`h-px w-8 ${isDark ? 'bg-violet-500/30' : 'bg-violet-300/50'}`} />
               </div>
-              <input
-                type="text"
-                value={search}
-                onChange={event => setSearch(event.target.value)}
-                placeholder="Search partners..."
-                className={`w-full rounded-[14px] border-none py-3 pl-11 pr-4 text-[0.95rem] font-medium outline-none transition-all ${
-                  isDark
-                    ? 'bg-white/[0.04] text-white placeholder:text-white/30 focus:bg-white/[0.08] focus:ring-2 focus:ring-purple-500/50'
-                    : 'bg-white text-gray-900 placeholder:text-gray-400 focus:bg-violet-50 focus:ring-2 focus:ring-violet-500/30'
-                }`}
-              />
-            </div>
-
-            <div className="flex w-full flex-wrap gap-2 sm:w-auto">
-              <button
-                onClick={() => setCat('All')}
-                className={`rounded-[12px] px-5 py-2.5 text-[0.85rem] font-bold uppercase tracking-wide transition-all duration-300 ${
-                  cat === 'All'
-                    ? isDark
-                      ? 'bg-white text-black shadow-lg shadow-white/10'
-                      : 'bg-gray-900 text-white shadow-md'
-                    : isDark
-                      ? 'bg-transparent text-white/50 hover:bg-white/10 hover:text-white'
-                      : 'bg-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-900'
+              <h1 className={`section-title !text-left ${!isDark ? 'text-gray-900' : ''}`}>
+                Trusted <span className="text-glow">partners</span>
+              </h1>
+              <p
+                className={`mt-4 max-w-xl text-[0.98rem] leading-[1.72] ${
+                  isDark ? 'text-slate-300/70' : 'text-slate-500'
                 }`}
               >
-                All
-              </button>
-              {cats.map(category => (
-                <button
-                  key={category}
-                  onClick={() => setCat(category)}
-                  className={`rounded-[12px] px-5 py-2.5 text-[0.85rem] font-bold uppercase tracking-wide transition-all duration-300 ${
-                    cat === category
-                      ? isDark
-                        ? 'bg-white text-black shadow-lg shadow-white/10'
-                        : 'bg-gray-900 text-white shadow-md'
-                      : isDark
-                        ? 'bg-transparent text-white/50 hover:bg-white/10 hover:text-white'
-                        : 'bg-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-900'
+                A curated view of the brands, schools, venues, and organizations that have trusted
+                Eventies experiences across the region.
+              </p>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.52, delay: 0.1, ease }}
+              className={`shrink-0 rounded-[20px] border px-6 py-5 ${
+                isDark
+                  ? 'border-white/[0.09] bg-white/[0.04]'
+                  : 'border-violet-200/60 bg-white shadow-[0_6px_24px_rgba(124,58,237,0.07)]'
+              }`}
+            >
+              <div
+                className={`flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.18em] ${
+                  isDark ? 'text-slate-500' : 'text-slate-400'
+                }`}
+              >
+                <UsersRound size={10} />
+                Partners
+              </div>
+              <div
+                className={`mt-1.5 font-display text-[2.6rem] font-black leading-none tracking-[-0.05em] ${
+                  isDark ? 'text-white' : 'text-slate-900'
+                }`}
+              >
+                {filtered.length}
+              </div>
+              <div className={`mt-1.5 text-[11.5px] font-medium ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                {cat === 'All' ? 'trusted partners' : `in ${cat}`}
+              </div>
+            </motion.div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.52, delay: 0.08, ease }}
+            className={`relative mb-9 rounded-[22px] border p-4 ${
+              isDark
+                ? 'border-white/[0.07] bg-white/[0.025]'
+                : 'border-violet-100/80 bg-white/80 shadow-[0_14px_36px_-24px_rgba(89,23,196,0.20)]'
+            }`}
+          >
+            <div className="grid gap-4 lg:grid-cols-[minmax(240px,320px)_1fr] lg:items-start">
+              <div>
+                <div className="mb-3.5 flex items-center gap-2">
+                  <Search size={12} className={isDark ? 'text-slate-600' : 'text-slate-400'} />
+                  <span
+                    className={`text-[9.5px] font-bold uppercase tracking-[0.18em] ${
+                      isDark ? 'text-slate-600' : 'text-slate-400'
+                    }`}
+                  >
+                    Search partners
+                  </span>
+                </div>
+                <div className="relative">
+                  <Search
+                    size={15}
+                    className={`pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 ${
+                      isDark ? 'text-slate-500' : 'text-slate-400'
+                    }`}
+                  />
+                  <input
+                    type="search"
+                    value={search}
+                    onChange={event => setSearch(event.target.value)}
+                    placeholder="Search by name or category..."
+                    className={`h-11 w-full rounded-[14px] border py-2 pl-10 pr-3 text-[13px] font-medium outline-none transition ${
+                      isDark
+                        ? 'border-white/[0.08] bg-white/[0.04] text-white placeholder:text-slate-600 focus:border-violet-400/40 focus:bg-white/[0.06]'
+                        : 'border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:border-violet-300 focus:ring-2 focus:ring-violet-100'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              <div className="min-w-0">
+                <div className="mb-3.5 flex items-center gap-2">
+                  <SlidersHorizontal size={12} className={isDark ? 'text-slate-600' : 'text-slate-400'} />
+                  <span
+                    className={`text-[9.5px] font-bold uppercase tracking-[0.18em] ${
+                      isDark ? 'text-slate-600' : 'text-slate-400'
+                    }`}
+                  >
+                    Filter by category
+                  </span>
+                </div>
+                <div className="-mx-4 overflow-x-auto px-4 pb-1">
+                  <div className="flex w-max min-w-full gap-2 sm:flex-wrap">
+                    <Chip active={cat === 'All'} onClick={() => setCat('All')}>
+                      All ({customers.length})
+                    </Chip>
+                    {cats.map(category => (
+                      <Chip key={category} active={cat === category} onClick={() => setCat(category)}>
+                        {category} ({countForCat(category)})
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          <hr className="hr-glow mb-9" />
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`${cat}-${search}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease }}
+            >
+              {filtered.length > 0 ? (
+                <CustomersGrid customers={filtered} />
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className={`rounded-[22px] border border-dashed py-18 text-center ${
+                    isDark
+                      ? 'border-white/[0.10] bg-white/[0.025]'
+                      : 'border-violet-200/70 bg-slate-50/60'
                   }`}
                 >
-                  {category}
-                </button>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {filtered.length > 0 ? (
-          <div
-            className="rounded-[32px] border border-white/5 bg-white/[0.01] p-4 sm:p-8 md:p-12"
-            style={{
-              boxShadow: isDark ? 'inset 0 1px 0 rgba(255,255,255,0.02)' : '',
-            }}
-          >
-            <CustomersGrid customers={filtered} />
-          </div>
-        ) : (
-          <div
-            className={`rounded-[32px] border py-32 text-center ${
-              isDark ? 'border-white/5 bg-white/[0.01]' : 'border-gray-100 bg-gray-50'
-            }`}
-          >
-            <h3 className={`font-display text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              No partners found
-            </h3>
-            <p className={`mt-2 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
-              Try adjusting your search or category filter.
-            </p>
-            <button
-              onClick={() => {
-                setSearch('')
-                setCat('All')
-              }}
-              className={`mt-6 rounded-full px-8 py-3 text-sm font-semibold transition-colors ${
-                isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-gray-900 text-white hover:bg-gray-800'
-              }`}
-            >
-              Clear Filters
-            </button>
-          </div>
-        )}
-
-        <motion.div {...ctaReveal} className="mt-24 text-center sm:mt-32">
-          <div
-            className={`mx-auto max-w-3xl rounded-[32px] border p-12 sm:p-16 ${
-              isDark
-                ? 'border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]'
-                : 'border-violet-100 bg-[linear-gradient(180deg,rgba(124,58,237,0.03),transparent)] shadow-2xl shadow-violet-100/50'
-            }`}
-          >
-            <h2
-              className={`font-display text-3xl font-bold sm:text-4xl ${
-                !isDark ? 'text-gray-900' : 'text-white'
-              }`}
-            >
-              Ready to create something <span className="text-glow">extraordinary?</span>
-            </h2>
-            <p className={`mt-4 text-base sm:text-lg ${isDark ? 'text-white/60' : 'text-gray-500'}`}>
-              Partner with the platform trusted by the very best.
-            </p>
-            <div className="mt-8 flex justify-center">
-              <Link
-                to="/contact"
-                className="btn-primary group relative !min-h-[56px] !rounded-[18px] !px-10 !text-[14px]"
-              >
-                <span>Start Your Project</span>
-                <svg
-                  width="18"
-                  height="18"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="ml-2 transition-transform duration-300 group-hover:translate-x-1"
-                >
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
-          </div>
-        </motion.div>
-      </section>
-    </div>
+                  <div
+                    className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] ${
+                      isDark ? 'border border-white/[0.07] bg-white/[0.06]' : 'border border-violet-100 bg-violet-50'
+                    }`}
+                  >
+                    <Building2 size={20} className={isDark ? 'text-slate-600' : 'text-violet-400'} />
+                  </div>
+                  <p className={`font-display text-[1.08rem] font-semibold ${isDark ? 'text-white/55' : 'text-slate-700'}`}>
+                    No partners match this filter
+                  </p>
+                  <p className={`mt-2 text-[13px] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+                    Try adjusting the search or selecting a different category.
+                  </p>
+                  <button
+                    onClick={clearFilters}
+                    className={`mt-5 rounded-[12px] border px-5 py-2.5 text-[12px] font-semibold transition-all duration-300 hover:-translate-y-0.5 ${
+                      isDark
+                        ? 'border-white/[0.10] bg-white/[0.04] text-white/70 hover:border-white/[0.16] hover:bg-white/[0.08]'
+                        : 'border-slate-200 bg-white text-slate-600 shadow-sm hover:border-violet-300 hover:text-violet-700'
+                    }`}
+                  >
+                    Clear filters
+                  </button>
+                </motion.div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+    </section>
   )
 }

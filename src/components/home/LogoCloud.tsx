@@ -82,7 +82,7 @@ export default function LogoCloud() {
             aria-hidden="true"
           />
 
-          <div className="logo-cloud-track mb-5 overflow-hidden sm:mb-6">
+          <div className="logo-cloud-track logo-cloud-track--spaced overflow-hidden">
             <div className="logo-cloud-row logo-cloud-row--fwd" aria-hidden="true">
               {loopA.map((customer, index) => (
                 <div key={`a-${customer.slug}-${index}`} className="relative">
