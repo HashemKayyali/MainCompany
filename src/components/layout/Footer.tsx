@@ -28,9 +28,9 @@ export default function Footer() {
     <footer className="relative pb-6 pt-6 sm:pb-5 sm:pt-5" role="contentinfo" aria-label="Site footer">
       <div className="site-container">
         <div className="section-shell px-5 py-6 sm:px-6 lg:px-8 lg:py-8">
-          <div className="relative grid gap-7 md:grid-cols-2 lg:grid-cols-[1.1fr_0.7fr_0.7fr_0.9fr]">
+          <div className="relative grid grid-cols-2 gap-x-6 gap-y-7 md:grid-cols-2 lg:grid-cols-[1.1fr_0.7fr_0.7fr_0.9fr]">
             {/* Brand */}
-            <div className="max-w-md">
+            <div className="col-span-2 max-w-md lg:col-span-1">
               <div className="flex items-center gap-3">
                 <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-[14px] border border-white/30 bg-[linear-gradient(145deg,#7c3aed_0%,#a855f7_48%,#c026d3_115%)] shadow-[0_12px_32px_-6px_rgba(124,58,237,0.55)]">
                   <div className="absolute inset-x-2 top-1.5 h-3 rounded-full bg-white/30 blur-sm" />
@@ -60,7 +60,7 @@ export default function Footer() {
             </div>
 
             {/* Navigation */}
-            <div>
+            <div className="min-w-0">
               <div className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${subtle}`}>
                 Navigate
               </div>
@@ -74,7 +74,7 @@ export default function Footer() {
             </div>
 
             {/* Featured */}
-            <div>
+            <div className="min-w-0">
               <div className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${subtle}`}>
                 Featured
               </div>
@@ -92,7 +92,7 @@ export default function Footer() {
             </div>
 
             {/* Contact */}
-            <div>
+            <div className="col-span-2 lg:col-span-1">
               <div className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${subtle}`}>
                 Connect
               </div>

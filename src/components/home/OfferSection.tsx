@@ -137,7 +137,7 @@ function ViewAllTile({ isDark, reducedVisualEffects }: { isDark: boolean; reduce
           </div>
           <h3
             className={cn(
-              'font-display text-[0.96rem] font-bold leading-tight tracking-[-0.02em]',
+              'font-display text-[1.08rem] font-bold leading-tight tracking-[-0.02em] sm:text-[1.13rem]',
               isDark ? 'text-white/92' : 'text-slate-900'
             )}
           >
@@ -239,6 +239,7 @@ export default function OfferSection() {
   const { isDark } = useTheme()
   const { perfLow } = usePerfMode()
   const [activeTab, setActiveTab] = useState('')
+  const sectionRef = useRef<HTMLElement | null>(null)
   const selectedCategoryRef = useRef<HTMLDivElement | null>(null)
   const headerReveal = useReveal({ distance: 16, duration: 0.42, margin: '0px 0px 16% 0px' })
   const { containerProps: categoryGridRevealProps, itemProps: categoryGridItemProps } = useRevealGroup({
@@ -317,8 +318,42 @@ export default function OfferSection() {
     }
   }, [activeTab, activeCat])
 
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.location.hash !== '#categories') return
+
+    const scrollToCategories = () => {
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      if (!sectionRef.current) return
+
+      const header = document.querySelector('header')
+      const headerHeight = header instanceof HTMLElement ? header.offsetHeight : 0
+      const top = window.scrollY + sectionRef.current.getBoundingClientRect().top - headerHeight - 16
+      const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+      const targetTop = Math.max(0, Math.min(top, maxTop))
+
+      window.__appLenis?.scrollTo(targetTop, { immediate: prefersReducedMotion, force: true })
+      window.scrollTo({
+        top: targetTop,
+        left: 0,
+        behavior: 'auto',
+      })
+    }
+
+    const timeouts = [0, 250, 750, 1500].map(delay =>
+      window.setTimeout(scrollToCategories, delay)
+    )
+
+    return () => {
+      timeouts.forEach(timeout => window.clearTimeout(timeout))
+    }
+  }, [])
+
   return (
-    <section className="site-section">
+    <section
+      ref={sectionRef}
+      id="categories"
+      className="site-section scroll-mt-[calc(var(--app-navbar-height)+1rem)]"
+    >
       <div className="site-container">
         <div
           className={cn(
@@ -364,7 +399,7 @@ export default function OfferSection() {
             </Link>
           </motion.div>
 
-          <motion.div {...categoryGridRevealProps} className="relative mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+          <motion.div {...categoryGridRevealProps} className="relative mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
             {loading
               ? Array.from({ length: 5 }).map((_, index) => (
                   <CategoryTileSkeleton key={`skel-${index}`} index={index} isDark={isDark} />
@@ -403,7 +438,7 @@ export default function OfferSection() {
                 <SelectedCategoryHeader category={activeCat} count={filtered.length} isDark={isDark} />
 
                 {filtered.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:gap-5">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:gap-5 2xl:grid-cols-4">
                     {filtered.map((product, index) => (
                       <ProductCard key={product.slug} product={product} index={index} />
                     ))}

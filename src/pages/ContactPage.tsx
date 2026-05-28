@@ -47,7 +47,7 @@ export default function ContactPage() {
 
   return (
     <section className="site-section">
-      <div className="site-container max-w-5xl">
+      <div className="site-container">
 
         {/* ── Page Header ── */}
         <motion.div

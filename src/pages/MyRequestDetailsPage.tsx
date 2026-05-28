@@ -86,7 +86,7 @@ export default function MyRequestDetailsPage() {
 
   return (
     <section className="site-section">
-      <div className="site-container max-w-4xl">
+      <div className="site-container">
         <Link
           to="/my-requests"
           className="mb-5 inline-flex items-center gap-1.5 rounded-[12px] border border-violet-200/70 bg-white px-3.5 py-2 text-[12.5px] font-bold text-[#4b3a63] transition hover:border-violet-400 hover:text-[#1a0b3d] active:translate-y-[1px]"
@@ -135,9 +135,9 @@ export default function MyRequestDetailsPage() {
             </div>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.42fr)]">
             {/* Summary */}
-            <div className={cn(sectionCard, 'overflow-hidden !p-0')}>
+            <div className={cn(sectionCard, 'overflow-hidden !p-0 xl:col-span-2')}>
               <div className="flex flex-wrap items-start justify-between gap-4 border-b border-violet-100 bg-[linear-gradient(180deg,#faf6ff,#ffffff)] p-5 sm:p-6">
                 <div className="min-w-0">
                   <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#7126e3]">
@@ -259,4 +259,3 @@ export default function MyRequestDetailsPage() {
     </section>
   )
 }
-

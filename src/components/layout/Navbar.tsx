@@ -52,6 +52,7 @@ type DesktopNavItem = {
 
 const MOBILE_NAV = [
   { to: '/', label: 'Home' },
+  { to: '/#categories', label: 'Categories' },
   { to: '/products', label: 'Products' },
   { to: '/customers', label: 'Customers' },
   { to: '/gallery', label: 'Gallery' },
@@ -61,71 +62,22 @@ const MOBILE_NAV = [
 
 const MOBILE_CHIPS = [
   { to: '/', label: 'Home' },
-  { to: '/products', label: 'Explore' },
+  { to: '/#categories', label: 'Categories' },
+  { to: '/products', label: 'Products' },
   { to: '/customers', label: 'Customers' },
   { to: '/gallery', label: 'Gallery' },
-  { to: '/about', label: 'Company' },
+  { to: '/about', label: 'About' },
+  { to: '/contact', label: 'Contact' },
 ] as const
 
 const DESKTOP_NAV: DesktopNavItem[] = [
   { key: 'home', label: 'Home', to: '/' },
-  {
-    key: 'explore',
-    label: 'Explore',
-    children: [
-      {
-        to: '/products',
-        label: 'Products',
-        description: 'Rental-ready activations and premium event setups.',
-        icon: LayoutGrid,
-        meta: 'Catalog',
-      },
-      {
-        to: '/customers',
-        label: 'Customers',
-        description: 'Trusted brands, partners, and credibility highlights.',
-        icon: Users,
-        meta: 'Trusted',
-      },
-      {
-        to: '/gallery',
-        label: 'Gallery',
-        description: 'Recent visuals, setups, and standout moments.',
-        icon: GalleryVerticalEnd,
-        meta: 'Highlights',
-      },
-    ],
-    eyebrow: 'Discover',
-    title: 'Explore the marketplace',
-    body: 'Browse products, customer success, and real event visuals from a single polished surface.',
-    ctaLabel: 'See all services',
-    ctaTo: '/products',
-  },
-  {
-    key: 'company',
-    label: 'Company',
-    children: [
-      {
-        to: '/about',
-        label: 'About',
-        description: 'How the marketplace works and what shapes the experience.',
-        icon: ShieldCheck,
-        meta: 'Overview',
-      },
-      {
-        to: '/contact',
-        label: 'Contact',
-        description: 'Talk with our team about planning, procurement, and event execution.',
-        icon: MessageCircleMore,
-        meta: 'Reach us',
-      },
-    ],
-    eyebrow: 'Connect',
-    title: 'Meet the team behind Eventies',
-    body: 'Learn how we curate premium event services and how to get in touch for your next project.',
-    ctaLabel: 'Contact us',
-    ctaTo: '/contact',
-  },
+  { key: 'categories', label: 'Categories', to: '/#categories' },
+  { key: 'products', label: 'Products', to: '/products' },
+  { key: 'customers', label: 'Customers', to: '/customers' },
+  { key: 'gallery', label: 'Gallery', to: '/gallery' },
+  { key: 'about', label: 'About', to: '/about' },
+  { key: 'contact', label: 'Contact', to: '/contact' },
 ]
 
 function getDesktopNavActive(
@@ -776,7 +728,7 @@ const NavbarUserMenuPortal = memo(function NavbarUserMenuPortal({
 })
 
 export default function Navbar() {
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
   const { isDark } = useTheme()
   const { perfLow } = usePerfMode()
 
@@ -886,7 +838,8 @@ export default function Navbar() {
       if (ticking) return
       ticking = true
       window.requestAnimationFrame(() => {
-        const nextScrolled = window.scrollY > 18
+        const y = window.scrollY
+        const nextScrolled = scrolledRef.current ? y > 8 : y > 24
         if (scrolledRef.current !== nextScrolled) {
           scrolledRef.current = nextScrolled
           setScrolled(nextScrolled)
@@ -1071,29 +1024,47 @@ export default function Navbar() {
     const root = document.documentElement
     const bar = navbarBarRef.current
     if (!bar) return
+
+    let frame = 0
+    let lastHeight = ''
+
     const update = () => {
-      const rect = bar.getBoundingClientRect()
-      root.style.setProperty('--app-navbar-height', `${Math.round(rect.bottom)}px`)
+      frame = 0
+      const nextHeight = `${Math.ceil(bar.getBoundingClientRect().height)}px`
+      if (nextHeight === lastHeight) return
+      lastHeight = nextHeight
+      root.style.setProperty('--app-navbar-height', nextHeight)
     }
+
+    const scheduleUpdate = () => {
+      if (frame) return
+      frame = window.requestAnimationFrame(update)
+    }
+
     update()
-    const frame = window.requestAnimationFrame(update)
-    const timeout = window.setTimeout(update, 120)
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null
+    const timeout = window.setTimeout(scheduleUpdate, 120)
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(scheduleUpdate) : null
     ro?.observe(bar)
-    window.addEventListener('resize', update, { passive: true })
+    window.addEventListener('resize', scheduleUpdate, { passive: true })
     return () => {
-      window.cancelAnimationFrame(frame)
+      if (frame) window.cancelAnimationFrame(frame)
       window.clearTimeout(timeout)
       ro?.disconnect()
-      window.removeEventListener('resize', update)
+      window.removeEventListener('resize', scheduleUpdate)
       root.style.removeProperty('--app-navbar-height')
     }
   }, [])
 
   // ── Derived state ──────────────────────────────────────────────────────────
   const active = useCallback(
-    (target: string) => (target === '/' ? pathname === '/' : pathname.startsWith(target)),
-    [pathname]
+    (target: string) => {
+      const [targetPath, targetHash] = target.split('#')
+      const normalizedPath = targetPath || '/'
+      if (targetHash) return pathname === normalizedPath && hash === `#${targetHash}`
+      if (target === '/') return pathname === '/' && !hash
+      return pathname.startsWith(target)
+    },
+    [hash, pathname]
   )
 
   const focus =
@@ -1298,11 +1269,11 @@ export default function Navbar() {
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 w-full">
       {/* ══════════════════════ MAIN BAR ══════════════════════ */}
       <div ref={navSurfaceRef} className={`pointer-events-auto w-full transition-all duration-500 ${navBarBg}`}>
-        <div className="relative mx-auto max-w-[84rem]">
+        <div className="relative mx-auto w-full">
 
           {/* ─── Nav bar rows (ref covers both rows so --app-navbar-height includes chip row) ─── */}
           <div ref={navbarBarRef}>
-          <div className="flex h-[3.75rem] items-center justify-between px-4 sm:h-[4.25rem] sm:px-6 lg:mx-auto lg:h-14 lg:max-w-[78rem] lg:px-4">
+          <div className="flex h-[3.875rem] w-full items-center justify-between px-4 sm:h-[4.375rem] sm:px-6 lg:h-[3.65rem] lg:px-8 2xl:px-10">
 
             {/* ── Logo ── */}
             <Link

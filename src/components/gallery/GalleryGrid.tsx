@@ -22,7 +22,7 @@ export default function GalleryGrid({
   return (
     <motion.div
       {...containerProps}
-      className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
+      className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
     >
       {albums.map(album => (
         <motion.div key={album.slug} {...itemProps}>

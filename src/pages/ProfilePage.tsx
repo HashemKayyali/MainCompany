@@ -109,7 +109,7 @@ export default function ProfilePage() {
 
   const canResetPassword = accountEmail.length > 0
 
-  const pageClassName = 'mx-auto w-full max-w-3xl px-4 py-12 sm:px-6'
+  const pageClassName = 'site-container py-12'
   const panelClassName = cn(
     'rounded-2xl border p-6 sm:p-8',
     isDark
@@ -419,7 +419,7 @@ export default function ProfilePage() {
             }}
           >
             <div className="space-y-8">
-              <div className="space-y-5">
+              <div className="grid gap-5 md:grid-cols-3">
                 <div>
                   <label htmlFor="profile-name" className={labelClassName}>
                     Full name

@@ -1,5 +1,5 @@
-import { memo, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { memo, useEffect, useRef, useState, type MouseEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Play } from 'lucide-react'
 import { useCategoriesData } from '../../contexts/DataContext'
@@ -17,20 +17,29 @@ import { useSpotlight, SpotlightOverlay } from '../ui/spotlight-card'
 
 const CARD_IMAGE_SIZES = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
 
+function isCardActionTarget(target: EventTarget | null) {
+  return target instanceof Element
+    ? Boolean(target.closest('a, button, input, textarea, select, [role="button"]'))
+    : false
+}
+
 const ProductCard = memo(function ProductCard({
   product,
   index = 0,
   revealOnScroll = true,
   imageLoading = 'lazy',
   imageFetchPriority = 'auto',
+  compact = false,
 }: {
   product: Product
   index?: number
   revealOnScroll?: boolean
   imageLoading?: 'eager' | 'lazy'
   imageFetchPriority?: 'high' | 'auto'
+  compact?: boolean
 }) {
   const { isDark } = useTheme()
+  const navigate = useNavigate()
   const { categories = [] } = useCategoriesData()
   const { perfLow } = usePerfMode()
   const motionEnabled = useMotionEnabled()
@@ -112,15 +121,23 @@ const ProductCard = memo(function ProductCard({
     setIsPlaying(false)
   }
 
+  const openProductFromCard = (event: MouseEvent<HTMLElement>) => {
+    if (isCardActionTarget(event.target)) return
+    navigate(`/products/${product.slug}`)
+  }
+
   return (
     <motion.article
       {...revealProps}
       ref={cardRef}
+      onClick={openProductFromCard}
+      onDragStart={event => event.preventDefault()}
       onMouseEnter={startPreview}
       onMouseLeave={stopPreview}
       {...spotlight.handlers}
       className={cn(
-        'group relative flex h-full flex-col overflow-hidden rounded-[22px]',
+        'group relative flex h-full cursor-pointer flex-col overflow-hidden',
+        compact ? 'rounded-[18px]' : 'rounded-[22px]',
         'transition-[border-color,box-shadow] duration-350',
         isDark
           ? reducedCardEffects
@@ -148,6 +165,7 @@ const ProductCard = memo(function ProductCard({
       <Link
         to={`/products/${product.slug}`}
         aria-label={`Open ${product.name}`}
+        draggable={false}
         className="relative z-10 block aspect-[4/3] w-full shrink-0 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2"
       >
         <FramedImage
@@ -231,11 +249,21 @@ const ProductCard = memo(function ProductCard({
         aria-hidden="true"
       />
 
-      <div className="relative z-10 flex flex-1 flex-col px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3.5 lg:px-5 lg:pb-5 lg:pt-4">
-        <div className="mb-1.5 sm:mb-2.5">
+      <div
+        className={cn(
+          'relative z-10 flex flex-1 flex-col',
+          compact
+            ? 'px-3 pb-3 pt-2.5'
+            : 'px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3.5 lg:px-5 lg:pb-5 lg:pt-4'
+        )}
+      >
+        <div className={compact ? 'mb-1.5' : 'mb-1.5 sm:mb-2.5'}>
           <span
             className={cn(
-              'inline-flex items-center rounded-full px-2 py-[3px] text-[8.5px] font-bold uppercase tracking-[0.14em] sm:px-2.5 sm:text-[9px] sm:tracking-[0.16em]',
+              'inline-flex items-center rounded-full font-bold uppercase',
+              compact
+                ? 'px-2 py-[2px] text-[8px] tracking-[0.13em]'
+                : 'px-2 py-[3px] text-[8.5px] tracking-[0.14em] sm:px-2.5 sm:text-[9px] sm:tracking-[0.16em]',
               isDark
                 ? 'bg-violet-500/[0.13] text-violet-300/95 ring-1 ring-violet-400/[0.17]'
                 : 'bg-violet-50 text-violet-700 ring-1 ring-violet-200/80'
@@ -245,11 +273,16 @@ const ProductCard = memo(function ProductCard({
           </span>
         </div>
 
-        <div className="mb-2.5 flex-1 sm:mb-4">
-          <Link to={`/products/${product.slug}`} className="outline-none focus-visible:underline">
+        <div className={compact ? 'mb-2 flex-1' : 'mb-2.5 flex-1 sm:mb-4'}>
+          <Link
+            to={`/products/${product.slug}`}
+            draggable={false}
+            className="outline-none focus-visible:underline"
+          >
             <h3
               className={cn(
-                'font-display text-[0.875rem] font-bold leading-tight tracking-[-0.028em] line-clamp-1 transition-colors duration-300 sm:text-[1.06rem]',
+                'font-display font-bold leading-tight tracking-[-0.028em] line-clamp-1 transition-colors duration-300',
+                compact ? 'text-[1rem]' : 'text-[0.98rem] sm:text-[1.16rem]',
                 isDark ? 'text-white group-hover:text-violet-100' : 'text-slate-900 group-hover:text-violet-900'
               )}
             >
@@ -258,7 +291,9 @@ const ProductCard = memo(function ProductCard({
           </Link>
           <p
             className={cn(
-              'mt-1 text-[11px] leading-[1.55] line-clamp-2 sm:mt-1.5 sm:text-[12.5px] sm:leading-[1.6]',
+              compact
+                ? 'mt-1 text-[10.5px] leading-[1.45] line-clamp-1'
+                : 'mt-1 text-[11px] leading-[1.55] line-clamp-2 sm:mt-1.5 sm:text-[12.5px] sm:leading-[1.6]',
               isDark ? 'text-slate-400/88' : 'text-slate-500'
             )}
           >
@@ -268,14 +303,16 @@ const ProductCard = memo(function ProductCard({
 
         <div
           className={cn(
-            'mb-2 flex items-end justify-between border-t pt-2.5 sm:mb-3.5 sm:pt-3',
+            'flex items-end justify-between border-t',
+            compact ? 'mb-2 pt-2' : 'mb-2 pt-2.5 sm:mb-3.5 sm:pt-3',
             isDark ? 'border-white/[0.07]' : 'border-slate-100'
           )}
         >
           <div>
             <div
               className={cn(
-                'text-[10px] font-semibold uppercase tracking-[0.12em]',
+                'font-semibold uppercase tracking-[0.12em]',
+                compact ? 'text-[8.5px]' : 'text-[10px]',
                 isDark ? 'text-slate-500' : 'text-slate-400'
               )}
             >
@@ -283,7 +320,8 @@ const ProductCard = memo(function ProductCard({
             </div>
             <div
               className={cn(
-                'mt-0.5 font-display text-[0.95rem] font-black tracking-[-0.04em] sm:text-[1.18rem]',
+                'mt-0.5 font-display font-black tracking-[-0.04em]',
+                compact ? 'text-[0.92rem]' : 'text-[0.95rem] sm:text-[1.18rem]',
                 isDark ? 'text-white' : 'text-slate-900'
               )}
             >
@@ -292,7 +330,7 @@ const ProductCard = memo(function ProductCard({
           </div>
         </div>
 
-        <ProductCommerceActions product={product} />
+        <ProductCommerceActions product={product} compact={compact} />
       </div>
     </motion.article>
   )

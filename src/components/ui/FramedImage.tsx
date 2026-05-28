@@ -92,7 +92,7 @@ const FramedImage = memo(
         src={parsed.src}
         loading={loading}
         decoding={decoding}
-        fetchPriority={fetchPriority ?? (loading === 'eager' ? 'high' : 'auto')}
+        {...{ fetchpriority: fetchPriority ?? (loading === 'eager' ? 'high' : 'auto') }}
         sizes={sizes ?? DEFAULT_SIZES}
         srcSet={srcSet}
         className={composedClassName}

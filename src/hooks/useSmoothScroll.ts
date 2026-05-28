@@ -99,15 +99,54 @@ export function useSmoothScroll(enabled = true) {
       window.scrollTo({ top, left: 0, behavior: 'auto' })
     }
 
-    const nextTop =
-      navigationType === 'POP'
-        ? scrollPositions.get(location.key) ?? 0
-        : 0
+    let retryTimer = 0
+    let attempts = 0
 
-    const frame = window.requestAnimationFrame(() => restoreScroll(nextTop))
+    const scrollToHashTarget = () => {
+      const id = decodeURIComponent(location.hash.slice(1))
+      const target = id ? document.getElementById(id) : null
+      if (target) {
+        const header = document.querySelector('header')
+        const headerHeight = header instanceof HTMLElement ? header.offsetHeight : 0
+        const top = window.scrollY + target.getBoundingClientRect().top - headerHeight - 16
+        const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+        const targetTop = Math.max(0, Math.min(top, maxTop))
+
+        const immediate = navigationType === 'POP' || prefersReducedMotion
+        if (shouldEnable && window.__appLenis) {
+          window.__appLenis.scrollTo(targetTop, { immediate, force: true })
+          return
+        }
+
+        window.scrollTo({
+          top: targetTop,
+          left: 0,
+          behavior: immediate ? 'auto' : 'smooth',
+        })
+        return
+      }
+
+      attempts += 1
+      if (attempts <= 80) retryTimer = window.setTimeout(scrollToHashTarget, 75)
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      if (location.hash) {
+        scrollToHashTarget()
+        return
+      }
+
+      const nextTop =
+        navigationType === 'POP'
+          ? scrollPositions.get(location.key) ?? 0
+          : 0
+
+      restoreScroll(nextTop)
+    })
 
     return () => {
       window.cancelAnimationFrame(frame)
+      window.clearTimeout(retryTimer)
     }
-  }, [location.key, navigationType, shouldEnable])
+  }, [location.hash, location.key, navigationType, prefersReducedMotion, shouldEnable])
 }

@@ -48,7 +48,7 @@ export default function Hero() {
           draggable={false}
           loading="eager"
           decoding="async"
-          fetchPriority="high"
+          {...{ fetchpriority: 'high' }}
           className={`h-full w-full object-cover object-right md:object-center transition-opacity duration-700 ${
             heroImageReady ? 'opacity-[0.72]' : 'opacity-0'
           }`}

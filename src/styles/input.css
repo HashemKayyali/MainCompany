@@ -556,8 +556,8 @@
 
   /* ─── Site container ─── */
   .site-container {
-    width: min(74rem, calc(100% - clamp(1rem, 4.4vw, 2.25rem)));
-    max-width: calc(100vw - clamp(1rem, 4.4vw, 2.25rem));
+    width: min(114rem, calc(100% - clamp(0.85rem, 1.8vw, 1.5rem)));
+    max-width: calc(100vw - clamp(0.85rem, 1.8vw, 1.5rem));
     margin-inline: auto;
     min-width: 0;
   }
@@ -960,8 +960,8 @@
     }
 
     .site-container {
-      width: min(100%, calc(100% - 1.125rem));
-      max-width: calc(100vw - 1.125rem);
+      width: min(100%, calc(100% - 0.85rem));
+      max-width: calc(100vw - 0.85rem);
     }
 
     .site-shell-pad {

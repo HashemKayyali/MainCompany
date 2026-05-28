@@ -115,7 +115,7 @@ export default function ContactForm() {
   return (
     <div className="space-y-4">
       <div className="glass rounded-[20px] p-4.5 sm:p-5">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <div>
             <label htmlFor="cf-name" className={`mb-2 block text-[13.5px] font-medium sm:text-[14px] ${sub}`}>
               Full Name *
@@ -146,7 +146,7 @@ export default function ContactForm() {
             {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email}</p>}
           </div>
 
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-2 xl:col-span-1">
             <label htmlFor="cf-phone" className={`mb-2 block text-[13.5px] font-medium sm:text-[14px] ${sub}`}>
               Phone
             </label>
@@ -186,7 +186,7 @@ export default function ContactForm() {
       </div>
 
       <div className="glass rounded-[20px] p-4.5 sm:p-5">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <div>
             <label htmlFor="cf-city" className={`mb-2 block text-[13.5px] font-medium sm:text-[14px] ${sub}`}>
               City
@@ -218,7 +218,7 @@ export default function ContactForm() {
             />
           </div>
 
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-2 xl:col-span-3">
             <label htmlFor="cf-notes" className={`mb-2 block text-[13.5px] font-medium sm:text-[14px] ${sub}`}>
               Notes
             </label>

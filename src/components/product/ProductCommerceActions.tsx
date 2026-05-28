@@ -13,10 +13,12 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
   product,
   variant = 'card',
   showContactLink = false,
+  compact = false,
 }: {
   product: Product
   variant?: 'card' | 'detail'
   showContactLink?: boolean
+  compact?: boolean
 }) {
   const { isDark } = useTheme()
   const { toast } = useToast()
@@ -37,10 +39,12 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
     [purchaseQuote.items, product.slug]
   )
 
-  // ── Detail variant button classes (unchanged) ──────────────────────────────
+  // ── Detail variant button classes ──────────────────────────────────────────
   const detailClass = {
-    primary: 'btn-primary !block !w-full !rounded-[14px] !text-center !text-[12px] sm:!text-[12.5px]',
-    secondary: 'btn-outline !block !w-full !rounded-[14px] !text-center !text-[12px] sm:!text-[12.5px]',
+    primary:
+      'btn-primary !inline-flex !min-h-[40px] !w-full !items-center !justify-center !gap-1.5 !whitespace-nowrap !rounded-[12px] !px-3 !py-2 !text-center !text-[10.75px] !font-bold !leading-none sm:!min-h-[42px] sm:!text-[11px]',
+    secondary:
+      'btn-outline !inline-flex !min-h-[40px] !w-full !items-center !justify-center !gap-1.5 !whitespace-nowrap !rounded-[12px] !px-3 !py-2 !text-center !text-[10.75px] !font-bold !leading-none sm:!min-h-[42px] sm:!text-[11px]',
   }
 
   // ── Cart actions ────────────────────────────────────────────────────────────
@@ -78,35 +82,35 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
   if (variant === 'detail') {
     return (
       <>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className={cn(
             'grid gap-2',
             rentalEnabled && saleEnabled ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'
           )}>
             {rentalEnabled && (
               <button type="button" onClick={addToRentalCart} className={detailClass.primary}>
-                <ShoppingCart size={15} className="inline mr-1.5" />
-                Add to Rental Cart
+                <ShoppingCart size={13} className="shrink-0" />
+                Add to Cart
               </button>
             )}
             {saleEnabled && (
               <button type="button" onClick={() => setModalOpen(true)} className={detailClass.secondary}>
-                <FileText size={15} className="inline mr-1.5" />
-                Request Purchase Quote
+                <FileText size={13} className="shrink-0" />
+                Purchase Quote
               </button>
             )}
           </div>
 
           <div className={cn(
-            'rounded-[14px] px-4 py-3 text-[11.5px] leading-5',
-            isDark ? 'bg-white/[0.03] text-purple-100/72' : 'bg-violet-50 text-gray-600'
+            'rounded-[13px] px-3.5 py-2.5 text-[11px] leading-[1.65]',
+            isDark ? 'bg-white/[0.035] text-purple-100/70' : 'bg-violet-50/80 text-slate-600'
           )}>
             Rental requests are priced per day and reviewed by the team before confirmation. Purchase quotes stay separate and do not reserve rental stock.
           </div>
 
           {showContactLink && (
             <Link to={`/contact?product=${product.slug}`} className={detailClass.secondary}>
-              <MessageCircle size={15} className="inline mr-1.5" />
+              <MessageCircle size={13} className="shrink-0" />
               General Inquiry
             </Link>
           )}
@@ -131,13 +135,24 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
   }
 
   // ── CARD VARIANT (redesigned) ─────────────────────────────────────────────
+  const cardStackClass = compact ? 'space-y-1' : 'space-y-1.5'
+  const cardGridGapClass = compact ? 'gap-1' : 'gap-1.5'
+  const cardPrimaryButtonClass = compact
+    ? 'inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-[11px] px-2.5 py-1.5 text-[9.75px] font-bold transition-all duration-300'
+    : 'inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-[13px] px-3 py-2 text-[10.75px] font-bold transition-all duration-300'
+  const cardSecondaryButtonClass = compact
+    ? 'inline-flex min-h-[31px] items-center justify-center gap-1.5 rounded-[10px] px-2.5 py-1 text-[9.75px] font-semibold transition-all duration-300'
+    : 'inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-[12px] px-3 py-1.5 text-[10.5px] font-semibold transition-all duration-300'
+  const primaryIconSize = compact ? 11 : 12
+  const secondaryIconSize = compact ? 10 : 11
+
   return (
     <>
-      <div className="space-y-1.5">
+      <div className={cardStackClass}>
 
         {/* ── Row 1: Rental cart action ── */}
         {rentalEnabled && (
-          <div className={cn('grid gap-1.5', isInRentalCart ? 'grid-cols-2' : 'grid-cols-1')}>
+          <div className={cn('grid', cardGridGapClass, isInRentalCart ? 'grid-cols-2' : 'grid-cols-1')}>
             {isInRentalCart ? (
               <>
                 {/* Added state */}
@@ -145,7 +160,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
                   type="button"
                   disabled
                   className={cn(
-                    'inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-[13px] px-3 py-2 text-[10.5px] font-bold transition-all duration-300',
+                    cardPrimaryButtonClass,
                     isDark
                       ? 'border border-emerald-500/30 bg-emerald-500/12 text-emerald-400'
                       : 'border border-emerald-400/40 bg-emerald-50 text-emerald-700'
@@ -160,7 +175,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
                   type="button"
                   onClick={removeFromRentalCart}
                   className={cn(
-                    'inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-[13px] px-3 py-2 text-[10.5px] font-bold transition-all duration-300',
+                    cardPrimaryButtonClass,
                     isDark
                       ? 'border border-red-500/22 bg-red-500/8 text-red-400 hover:border-red-500/38 hover:bg-red-500/14'
                       : 'border border-red-300/60 bg-red-50 text-red-600 hover:bg-red-100'
@@ -176,13 +191,13 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
                 type="button"
                 onClick={addToRentalCart}
                 className={cn(
-                  'inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-[13px] px-3 py-2 text-[10.75px] font-bold transition-all duration-300',
+                  cardPrimaryButtonClass,
                   isDark
                     ? 'bg-[linear-gradient(135deg,#1cc4ff_0%,#4f5fff_26%,#8b5cf6_64%,#ec4899_100%)] text-white shadow-[0_12px_32px_-10px_rgba(76,29,149,0.38)] hover:shadow-[0_16px_38px_-10px_rgba(76,29,149,0.48)] hover:brightness-105'
                     : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-[0_10px_26px_-8px_rgba(124,58,237,0.3)] hover:brightness-105'
                 )}
               >
-                <ShoppingCart size={12} />
+                <ShoppingCart size={primaryIconSize} />
                 Add to Cart
               </button>
             )}
@@ -191,20 +206,21 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
 
         {/* ── Row 2: Details + optional Quote ── */}
         <div className={cn(
-          'grid gap-1.5',
+          'grid',
+          cardGridGapClass,
           saleEnabled ? 'grid-cols-2' : 'grid-cols-1'
         )}>
           <Link
             to={`/products/${product.slug}`}
             className={cn(
-              'inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-[12px] px-3 py-1.5 text-[10.5px] font-semibold transition-all duration-300',
+              cardSecondaryButtonClass,
               isDark
                 ? 'border border-white/[0.09] bg-white/[0.04] text-white/72 hover:border-violet-400/22 hover:bg-white/[0.08] hover:text-white/90'
                 : 'border border-slate-200/80 bg-white text-slate-600 hover:border-violet-300/60 hover:bg-violet-50/60 hover:text-violet-700'
             )}
           >
             Details
-            <ArrowRight size={11} />
+            <ArrowRight size={secondaryIconSize} />
           </Link>
 
           {saleEnabled && (
@@ -212,13 +228,13 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
               type="button"
               onClick={() => setModalOpen(true)}
               className={cn(
-                'inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-[12px] px-3 py-1.5 text-[10.5px] font-semibold transition-all duration-300',
+                cardSecondaryButtonClass,
                 isDark
                   ? 'border border-white/[0.09] bg-white/[0.04] text-white/72 hover:border-cyan-400/22 hover:bg-white/[0.08] hover:text-white/90'
                   : 'border border-slate-200/80 bg-white text-slate-600 hover:border-violet-300/60 hover:bg-violet-50/60 hover:text-violet-700'
               )}
             >
-              <FileText size={11} />
+              <FileText size={secondaryIconSize} />
               Quote
             </button>
           )}
@@ -228,13 +244,14 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
           <Link
             to={`/contact?product=${product.slug}`}
             className={cn(
-              'inline-flex w-full min-h-[36px] items-center justify-center gap-1.5 rounded-[12px] px-3 py-1.5 text-[10.5px] font-semibold transition-all duration-300',
+              'w-full',
+              cardSecondaryButtonClass,
               isDark
                 ? 'border border-white/[0.09] bg-white/[0.04] text-white/72 hover:border-violet-400/22 hover:bg-white/[0.08]'
                 : 'border border-slate-200/80 bg-white text-slate-600 hover:border-violet-300/60'
             )}
           >
-            <MessageCircle size={11} />
+            <MessageCircle size={secondaryIconSize} />
             Inquiry
           </Link>
         )}

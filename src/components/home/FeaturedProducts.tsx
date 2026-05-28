@@ -75,7 +75,7 @@ export default function FeaturedProducts() {
 
           <motion.div
             {...containerProps}
-            className="relative grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:gap-5"
+            className="relative grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:gap-5 2xl:grid-cols-4"
           >
             {items.map((product, index) => (
               <motion.div key={product.slug} {...itemProps} className="h-full">

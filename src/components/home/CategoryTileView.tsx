@@ -145,7 +145,7 @@ const CategoryTileView = memo(function CategoryTileView({
 
         <h3
           className={cn(
-            'font-display text-[0.96rem] font-bold leading-tight tracking-[-0.02em] line-clamp-1',
+            'font-display text-[1.08rem] font-bold leading-tight tracking-[-0.02em] line-clamp-1 sm:text-[1.13rem]',
             isDark ? 'text-white/92' : 'text-slate-900'
           )}
         >

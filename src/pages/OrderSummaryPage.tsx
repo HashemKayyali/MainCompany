@@ -78,7 +78,7 @@ export default function OrderSummaryPage() {
 
   return (
     <section className="site-section">
-      <div className="site-container max-w-5xl">
+      <div className="site-container">
         <div className="mb-6">
           <span className="section-label">// Order Summary</span>
           <h1 className={cn('section-title !text-left', !isDark && 'text-gray-900')}>Rental Request Submitted</h1>
@@ -201,4 +201,3 @@ export default function OrderSummaryPage() {
     </section>
   )
 }
-

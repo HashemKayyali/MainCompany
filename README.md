@@ -282,5 +282,5 @@ Recommended next steps based on the current repository state:
 
 git status
 git add .
-git commit -m "Update website 5 "
+git commit -m "wide update "
 git push origin main
