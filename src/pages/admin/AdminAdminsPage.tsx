@@ -3,7 +3,6 @@ import { useAuth, type AdminRole } from '../../contexts/AuthContext'
 import { useDialog } from '../../contexts/DialogContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useToast } from '../../contexts/ToastContext'
-import type { AvatarFields } from '../../lib/avatar'
 import Modal from '../../components/ui/Modal'
 import UserAvatar from '../../components/ui/UserAvatar'
 import AdminActionButton from '../../components/admin/AdminActionButton'
@@ -17,7 +16,7 @@ import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../component
 import { cn } from '../../utils/cn'
 import { getErrorMessage } from '../../lib/errors'
 
-type AdminMember = { id: string; name: string; email: string; role: AdminRole } & AvatarFields
+type AdminMember = { id: string; name: string; email: string; role: AdminRole }
 
 export default function AdminAdminsPage() {
   const { admins, addAdmin, removeAdmin, changeAdminRole, user, isSuperAdmin } = useAuth()
@@ -111,10 +110,6 @@ export default function AdminAdminsPage() {
       name: admin.name,
       email: admin.email,
       role: admin.role,
-      avatarUrl: admin.avatarUrl,
-      avatarStyle: admin.avatarStyle,
-      avatarSeed: admin.avatarSeed,
-      avatarOptions: admin.avatarOptions,
     })
     setEditRole(admin.role)
   }
@@ -193,10 +188,6 @@ export default function AdminAdminsPage() {
                   name: admin.name,
                   email: admin.email,
                   role: safeRole,
-                  avatarUrl: admin.avatarUrl,
-                  avatarStyle: admin.avatarStyle,
-                  avatarSeed: admin.avatarSeed,
-                  avatarOptions: admin.avatarOptions,
                 }
                 const canManage = isSuperAdmin && !isYou && safeRole !== 'superadmin'
 
@@ -285,10 +276,6 @@ export default function AdminAdminsPage() {
               <UserAvatar
                 name={details.name}
                 email={details.email}
-                avatarUrl={details.avatarUrl}
-                avatarStyle={details.avatarStyle}
-                avatarSeed={details.avatarSeed}
-                avatarOptions={details.avatarOptions}
                 className="h-28 w-28 rounded-[32px]"
                 fallbackClassName={cn(
                   'text-5xl font-display font-bold shadow-lg',

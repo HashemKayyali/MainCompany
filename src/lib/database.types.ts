@@ -681,10 +681,6 @@ export interface Database {
           target_id: string
           new_name?: string | null
           new_phone?: string | null
-          new_avatar_url?: string | null
-          new_avatar_style?: string | null
-          new_avatar_seed?: string | null
-          new_avatar_options?: Json | null
         }
         Returns: { ok: boolean; error?: string }
       }

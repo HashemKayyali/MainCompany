@@ -425,17 +425,12 @@ const NavbarAccountActions = memo(function NavbarAccountActions({
               <UserAvatar
                 name={deferredUser?.name}
                 email={deferredUser?.email}
-                avatarUrl={deferredUser?.avatarUrl}
-                avatarStyle={deferredUser?.avatarStyle}
-                avatarSeed={deferredUser?.avatarSeed}
-                avatarOptions={deferredUser?.avatarOptions}
                 className="h-full w-full rounded-full"
                 fallbackClassName={
                   isDark
                     ? 'bg-[linear-gradient(135deg,rgba(124,58,237,0.52),rgba(236,72,153,0.35))] text-white'
                     : 'bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.12))] text-violet-700'
                 }
-                imageClassName="object-cover"
               />
             </div>
             <span className="hidden text-[12px] font-medium md:inline">{firstName}</span>
@@ -655,17 +650,12 @@ const NavbarUserMenuPortal = memo(function NavbarUserMenuPortal({
               <UserAvatar
                 name={deferredUser?.name}
                 email={deferredUser?.email}
-                avatarUrl={deferredUser?.avatarUrl}
-                avatarStyle={deferredUser?.avatarStyle}
-                avatarSeed={deferredUser?.avatarSeed}
-                avatarOptions={deferredUser?.avatarOptions}
                 className="h-full w-full rounded-full"
                 fallbackClassName={
                   isDark
                     ? 'bg-[linear-gradient(135deg,rgba(124,58,237,0.52),rgba(236,72,153,0.35))] text-white text-[11px]'
                     : 'bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.12))] text-violet-700 text-[11px]'
                 }
-                imageClassName="object-cover"
               />
             </div>
             <div className="min-w-0">

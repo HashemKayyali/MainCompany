@@ -1,8 +1,6 @@
-import type { AvatarFields } from './avatar'
-
 export const PROFILE_UPDATED_EVENT = 'bikeland:profile-updated'
 
-export type ProfileUpdatedDetail = AvatarFields & {
+export type ProfileUpdatedDetail = {
   userId: string
   name?: string | null
   phone?: string | null

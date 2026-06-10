@@ -224,10 +224,6 @@ export default function AdminLayout() {
                   <UserAvatar
                     name={currentUser?.name || displayName}
                     email={currentUser?.email || null}
-                    avatarUrl={currentUser?.avatarUrl}
-                    avatarStyle={currentUser?.avatarStyle}
-                    avatarSeed={currentUser?.avatarSeed}
-                    avatarOptions={currentUser?.avatarOptions}
                     className="h-full w-full rounded-[11px]"
                     fallbackClassName="bg-[linear-gradient(135deg,#7c3aed,#c026d3)] text-white"
                   />

@@ -4,29 +4,15 @@ import type { Database } from '../lib/database.types'
 import { getErrorMessage } from '../lib/errors'
 import { clearAuthPersistence, isSupabaseConfigured, setAuthPersistence, supabase } from '../lib/supabase'
 import {
-  avatarSelectionToProfileUpdate,
-  isAvatarSelectionEqual,
-  normalizeAvatarSelection,
-  sanitizeAvatarOptions,
-  type AvatarFields,
-  type AvatarSelection,
-} from '../lib/avatar'
-import {
   emitProfileUpdated,
   onProfileUpdated,
   type ProfileUpdatedDetail,
 } from '../lib/profile-sync'
-import {
-  fetchProfileIdentityRow,
-  isMissingAvatarColumnError,
-  isMissingAvatarUrlColumnError,
-  isMissingGeneratedAvatarColumnError,
-  mapProfileAvatarFields,
-} from '../services/profile.service'
+import { fetchProfileIdentityRow } from '../services/profile.service'
 import { withTimeout } from '../utils/with-timeout'
 import { useSession } from './SessionContext'
 
-export interface AppUser extends AvatarFields {
+export interface AppUser {
   id: string
   email: string
   name: string
@@ -63,8 +49,6 @@ interface UserCtx {
   updateProfile: (updates: {
     name?: string
     phone?: string
-    avatarUrl?: string | null
-    avatar?: AvatarSelection | null
   }) => Promise<string | true>
 }
 
@@ -97,19 +81,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       typeof metadata.phone === 'string' && metadata.phone.trim() ? metadata.phone.trim() : ''
     const metadataRole =
       typeof metadata.role === 'string' && metadata.role.trim() ? metadata.role.trim() : null
-    const avatar = mapProfileAvatarFields({
-      avatar_url:
-        typeof metadata.avatarUrl === 'string'
-          ? metadata.avatarUrl
-          : typeof metadata.avatar_url === 'string'
-            ? metadata.avatar_url
-            : typeof metadata.picture === 'string'
-              ? metadata.picture
-              : null,
-      avatar_style: typeof metadata.avatarStyle === 'string' ? metadata.avatarStyle : null,
-      avatar_seed: typeof metadata.avatarSeed === 'string' ? metadata.avatarSeed : null,
-      avatar_options: sanitizeAvatarOptions(metadata.avatarOptions) ?? null,
-    })
 
     return {
       id: authAccount.id,
@@ -118,7 +89,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       phone: metadataPhone,
       createdAt: authAccount.created_at || new Date().toISOString(),
       role: metadataRole,
-      ...avatar,
     }
   }, [])
 
@@ -133,7 +103,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         phone: data.phone || '',
         createdAt: data.created_at,
         role: data.role ?? null,
-        ...mapProfileAvatarFields(data),
       }
     },
     []
@@ -228,18 +197,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 ...prev,
                 name: hasDetailKey(detail, 'name') ? detail.name?.trim() || '' : prev.name,
                 phone: hasDetailKey(detail, 'phone') ? detail.phone?.trim() || '' : prev.phone,
-                avatarUrl: hasDetailKey(detail, 'avatarUrl')
-                  ? detail.avatarUrl ?? null
-                  : prev.avatarUrl,
-                avatarStyle: hasDetailKey(detail, 'avatarStyle')
-                  ? detail.avatarStyle ?? null
-                  : prev.avatarStyle,
-                avatarSeed: hasDetailKey(detail, 'avatarSeed')
-                  ? detail.avatarSeed ?? null
-                  : prev.avatarSeed,
-                avatarOptions: hasDetailKey(detail, 'avatarOptions')
-                  ? detail.avatarOptions ?? null
-                  : prev.avatarOptions,
               }
             : prev
         )
@@ -334,7 +291,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           const profileExists = await waitForProfileRow(authData.user.id)
 
           if (profileExists) {
-            let { error: profileError } = await supabase
+            const { error: profileError } = await supabase
               .from('profiles')
               .update({
                 phone: phone || null,
@@ -342,18 +299,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 email,
               } as ProfileUpdate)
               .eq('id', authData.user.id)
-
-            if (profileError && isMissingAvatarColumnError(profileError)) {
-              const retry = await supabase
-                .from('profiles')
-                .update({
-                  phone: phone || null,
-                  name,
-                  email,
-                } as ProfileUpdate)
-                .eq('id', authData.user.id)
-              profileError = retry.error
-            }
 
             if (profileError) {
               console.warn('Profile enrichment after signup failed:', profileError)
@@ -421,26 +366,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
     async (updates: {
       name?: string
       phone?: string
-      avatarUrl?: string | null
-      avatar?: AvatarSelection | null
     }): Promise<string | true> => {
       const targetId = authUser?.id || currentUser?.id
       if (!targetId) return 'You need to sign in first'
 
       const hasNameUpdate = Object.prototype.hasOwnProperty.call(updates, 'name')
       const hasPhoneUpdate = Object.prototype.hasOwnProperty.call(updates, 'phone')
-      const hasAvatarUrlUpdate = Object.prototype.hasOwnProperty.call(updates, 'avatarUrl')
-      const hasAvatarUpdate = Object.prototype.hasOwnProperty.call(updates, 'avatar')
       const currentName = currentUser?.name?.trim() || ''
       const currentPhone = currentUser?.phone?.trim() || ''
-      const currentAvatarUrl = currentUser?.avatarUrl?.trim() || ''
-      const currentAvatarSelection = normalizeAvatarSelection(currentUser)
       const nextName = hasNameUpdate ? updates.name?.trim() || '' : currentName
       const nextPhone = hasPhoneUpdate ? updates.phone?.trim() || '' : currentPhone
-      const nextAvatarUrl = hasAvatarUrlUpdate ? updates.avatarUrl?.trim() || '' : currentAvatarUrl
-      const nextAvatarSelection = hasAvatarUpdate
-        ? normalizeAvatarSelection(updates.avatar ?? null)
-        : currentAvatarSelection
       const payload: ProfileUpdate = {}
 
       if (hasNameUpdate && nextName !== currentName) {
@@ -451,10 +386,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
         payload.phone = nextPhone || null
       }
 
-      // Avatar columns were dropped from `profiles`
-      // (20260515_drop_avatar_columns.sql): never write them. The avatarUrl /
-      // avatar params are accepted but ignored at the DB layer; only name and
-      // phone are persisted.
+      // Only name and phone are persisted. The avatar feature (and its
+      // profiles.avatar_* columns) was removed in 20260515_drop_avatar_columns.sql.
 
       if (!Object.keys(payload).length) {
         return true
@@ -466,14 +399,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
             ...baseUser,
             ...(hasNameUpdate ? { name: nextName } : {}),
             ...(hasPhoneUpdate ? { phone: nextPhone } : {}),
-            ...(hasAvatarUrlUpdate ? { avatarUrl: nextAvatarUrl || null } : {}),
-            ...(hasAvatarUpdate
-              ? {
-                  avatarStyle: nextAvatarSelection?.avatarStyle ?? null,
-                  avatarSeed: nextAvatarSelection?.avatarSeed ?? null,
-                  avatarOptions: nextAvatarSelection?.avatarOptions ?? null,
-                }
-              : {}),
           }
         : null
 
@@ -512,10 +437,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
             userId: finalUser.id,
             name: finalUser.name,
             phone: finalUser.phone,
-            avatarUrl: finalUser.avatarUrl,
-            avatarStyle: finalUser.avatarStyle,
-            avatarSeed: finalUser.avatarSeed,
-            avatarOptions: finalUser.avatarOptions,
           })
         }
 

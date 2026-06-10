@@ -1,12 +1,10 @@
-import type { AvatarFields } from '../lib/avatar'
 import type { Database } from '../lib/database.types'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
-import { fetchProfileAvatarMap } from './profile.service'
 
 type AdminLogRow = Database['public']['Tables']['admin_logs']['Row']
 type AdminLogInsert = Database['public']['Tables']['admin_logs']['Insert']
 
-export interface AdminLog extends AvatarFields {
+export interface AdminLog {
   id: string
   admin_id: string | null
   admin_name: string
@@ -23,10 +21,6 @@ function mapAdminLog(row: AdminLogRow): AdminLog {
   return {
     ...row,
     action: row.action as AdminLog['action'],
-    avatarUrl: null,
-    avatarStyle: null,
-    avatarSeed: null,
-    avatarOptions: null,
   }
 }
 
@@ -63,15 +57,7 @@ export async function getAllLogs(): Promise<AdminLog[]> {
       return []
     }
 
-    const logs = (data || []).map(mapAdminLog)
-    const avatarMap = await fetchProfileAvatarMap(
-      logs.map(log => log.admin_id).filter((id): id is string => !!id)
-    )
-
-    return logs.map(log => ({
-      ...log,
-      ...((log.admin_id && avatarMap[log.admin_id]) || {}),
-    }))
+    return (data || []).map(mapAdminLog)
   } catch (error) {
     console.warn('[Logs] Failed to fetch logs:', error)
     return []

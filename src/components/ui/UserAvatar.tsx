@@ -1,15 +1,10 @@
 import { cn } from '../../utils/cn'
 
 /**
- * Avatar feature has been fully removed (no uploads, no generated
- * avatars, no avatar columns in the database). This component now
- * renders a simple, non-configurable initials chip purely so identity
- * circles in the navbar / sidebar / admin lists do not collapse.
- *
- * The prop signature stays permissive (it still accepts the old
- * avatarUrl / avatarStyle / avatarSeed / avatarOptions / imageClassName
- * props) so every existing call site keeps compiling — those props are
- * intentionally ignored.
+ * Avatar feature has been fully removed (no uploads, no generated avatars,
+ * no avatar columns in the database). This component renders a simple,
+ * non-configurable initials chip derived from the name/email so identity
+ * circles in the navbar / sidebar / admin lists stay consistent.
  */
 type UserAvatarProps = {
   name?: string | null
@@ -18,12 +13,6 @@ type UserAvatarProps = {
   className?: string
   fallbackClassName?: string
   size?: number
-  // Accepted but ignored (legacy avatar API):
-  avatarUrl?: string | null
-  avatarStyle?: string | null
-  avatarSeed?: string | null
-  avatarOptions?: unknown
-  imageClassName?: string
 }
 
 function initialsFrom(name?: string | null, email?: string | null) {

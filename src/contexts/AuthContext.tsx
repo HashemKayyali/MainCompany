@@ -7,21 +7,16 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { AvatarFields } from '../lib/avatar'
 import type { Database } from '../lib/database.types'
 import { onProfileUpdated, type ProfileUpdatedDetail } from '../lib/profile-sync'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
-import {
-  fetchProfileAvatarMap,
-  fetchProfileIdentityRow,
-  mapProfileAvatarFields,
-} from '../services/profile.service'
+import { fetchProfileIdentityRow } from '../services/profile.service'
 import { withTimeout } from '../utils/with-timeout'
 import { useSession } from './SessionContext'
 
 export type AdminRole = 'admin' | 'superadmin'
 
-export interface AdminUser extends AvatarFields {
+export interface AdminUser {
   id: string
   email: string
   name: string
@@ -56,10 +51,6 @@ async function fetchProfileIdentity(
 ): Promise<{
   role: string | null
   name: string | null
-  avatarUrl: string | null
-  avatarStyle: string | null
-  avatarSeed: string | null
-  avatarOptions: AvatarFields['avatarOptions']
 }> {
   // Cap the profile lookup so the admin-role check can never hang the
   // entire admin route on a slow request.
@@ -74,17 +65,12 @@ async function fetchProfileIdentity(
     return {
       role: null,
       name: null,
-      avatarUrl: null,
-      avatarStyle: null,
-      avatarSeed: null,
-      avatarOptions: null,
     }
   }
 
   return {
     role: data.role ?? null,
     name: data.name ?? null,
-    ...mapProfileAvatarFields(data),
   }
 }
 
@@ -110,10 +96,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: sessionUser.email || '',
         name: profile.name || sessionUser.email || 'Admin',
         role: profile.role,
-        avatarUrl: profile.avatarUrl,
-        avatarStyle: profile.avatarStyle,
-        avatarSeed: profile.avatarSeed,
-        avatarOptions: profile.avatarOptions,
       }
     },
     []
@@ -124,14 +106,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data: rpcData, error: rpcError } = await supabase.rpc('get_all_admins')
 
       if (!rpcError && Array.isArray(rpcData)) {
-        const avatarMap = await fetchProfileAvatarMap(rpcData.map(row => row.id))
         return rpcData.map((row: GetAllAdminsRow) => ({
           id: row.id,
           email: row.email || '',
           name: row.name || row.email || 'Admin',
           role: row.role as AdminRole,
           createdAt: row.created_at,
-          ...(avatarMap[row.id] || {}),
         }))
       }
 
@@ -142,14 +122,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error || !data) return []
 
-      const avatarMap = await fetchProfileAvatarMap(data.map(row => row.id))
       return data.map(row => ({
         id: row.id,
         email: row.email || '',
         name: row.name || row.email || 'Admin',
         role: row.role as AdminRole,
         createdAt: row.created_at,
-        ...(avatarMap[row.id] || {}),
       }))
     } catch (error) {
       console.warn('[AuthContext] Failed to fetch admins:', error)
@@ -208,10 +186,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           ? {
               ...prev,
               name: hasDetailKey(detail, 'name') ? detail.name?.trim() || '' : prev.name,
-              avatarUrl: hasDetailKey(detail, 'avatarUrl') ? detail.avatarUrl ?? null : prev.avatarUrl,
-              avatarStyle: hasDetailKey(detail, 'avatarStyle') ? detail.avatarStyle ?? null : prev.avatarStyle,
-              avatarSeed: hasDetailKey(detail, 'avatarSeed') ? detail.avatarSeed ?? null : prev.avatarSeed,
-              avatarOptions: hasDetailKey(detail, 'avatarOptions') ? detail.avatarOptions ?? null : prev.avatarOptions,
             }
           : prev
       )
@@ -222,10 +196,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             ? {
                 ...admin,
                 name: hasDetailKey(detail, 'name') ? detail.name?.trim() || '' : admin.name,
-                avatarUrl: hasDetailKey(detail, 'avatarUrl') ? detail.avatarUrl ?? null : admin.avatarUrl,
-                avatarStyle: hasDetailKey(detail, 'avatarStyle') ? detail.avatarStyle ?? null : admin.avatarStyle,
-                avatarSeed: hasDetailKey(detail, 'avatarSeed') ? detail.avatarSeed ?? null : admin.avatarSeed,
-                avatarOptions: hasDetailKey(detail, 'avatarOptions') ? detail.avatarOptions ?? null : admin.avatarOptions,
               }
             : admin
         )

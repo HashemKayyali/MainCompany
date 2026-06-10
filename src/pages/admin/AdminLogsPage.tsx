@@ -193,10 +193,6 @@ export default function AdminLogsPage() {
                       <UserAvatar
                         name={log.admin_name}
                         email={log.admin_email}
-                        avatarUrl={log.avatarUrl}
-                        avatarStyle={log.avatarStyle}
-                        avatarSeed={log.avatarSeed}
-                        avatarOptions={log.avatarOptions}
                         className="h-full w-full rounded-[18px]"
                         fallbackClassName={cn(
                           'text-[1.75rem] font-display font-bold',

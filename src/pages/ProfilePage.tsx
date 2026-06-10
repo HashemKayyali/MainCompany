@@ -1,20 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useTheme } from '../contexts/ThemeContext'
 import { useToast } from '../contexts/ToastContext'
 import { useUser } from '../contexts/UserContext'
 import { usePageMeta } from '../hooks/usePageMeta'
-import {
-  avatarIdentitySeed,
-  buildDefaultAvatarSelection,
-  isAvatarSelectionEqual,
-  normalizeAvatarUrl,
-  normalizeAvatarSelection,
-  type AvatarSelection,
-} from '../lib/avatar'
 import { getErrorMessage } from '../lib/errors'
-import { deleteImage, uploadImageVariants } from '../services/storage.service'
 import { cn } from '../utils/cn'
 
 function normalizeProfileValue(value?: string | null) {
@@ -32,8 +23,6 @@ type SyncedProfileSnapshot = {
   userId: string | null
   name: string
   phone: string
-  avatarUrl: string
-  avatarSelection: AvatarSelection
 }
 
 function feedbackTextClassName(tone: FeedbackTone, isDark: boolean) {
@@ -57,55 +46,21 @@ export default function ProfilePage() {
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [avatarUrl, setAvatarUrl] = useState('')
-  const [avatarSelection, setAvatarSelection] = useState<AvatarSelection>(() =>
-    buildDefaultAvatarSelection('guest-profile')
-  )
-  const [avatarUploading, setAvatarUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveFeedback, setSaveFeedback] = useState<InlineFeedback | null>(null)
   const [resetSending, setResetSending] = useState(false)
   const [resetFeedback, setResetFeedback] = useState<InlineFeedback | null>(null)
-  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false)
-  const avatarFileInputRef = useRef<HTMLInputElement>(null)
   const syncedSnapshotRef = useRef<SyncedProfileSnapshot>({
     userId: null,
     name: '',
     phone: '',
-    avatarUrl: '',
-    avatarSelection: buildDefaultAvatarSelection('guest-profile'),
   })
-
-  const profileIdentitySeed = useMemo(
-    () => avatarIdentitySeed([currentUser?.name, currentUser?.email, currentUser?.id]),
-    [currentUser?.email, currentUser?.id, currentUser?.name]
-  )
-  const pickerIdentitySeed = useMemo(
-    () => avatarIdentitySeed([currentUser?.id, currentUser?.email, currentUser?.name || name]),
-    [currentUser?.email, currentUser?.id, currentUser?.name, name]
-  )
-  const currentAvatar = useMemo(
-    () => normalizeAvatarSelection(currentUser),
-    [
-      currentUser?.avatarStyle,
-      currentUser?.avatarSeed,
-      JSON.stringify(currentUser?.avatarOptions || {}),
-    ]
-  )
-  const baselineAvatarSelection = useMemo(
-    () => currentAvatar || buildDefaultAvatarSelection(profileIdentitySeed),
-    [currentAvatar, profileIdentitySeed]
-  )
-  const baselineAvatarUrl = useMemo(() => normalizeAvatarUrl(currentUser?.avatarUrl) || '', [currentUser?.avatarUrl])
 
   const normalizedCurrentName = normalizeProfileValue(currentUser?.name)
   const normalizedCurrentPhone = normalizeProfileValue(currentUser?.phone)
   const trimmedName = name.trim()
   const trimmedPhone = phone.trim()
-  const trimmedAvatarUrl = normalizeAvatarUrl(avatarUrl) || ''
   const accountEmail = currentUser?.email?.trim() || ''
-  const avatarDisplayName = trimmedName || currentUser?.name || currentUser?.email || 'User'
-  const hasUploadedAvatar = trimmedAvatarUrl.length > 0
 
   const canResetPassword = accountEmail.length > 0
 
@@ -155,59 +110,29 @@ export default function ProfilePage() {
 
     const nextName = normalizedCurrentName
     const nextPhone = normalizedCurrentPhone
-    const nextAvatarUrl = baselineAvatarUrl
-    const nextAvatarSelection = baselineAvatarSelection
     const previousSnapshot = syncedSnapshotRef.current
     const switchedUser = previousSnapshot.userId !== currentUser.id
 
     setName(previous => (switchedUser || previous === previousSnapshot.name ? nextName : previous))
     setPhone(previous => (switchedUser || previous === previousSnapshot.phone ? nextPhone : previous))
-    setAvatarUrl(previous =>
-      switchedUser || previous === previousSnapshot.avatarUrl ? nextAvatarUrl : previous
-    )
-    setAvatarSelection(previous =>
-      switchedUser || isAvatarSelectionEqual(previous, previousSnapshot.avatarSelection)
-        ? isAvatarSelectionEqual(previous, nextAvatarSelection)
-          ? previous
-          : nextAvatarSelection
-        : previous
-    )
 
     syncedSnapshotRef.current = {
       userId: currentUser.id,
       name: nextName,
       phone: nextPhone,
-      avatarUrl: nextAvatarUrl,
-      avatarSelection: nextAvatarSelection,
     }
 
     if (switchedUser) {
       setSaveFeedback(null)
       setResetFeedback(null)
-      setAvatarPickerOpen(false)
     }
-  }, [baselineAvatarSelection, baselineAvatarUrl, currentUser, normalizedCurrentName, normalizedCurrentPhone])
+  }, [currentUser, normalizedCurrentName, normalizedCurrentPhone])
 
   const hasChanges = useMemo(() => {
     if (!currentUser) return false
 
-    return (
-      trimmedName !== normalizedCurrentName ||
-      trimmedPhone !== normalizedCurrentPhone ||
-      trimmedAvatarUrl !== baselineAvatarUrl ||
-      !isAvatarSelectionEqual(baselineAvatarSelection, avatarSelection)
-    )
-  }, [
-    avatarSelection,
-    baselineAvatarSelection,
-    baselineAvatarUrl,
-    currentUser,
-    normalizedCurrentName,
-    normalizedCurrentPhone,
-    trimmedAvatarUrl,
-    trimmedName,
-    trimmedPhone,
-  ])
+    return trimmedName !== normalizedCurrentName || trimmedPhone !== normalizedCurrentPhone
+  }, [currentUser, normalizedCurrentName, normalizedCurrentPhone, trimmedName, trimmedPhone])
 
   useEffect(() => {
     if (!saveFeedback) return
@@ -238,31 +163,22 @@ export default function ProfilePage() {
       return
     }
 
-    const normalizedAvatarChanged = !isAvatarSelectionEqual(baselineAvatarSelection, avatarSelection)
-    const normalizedAvatarUrlChanged = trimmedAvatarUrl !== baselineAvatarUrl
     const nextName = trimmedName
     const nextPhone = trimmedPhone
-    const nextAvatarUrl = trimmedAvatarUrl
 
     setSaving(true)
     setSaveFeedback(null)
     setName(nextName)
     setPhone(nextPhone)
-    setAvatarUrl(nextAvatarUrl)
 
     const result = await updateProfile({
       ...(nextName !== normalizedCurrentName ? { name: nextName } : {}),
       ...(nextPhone !== normalizedCurrentPhone ? { phone: nextPhone } : {}),
-      ...(normalizedAvatarUrlChanged ? { avatarUrl: nextAvatarUrl } : {}),
-      ...(normalizedAvatarChanged ? { avatar: avatarSelection } : {}),
     })
 
     setSaving(false)
 
     if (result === true) {
-      if (baselineAvatarUrl && baselineAvatarUrl !== nextAvatarUrl) {
-        void deleteImage(baselineAvatarUrl)
-      }
       const message = 'Profile updated successfully.'
       setSaveFeedback({ tone: 'success', message })
       toast('Profile updated', 'success')
@@ -272,47 +188,6 @@ export default function ProfilePage() {
     const message = result || 'Failed to update profile'
     setSaveFeedback({ tone: 'error', message })
     toast(message, 'error')
-  }
-
-  const handleAvatarFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    event.target.value = ''
-
-    if (!file) return
-    if (!currentUser) return
-
-    if (!file.type.startsWith('image/')) {
-      const message = 'Please choose an image file for your profile photo.'
-      toast(message, 'error')
-      setSaveFeedback({ tone: 'error', message })
-      return
-    }
-
-    setAvatarUploading(true)
-
-    try {
-      const { heroUrl } = await uploadImageVariants(file, `avatars/${currentUser.id}`)
-      if (trimmedAvatarUrl && trimmedAvatarUrl !== baselineAvatarUrl && trimmedAvatarUrl !== heroUrl) {
-        void deleteImage(trimmedAvatarUrl)
-      }
-      setAvatarUrl(heroUrl)
-      setSaveFeedback(null)
-      toast('Profile photo uploaded. Save profile to apply it.', 'success')
-    } catch (error: unknown) {
-      const message = getErrorMessage(error, 'Failed to upload profile photo')
-      toast(message, 'error')
-      setSaveFeedback({ tone: 'error', message })
-    } finally {
-      setAvatarUploading(false)
-    }
-  }
-
-  const handleRemoveAvatarPhoto = () => {
-    if (trimmedAvatarUrl && trimmedAvatarUrl !== baselineAvatarUrl) {
-      void deleteImage(trimmedAvatarUrl)
-    }
-    setAvatarUrl('')
-    setSaveFeedback(null)
   }
 
   const handleResetPassword = async () => {
@@ -352,7 +227,7 @@ export default function ProfilePage() {
         <div className={emptyStatePanelClassName}>
           <h1 className={titleClassName}>Profile settings</h1>
           <p className={cn('mt-3', subtitleClassName)}>
-            Sign in to manage your profile details, avatar, and account security.
+            Sign in to manage your profile details and account security.
           </p>
           <Link
             to={`/login?redirect=${encodeURIComponent('/profile')}`}
@@ -408,7 +283,7 @@ export default function ProfilePage() {
         <div className="space-y-8">
           <header className="space-y-2">
             <h1 className={titleClassName}>Profile settings</h1>
-            <p className={subtitleClassName}>Update your personal details and manage your avatar.</p>
+            <p className={subtitleClassName}>Update your personal details and manage your account.</p>
           </header>
 
           <form

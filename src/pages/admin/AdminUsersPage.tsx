@@ -4,15 +4,6 @@ import { useAuth, type AdminRole } from '../../contexts/AuthContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useDialog } from '../../contexts/DialogContext'
-import type { AvatarFields } from '../../lib/avatar'
-import {
-  avatarIdentitySeed,
-  buildDefaultAvatarSelection,
-  normalizeAvatarSelection,
-  normalizeAvatarUrl,
-  sanitizeAvatarOptions,
-  type AvatarSelection,
-} from '../../lib/avatar'
 import Modal from '../../components/ui/Modal'
 import AdminActionButton from '../../components/admin/AdminActionButton'
 import AdminDetailModal from '../../components/admin/AdminDetailModal'
@@ -24,11 +15,10 @@ import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
 import UserAvatar from '../../components/ui/UserAvatar'
 import { emitProfileUpdated } from '../../lib/profile-sync'
-import { fetchProfileAvatarMap } from '../../services/profile.service'
 import { cn } from '../../utils/cn'
 import { getErrorMessage } from '../../lib/errors'
 
-interface UserProfile extends AvatarFields {
+interface UserProfile {
   id: string
   email: string
   name: string
@@ -40,15 +30,6 @@ interface UserProfile extends AvatarFields {
 type SortKey = 'role' | 'name' | 'email' | 'newest' | 'oldest'
 
 const ROLE_ORDER: Record<string, number> = { superadmin: 0, admin: 1, user: 2 }
-
-function buildUserAvatarSelection(user: UserProfile, fallbackName?: string) {
-  return (
-    normalizeAvatarSelection(user) ||
-    buildDefaultAvatarSelection(
-      avatarIdentitySeed([fallbackName || user.name, user.email, user.id])
-    )
-  )
-}
 
 function sortUsers(users: UserProfile[], key: SortKey): UserProfile[] {
   const arr = [...users]
@@ -92,10 +73,6 @@ export default function AdminUsersPage() {
   const [editName, setEditName] = useState('')
   const [editPhone, setEditPhone] = useState('')
   const [editRole, setEditRole] = useState('')
-  const [editAvatarUrl, setEditAvatarUrl] = useState('')
-  const [editAvatarSelection, setEditAvatarSelection] = useState<AvatarSelection>(() =>
-    buildDefaultAvatarSelection('admin-user')
-  )
   const [editSaving, setEditSaving] = useState(false)
   const { cardView, displayCardView, viewTransitionClassName, setCardView } = useAdminCardView('users')
 
@@ -116,13 +93,7 @@ export default function AdminUsersPage() {
         role: u.role || 'user',
         created_at: u.created_at || '',
       }))
-      const avatarMap = await fetchProfileAvatarMap(baseUsers.map(user => user.id))
-      setUsers(
-        baseUsers.map(user => ({
-          ...user,
-          ...(avatarMap[user.id] || {}),
-        }))
-      )
+      setUsers(baseUsers)
     } catch (err) {
       console.error('Failed to fetch users:', err)
       toast('Failed to load users', 'error')
@@ -164,39 +135,16 @@ export default function AdminUsersPage() {
     setEditName(user.name)
     setEditPhone(user.phone)
     setEditRole(user.role)
-    setEditAvatarUrl(user.avatarUrl || '')
-    setEditAvatarSelection(buildUserAvatarSelection(user))
   }
 
   const handleSave = async () => {
     if (!editUser) return
     setEditSaving(true)
     try {
-      const currentAvatar = buildUserAvatarSelection(editUser)
-      const avatarChanged =
-        (normalizeAvatarUrl(editAvatarUrl) || '') !== (normalizeAvatarUrl(editUser.avatarUrl) || '') ||
-        currentAvatar.avatarStyle !== editAvatarSelection.avatarStyle ||
-        currentAvatar.avatarSeed !== editAvatarSelection.avatarSeed ||
-        JSON.stringify(currentAvatar.avatarOptions || {}) !==
-          JSON.stringify(editAvatarSelection.avatarOptions || {})
-
-      const nextAvatarUrl = avatarChanged
-        ? normalizeAvatarUrl(editAvatarUrl)
-        : normalizeAvatarUrl(editUser.avatarUrl)
-      const nextAvatarStyle = avatarChanged ? editAvatarSelection.avatarStyle : editUser.avatarStyle ?? null
-      const nextAvatarSeed = avatarChanged ? editAvatarSelection.avatarSeed : editUser.avatarSeed ?? null
-      const nextAvatarOptions = avatarChanged
-        ? sanitizeAvatarOptions(editAvatarSelection.avatarOptions) ?? {}
-        : editUser.avatarOptions ?? null
-
       const { data, error } = (await supabase.rpc('admin_update_user', {
         target_id: editUser.id,
         new_name: editName,
         new_phone: editPhone,
-        new_avatar_url: avatarChanged ? editAvatarUrl : null,
-        new_avatar_style: avatarChanged ? editAvatarSelection.avatarStyle : null,
-        new_avatar_seed: avatarChanged ? editAvatarSelection.avatarSeed : null,
-        new_avatar_options: avatarChanged ? sanitizeAvatarOptions(editAvatarSelection.avatarOptions) ?? {} : null,
       })) as any
       if (error) throw error
       if (data && !data.ok) {
@@ -207,10 +155,6 @@ export default function AdminUsersPage() {
         userId: editUser.id,
         name: editName.trim() || null,
         phone: editPhone.trim() || null,
-        avatarUrl: nextAvatarUrl,
-        avatarStyle: nextAvatarStyle,
-        avatarSeed: nextAvatarSeed,
-        avatarOptions: nextAvatarOptions,
       })
       toast(`${editName || editUser.email} updated`, 'success')
       await fetchUsers()
@@ -300,29 +244,10 @@ export default function AdminUsersPage() {
     return new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
   }
 
-  const editIdentitySeed = editUser
-    ? avatarIdentitySeed([editName || editUser.name, editUser.email, editUser.id])
-    : 'admin-user'
-
   const hasChanges = useMemo(() => {
     if (!editUser) return false
-
-    const currentAvatar = buildUserAvatarSelection(editUser)
-    const avatarChanged =
-      (normalizeAvatarUrl(editAvatarUrl) || '') !== (normalizeAvatarUrl(editUser.avatarUrl) || '') ||
-      currentAvatar.avatarStyle !== editAvatarSelection.avatarStyle ||
-      currentAvatar.avatarSeed !== editAvatarSelection.avatarSeed ||
-      JSON.stringify(currentAvatar.avatarOptions || {}) !==
-        JSON.stringify(editAvatarSelection.avatarOptions || {})
-
-    return editName !== editUser.name || editPhone !== editUser.phone || avatarChanged
-  }, [editAvatarSelection, editAvatarUrl, editName, editPhone, editUser])
-
-  const resetAvatarEditor = () => {
-    if (!editUser) return
-    setEditAvatarUrl('')
-    setEditAvatarSelection(buildDefaultAvatarSelection(editIdentitySeed))
-  }
+    return editName !== editUser.name || editPhone !== editUser.phone
+  }, [editName, editPhone, editUser])
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3.5">
@@ -477,10 +402,6 @@ export default function AdminUsersPage() {
               <UserAvatar
                 name={details.name}
                 email={details.email}
-                avatarUrl={details.avatarUrl}
-                avatarStyle={details.avatarStyle}
-                avatarSeed={details.avatarSeed}
-                avatarOptions={details.avatarOptions}
                 className="h-24 w-24 rounded-[26px]"
                 fallbackClassName={cn('text-5xl font-display font-bold', avatarBg(details.role))}
               />
@@ -559,10 +480,6 @@ export default function AdminUsersPage() {
               <UserAvatar
                 name={editName || editUser.name}
                 email={editUser.email}
-                avatarUrl={normalizeAvatarUrl(editAvatarUrl)}
-                avatarStyle={editAvatarSelection.avatarStyle}
-                avatarSeed={editAvatarSelection.avatarSeed}
-                avatarOptions={editAvatarSelection.avatarOptions}
                 className="h-10 w-10 rounded-[14px]"
                 fallbackClassName={cn('text-sm font-bold font-display', avatarBg(editUser.role))}
               />
