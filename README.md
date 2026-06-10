@@ -221,9 +221,9 @@ Supabase is a core part of the current architecture.
   - contact submission changes
   - rental commerce and request approval flows
   - admin/user RPCs and RLS adjustments
-- `supabase/functions/` currently contains Edge Functions for:
-  - `invite-admin`
-  - `remove-admin`
+- Admin management runs through SECURITY DEFINER RPCs (`set_admin_role`,
+  `remove_admin`). The old `invite-admin` / `remove-admin` Edge Functions were
+  never wired up and have been moved to `_archive/unused-edge-functions/`.
 
 Based on the service layer and SQL files, the backend currently covers:
 
