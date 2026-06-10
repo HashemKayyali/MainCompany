@@ -164,16 +164,18 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const fallback = buildFallbackUser(authAccount)
 
       try {
+        // The avatar_* columns were dropped from `profiles`
+        // (20260515_drop_avatar_columns.sql), so they must never be written.
+        // `role` is intentionally NOT written here: buildFallbackUser derives it
+        // from user-controllable user_metadata, and this upsert INSERTs a new row
+        // on recovery — the role-lock trigger is BEFORE UPDATE only and would not
+        // catch a malicious role on INSERT. We let the DB default own the role.
         const { error } = await supabase.from('profiles').upsert(
           {
             id: authAccount.id,
             email: fallback.email,
             name: fallback.name,
             phone: fallback.phone || null,
-            avatar_url: fallback.avatarUrl ?? null,
-            avatar_style: fallback.avatarStyle ?? null,
-            avatar_seed: fallback.avatarSeed ?? null,
-            avatar_options: fallback.avatarOptions ?? null,
           } as ProfileInsert,
           { onConflict: 'id' }
         )
@@ -449,13 +451,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
         payload.phone = nextPhone || null
       }
 
-      if (hasAvatarUrlUpdate && nextAvatarUrl !== currentAvatarUrl) {
-        payload.avatar_url = nextAvatarUrl || null
-      }
-
-      if (hasAvatarUpdate && !isAvatarSelectionEqual(currentAvatarSelection, updates.avatar ?? null)) {
-        Object.assign(payload, avatarSelectionToProfileUpdate(updates.avatar ?? null))
-      }
+      // Avatar columns were dropped from `profiles`
+      // (20260515_drop_avatar_columns.sql): never write them. The avatarUrl /
+      // avatar params are accepted but ignored at the DB layer; only name and
+      // phone are persisted.
 
       if (!Object.keys(payload).length) {
         return true
@@ -479,50 +478,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
         : null
 
       try {
-        let { error } = await supabase
+        const { error } = await supabase
           .from('profiles')
           .update(payload)
           .eq('id', targetId)
-
-        if (error && isMissingAvatarUrlColumnError(error)) {
-          const retryPayload = { ...payload }
-          delete retryPayload.avatar_url
-
-          if (!Object.keys(retryPayload).length) {
-            return 'Uploaded profile photos are not available until the avatar_url column is applied in Supabase.'
-          }
-
-          const retry = await supabase.from('profiles').update(retryPayload).eq('id', targetId)
-          error = retry.error
-        }
-
-        if (error && isMissingGeneratedAvatarColumnError(error)) {
-          const retryPayload = { ...payload }
-          delete retryPayload.avatar_style
-          delete retryPayload.avatar_seed
-          delete retryPayload.avatar_options
-
-          if (!Object.keys(retryPayload).length) {
-            return 'Generated avatar updates are not available until the profile avatar columns are applied in Supabase.'
-          }
-
-          const retry = await supabase.from('profiles').update(retryPayload).eq('id', targetId)
-          error = retry.error
-        }
-
-        if (error && isMissingAvatarColumnError(error)) {
-          const retryPayload: ProfileUpdate = {}
-
-          if (hasNameUpdate && payload.name !== undefined) retryPayload.name = payload.name
-          if (hasPhoneUpdate && payload.phone !== undefined) retryPayload.phone = payload.phone
-
-          if (!Object.keys(retryPayload).length) {
-            return 'Avatar updates are not available until the profile avatar columns are applied in Supabase.'
-          }
-
-          const retry = await supabase.from('profiles').update(retryPayload).eq('id', targetId)
-          error = retry.error
-        }
 
         if (error) return error.message
 

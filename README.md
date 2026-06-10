@@ -136,13 +136,13 @@ Main-Site/
 |   |-- App.tsx
 |   |-- main.tsx
 |   \-- router.tsx
+|-- _archive/
+|   \-- legacy-sql/        # archived schema.sql + migration.sql (DO NOT RUN)
 |-- supabase/
 |   |-- functions/
-|   |-- migrations/
-|   |-- migration.sql
+|   |-- migrations/        # source of truth for the schema (newest wins)
 |   |-- rental-commerce.sql
-|   |-- rls-policies.sql
-|   \-- schema.sql
+|   \-- rls-policies.sql
 |-- index.html
 |-- package.json
 |-- tailwind.config.js
