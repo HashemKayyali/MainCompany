@@ -2,6 +2,15 @@ import { useRef, useCallback } from 'react'
 
 /**
  * Client-side rate limiter.
+ *
+ * ⚠️ UX ONLY — NOT a security control. This lives in memory in the browser and
+ * is trivially bypassed (refresh the page, or POST directly to the Supabase
+ * REST API). Its only job is to give honest users immediate feedback and avoid
+ * accidental double-submits. The authoritative rate limit is enforced
+ * server-side by the BEFORE INSERT trigger `check_contact_rate_limit` on
+ * `contact_submissions` (see supabase/migrations). Never rely on this hook to
+ * protect the backend.
+ *
  * @param maxAttempts  max allowed within window
  * @param windowMs    rolling window in ms (default 60 s)
  */

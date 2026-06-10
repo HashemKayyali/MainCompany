@@ -10,6 +10,47 @@ import { sanitize, buildMailtoUrl, buildWhatsAppUrl } from '../../utils/format'
 import { social } from '../../data/social'
 import * as contactApi from '../../services/contact.service'
 
+/**
+ * Classify a failed contact_submissions insert so the UI can react honestly:
+ *  - 'rejected' → the server refused the row (rate-limit trigger or a CHECK
+ *    constraint). This is deterministic; retrying the same payload won't help,
+ *    so we surface the reason and do not claim success.
+ *  - 'network'  → a transient/connectivity failure with no server verdict, so
+ *    the WhatsApp/email fallback is still worth offering (with a clear "not
+ *    saved" notice).
+ */
+function classifyContactError(
+  error: unknown
+): { kind: 'rejected' | 'network'; message: string } {
+  const candidate = error as {
+    code?: string | null
+    message?: string | null
+    details?: string | null
+  }
+  const code = candidate?.code || ''
+  const text = `${candidate?.message || ''} ${candidate?.details || ''}`.toLowerCase()
+
+  if (text.includes('rate limit')) {
+    return {
+      kind: 'rejected',
+      message:
+        'You have sent too many requests recently. Please wait a little while before trying again.',
+    }
+  }
+
+  // Postgres integrity/constraint violations (class 23) or an explicit
+  // RAISE EXCEPTION (P0001) from a trigger = a definite server-side rejection.
+  if (/^23/.test(code) || code === 'P0001') {
+    return {
+      kind: 'rejected',
+      message:
+        'Your request could not be saved because some details were rejected. Please review your inputs and try again.',
+    }
+  }
+
+  return { kind: 'network', message: '' }
+}
+
 export default function ContactForm() {
   const [searchParams] = useSearchParams()
   const preselectedProduct = searchParams.get('product') || ''
@@ -71,6 +112,14 @@ export default function ContactForm() {
       .join('\n')
   }
 
+  const openFallbackChannel = (channel: 'whatsapp' | 'email') => {
+    if (channel === 'whatsapp') {
+      window.open(buildWhatsAppUrl(social.phone, buildMessage()), '_blank')
+      return
+    }
+    window.open(buildMailtoUrl(social.email, 'Event Booking', buildMessage()), '_blank')
+  }
+
   const submit = async (channel: 'whatsapp' | 'email') => {
     if (!validate()) return
 
@@ -83,6 +132,8 @@ export default function ContactForm() {
     }
 
     setSaving(true)
+    let savedOk = false
+    let failure: ReturnType<typeof classifyContactError> | null = null
     try {
       await contactApi.create({
         name: form.name,
@@ -93,21 +144,41 @@ export default function ContactForm() {
         address: form.address,
         message: form.message,
       })
-      setSaved(true)
-      toast("Request saved! We'll follow up soon.", 'success')
+      savedOk = true
     } catch (error) {
-      console.warn('Failed to save to DB (continuing with message):', error)
-      toast('Could not save to database, but your message will still be sent.', 'info')
+      failure = classifyContactError(error)
+      console.warn('Contact submission failed:', error)
     } finally {
       setSaving(false)
     }
 
-    if (channel === 'whatsapp') {
-      window.open(buildWhatsAppUrl(social.phone, buildMessage()), '_blank')
+    // Success — only here do we claim the request was saved.
+    if (savedOk) {
+      setErrors({})
+      setSaved(true)
+      toast("Request saved! We'll follow up soon.", 'success')
+      openFallbackChannel(channel)
       return
     }
 
-    window.open(buildMailtoUrl(social.email, 'Event Booking', buildMessage()), '_blank')
+    // Server rejected the submission (rate limit / constraint). Do NOT claim
+    // success and do NOT silently fall through — show the reason clearly.
+    if (failure?.kind === 'rejected') {
+      setSaved(false)
+      setErrors({ _global: failure.message })
+      toast(failure.message, 'error')
+      return
+    }
+
+    // Transient/network failure. Keep the WhatsApp/email fallback so the user
+    // can still reach us, but tell them explicitly it was NOT saved.
+    const channelLabel = channel === 'whatsapp' ? 'WhatsApp' : 'email'
+    setSaved(false)
+    setErrors({
+      _global: `We couldn't save your request to our system right now (connection issue). Your request was NOT saved — we're opening ${channelLabel} so you can still reach us.`,
+    })
+    toast(`Not saved (connection issue). Opening ${channelLabel} so you can still reach us.`, 'info')
+    openFallbackChannel(channel)
   }
 
   const sub = isDark ? 'text-purple-200/80' : 'text-gray-600'

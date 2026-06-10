@@ -27,6 +27,7 @@ export default function CheckoutPage() {
   const { toast } = useToast()
   const navigate = useNavigate()
   const rentalCart = useRentalCart()
+  const currency = rentalCart.items[0]?.currency || 'JOD'
   const [form, setForm] = useState(() => buildInitialRequestForm(currentUser || undefined))
   const [saving, setSaving] = useState(false)
 
@@ -224,8 +225,14 @@ export default function CheckoutPage() {
               })}
             </div>
 
-            <div className={cn('mt-5 rounded-[14px] px-4 py-3.5 text-[0.95rem]', isDark ? 'bg-[#0d1430]/88 text-cyan-100' : 'bg-violet-50 text-violet-700')}>
-              Grand total: {rentalCart.grandTotal.toFixed(2)}
+            <div className={cn('mt-5 rounded-[14px] px-4 py-3.5', isDark ? 'bg-[#0d1430]/88 text-cyan-100' : 'bg-violet-50 text-violet-700')}>
+              <div className="text-[0.95rem] font-semibold">
+                Estimated total: {rentalCart.grandTotal.toFixed(2)} {currency}
+              </div>
+              <div className={cn('mt-1 text-[11.5px] font-medium leading-5', isDark ? 'text-cyan-100/70' : 'text-violet-700/75')}>
+                Estimate based on current day rates. The final price is calculated by the
+                database and shown on your order summary after you confirm.
+              </div>
             </div>
           </div>
         </div>
