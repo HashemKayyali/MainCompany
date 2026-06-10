@@ -191,8 +191,10 @@ export default function ContactForm() {
               onChange={event => update('name', event.target.value)}
               autoComplete="name"
               maxLength={100}
+              aria-invalid={errors.name ? true : undefined}
+              aria-describedby={errors.name ? 'cf-name-error' : undefined}
             />
-            {errors.name && <p className="mt-1 text-xs text-red-400">{errors.name}</p>}
+            {errors.name && <p id="cf-name-error" role="alert" className="mt-1 text-xs text-red-400">{errors.name}</p>}
           </div>
 
           <div>
@@ -206,8 +208,10 @@ export default function ContactForm() {
               value={form.email}
               onChange={event => update('email', event.target.value)}
               autoComplete="email"
+              aria-invalid={errors.email ? true : undefined}
+              aria-describedby={errors.email ? 'cf-email-error' : undefined}
             />
-            {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email}</p>}
+            {errors.email && <p id="cf-email-error" role="alert" className="mt-1 text-xs text-red-400">{errors.email}</p>}
           </div>
 
           <div className="sm:col-span-2 xl:col-span-1">
@@ -223,8 +227,10 @@ export default function ContactForm() {
               placeholder="+962..."
               autoComplete="tel"
               maxLength={20}
+              aria-invalid={errors.phone ? true : undefined}
+              aria-describedby={errors.phone ? 'cf-phone-error' : undefined}
             />
-            {errors.phone && <p className="mt-1 text-xs text-red-400">{errors.phone}</p>}
+            {errors.phone && <p id="cf-phone-error" role="alert" className="mt-1 text-xs text-red-400">{errors.phone}</p>}
           </div>
         </div>
       </div>
@@ -293,14 +299,17 @@ export default function ContactForm() {
               value={form.message}
               onChange={event => update('message', event.target.value)}
               maxLength={2000}
+              aria-invalid={errors.message ? true : undefined}
+              aria-describedby={errors.message ? 'cf-notes-error' : undefined}
             />
-            {errors.message && <p className="mt-1 text-xs text-red-400">{errors.message}</p>}
+            {errors.message && <p id="cf-notes-error" role="alert" className="mt-1 text-xs text-red-400">{errors.message}</p>}
           </div>
         </div>
       </div>
 
       {errors._global && (
         <div
+          role="alert"
           className={`rounded-xl px-3 py-2.5 text-sm ${
             isDark ? 'bg-red-400/15 text-red-400' : 'bg-red-50 text-red-600'
           }`}
@@ -313,6 +322,7 @@ export default function ContactForm() {
         .filter(([key]) => key !== '_global')
         .some(([, value]) => value) && (
         <div
+          role="alert"
           className={`rounded-xl px-3 py-2.5 text-sm ${
             isDark ? 'bg-red-400/15 text-red-400' : 'bg-red-50 text-red-600'
           }`}
@@ -323,6 +333,7 @@ export default function ContactForm() {
 
       {saved && (
         <div
+          role="status"
           className={`rounded-xl px-3 py-2.5 text-sm ${
             isDark ? 'bg-emerald-400/15 text-emerald-400' : 'bg-emerald-50 text-emerald-600'
           }`}
