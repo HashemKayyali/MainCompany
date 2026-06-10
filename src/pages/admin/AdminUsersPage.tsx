@@ -83,9 +83,9 @@ export default function AdminUsersPage() {
 
   const fetchUsers = useCallback(async () => {
     try {
-      const { data, error } = (await supabase.rpc('get_all_users')) as any
+      const { data, error } = await supabase.rpc('get_all_users')
       if (error) throw error
-      const baseUsers: UserProfile[] = (data || []).map((u: any) => ({
+      const baseUsers: UserProfile[] = (data ?? []).map(u => ({
         id: u.id,
         email: u.email || '',
         name: u.name || '',
@@ -141,11 +141,11 @@ export default function AdminUsersPage() {
     if (!editUser) return
     setEditSaving(true)
     try {
-      const { data, error } = (await supabase.rpc('admin_update_user', {
+      const { data, error } = await supabase.rpc('admin_update_user', {
         target_id: editUser.id,
         new_name: editName,
         new_phone: editPhone,
-      })) as any
+      })
       if (error) throw error
       if (data && !data.ok) {
         toast(data.error || 'Failed', 'error')
@@ -177,10 +177,10 @@ export default function AdminUsersPage() {
     setEditSaving(true)
     try {
       if (editRole === 'user') {
-        const { data, error } = (await supabase.rpc('remove_admin', { target_id: editUser.id })) as any
+        const { data, error } = await supabase.rpc('remove_admin', { target_id: editUser.id })
         if (error) throw error
         if (data && !data.ok) {
-          toast(data.error, 'error')
+          toast(data.error || 'Failed to remove admin', 'error')
           return
         }
       } else {
