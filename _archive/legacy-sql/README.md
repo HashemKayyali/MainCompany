@@ -28,6 +28,16 @@ that key admin access off `admin_users`. The live app authorizes admins via
 and `20260515_lock_profile_role.sql`). Running `schema.sql` would introduce a
 parallel, contradictory admin model and **break admin permissions**.
 
+## Duplicate `contacts_admin_update` policy
+
+`migration.sql` also defined a `contacts_admin_update` RLS policy on
+`contact_submissions`, but an **older, weaker** version (only `USING
+(public.is_admin())`, missing the `WITH CHECK` clause). The authoritative policy
+— with both `USING` and `WITH CHECK` — lives in
+`supabase/migrations/20260402_auth_admin_rpc_and_contact_rls.sql`. Running the
+archived `migration.sql` after that migration would silently downgrade the
+policy. This is one more reason these files must never be executed.
+
 ## Source of truth
 
 The authoritative schema is the dated migration chain in
