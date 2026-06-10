@@ -8,6 +8,7 @@ import { jordanCities } from '../../data/locations'
 import { validateContactForm, sanitizeInput } from '../../utils/validators'
 import { sanitize, buildMailtoUrl, buildWhatsAppUrl } from '../../utils/format'
 import { social } from '../../data/social'
+import { t } from '../../lib/i18n'
 import * as contactApi from '../../services/contact.service'
 
 /**
@@ -31,21 +32,13 @@ function classifyContactError(
   const text = `${candidate?.message || ''} ${candidate?.details || ''}`.toLowerCase()
 
   if (text.includes('rate limit')) {
-    return {
-      kind: 'rejected',
-      message:
-        'You have sent too many requests recently. Please wait a little while before trying again.',
-    }
+    return { kind: 'rejected', message: t('contact.rateLimited') }
   }
 
   // Postgres integrity/constraint violations (class 23) or an explicit
   // RAISE EXCEPTION (P0001) from a trigger = a definite server-side rejection.
   if (/^23/.test(code) || code === 'P0001') {
-    return {
-      kind: 'rejected',
-      message:
-        'Your request could not be saved because some details were rejected. Please review your inputs and try again.',
-    }
+    return { kind: 'rejected', message: t('contact.rejected') }
   }
 
   return { kind: 'network', message: '' }
@@ -125,9 +118,9 @@ export default function ContactForm() {
 
     if (!checkRate()) {
       setErrors({
-        _global: `Too many requests. Please wait before trying again. (${remaining()} left)`,
+        _global: t('contact.tooManyRequests', { count: remaining() }),
       })
-      toast('Too many requests. Please wait a moment.', 'error')
+      toast(t('contact.tooManyRequestsToast'), 'error')
       return
     }
 
@@ -156,7 +149,7 @@ export default function ContactForm() {
     if (savedOk) {
       setErrors({})
       setSaved(true)
-      toast("Request saved! We'll follow up soon.", 'success')
+      toast(t('contact.saved'), 'success')
       openFallbackChannel(channel)
       return
     }
@@ -172,12 +165,12 @@ export default function ContactForm() {
 
     // Transient/network failure. Keep the WhatsApp/email fallback so the user
     // can still reach us, but tell them explicitly it was NOT saved.
-    const channelLabel = channel === 'whatsapp' ? 'WhatsApp' : 'email'
+    const channelLabel = t(channel === 'whatsapp' ? 'channel.whatsapp' : 'channel.email')
     setSaved(false)
     setErrors({
-      _global: `We couldn't save your request to our system right now (connection issue). Your request was NOT saved — we're opening ${channelLabel} so you can still reach us.`,
+      _global: t('contact.notSavedBanner', { channel: channelLabel }),
     })
-    toast(`Not saved (connection issue). Opening ${channelLabel} so you can still reach us.`, 'info')
+    toast(t('contact.notSavedToast', { channel: channelLabel }), 'info')
     openFallbackChannel(channel)
   }
 
@@ -324,7 +317,7 @@ export default function ContactForm() {
             isDark ? 'bg-red-400/15 text-red-400' : 'bg-red-50 text-red-600'
           }`}
         >
-          Please fill in all required fields correctly.
+          {t('contact.fixErrors')}
         </div>
       )}
 
@@ -334,7 +327,7 @@ export default function ContactForm() {
             isDark ? 'bg-emerald-400/15 text-emerald-400' : 'bg-emerald-50 text-emerald-600'
           }`}
         >
-          Your request has been saved. We&apos;ll follow up soon.
+          {t('contact.savedBanner')}
         </div>
       )}
 
