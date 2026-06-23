@@ -4,6 +4,9 @@ export type TabKey = 'basic' | 'content' | 'media' | 'options' | 'settings'
 
 export const TAB_ORDER: TabKey[] = ['basic', 'content', 'media', 'options', 'settings']
 
+export const DEFAULT_FROM = '#8b5cf6'
+export const DEFAULT_TO = '#ec4899'
+
 export const BADGE_OPTIONS = [
   'Most Popular',
   'New',

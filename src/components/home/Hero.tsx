@@ -189,10 +189,11 @@ export default function Hero() {
                 <span
                   className="relative z-10 inline-block bg-clip-text text-transparent"
                   style={{
-                    backgroundImage: 'linear-gradient(100deg, #6d28d9 0%, #7c3aed 45%, #9d6bff 100%)',
+                    backgroundImage:
+                      'linear-gradient(100deg, #5d18c4 0%, #7126e3 18%, #8344f5 34%, #c026d3 50%, #8344f5 66%, #7126e3 82%, #5d18c4 100%)',
                     WebkitTextFillColor: 'transparent',
                     backgroundSize: '200% auto',
-                    animation: motionEnabled ? 'text-glow-shift 8s ease-in-out infinite' : undefined,
+                    animation: motionEnabled ? 'text-color-flow 6s linear infinite' : undefined,
                   }}
                 >
                   Your Event Needs

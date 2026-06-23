@@ -4,14 +4,12 @@ import { useTheme } from '../../contexts/ThemeContext'
 import { useDialog } from '../../contexts/DialogContext'
 import * as productsApi from '../../services/products.service'
 import Modal from '../../components/ui/Modal'
-import ImageUploader from '../../components/ui/ImageUploader'
-import VideoUploader from '../../components/ui/VideoUploader'
 import FramedImage from '../../components/ui/FramedImage'
 import MediaPlacementModal from '../../components/ui/MediaPlacementModal'
 import AdminActionButton from '../../components/admin/AdminActionButton'
 import AdminDetailModal from '../../components/admin/AdminDetailModal'
 import AdminEntityCard from '../../components/admin/AdminEntityCard'
-import AdminEditorWorkspace, { AdminEditorSection } from '../../components/admin/AdminEditorWorkspace'
+import AdminEditorWorkspace from '../../components/admin/AdminEditorWorkspace'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminViewToggle from '../../components/admin/AdminViewToggle'
 import useAdminCardView from '../../components/admin/useAdminCardView'
@@ -26,7 +24,13 @@ import {
   getProductDisplayOrder,
   sanitizeProductDisplayOrder,
 } from '../../utils/product-order'
-import { BADGE_OPTIONS, EMPTY, TAB_ORDER, type TabKey } from './productForm/constants'
+import { DEFAULT_FROM, DEFAULT_TO, EMPTY, TAB_ORDER, type TabKey } from './productForm/constants'
+import { normalizeHex, parseGradient } from './productForm/helpers'
+import BasicTab from './productForm/BasicTab'
+import ContentTab from './productForm/ContentTab'
+import MediaTab from './productForm/MediaTab'
+import OptionsTab from './productForm/OptionsTab'
+import SettingsTab from './productForm/SettingsTab'
 
 
 export default function AdminProductsPage() {
@@ -59,31 +63,6 @@ export default function AdminProductsPage() {
     : 'bg-white text-gray-600 ring-1 ring-inset ring-gray-200 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.14)] hover:bg-gray-50'
   const orderedProducts = optimisticProducts ?? products
   const cardsLayoutClass = getAdminCardsLayoutClass(displayCardView)
-
-  const DEFAULT_FROM = '#8b5cf6'
-  const DEFAULT_TO = '#ec4899'
-
-  const normalizeHex = (hex: string | undefined, fallback: string) => {
-    const h = String(hex || fallback).trim()
-    if (/^#[0-9a-fA-F]{3}$/.test(h)) {
-      const r = h[1]
-      const g = h[2]
-      const b = h[3]
-      return `#${r}${r}${g}${g}${b}${b}`.toLowerCase()
-    }
-    if (/^#[0-9a-fA-F]{8}$/.test(h)) return h.slice(0, 7).toLowerCase()
-    if (/^#[0-9a-fA-F]{6}$/.test(h)) return h.toLowerCase()
-    return fallback.toLowerCase()
-  }
-
-  const parseGradient = (badgeColor: string) => {
-    const raw = String(badgeColor || '')
-    if (raw.includes('linear-gradient')) {
-      const hexes = raw.match(/#[0-9a-fA-F]{8}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}/g) || []
-      return { fromHex: normalizeHex(hexes[0], DEFAULT_FROM), toHex: normalizeHex(hexes[1], DEFAULT_TO) }
-    }
-    return { fromHex: DEFAULT_FROM, toHex: DEFAULT_TO }
-  }
 
   const setBadgeGradient = (fromHex: string, toHex: string) => {
     const from = normalizeHex(fromHex, DEFAULT_FROM)
@@ -722,342 +701,49 @@ export default function AdminProductsPage() {
           </div>
 
           {tab === 'basic' && (
-            <>
-              <AdminEditorSection
-                title="Identity"
-                hint="The storefront card pulls from these core fields first, so keep the name, slug, and badge setup together."
-              >
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Product Name *</label>
-                    <input value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} className="form-field" placeholder="Bike Blender" />
-                  </div>
-                  <div>
-                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Slug (URL)</label>
-                    <input value={form.slug || ''} onChange={e => setForm({ ...form, slug: e.target.value })} className="form-field" placeholder="auto-generated" />
-                    <p className={`mt-1 text-[11px] ${isDark ? 'text-purple-200/50' : 'text-gray-400'}`}>Leave empty to auto-generate.</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Badge Text</label>
-                    <select value={form.badge || ''} onChange={e => setForm({ ...form, badge: e.target.value })} className="form-field">
-                      <option value="">No badge</option>
-                      {BADGE_OPTIONS.map(badge => (
-                        <option key={badge} value={badge}>
-                          {badge}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Badge Gradient</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className={`flex items-center gap-2 rounded-xl px-3 py-2 ${soft2}`}>
-                        <span className={`text-[11px] ${sub}`}>From</span>
-                        <input type="color" value={form.badgeFromHex || DEFAULT_FROM} onChange={e => setBadgeGradient(e.target.value, form.badgeToHex || DEFAULT_TO)} className="h-7 w-8 cursor-pointer rounded border-0 bg-transparent p-0" />
-                      </div>
-                      <div className={`flex items-center gap-2 rounded-xl px-3 py-2 ${soft2}`}>
-                        <span className={`text-[11px] ${sub}`}>To</span>
-                        <input type="color" value={form.badgeToHex || DEFAULT_TO} onChange={e => setBadgeGradient(form.badgeFromHex || DEFAULT_FROM, e.target.value)} className="h-7 w-8 cursor-pointer rounded border-0 bg-transparent p-0" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </AdminEditorSection>
-
-              <AdminEditorSection
-                title="Listing Setup"
-                
-              >
-                <div>
-                  <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Category *</label>
-                  <select value={form.categoryId || ''} onChange={e => setForm({ ...form, categoryId: e.target.value })} className="form-field">
-                    <option value="">Select Category</option>
-                    {categories.map(category => (
-                      <option key={category.id} value={category.id}>
-                        {category.icon} {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-             
-
-                <div className="flex flex-wrap gap-3">
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" checked={!!form.featured} onChange={e => setForm({ ...form, featured: e.target.checked })} className="h-4 w-4 rounded accent-violet-400" />
-                    <span className={cn('text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>Featured product</span>
-                  </label>
-                </div>
-              </AdminEditorSection>
-
-            </>
+            <BasicTab
+              form={form}
+              setForm={setForm}
+              categories={categories}
+              setBadgeGradient={setBadgeGradient}
+              isDark={isDark}
+              sub={sub}
+              soft2={soft2}
+            />
           )}
 
-          {tab === 'content' && (
-            <>
-              <AdminEditorSection title="Descriptions" hint="Short copy drives the product card; long copy supports the detail page.">
-                <div>
-                  <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Short Description</label>
-                  <textarea value={form.shortDescription || ''} onChange={e => setForm({ ...form, shortDescription: e.target.value })} className="form-field resize-none" rows={3} />
-                </div>
-                <div>
-                  <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Full Description</label>
-                  <textarea value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} className="form-field resize-none" rows={6} />
-                </div>
-              </AdminEditorSection>
-
-              <AdminEditorSection title="Internal Notes" hint="One note per line. These stay out of the storefront card but help with setup and sales context.">
-                <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Notes (one per line)</label>
-                <textarea value={typeof form.notes === 'string' ? form.notes : (form.notes || []).join('\n')} onChange={e => setForm({ ...form, notes: e.target.value })} className="form-field resize-none" rows={7} />
-              </AdminEditorSection>
-            </>
-          )}
+          {tab === 'content' && <ContentTab form={form} setForm={setForm} sub={sub} />}
 
           {tab === 'media' && (
-            <>
-              <AdminEditorSection title="Gallery" hint="The first image becomes the hero automatically. Keep the strongest framed image in slot one.">
-                <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-4">
-                  {(form.gallery || []).map((url: string, idx: number) => (
-                    <div key={idx} className="group relative">
-                      <div className={`aspect-video overflow-hidden rounded-[14px] border ${isDark ? 'border-purple-500/20' : 'border-gray-200'}`}>
-                        <FramedImage media={url} alt="" className="h-full w-full" fallbackTransform={{ fit: 'cover' }} />
-                      </div>
-                      {idx === 0 ? <span className={`absolute left-1.5 top-1.5 rounded-md px-1.5 py-0.5 text-[8px] font-bold ${isDark ? 'bg-cyan-400/25 text-cyan-200' : 'bg-violet-100 text-violet-700'}`}>HERO</span> : null}
-                      <div className={`absolute inset-0 flex flex-wrap content-start items-start justify-start gap-1.5 rounded-[14px] p-1.5 opacity-0 transition-opacity group-hover:opacity-100 ${isDark ? 'bg-black/60' : 'bg-white/70'}`}>
-                        <button type="button" onClick={() => setActiveGalleryIndex(idx)} className={`rounded-lg px-2.5 py-1 text-[10px] font-semibold ${isDark ? 'bg-cyan-500/25 text-white' : 'bg-violet-100 text-violet-700'}`}>Frame</button>
-                        {idx > 0 ? <button type="button" onClick={() => moveGalleryImage(idx, -1)} className={`flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-bold ${isDark ? 'bg-purple-500/30 text-white' : 'bg-violet-100 text-violet-700'}`}>{'<'}</button> : null}
-                        {idx < (form.gallery || []).length - 1 ? <button type="button" onClick={() => moveGalleryImage(idx, 1)} className={`flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-bold ${isDark ? 'bg-purple-500/30 text-white' : 'bg-violet-100 text-violet-700'}`}>{'>'}</button> : null}
-                        <button type="button" onClick={() => removeGalleryImage(idx)} className="ml-auto flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/75 text-[11px] font-bold text-white">x</button>
-                      </div>
-                    </div>
-                  ))}
-
-                  <ImageUploader
-                    compact
-                    onChange={addGalleryImage}
-                    folder="products"
-                    frameAspect={16 / 10}
-                    defaultFit="cover"
-                    frameTitle="Adjust Product Image"
-                    frameHint="Choose what stays visible inside product cards and previews."
-                    previewAspectClass="aspect-video"
-                    renderFrameContextPreview={media =>
-                      renderProductPreview({
-                        heroImage: media,
-                        gallery: media ? [media, ...(previewProduct.gallery || []).filter(item => item !== media)] : previewProduct.gallery,
-                      })
-                    }
-                    frameContextTitle="Product Card Result"
-                    frameContextHint="Inspect the real storefront card result while you adjust the frame."
-                  />
-                </div>
-              </AdminEditorSection>
-
-              <AdminEditorSection title="Video" hint="Upload the optional hover-preview video and frame it against the actual product card output.">
-                <VideoUploader
-                  label="Product Video"
-                  value={form.videoUrl || ''}
-                  onChange={url => setForm((f: any) => ({ ...f, videoUrl: url }))}
-                  onRemove={() => setForm((f: any) => ({ ...f, videoUrl: '' }))}
-                  folder="products"
-                  frameAspect={16 / 10}
-                  defaultFit="cover"
-                  frameTitle="Adjust Product Video"
-                  frameHint="Choose what stays visible inside product previews."
-                  renderFrameContextPreview={media => renderProductPreview({ videoUrl: media })}
-                  frameContextTitle="Product Card Result"
-                  frameContextHint="Inspect the real storefront card result while you adjust the frame."
-                />
-              </AdminEditorSection>
-            </>
+            <MediaTab
+              form={form}
+              setForm={setForm}
+              setActiveGalleryIndex={setActiveGalleryIndex}
+              moveGalleryImage={moveGalleryImage}
+              removeGalleryImage={removeGalleryImage}
+              addGalleryImage={addGalleryImage}
+              renderProductPreview={renderProductPreview}
+              previewProduct={previewProduct}
+              isDark={isDark}
+              sub={sub}
+            />
           )}
 
           {tab === 'options' && (
-            <>
-              <AdminEditorSection title="Quick Options" hint="Keep short labels and comma-separated values so the setup remains compact and scannable.">
-                <div className="mb-1 flex items-center justify-between">
-                  <label className={`text-[12px] font-medium ${sub}`}>Quick Options</label>
-                  <button
-                    onClick={addOption}
-                    className={`rounded-lg border px-3 py-1 text-[11px] font-semibold ${isDark ? 'border-prism-violet/30 bg-prism-violet/15 text-prism-violet' : 'border-violet-200 bg-violet-50 text-violet-700'}`}
-                  >
-                    + Add Option
-                  </button>
-                </div>
-                <div className="space-y-2">
-                  {(form.quickOptions || []).map((option: any, idx: number) => (
-                    <div key={idx} className={`flex flex-col gap-2 rounded-[16px] p-2.5 sm:flex-row sm:items-center ${soft2}`}>
-                      <input value={option.label} onChange={e => updateOption(idx, 'label', e.target.value)} className="form-field !py-2 !text-xs flex-1" placeholder="Label (e.g. Bikes)" />
-                      <input value={option.values?.join(', ') || ''} onChange={e => updateOption(idx, 'values', e.target.value)} className="form-field !py-2 !text-xs flex-[2]" placeholder="Values: 1, 2, 3, 4" />
-                      <button onClick={() => removeOption(idx)} className={`rounded-lg border px-3 py-2 text-[11px] font-semibold ${isDark ? 'border-red-400/20 bg-red-400/10 text-red-200/90' : 'border-red-200 bg-red-50 text-red-700'}`}>
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </AdminEditorSection>
-
-              <AdminEditorSection title="Feature Columns" hint="These feed the detailed product view. Keep each line focused so both columns scan well.">
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                  <div>
-                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Features - Left Column (one per line)</label>
-                    <textarea value={typeof form.featuresLeft === 'string' ? form.featuresLeft : (form.features?.left || []).join('\n')} onChange={e => setForm({ ...form, featuresLeft: e.target.value })} className="form-field resize-none" rows={6} />
-                  </div>
-
-                  <div>
-                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Features - Right Column (one per line)</label>
-                    <textarea value={typeof form.featuresRight === 'string' ? form.featuresRight : (form.features?.right || []).join('\n')} onChange={e => setForm({ ...form, featuresRight: e.target.value })} className="form-field resize-none" rows={6} />
-                  </div>
-                </div>
-              </AdminEditorSection>
-            </>
+            <OptionsTab
+              form={form}
+              setForm={setForm}
+              addOption={addOption}
+              updateOption={updateOption}
+              removeOption={removeOption}
+              isDark={isDark}
+              sub={sub}
+              soft2={soft2}
+            />
           )}
 
           {tab === 'settings' && (
-            <>
-              <AdminEditorSection
-                title="Pricing & Commerce"
-                >
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  <div>
-                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Day Price</label>
-                    <input
-                      type="number"
-                      value={form.rentalPricePerDay || 0}
-                      onChange={e => setForm({ ...form, rentalPricePerDay: e.target.value })}
-                      className="form-field"
-                    />
-                  </div>
-                  <div>
-                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Currency</label>
-                    <input
-                      value={form.currency || 'JOD'}
-                      onChange={e => setForm({ ...form, currency: e.target.value.toUpperCase() })}
-                      className="form-field"
-                      placeholder="JOD"
-                      maxLength={6}
-                    />
-                  <p className={`mt-1 text-[11px] ${isDark ? 'text-purple-200/50' : 'text-gray-400'}`}></p>
-                  </div>
-
-                  <div className={`rounded-[18px] p-4 sm:col-span-2 xl:col-span-1 ${soft2}`}>
-                    <p className={`text-[11px] font-mono uppercase tracking-[0.2em] ${sub}`}>Pricing Behavior</p>
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={form.showPrice !== false}
-                          onChange={e => setForm({ ...form, showPrice: e.target.checked })}
-                          className="h-4 w-4 rounded accent-violet-400"
-                        />
-                        <span className={cn('text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>Show pricing publicly</span>
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={form.rentalEnabled !== false}
-                          onChange={e => setForm({ ...form, rentalEnabled: e.target.checked })}
-                          className="h-4 w-4 rounded accent-violet-400"
-                        />
-                        <span className={cn('text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>Available for rental</span>
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={form.saleEnabled !== false}
-                          onChange={e => setForm({ ...form, saleEnabled: e.target.checked })}
-                          className="h-4 w-4 rounded accent-violet-400"
-                        />
-                        <span className={cn('text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>Available for purchase quote</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </AdminEditorSection>
-
-              <AdminEditorSection
-                title="Rental & Inventory"
-                hint="Stock and buffer windows live here so availability checks and request approval stay aligned."
-              >
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  <div>
-                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Total Stock</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={form.stockTotal ?? 0}
-                      onChange={e => setForm({ ...form, stockTotal: e.target.value })}
-                      className="form-field"
-                    />
-                  </div>
-                  <div>
-                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Active Stock</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={form.stockActive ?? 0}
-                      onChange={e => setForm({ ...form, stockActive: e.target.value })}
-                      className="form-field"
-                    />
-                    <p className={`mt-1 text-[11px] ${isDark ? 'text-purple-200/50' : 'text-gray-400'}`}>Must stay less than or equal to total stock.</p>
-                  </div>
-                  <div>
-                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Minimum Rental Days</label>
-                    <input
-                      type="number"
-                      min={1}
-                      value={form.minimumRentalDays ?? 1}
-                      onChange={e => setForm({ ...form, minimumRentalDays: e.target.value })}
-                      className="form-field"
-                    />
-                  </div>
-                  <div>
-                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Buffer Before (days)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={form.bufferBeforeDays ?? 0}
-                      onChange={e => setForm({ ...form, bufferBeforeDays: e.target.value })}
-                      className="form-field"
-                    />
-                  </div>
-                  <div>
-                    <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Buffer After (days)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={form.bufferAfterDays ?? 0}
-                      onChange={e => setForm({ ...form, bufferAfterDays: e.target.value })}
-                      className="form-field"
-                    />
-                  </div>
-                  <div className={`rounded-[18px] p-4 ${soft2}`}>
-                    <p className={`text-[11px] font-mono uppercase tracking-[0.2em] ${sub}`}>Availability Summary</p>
-                    <div className="mt-3 space-y-2 text-sm">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className={sub}>Storefront rental status</span>
-                        <span className={cn('font-semibold', form.rentalEnabled !== false ? txt : isDark ? 'text-red-200' : 'text-red-600')}>
-                          {form.rentalEnabled !== false ? 'Enabled' : 'Disabled'}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className={sub}>Quote request status</span>
-                        <span className={cn('font-semibold', form.saleEnabled !== false ? txt : isDark ? 'text-red-200' : 'text-red-600')}>
-                          {form.saleEnabled !== false ? 'Enabled' : 'Disabled'}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className={sub}>Available units today</span>
-                        <span className={txt}>{Math.max(0, Number(form.stockActive) || 0)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </AdminEditorSection>
-            </>
+            <SettingsTab form={form} setForm={setForm} isDark={isDark} sub={sub} soft2={soft2} txt={txt} />
           )}
         </AdminEditorWorkspace>
       </Modal>

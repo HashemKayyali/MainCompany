@@ -203,6 +203,14 @@
     50% { background-position: 100% center; }
   }
 
+  /* Continuous, seamless color flow for gradient headline text.
+     Pairs with a looping gradient (same start/end colour) so the
+     hues glide across the text without any visible jump. */
+  @keyframes text-color-flow {
+    from { background-position: 0% center; }
+    to   { background-position: 200% center; }
+  }
+
   /* ─── Shimmer border ─── */
   .shimmer-border {
     position: relative;

@@ -15,6 +15,7 @@ export default function ProductsPage() {
     title: 'Products',
     description:
       'Browse premium marketplace services, event-ready activations, and curated experiences across the platform.',
+    canonical: 'https://www.eventiesjo.com/products',
   })
 
   const { products, categories, getProductsByCategory } = useData()

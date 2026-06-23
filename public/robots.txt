@@ -1,8 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /admin
-Disallow: /login
-Disallow: /register
-Disallow: /auth/callback
 
-Sitemap: https://main-company.vercel.app/sitemap.xml
+Sitemap: https://www.eventiesjo.com/sitemap.xml

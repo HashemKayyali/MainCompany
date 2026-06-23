@@ -18,6 +18,7 @@ import ProductFeatures from '../components/product/ProductFeatures'
 import ProductGallery from '../components/product/ProductGallery'
 import ProductOptions from '../components/product/ProductOptions'
 import ProductSuggestionsCarousel from '../components/product/ProductSuggestionsCarousel'
+import PageLoader from '../components/ui/PageLoader'
 import { useData } from '../contexts/DataContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { social } from '../data/social'
@@ -44,13 +45,14 @@ const INCLUDED_ITEMS = [
 
 export default function ProductDetailsPage() {
   const { slug } = useParams<{ slug: string }>()
-  const { categories, products, getProductBySlug, getPartsByProduct } = useData()
+  const { categories, products, getProductBySlug, getPartsByProduct, loading } = useData()
   const { isDark } = useTheme()
   const [includedOpen, setIncludedOpen] = useState(false)
 
   const product = getProductBySlug(slug || '')
   const parts = getPartsByProduct(slug || '')
   const showPrice = product ? product.showPrice !== false : true
+  const productNotFound = !loading && !product
 
   const similarProducts = useMemo(() => {
     if (!product?.categoryId) return []
@@ -58,9 +60,15 @@ export default function ProductDetailsPage() {
   }, [product?.categoryId, product?.slug, products])
 
   usePageMeta({
-    title: product?.name || 'Product',
-    description: product?.description || 'View product details and submit rental or purchase requests.',
+    title: productNotFound ? '404 - Not Found' : product?.name || 'Product',
+    description: productNotFound
+      ? 'The requested product could not be found.'
+      : product?.description || 'View product details and submit rental or purchase requests.',
     ogImage: product?.gallery?.[0],
+    canonical: product
+      ? `https://www.eventiesjo.com/products/${encodeURIComponent(product.slug)}`
+      : undefined,
+    noIndex: productNotFound,
     jsonLd: product
       ? {
           '@context': 'https://schema.org',
@@ -82,6 +90,7 @@ export default function ProductDetailsPage() {
       : undefined,
   })
 
+  if (loading && !product) return <PageLoader />
   if (!product) return <NotFoundPage />
 
   const categoryName =
