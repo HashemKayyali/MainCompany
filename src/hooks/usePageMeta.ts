@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { BRAND_LOGO_ABSOLUTE } from '../config/brand'
 
 type JsonLdInput = Record<string, unknown> | Array<Record<string, unknown>>
 
@@ -35,6 +36,7 @@ const GLOBAL_JSON_LD: Array<Record<string, unknown>> = [
     name: SITE_NAME,
     url: SITE_URL,
     email: 'info@eventiesjo.com',
+    logo: BRAND_LOGO_ABSOLUTE,
   },
   {
     '@context': 'https://schema.org',

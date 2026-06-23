@@ -5,6 +5,7 @@ const SITE_URL = 'https://www.eventiesjo.com'
 const SITE_NAME = 'Eventies'
 const DEFAULT_IMAGE = `${SITE_URL}/images/og-default.png`
 const DEFAULT_IMAGE_ALT = 'Eventies event services and vendors marketplace in Jordan'
+const BRAND_LOGO_ABSOLUTE = `${SITE_URL}/brand/eventies_icon_transparent_master.png`
 const DEFAULT_LOCALE = 'en_JO'
 const DEFAULT_IMAGE_WIDTH = '1200'
 const DEFAULT_IMAGE_HEIGHT = '630'
@@ -18,6 +19,7 @@ const GLOBAL_JSON_LD = [
     name: SITE_NAME,
     url: SITE_URL,
     email: 'info@eventiesjo.com',
+    logo: BRAND_LOGO_ABSOLUTE,
   },
   {
     '@context': 'https://schema.org',
@@ -390,10 +392,24 @@ function routeToFilePath(routePath) {
   return path.join(DIST_DIR, ...segments, 'index.html')
 }
 
+function routeToCleanUrlFilePath(routePath) {
+  if (routePath === '/') return undefined
+
+  const segments = routePath.split('/').filter(Boolean)
+  return path.join(DIST_DIR, `${segments.join('/')}.html`)
+}
+
 async function writeRouteHtml(template, meta) {
-  const filePath = routeToFilePath(meta.path)
-  await mkdir(path.dirname(filePath), { recursive: true })
-  await writeFile(filePath, injectSeo(template, meta), 'utf8')
+  const html = injectSeo(template, meta)
+  const filePaths = [
+    routeToFilePath(meta.path),
+    routeToCleanUrlFilePath(meta.path),
+  ].filter(Boolean)
+
+  for (const filePath of filePaths) {
+    await mkdir(path.dirname(filePath), { recursive: true })
+    await writeFile(filePath, html, 'utf8')
+  }
 }
 
 async function main() {
@@ -411,7 +427,7 @@ async function main() {
   }
 
   console.log(
-    `[seo-prerender] Generated ${metas.length} HTML files (${STATIC_PAGES.length} static pages, ${products.length} product pages).`
+    `[seo-prerender] Generated SEO HTML for ${metas.length} routes (${STATIC_PAGES.length} static pages, ${products.length} product pages).`
   )
 }
 

@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Mail, Phone, Sparkles } from 'lucide-react'
+import { BRAND_LOGO_HORIZONTAL, BRAND_LOGO_HORIZONTAL_PNG } from '../../config/brand'
 import { useProductsData } from '../../contexts/DataContext'
 import { social, socialLinks } from '../../data/social'
 
@@ -31,20 +32,23 @@ export default function Footer() {
           <div className="relative grid grid-cols-2 gap-x-6 gap-y-7 md:grid-cols-2 lg:grid-cols-[1.1fr_0.7fr_0.7fr_0.9fr]">
             {/* Brand */}
             <div className="col-span-2 max-w-md lg:col-span-1">
-              <div className="flex items-center gap-3">
-                <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-[14px] border border-white/30 bg-[linear-gradient(145deg,#7c3aed_0%,#a855f7_48%,#c026d3_115%)] shadow-[0_12px_32px_-6px_rgba(124,58,237,0.55)]">
-                  <div className="absolute inset-x-2 top-1.5 h-3 rounded-full bg-white/30 blur-sm" />
-                  <span className="relative text-[11px] font-black tracking-[0.12em] text-white">Ev</span>
-                </div>
-                <div className="leading-none">
-                  <div className="font-display text-[14px] font-bold tracking-[-0.01em]" style={{ color: '#1a0b3d' }}>
-                    Eventies
-                  </div>
-                  <div className={`mt-[3px] text-[9px] uppercase tracking-[0.18em] ${subtle}`}>
-                    Marketplace
-                  </div>
-                </div>
-              </div>
+              <Link to="/" className="inline-flex h-11 w-[142px] items-center transition-opacity hover:opacity-88">
+                <img
+                  src={BRAND_LOGO_HORIZONTAL}
+                  alt="Eventies"
+                  width={170}
+                  height={52}
+                  loading="lazy"
+                  decoding="async"
+                  className="block h-full w-full object-contain drop-shadow-[0_8px_18px_rgba(15,23,42,0.16)]"
+                  onError={(event) => {
+                    const image = event.currentTarget
+                    if (image.dataset.fallbackLogo === 'true') return
+                    image.dataset.fallbackLogo = 'true'
+                    image.src = BRAND_LOGO_HORIZONTAL_PNG
+                  }}
+                />
+              </Link>
               <p className="mt-4 text-[13px] leading-[1.7]" style={{ color: 'rgba(61, 35, 112, 0.78)' }}>
                 A premium marketplace for discovering, comparing, and booking trusted event services
                 — from first visit to final inquiry.

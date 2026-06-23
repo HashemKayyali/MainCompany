@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react'
+import { BRAND_LOGO_HORIZONTAL, BRAND_LOGO_HORIZONTAL_PNG } from '../../../config/brand'
 
 // ── Logo wordmark ─────────────────────────────────────────────────────────────
 export function EventiesLogo({
@@ -9,22 +10,21 @@ export function EventiesLogo({
   isDark: boolean
 }) {
   return (
-    <div className="flex items-center gap-2.5">
-      {/* Badge */}
-      <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[13px] border border-white/40 bg-[linear-gradient(145deg,#7126e3_0%,#a855f7_48%,#d946ef_112%)] shadow-[0_14px_34px_-6px_rgba(89,23,196,0.6)]">
-        <div className="absolute inset-x-2 top-1.5 h-3 rounded-full bg-white/35 blur-sm" />
-        <span className="relative text-[10.5px] font-black tracking-[0.12em] text-white">Ev</span>
-      </div>
-      {/* Text mark */}
-      <div className="min-w-0 leading-none">
-        <div className="font-display text-[12.75px] font-extrabold tracking-[-0.01em] sm:text-[13.5px]" style={{ color: '#140832' }}>
-          Eventies
-        </div>
-        <div className="mt-[3px] text-[8.5px] font-semibold uppercase tracking-[0.16em] text-violet-700 sm:text-[9px] sm:tracking-[0.18em]">
-          Marketplace
-        </div>
-      </div>
-    </div>
+    <span className="flex h-[34px] w-[112px] shrink-0 items-center sm:h-10 sm:w-[130px] lg:h-9 lg:w-[118px] xl:h-10 xl:w-[130px]">
+      <img
+        src={BRAND_LOGO_HORIZONTAL}
+        alt="Eventies"
+        width={160}
+        height={49}
+        className="block h-full w-full object-contain drop-shadow-[0_8px_18px_rgba(15,23,42,0.18)]"
+        onError={(event) => {
+          const image = event.currentTarget
+          if (image.dataset.fallbackLogo === 'true') return
+          image.dataset.fallbackLogo = 'true'
+          image.src = BRAND_LOGO_HORIZONTAL_PNG
+        }}
+      />
+    </span>
   )
 }
 

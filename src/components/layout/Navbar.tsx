@@ -717,17 +717,13 @@ export default function Navbar() {
                   <div className={`flex items-center gap-3 px-4 py-4 ${
                     isDark ? 'border-b border-white/[0.06]' : 'border-b border-violet-100/80'
                   }`}>
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[13px] border border-white/14 bg-[linear-gradient(145deg,#7c3aed_0%,#d946ef_48%,#22d3ee_112%)] shadow-[0_8px_24px_rgba(124,58,237,0.38)]">
-                      <span className="text-[10.5px] font-black tracking-[0.12em] text-white">Ev</span>
-                    </div>
-                    <div className="leading-none">
-                      <div className={`font-display text-[13px] font-bold tracking-[-0.01em] ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Eventies
-                      </div>
-                      <div className={`mt-0.5 text-[9px] uppercase tracking-[0.16em] ${isDark ? 'text-purple-100/45' : 'text-violet-600/65'}`}>
-                        Marketplace
-                      </div>
-                    </div>
+                    <Link
+                      to="/"
+                      onClick={() => setOpen(false)}
+                      className={`inline-flex items-center transition-opacity hover:opacity-88 ${focus}`}
+                    >
+                      <EventiesLogo heroMode={heroMode} isDark={isDark} />
+                    </Link>
                   </div>
 
                   <div className="space-y-3 px-3 pt-3">

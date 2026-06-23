@@ -24,3 +24,5 @@ treeStructure.txt
 # Dependencies and build output
 node_modules/
 dist/
+
+public/eventies_complete_logo_files/
