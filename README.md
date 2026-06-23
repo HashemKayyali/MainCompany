@@ -282,5 +282,5 @@ Recommended next steps based on the current repository state:
 
 git status
 git add .
-git commit -m "wide update "
+git commit -m "Update Logo  "
 git push origin main
