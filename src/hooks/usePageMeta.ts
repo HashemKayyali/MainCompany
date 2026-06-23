@@ -1,19 +1,54 @@
 import { useEffect } from 'react'
 
+type JsonLdInput = Record<string, unknown> | Array<Record<string, unknown>>
+
 interface PageMeta {
   title: string
   description?: string
+  canonical?: string
+  image?: string
+  imageAlt?: string
+  type?: string
+  noIndex?: boolean
+  /** JSON-LD structured data object or array */
+  jsonLd?: JsonLdInput
+  /** Backwards-compatible aliases for existing callers. */
   ogImage?: string
   ogType?: string
-  canonical?: string
-  noIndex?: boolean
-  /** JSON-LD structured data object */
-  jsonLd?: Record<string, unknown>
 }
 
 const SITE_NAME = 'Eventies'
+const SITE_URL = 'https://www.eventiesjo.com'
+const DEFAULT_TITLE = 'Event Services & Vendors in Jordan | Eventies'
 const DEFAULT_DESC =
-  'Premium event services marketplace in Jordan — discover, compare, and book trusted vendors for your next event.'
+  'Discover venues, photographers, catering, booths, equipment, entertainment, and trusted event vendors across Jordan with Eventies.'
+const DEFAULT_IMAGE = `${SITE_URL}/images/og-default.png`
+const DEFAULT_IMAGE_ALT = 'Eventies event services and vendors marketplace in Jordan'
+const DEFAULT_IMAGE_WIDTH = '1200'
+const DEFAULT_IMAGE_HEIGHT = '630'
+const DEFAULT_LOCALE = 'en_JO'
+
+const GLOBAL_JSON_LD: Array<Record<string, unknown>> = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_NAME,
+    url: SITE_URL,
+    email: 'info@eventiesjo.com',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: SITE_URL,
+  },
+]
+
+function getFullTitle(title: string) {
+  if (!title.trim()) return DEFAULT_TITLE
+  if (title.includes(SITE_NAME)) return title
+  return `${title} | ${SITE_NAME}`
+}
 
 function setMeta(name: string, content: string, attr: 'name' | 'property' = 'name') {
   let el = document.querySelector<HTMLMetaElement>(`meta[${attr}="${name}"]`)
@@ -23,6 +58,10 @@ function setMeta(name: string, content: string, attr: 'name' | 'property' = 'nam
     document.head.appendChild(el)
   }
   el.setAttribute('content', content)
+}
+
+function removeMeta(name: string, attr: 'name' | 'property' = 'name') {
+  document.querySelectorAll(`meta[${attr}="${name}"]`).forEach(el => el.remove())
 }
 
 function setLink(rel: string, href: string) {
@@ -35,93 +74,134 @@ function setLink(rel: string, href: string) {
   el.setAttribute('href', href)
 }
 
-function setJsonLd(data: Record<string, unknown>) {
-  let el = document.querySelector<HTMLScriptElement>('script[data-page-jsonld]')
-  if (!el) {
-    el = document.createElement('script')
-    el.type = 'application/ld+json'
-    el.setAttribute('data-page-jsonld', 'true')
-    document.head.appendChild(el)
+function removeLink(rel: string) {
+  document.querySelectorAll(`link[rel="${rel}"]`).forEach(el => el.remove())
+}
+
+function normalizeAbsoluteUrl(value?: string) {
+  const trimmed = value?.trim()
+  if (!trimmed) return undefined
+
+  try {
+    const url = new URL(trimmed, SITE_URL)
+    if (url.protocol !== 'https:') return undefined
+    url.hash = ''
+    return url.toString()
+  } catch {
+    return undefined
   }
-  el.textContent = JSON.stringify(data)
+}
+
+function normalizeCanonicalUrl(value?: string) {
+  const normalized = normalizeAbsoluteUrl(value)
+  if (!normalized) return undefined
+
+  const url = new URL(normalized)
+  url.search = ''
+  url.hash = ''
+  return url.toString()
+}
+
+function getCurrentPageUrl() {
+  if (typeof window === 'undefined') return SITE_URL
+
+  const url = new URL(window.location.pathname || '/', SITE_URL)
+  return url.toString()
+}
+
+function setJsonLd(data: Array<Record<string, unknown>>) {
+  document.querySelectorAll('script[data-page-jsonld]').forEach(el => el.remove())
+
+  data.forEach((item, index) => {
+    const el = document.createElement('script')
+    el.type = 'application/ld+json'
+    el.setAttribute('data-page-jsonld', String(index))
+    el.textContent = JSON.stringify(item)
+    document.head.appendChild(el)
+  })
+}
+
+function toJsonLdArray(jsonLd?: JsonLdInput) {
+  if (!jsonLd) return []
+  return Array.isArray(jsonLd) ? jsonLd : [jsonLd]
 }
 
 /**
- * Sets document title, meta description, Open Graph tags, Twitter cards,
- * canonical URL, and JSON-LD structured data.
- *
- * @example
- * usePageMeta({ title: 'Products', description: 'Browse our bike experiences' })
+ * Sets document title, meta description, canonical URL, Open Graph tags,
+ * Twitter card tags, robots directives, and JSON-LD structured data.
  */
-export function usePageMeta({ title, description, ogImage, ogType, canonical, noIndex, jsonLd }: PageMeta) {
+export function usePageMeta({
+  title,
+  description,
+  canonical,
+  image,
+  imageAlt,
+  type,
+  noIndex,
+  jsonLd,
+  ogImage,
+  ogType,
+}: PageMeta) {
   useEffect(() => {
-    // Title
-    const fullTitle = title === 'Home' ? SITE_NAME : `${title} — ${SITE_NAME}`
-    document.title = fullTitle
-
-    // Description
+    const fullTitle = getFullTitle(title)
     const desc = description || DEFAULT_DESC
+    const canonicalUrl = normalizeCanonicalUrl(canonical)
+    const pageUrl = canonicalUrl || getCurrentPageUrl()
+    const socialImage = normalizeAbsoluteUrl(image || ogImage) || DEFAULT_IMAGE
+    const socialImageAlt = imageAlt || DEFAULT_IMAGE_ALT
+    const pageType = type || ogType || 'website'
+
+    document.title = fullTitle
     setMeta('description', desc)
 
-    // Open Graph
     setMeta('og:title', fullTitle, 'property')
     setMeta('og:description', desc, 'property')
-    setMeta('og:type', ogType || 'website', 'property')
+    setMeta('og:url', pageUrl, 'property')
+    setMeta('og:type', pageType, 'property')
     setMeta('og:site_name', SITE_NAME, 'property')
-    // ✅ Always set og:url
-    setMeta('og:url', window.location.href, 'property')
+    setMeta('og:image', socialImage, 'property')
+    setMeta('og:image:secure_url', socialImage, 'property')
+    setMeta('og:image:alt', socialImageAlt, 'property')
+    setMeta('og:image:width', DEFAULT_IMAGE_WIDTH, 'property')
+    setMeta('og:image:height', DEFAULT_IMAGE_HEIGHT, 'property')
+    setMeta('og:locale', DEFAULT_LOCALE, 'property')
 
-    if (ogImage) {
-      setMeta('og:image', ogImage, 'property')
-      setMeta('twitter:image', ogImage)
-    } else {
-      document.querySelector('meta[property="og:image"]')?.remove()
-      document.querySelector('meta[name="twitter:image"]')?.remove()
-    }
-
-    // Twitter
-    setMeta('twitter:card', ogImage ? 'summary_large_image' : 'summary')
+    setMeta('twitter:card', 'summary_large_image')
     setMeta('twitter:title', fullTitle)
     setMeta('twitter:description', desc)
+    setMeta('twitter:image', socialImage)
+    setMeta('twitter:image:alt', socialImageAlt)
 
-    // Canonical
-    if (canonical) {
-      setLink('canonical', canonical)
+    // Do not add twitter:site unless Eventies has a real X account.
+    removeMeta('twitter:site')
+
+    if (canonicalUrl) {
+      setLink('canonical', canonicalUrl)
     } else {
-      const el = document.querySelector('link[rel="canonical"]')
-      if (el) el.remove()
+      removeLink('canonical')
     }
 
-    // Robots
     if (noIndex) {
       setMeta('robots', 'noindex, nofollow')
     } else {
-      const el = document.querySelector('meta[name="robots"]')
-      if (el) el.remove()
+      removeMeta('robots')
     }
 
-    // ✅ JSON-LD Structured Data
-    if (jsonLd) {
-      setJsonLd(jsonLd)
-    } else {
-      // Default Organization schema
-      setJsonLd({
-        '@context': 'https://schema.org',
-        '@type': 'Organization',
-        name: SITE_NAME,
-        description: DEFAULT_DESC,
-        address: {
-          '@type': 'PostalAddress',
-          addressLocality: 'Amman',
-          addressCountry: 'JO',
-        },
-      })
-    }
+    setJsonLd([...GLOBAL_JSON_LD, ...toJsonLdArray(jsonLd)])
 
     return () => {
-      // Cleanup JSON-LD on unmount (new page will set its own)
-      const el = document.querySelector('script[data-page-jsonld]')
-      if (el) el.remove()
+      document.querySelectorAll('script[data-page-jsonld]').forEach(el => el.remove())
     }
-  }, [title, description, ogImage, ogType, canonical, noIndex, jsonLd])
+  }, [
+    title,
+    description,
+    canonical,
+    image,
+    imageAlt,
+    type,
+    noIndex,
+    jsonLd,
+    ogImage,
+    ogType,
+  ])
 }

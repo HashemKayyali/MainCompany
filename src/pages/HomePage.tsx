@@ -7,9 +7,10 @@ import { usePageMeta } from '../hooks/usePageMeta'
 
 export default function HomePage() {
   usePageMeta({
-    title: 'Home',
+    title: 'Event Services & Vendors in Jordan | Eventies',
     description:
-      'Premium event services marketplace in Jordan for discovering, comparing, and booking trusted vendors across categories.',
+      'Discover venues, photographers, catering, booths, equipment, entertainment, and trusted event vendors across Jordan with Eventies.',
+    canonical: 'https://www.eventiesjo.com/',
   })
 
   return (

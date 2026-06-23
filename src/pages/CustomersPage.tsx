@@ -11,8 +11,10 @@ const ease = [0.16, 1, 0.3, 1]
 
 export default function CustomersPage() {
   usePageMeta({
-    title: 'Customers',
-    description: 'Trusted by leading premium brands, enterprises, and organizations across the region.',
+    title: 'Eventies Clients & Event Partners in Jordan',
+    description:
+      'See the brands, schools, venues, and organizations that trust Eventies for event activations and experiences across Jordan.',
+    canonical: 'https://www.eventiesjo.com/customers',
   })
 
   const { customers } = useData()

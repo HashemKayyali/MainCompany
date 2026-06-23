@@ -39,8 +39,10 @@ const contactCards = [
 
 export default function ContactPage() {
   usePageMeta({
-    title: 'Contact',
-    description: 'Talk with Eventies about rental requests, purchase quotes, and event planning support.',
+    title: 'Contact Eventies | Plan an Event in Jordan',
+    description:
+      'Contact Eventies for event rentals, vendor services, equipment, activations, and planning support in Amman and across Jordan.',
+    canonical: 'https://www.eventiesjo.com/contact',
   })
 
   const { isDark } = useTheme()

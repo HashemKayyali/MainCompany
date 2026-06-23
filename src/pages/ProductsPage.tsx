@@ -12,9 +12,9 @@ const ease = [0.16, 1, 0.3, 1]
 
 export default function ProductsPage() {
   usePageMeta({
-    title: 'Products',
+    title: 'Event Services & Equipment in Jordan | Eventies',
     description:
-      'Browse premium marketplace services, event-ready activations, and curated experiences across the platform.',
+      'Browse event rentals, interactive games, VR experiences, screens, booths, entertainment, and production services from trusted providers in Jordan.',
     canonical: 'https://www.eventiesjo.com/products',
   })
 

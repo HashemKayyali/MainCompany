@@ -64,9 +64,10 @@ export default function AboutPage() {
   const { perfLow } = usePerfMode()
 
   usePageMeta({
-    title: 'About',
+    title: 'About Eventies | Jordan Event Services Marketplace',
     description:
-      'Learn about Eventies — a premium event services marketplace connecting clients with trusted vendors for activations, experiences, and events across Jordan.',
+      'Learn how Eventies connects event organizers with trusted services, equipment, activations, and vendors across Jordan.',
+    canonical: 'https://www.eventiesjo.com/about',
   })
 
   const txt = isDark ? 'text-white' : 'text-gray-900'

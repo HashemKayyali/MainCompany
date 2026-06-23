@@ -43,6 +43,20 @@ const INCLUDED_ITEMS = [
   'Spare parts availability',
 ]
 
+function getPublicImageUrl(value?: string) {
+  const trimmed = value?.trim()
+  if (!trimmed) return undefined
+
+  try {
+    const url = new URL(trimmed, 'https://www.eventiesjo.com')
+    if (url.protocol !== 'https:') return undefined
+    url.hash = ''
+    return url.toString()
+  } catch {
+    return undefined
+  }
+}
+
 export default function ProductDetailsPage() {
   const { slug } = useParams<{ slug: string }>()
   const { categories, products, getProductBySlug, getPartsByProduct, loading } = useData()
@@ -53,6 +67,9 @@ export default function ProductDetailsPage() {
   const parts = getPartsByProduct(slug || '')
   const showPrice = product ? product.showPrice !== false : true
   const productNotFound = !loading && !product
+  const productImage = product?.gallery?.[0]
+  const productStructuredImage = getPublicImageUrl(productImage)
+  const productImageAlt = product ? `${product.name} rental for events in Jordan` : undefined
 
   const similarProducts = useMemo(() => {
     if (!product?.categoryId) return []
@@ -60,14 +77,22 @@ export default function ProductDetailsPage() {
   }, [product?.categoryId, product?.slug, products])
 
   usePageMeta({
-    title: productNotFound ? '404 - Not Found' : product?.name || 'Product',
+    title: productNotFound
+      ? 'Product Not Found | Eventies'
+      : product
+        ? `${product.name} Rental in Jordan | Eventies`
+        : 'Event Product Rental in Jordan | Eventies',
     description: productNotFound
       ? 'The requested product could not be found.'
-      : product?.description || 'View product details and submit rental or purchase requests.',
-    ogImage: product?.gallery?.[0],
+      : product
+        ? `Rent or request ${product.name} for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.`
+        : 'Rent or request event products for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.',
+    image: productImage,
+    imageAlt: productImageAlt,
     canonical: product
       ? `https://www.eventiesjo.com/products/${encodeURIComponent(product.slug)}`
       : undefined,
+    type: product ? 'product' : 'website',
     noIndex: productNotFound,
     jsonLd: product
       ? {
@@ -75,14 +100,13 @@ export default function ProductDetailsPage() {
           '@type': 'Product',
           name: product.name,
           description: product.description,
-          image: product.gallery?.[0],
+          ...(productStructuredImage ? { image: productStructuredImage } : {}),
           ...(showPrice
             ? {
                 offers: {
                   '@type': 'Offer',
                   price: product.rentalPricePerDay,
                   priceCurrency: product.currency || 'JOD',
-                  availability: 'https://schema.org/InStock',
                 },
               }
             : {}),
