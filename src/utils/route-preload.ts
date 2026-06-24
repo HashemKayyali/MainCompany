@@ -15,6 +15,7 @@ function lazyRoute<T extends ComponentType<any>>(importer: RouteImporter<T>) {
 export const routeImporters = {
   home: () => import('../pages/HomePage'),
   products: () => import('../pages/ProductsPage'),
+  category: () => import('../pages/CategoryPage'),
   productDetails: () => import('../pages/ProductDetailsPage'),
   customers: () => import('../pages/CustomersPage'),
   gallery: () => import('../pages/GalleryPage'),
@@ -47,6 +48,7 @@ export const routeImporters = {
 export const lazyRoutes = {
   HomePage: lazyRoute(routeImporters.home),
   ProductsPage: lazyRoute(routeImporters.products),
+  CategoryPage: lazyRoute(routeImporters.category),
   ProductDetailsPage: lazyRoute(routeImporters.productDetails),
   CustomersPage: lazyRoute(routeImporters.customers),
   GalleryPage: lazyRoute(routeImporters.gallery),

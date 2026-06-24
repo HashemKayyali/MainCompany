@@ -147,6 +147,18 @@ function normalizePublicHttpsUrl(value) {
   }
 }
 
+function normalizeText(value) {
+  return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : ''
+}
+
+function getCategoryDescription(category) {
+  const name = normalizeText(category.name)
+  return (
+    normalizeText(category.description) ||
+    `Browse ${name} event services, rentals, and experiences in Jordan through Eventies.`
+  )
+}
+
 function getFirstPublicProductImage(product) {
   const gallery = Array.isArray(product.gallery) ? product.gallery : []
   const galleryImage = gallery.map(normalizePublicHttpsUrl).find(Boolean)
@@ -182,7 +194,7 @@ async function fetchActiveProductsWithKey(supabaseUrl, supabaseKey) {
     const endpoint = new URL('/rest/v1/products', supabaseUrl)
     endpoint.searchParams.set(
       'select',
-      'slug,title,description,hero_image,gallery,created_at,show_price,price,currency'
+      'slug,title,description,hero_image,gallery,category_id,created_at,show_price,price,currency'
     )
     endpoint.searchParams.set('is_active', 'eq.true')
     endpoint.searchParams.set('order', 'created_at.asc')
@@ -275,6 +287,104 @@ async function fetchActiveProducts() {
   return []
 }
 
+async function fetchActiveCategoriesWithKey(supabaseUrl, supabaseKey) {
+  const categories = []
+  const pageSize = 1000
+  let start = 0
+
+  for (;;) {
+    const endpoint = new URL('/rest/v1/categories', supabaseUrl)
+    endpoint.searchParams.set('select', 'id,slug,name,description,image,created_at')
+    endpoint.searchParams.set('order', 'created_at.asc')
+
+    const response = await fetch(endpoint, {
+      headers: {
+        Accept: 'application/json',
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        Prefer: 'count=exact',
+        Range: `${start}-${start + pageSize - 1}`,
+      },
+    })
+
+    if (!response.ok) {
+      const error = new Error(
+        `Supabase category prerender query failed with status ${response.status}`
+      )
+      error.status = response.status
+      throw error
+    }
+
+    const data = await response.json()
+    if (!Array.isArray(data)) {
+      throw new Error('Supabase category prerender query returned an invalid response')
+    }
+
+    categories.push(...data)
+
+    const totalValue = response.headers.get('content-range')?.split('/')[1]
+    const total = totalValue && totalValue !== '*' ? Number(totalValue) : undefined
+
+    if (data.length === 0) break
+
+    start += data.length
+    if (typeof total === 'number' && Number.isFinite(total)) {
+      if (start >= total) break
+    } else if (data.length < pageSize) {
+      break
+    }
+  }
+
+  return Array.from(
+    new Map(
+      categories
+        .map(category => ({
+          ...category,
+          slug: normalizeText(category.slug),
+          name: normalizeText(category.name),
+        }))
+        .filter(category => category.slug && category.name)
+        .map(category => [category.slug, category])
+    ).values()
+  ).sort((a, b) => a.slug.localeCompare(b.slug))
+}
+
+async function fetchActiveCategories() {
+  const { supabaseUrl, keyCandidates } = getSupabaseConfig()
+  let lastError
+
+  for (const candidate of keyCandidates) {
+    try {
+      const categories = await fetchActiveCategoriesWithKey(supabaseUrl, candidate.value)
+
+      if (
+        categories.length > 0 ||
+        candidate.label === 'service-role' ||
+        keyCandidates.length === 1
+      ) {
+        return categories
+      }
+
+      console.warn(
+        '[seo-prerender] Anon category query returned 0 categories; retrying with the server-only service role key.'
+      )
+    } catch (error) {
+      lastError = error
+
+      if (candidate.label === 'service-role' || keyCandidates.length === 1) {
+        throw error
+      }
+
+      console.warn(
+        '[seo-prerender] Anon category query failed; retrying with the server-only service role key.'
+      )
+    }
+  }
+
+  if (lastError) throw lastError
+  return []
+}
+
 function productToMeta(product) {
   const encodedSlug = encodeURIComponent(product.slug)
   const routePath = `/products/${encodedSlug}`
@@ -311,6 +421,49 @@ function productToMeta(product) {
     image,
     imageAlt: `${product.title} rental for events in Jordan`,
     jsonLd: [productJsonLd],
+  }
+}
+
+function categoryToMeta(category, products) {
+  const encodedSlug = encodeURIComponent(category.slug)
+  const routePath = `/categories/${encodedSlug}`
+  const title = `${category.name} Event Services in Jordan | Eventies`
+  const description = getCategoryDescription(category)
+  const canonical = canonicalUrl(routePath)
+  const categoryImage = normalizePublicHttpsUrl(category.image)
+  const categoryProducts = products.filter(product => product.category_id === category.id)
+  const itemListId = `${canonical}#item-list`
+  const collectionPageJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `${category.name} Event Services in Jordan`,
+    description,
+    url: canonical,
+    ...(categoryImage ? { image: categoryImage } : {}),
+    mainEntity: { '@id': itemListId },
+  }
+  const itemListJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    '@id': itemListId,
+    name: `${category.name} Event Services in Jordan`,
+    itemListElement: categoryProducts.map((product, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: product.title,
+      url: `${SITE_URL}/products/${encodeURIComponent(product.slug)}`,
+    })),
+  }
+
+  return {
+    path: routePath,
+    title,
+    description,
+    canonical,
+    type: 'website',
+    image: categoryImage || DEFAULT_IMAGE,
+    imageAlt: `${category.name} event services in Jordan`,
+    jsonLd: [collectionPageJsonLd, itemListJsonLd],
   }
 }
 
@@ -416,9 +569,13 @@ async function main() {
   await loadEnvFiles()
 
   const template = await readFile(TEMPLATE_PATH, 'utf8')
-  const products = await fetchActiveProducts()
+  const [products, categories] = await Promise.all([
+    fetchActiveProducts(),
+    fetchActiveCategories(),
+  ])
   const metas = [
     ...STATIC_PAGES.map(staticPageToMeta),
+    ...categories.map(category => categoryToMeta(category, products)),
     ...products.map(productToMeta),
   ]
 
@@ -427,7 +584,7 @@ async function main() {
   }
 
   console.log(
-    `[seo-prerender] Generated SEO HTML for ${metas.length} routes (${STATIC_PAGES.length} static pages, ${products.length} product pages).`
+    `[seo-prerender] Generated SEO HTML for ${metas.length} routes (${STATIC_PAGES.length} static pages, ${categories.length} category pages, ${products.length} product pages).`
   )
 }
 

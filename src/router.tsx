@@ -10,6 +10,7 @@ import { lazyRoutes } from './utils/route-preload'
 const {
   HomePage,
   ProductsPage,
+  CategoryPage,
   ProductDetailsPage,
   CustomersPage,
   GalleryPage,
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
       { index: true, element: <S><HomePage /></S> },
       { path: 'products', element: <S><ProductsPage /></S> },
       { path: 'products/:slug', element: <S><ProductDetailsPage /></S> },
+      { path: 'categories/:slug', element: <S><CategoryPage /></S> },
       { path: 'customers', element: <S><CustomersPage /></S> },
       { path: 'gallery', element: <S><GalleryPage /></S> },
       { path: 'about', element: <S><AboutPage /></S> },

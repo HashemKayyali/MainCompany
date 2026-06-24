@@ -14,6 +14,11 @@ type ProductSitemapRow = {
   created_at: string | null
 }
 
+type CategorySitemapRow = {
+  slug: string | null
+  created_at: string | null
+}
+
 type ServerEnvironment = Record<string, string | undefined>
 
 function getServerEnvironment(): ServerEnvironment {
@@ -56,7 +61,31 @@ function renderUrl(location: string, lastModified?: string) {
   </url>`
 }
 
-function renderSitemap(products: ProductSitemapRow[]) {
+function renderDynamicUrls(
+  rows: Array<{ slug: string | null; created_at: string | null }>,
+  basePath: 'categories' | 'products'
+) {
+  return Array.from(
+    new Map(
+      rows
+        .map(row => ({
+          slug: row.slug?.trim() ?? '',
+          lastModified: formatLastModified(row.created_at),
+        }))
+        .filter(row => row.slug.length > 0)
+        .map(row => [row.slug, row] as const)
+    ).values()
+  )
+    .sort((a, b) => a.slug.localeCompare(b.slug))
+    .map(row =>
+      renderUrl(
+        canonicalUrl(`/${basePath}/${encodeURIComponent(row.slug)}`),
+        row.lastModified
+      )
+    )
+}
+
+function renderSitemap(products: ProductSitemapRow[], categories: CategorySitemapRow[]) {
   const productUrls = Array.from(
     new Map(
       products
@@ -76,8 +105,11 @@ function renderSitemap(products: ProductSitemapRow[]) {
       )
     )
 
+  const categoryUrls = renderDynamicUrls(categories, 'categories')
+
   const urls = [
     ...STATIC_PATHS.map(path => renderUrl(canonicalUrl(path))),
+    ...categoryUrls,
     ...productUrls,
   ]
 
@@ -152,6 +184,67 @@ async function getActiveProducts() {
   return products
 }
 
+async function getActiveCategories() {
+  const env = getServerEnvironment()
+  const supabaseUrl = env.SUPABASE_URL || env.VITE_SUPABASE_URL
+
+  const supabaseKey =
+    env.SUPABASE_ANON_KEY ||
+    env.VITE_SUPABASE_ANON_KEY ||
+    env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Supabase sitemap environment variables are not configured')
+  }
+
+  const categories: CategorySitemapRow[] = []
+  const pageSize = 1000
+  let start = 0
+
+  for (;;) {
+    const endpoint = new URL('/rest/v1/categories', supabaseUrl)
+    endpoint.searchParams.set('select', 'slug,created_at')
+    endpoint.searchParams.set('order', 'created_at.asc')
+
+    const response = await fetch(endpoint, {
+      headers: {
+        Accept: 'application/json',
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        Prefer: 'count=exact',
+        Range: `${start}-${start + pageSize - 1}`,
+      },
+      cache: 'no-store',
+    })
+
+    if (!response.ok) {
+      throw new Error(`Supabase category query failed with status ${response.status}`)
+    }
+
+    const data: unknown = await response.json()
+    if (!Array.isArray(data)) {
+      throw new Error('Supabase category query returned an invalid response')
+    }
+
+    const page = data as CategorySitemapRow[]
+    categories.push(...page)
+
+    const totalValue = response.headers.get('content-range')?.split('/')[1]
+    const total = totalValue && totalValue !== '*' ? Number(totalValue) : undefined
+
+    if (page.length === 0) break
+
+    start += page.length
+    if (typeof total === 'number' && Number.isFinite(total)) {
+      if (start >= total) break
+    } else if (page.length < pageSize) {
+      break
+    }
+  }
+
+  return categories
+}
+
 export default {
   async fetch(request: Request) {
     if (request.method !== 'GET' && request.method !== 'HEAD') {
@@ -162,8 +255,11 @@ export default {
     }
 
     try {
-      const products = await getActiveProducts()
-      const sitemap = renderSitemap(products)
+      const [products, categories] = await Promise.all([
+        getActiveProducts(),
+        getActiveCategories(),
+      ])
+      const sitemap = renderSitemap(products, categories)
 
       return new Response(request.method === 'HEAD' ? null : sitemap, {
         status: 200,

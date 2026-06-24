@@ -1,14 +1,12 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useEffect, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowUpRight, LayoutGrid, Sparkles } from 'lucide-react'
-import ProductCard from '../product/ProductCard'
+import { motion } from 'framer-motion'
+import { ArrowUpRight, LayoutGrid } from 'lucide-react'
 import CategoryTileView from './CategoryTileView'
 import { useCategoriesData, useDataMeta, useProductsData } from '../../contexts/DataContext'
 import { useReveal, useRevealGroup } from '../../hooks/useReveal'
 import { usePerfMode } from '../../hooks/usePerfMode'
 import { useTheme } from '../../contexts/ThemeContext'
-import { scrollToPosition } from '../../utils/scroll'
 import { cn } from '../../utils/cn'
 
 const ease = [0.16, 1, 0.3, 1] as const
@@ -16,44 +14,39 @@ const ease = [0.16, 1, 0.3, 1] as const
 type CategoryItem = {
   id: string
   name: string
-  description?: string
+  slug: string
   image?: string
   count: number
 }
 
 const CategoryTile = memo(function CategoryTile({
   category,
-  active,
   isDark,
-  onClick,
   reducedVisualEffects,
 }: {
   category: CategoryItem
-  active: boolean
   isDark: boolean
-  onClick: () => void
   reducedVisualEffects: boolean
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="block w-full cursor-pointer text-left focus:outline-none"
+    <Link
+      to={`/categories/${encodeURIComponent(category.slug)}`}
+      aria-label={`Explore ${category.name} services`}
+      className="block w-full cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2"
     >
       <CategoryTileView
         name={category.name}
         image={category.image}
         count={category.count}
-        active={active}
         reducedVisualEffects={reducedVisualEffects}
         isDarkOverride={isDark}
       />
-    </button>
+    </Link>
   )
 }, (prev, next) =>
-  prev.active === next.active &&
   prev.isDark === next.isDark &&
   prev.category.id === next.category.id &&
+  prev.category.slug === next.category.slug &&
   prev.category.count === next.category.count &&
   prev.category.name === next.category.name &&
   prev.category.image === next.category.image
@@ -169,78 +162,13 @@ function CategoryTileSkeleton({ index, isDark }: { index: number; isDark: boolea
   )
 }
 
-function SelectedCategoryHeader({
-  category,
-  count,
-  isDark,
-}: {
-  category: CategoryItem
-  count: number
-  isDark: boolean
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.38, ease }}
-      className={cn(
-        'mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between overflow-hidden rounded-[16px] border px-5 py-4',
-        isDark
-          ? 'border-violet-500/16 bg-[linear-gradient(135deg,rgba(124,58,237,0.09),rgba(34,211,238,0.045))]'
-          : 'border-violet-200/55 bg-gradient-to-r from-violet-50/80 to-cyan-50/40'
-      )}
-    >
-      <div className="flex items-center gap-3.5">
-        <div
-          className={cn(
-            'flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px]',
-            isDark ? 'bg-violet-500/20 text-violet-300' : 'bg-violet-100 text-violet-600'
-          )}
-        >
-          <Sparkles className="h-4 w-4" />
-        </div>
-        <div>
-          <div
-            className={cn(
-              'text-[9px] font-bold uppercase tracking-[0.18em]',
-              isDark ? 'text-violet-300/60' : 'text-violet-500/70'
-            )}
-          >
-            Category Focus
-          </div>
-          <h3
-            className={cn(
-              'font-display text-[1.18rem] font-bold tracking-tight leading-tight',
-              isDark ? 'text-white' : 'text-slate-900'
-            )}
-          >
-            {category.name}
-          </h3>
-        </div>
-      </div>
-      <span
-        className={cn(
-          'self-start sm:self-auto inline-flex items-center rounded-full border px-4 py-1.5 text-[10.5px] font-semibold',
-          isDark
-            ? 'border-white/[0.10] bg-white/[0.05] text-white/75'
-            : 'border-violet-200/70 bg-white text-slate-700 shadow-sm'
-        )}
-      >
-        {count} Available
-      </span>
-    </motion.div>
-  )
-}
-
 export default function OfferSection() {
   const { products } = useProductsData()
   const { categories } = useCategoriesData()
   const { loading } = useDataMeta()
   const { isDark } = useTheme()
   const { perfLow } = usePerfMode()
-  const [activeTab, setActiveTab] = useState('')
   const sectionRef = useRef<HTMLElement | null>(null)
-  const selectedCategoryRef = useRef<HTMLDivElement | null>(null)
   const headerReveal = useReveal({ distance: 16, duration: 0.42, margin: '0px 0px 16% 0px' })
   const { containerProps: categoryGridRevealProps, itemProps: categoryGridItemProps } = useRevealGroup({
     distance: 14,
@@ -267,56 +195,15 @@ export default function OfferSection() {
         .map(category => ({
           id: category.id,
           name: category.name,
-          description: category.description,
+          slug: category.slug,
           image: category.image,
           count: productsByCategory.get(category.id)?.length ?? 0,
         }))
+        .filter(c => c.slug.trim().length > 0)
         .filter(c => c.count > 0)
         .sort((a, b) => b.count - a.count),
     [categories, productsByCategory]
   )
-
-  const activeCat = useMemo(
-    () => categoryItems.find(category => category.id === activeTab),
-    [categoryItems, activeTab]
-  )
-  const filtered = useMemo(
-    () => (activeCat ? productsByCategory.get(activeCat.id) ?? [] : []),
-    [activeCat, productsByCategory]
-  )
-
-  const handleCategoryClick = useCallback((id: string) => {
-    setActiveTab(prev => (prev === id ? '' : id))
-  }, [])
-
-  useEffect(() => {
-    if (!activeCat || !selectedCategoryRef.current || typeof window === 'undefined') return
-
-    let frameOne = 0
-    let frameTwo = 0
-
-    frameOne = window.requestAnimationFrame(() => {
-      frameTwo = window.requestAnimationFrame(() => {
-        const header = document.querySelector('header')
-        const headerHeight = header instanceof HTMLElement ? header.offsetHeight : 0
-        const viewportPadding = 20
-        const rect = selectedCategoryRef.current?.getBoundingClientRect()
-        if (!rect) return
-
-        const top = window.scrollY + rect.top - headerHeight - viewportPadding
-        const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
-        const targetTop = Math.max(0, Math.min(top, maxTop))
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-        scrollToPosition(targetTop, { immediate: prefersReducedMotion })
-      })
-    })
-
-    return () => {
-      window.cancelAnimationFrame(frameOne)
-      window.cancelAnimationFrame(frameTwo)
-    }
-  }, [activeTab, activeCat])
 
   useEffect(() => {
     if (typeof window === 'undefined' || window.location.hash !== '#categories') return
@@ -381,7 +268,7 @@ export default function OfferSection() {
                 What We Offer
               </h2>
               <p className={cn('mt-4 max-w-xl text-[14.5px] leading-[1.72]', isDark ? 'text-slate-300/70' : 'text-slate-500')}>
-                Browse our hand-picked service categories. Select any category below to reveal tailored services, packages, and event-ready solutions.
+                Browse our hand-picked service categories. Open any category below to explore tailored services, packages, and event-ready solutions.
               </p>
             </div>
 
@@ -410,9 +297,7 @@ export default function OfferSection() {
                     <motion.div key={category.id} {...categoryGridItemProps}>
                       <CategoryTile
                         category={category}
-                        active={activeCat?.id === category.id}
                         isDark={isDark}
-                        onClick={() => handleCategoryClick(category.id)}
                         reducedVisualEffects={perfLow}
                       />
                     </motion.div>
@@ -424,43 +309,6 @@ export default function OfferSection() {
               )}
           </motion.div>
 
-          <AnimatePresence mode="wait">
-            {activeCat && (
-              <motion.div
-                ref={selectedCategoryRef}
-                key={activeCat.id}
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.4, ease }}
-                className={cn('pt-8 border-t', isDark ? 'border-white/[0.07]' : 'border-violet-100/55')}
-              >
-                <SelectedCategoryHeader category={activeCat} count={filtered.length} isDark={isDark} />
-
-                {filtered.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:gap-5 2xl:grid-cols-4">
-                    {filtered.map((product, index) => (
-                      <ProductCard key={product.slug} product={product} index={index} />
-                    ))}
-                  </div>
-                ) : (
-                  <div
-                    className={cn(
-                      'rounded-[18px] border border-dashed px-6 py-14 text-center',
-                      isDark ? 'border-white/[0.10] bg-white/[0.02] text-slate-500' : 'border-slate-200 bg-slate-50 text-slate-400'
-                    )}
-                  >
-                    <p className={cn('font-display text-[1.05rem] font-semibold', isDark ? 'text-white/52' : 'text-slate-700')}>
-                      No services in this category yet
-                    </p>
-                    <p className={cn('mt-2 text-[13px]', isDark ? 'text-slate-600' : 'text-slate-400')}>
-                      Check back soon or browse other categories.
-                    </p>
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </div>
     </section>
