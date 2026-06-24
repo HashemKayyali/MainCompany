@@ -209,8 +209,9 @@ export default function AdminUsersPage() {
     })
     if (!ok) return
     try {
+      const redirectTo = `${window.location.origin}/update-password`
       const { error } = await supabase.auth.resetPasswordForEmail(target.email, {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo,
       })
       if (error) throw error
       toast(`Reset email sent to ${target.email}`, 'success')

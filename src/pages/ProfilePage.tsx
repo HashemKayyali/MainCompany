@@ -203,8 +203,9 @@ export default function ProfilePage() {
     setResetSending(true)
 
     try {
+      const redirectTo = `${window.location.origin}/update-password`
       const { error } = await supabase.auth.resetPasswordForEmail(accountEmail, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo,
       })
 
       if (error) throw error
