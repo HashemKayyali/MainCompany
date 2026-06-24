@@ -3,6 +3,9 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/reset-password", "destination": "/index.html" },
+    { "source": "/update-password", "destination": "/index.html" },
+    { "source": "/auth/callback", "destination": "/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

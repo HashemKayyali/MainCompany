@@ -282,5 +282,5 @@ Recommended next steps based on the current repository state:
 
 git status
 git add .
-git commit -m "Update login3  "
+git commit -m "Update resetpassword  "
 git push origin main
