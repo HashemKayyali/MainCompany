@@ -10,7 +10,7 @@ export function EventiesLogo({
   isDark: boolean
 }) {
   return (
-    <span className="flex h-[34px] w-[112px] shrink-0 items-center sm:h-10 sm:w-[130px] lg:h-9 lg:w-[118px] xl:h-10 xl:w-[130px]">
+    <span className="flex h-[38px] w-[126px] shrink-0 items-center sm:h-11 sm:w-[146px] lg:h-[41px] lg:w-[136px] xl:h-11 xl:w-[146px]">
       <img
         src={BRAND_LOGO_HORIZONTAL}
         alt="Eventies"

@@ -20,6 +20,7 @@ const {
   AuthCallback,
   ProfilePage,
   ResetPasswordPage,
+  UpdatePasswordPage,
   RentalCartPage,
   CheckoutPage,
   OrderSummaryPage,
@@ -63,7 +64,6 @@ export const router = createBrowserRouter([
       { path: 'about', element: <S><AboutPage /></S> },
       { path: 'contact', element: <S><ContactPage /></S> },
       { path: 'profile', element: <S><ProfilePage /></S> },
-      { path: 'reset-password', element: <S><ResetPasswordPage /></S> },
       { path: 'rental-cart', element: <S><RentalCartPage /></S> },
       { path: 'checkout', element: <S><CheckoutPage /></S> },
       { path: 'order-summary/:requestNumber', element: <S><OrderSummaryPage /></S> },
@@ -79,6 +79,9 @@ export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/user-login', element: <UserLoginRedirect /> },
   { path: '/register', element: <RegisterPage /> },
+  { path: '/reset-password', element: <ResetPasswordPage /> },
+  { path: '/forgot-password', element: <ResetPasswordPage /> },
+  { path: '/update-password', element: <UpdatePasswordPage /> },
 
   {
     path: '/admin',

@@ -282,5 +282,5 @@ Recommended next steps based on the current repository state:
 
 git status
 git add .
-git commit -m "Update Logo  "
+git commit -m "Update login  "
 git push origin main

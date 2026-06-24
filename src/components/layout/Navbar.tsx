@@ -577,12 +577,12 @@ export default function Navbar() {
 
           {/* ─── Nav bar rows (ref covers both rows so --app-navbar-height includes chip row) ─── */}
           <div ref={navbarBarRef}>
-          <div className="flex h-[3.875rem] w-full items-center justify-between px-4 sm:h-[4.375rem] sm:px-6 lg:h-[3.65rem] lg:px-8 2xl:px-10">
+          <div className="flex h-[4.25rem] w-full items-center justify-between px-4 sm:h-[4.75rem] sm:px-6 lg:h-[4.15rem] lg:px-8 2xl:px-10">
 
             {/* ── Logo ── */}
             <Link
               to="/"
-              className={`flex min-w-0 items-center transition-opacity hover:opacity-88 lg:min-w-[180px] ${focus}`}
+              className={`flex min-w-0 items-center transition-opacity hover:opacity-88 lg:min-w-[200px] ${focus}`}
             >
               <EventiesLogo heroMode={heroMode} isDark={isDark} />
             </Link>
@@ -708,7 +708,7 @@ export default function Navbar() {
                       : 'border-violet-300/70 bg-white shadow-[0_24px_64px_-12px_rgba(46,10,114,0.28),0_8px_22px_-6px_rgba(89,23,196,0.18),inset_0_1px_0_rgba(255,255,255,0.95)]'
                   }`}
                   style={{
-                    maxHeight: 'calc(100dvh - 5.5rem)',
+                    maxHeight: 'calc(100dvh - 6rem)',
                     paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))',
                   }}
                 >

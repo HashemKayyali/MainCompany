@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useMemo } from 'react'
 import { useData } from '../../contexts/DataContext'
 import { useUser } from '../../contexts/UserContext'
+import { BRAND_ICON } from '../../config/brand'
 import UserAvatar from '../ui/UserAvatar'
 import { cn } from '../../utils/cn'
 
@@ -270,8 +271,16 @@ export default function Sidebar({
         {/* Footer brand mark */}
         <div className="relative shrink-0 border-t border-white/[0.07] px-5 py-4">
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-[9px] bg-[linear-gradient(135deg,#7c3aed,#9d6bff)] text-[10px] font-black text-white">
-              Ev
+            <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-[9px] bg-white/[0.06] ring-1 ring-white/[0.08]">
+              <img
+                src={BRAND_ICON}
+                alt="Eventies"
+                width={28}
+                height={28}
+                className="block h-full w-full object-contain"
+                loading="lazy"
+                decoding="async"
+              />
             </span>
             <span className="text-[11px] font-bold tracking-[0.04em] text-violet-100/55">
               Eventies Admin

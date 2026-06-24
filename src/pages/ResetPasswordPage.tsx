@@ -1,269 +1,140 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useTheme } from '../contexts/ThemeContext'
-import { useToast } from '../contexts/ToastContext'
-import { useSession } from '../contexts/SessionContext'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { ArrowLeft, Loader2, Mail } from 'lucide-react'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { getErrorMessage } from '../lib/errors'
-import { supabase } from '../lib/supabase'
+import { isSupabaseConfigured, supabase } from '../lib/supabase'
+import { cn } from '../utils/cn'
 
 export default function ResetPasswordPage() {
   usePageMeta({ title: 'Reset Password', noIndex: true })
 
-  const { authUser, loading: sessionLoading } = useSession()
-  const { isDark } = useTheme()
-  const { toast } = useToast()
-  const navigate = useNavigate()
-
-  const [password, setPassword] = useState('')
-  const [confirm, setConfirm] = useState('')
+  const [email, setEmail] = useState('')
   const [saving, setSaving] = useState(false)
-  const [done, setDone] = useState(false)
+  const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
 
-  const hasRecoveryTokens = useMemo(() => {
-    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
-    return Boolean(
-      hashParams.get('type') === 'recovery' ||
-      hashParams.get('access_token') ||
-      hashParams.get('refresh_token')
-    )
-  }, [])
-
-  const [linkChecked, setLinkChecked] = useState(false)
-
-  const txt = isDark ? 'text-white' : 'text-gray-900'
-  const sub = isDark ? 'text-purple-200/70' : 'text-gray-500'
-  const muted = isDark ? 'text-purple-300/40' : 'text-gray-400'
-  const ready = !!authUser
-
-  useEffect(() => {
-    if (sessionLoading) return
-    if (authUser) {
-      setLinkChecked(true)
-      return
-    }
-
-    const timer = window.setTimeout(() => {
-      setLinkChecked(true)
-      setError(
-        hasRecoveryTokens
-          ? 'This reset link may be expired or invalid. Please request a new one.'
-          : 'Open the password reset link from your email to choose a new password.'
-      )
-    }, 800)
-
-    return () => window.clearTimeout(timer)
-  }, [authUser, hasRecoveryTokens, sessionLoading])
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
     setError('')
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
+    if (!email.trim()) {
+      setError('Enter your email address')
       return
     }
 
-    if (password !== confirm) {
-      setError('Passwords do not match')
+    if (!isSupabaseConfigured()) {
+      setError('Authentication is not configured')
       return
     }
 
     setSaving(true)
 
     try {
-      const { error: updateError } = await supabase.auth.updateUser({ password })
-      if (updateError) throw updateError
+      const redirectTo = `${window.location.origin}/update-password`
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo,
+      })
 
-      await supabase.auth.signOut()
-      setDone(true)
-      toast('Password updated successfully!', 'success')
-      window.setTimeout(() => navigate('/login', { replace: true }), 1200)
+      if (resetError) throw resetError
+
+      setSent(true)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to update password'))
+      setError(getErrorMessage(err, 'Failed to send reset link'))
     } finally {
       setSaving(false)
     }
   }
 
   return (
-    <section className="site-section">
-      <div className="site-container max-w-[32rem]">
-        <div className="mb-8 text-center">
-          <div
-            className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${
-              isDark
-                ? 'border border-violet-500/20 bg-violet-500/10'
-                : 'border border-violet-200 bg-violet-50'
-            }`}
-          >
-            <svg
-              width="24"
-              height="24"
-              fill="none"
-              stroke={isDark ? '#a78bfa' : '#7c3aed'}
-              strokeWidth="1.8"
-              strokeLinecap="round"
-            >
-              <rect x="5" y="11" width="14" height="10" rx="2" />
-              <path d="M7 11V8a5 5 0 1 1 10 0v3" />
-              <circle cx="12" cy="16" r="1.5" />
-            </svg>
+    <main className="relative flex h-[100dvh] min-h-[100dvh] w-full items-center justify-center overflow-x-hidden bg-[#fbf8ff] p-4">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(217,70,239,0.10),transparent_30%),radial-gradient(circle_at_86%_76%,rgba(124,58,237,0.08),transparent_32%)]" />
+
+      <section className="relative z-10 w-full max-w-[420px] overflow-hidden rounded-[28px] border border-slate-200/90 bg-white p-6 shadow-[0_30px_100px_-60px_rgba(76,29,149,0.35)] sm:p-8">
+        <div className="mb-6 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-violet-200 bg-violet-50">
+            <Mail size={22} className="text-violet-600" />
           </div>
-          <h1 className={`mt-4 font-display text-[1.85rem] font-bold ${txt}`}>
-            {done ? 'Password Updated' : 'Reset Your Password'}
+          <h1 className="mt-4 font-display text-[1.6rem] font-black tracking-[-0.04em] text-[#12051f] sm:text-[1.85rem]">
+            {sent ? 'Check Your Inbox' : 'Forgot Password'}
           </h1>
-          <p className={`mt-2 text-sm ${sub}`}>
-            {done ? 'You can now sign in with your new password.' : 'Enter your new password below.'}
+          <p className="mt-2 text-[12.5px] font-medium leading-relaxed text-[#150628]/70">
+            {sent
+              ? `If this email exists in our system, we sent a reset link to ${email}.`
+              : 'Enter your email and we will send you a reset link.'}
           </p>
         </div>
 
-        {done ? (
-          <div className="text-center">
-            <div
-              className={`inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-medium ${
-                isDark
-                  ? 'border border-emerald-400/20 bg-emerald-400/10 text-emerald-300'
-                  : 'border border-emerald-200 bg-emerald-50 text-emerald-700'
-              }`}
+        {sent ? (
+          <div className="space-y-4 text-center">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-[12px] font-semibold text-emerald-700">
+              If this account exists, you will receive a reset link shortly.
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setSent(false)
+                setEmail('')
+                setError('')
+              }}
+              className="text-[12.5px] font-semibold text-[#150628]/70 hover:text-violet-700 hover:underline"
             >
-              Redirecting you to sign in...
-            </div>
-            <div className="mt-5">
-              <Link to="/login" className="btn-primary inline-flex">
-                Go to Sign In
-              </Link>
-            </div>
-          </div>
-        ) : sessionLoading || (!linkChecked && !error) ? (
-          <div className="py-10 text-center">
-            <div
-              className={`mx-auto h-8 w-8 animate-spin rounded-full border-2 border-t-transparent ${
-                isDark ? 'border-purple-400' : 'border-violet-500'
-              }`}
-            />
-            <p className={`mt-4 text-sm ${sub}`}>Verifying reset link...</p>
-          </div>
-        ) : error && !ready ? (
-          <div className="text-center">
-            <div
-              className={`rounded-2xl px-5 py-4 text-sm ${
-                isDark
-                  ? 'border border-red-400/20 bg-red-400/10 text-red-300'
-                  : 'border border-red-200 bg-red-50 text-red-600'
-              }`}
-            >
-              {error}
-            </div>
-            <div className="mt-5 flex flex-col items-center gap-3">
-              <Link to="/login" className="btn-primary inline-flex">
-                Back to Sign In
-              </Link>
-              <Link
-                to="/"
-                className={`text-sm ${
-                  isDark ? 'text-purple-200/50 hover:text-purple-200/80' : 'text-gray-400 hover:text-gray-600'
-                }`}
-              >
-                Back to Home
-              </Link>
-            </div>
+              Send another link
+            </button>
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="glass rounded-2xl p-5">
-              <label className={`mb-2 block text-[12px] font-mono uppercase tracking-wider ${muted}`}>
-                New Password
-              </label>
-              <input
-                className={`form-field ${error ? '!border-red-400/40' : ''}`}
-                type="password"
-                value={password}
-                onChange={(event) => {
-                  setPassword(event.target.value)
-                  setError('')
-                }}
-                placeholder="At least 6 characters"
-                minLength={6}
-                autoFocus
-              />
-            </div>
-
-            <div className="glass rounded-2xl p-5">
-              <label className={`mb-2 block text-[12px] font-mono uppercase tracking-wider ${muted}`}>
-                Confirm Password
-              </label>
-              <input
-                className={`form-field ${error ? '!border-red-400/40' : ''}`}
-                type="password"
-                value={confirm}
-                onChange={(event) => {
-                  setConfirm(event.target.value)
-                  setError('')
-                }}
-                placeholder="Repeat your password"
-                onKeyDown={(event) => event.key === 'Enter' && void handleSubmit()}
-              />
-            </div>
-
-            {password && (
-              <div className="flex gap-1">
-                {[1, 2, 3, 4].map((index) => {
-                  const strength =
-                    password.length >= 12 ? 4 : password.length >= 8 ? 3 : password.length >= 6 ? 2 : 1
-                  const active = index <= strength
-                  const color =
-                    strength <= 1
-                      ? 'bg-red-500'
-                      : strength === 2
-                        ? 'bg-amber-500'
-                        : strength === 3
-                          ? 'bg-cyan-500'
-                          : 'bg-emerald-500'
-
-                  return (
-                    <div
-                      key={index}
-                      className={`h-1 flex-1 rounded-full transition-all ${
-                        active ? color : isDark ? 'bg-white/[0.06]' : 'bg-gray-200'
-                      }`}
-                    />
-                  )
-                })}
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div>
+              <label className="mb-1.5 block text-[11px] font-bold text-[#150628]/70">Email</label>
+              <div className="relative">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={event => {
+                    setEmail(event.target.value)
+                    setError('')
+                  }}
+                  placeholder="you@company.com"
+                  autoComplete="email"
+                  inputMode="email"
+                  autoFocus
+                  className={cn(
+                    'h-[44px] w-full rounded-xl border bg-[#f8f5fc]/95 pl-9 pr-3 text-[12.5px] font-semibold text-[#150628] placeholder:text-xs placeholder:text-slate-400/70 focus:bg-white focus:outline-none focus:ring-4 focus:ring-violet-500/10',
+                    error ? 'border-red-300 focus:border-red-400' : 'border-slate-200/90 focus:border-violet-400'
+                  )}
+                />
+                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-violet-500/70">
+                  <Mail size={15} />
+                </span>
               </div>
-            )}
+            </div>
 
             {error && (
-              <div
-                className={`rounded-xl px-4 py-3 text-sm ${
-                  isDark ? 'bg-red-400/10 text-red-400' : 'bg-red-50 text-red-600'
-                }`}
-              >
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-[12px] font-semibold text-red-600">
                 {error}
               </div>
             )}
 
             <button
-              onClick={() => void handleSubmit()}
-              disabled={saving || !password || !confirm}
-              className="btn-primary w-full !rounded-2xl disabled:opacity-40"
+              type="submit"
+              disabled={saving || !email.trim()}
+              className="flex h-[44px] w-full items-center justify-center rounded-xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-700 px-4 text-[12.5px] font-black text-white shadow-[0_14px_32px_-20px_rgba(124,58,237,0.65)] transition-all duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
             >
-              {saving ? 'Updating...' : 'Update Password'}
+              {saving ? <Loader2 size={16} className="animate-spin" /> : 'Send reset link'}
             </button>
-
-            <div className="text-center">
-              <Link
-                to="/"
-                className={`text-sm ${
-                  isDark ? 'text-purple-200/50 hover:text-purple-200/80' : 'text-gray-400 hover:text-gray-600'
-                }`}
-              >
-                Back to Home
-              </Link>
-            </div>
-          </div>
+          </form>
         )}
-      </div>
-    </section>
+
+        <div className="mt-5 flex items-center justify-center">
+          <Link
+            to="/login"
+            className="flex items-center gap-1.5 text-[12.5px] font-semibold text-[#150628]/70 transition-colors hover:text-violet-700"
+          >
+            <ArrowLeft size={14} />
+            Back to sign in
+          </Link>
+        </div>
+      </section>
+    </main>
   )
 }

@@ -41,7 +41,7 @@ export default function AuthCallback() {
       }
 
       if (hashParams.get('type') === 'recovery') {
-        window.location.replace(`/reset-password${window.location.hash}`)
+        window.location.replace(`/update-password${window.location.hash}`)
         return
       }
 
