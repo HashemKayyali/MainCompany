@@ -2,11 +2,26 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
-    { "source": "/reset-password", "destination": "/index.html" },
-    { "source": "/update-password", "destination": "/index.html" },
-    { "source": "/auth/callback", "destination": "/index.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/reset-password",
+      "destination": "/"
+    },
+    {
+      "source": "/update-password",
+      "destination": "/"
+    },
+    {
+      "source": "/auth/callback",
+      "destination": "/"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/"
+    }
   ],
   "headers": [
     {
