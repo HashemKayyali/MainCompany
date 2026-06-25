@@ -79,16 +79,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
       typeof metadata.name === 'string' && metadata.name.trim() ? metadata.name.trim() : null
     const metadataPhone =
       typeof metadata.phone === 'string' && metadata.phone.trim() ? metadata.phone.trim() : ''
-    const metadataRole =
-      typeof metadata.role === 'string' && metadata.role.trim() ? metadata.role.trim() : null
 
+    // Never derive admin rights from user-controllable user_metadata.
+    // The DB profile is the only trusted source for role.
     return {
       id: authAccount.id,
       email: authAccount.email || '',
       name: metadataName || authAccount.email?.split('@')[0] || 'User',
       phone: metadataPhone,
       createdAt: authAccount.created_at || new Date().toISOString(),
-      role: metadataRole,
+      role: null,
     }
   }, [])
 

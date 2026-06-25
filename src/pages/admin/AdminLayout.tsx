@@ -1,5 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { usePageMeta } from '../../hooks/usePageMeta'
 import { useUser } from '../../contexts/UserContext'
 import Sidebar from '../../components/admin/Sidebar'
 import UserAvatar from '../../components/ui/UserAvatar'
@@ -107,6 +108,8 @@ function Icon({ name, className }: { name: 'menu' | 'logout' | 'chev' | 'externa
 }
 
 export default function AdminLayout() {
+  usePageMeta({ title: 'Admin', noIndex: true })
+
   const { currentUser, logout } = useUser()
   const { pathname } = useLocation()
   const title = usePageTitle(pathname)

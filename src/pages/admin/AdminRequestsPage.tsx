@@ -4,6 +4,7 @@ import AdminActionButton from '../../components/admin/AdminActionButton'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useToast } from '../../contexts/ToastContext'
+import { useDialog } from '../../contexts/DialogContext'
 import { approveRentalRequest, listAdminRequests, updateRequestStatus } from '../../services/admin-requests.service'
 import type { AdminRequestListItem, RequestType } from '../../types/commerce'
 import { getCommerceErrorMessage } from '../../utils/commerce'
@@ -14,6 +15,7 @@ type RequestFilter = 'all' | RequestType
 export default function AdminRequestsPage() {
   const { isDark } = useTheme()
   const { toast } = useToast()
+  const dialog = useDialog()
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [requests, setRequests] = useState<AdminRequestListItem[]>([])
@@ -70,6 +72,14 @@ export default function AdminRequestsPage() {
   }
 
   const quickReject = async (request: AdminRequestListItem) => {
+    const ok = await dialog.confirm({
+      title: 'Reject Request?',
+      message: `This will permanently reject ${request.requestNumber}.`,
+      confirmLabel: 'Reject',
+      variant: 'danger',
+    })
+    if (!ok) return
+
     setWorkingRequestId(request.id)
     try {
       await updateRequestStatus(request.type, request.id, 'rejected', 'Rejected from requests list')

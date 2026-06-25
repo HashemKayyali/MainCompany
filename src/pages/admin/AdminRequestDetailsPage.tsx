@@ -5,6 +5,7 @@ import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import RequestStatusBadge from '../../components/requests/RequestStatusBadge'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useToast } from '../../contexts/ToastContext'
+import { useDialog } from '../../contexts/DialogContext'
 import { getRentalAvailability } from '../../services/availability.service'
 import {
   approveRentalRequest,
@@ -57,6 +58,7 @@ export default function AdminRequestDetailsPage() {
   const { type, id } = useParams<{ type: RequestType; id: string }>()
   const { isDark } = useTheme()
   const { toast } = useToast()
+  const dialog = useDialog()
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [request, setRequest] = useState<RentalRequestDetails | PurchaseQuoteRequestDetails | null>(null)
@@ -140,8 +142,21 @@ export default function AdminRequestDetailsPage() {
     return isRental ? RENTAL_ACTIONS[request.status] || [] : PURCHASE_ACTIONS[request.status] || []
   }, [isRental, request])
 
-  const handleStatusChange = async (nextStatus: string, fallbackNote: string) => {
+  const isDestructiveStatus = (nextStatus: string) =>
+    ['rejected', 'cancelled', 'lost'].includes(nextStatus)
+
+  const handleStatusChange = async (nextStatus: string, fallbackNote: string, label: string) => {
     if (!request || !type) return
+
+    if (isDestructiveStatus(nextStatus)) {
+      const ok = await dialog.confirm({
+        title: `${label}?`,
+        message: `This will permanently set ${request.requestNumber} to ${nextStatus.replace(/_/g, ' ')}.`,
+        confirmLabel: label,
+        variant: 'danger',
+      })
+      if (!ok) return
+    }
 
     setSubmittingAction(true)
     try {
@@ -389,7 +404,7 @@ export default function AdminRequestDetailsPage() {
                         key={action.label}
                         tone={action.tone || 'neutral'}
                         disabled={submittingAction}
-                        onClick={() => void handleStatusChange(action.status, `${action.label} from admin request details`)}
+                        onClick={() => void handleStatusChange(action.status, `${action.label} from admin request details`, action.label)}
                       >
                         {submittingAction ? 'Working...' : action.label}
                       </AdminActionButton>

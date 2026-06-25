@@ -102,6 +102,7 @@ export const router = createBrowserRouter([
       { path: 'logs', element: <S><AdminLogsPage /></S> },
       { path: 'requests', element: <S><AdminRequestsPage /></S> },
       { path: 'requests/:type/:id', element: <S><AdminRequestDetailsPage /></S> },
+      { path: '*', element: <S><NotFoundPage /></S> },
     ],
   },
 ])

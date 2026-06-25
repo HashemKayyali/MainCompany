@@ -22,18 +22,12 @@ export default function UpdatePasswordPage() {
 
   const checkedRef = useRef(false)
 
-  const searchParams = useMemo(() => new URLSearchParams(window.location.search), [window.location.search])
-  const hashParams = useMemo(() => new URLSearchParams(window.location.hash.replace(/^#/, '')), [window.location.hash])
+  const searchParams = useMemo(() => new URLSearchParams(window.location.search), [])
+  const hashParams = useMemo(() => new URLSearchParams(window.location.hash.replace(/^#/, '')), [])
 
-  const hasCode = useMemo(() => Boolean(searchParams.get('code')), [searchParams])
-  const hasRecoveryHash = useMemo(
-    () =>
-      Boolean(
-        hashParams.get('type') === 'recovery' ||
-        hashParams.get('access_token') ||
-        hashParams.get('refresh_token')
-      ),
-    [hashParams]
+  const hasCode = Boolean(searchParams.get('code'))
+  const hasRecoveryHash = Boolean(
+    hashParams.get('type') === 'recovery' || hashParams.get('access_token')
   )
 
   useEffect(() => {
@@ -48,11 +42,19 @@ export default function UpdatePasswordPage() {
       }
 
       try {
-        if (hasCode) {
-          const code = searchParams.get('code')
-          if (code) {
-            const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
-            if (exchangeError) throw exchangeError
+        const code = searchParams.get('code')
+        if (code) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+          if (exchangeError) throw exchangeError
+        } else if (hasRecoveryHash) {
+          const accessToken = hashParams.get('access_token')
+          const refreshToken = hashParams.get('refresh_token')
+          if (accessToken && refreshToken) {
+            const { error: sessionError } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            })
+            if (sessionError) throw sessionError
           }
         }
 
@@ -73,7 +75,7 @@ export default function UpdatePasswordPage() {
     }
 
     void checkRecoverySession()
-  }, [hasCode, hasRecoveryHash, searchParams])
+  }, [searchParams, hashParams, hasRecoveryHash])
 
   const strength = useMemo(() => {
     if (!password) return 0
@@ -176,8 +178,9 @@ export default function UpdatePasswordPage() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label className="mb-1.5 block text-[11px] font-bold text-[#150628]/70">New Password</label>
+              <label htmlFor="new-password" className="mb-1.5 block text-[11px] font-bold text-[#150628]/70">New Password</label>
               <input
+                id="new-password"
                 type="password"
                 value={password}
                 onChange={event => setPassword(event.target.value)}
@@ -192,8 +195,9 @@ export default function UpdatePasswordPage() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-[11px] font-bold text-[#150628]/70">Confirm Password</label>
+              <label htmlFor="confirm-password" className="mb-1.5 block text-[11px] font-bold text-[#150628]/70">Confirm Password</label>
               <input
+                id="confirm-password"
                 type="password"
                 value={confirmPassword}
                 onChange={event => setConfirmPassword(event.target.value)}

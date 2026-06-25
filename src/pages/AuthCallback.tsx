@@ -6,6 +6,31 @@ import { useSession } from '../contexts/SessionContext'
 
 type CallbackPhase = 'processing' | 'redirecting' | 'error'
 
+const AUTH_PATHS = new Set([
+  '/login',
+  '/register',
+  '/user-login',
+  '/reset-password',
+  '/forgot-password',
+  '/update-password',
+  '/auth/callback',
+])
+
+function getFriendlyCallbackError(raw: string): string {
+  const lower = raw.toLowerCase()
+  if (lower.includes('access_denied')) return 'Sign-in was cancelled or denied.'
+  if (lower.includes('invalid request')) return 'The sign-in link is invalid or has expired.'
+  if (lower.includes('server_error')) return 'We could not complete sign-in due to a provider error.'
+  if (lower.includes('popup_closed')) return 'The sign-in window was closed before finishing.'
+  return 'We could not complete that sign-in. Please try again.'
+}
+
+function getPostAuthRedirect(redirectParam: string | null, fallback = '/') {
+  const safe = redirectParam ? getSafeRedirectPath(redirectParam, fallback) : fallback
+  const normalized = safe.split('?')[0]?.toLowerCase() || safe
+  return AUTH_PATHS.has(normalized) ? fallback : safe
+}
+
 export default function AuthCallback() {
   usePageMeta({ title: 'Auth Callback', noIndex: true })
 
@@ -17,7 +42,7 @@ export default function AuthCallback() {
   const redirectTarget = useMemo(() => {
     const params = new URLSearchParams(window.location.search)
     const redirectParam = params.get('redirect')
-    return redirectParam ? getSafeRedirectPath(redirectParam, '/') : '/'
+    return getPostAuthRedirect(redirectParam, '/')
   }, [])
 
   useEffect(() => {
@@ -35,7 +60,7 @@ export default function AuthCallback() {
       if (callbackError) {
         if (!cancelled) {
           setPhase('error')
-          setErrorMessage(callbackError)
+          setErrorMessage(getFriendlyCallbackError(callbackError))
         }
         return
       }
@@ -47,13 +72,13 @@ export default function AuthCallback() {
 
       const authCode = searchParams.get('code')
       if (authCode) {
-        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href)
+        const { error } = await supabase.auth.exchangeCodeForSession(authCode)
 
         if (cancelled) return
 
         if (error) {
           setPhase('error')
-          setErrorMessage(error.message)
+          setErrorMessage(getFriendlyCallbackError(error.message))
           return
         }
       }

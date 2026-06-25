@@ -143,7 +143,10 @@ export const supabase = createClient<Database, 'public'>(
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true,
+      // Disabled to avoid racing with explicit exchangeCodeForSession calls in
+      // AuthCallback and UpdatePasswordPage. We handle the OAuth code / recovery
+      // hash exchange manually so we can reliably show success/error UI.
+      detectSessionInUrl: false,
       storageKey: SUPABASE_STORAGE_KEY,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       storage: authStorageAdapter as any,

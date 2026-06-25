@@ -7,6 +7,7 @@ import { BRAND_LOGO_HORIZONTAL } from '../config/brand'
 import { getSafeRedirectPath } from '../lib/auth-routing'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { cn } from '../utils/cn'
+import { usePageMeta } from '../hooks/usePageMeta'
 
 type Mode = 'login' | 'register'
 
@@ -18,11 +19,32 @@ type AuthLocationState = {
 
 const AUTH_HERO_IMAGE = '/images/hero-bg-event.webp'
 
-const AUTH_PATHS = new Set(['/login', '/register', '/reset-password', '/update-password', '/forgot-password', '/auth/callback'])
+const AUTH_PATHS = new Set([
+  '/login',
+  '/register',
+  '/user-login',
+  '/reset-password',
+  '/forgot-password',
+  '/update-password',
+  '/auth/callback',
+])
 
 function getFriendlyAuthError(message: string) {
-  if (message.toLowerCase().includes('invalid login credentials')) {
+  const lower = message.toLowerCase()
+  if (lower.includes('invalid login credentials')) {
     return 'Email or password is incorrect. Please try again.'
+  }
+  if (lower.includes('user already registered') || lower.includes('already registered')) {
+    return 'An account with this email already exists. Try signing in.'
+  }
+  if (lower.includes('email not confirmed') || lower.includes('email_confirm')) {
+    return 'Please confirm your email before signing in.'
+  }
+  if (lower.includes('rate limit')) {
+    return 'Too many attempts. Please wait a moment and try again.'
+  }
+  if (lower.includes('network') || lower.includes('fetch')) {
+    return 'Network error. Please check your connection and try again.'
   }
   return message
 }
@@ -213,6 +235,8 @@ function LeftHeroPanel() {
 }
 
 export default function AuthPage() {
+  usePageMeta({ title: 'Account', noIndex: true })
+
   const location = useLocation()
   const { pathname } = location
   const navigate = useNavigate()
@@ -342,7 +366,6 @@ export default function AuthPage() {
       setSuccess(result.message)
       navigate(defaultDestination, { replace: true })
     } catch (err: unknown) {
-      console.error('[Auth] login exception:', err)
       setError('Login failed. Please try again.')
     } finally {
       setBusy(false)
@@ -362,7 +385,7 @@ export default function AuthPage() {
       const result = await register(name.trim(), email.trim(), phone.trim(), password)
 
       if (!result.ok) {
-        setError(result.message || 'Register failed')
+        setError(getFriendlyAuthError(result.message || 'Register failed'))
         return
       }
 
@@ -566,8 +589,9 @@ export default function AuthPage() {
 
                   <form onSubmit={handleLogin} className="space-y-2.5">
                     <div>
-                      <label className={labelClass}>Email</label>
+                      <label htmlFor="auth-email" className={labelClass}>Email</label>
                       <AuthInput
+                        id="auth-email"
                         type="email"
                         icon={Mail}
                         value={email}
@@ -582,8 +606,9 @@ export default function AuthPage() {
                     </div>
 
                     <div>
-                      <label className={labelClass}>Password</label>
+                      <label htmlFor="auth-password" className={labelClass}>Password</label>
                       <AuthInput
+                        id="auth-password"
                         type={showPassword ? 'text' : 'password'}
                         icon={Lock}
                         value={password}
@@ -670,8 +695,9 @@ export default function AuthPage() {
 
                   <form onSubmit={handleRegister} className="space-y-2.5">
                     <div>
-                      <label className={labelClass}>Full Name *</label>
+                      <label htmlFor="auth-name" className={labelClass}>Full Name *</label>
                       <AuthInput
+                        id="auth-name"
                         icon={User}
                         value={name}
                         onChange={e => setName(e.target.value)}
@@ -683,8 +709,9 @@ export default function AuthPage() {
 
                     <div className="grid gap-2.5 sm:grid-cols-2">
                       <div>
-                        <label className={labelClass}>Email *</label>
+                        <label htmlFor="auth-register-email" className={labelClass}>Email *</label>
                         <AuthInput
+                          id="auth-register-email"
                           type="email"
                           icon={Mail}
                           value={email}
@@ -697,10 +724,11 @@ export default function AuthPage() {
                       </div>
 
                       <div>
-                        <label className={labelClass}>
+                        <label htmlFor="auth-phone" className={labelClass}>
                           Phone <span className="text-slate-400">optional</span>
                         </label>
                         <AuthInput
+                          id="auth-phone"
                           type="tel"
                           icon={Phone}
                           value={phone}
@@ -714,8 +742,9 @@ export default function AuthPage() {
 
                     <div className="grid gap-2.5 sm:grid-cols-2">
                       <div>
-                        <label className={labelClass}>Password *</label>
+                        <label htmlFor="auth-register-password" className={labelClass}>Password *</label>
                         <AuthInput
+                          id="auth-register-password"
                           type={showPassword ? 'text' : 'password'}
                           icon={Lock}
                           value={password}
@@ -729,8 +758,9 @@ export default function AuthPage() {
                         />
                       </div>
                       <div>
-                        <label className={labelClass}>Confirm *</label>
+                        <label htmlFor="auth-confirm" className={labelClass}>Confirm *</label>
                         <AuthInput
+                          id="auth-confirm"
                           type={showConfirm ? 'text' : 'password'}
                           icon={Lock}
                           value={confirm}
