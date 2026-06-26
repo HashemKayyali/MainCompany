@@ -428,15 +428,21 @@ export default function AuthPage() {
 
     setSocialLoading(provider)
 
-    const callbackUrl = new URL('/auth/callback', window.location.origin)
+    // Preserve the intended post-login destination across the OAuth redirect.
+    // The redirect URL passed to Supabase must be an exact allow-list match, so
+    // we keep the return path in sessionStorage instead of query params.
     if (redirectTarget && redirectTarget !== '/') {
-      callbackUrl.searchParams.set('redirect', redirectTarget)
+      try {
+        window.sessionStorage.setItem('eventies:oauth:redirect', redirectTarget)
+      } catch {
+        // ignore storage errors
+      }
     }
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: callbackUrl.toString(),
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     })
 
