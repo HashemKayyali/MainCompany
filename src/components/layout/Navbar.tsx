@@ -187,9 +187,9 @@ export default function Navbar() {
       const p = Math.min(1, Math.max(0, y / 60)) // 0 → 1 over 60px
 
       el.style.backgroundColor = `rgba(255, 255, 255, ${p * 0.92})`
-      el.style.borderBottomColor = `rgba(196, 165, 255, ${p * 0.55})`
+      el.style.borderBottomColor = `rgba(226, 232, 240, ${p * 0.55})`
       el.style.boxShadow =
-        p > 0.04 ? `0 2px 28px rgba(46, 10, 114, ${p * 0.16})` : 'none'
+        p > 0.04 ? `0 2px 28px rgba(15, 23, 42, ${p * 0.12})` : 'none'
 
       const blur = `${(p * 16).toFixed(2)}px`
       const filter = p > 0.04 ? `blur(${blur}) saturate(1.2)` : 'none'
@@ -385,43 +385,43 @@ export default function Navbar() {
     ? 'border-b border-transparent'
     : scrolled
       ? perfLow
-        ? 'border-b border-violet-300/55 bg-white/[0.97] shadow-[0_2px_28px_rgba(46,10,114,0.14)]'
-        : 'border-b border-violet-300/55 bg-white/[0.92] backdrop-blur-xl shadow-[0_2px_28px_rgba(46,10,114,0.14)]'
+        ? 'border-b border-slate-200/70 bg-white/[0.97] shadow-[0_2px_28px_rgba(15,23,42,0.12)]'
+        : 'border-b border-slate-200/70 bg-white/[0.92] backdrop-blur-xl shadow-[0_2px_28px_rgba(15,23,42,0.12)]'
       : perfLow
-        ? 'border-b border-violet-200/55 bg-white/[0.95]'
-        : 'border-b border-violet-200/55 bg-white/[0.86] backdrop-blur-xl shadow-[0_1px_22px_rgba(46,10,114,0.08)]'
+        ? 'border-b border-slate-200/50 bg-white/[0.95]'
+        : 'border-b border-slate-200/50 bg-white/[0.86] backdrop-blur-xl shadow-[0_1px_22px_rgba(15,23,42,0.06)]'
 
   // ── Utility pill (search, login) ───────────────────────────────────────────
   const utilityPill =
-    'border-violet-300/70 bg-white/95 text-violet-900 hover:border-violet-500/70 hover:bg-white hover:text-violet-950 hover:shadow-[0_10px_26px_-10px_rgba(89,23,196,0.32)]'
+    'border-slate-300/70 bg-white/95 text-slate-700 hover:border-slate-400/70 hover:bg-white hover:text-slate-900 hover:shadow-[0_10px_26px_-10px_rgba(15,23,42,0.18)]'
 
   // ── Desktop nav link text ──────────────────────────────────────────────────
   const navLinkColor = useCallback(
     (isActive: boolean) =>
       isActive
-        ? 'text-violet-950'
-        : 'text-ink-700 hover:text-violet-900',
+        ? 'text-slate-950'
+        : 'text-slate-600 hover:text-slate-900',
     []
   )
 
   const navTriggerColor = useCallback(
     (isActive: boolean, isOpen: boolean) =>
       isActive || isOpen
-        ? 'text-violet-950'
-        : 'text-ink-700 hover:text-violet-900',
+        ? 'text-slate-950'
+        : 'text-slate-600 hover:text-slate-900',
     []
   )
 
   // ── Active pill ────────────────────────────────────────────────────────────
   const navActivePill =
-    'bg-white border border-violet-300/80 shadow-[0_10px_24px_-10px_rgba(89,23,196,0.32)]'
+    'bg-white border border-slate-200/80 shadow-[0_10px_24px_-10px_rgba(15,23,42,0.14)]'
 
   // ── Mobile tile ────────────────────────────────────────────────────────────
   const mobileTile =
-    'border-violet-300/55 bg-white/95 text-violet-900 hover:text-violet-950 hover:bg-white hover:border-violet-400/70'
+    'border-slate-300/55 bg-white/95 text-slate-700 hover:text-slate-900 hover:bg-white hover:border-slate-400/70'
 
   const mobileActiveTile =
-    'border-violet-400/70 bg-[linear-gradient(135deg,rgba(113,38,227,0.18),rgba(168,85,247,0.10),rgba(217,70,239,0.08))] text-violet-950 shadow-[0_6px_18px_-6px_rgba(89,23,196,0.32)]'
+    'border-brand-300/70 bg-brand-50 text-brand-900 shadow-sm'
 
   // ── Cart / Quote surfaces ──────────────────────────────────────────────────
   // ── Desktop nav data ────────────────────────────────────────────────────────

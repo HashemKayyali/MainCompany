@@ -1,8 +1,15 @@
-import Hero from '../components/home/Hero'
-import FeaturedProducts from '../components/home/FeaturedProducts'
-import LogoCloud from '../components/home/LogoCloud'
-import OfferSection from '../components/home/OfferSection'
-import StatsStrip from '../components/home/StatsStrip'
+import BuildCompleteEventSetup from '../components/home/BuildCompleteEventSetup'
+import CategoryDiscovery from '../components/home/CategoryDiscovery'
+import CompactHero from '../components/home/CompactHero'
+import EventInspirationGallery from '../components/home/EventInspirationGallery'
+import FAQ from '../components/home/FAQ'
+import FinalCTA from '../components/home/FinalCTA'
+import ForCompanies from '../components/home/ForCompanies'
+import HowItWorks from '../components/home/HowItWorks'
+import MarketplaceFeatures from '../components/home/MarketplaceFeatures'
+import PlanByEventType from '../components/home/PlanByEventType'
+import PopularRentals from '../components/home/PopularRentals'
+import ProviderCTA from '../components/home/ProviderCTA'
 import { usePageMeta } from '../hooks/usePageMeta'
 
 export default function HomePage() {
@@ -15,15 +22,18 @@ export default function HomePage() {
 
   return (
     <>
-      <Hero />
-
-      <div className="relative z-10 -mt-24 sm:-mt-28">
-        <StatsStrip />
-      </div>
-
-      <FeaturedProducts />
-      <OfferSection />
-      <LogoCloud />
+      <CompactHero />
+      <CategoryDiscovery />
+      <PopularRentals />
+      <PlanByEventType />
+      <HowItWorks />
+      <BuildCompleteEventSetup />
+      <MarketplaceFeatures />
+      <EventInspirationGallery />
+      <ForCompanies />
+      <ProviderCTA />
+      <FAQ />
+      <FinalCTA />
     </>
   )
 }

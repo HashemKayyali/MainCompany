@@ -6,39 +6,34 @@ function sr(seed: number): number {
   return x - Math.floor(x)
 }
 
-const SPARKLE_COUNT = 18
+const SPARKLE_COUNT = 14
 
 const SPARKLES = Array.from({ length: SPARKLE_COUNT }, (_, i) => ({
   id: i,
   x: sr(i) * 100,
   y: sr(i + 100) * 100,
-  size: sr(i + 200) * 2.4 + 0.6,
+  size: sr(i + 200) * 2 + 0.5,
   delay: sr(i + 300) * 8,
-  duration: sr(i + 400) * 3 + 3,
+  duration: sr(i + 400) * 3 + 4,
   variant: (i % 3) as 0 | 1 | 2,
-  color:
-    i % 5 === 0 ? 'pink'
-    : i % 7 === 0 ? 'lavender'
-    : 'violet',
+  color: i % 4 === 0 ? 'purple' : 'slate',
 }))
 
 const SPARKLE_BG: Record<string, string> = {
-  violet: 'rgba(168, 85, 247, 0.85)',
-  lavender: 'rgba(196, 181, 253, 0.85)',
-  pink: 'rgba(217, 70, 239, 0.75)',
+  purple: 'rgba(124, 58, 237, 0.55)',
+  slate: 'rgba(148, 163, 184, 0.55)',
 }
 
 const SPARKLE_GLOW: Record<string, string> = {
-  violet: '0 0 6px 2px rgba(168, 85, 247, 0.45)',
-  lavender: '0 0 6px 2px rgba(196, 181, 253, 0.4)',
-  pink: '0 0 6px 2px rgba(217, 70, 239, 0.4)',
+  purple: '0 0 5px 1px rgba(124, 58, 237, 0.28)',
+  slate: '0 0 5px 1px rgba(148, 163, 184, 0.22)',
 }
 
 const ANIM_NAMES = ['hs-star-a', 'hs-star-b', 'hs-star-c'] as const
 
 const lightGridStyle: CSSProperties = {
   backgroundImage:
-    'linear-gradient(rgba(124,58,237,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.035) 1px, transparent 1px)',
+    'linear-gradient(rgba(15, 23, 42, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 23, 42, 0.025) 1px, transparent 1px)',
   backgroundSize: '128px 128px',
 }
 
@@ -61,46 +56,45 @@ export default function AnimatedBackground({
 
   return (
     <div className={`${rootPos} pointer-events-none z-0 overflow-hidden ${className}`} aria-hidden="true">
-      {/* Base layer – soft white/lavender wash */}
-      <div className="absolute inset-0 bg-[#fbf8ff]" />
+      {/* Base layer – clean off-white */}
+      <div className="absolute inset-0 bg-[#f9f9fb]" />
 
       {/* Subtle grid */}
       <div className="absolute inset-0 opacity-[0.55]" style={lightGridStyle} />
 
-      {/* Primary radial glows */}
+      {/* Faint accent glows – purple kept only as a whisper */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(72% 44% at 12% -4%, rgba(124,58,237,0.16) 0%, transparent 70%), ' +
-            'radial-gradient(58% 36% at 88% 14%, rgba(168,85,247,0.13) 0%, transparent 68%), ' +
-            'radial-gradient(58% 40% at 52% 104%, rgba(217,70,239,0.10) 0%, transparent 72%), ' +
-            'radial-gradient(48% 28% at 50% 50%, rgba(196,165,255,0.08) 0%, transparent 78%)',
+            'radial-gradient(72% 44% at 12% -4%, rgba(124,58,237,0.06) 0%, transparent 70%), ' +
+            'radial-gradient(58% 36% at 88% 14%, rgba(168,85,247,0.04) 0%, transparent 68%), ' +
+            'radial-gradient(58% 40% at 52% 104%, rgba(124,58,237,0.03) 0%, transparent 72%)',
         }}
       />
 
-      {/* Larger blurred orbs for depth */}
+      {/* Larger blurred orbs for depth – kept neutral */}
       {!isLightweight && (
         <>
           <div
             className="absolute -left-[12%] top-[-8%] h-[52%] w-[58%] blur-[64px]"
             style={{
               background:
-                'radial-gradient(circle, rgba(168,85,247,0.18) 0%, rgba(124,58,237,0.10) 44%, transparent 72%)',
+                'radial-gradient(circle, rgba(124,58,237,0.08) 0%, rgba(124,58,237,0.04) 44%, transparent 72%)',
             }}
           />
           <div
             className="absolute right-[-10%] top-[8%] h-[44%] w-[48%] blur-[60px]"
             style={{
               background:
-                'radial-gradient(circle, rgba(217,70,239,0.14) 0%, rgba(168,85,247,0.06) 46%, transparent 74%)',
+                'radial-gradient(circle, rgba(148,163,184,0.10) 0%, rgba(124,58,237,0.04) 46%, transparent 74%)',
             }}
           />
           <div
             className="absolute left-[20%] bottom-[-8%] h-[40%] w-[60%] blur-[72px]"
             style={{
               background:
-                'radial-gradient(circle, rgba(196,165,255,0.20) 0%, rgba(168,85,247,0.08) 50%, transparent 76%)',
+                'radial-gradient(circle, rgba(226, 232, 240, 0.45) 0%, rgba(124,58,237,0.04) 50%, transparent 76%)',
             }}
           />
         </>
@@ -111,7 +105,7 @@ export default function AnimatedBackground({
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse 110% 90% at 50% 50%, transparent 50%, rgba(124,58,237,0.04) 100%)',
+            'radial-gradient(ellipse 110% 90% at 50% 50%, transparent 50%, rgba(15, 23, 42, 0.025) 100%)',
         }}
       />
 

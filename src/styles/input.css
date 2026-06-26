@@ -33,10 +33,10 @@
     --ink-200: #d4c4ec;
     --ink-100: #ece2f6;
 
-    /* Background scale: still soft, but more confident lavender. */
-    --bg-base:    #f8f3ff;
-    --bg-soft:    #efe5ff;
-    --bg-mid:     #e4d3ff;
+    /* Background scale: clean marketplace canvas with whispered lavender accent. */
+    --bg-base:    #f9f9fb;
+    --bg-soft:    #f3f1f7;
+    --bg-mid:     #e9e4f1;
     --surface:    #ffffff;
     --surface-2:  #fbf6ff;
     --border-strong: rgba(113, 38, 227, 0.22);
@@ -81,9 +81,8 @@
     overflow-x: clip;
     background-color: var(--bg-base);
     background-image:
-      radial-gradient(ellipse 80% 50% at 14% -4%, rgba(113, 38, 227, 0.14) 0%, transparent 64%),
-      radial-gradient(ellipse 60% 40% at 92% 12%, rgba(168, 85, 247, 0.11) 0%, transparent 60%),
-      radial-gradient(ellipse 70% 45% at 50% 110%, rgba(180, 145, 255, 0.13) 0%, transparent 64%);
+      radial-gradient(ellipse 70% 45% at 14% -4%, rgba(124, 58, 237, 0.06) 0%, transparent 64%),
+      radial-gradient(ellipse 60% 40% at 92% 12%, rgba(148, 163, 184, 0.05) 0%, transparent 60%);
     color: var(--ink-900);
   }
 
