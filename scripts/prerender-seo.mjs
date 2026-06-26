@@ -395,32 +395,35 @@ function productToMeta(product) {
   const price = Number(product.price)
   const hasVisiblePrice =
     product.show_price !== false && Number.isFinite(price) && price > 0
-  const productJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: product.title,
-    description: product.description || description,
-    ...(productImage ? { image: productImage } : {}),
-    ...(hasVisiblePrice
-      ? {
-          offers: {
-            '@type': 'Offer',
-            price,
-            priceCurrency: product.currency || 'JOD',
-          },
-        }
-      : {}),
-  }
+  const productUrl = canonicalUrl(routePath)
+  const productJsonLd = hasVisiblePrice
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: product.title,
+        description: product.description || description,
+        url: productUrl,
+        ...(productImage ? { image: productImage } : {}),
+        offers: {
+          '@type': 'Offer',
+          url: productUrl,
+          price,
+          priceCurrency: product.currency || 'JOD',
+          availability: 'https://schema.org/InStock',
+          itemCondition: 'https://schema.org/NewCondition',
+        },
+      }
+    : undefined
 
   return {
     path: routePath,
     title,
     description,
-    canonical: canonicalUrl(routePath),
+    canonical: productUrl,
     type: 'product',
     image,
     imageAlt: `${product.title} rental for events in Jordan`,
-    jsonLd: [productJsonLd],
+    jsonLd: productJsonLd ? [productJsonLd] : [],
   }
 }
 

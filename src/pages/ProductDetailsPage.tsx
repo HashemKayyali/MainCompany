@@ -27,6 +27,7 @@ import { cn } from '../utils/cn'
 import NotFoundPage from './NotFoundPage'
 
 const ease = [0.16, 1, 0.3, 1]
+const SITE_URL = 'https://www.eventiesjo.com'
 
 const TRUST_BADGES = [
   { icon: ShieldCheck, label: 'Insured equipment' },
@@ -48,7 +49,7 @@ function getPublicImageUrl(value?: string) {
   if (!trimmed) return undefined
 
   try {
-    const url = new URL(trimmed, 'https://www.eventiesjo.com')
+    const url = new URL(trimmed, SITE_URL)
     if (url.protocol !== 'https:') return undefined
     url.hash = ''
     return url.toString()
@@ -66,10 +67,37 @@ export default function ProductDetailsPage() {
   const product = getProductBySlug(slug || '')
   const parts = getPartsByProduct(slug || '')
   const showPrice = product ? product.showPrice !== false : true
+  const productUrl = product
+    ? `${SITE_URL}/products/${encodeURIComponent(product.slug)}`
+    : undefined
+  const productPrice = Number(product?.rentalPricePerDay)
+  const hasVisibleProductPrice =
+    !!product && showPrice && Number.isFinite(productPrice) && productPrice > 0
   const productNotFound = !loading && !product
   const productImage = product?.gallery?.[0]
   const productStructuredImage = getPublicImageUrl(productImage)
   const productImageAlt = product ? `${product.name} rental for events in Jordan` : undefined
+
+  const productJsonLd = useMemo(() => {
+    if (!product || !productUrl || !hasVisibleProductPrice) return undefined
+
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: product.name,
+      description: product.description,
+      url: productUrl,
+      ...(productStructuredImage ? { image: productStructuredImage } : {}),
+      offers: {
+        '@type': 'Offer',
+        url: productUrl,
+        price: productPrice,
+        priceCurrency: product.currency || 'JOD',
+        availability: 'https://schema.org/InStock',
+        itemCondition: 'https://schema.org/NewCondition',
+      },
+    }
+  }, [hasVisibleProductPrice, product, productPrice, productStructuredImage, productUrl])
 
   const similarProducts = useMemo(() => {
     if (!product?.categoryId) return []
@@ -90,28 +118,11 @@ export default function ProductDetailsPage() {
     image: productImage,
     imageAlt: productImageAlt,
     canonical: product
-      ? `https://www.eventiesjo.com/products/${encodeURIComponent(product.slug)}`
+      ? productUrl
       : undefined,
     type: product ? 'product' : 'website',
     noIndex: productNotFound,
-    jsonLd: product
-      ? {
-          '@context': 'https://schema.org',
-          '@type': 'Product',
-          name: product.name,
-          description: product.description,
-          ...(productStructuredImage ? { image: productStructuredImage } : {}),
-          ...(showPrice
-            ? {
-                offers: {
-                  '@type': 'Offer',
-                  price: product.rentalPricePerDay,
-                  priceCurrency: product.currency || 'JOD',
-                },
-              }
-            : {}),
-        }
-      : undefined,
+    jsonLd: productJsonLd,
   })
 
   if (loading && !product) return <PageLoader />
