@@ -155,7 +155,7 @@ function SocialAuthOptions({
         <span className="h-px flex-1 bg-slate-200" />
       </div>
 
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="-m-1 grid grid-cols-3 gap-2.5 overflow-visible p-1">
         {providers.map(({ name, provider, icon }) => {
           const isLoading = loadingProvider === provider
           return (
@@ -166,7 +166,7 @@ function SocialAuthOptions({
               disabled={!!loadingProvider}
               aria-label={`${action} with ${name}`}
               aria-busy={isLoading}
-              className="group flex h-[46px] min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-slate-200/90 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-50/60 hover:shadow-[0_14px_30px_-30px_rgba(76,29,149,0.5)] focus:outline-none focus-visible:ring-4 focus-visible:ring-violet-500/15 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+              className="auth-social-button group flex h-[46px] min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-slate-200/90 bg-white shadow-sm transition-all duration-300 enabled:hover:-translate-y-0.5 enabled:hover:border-violet-300 enabled:hover:bg-violet-50/60 enabled:hover:shadow-[0_14px_30px_-30px_rgba(76,29,149,0.5)] focus:outline-none active:border-violet-300 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isLoading ? (
                 <span className="h-[22px] w-[22px] animate-spin rounded-full border-2 border-violet-300 border-t-violet-600" />
@@ -190,6 +190,10 @@ function LeftHeroPanel() {
       <img
         src={AUTH_HERO_IMAGE}
         alt="Event services showcase"
+        width={1600}
+        height={1200}
+        loading="eager"
+        decoding="async"
         draggable={false}
         className="absolute inset-0 h-full w-full object-cover object-right"
       />
@@ -223,10 +227,10 @@ function LeftHeroPanel() {
             Plan. Compare. Request.
           </div>
           <h2 className="font-display text-[2.9rem] font-black leading-[0.96] tracking-[-0.055em] text-[#0f172a] drop-shadow-[0_8px_30px_rgba(255,255,255,0.55)] xl:text-[3.5rem]">
-            Book everything your event needs.
+            Plan your event request in one place.
           </h2>
           <p className="mt-5 max-w-[23rem] text-[13.5px] font-semibold leading-[1.65] text-[#1e1b4b]/80">
-            Discover trusted vendors, event rentals, games, screens, activations, and production services across Jordan.
+            Discover trusted providers, event rentals, games, screens, activations, and production services across Jordan.
           </p>
         </div>
       </div>
@@ -482,6 +486,10 @@ export default function AuthPage() {
         src={AUTH_HERO_IMAGE}
         alt=""
         aria-hidden="true"
+        width={1600}
+        height={1200}
+        loading="eager"
+        decoding="async"
         draggable={false}
         className="fixed inset-0 h-full w-full scale-105 object-cover object-right opacity-16 blur-[2px]"
       />

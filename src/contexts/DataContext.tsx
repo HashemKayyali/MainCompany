@@ -9,6 +9,8 @@ import {
   type ReactNode,
 } from 'react'
 import type { Customer } from '../data/customers'
+import type { CustomBuild, CustomBuildCategory } from '../data/custom-builds'
+import { DEFAULT_CUSTOM_BUILD_CATEGORIES, DEFAULT_CUSTOM_BUILDS } from '../data/custom-builds'
 import { DEFAULT_CATEGORIES, DEFAULT_CUSTOMERS, DEFAULT_PARTS, DEFAULT_PRODUCTS } from '../data/defaults'
 import type { GalleryAlbum } from '../data/gallery'
 import type { Category, Product, ProductPart } from '../data/products/types'
@@ -18,6 +20,7 @@ import { useUser } from './UserContext'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { getErrorMessage } from '../lib/errors'
 import * as categoriesApi from '../services/categories.service'
+import * as customBuildsApi from '../services/custom-builds.service'
 import * as customersApi from '../services/customers.service'
 import * as galleryApi from '../services/gallery.service'
 import * as logsApi from '../services/logs.service'
@@ -54,6 +57,15 @@ interface DataCtx {
   updateGalleryAlbum: (slug: string, a: Partial<GalleryAlbum>) => Promise<void>
   deleteGalleryAlbum: (slug: string) => Promise<void>
 
+  customBuilds: CustomBuild[]
+  customBuildCategories: CustomBuildCategory[]
+  addCustomBuild: (b: CustomBuild) => Promise<void>
+  updateCustomBuild: (id: string, b: Partial<CustomBuild>) => Promise<void>
+  deleteCustomBuild: (id: string) => Promise<void>
+  addCustomBuildCategory: (c: CustomBuildCategory) => Promise<void>
+  updateCustomBuildCategory: (id: string, c: Partial<CustomBuildCategory>) => Promise<void>
+  deleteCustomBuildCategory: (id: string) => Promise<void>
+
   getProductBySlug: (s: string) => Product | undefined
   getPartsByProduct: (s: string) => ProductPart[]
   getProductsByCategory: (id: string) => Product[]
@@ -73,6 +85,7 @@ type PartDataCtx = Pick<DataCtx, 'parts' | 'getPartsByProduct'>
 type CustomerDataCtx = Pick<DataCtx, 'customers'>
 type CategoryDataCtx = Pick<DataCtx, 'categories'>
 type GalleryDataCtx = Pick<DataCtx, 'galleryAlbums'>
+type CustomBuildDataCtx = Pick<DataCtx, 'customBuilds' | 'customBuildCategories'>
 type DataMetaCtx = Pick<DataCtx, 'loading' | 'error' | 'refreshAll' | 'resetToDefaults'>
 type DataActionsCtx = Pick<
   DataCtx,
@@ -91,6 +104,12 @@ type DataActionsCtx = Pick<
   | 'addGalleryAlbum'
   | 'updateGalleryAlbum'
   | 'deleteGalleryAlbum'
+  | 'addCustomBuild'
+  | 'updateCustomBuild'
+  | 'deleteCustomBuild'
+  | 'addCustomBuildCategory'
+  | 'updateCustomBuildCategory'
+  | 'deleteCustomBuildCategory'
 >
 
 type DataSnapshot = {
@@ -99,11 +118,13 @@ type DataSnapshot = {
   customers: Customer[]
   categories: Category[]
   galleryAlbums: GalleryAlbum[]
+  customBuilds: CustomBuild[]
+  customBuildCategories: CustomBuildCategory[]
 }
 
 type CachedDataSnapshot = DataSnapshot & {
   savedAt: number
-  version: 1
+  version: 5
 }
 
 const Ctx = createContext<DataCtx>({} as DataCtx)
@@ -112,11 +133,12 @@ const PartsCtx = createContext<PartDataCtx>({} as PartDataCtx)
 const CustomersCtx = createContext<CustomerDataCtx>({} as CustomerDataCtx)
 const CategoriesCtx = createContext<CategoryDataCtx>({} as CategoryDataCtx)
 const GalleryCtx = createContext<GalleryDataCtx>({} as GalleryDataCtx)
+const CustomBuildsCtx = createContext<CustomBuildDataCtx>({} as CustomBuildDataCtx)
 const DataMetaCtx = createContext<DataMetaCtx>({} as DataMetaCtx)
 const DataActionsCtx = createContext<DataActionsCtx>({} as DataActionsCtx)
 
-const CACHE_KEY = 'eventies:data-cache:v1'
-const CACHE_VERSION = 1 as const
+const CACHE_KEY = 'eventies:data-cache:v5'
+const CACHE_VERSION = 5 as const
 const MAX_RETRIES = 3
 const RETRY_DELAY = 2000
 const DEFAULT_SNAPSHOT: DataSnapshot = {
@@ -125,6 +147,8 @@ const DEFAULT_SNAPSHOT: DataSnapshot = {
   customers: DEFAULT_CUSTOMERS,
   categories: DEFAULT_CATEGORIES,
   galleryAlbums: [],
+  customBuilds: DEFAULT_CUSTOM_BUILDS,
+  customBuildCategories: DEFAULT_CUSTOM_BUILD_CATEGORIES,
 }
 
 function readSnapshot() {
@@ -141,7 +165,9 @@ function readSnapshot() {
       !Array.isArray(parsed.parts) ||
       !Array.isArray(parsed.customers) ||
       !Array.isArray(parsed.categories) ||
-      !Array.isArray(parsed.galleryAlbums)
+      !Array.isArray(parsed.galleryAlbums) ||
+      !Array.isArray(parsed.customBuilds) ||
+      !Array.isArray(parsed.customBuildCategories)
     ) {
       return null
     }
@@ -152,6 +178,8 @@ function readSnapshot() {
       customers: parsed.customers,
       categories: parsed.categories,
       galleryAlbums: parsed.galleryAlbums,
+      customBuilds: parsed.customBuilds,
+      customBuildCategories: parsed.customBuildCategories,
     } satisfies DataSnapshot
   } catch {
     return null
@@ -184,6 +212,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [galleryAlbums, setGalleryAlbums] = useState<GalleryAlbum[]>([])
+  const [customBuilds, setCustomBuilds] = useState<CustomBuild[]>([])
+  const [customBuildCategories, setCustomBuildCategories] = useState<CustomBuildCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -206,6 +236,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setCustomers(snapshot.customers)
         setCategories(snapshot.categories)
         setGalleryAlbums(snapshot.galleryAlbums)
+        setCustomBuilds(snapshot.customBuilds)
+        setCustomBuildCategories(snapshot.customBuildCategories)
         setError(nextError)
         setLoading(nextLoading)
       })
@@ -250,13 +282,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
   )
 
   const loadAllOnce = useCallback(async (): Promise<DataSnapshot> => {
-    const [nextProducts, nextParts, nextCustomers, nextCategories, nextGalleryAlbums] =
+    const [
+      nextProducts,
+      nextParts,
+      nextCustomers,
+      nextCategories,
+      nextGalleryAlbums,
+      nextCustomBuilds,
+      nextCustomBuildCategories,
+    ] =
       await Promise.all([
         productsApi.getAll(),
         partsApi.getAll(),
         customersApi.getAll(),
         categoriesApi.getAll(),
         galleryApi.getAll().catch(() => []),
+        customBuildsApi.getAll().catch(() => []),
+        customBuildsApi.getCategories().catch(() => []),
       ])
 
     return {
@@ -265,6 +307,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       customers: nextCustomers,
       categories: nextCategories,
       galleryAlbums: nextGalleryAlbums,
+      customBuilds: nextCustomBuilds,
+      customBuildCategories: nextCustomBuildCategories,
     }
   }, [])
 
@@ -345,17 +389,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
       !parts.length &&
       !customers.length &&
       !categories.length &&
-      !galleryAlbums.length
+      !galleryAlbums.length &&
+      !customBuilds.length &&
+      !customBuildCategories.length
     ) {
       return
     }
 
     if (snapshotTimer.current) clearTimeout(snapshotTimer.current)
     snapshotTimer.current = setTimeout(() => {
-      writeSnapshot({ products, parts, customers, categories, galleryAlbums })
+      writeSnapshot({ products, parts, customers, categories, galleryAlbums, customBuilds, customBuildCategories })
       snapshotTimer.current = null
     }, 1500)
-  }, [categories, customers, galleryAlbums, loading, parts, products])
+  }, [categories, customBuildCategories, customBuilds, customers, galleryAlbums, loading, parts, products])
 
   const addProduct = useCallback(
     async (product: Product) => {
@@ -606,6 +652,118 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [galleryAlbums, safeSet, toast, writeLog]
   )
 
+  const addCustomBuild = useCallback(
+    async (build: CustomBuild) => {
+      try {
+        const created = await customBuildsApi.create(build)
+        safeSet(() =>
+          setCustomBuilds(prev =>
+            [...prev, created].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+          )
+        )
+        writeLog('create', 'custom_build', created.id || created.title, created.title)
+        toast(`${created.title} added`, 'success')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to add custom build'), 'error')
+        throw actionError
+      }
+    },
+    [safeSet, toast, writeLog]
+  )
+
+  const updateCustomBuild = useCallback(
+    async (id: string, updates: Partial<CustomBuild>) => {
+      try {
+        const updated = await customBuildsApi.update(id, updates)
+        safeSet(() =>
+          setCustomBuilds(prev =>
+            prev
+              .map(build => (build.id === id ? updated : build))
+              .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+          )
+        )
+        writeLog('update', 'custom_build', id, updated.title || id)
+        toast(`${updated.title} updated`, 'success')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to update custom build'), 'error')
+        throw actionError
+      }
+    },
+    [safeSet, toast, writeLog]
+  )
+
+  const deleteCustomBuild = useCallback(
+    async (id: string) => {
+      try {
+        const existing = customBuilds.find(build => build.id === id)
+        await customBuildsApi.remove(id)
+        safeSet(() => setCustomBuilds(prev => prev.filter(build => build.id !== id)))
+        writeLog('delete', 'custom_build', id, existing?.title || id)
+        toast(`${existing?.title || 'Custom build'} deleted`, 'success')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to delete custom build'), 'error')
+        throw actionError
+      }
+    },
+    [customBuilds, safeSet, toast, writeLog]
+  )
+
+  const addCustomBuildCategory = useCallback(
+    async (category: CustomBuildCategory) => {
+      try {
+        const created = await customBuildsApi.createCategory(category)
+        safeSet(() =>
+          setCustomBuildCategories(prev =>
+            [...prev, created].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+          )
+        )
+        writeLog('create', 'custom_build_category', created.id || created.name, created.name)
+        toast(`${created.name} added`, 'success')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to add custom build category'), 'error')
+        throw actionError
+      }
+    },
+    [safeSet, toast, writeLog]
+  )
+
+  const updateCustomBuildCategory = useCallback(
+    async (id: string, updates: Partial<CustomBuildCategory>) => {
+      try {
+        const updated = await customBuildsApi.updateCategory(id, updates)
+        safeSet(() =>
+          setCustomBuildCategories(prev =>
+            prev
+              .map(category => (category.id === id ? updated : category))
+              .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+          )
+        )
+        writeLog('update', 'custom_build_category', id, updated.name || id)
+        toast(`${updated.name} updated`, 'success')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to update custom build category'), 'error')
+        throw actionError
+      }
+    },
+    [safeSet, toast, writeLog]
+  )
+
+  const deleteCustomBuildCategory = useCallback(
+    async (id: string) => {
+      try {
+        const existing = customBuildCategories.find(category => category.id === id)
+        await customBuildsApi.removeCategory(id)
+        safeSet(() => setCustomBuildCategories(prev => prev.filter(category => category.id !== id)))
+        writeLog('delete', 'custom_build_category', id, existing?.name || id)
+        toast(`${existing?.name || 'Custom build category'} deleted`, 'success')
+      } catch (actionError: unknown) {
+        toast(getErrorMessage(actionError, 'Failed to delete custom build category'), 'error')
+        throw actionError
+      }
+    },
+    [customBuildCategories, safeSet, toast, writeLog]
+  )
+
   const getProductBySlug = useCallback(
     (slug: string) => products.find(product => product.slug === slug),
     [products]
@@ -664,6 +822,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const customerValue = useMemo<CustomerDataCtx>(() => ({ customers }), [customers])
   const categoryValue = useMemo<CategoryDataCtx>(() => ({ categories }), [categories])
   const galleryValue = useMemo<GalleryDataCtx>(() => ({ galleryAlbums }), [galleryAlbums])
+  const customBuildValue = useMemo<CustomBuildDataCtx>(
+    () => ({ customBuilds, customBuildCategories }),
+    [customBuildCategories, customBuilds]
+  )
 
   const metaValue = useMemo<DataMetaCtx>(
     () => ({
@@ -692,18 +854,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
       addGalleryAlbum,
       updateGalleryAlbum,
       deleteGalleryAlbum,
+      addCustomBuild,
+      updateCustomBuild,
+      deleteCustomBuild,
+      addCustomBuildCategory,
+      updateCustomBuildCategory,
+      deleteCustomBuildCategory,
     }),
     [
+      addCustomBuild,
+      addCustomBuildCategory,
       addCategory,
       addCustomer,
       addGalleryAlbum,
       addPart,
       addProduct,
+      deleteCustomBuild,
+      deleteCustomBuildCategory,
       deleteCategory,
       deleteCustomer,
       deleteGalleryAlbum,
       deletePart,
       deleteProduct,
+      updateCustomBuild,
+      updateCustomBuildCategory,
       updateCategory,
       updateCustomer,
       updateGalleryAlbum,
@@ -719,10 +893,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
       ...customerValue,
       ...categoryValue,
       ...galleryValue,
+      ...customBuildValue,
       ...metaValue,
       ...actionsValue,
     }),
-    [actionsValue, categoryValue, customerValue, galleryValue, metaValue, partValue, productValue]
+    [actionsValue, categoryValue, customBuildValue, customerValue, galleryValue, metaValue, partValue, productValue]
   )
 
   return (
@@ -731,11 +906,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
         <CustomersCtx.Provider value={customerValue}>
           <CategoriesCtx.Provider value={categoryValue}>
             <GalleryCtx.Provider value={galleryValue}>
-              <DataMetaCtx.Provider value={metaValue}>
-                <DataActionsCtx.Provider value={actionsValue}>
-                  <Ctx.Provider value={value}>{children}</Ctx.Provider>
-                </DataActionsCtx.Provider>
-              </DataMetaCtx.Provider>
+              <CustomBuildsCtx.Provider value={customBuildValue}>
+                <DataMetaCtx.Provider value={metaValue}>
+                  <DataActionsCtx.Provider value={actionsValue}>
+                    <Ctx.Provider value={value}>{children}</Ctx.Provider>
+                  </DataActionsCtx.Provider>
+                </DataMetaCtx.Provider>
+              </CustomBuildsCtx.Provider>
             </GalleryCtx.Provider>
           </CategoriesCtx.Provider>
         </CustomersCtx.Provider>
@@ -750,5 +927,6 @@ export const usePartsData = () => useContext(PartsCtx)
 export const useCustomersData = () => useContext(CustomersCtx)
 export const useCategoriesData = () => useContext(CategoriesCtx)
 export const useGalleryData = () => useContext(GalleryCtx)
+export const useCustomBuildsData = () => useContext(CustomBuildsCtx)
 export const useDataMeta = () => useContext(DataMetaCtx)
 export const useDataActions = () => useContext(DataActionsCtx)

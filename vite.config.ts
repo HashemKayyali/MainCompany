@@ -5,8 +5,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',
-    port: 5174,
-    strictPort: true,
+    port: Number(process.env.PORT) || 5174,
+    strictPort: !process.env.PORT,
   },
   preview: {
     host: '0.0.0.0',
@@ -46,12 +46,30 @@ export default defineConfig({
             return 'vendor-supabase'
           }
 
+          if (id.includes('three')) {
+            return 'vendor-three'
+          }
+
+          if (id.includes('cobe')) {
+            return 'vendor-globe'
+          }
+
+          if (id.includes('@radix-ui')) {
+            return 'vendor-radix'
+          }
+
           if (id.includes('lucide-react')) {
             return 'vendor-icons'
           }
 
           if (id.includes('@dicebear')) {
             return 'vendor-avatar'
+          }
+
+          // Keep the WebGL shader lib in its own chunk so it stays lazy
+          // (only the homepage hero dynamically imports it).
+          if (id.includes('@paper-design')) {
+            return 'vendor-shaders'
           }
 
           return 'vendor-misc'

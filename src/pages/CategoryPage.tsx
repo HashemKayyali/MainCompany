@@ -9,6 +9,7 @@ import { useTheme } from '../contexts/ThemeContext'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { cn } from '../utils/cn'
 import NotFoundPage from './NotFoundPage'
+import { useI18n } from '../contexts/LanguageContext'
 
 const SITE_URL = 'https://www.eventiesjo.com'
 const DEFAULT_SOCIAL_IMAGE = `${SITE_URL}/images/og-default.png`
@@ -40,6 +41,7 @@ export default function CategoryPage() {
   const { slug = '' } = useParams<{ slug: string }>()
   const { categories, getProductsByCategory, loading } = useData()
   const { isDark } = useTheme()
+  const { locale, translateText } = useI18n()
 
   const normalizedSlug = slug.trim().toLowerCase()
   const category = useMemo(
@@ -54,6 +56,7 @@ export default function CategoryPage() {
   )
 
   const categoryName = category?.name || 'Category'
+  const categoryDisplayName = translateText(categoryName)
   const description = category
     ? normalizeText(category.description) || getFallbackDescription(category.name)
     : 'The requested category could not be found.'
@@ -135,11 +138,11 @@ export default function CategoryPage() {
             )}
           >
             <ArrowLeft size={11} strokeWidth={2.5} />
-            All Products
+            {translateText('All Services')}
           </Link>
           <ChevronRight size={11} className={isDark ? 'text-white/18' : 'text-slate-300'} />
           <span className={cn('text-[11px] font-semibold', isDark ? 'text-slate-300' : 'text-slate-700')}>
-            {category.name}
+            {categoryDisplayName}
           </span>
         </motion.nav>
 
@@ -166,14 +169,14 @@ export default function CategoryPage() {
           >
             <div className="max-w-2xl">
               <div className="mb-3 flex items-center gap-2.5">
-                <span className="section-label">// Category Collection</span>
+                <span className="section-label">{translateText('Category Collection')}</span>
                 <div className={cn('h-px w-8', isDark ? 'bg-violet-500/30' : 'bg-violet-300/50')} />
               </div>
               <h1 className={cn('section-title !text-left', headingText)}>
-                {category.name} Event Services in Jordan
+                {locale === 'ar' ? `${categoryDisplayName} خدمات فعاليات في الأردن` : `${category.name} Event Services in Jordan`}
               </h1>
               <p className={cn('mt-4 max-w-2xl text-[0.98rem] leading-[1.72]', bodyText)}>
-                {description}
+                {translateText(description)}
               </p>
               <Link
                 to="/products"
@@ -185,7 +188,7 @@ export default function CategoryPage() {
                 )}
               >
                 <ArrowLeft size={13} />
-                Back to all products
+                {translateText('Back to all services')}
               </Link>
             </div>
 
@@ -202,13 +205,13 @@ export default function CategoryPage() {
             >
               <div className={cn('flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.18em]', mutedText)}>
                 <LayoutGrid size={10} />
-                Product count
+                {translateText('Service count')}
               </div>
               <div className={cn('mt-1.5 font-display text-[2.6rem] font-black leading-none tracking-[-0.05em]', headingText)}>
                 {categoryProducts.length}
               </div>
               <div className={cn('mt-1.5 text-[11.5px] font-medium', mutedText)}>
-                service{categoryProducts.length !== 1 ? 's' : ''} in this category
+                {translateText(categoryProducts.length === 1 ? 'service in this category' : 'services in this category')}
               </div>
             </motion.div>
           </motion.div>
@@ -245,8 +248,8 @@ export default function CategoryPage() {
               >
                 <Search size={20} className={isDark ? 'text-slate-600' : 'text-violet-400'} />
               </div>
-              <p className={cn('font-display text-[1.08rem] font-semibold', isDark ? 'text-white/55' : 'text-slate-700')}>
-                No products in this category yet
+              <p className={cn('text-[1.08rem] font-semibold', isDark ? 'text-white/55' : 'text-slate-700')}>
+                No services in this category yet
               </p>
               <p className={cn('mt-2 text-[13px]', mutedText)}>
                 Browse all Eventies services while this collection is being updated.
@@ -260,7 +263,7 @@ export default function CategoryPage() {
                     : 'border-slate-200 bg-white text-slate-600 shadow-sm hover:border-violet-300 hover:text-violet-700'
                 )}
               >
-                Show all products
+                Show all services
               </Link>
             </motion.div>
           )}

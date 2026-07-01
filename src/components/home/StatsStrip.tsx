@@ -72,7 +72,7 @@ export default function StatsStrip() {
               <div className="stats-marquee__inner">
                 {loop.map((item, i) => (
                   <div key={`${item}-${i}`} className="flex shrink-0 items-center gap-3 px-4">
-                    <span className="whitespace-nowrap font-display text-[10px] font-bold uppercase tracking-[0.16em] text-violet-800 sm:text-[10.5px] sm:tracking-[0.18em]">
+                    <span className="whitespace-nowrap font-sans text-[10px] font-bold uppercase tracking-[0.16em] text-violet-800 sm:text-[10.5px] sm:tracking-[0.18em]">
                       {item}
                     </span>
                     <span

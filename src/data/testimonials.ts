@@ -20,14 +20,14 @@ export const testimonials: Testimonial[] = [
     name: 'Ahmad Khader',
     role: 'Marketing Director',
     company: 'Umniah',
-    quote: 'Professional setup, amazing crowd engagement, and our brand visibility went through the roof. Already booked for next year.',
+    quote: 'Professional setup, amazing crowd engagement, and our brand visibility went through the roof. Already planning next year.',
   },
   {
     id: 't-3',
     name: 'Lina Haddad',
     role: 'Student Activities',
     company: 'PSUT',
-    quote: 'The VR cycling was the highlight of our orientation week. Students couldn\'t stop talking about it. 10/10 would book again.',
+    quote: 'The VR cycling was the highlight of our orientation week. Students couldn\'t stop talking about it. 10/10 would request again.',
   },
   {
     id: 't-4',

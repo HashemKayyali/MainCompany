@@ -53,13 +53,13 @@ export default function FeaturedProducts() {
             <motion.div {...headerReveal}>
               <span className="section-label">Featured</span>
               <h2 className="section-title !mt-3 !text-left">
-                What We <span className="text-glow">Build</span>
+                Featured Event <span className="text-glow">Services</span>
               </h2>
               <p
                 className="mt-4 max-w-lg text-[14px] leading-[1.7]"
                 style={{ color: 'rgba(61, 35, 112, 0.78)' }}
               >
-                Hand-selected showcase of our finest productions — each one a real event delivered for real clients.
+                A selected showcase of popular rentals, activations, and event-ready setups available through Eventies.
               </p>
             </motion.div>
 
@@ -68,7 +68,7 @@ export default function FeaturedProducts() {
               className="hidden shrink-0 items-center gap-2.5 rounded-[14px] border border-violet-200/85 bg-white px-5 py-2.5 text-[11.5px] font-semibold text-violet-700 shadow-[0_8px_22px_-10px_rgba(124,58,237,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50/85 hover:text-violet-900 hover:shadow-[0_14px_34px_-12px_rgba(124,58,237,0.32)] lg:inline-flex"
             >
               <Sparkles className="h-3.5 w-3.5" strokeWidth={2.2} />
-              All Products
+              View All Services
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
             </Link>
           </div>
@@ -96,7 +96,7 @@ export default function FeaturedProducts() {
               className="inline-flex items-center gap-2 rounded-[14px] border border-violet-200/85 bg-white px-6 py-3 text-[12px] font-semibold text-violet-700 shadow-[0_8px_22px_-10px_rgba(124,58,237,0.22)] transition-all duration-300 hover:border-violet-400 hover:bg-violet-50/85 hover:text-violet-900"
             >
               <Sparkles className="h-3.5 w-3.5" strokeWidth={2.2} />
-              All Products
+              View All Services
               <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
             </Link>
           </div>

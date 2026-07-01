@@ -4,6 +4,8 @@ import { useData } from '../../contexts/DataContext'
 import { useUser } from '../../contexts/UserContext'
 import { BRAND_ICON } from '../../config/brand'
 import UserAvatar from '../ui/UserAvatar'
+import LanguageSwitcher from '../layout/LanguageSwitcher'
+import { useI18n } from '../../contexts/LanguageContext'
 import { cn } from '../../utils/cn'
 
 type SidebarVariant = 'desktop' | 'drawer'
@@ -14,6 +16,7 @@ type IconName =
   | 'users'
   | 'folder'
   | 'image'
+  | 'sparkles'
   | 'shield'
   | 'log'
   | 'person'
@@ -73,6 +76,13 @@ function Icon({ name, className }: { name: IconName; className?: string }) {
           <path d="M20.5 16.8l-4.2-4.2a1.4 1.4 0 0 0-2 0l-5.8 5.8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         </svg>
       )
+    case 'sparkles':
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 3.8l1.2 3.4a2.8 2.8 0 0 0 1.7 1.7l3.3 1.1-3.3 1.2a2.8 2.8 0 0 0-1.7 1.7L12 16.2l-1.2-3.3a2.8 2.8 0 0 0-1.7-1.7L5.8 10l3.3-1.1a2.8 2.8 0 0 0 1.7-1.7L12 3.8Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+          <path d="M18.4 15.5l.6 1.7a1.6 1.6 0 0 0 1 1l1.6.6-1.6.6a1.6 1.6 0 0 0-1 1l-.6 1.6-.6-1.6a1.6 1.6 0 0 0-1-1l-1.6-.6 1.6-.6a1.6 1.6 0 0 0 1-1l.6-1.7Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+        </svg>
+      )
     case 'shield':
       return (
         <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -114,6 +124,7 @@ const CONTENT_LINKS: SidebarLink[] = [
   { to: '/admin/parts', label: 'Parts', icon: 'wrench' },
   { to: '/admin/customers', label: 'Customers', icon: 'users' },
   { to: '/admin/categories', label: 'Categories', icon: 'folder' },
+  { to: '/admin/custom-builds', label: 'Custom Builds', icon: 'sparkles' },
   { to: '/admin/gallery', label: 'Gallery', icon: 'image' },
 ]
 
@@ -137,11 +148,12 @@ export default function Sidebar({
   onNavigate?: () => void
 }) {
   const { pathname } = useLocation()
-  const { products, parts, customers, categories, galleryAlbums } = useData()
+  const { products, parts, customers, categories, galleryAlbums, customBuilds } = useData()
   const { currentUser } = useUser()
+  const { t, translateText, dir } = useI18n()
 
-  const displayName = currentUser?.name?.trim() || 'Admin User'
-  const displayRole = roleLabel(currentUser?.role)
+  const displayName = currentUser?.name?.trim() || t('admin.roles.adminUser')
+  const displayRole = translateText(roleLabel(currentUser?.role))
 
   const counts: Record<string, number> = useMemo(
     () => ({
@@ -149,9 +161,10 @@ export default function Sidebar({
       '/admin/parts': parts?.length ?? 0,
       '/admin/customers': customers?.length ?? 0,
       '/admin/categories': categories?.length ?? 0,
+      '/admin/custom-builds': customBuilds?.length ?? 0,
       '/admin/gallery': galleryAlbums?.length ?? 0,
     }),
-    [products, parts, customers, categories, galleryAlbums]
+    [products, parts, customers, categories, customBuilds, galleryAlbums]
   )
 
   const isActive = (to: string, exact?: boolean) =>
@@ -173,7 +186,7 @@ export default function Sidebar({
         onClick={onNavigate}
         aria-current={active ? 'page' : undefined}
         className={cn(
-          'group relative flex items-center gap-3 rounded-[14px] py-2.5 pl-3 pr-2.5 transition-all duration-200',
+          'group relative flex items-center gap-3 rounded-[14px] py-2.5 ps-3 pe-2.5 transition-all duration-200',
           active
             ? 'bg-[linear-gradient(135deg,#7c3aed,#9d6bff)] text-white shadow-[0_14px_30px_-14px_rgba(157,107,255,0.8)]'
             : 'text-violet-100/65 hover:bg-white/[0.07] hover:text-white'
@@ -182,7 +195,7 @@ export default function Sidebar({
         {active && (
           <span
             aria-hidden="true"
-            className="absolute -left-2.5 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-full bg-white/90"
+            className={cn('absolute top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-full bg-white/90', dir === 'rtl' ? '-right-2.5' : '-left-2.5')}
           />
         )}
         <span
@@ -196,7 +209,7 @@ export default function Sidebar({
           <Icon name={link.icon} />
         </span>
         <span className="min-w-0 flex-1 truncate text-[12.5px] font-bold tracking-[-0.01em]">
-          {link.label}
+          {translateText(link.label)}
         </span>
         {count !== undefined && (
           <span
@@ -242,11 +255,15 @@ export default function Sidebar({
               <div className="truncate text-[9.5px] font-extrabold uppercase tracking-[0.2em] text-violet-300">
                 {displayRole}
               </div>
-              <div className="mt-1 truncate font-display text-[14px] font-bold text-white">
+              <div className="mt-1 truncate font-sans text-[14px] font-bold text-white">
                 {displayName}
               </div>
             </div>
           </div>
+          <LanguageSwitcher
+            compact
+            className="mt-3 w-full border-white/[0.12] bg-white/[0.06] text-violet-50 hover:bg-white/[0.10]"
+          />
         </div>
 
         {/* Nav */}
@@ -254,14 +271,14 @@ export default function Sidebar({
           <div className="space-y-6">
             <section className="space-y-1.5">
               <div className="px-3 pb-1 text-[9.5px] font-extrabold uppercase tracking-[0.22em] text-violet-300/55">
-                Main
+                {t('admin.nav.main')}
               </div>
               <div className="space-y-1">{CONTENT_LINKS.map(renderLink)}</div>
             </section>
 
             <section className="space-y-1.5">
               <div className="px-3 pb-1 text-[9.5px] font-extrabold uppercase tracking-[0.22em] text-violet-300/55">
-                Access
+                {t('admin.nav.access')}
               </div>
               <div className="space-y-1">{ACCESS_LINKS.map(renderLink)}</div>
             </section>
@@ -283,7 +300,7 @@ export default function Sidebar({
               />
             </span>
             <span className="text-[11px] font-bold tracking-[0.04em] text-violet-100/55">
-              Eventies Admin
+              {t('admin.layout.eventiesAdmin')}
             </span>
           </div>
         </div>

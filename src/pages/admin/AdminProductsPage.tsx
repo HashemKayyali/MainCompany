@@ -365,7 +365,7 @@ export default function AdminProductsPage() {
         {product.showPrice === false ? (
           <div className="mt-1 flex items-end gap-2">
             <div className="flex items-end gap-1.5 opacity-45">
-              <span className={cn('font-display text-[1.15rem] font-semibold leading-none', txt)}>
+              <span className={cn('font-sans text-[1.15rem] font-semibold leading-none', txt)}>
                 {product.rentalPricePerDay}
               </span>
               <span className={`pb-[1px] text-[9px] font-mono uppercase tracking-[0.16em] ${sub}`}>
@@ -381,7 +381,7 @@ export default function AdminProductsPage() {
           </div>
         ) : (
           <div className="mt-1 flex items-end gap-1.5">
-            <span className={cn('font-display text-[1.15rem] font-semibold leading-none', txt)}>
+            <span className={cn('font-sans text-[1.15rem] font-semibold leading-none', txt)}>
               {product.rentalPricePerDay}
             </span>
             <span className={`pb-[1px] text-[9px] font-mono uppercase tracking-[0.16em] ${sub}`}>

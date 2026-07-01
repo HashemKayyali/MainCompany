@@ -47,7 +47,7 @@ export default function NotFoundPage() {
             </Link>
             <Link to="/products" className="btn-outline">
               <Search className="h-4 w-4" strokeWidth={2.2} />
-              Browse Products
+              Browse Services
             </Link>
             <Link to="/contact" className="btn-outline">
               <MessageCircle className="h-4 w-4" strokeWidth={2.2} />

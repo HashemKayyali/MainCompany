@@ -18,7 +18,7 @@ export default function OrderSummaryPage() {
   const [loadError, setLoadError] = useState('')
 
   usePageMeta({
-    title: requestNumber ? `Order Summary ${requestNumber}` : 'Order Summary',
+    title: requestNumber ? `Request Summary ${requestNumber}` : 'Request Summary',
     description: 'Review the rental request you just submitted.',
     noIndex: true,
   })
@@ -63,7 +63,7 @@ export default function OrderSummaryPage() {
               Sign in to View This Request
             </h1>
             <p className={cn('mt-4 text-sm leading-7', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
-              This order summary belongs to your account.
+              This request summary belongs to your account.
             </p>
             <div className="mt-6">
               <Link to={`/login?redirect=${encodeURIComponent(`/order-summary/${requestNumber}`)}`} className="btn-primary !rounded-xl !px-5 !py-3 !text-sm">
@@ -80,21 +80,21 @@ export default function OrderSummaryPage() {
     <section className="site-section">
       <div className="site-container">
         <div className="mb-6">
-          <span className="section-label">// Order Summary</span>
+          <span className="section-label">// Request Summary</span>
           <h1 className={cn('section-title !text-left', !isDark && 'text-gray-900')}>Rental Request Submitted</h1>
           <p className={cn('mt-3 text-[0.96rem] leading-7', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
-            Your request was saved successfully and is waiting for admin review.
+            Your request was saved successfully and is waiting for Eventies review.
           </p>
         </div>
 
         {loading ? (
           <div className={cn('rounded-[24px] border p-6 sm:p-7 text-[0.95rem]', isDark ? 'border-white/10 bg-white/[0.03] text-purple-100/68' : 'border-gray-200 bg-white text-gray-500')}>
-            Loading order summary...
+            Loading request summary...
           </div>
         ) : loadError ? (
           <div className={cn('rounded-[28px] border p-6 sm:p-7', isDark ? 'border-rose-400/14 bg-[linear-gradient(180deg,rgba(22,10,25,0.84),rgba(10,10,22,0.92))]' : 'border-rose-200 bg-white')}>
             <div className={cn('text-[10px] font-mono uppercase tracking-[0.22em]', isDark ? 'text-rose-200/70' : 'text-rose-600/80')}>
-              Order Summary
+              Request Summary
             </div>
             <h2 className={cn('mt-3 font-display text-[1.35rem] font-black', isDark ? 'text-white' : 'text-gray-900')}>
               We couldn&apos;t load this request
@@ -107,7 +107,7 @@ export default function OrderSummaryPage() {
                 Go to My Requests
               </Link>
               <Link to="/products" className="btn-outline !w-full !rounded-xl !px-4 !py-2 !text-sm sm:!w-auto">
-                Browse Products
+                Browse Services
               </Link>
             </div>
           </div>
@@ -124,7 +124,7 @@ export default function OrderSummaryPage() {
                 Go to My Requests
               </Link>
               <Link to="/products" className="btn-outline !w-full !rounded-xl !px-4 !py-2 !text-sm sm:!w-auto">
-                Browse Products
+                Browse Services
               </Link>
             </div>
           </div>
@@ -160,7 +160,7 @@ export default function OrderSummaryPage() {
             </div>
 
             <div className={cn('rounded-[24px] border p-5 sm:p-6', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
-              <div className={cn('text-[1.08rem] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>Items</div>
+              <div className={cn('text-[1.08rem] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>Services</div>
               <div className="mt-4 space-y-3.5">
                 {request.items.map(item => (
                   <div key={item.id} className={cn('rounded-[18px] border px-4.5 py-4 sm:px-5', isDark ? 'border-white/8 bg-white/[0.02]' : 'border-gray-100 bg-gray-50')}>
@@ -183,7 +183,7 @@ export default function OrderSummaryPage() {
               </div>
 
               <div className={cn('mt-4 rounded-[18px] px-4.5 py-4 text-[0.95rem] font-semibold', isDark ? 'bg-[#0d1430]/88 text-cyan-100' : 'bg-violet-50 text-violet-700')}>
-                Grand total: {request.grandTotal.toFixed(2)} JOD
+                Estimated total: {request.grandTotal.toFixed(2)} JOD
               </div>
             </div>
 

@@ -6,6 +6,7 @@ import { usePurchaseQuote } from '../../contexts/PurchaseQuoteContext'
 import { useRentalCart } from '../../contexts/RentalCartContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useToast } from '../../contexts/ToastContext'
+import { useI18n } from '../../contexts/LanguageContext'
 import Modal from '../ui/Modal'
 import { cn } from '../../utils/cn'
 
@@ -22,6 +23,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
 }) {
   const { isDark } = useTheme()
   const { toast } = useToast()
+  const { t } = useI18n()
   const rentalCart = useRentalCart()
   const purchaseQuote = usePurchaseQuote()
   const [modalOpen, setModalOpen] = useState(false)
@@ -47,15 +49,15 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
       'btn-outline !inline-flex !min-h-[40px] !w-full !items-center !justify-center !gap-1.5 !whitespace-nowrap !rounded-[12px] !px-3 !py-2 !text-center !text-[10.75px] !font-bold !leading-none sm:!min-h-[42px] sm:!text-[11px]',
   }
 
-  // ── Cart actions ────────────────────────────────────────────────────────────
+  // ── Request draft actions ──────────────────────────────────────────────────
   const addToRentalCart = () => {
     rentalCart.addProduct(product, 1)
-    toast(`${product.name} added to rental cart.`, 'success')
+    toast(t('{service} added to your rental request draft.', { service: product.name }), 'success')
   }
 
   const removeFromRentalCart = () => {
     rentalCart.removeItem(product.slug)
-    toast(`${product.name} removed from rental cart.`, 'success')
+    toast(t('{service} removed from your rental request draft.', { service: product.name }), 'success')
   }
 
   const resetDraftModal = () => {
@@ -66,13 +68,13 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
 
   const addToPurchaseDraft = () => {
     purchaseQuote.addProduct(product, quantity, note)
-    toast(`${product.name} saved to your purchase quote draft on this device.`, 'success')
+    toast(t('{service} saved to your purchase quote request draft.', { service: product.name }), 'success')
     resetDraftModal()
   }
 
   const addAndReviewDraft = () => {
     purchaseQuote.addProduct(product, quantity, note)
-    toast(`${product.name} saved. Opening your purchase quote draft.`, 'success')
+    toast(t('{service} saved. Opening your purchase quote request draft.', { service: product.name }), 'success')
     resetDraftModal()
   }
 
@@ -90,13 +92,13 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
             {rentalEnabled && (
               <button type="button" onClick={addToRentalCart} className={detailClass.primary}>
                 <ShoppingCart size={13} className="shrink-0" />
-                Add to Cart
+                Add to Rental Request
               </button>
             )}
             {saleEnabled && (
               <button type="button" onClick={() => setModalOpen(true)} className={detailClass.secondary}>
                 <FileText size={13} className="shrink-0" />
-                Purchase Quote
+                Request a Purchase Quote
               </button>
             )}
           </div>
@@ -105,18 +107,18 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
             'rounded-[13px] px-3.5 py-2.5 text-[11px] leading-[1.65]',
             isDark ? 'bg-white/[0.035] text-purple-100/70' : 'bg-violet-50/80 text-slate-600'
           )}>
-            Rental requests are priced per day and reviewed by the team before confirmation. Purchase quotes stay separate and do not reserve rental stock.
+            Rental requests and purchase quote requests are reviewed before confirmation. Availability, pricing, setup, delivery, shipping, and scope are confirmed after review.
           </div>
 
           {showContactLink && (
             <Link to={`/contact?product=${product.slug}`} className={detailClass.secondary}>
               <MessageCircle size={13} className="shrink-0" />
-              General Inquiry
+              Ask About This Service
             </Link>
           )}
         </div>
 
-        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={`Purchase Quote for ${product.name}`} size="md">
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={`Purchase Quote Request for ${product.name}`} size="md">
           <PurchaseQuoteModalBody
             product={product}
             isDark={isDark}
@@ -150,7 +152,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
     <>
       <div className={cardStackClass}>
 
-        {/* ── Row 1: Rental cart action ── */}
+        {/* ── Row 1: Rental request draft action ── */}
         {rentalEnabled && (
           <div className={cn('grid', cardGridGapClass, isInRentalCart ? 'grid-cols-2' : 'grid-cols-1')}>
             {isInRentalCart ? (
@@ -186,7 +188,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
                 </button>
               </>
             ) : (
-              /* Add to Cart */
+              /* Add to Request */
               <button
                 type="button"
                 onClick={addToRentalCart}
@@ -198,7 +200,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
                 )}
               >
                 <ShoppingCart size={primaryIconSize} />
-                Add to Cart
+                Add to Rental Request
               </button>
             )}
           </div>
@@ -219,7 +221,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
                 : 'border border-slate-200/80 bg-white text-slate-600 hover:border-violet-300/60 hover:bg-violet-50/60 hover:text-violet-700'
             )}
           >
-            Details
+            Service Details
             <ArrowRight size={secondaryIconSize} />
           </Link>
 
@@ -235,7 +237,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
               )}
             >
               <FileText size={secondaryIconSize} />
-              Quote
+              Request a Purchase Quote
             </button>
           )}
         </div>
@@ -252,12 +254,12 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
             )}
           >
             <MessageCircle size={secondaryIconSize} />
-            Inquiry
+            Ask
           </Link>
         )}
       </div>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={`Purchase Quote for ${product.name}`} size="md">
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={`Purchase Quote Request for ${product.name}`} size="md">
         <PurchaseQuoteModalBody
           product={product}
           isDark={isDark}
@@ -306,13 +308,13 @@ function PurchaseQuoteModalBody({
       <div className={cn('rounded-[18px] border p-3.5', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-gray-50')}>
         <div className={cn('text-sm font-semibold', isDark ? 'text-white' : 'text-gray-900')}>{product.name}</div>
         <div className={cn('mt-1.5 text-[12px] leading-5', isDark ? 'text-purple-100/65' : 'text-gray-500')}>
-          Add this item to your multi-product purchase quote draft. Drafts are saved locally on this device until you send them, then they appear in My Requests.
+          Add this service to your purchase quote request draft. Drafts are saved locally on this device until you submit them, then they appear in My Requests.
         </div>
       </div>
 
       {productAlreadyInDraft && (
         <div className={cn('rounded-[15px] px-3.5 py-2.5 text-[11.5px] leading-5', isDark ? 'bg-fuchsia-500/10 text-fuchsia-100/82' : 'bg-fuchsia-50 text-fuchsia-700')}>
-          This product is already in your draft. Adding it again will increase the quantity and keep your latest note.
+          This service is already in your draft. Adding it again will increase the quantity and keep your latest note.
         </div>
       )}
 
@@ -332,13 +334,13 @@ function PurchaseQuoteModalBody({
 
       <div>
         <label className={cn('mb-1.5 block text-[13px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
-          Item Note
+          Service Note
         </label>
         <textarea
           rows={4}
           value={note}
           onChange={e => setNote(e.target.value)}
-          placeholder="Optional note for your sales team..."
+          placeholder="Optional note for the Eventies team..."
           className="form-field resize-none"
         />
       </div>
@@ -349,10 +351,10 @@ function PurchaseQuoteModalBody({
           className="btn-outline !w-full !rounded-[14px] !px-4 !py-2 !text-[11.5px] sm:!w-auto"
           onClick={addAndReviewDraft}
         >
-          Add &amp; Review Draft
+          Review Purchase Quote Request
         </Link>
         <button type="button" onClick={addToPurchaseDraft} className="btn-primary !w-full !rounded-[14px] !px-4 !py-2 !text-[11.5px] sm:!w-auto">
-          Save to Draft
+          Save to Purchase Quote Draft
         </button>
       </div>
     </div>

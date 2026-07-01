@@ -9,36 +9,25 @@ import {
 import {
   getMediaObjectStyle,
   parseMediaValue,
-  type MediaFit,
   type MediaFrameTransform,
 } from '../../utils/media-frame'
 
 interface Props extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> {
   media?: string
   fallbackTransform?: Partial<MediaFrameTransform>
+  fallbackSrc?: string
   extraScale?: number
   revealMode?: 'soft' | 'crisp'
 }
 
-const RESPONSIVE_WIDTHS = [320, 480, 640, 960, 1280, 1600]
+const DEFAULT_FALLBACK_SRC = '/images/image-fallback.svg'
 const DEFAULT_SIZES = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
 
-function buildResponsiveSrc(src: string, width: number, fit: MediaFit) {
-  try {
-    const url = new URL(src)
-    url.searchParams.set('width', String(width))
-    url.searchParams.set('quality', '82')
-    url.searchParams.set('resize', fit === 'contain' ? 'contain' : 'cover')
-    return url.toString()
-  } catch {
-    return src
-  }
-}
+function normalizeImageSrc(src?: string) {
+  const cleanSrc = src?.trim() ?? ''
+  if (!cleanSrc) return ''
 
-function buildSrcSet(src: string, fit: MediaFit) {
-  if (!src || !src.includes('supabase')) return undefined
-
-  return RESPONSIVE_WIDTHS.map(width => `${buildResponsiveSrc(src, width, fit)} ${width}w`).join(', ')
+  return cleanSrc
 }
 
 const FramedImage = memo(
@@ -46,6 +35,7 @@ const FramedImage = memo(
     {
       media = '',
       fallbackTransform,
+      fallbackSrc = DEFAULT_FALLBACK_SRC,
       extraScale,
       revealMode = 'crisp',
       style,
@@ -65,16 +55,17 @@ const FramedImage = memo(
       () => getMediaObjectStyle(media, { fallback: fallbackTransform, extraScale }),
       [extraScale, fallbackTransform, media]
     )
-    const srcSet = useMemo(
-      () => buildSrcSet(parsed.src, parsed.transform.fit),
-      [parsed.src, parsed.transform.fit]
-    )
 
     const [isLoaded, setIsLoaded] = useState(false)
+    const [hasError, setHasError] = useState(false)
 
     useEffect(() => {
       setIsLoaded(false)
+      setHasError(false)
     }, [parsed.src])
+
+    const realSrc = normalizeImageSrc(parsed.src)
+    const displaySrc = !hasError && realSrc ? realSrc : fallbackSrc
 
     const composedClassName = [
       className,
@@ -89,12 +80,11 @@ const FramedImage = memo(
       <img
         {...props}
         ref={ref}
-        src={parsed.src}
+        src={displaySrc}
         loading={loading}
         decoding={decoding}
         {...{ fetchpriority: fetchPriority ?? (loading === 'eager' ? 'high' : 'auto') }}
         sizes={sizes ?? DEFAULT_SIZES}
-        srcSet={srcSet}
         className={composedClassName}
         style={{
           ...objectStyle,
@@ -105,7 +95,12 @@ const FramedImage = memo(
           onLoad?.(event)
         }}
         onError={event => {
-          setIsLoaded(true)
+          if (displaySrc !== fallbackSrc) {
+            setIsLoaded(false)
+            setHasError(true)
+          } else {
+            setIsLoaded(true)
+          }
           onError?.(event)
         }}
       />

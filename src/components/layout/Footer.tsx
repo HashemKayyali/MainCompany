@@ -1,47 +1,122 @@
-import { useMemo } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { Mail, Phone, Sparkles } from 'lucide-react'
+import {
+  Facebook,
+  Instagram,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+  ShieldCheck,
+  Sparkles,
+  type LucideIcon,
+} from 'lucide-react'
 import { BRAND_LOGO_HORIZONTAL, BRAND_LOGO_HORIZONTAL_PNG } from '../../config/brand'
-import { useProductsData } from '../../contexts/DataContext'
+import { useCategoriesData } from '../../contexts/DataContext'
 import { social, socialLinks } from '../../data/social'
 
-export default function Footer() {
-  const { products } = useProductsData()
+const CONTACT_EMAILS = [
+  { label: 'General', address: social.email },
+  { label: 'Event Requests', address: 'booking@eventiesjo.com' },
+  { label: 'Vendors', address: 'vendors@eventiesjo.com' },
+  { label: 'Support', address: 'support@eventiesjo.com' },
+] as const
 
-  const pages = useMemo(
+const companyLinks = [
+  { to: '/', label: 'Home' },
+  { to: '/about', label: 'About Eventies' },
+  { to: '/custom-builds', label: 'Custom Builds' },
+  { to: '/customers', label: 'Customers' },
+  { to: '/gallery', label: 'Gallery' },
+  { to: '/contact', label: 'Contact' },
+]
+
+const supportLinks = [
+  { to: '/products', label: 'Browse Services' },
+  { to: '/contact', label: 'Request a Quote' },
+  { to: '/my-requests', label: 'Track Requests' },
+  { to: '/contact?type=provider', label: 'Become a Provider' },
+  { to: '/help', label: 'Help Center' },
+]
+
+const policyLinks = [
+  { to: '/privacy-policy', label: 'Privacy Policy' },
+  { to: '/terms', label: 'Terms of Service' },
+  { to: '/vendor-terms', label: 'Vendor Terms' },
+  { to: '/refund-policy', label: 'Refund Policy' },
+  { to: '/cookie-policy', label: 'Cookie Policy' },
+]
+
+const socialIconMap: Record<string, LucideIcon> = {
+  facebook: Facebook,
+  instagram: Instagram,
+  whatsapp: MessageCircle,
+}
+
+function SocialIcon({ platform }: { platform: string }) {
+  const Icon = socialIconMap[platform.toLowerCase()] || Sparkles
+  return <Icon className="h-4 w-4" strokeWidth={2.2} />
+}
+
+function FooterColumn({
+  title,
+  children,
+}: {
+  title: string
+  children: ReactNode
+}) {
+  return (
+    <div className="text-center sm:text-left">
+      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-violet-600">
+        {title}
+      </div>
+      <div className="mt-5 space-y-3 text-[12.5px] font-medium">{children}</div>
+    </div>
+  )
+}
+
+export default function Footer() {
+  const { categories } = useCategoriesData()
+
+  const categoryLinks = useMemo(
+    () =>
+      categories
+        .filter(category => category.slug.trim().length > 0)
+        .slice(0, 8)
+        .map(category => ({
+          to: `/categories/${encodeURIComponent(category.slug)}`,
+          label: category.name,
+          icon: category.icon?.trim() || '',
+        })),
+    [categories]
+  )
+
+  const footerSocialLinks = useMemo(
     () => [
-      { to: '/', label: 'Home' },
-      { to: '/products', label: 'Products' },
-      { to: '/customers', label: 'Customers' },
-      { to: '/gallery', label: 'Gallery' },
-      { to: '/about', label: 'About' },
-      { to: '/contact', label: 'Contact' },
+      ...socialLinks,
+      { platform: 'WhatsApp', url: social.whatsapp, label: 'WhatsApp' },
     ],
     []
   )
 
-  const topProducts = useMemo(() => (products || []).slice(0, 5), [products])
-
-  const subtle = 'text-violet-600/65'
-  const linkClass = 'text-ink-700/85 hover:text-violet-700 transition-colors'
+  const linkClass = 'text-ink-700/72 transition-colors hover:text-violet-800'
 
   return (
-    <footer className="relative pb-6 pt-6 sm:pb-5 sm:pt-5" role="contentinfo" aria-label="Site footer">
-      <div className="site-container">
-        <div className="section-shell px-5 py-6 sm:px-6 lg:px-8 lg:py-8">
-          <div className="relative grid grid-cols-2 gap-x-6 gap-y-7 md:grid-cols-2 lg:grid-cols-[1.1fr_0.7fr_0.7fr_0.9fr]">
-            {/* Brand */}
-            <div className="col-span-2 max-w-md lg:col-span-1">
-              <Link to="/" className="inline-flex h-11 w-[142px] items-center transition-opacity hover:opacity-88">
+    <footer className="relative z-10 mt-8 w-full pb-7 pt-12" role="contentinfo" aria-label="Site footer">
+      <div className="site-container-wide">
+        <div className="section-shell overflow-hidden px-6 py-10 sm:px-8 lg:px-10 lg:py-12">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.05fr_2fr] lg:gap-12">
+            <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+              <Link to="/" className="inline-flex h-12 w-[166px] items-center transition-opacity hover:opacity-85" aria-label="Eventies home">
                 <img
                   src={BRAND_LOGO_HORIZONTAL}
                   alt="Eventies"
-                  width={170}
-                  height={52}
+                  width={190}
+                  height={58}
                   loading="lazy"
                   decoding="async"
-                  className="block h-full w-full object-contain drop-shadow-[0_8px_18px_rgba(15,23,42,0.16)]"
-                  onError={(event) => {
+                  className="block h-full w-full object-contain"
+                  onError={event => {
                     const image = event.currentTarget
                     if (image.dataset.fallbackLogo === 'true') return
                     image.dataset.fallbackLogo = 'true'
@@ -49,105 +124,129 @@ export default function Footer() {
                   }}
                 />
               </Link>
-              <p className="mt-4 text-[13px] leading-[1.7]" style={{ color: 'rgba(61, 35, 112, 0.78)' }}>
-                A premium marketplace for discovering, comparing, and booking trusted event services
-                — from first visit to final inquiry.
+
+              <p className="mt-5 max-w-sm text-[13.5px] leading-[1.75] text-ink-700/72">
+                Eventies helps clients discover event services, compare trusted providers across Jordan,
+                and submit clear requests from one organized marketplace.
               </p>
 
-              {/* Subtle accent */}
-              <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-violet-200/70 bg-violet-50/70 px-3 py-1.5">
-                <Sparkles className="h-3 w-3 text-violet-600" strokeWidth={2.4} />
-                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-700">
-                  Trusted by 30+ vendors
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-violet-200/75 bg-white/72 px-3 py-1.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-violet-600" strokeWidth={2.4} />
+                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-violet-700">
+                  Trusted event services marketplace
                 </span>
+              </div>
+
+              <div className="mt-7 flex flex-wrap justify-center gap-2.5 lg:justify-start">
+                {footerSocialLinks.map(item => (
+                  <a
+                    key={item.platform}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-violet-200/80 bg-white text-violet-700 shadow-[0_10px_22px_-18px_rgba(89,23,196,0.55)] transition-all hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50 hover:text-violet-900"
+                    aria-label={`Follow Eventies on ${item.platform}`}
+                  >
+                    <SocialIcon platform={item.platform} />
+                  </a>
+                ))}
               </div>
             </div>
 
-            {/* Navigation */}
-            <div className="min-w-0">
-              <div className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${subtle}`}>
-                Navigate
-              </div>
-              <div className="mt-4 flex flex-col gap-2.5">
-                {pages.map((item) => (
-                  <Link key={item.to} to={item.to} className={`text-[12.5px] font-medium ${linkClass}`}>
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-5">
+              <FooterColumn title="Categories">
+                {categoryLinks.length > 0 ? (
+                  categoryLinks.map(item => (
+                    <Link key={item.to} to={item.to} className={`flex items-center justify-center gap-2 sm:justify-start ${linkClass}`}>
+                      {item.icon ? (
+                        <span className="max-w-[1.5rem] truncate text-[13px]" aria-hidden="true">
+                          {item.icon}
+                        </span>
+                      ) : (
+                        <span className="h-1.5 w-1.5 rounded-full bg-violet-500/70" aria-hidden="true" />
+                      )}
+                      <span>{item.label}</span>
+                    </Link>
+                  ))
+                ) : (
+                  <Link to="/products" className={linkClass}>
+                    Browse services
+                  </Link>
+                )}
+              </FooterColumn>
+
+              <FooterColumn title="Company">
+                {companyLinks.map(item => (
+                  <Link key={item.to} to={item.to} className={`block ${linkClass}`}>
                     {item.label}
                   </Link>
                 ))}
-              </div>
-            </div>
+              </FooterColumn>
 
-            {/* Featured */}
-            <div className="min-w-0">
-              <div className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${subtle}`}>
-                Featured
-              </div>
-              <div className="mt-4 flex flex-col gap-2.5">
-                {topProducts.map((item) => (
-                  <Link
-                    key={item.slug}
-                    to={`/products/${item.slug}`}
-                    className={`text-[12.5px] font-medium ${linkClass}`}
-                  >
-                    {item.name}
+              <FooterColumn title="Support">
+                {supportLinks.map(item => (
+                  <Link key={item.to} to={item.to} className={`block ${linkClass}`}>
+                    {item.label}
                   </Link>
                 ))}
-              </div>
-            </div>
+              </FooterColumn>
 
-            {/* Contact */}
-            <div className="col-span-2 lg:col-span-1">
-              <div className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${subtle}`}>
-                Connect
-              </div>
-              <div className="mt-4 space-y-3.5">
-                <div className="flex items-start gap-2.5">
-                  <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-[10px] border border-violet-200/70 bg-violet-50/80">
-                    <Mail className="h-3.5 w-3.5 text-violet-600" strokeWidth={2.2} />
-                  </div>
-                  <div>
-                    <div className={`text-[10px] uppercase tracking-[0.16em] ${subtle}`}>Email</div>
-                    <a href={`mailto:${social.email}`} className={`mt-0.5 block text-[12.5px] font-medium ${linkClass}`}>
-                      {social.email}
-                    </a>
-                  </div>
+              <FooterColumn title="Legal">
+                {policyLinks.map(item => (
+                  <Link key={item.to} to={item.to} className={`block ${linkClass}`}>
+                    {item.label}
+                  </Link>
+                ))}
+              </FooterColumn>
+
+              <FooterColumn title="Contact">
+                <a href={`tel:${social.phone}`} className={`flex items-center justify-center gap-2 sm:justify-start ${linkClass}`}>
+                  <Phone className="h-4 w-4 shrink-0 text-violet-600" strokeWidth={2.2} />
+                  <span>{social.phoneFormatted}</span>
+                </a>
+                <div className="flex items-start justify-center gap-2 sm:justify-start">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" strokeWidth={2.2} />
+                  <address className="not-italic text-ink-700/72">Amman, Jordan</address>
                 </div>
-                <div className="flex items-start gap-2.5">
-                  <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-[10px] border border-violet-200/70 bg-violet-50/80">
-                    <Phone className="h-3.5 w-3.5 text-violet-600" strokeWidth={2.2} />
-                  </div>
-                  <div>
-                    <div className={`text-[10px] uppercase tracking-[0.16em] ${subtle}`}>Phone</div>
-                    <a href={`tel:${social.phone}`} className={`mt-0.5 block text-[12.5px] font-medium ${linkClass}`}>
-                      {social.phoneFormatted}
-                    </a>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {socialLinks.map((item) => (
-                    <a
-                      key={item.platform}
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center rounded-lg border border-violet-200/70 bg-white/80 px-3 py-1.5 text-[10.5px] font-semibold tracking-wide text-violet-700 transition-all hover:border-violet-400/85 hover:bg-violet-50/80 hover:text-violet-900 hover:shadow-[0_4px_12px_-4px_rgba(124,58,237,0.22)]"
-                      aria-label={`Follow us on ${item.platform}`}
-                    >
-                      {item.platform}
-                    </a>
-                  ))}
-                </div>
-              </div>
+                {CONTACT_EMAILS.map(item => (
+                  <a
+                    key={item.address}
+                    href={`mailto:${item.address}`}
+                    className={`flex items-start justify-center gap-2 break-all sm:justify-start ${linkClass}`}
+                  >
+                    <Mail className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" strokeWidth={2.2} />
+                    <span>
+                      <span className="block text-[9.5px] font-bold uppercase tracking-[0.15em] text-violet-500/80">
+                        {item.label}
+                      </span>
+                      {item.address}
+                    </span>
+                  </a>
+                ))}
+              </FooterColumn>
             </div>
           </div>
 
-          <div className="relative mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-violet-100/85 pt-5">
-            <p className={`text-[10px] uppercase tracking-[0.16em] ${subtle}`}>
-              &copy; {new Date().getFullYear()} Eventies &middot; Premium event services marketplace
-            </p>
-            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-600/70">
-              <span className="h-1.5 w-1.5 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(168,85,247,0.7)]" />
-              Made in Jordan
+          <div className="mt-10 border-t border-violet-100/90 pt-6">
+            <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
+              <p className="text-[11px] font-semibold text-ink-600/70">
+                &copy; {new Date().getFullYear()} Eventies. All rights reserved.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] font-bold uppercase tracking-[0.16em] text-violet-600/72">
+                <Link to="/privacy-policy" className="transition hover:text-violet-900">
+                  Privacy
+                </Link>
+                <Link to="/terms" className="transition hover:text-violet-900">
+                  Terms
+                </Link>
+                <Link to="/cookie-policy" className="transition hover:text-violet-900">
+                  Cookies
+                </Link>
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+                  Made in Jordan
+                </span>
+              </div>
             </div>
           </div>
         </div>

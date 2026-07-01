@@ -79,7 +79,7 @@ export default function AdminDetailModal({
                 key={section.title}
                 className="rounded-[18px] border border-violet-200/70 bg-white p-4 shadow-[0_8px_24px_-18px_rgba(89,23,196,0.16)] sm:p-5"
               >
-                <h3 className="font-display text-[1.05rem] font-extrabold text-[#1a0b3d]">
+                <h3 className="font-sans text-[1.05rem] font-extrabold text-[#1a0b3d]">
                   {section.title}
                 </h3>
                 {section.description && (

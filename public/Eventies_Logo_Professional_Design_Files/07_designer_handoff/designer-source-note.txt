@@ -1,0 +1,14 @@
+Eventies source note for designer
+
+The supplied PNG masters are cleaned production exports.
+The SVG files are web-ready embedded artwork, not native editable vector paths.
+
+To create final editable source in Illustrator/Figma:
+1. Place `eventies-logo-master-black-wordmark-transparent.png` as the visual reference.
+2. Rebuild the wordmark using a licensed Zodiak / Zodiak-like high-contrast serif font.
+3. Convert the final wordmark to outlines.
+4. Rebuild or trace the icon using the included icon master as reference.
+5. Export final native files as AI, SVG outline, PDF, PNG, and WebP.
+
+Important:
+No font files are included or redistributed.

@@ -1,9 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 
-export default function Lightbox({ images, open, onClose }: { images: string[]; initialIndex?: number; open: boolean; onClose: () => void }) {
-  const [idx, setIdx] = useState(0)
+export default function Lightbox({ images, open, onClose, initialIndex = 0 }: { images: string[]; initialIndex?: number; open: boolean; onClose: () => void }) {
+  const [idx, setIdx] = useState(initialIndex)
   const next = useCallback(() => setIdx(i => (i + 1) % images.length), [images.length])
   const prev = useCallback(() => setIdx(i => (i - 1 + images.length) % images.length), [images.length])
+
+  useEffect(() => {
+    if (open) setIdx(Math.min(Math.max(initialIndex, 0), Math.max(images.length - 1, 0)))
+  }, [open, initialIndex, images.length])
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
@@ -37,8 +41,11 @@ export default function Lightbox({ images, open, onClose }: { images: string[]; 
       <img
         src={images[idx]}
         alt={`Gallery photo ${idx + 1} of ${images.length}`}
-        loading="lazy"
+        width={1600}
+        height={1200}
+        loading="eager"
         decoding="async"
+        sizes="100vw"
         className="max-h-[82vh] max-w-[92vw] rounded-[18px] object-contain sm:max-h-[85vh] sm:max-w-[90vw]"
         onClick={e => e.stopPropagation()}
       />

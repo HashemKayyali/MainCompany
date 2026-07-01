@@ -75,7 +75,7 @@ export default function RequestListCard({
 
           <div className={cn('rounded-[16px] px-3.5 py-3', isDark ? 'bg-white/[0.03] ring-1 ring-inset ring-white/[0.05]' : 'bg-gray-50 ring-1 ring-inset ring-gray-100')}>
             <div className={cn('text-[10px] font-mono uppercase tracking-[0.14em]', isDark ? 'text-cyan-100/40' : 'text-gray-400')}>
-              Items
+              Services
             </div>
             <div className="mt-2 text-[0.95rem] font-medium">{request.itemCount}</div>
           </div>
@@ -85,7 +85,7 @@ export default function RequestListCard({
               Total
             </div>
             <div className="mt-2 text-[0.95rem] font-medium">
-              {request.total == null ? 'Quote Pending' : `${request.total.toFixed(2)} JOD`}
+              {request.total == null ? 'Review Pending' : `${request.total.toFixed(2)} JOD`}
             </div>
           </div>
 

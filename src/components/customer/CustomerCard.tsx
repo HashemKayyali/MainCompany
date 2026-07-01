@@ -1,86 +1,70 @@
 import { memo, useState } from 'react'
-import { useTheme } from '../../contexts/ThemeContext'
 import type { Customer } from '../../data/customers'
 import { usePerfMode } from '../../hooks/usePerfMode'
 import FramedImage from '../ui/FramedImage'
 import { cn } from '../../utils/cn'
-import { useSpotlight, SpotlightOverlay } from '../ui/spotlight-card'
 
+/**
+ * Partner logo card for the /customers page. Matches the site "Redesign"
+ * theme: a soft violet→fuchsia logo well on a clean white card with a
+ * violet hover ring, name, and category caption.
+ */
 const CustomerCard = memo(function CustomerCard({ customer }: { customer: Customer }) {
-  const { isDark } = useTheme()
   const { perfLow } = usePerfMode()
   const [imgOk, setImgOk] = useState(true)
-  const spotlight = useSpotlight()
 
   return (
     <div
-      {...spotlight.handlers}
       className={cn(
-        'group relative flex min-h-[154px] w-full min-w-0 flex-col overflow-hidden rounded-[22px] border p-3.5 transition-[border-color,box-shadow,transform] duration-300 sm:min-h-[166px] sm:p-4',
-        !perfLow && 'hover:-translate-y-0.5',
-        isDark
-          ? 'border-white/[0.10] bg-white/[0.03] shadow-[0_20px_48px_-28px_rgba(0,0,0,0.66),inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/[0.18] hover:bg-white/[0.05] hover:shadow-[0_26px_58px_-28px_rgba(0,0,0,0.72),inset_0_1px_0_rgba(255,255,255,0.06)]'
-          : 'border-black/[0.12] bg-white shadow-[0_22px_54px_-34px_rgba(15,23,42,0.42),0_8px_20px_-16px_rgba(15,23,42,0.20),0_0_0_1px_rgba(255,255,255,0.88)] hover:border-black/[0.22] hover:shadow-[0_28px_62px_-32px_rgba(15,23,42,0.44),0_10px_24px_-16px_rgba(15,23,42,0.24),0_0_0_1px_rgba(255,255,255,0.92)]'
+        'group relative flex h-full min-h-[162px] flex-col overflow-hidden rounded-[22px] border border-violet-200/70 bg-white p-3.5 transition-all duration-400 sm:min-h-[178px] sm:p-4',
+        !perfLow && 'hover:-translate-y-1 hover:border-violet-300 hover:shadow-[0_28px_56px_-30px_rgba(89,23,196,0.42)]'
       )}
+      style={{ boxShadow: '0 1px 2px rgba(20,8,50,0.04), 0 14px 34px -24px rgba(89,23,196,0.18)' }}
     >
-      {!perfLow && <SpotlightOverlay ref={spotlight.overlayRef} color="rgba(124,58,237,0.08)" size={180} />}
-
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{
-          background: 'linear-gradient(90deg, transparent 10%, rgba(168,85,247,0.58) 50%, transparent 90%)',
-        }}
+      {/* Violet hover ring */}
+      <span
+        className="pointer-events-none absolute inset-0 z-10 rounded-[22px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{ boxShadow: 'inset 0 0 0 1.5px rgba(168,85,247,0.5)' }}
+        aria-hidden="true"
       />
 
-      <div
-        className={cn(
-          'relative flex h-20 w-full min-w-0 items-center justify-center overflow-hidden rounded-[16px] border sm:h-24',
-          isDark ? 'border-white/[0.06] bg-white/[0.03]' : 'border-slate-100 bg-slate-50/70'
-        )}
-      >
+      {/* Logo well */}
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-[16px] bg-gradient-to-br from-violet-50 via-white to-fuchsia-50/60 p-4">
+        <span
+          className="pointer-events-none absolute inset-0"
+          style={{ background: 'radial-gradient(60% 60% at 50% 35%, rgba(168,85,247,0.10) 0%, transparent 70%)' }}
+          aria-hidden="true"
+        />
         {imgOk ? (
           <FramedImage
             media={customer.logo}
             alt={customer.name}
+            width={320}
+            height={180}
             loading="lazy"
             sizes="(max-width: 640px) 42vw, (max-width: 1024px) 28vw, 190px"
-            className={cn(
-              'h-full max-h-14 w-auto max-w-[84%] object-contain transition-all duration-300 sm:max-h-16',
-              isDark
-                ? 'opacity-72 group-hover:opacity-95'
-                : 'opacity-80 mix-blend-multiply group-hover:opacity-100'
-            )}
             fallbackTransform={{ fit: 'contain' }}
             onError={() => setImgOk(false)}
+            className="relative h-full max-h-[3.75rem] w-auto max-w-[84%] object-contain opacity-90 mix-blend-multiply transition-all duration-500 ease-out group-hover:scale-[1.05] group-hover:opacity-100 sm:max-h-16"
           />
         ) : (
-          <span
-            className={cn(
-              'font-display text-[1rem] font-bold uppercase tracking-widest',
-              isDark ? 'text-white/28' : 'text-slate-400'
-            )}
-          >
+          <span className="relative font-sans text-[1.1rem] font-black uppercase tracking-widest text-violet-300">
             {customer.name.slice(0, 2)}
           </span>
         )}
       </div>
 
+      {/* Footer */}
       <div className="mt-3 min-w-0 text-center">
         <div
-          className={cn(
-            'truncate font-display text-[0.86rem] font-bold leading-tight tracking-[-0.025em] transition-colors duration-300 sm:text-[0.95rem]',
-            isDark ? 'text-white/82 group-hover:text-white' : 'text-slate-900 group-hover:text-violet-900'
-          )}
+          className="truncate font-sans text-[0.9rem] font-bold leading-tight tracking-[-0.02em] text-ink-900 transition-colors duration-300 group-hover:text-violet-900 sm:text-[0.98rem]"
           title={customer.name}
         >
           {customer.name}
         </div>
         {customer.category && (
           <div
-            className={cn(
-              'mt-1.5 truncate text-[9px] font-bold uppercase tracking-[0.16em] sm:text-[9.5px]',
-              isDark ? 'text-violet-300/72' : 'text-violet-700/78'
-            )}
+            className="mt-1 truncate text-[9px] font-bold uppercase tracking-[0.16em] text-violet-500 sm:text-[9.5px]"
             title={customer.category}
           >
             {customer.category}

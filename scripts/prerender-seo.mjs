@@ -4,7 +4,7 @@ import path from 'node:path'
 const SITE_URL = 'https://www.eventiesjo.com'
 const SITE_NAME = 'Eventies'
 const DEFAULT_IMAGE = `${SITE_URL}/images/og-default.png`
-const DEFAULT_IMAGE_ALT = 'Eventies event services and vendors marketplace in Jordan'
+const DEFAULT_IMAGE_ALT = 'Eventies event services and trusted providers marketplace in Jordan'
 const BRAND_LOGO_ABSOLUTE = `${SITE_URL}/brand/eventies_icon_transparent_master.png`
 const DEFAULT_LOCALE = 'en_JO'
 const DEFAULT_IMAGE_WIDTH = '1200'
@@ -32,39 +32,45 @@ const GLOBAL_JSON_LD = [
 const STATIC_PAGES = [
   {
     path: '/',
-    title: 'Event Services & Vendors in Jordan | Eventies',
+    title: 'Eventies | Event Services Marketplace in Jordan',
     description:
-      'Discover venues, photographers, catering, booths, equipment, entertainment, and trusted event vendors across Jordan with Eventies.',
+      'Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.',
   },
   {
     path: '/products',
-    title: 'Event Services & Equipment in Jordan | Eventies',
+    title: 'Event Services & Rentals in Jordan | Eventies',
     description:
-      'Browse event rentals, interactive games, VR experiences, screens, booths, entertainment, and production services from trusted providers in Jordan.',
+      'Browse interactive games, screens, booths, production support, and event rentals from trusted providers across Jordan. Compare options and submit one clear request for review.',
+  },
+  {
+    path: '/custom-builds',
+    title: 'Custom Event Builds & Interactive Experiences | Eventies',
+    description:
+      'Eventies designs and builds custom interactive experiences, branded activations, games, software, hardware, and event-ready setups for local and international projects.',
   },
   {
     path: '/customers',
     title: 'Eventies Clients & Event Partners in Jordan',
     description:
-      'See the brands, schools, venues, and organizations that trust Eventies for event activations and experiences across Jordan.',
+      'A curated look at brands, schools, venues, and organizations connected to Eventies activations, custom builds, and event services across Jordan and the region.',
   },
   {
     path: '/gallery',
     title: 'Event Gallery & Activations in Jordan | Eventies',
     description:
-      'Explore photos from Eventies activations, equipment setups, games, VR experiences, and corporate events across Jordan.',
+      'Browse albums from Eventies activations, service setups, custom builds, and real event moments across Jordan.',
   },
   {
     path: '/about',
     title: 'About Eventies | Jordan Event Services Marketplace',
     description:
-      'Learn how Eventies connects event organizers with trusted services, equipment, activations, and vendors across Jordan.',
+      'Learn how Eventies helps clients, organizers, companies, and providers discover rentals, activations, production support, custom builds, and trusted event services across Jordan.',
   },
   {
     path: '/contact',
-    title: 'Contact Eventies | Plan an Event in Jordan',
+    title: 'Contact Eventies | Event Requests in Jordan',
     description:
-      'Contact Eventies for event rentals, vendor services, equipment, activations, and planning support in Amman and across Jordan.',
+      'Contact Eventies for event rentals, purchase requests, custom builds, support, provider inquiries, and event service partnerships in Jordan.',
   },
 ]
 
@@ -388,8 +394,8 @@ async function fetchActiveCategories() {
 function productToMeta(product) {
   const encodedSlug = encodeURIComponent(product.slug)
   const routePath = `/products/${encodedSlug}`
-  const title = `${product.title} Rental in Jordan | Eventies`
-  const description = `Rent or request ${product.title} for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.`
+  const title = `${product.title} for Events in Jordan | Eventies`
+  const description = `Request ${product.title} for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.`
   const productImage = getFirstPublicProductImage(product)
   const image = productImage || DEFAULT_IMAGE
   const price = Number(product.price)
@@ -422,7 +428,7 @@ function productToMeta(product) {
     canonical: productUrl,
     type: 'product',
     image,
-    imageAlt: `${product.title} rental for events in Jordan`,
+    imageAlt: `${product.title} service for events in Jordan`,
     jsonLd: productJsonLd ? [productJsonLd] : [],
   }
 }

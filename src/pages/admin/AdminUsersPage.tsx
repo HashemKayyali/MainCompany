@@ -329,13 +329,13 @@ export default function AdminUsersPage() {
                         name={user.name}
                         email={user.email}
                         className={cn(
-                          'h-11 w-11 shrink-0 rounded-[12px] text-[0.95rem] font-display font-bold',
+                          'h-11 w-11 shrink-0 rounded-[12px] text-[0.95rem] font-sans font-bold',
                           avatarBg(user.role)
                         )}
                       />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="truncate font-display text-[14px] font-extrabold text-[#1a0b3d]">
+                          <span className="truncate font-sans text-[14px] font-extrabold text-[#1a0b3d]">
                             {user.name || 'No name'}
                           </span>
                           {isYou && (
@@ -404,7 +404,7 @@ export default function AdminUsersPage() {
                 name={details.name}
                 email={details.email}
                 className="h-24 w-24 rounded-[26px]"
-                fallbackClassName={cn('text-5xl font-display font-bold', avatarBg(details.role))}
+                fallbackClassName={cn('text-5xl font-sans font-bold', avatarBg(details.role))}
               />
             </div>
           ) : null
@@ -482,7 +482,7 @@ export default function AdminUsersPage() {
                 name={editName || editUser.name}
                 email={editUser.email}
                 className="h-10 w-10 rounded-[14px]"
-                fallbackClassName={cn('text-sm font-bold font-display', avatarBg(editUser.role))}
+                fallbackClassName={cn('text-sm font-bold font-sans', avatarBg(editUser.role))}
               />
               <div className="min-w-0 flex-1">
                 <div className={`truncate text-sm font-medium ${txt}`}>{editUser.email}</div>

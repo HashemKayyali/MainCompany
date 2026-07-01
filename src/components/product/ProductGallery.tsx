@@ -81,8 +81,11 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
                     <FramedImage
                       media={activeImage}
                       alt={`${name} - enlarged photo ${activeImageIndex + 1}`}
+                      width={1600}
+                      height={1200}
                       loading="eager"
                       fetchPriority="high"
+                      sizes="100vw"
                       className="block h-auto max-h-[calc(100dvh-3rem)] w-auto max-w-[calc(100vw-3rem)] object-contain"
                       fallbackTransform={{ fit: 'contain', bgColor: '#000000', bgOpacity: 1 }}
                       style={{ objectFit: 'contain', transform: 'none' }}
@@ -107,7 +110,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
           '[&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent',
           '[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-violet-300/60'
         )}
-        aria-label="Product media thumbnails"
+        aria-label="Service media thumbnails"
       >
         {hasVideo && (
           <button
@@ -164,7 +167,10 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
               <FramedImage
                 media={img}
                 alt=""
+                width={172}
+                height={128}
                 loading="lazy"
+                sizes="86px"
                 className={thumbnailMedia}
                 fallbackTransform={{ fit: 'contain', bgColor: '#ffffff', bgOpacity: 0 }}
                 style={{ objectFit: 'contain', transform: 'none' }}
@@ -230,8 +236,11 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
                 <FramedImage
                   media={images[activeImageIndex]}
                   alt={`${name} - photo ${activeImageIndex + 1}`}
+                  width={1400}
+                  height={1050}
                   loading="eager"
                   fetchPriority="high"
+                  sizes="(max-width: 1024px) 100vw, 760px"
                   className={mobileMainMedia}
                   fallbackTransform={{ fit: 'contain', bgColor: '#ffffff', bgOpacity: 0 }}
                   style={{ objectFit: 'contain', transform: 'none' }}

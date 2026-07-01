@@ -1,1039 +1,856 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowRight,
-  GalleryVerticalEnd,
+  ChevronDown,
   LayoutGrid,
+  LogOut,
   Menu,
-  MessageCircleMore,
+  Package,
   Search,
   ShieldCheck,
-  Users,
+  ShoppingCart,
+  Tag,
+  User2,
   X,
 } from 'lucide-react'
-import { useTheme } from '../../contexts/ThemeContext'
+import { BRAND_ICON, BRAND_LOGO_HORIZONTAL } from '../../config/brand'
 import { useAuth } from '../../contexts/AuthContext'
-import { usePurchaseQuote } from '../../contexts/PurchaseQuoteContext'
+import { useCategoriesData, useProductsData } from '../../contexts/DataContext'
 import { useRentalCart } from '../../contexts/RentalCartContext'
 import { useUser } from '../../contexts/UserContext'
+import { useI18n } from '../../contexts/LanguageContext'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
-import { usePerfMode } from '../../hooks/usePerfMode'
 import { preloadRoute } from '../../utils/route-preload'
-import SearchDialog from '../ui/SearchDialog'
-import { DESKTOP_NAV } from './navbar/navConfig'
-import { EventiesLogo } from './navbar/NavbarPrimitives'
-import {
-  DesktopPrimaryNav,
-  MobileTopChips,
-  NavbarAccountActions,
-  NavbarMobileUtilityGrid,
-  NavbarUserMenuPortal,
-} from './navbar/NavbarSections'
+import LanguageSwitcher from './LanguageSwitcher'
+
+const NAV_LINKS = [
+  { to: '/', label: 'Home' },
+  { to: '/products', label: 'Services' },
+  { to: '/custom-builds', label: 'Custom Builds' },
+  { to: '/customers', label: 'Customers' },
+  { to: '/gallery', label: 'Gallery' },
+  { to: '/about', label: 'About' },
+  { to: '/contact', label: 'Contact' },
+]
+
+type SearchResult = {
+  type: 'category' | 'product'
+  label: string
+  to: string
+  meta: string
+  image?: string
+}
+
+function initialsOf(name?: string | null, email?: string | null) {
+  const source = (name || '').trim() || (email || '').trim()
+  if (!source) return 'U'
+  const parts = source.split(/[\s@._-]+/).filter(Boolean)
+  if (parts.length === 0) return source.slice(0, 2).toUpperCase()
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[1][0]).toUpperCase()
+}
+
+/** Brand initials badge — replaces the plain avatar chip. */
+function Avatar({
+  name,
+  email,
+  className = 'h-8 w-8 text-[12px]',
+  ring = 'ring-2 ring-white/40',
+}: {
+  name?: string | null
+  email?: string | null
+  className?: string
+  ring?: string
+}) {
+  return (
+    <span
+      className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-full font-display font-black text-white ${ring} ${className}`}
+      style={{ background: 'linear-gradient(140deg, #7c3aed 0%, #9333ea 45%, #d946ef 100%)' }}
+      aria-hidden="true"
+    >
+      <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-white/15" />
+      <span className="relative tracking-tight">{initialsOf(name, email)}</span>
+    </span>
+  )
+}
+
+function BrandLogo({ overHero, compact = false }: { overHero: boolean; compact?: boolean }) {
+  // Use the approved full logo asset as one image so the wordmark never changes
+  // between English and Arabic modes. The only allowed change is color treatment:
+  // white over dark hero sections, original colored/black logo after scrolling.
+  const logoSize = compact
+    ? 'h-[38px] w-[176px]'
+    : 'h-[48px] w-[220px] sm:h-[52px] sm:w-[238px]'
+  const logoTone = overHero ? 'eventies-logo-full--hero' : 'eventies-logo-full--original'
+
+  return (
+    <span className="eventies-logo-lockup inline-flex shrink-0 items-center" dir="ltr" aria-hidden="true">
+      <img
+        src={BRAND_LOGO_HORIZONTAL}
+        alt=""
+        width={238}
+        height={52}
+        loading="eager"
+        decoding="async"
+        className={`${logoSize} eventies-logo-full ${logoTone} block shrink-0 object-contain transition-[filter] duration-300`}
+        onError={event => {
+          const image = event.currentTarget
+          if (image.dataset.fallbackLogoIcon === 'true') return
+          image.dataset.fallbackLogoIcon = 'true'
+          image.src = BRAND_ICON
+          image.className = `${compact ? 'h-10 w-10' : 'h-12 w-12'} eventies-logo-icon ${logoTone} block shrink-0 object-contain transition-[filter] duration-300`
+        }}
+      />
+    </span>
+  )
+}
 
 export default function Navbar() {
-  const { pathname, hash } = useLocation()
-  const { isDark } = useTheme()
-  const { perfLow } = usePerfMode()
+  const location = useLocation()
+  const { pathname, search, hash } = location
+  const navigate = useNavigate()
+  const { categories } = useCategoriesData()
+  const { products, getProductsByCategory } = useProductsData()
+  const { isLoggedIn, currentUser, logout } = useUser()
+  const { isAuth } = useAuth()
+  const { itemCount } = useRentalCart()
+  const { translateText, dir } = useI18n()
 
-  // ── Route-derived flags (declared up-front so any effect/state hook below
-  //    can reference them in deps arrays without hitting a TDZ in production).
-  const isHome = pathname === '/'
-  // Hero is now light/purple, so the navbar uses the same light treatment over hero
-  const heroMode = false
-
-  const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [desktopMenu, setDesktopMenu] = useState<string | null>(null)
-  const [desktopMenuPosition, setDesktopMenuPosition] = useState<{
-    top: number
-    left: number
-    width: number
-    compact: boolean
-  } | null>(null)
-  const [userMenu, setUserMenu] = useState(false)
-  const [userMenuPosition, setUserMenuPosition] = useState<{
-    top: number
-    left: number
-    placement: 'top' | 'bottom'
-  } | null>(null)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [catsOpen, setCatsOpen] = useState(false)
+  const [userOpen, setUserOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [searchFocused, setSearchFocused] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(-1)
 
-  const userMenuAnchorRef = useRef<HTMLDivElement>(null)
-  const userMenuPopoverRef = useRef<HTMLDivElement>(null)
-  const desktopMenuPopoverRef = useRef<HTMLDivElement>(null)
-  const navbarBarRef = useRef<HTMLDivElement>(null)
-  const navSurfaceRef = useRef<HTMLDivElement>(null)
-  const desktopPanelFirstLinkRef = useRef<HTMLAnchorElement>(null)
-  const desktopTriggerRefs = useRef<Record<string, HTMLElement | null>>({})
-  const desktopOpenTimerRef = useRef<number | null>(null)
-  const desktopCloseTimerRef = useRef<number | null>(null)
-  const scrolledRef = useRef(false)
-  const [canHoverDesktopNav, setCanHoverDesktopNav] = useState(true)
+  const searchRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const catsRef = useRef<HTMLDivElement>(null)
+  const userRef = useRef<HTMLDivElement>(null)
+  const fastNavIntentRef = useRef<{ to: string; at: number } | null>(null)
 
-  useBodyScrollLock(open)
+  const hasDarkHero =
+    pathname === '/' ||
+    pathname === '/products' ||
+    pathname === '/categories' ||
+    pathname === '/customers' ||
+    pathname === '/custom-builds' ||
+    pathname === '/gallery' ||
+    pathname === '/about' ||
+    pathname === '/contact'
+  const overHero = hasDarkHero && !scrolled
+  const cartCount = itemCount > 99 ? '99+' : String(itemCount)
+  const userName = currentUser?.name?.trim() || ''
+  const emailName = currentUser?.email?.split('@')[0]?.replace(/[._-]+/g, ' ').trim() || ''
+  const accountButtonLabel = userName.split(/\s+/)[0] || emailName.split(/\s+/)[0] || translateText('My Account')
+  const isArabic = dir === 'rtl'
+  const tr = useCallback((value: string) => translateText(value), [translateText])
+  const serviceCountLabel = useCallback(
+    (count: number) => `${count} ${translateText(count === 1 ? 'service' : 'services')}`,
+    [translateText]
+  )
 
-  const openSearchDialog = useCallback(() => {
-    if (desktopOpenTimerRef.current) {
-      window.clearTimeout(desktopOpenTimerRef.current)
-      desktopOpenTimerRef.current = null
-    }
-    if (desktopCloseTimerRef.current) {
-      window.clearTimeout(desktopCloseTimerRef.current)
-      desktopCloseTimerRef.current = null
-    }
-    setOpen(false)
-    setDesktopMenu(null)
-    setUserMenu(false)
-    setSearchOpen(true)
-  }, [])
-
-  // Cmd/Ctrl+K search shortcut
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault()
-        setSearchOpen(current => {
-          const next = !current
-          if (next) {
-            if (desktopOpenTimerRef.current) {
-              window.clearTimeout(desktopOpenTimerRef.current)
-              desktopOpenTimerRef.current = null
-            }
-            if (desktopCloseTimerRef.current) {
-              window.clearTimeout(desktopCloseTimerRef.current)
-              desktopCloseTimerRef.current = null
-            }
-            setOpen(false)
-            setDesktopMenu(null)
-            setUserMenu(false)
-          }
-          return next
-        })
-      }
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [])
+  useBodyScrollLock(mobileOpen)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const media = window.matchMedia('(hover: hover) and (pointer: fine)')
-    const update = () => setCanHoverDesktopNav(media.matches)
-
-    update()
-
-    if (typeof media.addEventListener === 'function') {
-      media.addEventListener('change', update)
-      return () => media.removeEventListener('change', update)
-    }
-
-    media.addListener(update)
-    return () => media.removeListener(update)
-  }, [])
-
-  useEffect(() => {
-    // Binary "scrolled" flag used by non-home routes. The home page does
-    // not depend on this — it drives the navbar surface via a continuous
-    // scroll-based ramp (see the navSurfaceRef effect below).
-    let ticking = false
-    const onScroll = () => {
-      if (ticking) return
-      ticking = true
-      window.requestAnimationFrame(() => {
-        const y = window.scrollY
-        const nextScrolled = scrolledRef.current ? y > 8 : y > 24
-        if (scrolledRef.current !== nextScrolled) {
-          scrolledRef.current = nextScrolled
-          setScrolled(nextScrolled)
-        }
-        ticking = false
-      })
-    }
+    const onScroll = () => setScrolled(window.scrollY > 24)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // ── Home: drive navbar surface continuously from scroll position ────────
-  // The bar starts fully transparent at scrollY = 0 and ramps to a solid
-  // white surface within the first ~60 px of scroll. Non-home routes keep
-  // their static class-based surface (see navBarBg).
   useEffect(() => {
-    const el = navSurfaceRef.current
-    if (!el) return
-
-    if (!isHome) {
-      // Clear any inline styles left over from the home page.
-      el.style.backgroundColor = ''
-      el.style.borderBottomColor = ''
-      el.style.boxShadow = ''
-      el.style.backdropFilter = ''
-      ;(el.style as CSSStyleDeclaration & { webkitBackdropFilter?: string }).webkitBackdropFilter = ''
-      el.style.transition = ''
-      return
-    }
-
-    // Disable the wrapper's CSS transition while we're driving it via
-    // requestAnimationFrame — otherwise the transition would fight every
-    // frame and feel laggy. The ramp itself is already smooth.
-    el.style.transition = 'none'
-
-    let raf = 0
-    const apply = () => {
-      raf = 0
-      const y = window.scrollY
-      const p = Math.min(1, Math.max(0, y / 60)) // 0 → 1 over 60px
-
-      el.style.backgroundColor = `rgba(255, 255, 255, ${p * 0.92})`
-      el.style.borderBottomColor = `rgba(196, 165, 255, ${p * 0.55})`
-      el.style.boxShadow =
-        p > 0.04 ? `0 2px 28px rgba(46, 10, 114, ${p * 0.16})` : 'none'
-
-      const blur = `${(p * 16).toFixed(2)}px`
-      const filter = p > 0.04 ? `blur(${blur}) saturate(1.2)` : 'none'
-      el.style.backdropFilter = filter
-      ;(el.style as CSSStyleDeclaration & { webkitBackdropFilter?: string }).webkitBackdropFilter = filter
-    }
-
-    const onScroll = () => {
-      if (raf) return
-      raf = window.requestAnimationFrame(apply)
-    }
-
-    apply()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      if (raf) window.cancelAnimationFrame(raf)
-      window.removeEventListener('scroll', onScroll)
-    }
-  }, [isHome])
-
-  useEffect(() => {
-    setOpen(false)
-    setDesktopMenu(null)
-    setUserMenu(false)
-    setSearchOpen(false)
+    setMobileOpen(false)
+    setCatsOpen(false)
+    setUserOpen(false)
+    setSearchFocused(false)
+    setQuery('')
   }, [pathname])
 
   useEffect(() => {
-    const onResize = () => {
-      if (window.innerWidth >= 1024) setOpen(false)
-      if (window.innerWidth < 1024) setDesktopMenu(null)
-    }
-    window.addEventListener('resize', onResize, { passive: true })
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
-
-  useEffect(() => {
-    if (!userMenu) return
-    const handleOutsideClose = (e: Event) => {
-      const target = e.target as Node
-      if (
-        !userMenuAnchorRef.current?.contains(target) &&
-        !userMenuPopoverRef.current?.contains(target)
-      ) {
-        setUserMenu(false)
-      }
-    }
-    // mousedown for mouse; touchstart for iPad/touch devices (mousedown never fires on tap)
-    document.addEventListener('mousedown', handleOutsideClose)
-    document.addEventListener('touchstart', handleOutsideClose, { passive: true })
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClose)
-      document.removeEventListener('touchstart', handleOutsideClose)
-    }
-  }, [userMenu])
-
-  const updateUserMenuPosition = useCallback(() => {
-    const anchor = userMenuAnchorRef.current
-    if (!anchor) return
-    const rect = anchor.getBoundingClientRect()
-    const pad = 16
-    const menuW = 280
-    const menuH = userMenuPopoverRef.current?.offsetHeight ?? 260
-    const canAbove = rect.top - 10 - menuH > pad
-    const shouldAbove = rect.bottom + 10 + menuH > window.innerHeight - pad && canAbove
-    const left = Math.min(
-      window.innerWidth - pad - menuW,
-      Math.max(pad, rect.right - menuW)
-    )
-    const rawTop = shouldAbove ? rect.top - menuH - 10 : rect.bottom + 10
-    const top = Math.max(pad, Math.min(rawTop, window.innerHeight - pad - menuH))
-    const placement = shouldAbove ? 'top' : 'bottom'
-
-    setUserMenuPosition(prev =>
-      prev && prev.top === top && prev.left === left && prev.placement === placement
-        ? prev
-        : { top, left, placement }
-    )
-  }, [])
-
-  const toggleUserMenu = useCallback(() => {
-    if (!userMenu) updateUserMenuPosition()
-    setUserMenu(value => !value)
-  }, [updateUserMenuPosition, userMenu])
-
-  useEffect(() => {
-    if (!userMenu) { setUserMenuPosition(null); return }
-
-    let frame = 0
-    const scheduleUpdate = () => {
-      if (frame) return
-      frame = window.requestAnimationFrame(() => {
-        frame = 0
-        updateUserMenuPosition()
-      })
-    }
-
-    scheduleUpdate()
-    window.addEventListener('resize', scheduleUpdate, { passive: true })
-    window.addEventListener('scroll', scheduleUpdate, true)
-    return () => {
-      if (frame) window.cancelAnimationFrame(frame)
-      window.removeEventListener('resize', scheduleUpdate)
-      window.removeEventListener('scroll', scheduleUpdate, true)
-    }
-  }, [updateUserMenuPosition, userMenu])
-
-  useEffect(
-    () => () => {
-      if (desktopOpenTimerRef.current) window.clearTimeout(desktopOpenTimerRef.current)
-      if (desktopCloseTimerRef.current) window.clearTimeout(desktopCloseTimerRef.current)
-    },
-    []
-  )
-
-  useEffect(() => {
-    if (open || searchOpen || userMenu) setDesktopMenu(null)
-  }, [open, searchOpen, userMenu])
-
-  useEffect(() => {
-    if (!searchOpen) return
-    if (desktopOpenTimerRef.current) {
-      window.clearTimeout(desktopOpenTimerRef.current)
-      desktopOpenTimerRef.current = null
-    }
-    if (desktopCloseTimerRef.current) {
-      window.clearTimeout(desktopCloseTimerRef.current)
-      desktopCloseTimerRef.current = null
-    }
-    setOpen(false)
-    setUserMenu(false)
-  }, [searchOpen])
-
-  useLayoutEffect(() => {
-    if (typeof window === 'undefined') return
-    const root = document.documentElement
-    const bar = navbarBarRef.current
-    if (!bar) return
-
-    let frame = 0
-    let lastHeight = ''
-
-    const update = () => {
-      frame = 0
-      const nextHeight = `${Math.ceil(bar.getBoundingClientRect().height)}px`
-      if (nextHeight === lastHeight) return
-      lastHeight = nextHeight
-      root.style.setProperty('--app-navbar-height', nextHeight)
-    }
-
-    const scheduleUpdate = () => {
-      if (frame) return
-      frame = window.requestAnimationFrame(update)
-    }
-
-    update()
-    const timeout = window.setTimeout(scheduleUpdate, 120)
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(scheduleUpdate) : null
-    ro?.observe(bar)
-    window.addEventListener('resize', scheduleUpdate, { passive: true })
-    return () => {
-      if (frame) window.cancelAnimationFrame(frame)
-      window.clearTimeout(timeout)
-      ro?.disconnect()
-      window.removeEventListener('resize', scheduleUpdate)
-      root.style.removeProperty('--app-navbar-height')
-    }
-  }, [])
-
-  // ── Derived state ──────────────────────────────────────────────────────────
-  const active = useCallback(
-    (target: string) => {
-      const [targetPath, targetHash] = target.split('#')
-      const normalizedPath = targetPath || '/'
-      if (targetHash) return pathname === normalizedPath && hash === `#${targetHash}`
-      if (target === '/') return pathname === '/' && !hash
-      return pathname.startsWith(target)
-    },
-    [hash, pathname]
-  )
-
-  const focus =
-    'focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent'
-
-  // ── Nav bar background ────────────────────────────────────────────────────
-  // Home page: handled by the navSurfaceRef effect — surface ramps from
-  // transparent → white over the first 60 px of scroll. We leave the class
-  // empty here so the inline styles win cleanly.
-  //
-  // Other pages: keep the existing static white surface, with the
-  // "scrolled" variant kicking in after a tiny 18 px scroll.
-  const navBarBg = isHome
-    ? 'border-b border-transparent'
-    : scrolled
-      ? perfLow
-        ? 'border-b border-violet-300/55 bg-white/[0.97] shadow-[0_2px_28px_rgba(46,10,114,0.14)]'
-        : 'border-b border-violet-300/55 bg-white/[0.92] backdrop-blur-xl shadow-[0_2px_28px_rgba(46,10,114,0.14)]'
-      : perfLow
-        ? 'border-b border-violet-200/55 bg-white/[0.95]'
-        : 'border-b border-violet-200/55 bg-white/[0.86] backdrop-blur-xl shadow-[0_1px_22px_rgba(46,10,114,0.08)]'
-
-  // ── Utility pill (search, login) ───────────────────────────────────────────
-  const utilityPill =
-    'border-violet-300/70 bg-white/95 text-violet-900 hover:border-violet-500/70 hover:bg-white hover:text-violet-950 hover:shadow-[0_10px_26px_-10px_rgba(89,23,196,0.32)]'
-
-  // ── Desktop nav link text ──────────────────────────────────────────────────
-  const navLinkColor = useCallback(
-    (isActive: boolean) =>
-      isActive
-        ? 'text-violet-950'
-        : 'text-ink-700 hover:text-violet-900',
-    []
-  )
-
-  const navTriggerColor = useCallback(
-    (isActive: boolean, isOpen: boolean) =>
-      isActive || isOpen
-        ? 'text-violet-950'
-        : 'text-ink-700 hover:text-violet-900',
-    []
-  )
-
-  // ── Active pill ────────────────────────────────────────────────────────────
-  const navActivePill =
-    'bg-white border border-violet-300/80 shadow-[0_10px_24px_-10px_rgba(89,23,196,0.32)]'
-
-  // ── Mobile tile ────────────────────────────────────────────────────────────
-  const mobileTile =
-    'border-violet-300/55 bg-white/95 text-violet-900 hover:text-violet-950 hover:bg-white hover:border-violet-400/70'
-
-  const mobileActiveTile =
-    'border-violet-400/70 bg-[linear-gradient(135deg,rgba(113,38,227,0.18),rgba(168,85,247,0.10),rgba(217,70,239,0.08))] text-violet-950 shadow-[0_6px_18px_-6px_rgba(89,23,196,0.32)]'
-
-  // ── Cart / Quote surfaces ──────────────────────────────────────────────────
-  // ── Desktop nav data ────────────────────────────────────────────────────────
-
-  const activeDesktopItem = useMemo(
-    () => DESKTOP_NAV.find(item => item.key === desktopMenu) ?? null,
-    [desktopMenu]
-  )
-
-  const setDesktopTriggerRef = useCallback((key: string, node: HTMLElement | null) => {
-    desktopTriggerRefs.current[key] = node
-  }, [])
-
-  const updateDesktopMenuPosition = useCallback(
-    (key: string) => {
-      if (typeof window === 'undefined' || window.innerWidth < 1024) return
-      const trigger = desktopTriggerRefs.current[key]
-      const item = DESKTOP_NAV.find(entry => entry.key === key)
-      if (!trigger || !item?.children?.length) return
-
-      const rect = trigger.getBoundingClientRect()
-      const pad = 16
-      const compact = window.innerWidth < 1360
-      const preferredWidth =
-        key === 'explore'
-          ? compact
-            ? 400
-            : 470
-          : compact
-            ? 360
-            : 420
-      const width = Math.min(window.innerWidth - pad * 2, preferredWidth)
-      const rawLeft =
-        key === 'company'
-          ? rect.right - width + (compact ? 0 : 10)
-          : compact
-            ? rect.left - 20
-            : rect.left + rect.width / 2 - width / 2
-      const left = Math.min(
-        window.innerWidth - pad - width,
-        Math.max(pad, rawLeft)
-      )
-      const top = rect.bottom + 4
-
-      setDesktopMenuPosition(prev =>
-        prev &&
-        prev.top === top &&
-        prev.left === left &&
-        prev.width === width &&
-        prev.compact === compact
-          ? prev
-          : { top, left, width, compact }
-      )
-    },
-    []
-  )
-
-  const clearDesktopTimers = useCallback(() => {
-    if (desktopOpenTimerRef.current) { window.clearTimeout(desktopOpenTimerRef.current); desktopOpenTimerRef.current = null }
-    if (desktopCloseTimerRef.current) { window.clearTimeout(desktopCloseTimerRef.current); desktopCloseTimerRef.current = null }
-  }, [])
-
-  const openDesktopMenu = useCallback(
-    (key: string, immediate = false) => {
-      if (typeof window !== 'undefined' && window.innerWidth < 1024) return
-      clearDesktopTimers()
-      const show = () => {
-        setDesktopMenu(key)
-        window.requestAnimationFrame(() => updateDesktopMenuPosition(key))
-      }
-
-      if (immediate) {
-        show()
-        return
-      }
-
-      desktopOpenTimerRef.current = window.setTimeout(show, 36)
-    },
-    [clearDesktopTimers, updateDesktopMenuPosition]
-  )
-
-  const scheduleDesktopClose = useCallback(
-    (immediate = false) => {
-      clearDesktopTimers()
-      if (immediate) {
-        setDesktopMenu(null)
-        setDesktopMenuPosition(null)
-        return
-      }
-      desktopCloseTimerRef.current = window.setTimeout(() => {
-        setDesktopMenu(null)
-        setDesktopMenuPosition(null)
-      }, 140)
-    },
-    [clearDesktopTimers]
-  )
-
-  useEffect(() => {
-    if (!desktopMenu) {
-      setDesktopMenuPosition(null)
-      return
-    }
-    if (typeof window === 'undefined' || window.innerWidth < 1024) {
-      setDesktopMenuPosition(null)
-      return
-    }
-
-    let frame = 0
-    const scheduleUpdate = () => {
-      if (frame) return
-      frame = window.requestAnimationFrame(() => {
-        frame = 0
-        updateDesktopMenuPosition(desktopMenu)
-      })
-    }
-
-    scheduleUpdate()
-    window.addEventListener('resize', scheduleUpdate, { passive: true })
-    window.addEventListener('scroll', scheduleUpdate, true)
-    return () => {
-      if (frame) window.cancelAnimationFrame(frame)
-      window.removeEventListener('resize', scheduleUpdate)
-      window.removeEventListener('scroll', scheduleUpdate, true)
-    }
-  }, [desktopMenu, updateDesktopMenuPosition])
-
-  useEffect(() => {
-    if (!desktopMenu) return
-
-    const handleOutsidePointer = (event: MouseEvent | TouchEvent) => {
+    const onDown = (event: MouseEvent) => {
       const target = event.target as Node
+      if (catsRef.current && !catsRef.current.contains(target)) setCatsOpen(false)
+      if (userRef.current && !userRef.current.contains(target)) setUserOpen(false)
+      if (searchRef.current && !searchRef.current.contains(target)) setSearchFocused(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [])
 
-      if (desktopMenuPopoverRef.current?.contains(target)) return
-      if (Object.values(desktopTriggerRefs.current).some(node => node?.contains(target))) return
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        searchInputRef.current?.focus()
+        setSearchFocused(true)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
-      scheduleDesktopClose(true)
+  const normalizeNavTarget = useCallback((to: string) => {
+    if (typeof window === 'undefined') return to
+    try {
+      const url = new URL(to, window.location.origin)
+      if (url.origin !== window.location.origin) return to
+      return `${url.pathname}${url.search}${url.hash}`
+    } catch {
+      return to
+    }
+  }, [])
+
+  const runFastNav = useCallback(
+    (to: string, afterNavigate?: () => void) => {
+      const target = normalizeNavTarget(to)
+      afterNavigate?.()
+      preloadRoute(to)
+
+      if (target === `${pathname}${search}${hash}`) return
+
+      fastNavIntentRef.current = {
+        to: target,
+        at: typeof performance !== 'undefined' ? performance.now() : Date.now(),
+      }
+      navigate(to)
+    },
+    [hash, navigate, normalizeNavTarget, pathname, search]
+  )
+
+  const fastNavProps = useCallback(
+    (to: string, afterNavigate?: () => void) => ({
+      onPointerDown: (event: ReactPointerEvent<HTMLAnchorElement>) => {
+        if (event.pointerType === 'touch') return
+        if (event.button !== 0 || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
+        if (event.currentTarget.target && event.currentTarget.target !== '_self') return
+
+        event.preventDefault()
+        runFastNav(to, afterNavigate)
+      },
+      onClick: (event: ReactMouseEvent<HTMLAnchorElement>) => {
+        const target = normalizeNavTarget(to)
+        const intent = fastNavIntentRef.current
+        const now = typeof performance !== 'undefined' ? performance.now() : Date.now()
+
+        if (intent?.to === target && now - intent.at < 900) {
+          event.preventDefault()
+          return
+        }
+
+        afterNavigate?.()
+        preloadRoute(to)
+      },
+    }),
+    [normalizeNavTarget, runFastNav]
+  )
+
+  const active = useCallback(
+    (to: string) => (to === '/' ? pathname === '/' : pathname.startsWith(to.split('#')[0])),
+    [pathname]
+  )
+
+  const categoryList = useMemo(
+    () =>
+      categories
+        .filter(category => category.slug.trim().length > 0)
+        .map(category => ({ ...category, count: getProductsByCategory(category.id).length }))
+        .sort((a, b) => b.count - a.count),
+    [categories, getProductsByCategory]
+  )
+
+  const results = useMemo<SearchResult[]>(() => {
+    const q = query.trim().toLowerCase()
+    if (q.length < 1) return []
+
+    const catHits: SearchResult[] = categoryList
+      .filter(category => category.name.toLowerCase().includes(q))
+      .slice(0, 3)
+      .map(category => ({
+        type: 'category',
+        label: category.name,
+        to: `/categories/${encodeURIComponent(category.slug)}`,
+        meta: `${category.count} ${category.count === 1 ? 'service' : 'services'}`,
+      }))
+
+    const prodHits: SearchResult[] = products
+      .filter(
+        product =>
+          product.name.toLowerCase().includes(q) ||
+          (product.shortDescription || '').toLowerCase().includes(q) ||
+          (product.categoryTags || []).some(tag => tag.toLowerCase().includes(q))
+      )
+      .slice(0, 6)
+      .map(product => ({
+        type: 'product',
+        label: product.name,
+        to: `/products/${product.slug}`,
+        meta: categories.find(category => category.id === product.categoryId)?.name || 'Service',
+        image: product.heroImage,
+      }))
+
+    return [...catHits, ...prodHits].slice(0, 8)
+  }, [query, categoryList, products, categories])
+
+  const showSuggestions = searchFocused && query.trim().length >= 1
+  useEffect(() => setActiveIndex(-1), [query])
+
+  const runSearch = useCallback(() => {
+    const chosen = activeIndex >= 0 ? results[activeIndex] : results[0]
+    const closeSearch = () => {
+      setSearchFocused(false)
+      setQuery('')
     }
 
-    document.addEventListener('mousedown', handleOutsidePointer)
-    document.addEventListener('touchstart', handleOutsidePointer, { passive: true })
+    if (chosen) runFastNav(chosen.to, closeSearch)
+    else if (query.trim()) runFastNav('/products', closeSearch)
+    else closeSearch()
+  }, [activeIndex, results, query, runFastNav])
 
-    return () => {
-      document.removeEventListener('mousedown', handleOutsidePointer)
-      document.removeEventListener('touchstart', handleOutsidePointer)
+  const onSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setActiveIndex(index => Math.min(index + 1, results.length - 1))
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setActiveIndex(index => Math.max(index - 1, -1))
+    } else if (event.key === 'Enter') {
+      event.preventDefault()
+      runSearch()
+    } else if (event.key === 'Escape') {
+      setSearchFocused(false)
+      searchInputRef.current?.blur()
     }
-  }, [desktopMenu, scheduleDesktopClose])
+  }
+
+  // ── Surfaces ─────────────────────────────────────────────────────────────────
+  const barSurface = overHero
+    ? 'border-white/[0.07] bg-[rgba(12,4,38,0.18)] backdrop-blur-lg'
+    : 'border-violet-100/90 bg-white/90 shadow-[0_6px_30px_-12px_rgba(46,10,114,0.2)] backdrop-blur-xl'
+
+  const linkColor = (isActive: boolean) =>
+    overHero
+      ? isActive
+        ? 'text-white'
+        : 'text-white/75 hover:text-white'
+      : isActive
+        ? 'text-violet-900'
+        : 'text-ink-600 hover:text-violet-900'
+
+  const activePill = overHero ? 'bg-white/18' : 'bg-violet-100'
+
+  // More opaque utility buttons so they don't blend into the hero.
+  const utilityBtn = overHero
+    ? 'border-white/30 bg-white/[0.16] text-white hover:bg-white/25'
+    : 'border-violet-200 bg-white text-ink-800 hover:border-violet-300 hover:bg-violet-50'
+
+  // Search is a near-white pill in both states (clear and legible).
+  const searchSurface = overHero
+    ? 'border-white/50 bg-white/95 shadow-[0_8px_24px_-12px_rgba(8,3,26,0.6)] focus-within:border-violet-300 focus-within:bg-white'
+    : 'border-violet-200 bg-white focus-within:border-violet-300'
 
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-0 z-50 w-full">
-      {/* ══════════════════════ MAIN BAR ══════════════════════ */}
-      <div ref={navSurfaceRef} className={`pointer-events-auto w-full transition-all duration-500 ${navBarBg}`}>
-        <div className="relative mx-auto w-full">
+    <header className="fixed inset-x-0 top-0 z-50">
+      <div className={`border-b transition-colors duration-300 ${barSurface}`} dir="ltr">
+        <div className={`site-container flex h-[74px] items-center gap-4 ${isArabic ? 'nav-shell-ar' : ''}`}>
+          {/* Logo — larger */}
+          <Link
+            to="/"
+            onMouseEnter={() => preloadRoute('/')}
+            onFocus={() => preloadRoute('/')}
+            {...fastNavProps('/')}
+            className="flex shrink-0 items-center"
+            aria-label={tr('Eventies home')}
+          >
+            <BrandLogo overHero={overHero} />
+          </Link>
 
-          {/* ─── Nav bar rows (ref covers both rows so --app-navbar-height includes chip row) ─── */}
-          <div ref={navbarBarRef}>
-          <div className="flex h-[4.25rem] w-full items-center justify-between px-4 sm:h-[4.75rem] sm:px-6 lg:h-[4.15rem] lg:px-8 2xl:px-10">
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Main navigation">
+            {NAV_LINKS.slice(0, 1).map(item => {
+              const isCurrent = active(item.to)
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onMouseEnter={() => preloadRoute(item.to)}
+                  onFocus={() => preloadRoute(item.to)}
+                  {...fastNavProps(item.to)}
+                  aria-current={isCurrent ? 'page' : undefined}
+                  className={`relative inline-flex h-9 items-center rounded-full px-3.5 font-display text-[13px] font-semibold transition-colors ${linkColor(isCurrent)}`}
+                >
+                  {isCurrent && <span className={`absolute inset-0 rounded-full ${activePill}`} />}
+                  <span className="relative z-10">{tr(item.label)}</span>
+                </Link>
+              )
+            })}
 
-            {/* ── Logo ── */}
+            <div ref={catsRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setCatsOpen(open => !open)}
+                aria-expanded={catsOpen}
+                aria-haspopup="menu"
+                className={`relative inline-flex h-9 items-center gap-1 rounded-full px-3.5 font-display text-[13px] font-semibold transition-colors ${linkColor(
+                  active('/categories') || pathname.includes('#categories')
+                )}`}
+              >
+                {(active('/categories') || catsOpen) && <span className={`absolute inset-0 rounded-full ${activePill}`} />}
+                <span className="relative z-10">{tr('Categories')}</span>
+                <ChevronDown className={`relative z-10 h-3.5 w-3.5 transition-transform ${catsOpen ? 'rotate-180' : ''}`} strokeWidth={2.4} />
+              </button>
+
+              <AnimatePresence>
+                {catsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.97 }}
+                    transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                    dir={dir}
+                    className="absolute left-0 top-[calc(100%+12px)] z-50 w-[336px] overflow-hidden rounded-[20px] border border-violet-200/80 bg-white p-2.5 shadow-[0_36px_80px_-26px_rgba(46,10,114,0.45)]"
+                    role="menu"
+                  >
+                    <div
+                      className="pointer-events-none absolute inset-x-0 top-0 h-px"
+                      style={{ background: 'linear-gradient(90deg, transparent 12%, rgba(168,85,247,0.5) 50%, transparent 88%)' }}
+                    />
+                    <div className="mb-1.5 flex items-center justify-between px-2.5 pt-1.5">
+                      <span className="font-display text-[10px] font-bold uppercase tracking-[0.2em] text-violet-500">{tr('Browse categories')}</span>
+                      <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700">{categoryList.length}</span>
+                    </div>
+                    <div className="max-h-[58vh] overflow-y-auto pr-0.5">
+                      {categoryList.map(category => (
+                        <Link
+                          key={category.id}
+                          to={`/categories/${encodeURIComponent(category.slug)}`}
+                          onMouseEnter={() => preloadRoute(`/categories/${encodeURIComponent(category.slug)}`)}
+                          onFocus={() => preloadRoute(`/categories/${encodeURIComponent(category.slug)}`)}
+                          {...fastNavProps(`/categories/${encodeURIComponent(category.slug)}`, () => setCatsOpen(false))}
+                          className="group/cat flex items-center gap-3 rounded-[14px] px-2.5 py-2.5 transition-colors hover:bg-violet-50"
+                          role="menuitem"
+                        >
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border border-violet-200/80 bg-gradient-to-br from-violet-100 to-fuchsia-100 text-[1.1rem] transition-transform duration-200 group-hover/cat:scale-105">
+                            {category.icon || '✦'}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate font-display text-[13.5px] font-bold text-ink-900">{category.name}</span>
+                            <span className="block text-[11px] font-semibold text-violet-500">
+                              {serviceCountLabel(category.count)}
+                            </span>
+                          </span>
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-50 text-violet-500 transition-all duration-200 group-hover/cat:bg-violet-600 group-hover/cat:text-white">
+                            <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.2} />
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                    <Link
+                      to="/categories"
+                      onMouseEnter={() => preloadRoute('/categories')}
+                      onFocus={() => preloadRoute('/categories')}
+                      {...fastNavProps('/categories', () => setCatsOpen(false))}
+                      className="mt-1.5 flex items-center justify-center gap-2 rounded-[14px] bg-gradient-to-r from-violet-600 to-fuchsia-500 px-3 py-3 font-display text-[12.5px] font-bold text-white transition-all hover:-translate-y-0.5"
+                    >
+                      <LayoutGrid className="h-3.5 w-3.5" strokeWidth={2.2} />
+                      {tr('View all categories')}
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {NAV_LINKS.slice(1).map(item => {
+              const isCurrent = active(item.to)
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onMouseEnter={() => preloadRoute(item.to)}
+                  onFocus={() => preloadRoute(item.to)}
+                  {...fastNavProps(item.to)}
+                  aria-current={isCurrent ? 'page' : undefined}
+                  className={`relative inline-flex h-9 items-center rounded-full px-3.5 font-display text-[13px] font-semibold transition-colors ${linkColor(isCurrent)}`}
+                >
+                  {isCurrent && <span className={`absolute inset-0 rounded-full ${activePill}`} />}
+                  <span className="relative z-10">{tr(item.label)}</span>
+                </Link>
+              )
+            })}
+          </nav>
+
+          {/* Right cluster: search + utilities */}
+          <div className="ml-auto flex items-center gap-2.5">
+            {/* Inline search — wider */}
+            <div ref={searchRef} className="relative hidden lg:block">
+              <div className={`flex h-11 w-[clamp(260px,28vw,430px)] items-center gap-2.5 rounded-full border px-4 transition-all duration-200 ${searchSurface}`}>
+                <Search className="h-[18px] w-[18px] shrink-0 text-violet-500" strokeWidth={2.2} />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={query}
+                  onChange={event => setQuery(event.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onKeyDown={onSearchKeyDown}
+                  placeholder={tr('Search categories or services...')}
+                  aria-label={tr('Search categories or services')}
+                  dir={dir}
+                  className="nav-search-input min-w-0 flex-1 bg-transparent text-[13px] font-normal text-ink-900 outline-none placeholder:text-ink-400 focus:outline-none focus-visible:outline-none"
+                />
+              </div>
+
+              <AnimatePresence>
+                {showSuggestions && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                    dir={dir}
+                    className="absolute right-0 top-[calc(100%+10px)] z-50 w-[min(460px,92vw)] overflow-hidden rounded-[20px] border border-violet-200/80 bg-white p-2 shadow-[0_36px_80px_-26px_rgba(46,10,114,0.45)]"
+                  >
+                    {results.length === 0 ? (
+                      <div className="px-3 py-6 text-center text-[12.5px] font-medium text-ink-500">
+                        {tr('No matches for')} “{query.trim()}”. {tr('Press Enter to browse all services.')}
+                      </div>
+                    ) : (
+                      results.map((result, index) => (
+                        <Link
+                          key={`${result.type}-${result.to}`}
+                          to={result.to}
+                          onMouseEnter={() => {
+                            setActiveIndex(index)
+                            preloadRoute(result.to)
+                          }}
+                          onFocus={() => preloadRoute(result.to)}
+                          {...fastNavProps(result.to, () => {
+                            setSearchFocused(false)
+                            setQuery('')
+                          })}
+                          className={`flex items-center gap-3 rounded-[14px] px-2.5 py-2.5 transition-colors ${
+                            index === activeIndex ? 'bg-violet-50' : 'hover:bg-violet-50'
+                          }`}
+                        >
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[11px] border border-violet-200 bg-violet-50 text-violet-600">
+                            {result.type === 'product' && result.image ? (
+                              <img src={result.image} alt="" width={40} height={40} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                            ) : result.type === 'category' ? (
+                              <Tag className="h-4 w-4" strokeWidth={2.2} />
+                            ) : (
+                              <Package className="h-4 w-4" strokeWidth={2.2} />
+                            )}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[13.5px] font-bold text-ink-900">{result.label}</span>
+                            <span className="block truncate text-[11px] font-medium text-ink-500">{tr(result.meta)}</span>
+                          </span>
+                          <span
+                            className={`shrink-0 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.1em] ${
+                              result.type === 'category' ? 'bg-violet-100 text-violet-700' : 'bg-fuchsia-100 text-fuchsia-700'
+                            }`}
+                          >
+                            {tr(result.type === 'category' ? 'Category' : 'Service')}
+                          </span>
+                        </Link>
+                      ))
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <LanguageSwitcher className={`hidden sm:inline-flex ${utilityBtn}`} />
+
+            {/* Request draft */}
             <Link
-              to="/"
-              className={`flex min-w-0 items-center transition-opacity hover:opacity-88 lg:min-w-[200px] ${focus}`}
+              to="/rental-cart"
+              onMouseEnter={() => preloadRoute('/rental-cart')}
+              onFocus={() => preloadRoute('/rental-cart')}
+              {...fastNavProps('/rental-cart')}
+              aria-label={itemCount > 0 ? `${tr('Request draft')}, ${itemCount} ${tr('items')}` : tr('Request draft')}
+              className={`relative inline-flex h-11 items-center gap-2 rounded-full border px-3.5 transition-all ${utilityBtn}`}
             >
-              <EventiesLogo heroMode={heroMode} isDark={isDark} />
+              <span className="relative inline-flex">
+                <ShoppingCart className="h-[18px] w-[18px]" strokeWidth={2.2} />
+                {itemCount > 0 && (
+                  <span className="absolute -right-2 -top-2 inline-flex min-w-[1.05rem] items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-500 px-1 py-[1px] text-[9px] font-bold leading-none text-white ring-2 ring-white/70">
+                    {cartCount}
+                  </span>
+                )}
+              </span>
+              <span className="hidden font-display text-[13px] font-semibold sm:inline">{tr('Request Draft')}</span>
             </Link>
 
-            {/* ── Desktop nav (center) ── */}
-            <DesktopPrimaryNav
-              active={active}
-              canHoverDesktopNav={canHoverDesktopNav}
-              desktopMenu={desktopMenu}
-              desktopPanelFirstLinkRef={desktopPanelFirstLinkRef}
-              focus={focus}
-              navActivePill={navActivePill}
-              navLinkColor={navLinkColor}
-              navTriggerColor={navTriggerColor}
-              openDesktopMenu={openDesktopMenu}
-              scheduleDesktopClose={scheduleDesktopClose}
-              setDesktopTriggerRef={setDesktopTriggerRef}
-            />
-
-            {/* ── Right actions ── */}
-            <div className="flex items-center justify-end gap-1.5 sm:gap-2 lg:min-w-[160px]">
-
-              {/* Search compact (sm–xl) — same square footprint as Cart
-                  & hamburger so the right-side controls line up. */}
-              <button
-                onClick={openSearchDialog}
-                className={`hidden h-10 w-10 items-center justify-center rounded-md border text-[12px] font-medium transition-all sm:inline-flex xl:hidden ${utilityPill} ${focus}`}
-                aria-label="Search (Ctrl+K)"
-              >
-                <Search className="h-4 w-4" strokeWidth={2.2} />
-              </button>
-
-              {/* Search with label (xl+) */}
-              <button
-                onClick={openSearchDialog}
-                className={`hidden h-10 items-center gap-2 rounded-md border px-3.5 text-[12px] font-semibold transition-all xl:inline-flex ${utilityPill} ${focus}`}
-                aria-label="Search (Ctrl+K)"
-              >
-                <Search className="h-4 w-4" strokeWidth={2.2} />
-                <span>Search</span>
-                <kbd className={`ml-0.5 rounded-md border px-1.5 py-0.5 text-[8.5px] font-mono tracking-[0.08em] ${
-                  heroMode
-                    ? 'border-white/12 bg-white/[0.06] text-white/38'
-                    : isDark
-                      ? 'border-white/10 bg-white/[0.04] text-purple-100/44'
-                      : 'border-violet-200 bg-violet-50/80 text-violet-600'
-                }`}>
-                  ⌘K
-                </kbd>
-              </button>
-
-              <NavbarAccountActions
-                focus={focus}
-                heroMode={heroMode}
-                isDark={isDark}
-                pathname={pathname}
-                utilityPill={utilityPill}
-                userMenu={userMenu}
-                userMenuAnchorRef={userMenuAnchorRef}
-                onToggleUserMenu={toggleUserMenu}
-              />
-
-              {/* Hamburger — matches the Cart button's mobile footprint
-                  exactly (h-10 w-10 rounded-md), so on phones the two
-                  right-side controls read as a tidy pair. */}
-              <button
-                onClick={() => setOpen(v => !v)}
-                className={`inline-flex h-10 w-10 items-center justify-center rounded-md border transition-all lg:hidden ${
-                  open
-                    ? isDark
-                      ? 'border-violet-400/30 bg-violet-500/14 text-white'
-                      : 'border-violet-400/70 bg-violet-50 text-violet-900'
-                    : utilityPill
-                } ${focus}`}
-                aria-label={open ? 'Close menu' : 'Open menu'}
-                aria-expanded={open}
-              >
-                <AnimatePresence mode="wait" initial={false}>
-                  {open ? (
-                    <motion.span
-                      key="x"
-                      initial={{ rotate: -45, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: 45, opacity: 0 }}
-                      transition={{ duration: 0.14 }}
-                    >
-                      <X className="h-4 w-4" strokeWidth={2} />
-                    </motion.span>
-                  ) : (
-                    <motion.span
-                      key="menu"
-                      initial={{ rotate: 45, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: -45, opacity: 0 }}
-                      transition={{ duration: 0.14 }}
-                    >
-                      <Menu className="h-4 w-4" strokeWidth={2} />
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </button>
-            </div>
-          </div>
-
-          {/* ── Mobile nav chip row (row 2 — only shows below lg breakpoint) ── */}
-          <MobileTopChips active={active} heroMode={heroMode} isDark={isDark} />
-          </div>{/* closes navbarBarRef wrapper */}
-
-          {/* ══════════════════════ MOBILE MENU ══════════════════════ */}
-          <AnimatePresence>
-            {open && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
-                className="overflow-hidden lg:hidden"
-              >
-                <div
-                  className={`mx-3 mb-3 overflow-y-auto rounded-[22px] border ${
-                    isDark
-                      ? 'border-white/[0.08] bg-[linear-gradient(180deg,rgba(5,7,20,0.99),rgba(3,5,16,0.99))] shadow-[0_24px_80px_rgba(0,2,12,0.65),inset_0_1px_0_rgba(255,255,255,0.04)]'
-                      : 'border-violet-300/70 bg-white shadow-[0_24px_64px_-12px_rgba(46,10,114,0.28),0_8px_22px_-6px_rgba(89,23,196,0.18),inset_0_1px_0_rgba(255,255,255,0.95)]'
-                  }`}
-                  style={{
-                    maxHeight: 'calc(100dvh - 6rem)',
-                    paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))',
-                  }}
+            {/* User / Login */}
+            {isLoggedIn ? (
+              <div ref={userRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setUserOpen(open => !open)}
+                  aria-expanded={userOpen}
+                  aria-label={tr('Account menu')}
+                  className={`inline-flex h-11 items-center gap-2 rounded-full border pl-1.5 pr-3 transition-all ${utilityBtn}`}
                 >
+                  <Avatar name={currentUser?.name} email={currentUser?.email} className="h-8 w-8 text-[12px]" ring={overHero ? 'ring-2 ring-white/50' : 'ring-2 ring-white'} />
+                  <span className="hidden max-w-[96px] truncate font-display text-[13px] font-bold md:inline">
+                    {accountButtonLabel}
+                  </span>
+                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${userOpen ? 'rotate-180' : ''}`} strokeWidth={2.2} />
+                </button>
 
-                  {/* ─── Brand stripe ─── */}
-                  <div className={`flex items-center gap-3 px-4 py-4 ${
-                    isDark ? 'border-b border-white/[0.06]' : 'border-b border-violet-100/80'
-                  }`}>
-                    <Link
-                      to="/"
-                      onClick={() => setOpen(false)}
-                      className={`inline-flex items-center transition-opacity hover:opacity-88 ${focus}`}
+                <AnimatePresence>
+                  {userOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.97 }}
+                      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                      dir={dir}
+                      className="absolute right-0 top-[calc(100%+12px)] z-50 w-[272px] overflow-hidden rounded-[20px] border border-violet-200/80 bg-white shadow-[0_36px_80px_-26px_rgba(46,10,114,0.45)]"
                     >
-                      <EventiesLogo heroMode={heroMode} isDark={isDark} />
-                    </Link>
-                  </div>
-
-                  <div className="space-y-3 px-3 pt-3">
-
-                    {/* ─── Home ─── */}
-                    <div>
-                      <Link
-                        to="/"
-                        className={`inline-flex w-full min-h-[48px] items-center gap-3 rounded-[15px] border px-4 text-[13px] font-semibold tracking-[-0.01em] transition-all duration-300 ${
-                          active('/') ? mobileActiveTile : mobileTile
-                        } ${focus}`}
-                      >
-                        <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] ${
-                          isDark ? 'bg-white/[0.06] border border-white/[0.08]' : 'bg-violet-50 border border-violet-200/60'
-                        }`}>
-                          <LayoutGrid className="h-3.5 w-3.5 opacity-75" strokeWidth={2} />
-                        </div>
-                        <div>
-                          <div>Home</div>
-                          <div className={`text-[10px] font-normal tracking-normal ${isDark ? 'text-purple-100/38' : 'text-gray-400'}`}>
-                            Back to start
-                          </div>
-                        </div>
-                      </Link>
-                    </div>
-
-                    {/* ─── Explore ─── */}
-                    <div>
-                      <div className={`mb-2 px-1 text-[9px] font-bold uppercase tracking-[0.22em] ${isDark ? 'text-purple-100/36' : 'text-violet-600/58'}`}>
-                        Explore
+                      <div className="flex items-center gap-3 border-b border-violet-100 bg-gradient-to-br from-violet-100 to-fuchsia-50 px-4 py-4">
+                        <Avatar name={currentUser?.name} email={currentUser?.email} className="h-11 w-11 text-[15px]" ring="ring-2 ring-white" />
+                        <span className="min-w-0">
+                          <span className="block truncate font-display text-[13.5px] font-bold text-ink-900">{currentUser?.name || emailName || tr('User')}</span>
+                          <span className="block truncate text-[11px] font-medium text-ink-500">{currentUser?.email || ''}</span>
+                        </span>
                       </div>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        <Link
-                          to="/products"
-                          className={`inline-flex min-h-[56px] flex-col items-center justify-center gap-1.5 rounded-[15px] border px-3 text-[12.5px] font-medium tracking-[-0.01em] transition-all duration-300 ${
-                            active('/products') ? mobileActiveTile : mobileTile
-                          } ${focus}`}
-                        >
-                          <LayoutGrid className="h-4 w-4 opacity-70" strokeWidth={2} />
-                          <span>Products</span>
-                        </Link>
-                        <Link
-                          to="/customers"
-                          className={`inline-flex min-h-[56px] flex-col items-center justify-center gap-1.5 rounded-[15px] border px-3 text-[12.5px] font-medium tracking-[-0.01em] transition-all duration-300 ${
-                            active('/customers') ? mobileActiveTile : mobileTile
-                          } ${focus}`}
-                        >
-                          <Users className="h-4 w-4 opacity-70" strokeWidth={2} />
-                          <span>Customers</span>
-                        </Link>
-                        <Link
-                          to="/gallery"
-                          className={`col-span-2 inline-flex min-h-[48px] items-center justify-center gap-2.5 rounded-[15px] border px-4 text-[13px] font-medium tracking-[-0.01em] transition-all duration-300 ${
-                            active('/gallery') ? mobileActiveTile : mobileTile
-                          } ${focus}`}
-                        >
-                          <GalleryVerticalEnd className="h-4 w-4 opacity-70" strokeWidth={2} />
-                          Gallery
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* ─── Company ─── */}
-                    <div>
-                      <div className={`mb-2 px-1 text-[9px] font-bold uppercase tracking-[0.22em] ${isDark ? 'text-purple-100/36' : 'text-violet-600/58'}`}>
-                        Company
-                      </div>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        <Link
-                          to="/about"
-                          className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium tracking-[-0.01em] transition-all duration-300 ${
-                            active('/about') ? mobileActiveTile : mobileTile
-                          } ${focus}`}
-                        >
-                          <ShieldCheck className="h-4 w-4 opacity-70" strokeWidth={2} />
-                          About
-                        </Link>
-                        <Link
-                          to="/contact"
-                          className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium tracking-[-0.01em] transition-all duration-300 ${
-                            active('/contact') ? mobileActiveTile : mobileTile
-                          } ${focus}`}
-                        >
-                          <MessageCircleMore className="h-4 w-4 opacity-70" strokeWidth={2} />
-                          Contact
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* ─── Account & Tools ─── */}
-                    <div className={`pb-1 pt-0 ${isDark ? 'border-t border-white/[0.06]' : 'border-t border-violet-100/70'}`}>
-                      <div className={`mb-2 mt-3 px-1 text-[9px] font-bold uppercase tracking-[0.22em] ${isDark ? 'text-purple-100/36' : 'text-violet-600/58'}`}>
-                        Account &amp; Tools
-                      </div>
-                      <NavbarMobileUtilityGrid
-                        focus={focus}
-                        isDark={isDark}
-                        mobileActiveTile={mobileActiveTile}
-                        mobileTile={mobileTile}
-                        openSearchDialog={openSearchDialog}
-                        pathname={pathname}
-                      />
-                    </div>
-
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* ══════════════════════ DESKTOP DROPDOWN ══════════════════════ */}
-          <AnimatePresence>
-            {activeDesktopItem?.children && desktopMenuPosition && (
-              <motion.div
-                ref={desktopMenuPopoverRef}
-                initial={{ opacity: 0, y: -10, scale: 0.982 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.982 }}
-                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                onMouseEnter={() => {
-                  if (canHoverDesktopNav) clearDesktopTimers()
-                }}
-                onMouseLeave={() => {
-                  if (canHoverDesktopNav) scheduleDesktopClose()
-                }}
-                onKeyDown={e => { if (e.key === 'Escape') { e.preventDefault(); scheduleDesktopClose(true) } }}
-                className="fixed z-[100] hidden lg:block"
-                role="menu"
-                aria-label={`${activeDesktopItem.label} menu`}
-                style={{
-                  top: desktopMenuPosition.top,
-                  left: desktopMenuPosition.left,
-                  width: desktopMenuPosition.width,
-                }}
-              >
-                {/* Hover bridge — keeps menu open while mouse travels from trigger to panel.
-                    pointer-events-none on touch devices so it doesn't intercept taps. */}
-                <div className={`absolute inset-x-0 -top-4 h-5 ${canHoverDesktopNav ? 'pointer-events-auto' : 'pointer-events-none'}`} />
-
-                <div
-                  className={`relative overflow-hidden rounded-[18px] border ${
-                    isDark
-                      ? 'border-white/[0.08] bg-[rgba(7,9,22,0.92)] shadow-[0_24px_72px_rgba(0,2,10,0.56),inset_0_1px_0_rgba(255,255,255,0.04)]'
-                      : 'border-violet-300/70 bg-white shadow-[0_30px_80px_-18px_rgba(46,10,114,0.32),0_10px_28px_-8px_rgba(89,23,196,0.18),inset_0_1px_0_rgba(255,255,255,0.95)]'
-                  }`}
-                >
-                  {/* Top accent line */}
-                  <div
-                    className="absolute inset-x-0 top-0 h-px"
-                    style={{
-                      background: isDark
-                        ? 'linear-gradient(90deg, transparent 5%, rgba(124,58,237,0.45) 35%, rgba(6,182,212,0.35) 65%, transparent 95%)'
-                        : 'linear-gradient(90deg, transparent 5%, rgba(124,58,237,0.2) 35%, rgba(6,182,212,0.15) 65%, transparent 95%)',
-                    }}
-                  />
-
-                  <div>
-
-                    {/* ── Left panel: title + CTA ── */}
-                    <div className={`relative flex flex-col justify-between px-6 py-5 ${
-                      isDark
-                        ? 'bg-[linear-gradient(160deg,rgba(12,10,28,0.96),rgba(8,9,20,0.9))]'
-                        : 'bg-[linear-gradient(160deg,rgba(247,241,255,1),rgba(241,231,255,0.96))] border-b border-violet-200/60'
-                    }`}>
-                      {/* Corner accent glow */}
-                      {isDark && (
-                        <div
-                          className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full blur-3xl"
-                          style={{ background: 'rgba(124,58,237,0.10)' }}
-                        />
-                      )}
-
-                      <div className="relative">
-                        <div className={`text-[9px] font-bold uppercase tracking-[0.24em] ${
-                          isDark ? 'text-violet-300/68' : 'text-violet-800'
-                        }`}>
-                          {activeDesktopItem.eyebrow}
-                        </div>
-                        <h3 className={`mt-2 font-display text-[1.04rem] font-bold leading-tight tracking-[-0.025em] ${
-                          isDark ? 'text-white' : 'text-ink-900'
-                        }`}>
-                          {activeDesktopItem.title}
-                        </h3>
-                        <p className={`mt-2.5 max-w-[14rem] text-[11.5px] leading-[1.55] ${
-                          isDark ? 'text-purple-100/52' : 'text-ink-600'
-                        }`}>
-                          {activeDesktopItem.body}
-                        </p>
-                      </div>
-
-                      {activeDesktopItem.ctaTo && activeDesktopItem.ctaLabel && (
-                        <Link
-                          to={activeDesktopItem.ctaTo}
-                          onClick={() => scheduleDesktopClose(true)}
-                          className={`mt-5 inline-flex h-10 w-fit items-center gap-2 rounded-md border px-4 text-[11px] font-bold transition-all duration-200 hover:-translate-y-0.5 ${
-                            isDark
-                              ? 'border-white/[0.11] bg-white/[0.05] text-white hover:border-violet-400/22 hover:bg-white/[0.08]'
-                              : 'border-violet-300/80 bg-white text-violet-800 shadow-[0_4px_14px_-6px_rgba(89,23,196,0.22)] hover:border-violet-500 hover:bg-violet-50 hover:text-violet-900'
-                          } ${focus}`}
-                        >
-                          {activeDesktopItem.ctaLabel}
-                          <ArrowRight className="h-3 w-3" strokeWidth={2.2} />
-                        </Link>
-                      )}
-                    </div>
-
-                    {/* ── Right panel: nav items ── */}
-                    <div className={`p-3 ${
-                      isDark
-                        ? 'bg-[linear-gradient(180deg,rgba(6,8,20,0.9),rgba(5,7,16,0.84))]'
-                        : 'bg-white'
-                    }`}>
-                      <div
-                        className={`grid gap-2 ${
-                          desktopMenuPosition.compact
-                            ? 'grid-cols-1'
-                            : activeDesktopItem.children.length > 2
-                              ? 'grid-cols-2'
-                              : 'grid-cols-1'
-                        }`}
-                      >
-                        {activeDesktopItem.children.map((child, index) => {
-                          const isCurrent = active(child.to)
-                          const Icon = child.icon
+                      <div className="p-2">
+                        {[
+                          { to: '/my-requests', label: 'My Requests', icon: Package },
+                          { to: '/profile', label: 'Profile', icon: User2 },
+                          ...(isAuth ? [{ to: '/admin', label: 'Admin Panel', icon: ShieldCheck }] : []),
+                        ].map(item => {
+                          const Icon = item.icon
                           return (
                             <Link
-                              key={child.to}
-                              ref={index === 0 ? desktopPanelFirstLinkRef : undefined}
-                              to={child.to}
-                              onMouseEnter={() => preloadRoute(child.to)}
-                              onFocus={() => preloadRoute(child.to)}
-                              onClick={() => scheduleDesktopClose(true)}
-                              role="menuitem"
-                              className={`group relative flex items-start gap-3 overflow-hidden rounded-[14px] border p-3 transition-all duration-200 ${
-                                isCurrent
-                                  ? isDark
-                                    ? 'border-violet-300/24 bg-[linear-gradient(148deg,rgba(124,58,237,0.16),rgba(236,72,153,0.07),rgba(34,211,238,0.07))]'
-                                    : 'border-violet-400/60 bg-[linear-gradient(148deg,rgba(113,38,227,0.14),rgba(217,70,239,0.08))] shadow-[0_4px_14px_-6px_rgba(89,23,196,0.28)]'
-                                  : isDark
-                                    ? 'border-white/[0.06] bg-white/[0.02] hover:border-violet-400/18 hover:bg-white/[0.05]'
-                                    : 'border-violet-200/70 bg-white hover:border-violet-400/60 hover:bg-violet-50/70 hover:shadow-[0_6px_18px_-8px_rgba(89,23,196,0.24)]'
-                              } ${focus}`}
+                              key={item.to}
+                              to={item.to}
+                              onMouseEnter={() => preloadRoute(item.to)}
+                              onFocus={() => preloadRoute(item.to)}
+                              {...fastNavProps(item.to, () => setUserOpen(false))}
+                              className="flex items-center gap-3 rounded-[13px] px-3 py-2.5 font-display text-[12.5px] font-semibold text-ink-800 transition-colors hover:bg-violet-50 hover:text-violet-900"
                             >
-                              {/* Hover glow on item */}
-                              {isDark && !isCurrent && (
-                                <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-400 group-hover:opacity-100"
-                                  style={{ background: 'radial-gradient(ellipse 90% 70% at 20% 50%, rgba(124,58,237,0.08) 0%, transparent 70%)' }}
-                                />
-                              )}
-
-                              {/* Icon */}
-                              <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-md border transition-transform duration-200 group-hover:scale-105 ${
-                                isCurrent
-                                  ? isDark
-                                    ? 'border-violet-400/28 bg-[linear-gradient(145deg,rgba(124,58,237,0.28),rgba(236,72,153,0.14))] text-violet-200'
-                                    : 'border-violet-400/70 bg-[linear-gradient(145deg,rgba(113,38,227,0.22),rgba(217,70,239,0.12))] text-violet-800'
-                                  : isDark
-                                    ? 'border-white/[0.09] bg-white/[0.05] text-white/75 group-hover:border-violet-400/22 group-hover:text-white'
-                                    : 'border-violet-200/80 bg-violet-50 text-violet-700 group-hover:border-violet-400 group-hover:bg-violet-100'
-                              }`}>
-                                <Icon className="h-4 w-4" strokeWidth={2} />
-                              </div>
-
-                              {/* Text */}
-                              <div className="relative min-w-0 flex-1">
-                                <div className="flex items-center justify-between gap-2">
-                                  <span className={`text-[12.5px] font-bold tracking-[-0.01em] transition-colors ${
-                                    isDark ? 'text-white/90 group-hover:text-white' : 'text-ink-900 group-hover:text-violet-900'
-                                  }`}>
-                                    {child.label}
-                                  </span>
-                                  <span className={`shrink-0 rounded-full border px-2 py-[3px] text-[7.5px] font-bold uppercase tracking-[0.12em] ${
-                                    isDark
-                                      ? 'border-white/[0.09] bg-white/[0.04] text-cyan-200/58'
-                                      : 'border-violet-300/70 bg-violet-100/80 text-violet-800'
-                                  }`}>
-                                    {child.meta}
-                                  </span>
-                                </div>
-                                <p className={`mt-1.5 text-[11px] leading-[1.5] ${
-                                  isDark ? 'text-purple-100/48 group-hover:text-purple-100/65' : 'text-ink-600'
-                                }`}>
-                                  {child.description}
-                                </p>
-                              </div>
+                              <Icon className="h-4 w-4 text-violet-600" strokeWidth={2} />
+                              {tr(item.label)}
                             </Link>
                           )
                         })}
+                        <div className="my-1 h-px bg-violet-100" />
+                        <button
+                          type="button"
+                          onClick={() => void logout()}
+                          className="flex w-full items-center gap-3 rounded-[13px] px-3 py-2.5 text-left font-display text-[12.5px] font-semibold text-red-600 transition-colors hover:bg-red-50"
+                        >
+                          <LogOut className="h-4 w-4" strokeWidth={2} />
+                          {tr('Logout')}
+                        </button>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                onMouseEnter={() => preloadRoute('/login')}
+                onFocus={() => preloadRoute('/login')}
+                {...fastNavProps('/login')}
+                className={`group inline-flex h-11 items-center gap-2 rounded-full border pl-1.5 pr-4 font-bold transition-all hover:-translate-y-0.5 ${
+                  overHero
+                    ? 'border-white/45 bg-white text-ink-900'
+                    : 'border-violet-200 bg-white text-ink-900 hover:border-violet-300 hover:shadow-[0_12px_26px_-12px_rgba(124,58,237,0.45)]'
+                }`}
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white shadow-[0_6px_14px_-6px_rgba(192,38,211,0.7)] transition-transform group-hover:scale-105">
+                  <User2 className="h-4 w-4" strokeWidth={2.4} />
+                </span>
+                <span className="hidden font-display text-[13px] sm:inline">{tr('Login')}</span>
+              </Link>
             )}
-          </AnimatePresence>
 
+            {/* Mobile toggle */}
+            <button
+              type="button"
+              onClick={() => setMobileOpen(open => !open)}
+              aria-label={tr('Menu')}
+              aria-expanded={mobileOpen}
+              className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition-all lg:hidden ${utilityBtn}`}
+            >
+              {mobileOpen ? <X className="h-5 w-5" strokeWidth={2.2} /> : <Menu className="h-5 w-5" strokeWidth={2.2} />}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* ══════════════════════ USER MENU PORTAL ══════════════════════ */}
-      <NavbarUserMenuPortal
-        focus={focus}
-        isDark={isDark}
-        onClose={() => setUserMenu(false)}
-        userMenu={userMenu}
-        userMenuPopoverRef={userMenuPopoverRef}
-        userMenuPosition={userMenuPosition}
-      />
+      {/* Mobile drawer */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 z-40 bg-ink-900/40 backdrop-blur-sm lg:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileOpen(false)}
+              aria-hidden="true"
+            />
+            <motion.div
+              dir={dir}
+              className="fixed inset-x-0 top-0 z-50 max-h-[92vh] overflow-y-auto rounded-b-[24px] border-b border-violet-100 bg-white p-4 shadow-2xl lg:hidden"
+              initial={{ y: '-100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '-100%' }}
+              transition={{ type: 'spring', stiffness: 360, damping: 36 }}
+              role="dialog"
+              aria-modal="true"
+              aria-label={tr('Mobile navigation')}
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <BrandLogo overHero={false} compact />
+                <div className="flex items-center gap-2">
+                  <LanguageSwitcher compact className="border-violet-200 bg-white text-ink-700" />
+                  <button
+                    type="button"
+                    onClick={() => setMobileOpen(false)}
+                    aria-label={tr('Close menu')}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-violet-200 bg-white text-ink-700"
+                  >
+                    <X className="h-5 w-5" strokeWidth={2.2} />
+                  </button>
+                </div>
+              </div>
 
-      <SearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
+              <form
+                onSubmit={event => {
+                  event.preventDefault()
+                  runFastNav('/products', () => setMobileOpen(false))
+                }}
+                className="mb-3 flex h-12 items-center gap-2 rounded-full border border-violet-200 bg-white px-4"
+              >
+                <Search className="h-4 w-4 text-violet-500" strokeWidth={2.2} />
+                <input
+                  value={query}
+                  onChange={event => setQuery(event.target.value)}
+                  placeholder={tr('Search categories or services...')}
+                  dir={dir}
+                  className="min-w-0 flex-1 bg-transparent text-[13px] font-medium text-ink-900 outline-none placeholder:text-ink-400"
+                  aria-label={tr('Search')}
+                />
+              </form>
+
+              {query.trim().length >= 1 && results.length > 0 && (
+                <div className="mb-3 overflow-hidden rounded-2xl border border-violet-100">
+                  {results.map(result => (
+                    <Link
+                      key={`m-${result.type}-${result.to}`}
+                      to={result.to}
+                      onMouseEnter={() => preloadRoute(result.to)}
+                      onFocus={() => preloadRoute(result.to)}
+                      {...fastNavProps(result.to, () => setMobileOpen(false))}
+                      className="flex items-center gap-3 border-b border-violet-50 px-3 py-2.5 last:border-0 hover:bg-violet-50"
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[9px] border border-violet-200 bg-violet-50 text-violet-600">
+                        {result.type === 'product' && result.image ? (
+                          <img src={result.image} alt="" width={32} height={32} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                        ) : result.type === 'category' ? (
+                          <Tag className="h-3.5 w-3.5" strokeWidth={2.2} />
+                        ) : (
+                          <Package className="h-3.5 w-3.5" strokeWidth={2.2} />
+                        )}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[12.5px] font-bold text-ink-900">{result.label}</span>
+                        <span className="block truncate text-[10.5px] text-ink-500">{tr(result.meta)}</span>
+                      </span>
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.1em] ${
+                          result.type === 'category' ? 'bg-violet-100 text-violet-700' : 'bg-fuchsia-100 text-fuchsia-700'
+                        }`}
+                      >
+                        {tr(result.type === 'category' ? 'Category' : 'Service')}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-1.5">
+                {[{ to: '/', label: 'Home' }, ...NAV_LINKS.slice(1)].map(item => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onMouseEnter={() => preloadRoute(item.to)}
+                    onFocus={() => preloadRoute(item.to)}
+                    {...fastNavProps(item.to, () => setMobileOpen(false))}
+                    className={`inline-flex min-h-[46px] items-center rounded-xl border px-3.5 font-display text-[13px] font-semibold transition-all ${
+                      active(item.to) ? 'border-violet-300 bg-violet-50 text-violet-900' : 'border-violet-100 bg-white text-ink-700 hover:bg-violet-50'
+                    }`}
+                  >
+                    {tr(item.label)}
+                  </Link>
+                ))}
+              </div>
+
+              <div className="mt-3 font-display text-[10px] font-bold uppercase tracking-[0.18em] text-violet-500">{tr('Categories')}</div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {categoryList.slice(0, 8).map(category => (
+                  <Link
+                    key={category.id}
+                    to={`/categories/${encodeURIComponent(category.slug)}`}
+                    onMouseEnter={() => preloadRoute(`/categories/${encodeURIComponent(category.slug)}`)}
+                    onFocus={() => preloadRoute(`/categories/${encodeURIComponent(category.slug)}`)}
+                    {...fastNavProps(`/categories/${encodeURIComponent(category.slug)}`, () => setMobileOpen(false))}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-white px-3 py-1.5 font-display text-[12px] font-semibold text-ink-700 hover:bg-violet-50"
+                  >
+                    <span>{category.icon || '*'}</span>
+                    {category.name}
+                  </Link>
+                ))}
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-1.5">
+                <Link
+                  to="/rental-cart"
+                  onMouseEnter={() => preloadRoute('/rental-cart')}
+                  onFocus={() => preloadRoute('/rental-cart')}
+                  {...fastNavProps('/rental-cart', () => setMobileOpen(false))}
+                  className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-violet-200 bg-white font-display text-[13px] font-semibold text-ink-800"
+                >
+                  <ShoppingCart className="h-4 w-4" strokeWidth={2} /> {tr('Request Draft')} {itemCount > 0 && `(${cartCount})`}
+                </Link>
+                {isLoggedIn ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileOpen(false)
+                      void logout()
+                    }}
+                    className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 font-display text-[13px] font-semibold text-red-600"
+                  >
+                    <LogOut className="h-4 w-4" strokeWidth={2} /> {tr('Logout')}
+                  </button>
+                ) : (
+                  <Link
+                    to="/login"
+                    onMouseEnter={() => preloadRoute('/login')}
+                    onFocus={() => preloadRoute('/login')}
+                    {...fastNavProps('/login', () => setMobileOpen(false))}
+                    className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-violet-200 bg-white font-display text-[13px] font-semibold text-ink-800 transition-all hover:bg-violet-50"
+                  >
+                    <User2 className="h-4 w-4 text-violet-600" strokeWidth={2} />
+                    {tr('Login')}
+                  </Link>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   )
 }

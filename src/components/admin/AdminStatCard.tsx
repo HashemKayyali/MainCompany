@@ -31,7 +31,7 @@ export default function AdminStatCard({
           <div className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#7126e3]">
             {label}
           </div>
-          <div className="font-display text-[1.5rem] font-black leading-none tracking-[-0.04em] text-[#1a0b3d] sm:text-[1.65rem]">
+          <div className="font-sans text-[1.5rem] font-black leading-none tracking-[-0.04em] text-[#1a0b3d] sm:text-[1.65rem]">
             {value}
           </div>
         </div>

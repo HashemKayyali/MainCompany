@@ -201,13 +201,13 @@ export default function AdminAdminsPage() {
                         name={admin.name}
                         email={admin.email}
                         className={cn(
-                          'h-11 w-11 shrink-0 rounded-[12px] text-[0.95rem] font-display font-bold',
+                          'h-11 w-11 shrink-0 rounded-[12px] text-[0.95rem] font-sans font-bold',
                           avatarClass(safeRole)
                         )}
                       />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="truncate font-display text-[14px] font-extrabold text-[#1a0b3d]">
+                          <span className="truncate font-sans text-[14px] font-extrabold text-[#1a0b3d]">
                             {admin.name}
                           </span>
                           {isYou && (
@@ -278,7 +278,7 @@ export default function AdminAdminsPage() {
                 email={details.email}
                 className="h-28 w-28 rounded-[32px]"
                 fallbackClassName={cn(
-                  'text-5xl font-display font-bold shadow-lg',
+                  'text-5xl font-sans font-bold shadow-lg',
                   avatarClass(details.role)
                 )}
               />

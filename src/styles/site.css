@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+
 /* ── Lenis smooth scroll ── */
 html.lenis-root,
 html.lenis-root body {
@@ -15,6 +17,27 @@ html.lenis-root body {
   border-radius: 8px;
 }
 
+.auth-social-button:focus,
+.auth-social-button:focus-visible,
+.auth-social-button:active {
+  outline: none !important;
+}
+
+.auth-social-button:focus-visible {
+  border-color: rgba(124, 58, 237, 0.5);
+  box-shadow:
+    inset 0 0 0 1px rgba(124, 58, 237, 0.32),
+    0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.nav-search-input,
+.nav-search-input:focus,
+.nav-search-input:focus-visible {
+  border: 0;
+  box-shadow: none;
+  outline: none !important;
+}
+
 /* ── Performance / Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
   .animate-aurora,
@@ -26,7 +49,478 @@ html.perf-low .animate-orbit {
   animation: none !important;
 }
 
+.hero-background-surface {
+  contain: paint;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  will-change: opacity, transform;
+}
+
+.hero-background-surface canvas,
+.hero-background-surface > * {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+.eventies-hero-shell {
+  min-height: clamp(660px, 78vh, 760px);
+}
+
+.hero-title-silver {
+  display: block;
+  overflow: visible;
+  line-height: 1.13;
+  padding-block: 0.015em 0.18em;
+  margin-block-end: -0.1em;
+}
+
+.hero-title-silver * {
+  overflow: visible;
+}
+
+main h1.font-display:not(.hero-title-silver) {
+  overflow: visible;
+  line-height: 1.12;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.04em;
+}
+
+@media (max-width: 1023px) {
+  .eventies-hero-shell {
+    min-height: auto;
+  }
+}
+
+/* Custom Builds alternating section backgrounds */
+.custom-builds-bg {
+  background:
+    linear-gradient(135deg, #0b0322 0%, #190453 38%, #2d0b66 66%, #0a0420 100%);
+}
+
+.custom-builds-bg::before,
+.custom-builds-bg::after {
+  content: '';
+  position: absolute;
+  inset: -18%;
+  pointer-events: none;
+}
+
+.custom-builds-bg::before {
+  opacity: 0.68;
+  background-size: 180% 180%;
+  animation: cb-energy-drift 18s ease-in-out infinite;
+}
+
+.custom-builds-bg::after {
+  opacity: 0.32;
+  animation: cb-grid-shift 16s linear infinite;
+}
+
+.custom-builds-bg--electric::before {
+  background:
+    linear-gradient(115deg, transparent 0 18%, rgba(255, 255, 255, 0.2) 19%, transparent 21% 47%, rgba(217, 70, 239, 0.28) 49%, transparent 51%),
+    linear-gradient(245deg, transparent 0 32%, rgba(124, 58, 237, 0.32) 33%, transparent 35% 72%, rgba(255, 255, 255, 0.14) 74%, transparent 76%);
+}
+
+.custom-builds-bg--electric::after {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    repeating-linear-gradient(45deg, rgba(217, 70, 239, 0.12) 0 1px, transparent 1px 24px);
+  background-size: 54px 54px, 54px 54px, 96px 96px;
+}
+
+.custom-builds-bg--waves {
+  background:
+    linear-gradient(140deg, #f7f4ff 0%, #ffffff 42%, #efe7ff 100%);
+}
+
+.custom-builds-bg--waves::before {
+  opacity: 0.75;
+  background:
+    repeating-radial-gradient(ellipse at 18% 22%, rgba(124, 58, 237, 0.14) 0 2px, transparent 2px 28px),
+    repeating-radial-gradient(ellipse at 82% 74%, rgba(217, 70, 239, 0.11) 0 2px, transparent 2px 34px);
+}
+
+.custom-builds-bg--waves::after {
+  opacity: 0.26;
+  background:
+    linear-gradient(120deg, transparent 0 28%, rgba(124, 58, 237, 0.2) 29%, transparent 31% 62%, rgba(217, 70, 239, 0.16) 64%, transparent 66%),
+    linear-gradient(90deg, rgba(124, 58, 237, 0.08) 1px, transparent 1px);
+  background-size: 150% 150%, 38px 38px;
+}
+
+.custom-builds-bg--deployment {
+  background:
+    linear-gradient(140deg, #fbf8ff 0%, #ffffff 32%, #f3ebff 66%, #fbf7ff 100%);
+}
+
+.custom-builds-bg--deployment::before {
+  inset: -26%;
+  opacity: 0.92;
+  background:
+    radial-gradient(ellipse 44% 34% at 18% 18%, rgba(124, 58, 237, 0.24) 0%, transparent 66%),
+    radial-gradient(ellipse 46% 36% at 82% 26%, rgba(217, 70, 239, 0.18) 0%, transparent 68%),
+    radial-gradient(ellipse 62% 34% at 48% 92%, rgba(168, 85, 247, 0.18) 0%, transparent 68%),
+    conic-gradient(from 165deg at 52% 48%, transparent 0deg, rgba(124, 58, 237, 0.08) 58deg, transparent 112deg, rgba(217, 70, 239, 0.07) 190deg, transparent 260deg, rgba(168, 85, 247, 0.08) 318deg, transparent 360deg);
+  filter: blur(22px);
+  animation: cb-deployment-aurora 24s ease-in-out infinite;
+}
+
+.custom-builds-bg--deployment::after {
+  inset: -14% -20%;
+  opacity: 0.58;
+  background:
+    radial-gradient(ellipse 120% 24% at 50% 8%, transparent 46%, rgba(124, 58, 237, 0.13) 50%, transparent 62%),
+    radial-gradient(ellipse 126% 26% at 48% 48%, transparent 48%, rgba(217, 70, 239, 0.1) 52%, transparent 64%),
+    radial-gradient(ellipse 118% 24% at 52% 88%, transparent 46%, rgba(124, 58, 237, 0.1) 51%, transparent 63%);
+  animation: cb-deployment-waves 30s ease-in-out infinite;
+}
+
+.custom-builds-bg--circuit::before {
+  background:
+    linear-gradient(90deg, transparent 0 18%, rgba(168, 85, 247, 0.2) 19%, transparent 20% 46%, rgba(217, 70, 239, 0.18) 47%, transparent 48%),
+    linear-gradient(0deg, transparent 0 24%, rgba(255, 255, 255, 0.12) 25%, transparent 26% 72%, rgba(124, 58, 237, 0.18) 73%, transparent 74%);
+}
+
+.custom-builds-bg--circuit::after {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 46px 46px;
+}
+
+.custom-builds-bg--hero {
+  background:
+    radial-gradient(68% 58% at 53% 21%, rgba(217, 70, 239, 0.56) 0%, rgba(168, 85, 247, 0.26) 34%, transparent 66%),
+    radial-gradient(58% 54% at 82% 56%, rgba(168, 85, 247, 0.48) 0%, transparent 64%),
+    radial-gradient(64% 58% at 15% 10%, rgba(91, 33, 182, 0.58) 0%, transparent 66%),
+    linear-gradient(145deg, #0b0324 0%, #1b0646 38%, #5b16b6 68%, #9d2bd2 100%);
+}
+
+.custom-builds-bg--hero::before {
+  inset: -20%;
+  opacity: 0.54;
+  background:
+    radial-gradient(ellipse 64% 34% at 22% 18%, rgba(255, 255, 255, 0.18) 0%, transparent 64%),
+    radial-gradient(ellipse 58% 38% at 78% 74%, rgba(217, 70, 239, 0.26) 0%, transparent 66%),
+    linear-gradient(120deg, transparent 0 30%, rgba(255, 255, 255, 0.16) 31%, transparent 33% 62%, rgba(168, 85, 247, 0.2) 64%, transparent 66%);
+  background-size: 140% 140%;
+  filter: blur(8px);
+  animation: cb-energy-drift 22s ease-in-out infinite;
+}
+
+.custom-builds-bg--hero::after {
+  inset: -12%;
+  opacity: 0.34;
+  background:
+    radial-gradient(ellipse 130% 26% at 48% 12%, transparent 46%, rgba(255, 255, 255, 0.13) 50%, transparent 60%),
+    radial-gradient(ellipse 126% 30% at 52% 66%, transparent 48%, rgba(217, 70, 239, 0.14) 52%, transparent 62%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: auto, auto, 54px 54px;
+  animation: cb-deployment-waves 28s ease-in-out infinite;
+}
+
+@keyframes cb-energy-drift {
+  0%, 100% { transform: translate3d(-2%, -1%, 0) rotate(0deg); background-position: 0% 50%; }
+  50% { transform: translate3d(2%, 1%, 0) rotate(1deg); background-position: 100% 50%; }
+}
+
+@keyframes cb-grid-shift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(46px, 46px, 0); }
+}
+
+@keyframes cb-deployment-aurora {
+  0%, 100% {
+    transform: translate3d(-1.8%, -1.2%, 0) scale(1) rotate(0deg);
+    background-position: 0% 50%;
+  }
+  50% {
+    transform: translate3d(1.8%, 1.2%, 0) scale(1.045) rotate(1deg);
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes cb-deployment-waves {
+  0%, 100% {
+    transform: translate3d(-2.4%, -0.6%, 0) scaleY(1);
+    opacity: 0.48;
+  }
+  50% {
+    transform: translate3d(2.4%, 0.8%, 0) scaleY(1.08);
+    opacity: 0.72;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .custom-builds-bg::before,
+  .custom-builds-bg::after {
+    animation: none !important;
+  }
+}
+
+html.perf-low .custom-builds-bg::before,
+html.perf-low .custom-builds-bg::after {
+  animation: none !important;
+}
+
 /* ── Light dot pattern overlay ── */
+/* About / Contact alternating story sections */
+/* Homepage alternating section bands */
+.home-band {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.home-band > section {
+  position: relative;
+  z-index: 1;
+}
+
+.home-band--plain {
+  background: #ffffff;
+}
+
+.home-band--theme {
+  background:
+    linear-gradient(135deg, #ffffff 0%, #fbf7ff 30%, #f1e8ff 68%, #ffffff 100%);
+}
+
+.home-band--theme::before,
+.home-band--theme::after {
+  content: '';
+  position: absolute;
+  inset: -18%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.home-band--theme::before {
+  opacity: 0.82;
+  background:
+    radial-gradient(ellipse 72% 42% at 17% 18%, rgba(124, 58, 237, 0.16) 0%, transparent 64%),
+    radial-gradient(ellipse 62% 36% at 82% 28%, rgba(217, 70, 239, 0.12) 0%, transparent 64%),
+    radial-gradient(ellipse 80% 40% at 50% 98%, rgba(168, 85, 247, 0.12) 0%, transparent 68%);
+  filter: blur(18px);
+  animation: home-band-drift 22s ease-in-out infinite;
+}
+
+.home-band--theme::after {
+  opacity: 0.58;
+  background:
+    radial-gradient(ellipse 128% 28% at 50% 8%, transparent 46%, rgba(124, 58, 237, 0.10) 50%, transparent 60%),
+    radial-gradient(ellipse 128% 28% at 48% 58%, transparent 48%, rgba(217, 70, 239, 0.08) 52%, transparent 62%),
+    linear-gradient(90deg, rgba(124, 58, 237, 0.06) 1px, transparent 1px);
+  background-size: auto, auto, 44px 44px;
+  animation: home-band-wave 28s ease-in-out infinite;
+}
+
+@keyframes home-band-drift {
+  0%, 100% { transform: translate3d(-1.5%, -1%, 0) scale(1); }
+  50% { transform: translate3d(1.5%, 1%, 0) scale(1.04); }
+}
+
+@keyframes home-band-wave {
+  0%, 100% { transform: translate3d(-2%, 0, 0); opacity: 0.48; }
+  50% { transform: translate3d(2%, 1%, 0); opacity: 0.72; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-band--theme::before,
+  .home-band--theme::after {
+    animation: none !important;
+  }
+}
+
+html.perf-low .home-band--theme::before,
+html.perf-low .home-band--theme::after {
+  animation: none !important;
+}
+
+.story-section {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f3ff 36%, #f0e8ff 68%, #ffffff 100%);
+}
+
+.story-section::before,
+.story-section::after {
+  content: '';
+  position: absolute;
+  inset: -18%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.story-section > .site-container-wide {
+  position: relative;
+  z-index: 1;
+}
+
+.story-section--waves::before {
+  opacity: 0.9;
+  background:
+    radial-gradient(ellipse 72% 44% at 18% 20%, rgba(124, 58, 237, 0.18) 0%, transparent 62%),
+    radial-gradient(ellipse 64% 38% at 82% 30%, rgba(217, 70, 239, 0.13) 0%, transparent 64%),
+    radial-gradient(ellipse 80% 40% at 50% 96%, rgba(168, 85, 247, 0.14) 0%, transparent 66%);
+  filter: blur(18px);
+  animation: story-aurora-drift 20s ease-in-out infinite;
+}
+
+.story-section--waves::after {
+  opacity: 0.72;
+  background:
+    radial-gradient(ellipse 120% 28% at 50% 3%, transparent 46%, rgba(124, 58, 237, 0.12) 49%, transparent 58%),
+    radial-gradient(ellipse 120% 30% at 48% 50%, transparent 48%, rgba(217, 70, 239, 0.09) 51%, transparent 60%),
+    radial-gradient(ellipse 120% 28% at 52% 96%, transparent 48%, rgba(124, 58, 237, 0.1) 51%, transparent 60%);
+  animation: story-soft-wave 24s ease-in-out infinite;
+}
+
+.story-section--ribbons {
+  background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 36%, #f1e8ff 72%, #ffffff 100%);
+}
+
+.story-section--ribbons::before {
+  opacity: 0.84;
+  background:
+    radial-gradient(ellipse 72% 34% at 18% 10%, rgba(217, 70, 239, 0.13) 0%, transparent 66%),
+    radial-gradient(ellipse 74% 38% at 76% 70%, rgba(124, 58, 237, 0.16) 0%, transparent 68%),
+    radial-gradient(ellipse 56% 32% at 52% 42%, rgba(168, 85, 247, 0.12) 0%, transparent 70%);
+  filter: blur(16px);
+  animation: story-aurora-drift 22s ease-in-out infinite reverse;
+}
+
+.story-section--ribbons::after {
+  opacity: 0.64;
+  background:
+    radial-gradient(ellipse 135% 26% at 50% 18%, transparent 45%, rgba(124, 58, 237, 0.11) 49%, transparent 58%),
+    radial-gradient(ellipse 135% 28% at 50% 72%, transparent 46%, rgba(217, 70, 239, 0.09) 50%, transparent 60%);
+  animation: story-soft-wave 26s ease-in-out infinite reverse;
+}
+
+.story-section--signals {
+  background: linear-gradient(135deg, #ffffff 0%, #f7f1ff 44%, #efe7ff 74%, #ffffff 100%);
+}
+
+.story-section--signals::before {
+  opacity: 0.82;
+  background:
+    radial-gradient(ellipse 76% 42% at 20% 78%, rgba(124, 58, 237, 0.15) 0%, transparent 64%),
+    radial-gradient(ellipse 62% 36% at 78% 20%, rgba(217, 70, 239, 0.12) 0%, transparent 64%),
+    radial-gradient(ellipse 68% 34% at 52% 48%, rgba(168, 85, 247, 0.1) 0%, transparent 68%);
+  filter: blur(18px);
+  animation: story-aurora-drift 24s ease-in-out infinite;
+}
+
+.story-section--signals::after {
+  opacity: 0.62;
+  background:
+    radial-gradient(ellipse 125% 28% at 52% 28%, transparent 46%, rgba(124, 58, 237, 0.1) 50%, transparent 60%),
+    radial-gradient(ellipse 125% 28% at 48% 76%, transparent 48%, rgba(217, 70, 239, 0.08) 52%, transparent 62%);
+  animation: story-soft-wave 28s ease-in-out infinite;
+}
+
+@keyframes story-aurora-drift {
+  0%, 100% { transform: translate3d(-1.5%, -1%, 0) scale(1); }
+  50% { transform: translate3d(1.5%, 1%, 0) scale(1.04); }
+}
+
+@keyframes story-soft-wave {
+  0%, 100% { transform: translate3d(-2%, 0, 0) scaleY(1); opacity: 0.56; }
+  50% { transform: translate3d(2%, 1%, 0) scaleY(1.08); opacity: 0.78; }
+}
+
+/* About / Contact hero symbol systems */
+.hero-symbol-stage {
+  min-height: clamp(22rem, 42vw, 34rem);
+}
+
+.hero-orbit-spin {
+  animation: hero-symbol-spin 34s linear infinite;
+}
+
+.hero-orbit-spin-reverse {
+  animation: hero-symbol-spin 42s linear infinite reverse;
+}
+
+.hero-signal-dash {
+  stroke-dasharray: 12 14;
+  animation: hero-signal-dash 12s linear infinite;
+}
+
+.hero-signal-dash--slow {
+  animation-duration: 16s;
+}
+
+.hero-signal-node {
+  animation: hero-node-float 7.5s ease-in-out infinite;
+}
+
+.hero-center-pulse {
+  animation: hero-center-pulse 3.8s ease-in-out infinite;
+}
+
+.hero-flow-dot {
+  animation: hero-flow-dot 5.2s ease-in-out infinite;
+}
+
+.hero-flow-dot--late {
+  animation-delay: 1.7s;
+}
+
+@keyframes hero-symbol-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes hero-signal-dash {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -120; }
+}
+
+@keyframes hero-node-float {
+  0%, 100% { translate: 0 0; scale: 1; }
+  50% { translate: 0 -8px; scale: 1.03; }
+}
+
+@keyframes hero-center-pulse {
+  0%, 100% { opacity: 0.25; transform: scale(0.9); }
+  50% { opacity: 0.5; transform: scale(1.08); }
+}
+
+@keyframes hero-flow-dot {
+  0%, 100% { opacity: 0.45; transform: translate3d(0, 0, 0) scale(0.9); }
+  50% { opacity: 1; transform: translate3d(18px, -12px, 0) scale(1.18); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-section::before,
+  .story-section::after,
+  .hero-orbit-spin,
+  .hero-orbit-spin-reverse,
+  .hero-signal-dash,
+  .hero-signal-node,
+  .hero-center-pulse,
+  .hero-flow-dot {
+    animation: none !important;
+  }
+}
+
+html.perf-low .story-section::before,
+html.perf-low .story-section::after,
+html.perf-low .hero-orbit-spin,
+html.perf-low .hero-orbit-spin-reverse,
+html.perf-low .hero-signal-dash,
+html.perf-low .hero-signal-node,
+html.perf-low .hero-center-pulse,
+html.perf-low .hero-flow-dot {
+  animation: none !important;
+}
+
+/* Light dot pattern overlay */
 .dot-pattern {
   background-image: radial-gradient(rgba(124, 58, 237, 0.10) 1px, transparent 1px);
   background-size: 24px 24px;
@@ -321,4 +815,208 @@ html.perf-low .spotlight-glow {
   box-shadow:
     0 0 0 1px rgba(124, 58, 237, 0.24),
     0 18px 48px -8px rgba(124, 58, 237, 0.34);
+}
+html[dir="rtl"] body {
+  direction: rtl;
+}
+
+html[dir="rtl"] input,
+html[dir="rtl"] textarea,
+html[dir="rtl"] select {
+  text-align: right;
+}
+
+html[dir="rtl"] .nav-search-input {
+  text-align: right;
+}
+
+html[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+html[dir="rtl"] .sm\:text-left {
+  text-align: right;
+}
+
+/* Keep the Eventies wordmark visually identical in English and Arabic modes.
+   Arabic typography rules intentionally replace display fonts globally, but the
+   brand logo must keep its Latin wordmark/font and LTR shaping at all times. */
+.eventies-logo-wordmark {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-family: "Zodiak", Georgia, "Times New Roman", serif !important;
+  line-height: 1 !important;
+  letter-spacing: -0.045em !important;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
+
+.eventies-logo-icon {
+  image-rendering: auto !important;
+}
+
+html[dir="rtl"] .eventies-logo-wordmark,
+.nav-shell-ar .eventies-logo-wordmark {
+  font-family: "Zodiak", Georgia, "Times New Roman", serif !important;
+  line-height: 1 !important;
+  letter-spacing: -0.045em !important;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+
+/* ── Arabic typography QA ──
+   Use IBM Plex Sans Arabic for RTL and loosen display line-height so large Arabic
+   headlines do not overlap when the language switcher is set to العربية. */
+:root {
+  --eventies-arabic-font: "IBM Plex Sans Arabic", "Alexandria", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+html[dir="rtl"] body,
+html[dir="rtl"] button,
+html[dir="rtl"] input,
+html[dir="rtl"] textarea,
+html[dir="rtl"] select,
+html[dir="rtl"] .font-sans {
+  font-family: var(--eventies-arabic-font) !important;
+}
+
+html[dir="rtl"] .font-display {
+  font-family: var(--eventies-arabic-font) !important;
+  line-height: 1.18 !important;
+  letter-spacing: 0 !important;
+}
+
+html[dir="rtl"] h1.font-display,
+html[dir="rtl"] .hero-title-silver {
+  font-size: clamp(2.05rem, 4vw, 3.8rem) !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+}
+
+html[dir="rtl"] h2.font-display {
+  line-height: 1.18 !important;
+  letter-spacing: 0 !important;
+}
+
+html[dir="rtl"] .uppercase,
+html[dir="rtl"] [class*="tracking-"] {
+  letter-spacing: 0 !important;
+}
+
+html[dir="rtl"] .font-display.leading-none,
+html[dir="rtl"] .font-display[class*="leading-"] {
+  line-height: 1.2 !important;
+}
+
+html[dir="rtl"] p,
+html[dir="rtl"] li,
+html[dir="rtl"] .text-sm,
+html[dir="rtl"] .text-base,
+html[dir="rtl"] .text-lg,
+html[dir="rtl"] .text-xl {
+  line-height: 1.95;
+}
+
+html[dir="rtl"] .nav-search-input::placeholder {
+  font-family: var(--eventies-arabic-font) !important;
+}
+
+/* RTL spacing fixes for translated accordion/content rows. */
+html[dir="rtl"] .pl-16 {
+  padding-left: 1rem;
+  padding-right: 4rem;
+}
+
+html[dir="rtl"] .pl-\[4\.25rem\] {
+  padding-left: 1rem;
+  padding-right: 4.25rem;
+}
+
+@media (min-width: 640px) {
+  html[dir="rtl"] .sm\:pl-\[4\.25rem\] {
+    padding-left: 1.25rem;
+    padding-right: 4.25rem;
+  }
+}
+
+html[dir="rtl"] .group:hover .group-hover\:translate-x-0\.5,
+html[dir="rtl"] .group:hover .group-hover\:translate-x-1 {
+  transform: translateX(-0.125rem);
+}
+
+
+/* RTL icon direction and media-row stability fixes. */
+html[dir="rtl"] svg.lucide-arrow-right,
+html[dir="rtl"] svg.lucide-arrow-left,
+html[dir="rtl"] svg.lucide-chevron-right,
+html[dir="rtl"] svg.lucide-chevron-left {
+  transform: rotate(180deg) !important;
+}
+
+html[dir="rtl"] .gallery-strip,
+html[dir="rtl"] .logo-cloud-track,
+html[dir="rtl"] .logo-cloud-row {
+  direction: ltr;
+}
+
+html[dir="rtl"] .rtl-hide-step-label {
+  display: none !important;
+}
+
+html[dir="rtl"] .rtl-description,
+html[dir="rtl"] .section-description,
+html[dir="rtl"] .hero-description {
+  line-height: 1.95 !important;
+}
+
+/* Keep the top navigation in a stable brand layout while Arabic content remains RTL elsewhere. */
+.nav-shell-ar {
+  direction: ltr;
+}
+
+.nav-shell-ar input[dir="rtl"] {
+  text-align: right;
+}
+
+.nav-shell-ar .font-display {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* Final logo lock: keep the brand mark 100% identical in English and Arabic. */
+.eventies-logo-lockup,
+html[dir="rtl"] .eventies-logo-lockup,
+.nav-shell-ar .eventies-logo-lockup {
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  flex: 0 0 auto !important;
+}
+
+.eventies-logo-full,
+html[dir="rtl"] .eventies-logo-full,
+.nav-shell-ar .eventies-logo-full {
+  display: block !important;
+  object-fit: contain !important;
+  image-rendering: auto !important;
+  max-width: none !important;
+  transform: none !important;
+  font-family: initial !important;
+}
+
+.eventies-logo-full--hero,
+.eventies-logo-icon.eventies-logo-full--hero,
+html[dir="rtl"] .eventies-logo-full--hero,
+.nav-shell-ar .eventies-logo-full--hero {
+  filter: brightness(0) invert(1) !important;
+}
+
+.eventies-logo-full--original,
+.eventies-logo-icon.eventies-logo-full--original,
+html[dir="rtl"] .eventies-logo-full--original,
+.nav-shell-ar .eventies-logo-full--original {
+  filter: none !important;
 }

@@ -1,0 +1,52 @@
+[
+  {
+    "variant": "black_wordmark",
+    "size": [
+      1902,
+      439
+    ],
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_pixels": 692661,
+    "neutral_full_alpha_rgb_min": [
+      0,
+      0,
+      0
+    ],
+    "neutral_full_alpha_rgb_max": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "variant": "white_wordmark",
+    "size": [
+      1905,
+      439
+    ],
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_pixels": 690113,
+    "neutral_full_alpha_rgb_min": [
+      255,
+      255,
+      255
+    ],
+    "neutral_full_alpha_rgb_max": [
+      255,
+      255,
+      255
+    ]
+  },
+  {
+    "variant": "icon",
+    "size": [
+      865,
+      865
+    ],
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_pixels": 480460
+  }
+]

@@ -85,7 +85,10 @@ const CategoryTileView = memo(function CategoryTileView({
             <FramedImage
               media={image}
               alt={name}
+              width={800}
+              height={600}
               loading="lazy"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               draggable={false}
               fallbackTransform={{ fit: 'cover' }}
               className="h-full w-full select-none object-cover object-center"
@@ -145,7 +148,7 @@ const CategoryTileView = memo(function CategoryTileView({
 
         <h3
           className={cn(
-            'font-display text-[1.08rem] font-bold leading-tight tracking-[-0.02em] line-clamp-1 sm:text-[1.13rem]',
+            'font-sans text-[1.08rem] font-bold leading-tight tracking-[-0.02em] line-clamp-1 sm:text-[1.13rem]',
             isDark ? 'text-white/92' : 'text-slate-900'
           )}
         >

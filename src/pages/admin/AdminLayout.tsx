@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { useUser } from '../../contexts/UserContext'
 import Sidebar from '../../components/admin/Sidebar'
+import LanguageSwitcher from '../../components/layout/LanguageSwitcher'
+import { useI18n } from '../../contexts/LanguageContext'
 import UserAvatar from '../../components/ui/UserAvatar'
 import AnimatedBackground from '../../components/theme/AnimatedBackground'
 import { cn } from '../../utils/cn'
@@ -19,6 +21,7 @@ function usePageTitle(pathname: string) {
     if (pathname.startsWith('/admin/parts')) return 'Parts'
     if (pathname.startsWith('/admin/customers')) return 'Customers'
     if (pathname.startsWith('/admin/categories')) return 'Categories'
+    if (pathname.startsWith('/admin/custom-builds')) return 'Custom Builds'
     if (pathname.startsWith('/admin/gallery')) return 'Gallery'
     if (pathname.startsWith('/admin/users')) return 'Users'
     if (pathname.startsWith('/admin/admins')) return 'Admins'
@@ -39,6 +42,7 @@ function buildBreadcrumbs(pathname: string): Crumb[] {
     parts: 'Parts',
     customers: 'Customers',
     categories: 'Categories',
+    'custom-builds': 'Custom Builds',
     gallery: 'Gallery',
     users: 'Users',
     admins: 'Admins',
@@ -55,7 +59,7 @@ function buildBreadcrumbs(pathname: string): Crumb[] {
         ? sub === 'rental'
           ? 'Rental'
           : sub === 'purchase_quote'
-            ? 'Purchase Quote'
+            ? 'Purchase Quote Request'
             : 'Details'
         : sub === 'create'
           ? 'Create'
@@ -108,12 +112,17 @@ function Icon({ name, className }: { name: 'menu' | 'logout' | 'chev' | 'externa
 }
 
 export default function AdminLayout() {
-  usePageMeta({ title: 'Admin', noIndex: true })
-
   const { currentUser, logout } = useUser()
   const { pathname } = useLocation()
-  const title = usePageTitle(pathname)
-  const crumbs = useMemo(() => buildBreadcrumbs(pathname), [pathname])
+  const { t, translateText, dir } = useI18n()
+  usePageMeta({ title: t('admin.meta.title'), noIndex: true })
+  const rawTitle = usePageTitle(pathname)
+  const title = translateText(rawTitle)
+  const rawCrumbs = useMemo(() => buildBreadcrumbs(pathname), [pathname])
+  const crumbs = useMemo(
+    () => rawCrumbs.map(crumb => ({ ...crumb, label: translateText(crumb.label) })),
+    [rawCrumbs, translateText]
+  )
   const mainScrollRef = useRef<HTMLDivElement | null>(null)
   const layoutVars = useMemo(
     () =>
@@ -132,7 +141,7 @@ export default function AdminLayout() {
     container.scrollTop = 0
   }, [pathname])
 
-  const displayName = currentUser?.name?.trim() || 'Admin'
+  const displayName = currentUser?.name?.trim() || t('admin.layout.admin')
 
   const quickLinkClass = (target: string) =>
     cn(
@@ -145,6 +154,7 @@ export default function AdminLayout() {
   return (
     <div
       className="admin-scope relative h-screen overflow-hidden bg-[#f4eeff] text-ink-900"
+      dir={dir}
       style={layoutVars}
     >
       <AnimatedBackground position="absolute" className="z-0 overflow-hidden" variant="lightweight" />
@@ -157,7 +167,7 @@ export default function AdminLayout() {
             onClick={() => setOpen(false)}
             aria-hidden="true"
           />
-          <div className="absolute inset-y-0 left-0">
+          <div className={cn('absolute inset-y-0', dir === 'rtl' ? 'right-0' : 'left-0')}>
             <Sidebar variant="drawer" onNavigate={() => setOpen(false)} />
           </div>
         </div>
@@ -170,14 +180,14 @@ export default function AdminLayout() {
             <button
               onClick={() => setOpen(true)}
               className="inline-flex h-10 w-10 items-center justify-center rounded-[12px] border border-violet-200 bg-white text-[#4b3a63] transition hover:border-violet-400 hover:text-[#1a0b3d] active:translate-y-[1px] md:hidden"
-              aria-label="Open sidebar"
-              title="Menu"
+              aria-label={t('admin.layout.openSidebar')}
+              title={t('Menu')}
             >
               <Icon name="menu" />
             </button>
 
             <div className="min-w-0 flex-1">
-              <div className="truncate font-display text-[1.15rem] font-extrabold tracking-[-0.03em] text-[#1a0b3d] sm:text-[1.28rem]">
+              <div className="truncate font-sans text-[1.15rem] font-extrabold tracking-[-0.03em] text-[#1a0b3d] sm:text-[1.28rem]">
                 {title}
               </div>
               <div className="mt-0.5 hidden items-center gap-1.5 sm:flex">
@@ -186,7 +196,7 @@ export default function AdminLayout() {
                   return (
                     <div key={`${crumb.label}-${index}`} className="flex items-center gap-1.5">
                       {index > 0 && (
-                        <Icon name="chev" className="h-3 w-3 text-violet-300" />
+                        <Icon name="chev" className={cn('h-3 w-3 text-violet-300', dir === 'rtl' && 'rotate-180')} />
                       )}
                       {crumb.to && !last ? (
                         <Link
@@ -206,10 +216,10 @@ export default function AdminLayout() {
 
             <div className="hidden items-center gap-2 lg:flex">
               <Link to="/admin/requests" className={quickLinkClass('/admin/requests')}>
-                Requests
+                {t('admin.nav.requests')}
               </Link>
               <Link to="/admin/products" className={quickLinkClass('/admin/products')}>
-                Products
+                {t('admin.nav.services')}
               </Link>
             </div>
 
@@ -219,8 +229,13 @@ export default function AdminLayout() {
                 className="inline-flex min-h-[38px] items-center gap-1.5 rounded-[12px] border border-violet-200/70 bg-white px-3.5 text-[11px] font-bold text-[#4b3a63] transition hover:border-violet-400 hover:text-[#1a0b3d] active:translate-y-[1px]"
               >
                 <Icon name="external" className="h-3.5 w-3.5" />
-                Open Site
+                {t('admin.layout.openSite')}
               </Link>
+
+              <LanguageSwitcher
+                compact
+                className="min-h-[38px] border-violet-200/70 bg-white px-3 text-[#4b3a63] hover:border-violet-400 hover:text-[#1a0b3d]"
+              />
 
               <div className="flex items-center gap-2.5 rounded-[14px] border border-violet-200/70 bg-white px-3 py-1.5">
                 <div className="flex h-[34px] w-[34px] items-center justify-center overflow-hidden rounded-[11px] bg-[linear-gradient(135deg,#7c3aed,#c026d3)] text-[10px] font-bold text-white">
@@ -234,7 +249,7 @@ export default function AdminLayout() {
                 <div className="hidden leading-4 xl:block">
                   <div className="text-[11.5px] font-bold text-[#1a0b3d]">{displayName}</div>
                   <div className="mt-0.5 text-[10px] font-semibold text-[#6b5a82]">
-                    Control shell
+                    {t('admin.layout.controlShell')}
                   </div>
                 </div>
               </div>
@@ -244,10 +259,10 @@ export default function AdminLayout() {
                   void logout()
                 }}
                 className="inline-flex min-h-[38px] items-center gap-2 rounded-[12px] border border-red-200 bg-red-50 px-3.5 text-[11px] font-bold text-red-700 transition hover:border-red-300 hover:bg-red-100 hover:text-red-800 active:translate-y-[1px]"
-                title="Logout"
+                title={t('Logout')}
               >
                 <Icon name="logout" className="h-4 w-4" />
-                <span>Exit</span>
+                <span>{t('admin.layout.exit')}</span>
               </button>
             </div>
           </div>

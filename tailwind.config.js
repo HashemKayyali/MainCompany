@@ -4,9 +4,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ['"Sora"', '"Alexandria"', 'system-ui', 'sans-serif'],
-        sans: ['"Alexandria"', 'system-ui', 'sans-serif'],
-        mono: ['"Alexandria"', 'system-ui', 'sans-serif'],
+        display: ['"Zodiak"', '"Alexandria"', '"IBM Plex Sans Arabic"', 'system-ui', 'serif'],
+        sans: ['"Alexandria"', '"IBM Plex Sans Arabic"', 'system-ui', 'sans-serif'],
+        mono: ['"Alexandria"', '"IBM Plex Sans Arabic"', 'system-ui', 'sans-serif'],
       },
       colors: {
         // Brand purple — primary identity (more saturated for light theme)

@@ -39,6 +39,8 @@ export default function GalleryGrid({
               <FramedImage
                 media={album.cover}
                 alt={album.title}
+                width={800}
+                height={500}
                 loading="lazy"
                 sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
                 className="h-full w-full transition-transform duration-700 group-hover:scale-105"
@@ -50,7 +52,7 @@ export default function GalleryGrid({
             </div>
             <div className="p-2.5">
               <h3
-                className={`font-display text-[0.88rem] font-bold ${
+                className={`font-sans text-[0.88rem] font-bold ${
                   isDark ? 'text-white' : 'text-gray-900'
                 }`}
               >

@@ -10,6 +10,7 @@ import { DataProvider } from './contexts/DataContext'
 import { RentalCartProvider } from './contexts/RentalCartContext'
 import { PurchaseQuoteProvider } from './contexts/PurchaseQuoteContext'
 import { DialogProvider } from './contexts/DialogContext'
+import { LanguageProvider } from './contexts/LanguageContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import { ToastProvider } from './contexts/ToastContext'
 import { router } from './router'
@@ -22,23 +23,25 @@ const AppTree = (
     <PerfClass>
       <MotionConfig reducedMotion="user">
         <ThemeProvider>
-          <ToastProvider>
-          <DialogProvider>
-          <SessionProvider>
-            <AuthProvider>
-              <UserProvider>
-                <DataProvider>
-                  <RentalCartProvider>
-                    <PurchaseQuoteProvider>
-                      <RouterProvider router={router} future={{ v7_startTransition: true }} />
-                    </PurchaseQuoteProvider>
-                  </RentalCartProvider>
-                </DataProvider>
-              </UserProvider>
-            </AuthProvider>
-          </SessionProvider>
-          </DialogProvider>
-          </ToastProvider>
+          <LanguageProvider>
+            <ToastProvider>
+              <DialogProvider>
+                <SessionProvider>
+                  <AuthProvider>
+                    <UserProvider>
+                      <DataProvider>
+                        <RentalCartProvider>
+                          <PurchaseQuoteProvider>
+                            <RouterProvider router={router} future={{ v7_startTransition: true }} />
+                          </PurchaseQuoteProvider>
+                        </RentalCartProvider>
+                      </DataProvider>
+                    </UserProvider>
+                  </AuthProvider>
+                </SessionProvider>
+              </DialogProvider>
+            </ToastProvider>
+          </LanguageProvider>
         </ThemeProvider>
       </MotionConfig>
     </PerfClass>

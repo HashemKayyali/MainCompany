@@ -15,7 +15,7 @@ export default function AdminPageHeader({ title, actions }: AdminPageHeaderProps
             className="mt-1 h-7 w-1.5 shrink-0 rounded-full bg-[linear-gradient(180deg,#6d28d9,#7c3aed_55%,#9d6bff)]"
           />
           <div className="min-w-0">
-            <h1 className="font-display text-[1.3rem] font-extrabold tracking-[-0.04em] text-[#1a0b3d] sm:text-[1.46rem] lg:text-[1.6rem]">
+            <h1 className="font-sans text-[1.3rem] font-extrabold tracking-[-0.04em] text-[#1a0b3d] sm:text-[1.46rem] lg:text-[1.6rem]">
               {title}
             </h1>
             <div

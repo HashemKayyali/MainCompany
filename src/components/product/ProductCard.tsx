@@ -70,8 +70,8 @@ const ProductCard = memo(function ProductCard({
   const showRentalPrice = product.rentalEnabled !== false && product.showPrice !== false
   const priceDisplay = showRentalPrice
     ? `${product.rentalPricePerDay} ${product.currency}`
-    : 'Quote Based'
-  const priceLabel = showRentalPrice ? 'Per Day' : 'Custom Pricing'
+    : 'Reviewed pricing'
+  const priceLabel = showRentalPrice ? 'Per Day' : 'Reviewed Pricing'
 
   // Pause and reset the video when the card scrolls out of the viewport.
   // Never autoplay — on desktop, hover events handle playback; on mobile, no autoplay at all.
@@ -171,6 +171,8 @@ const ProductCard = memo(function ProductCard({
         <FramedImage
           media={product.heroImage}
           alt={product.name}
+          width={800}
+          height={600}
           loading={imageLoading}
           fetchPriority={imageFetchPriority}
           sizes={CARD_IMAGE_SIZES}
@@ -281,7 +283,7 @@ const ProductCard = memo(function ProductCard({
           >
             <h3
               className={cn(
-                'font-display font-bold leading-tight tracking-[-0.028em] line-clamp-1 transition-colors duration-300',
+                'font-sans font-bold leading-tight tracking-[-0.028em] line-clamp-1 transition-colors duration-300',
                 compact ? 'text-[1rem]' : 'text-[0.98rem] sm:text-[1.16rem]',
                 isDark ? 'text-white group-hover:text-violet-100' : 'text-slate-900 group-hover:text-violet-900'
               )}
@@ -320,7 +322,7 @@ const ProductCard = memo(function ProductCard({
             </div>
             <div
               className={cn(
-                'mt-0.5 font-display font-black tracking-[-0.04em]',
+                'mt-0.5 font-sans font-black tracking-[-0.04em]',
                 compact ? 'text-[0.92rem]' : 'text-[0.95rem] sm:text-[1.18rem]',
                 isDark ? 'text-white' : 'text-slate-900'
               )}

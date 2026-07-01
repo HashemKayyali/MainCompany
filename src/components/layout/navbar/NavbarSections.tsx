@@ -63,7 +63,7 @@ export const DesktopPrimaryNav = memo(function DesktopPrimaryNav({
                 onMouseEnter={() => preloadRoute(item.to!)}
                 onFocus={() => preloadRoute(item.to!)}
                 aria-current={isCurrent ? 'page' : undefined}
-                className={`relative inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium tracking-[-0.01em] transition-all duration-200 ${navLinkColor(isCurrent)} ${focus}`}
+                className={`relative inline-flex h-10 items-center justify-center rounded-md px-4 font-display text-sm font-medium tracking-[-0.01em] transition-all duration-200 ${navLinkColor(isCurrent)} ${focus}`}
               >
                 {showPill && (
                   <motion.div
@@ -118,7 +118,7 @@ export const DesktopPrimaryNav = memo(function DesktopPrimaryNav({
                   }
                 }
               }}
-              className={`relative inline-flex h-10 items-center justify-center gap-1.5 rounded-md px-4 text-sm font-medium tracking-[-0.01em] transition-all duration-200 ${navTriggerColor(isCurrent, isOpen)} ${focus}`}
+              className={`relative inline-flex h-10 items-center justify-center gap-1.5 rounded-md px-4 font-display text-sm font-medium tracking-[-0.01em] transition-all duration-200 ${navTriggerColor(isCurrent, isOpen)} ${focus}`}
             >
               {showPill && (
                 <motion.div
@@ -162,7 +162,7 @@ export const MobileTopChips = memo(function MobileTopChips({
             to={chip.to}
             onMouseEnter={() => preloadRoute(chip.to)}
             onFocus={() => preloadRoute(chip.to)}
-            className={`inline-flex h-[1.875rem] shrink-0 items-center rounded-full border px-3.5 text-[11.5px] font-semibold whitespace-nowrap transition-all duration-300 ${
+            className={`inline-flex h-[1.875rem] shrink-0 items-center rounded-full border px-3.5 font-display text-[11.5px] font-semibold whitespace-nowrap transition-all duration-300 ${
               isChipActive
                 ? 'border-violet-400/80 bg-[linear-gradient(135deg,rgba(113,38,227,0.18),rgba(168,85,247,0.10))] text-violet-950 shadow-[0_4px_14px_-4px_rgba(89,23,196,0.32)]'
                 : 'border-violet-300/60 bg-white/95 text-violet-800 hover:text-violet-950 hover:bg-white hover:border-violet-400/80'
@@ -237,7 +237,7 @@ export const NavbarAccountActions = memo(function NavbarAccountActions({
       <Link
         to="/rental-cart"
         className={`relative inline-flex h-10 w-10 items-center justify-center rounded-md border transition-all sm:w-auto sm:justify-start sm:gap-2 sm:px-3.5 ${cartSurface} ${focus}`}
-        aria-label={cartHasItems ? `Cart · ${cartItemCount}` : 'Cart'}
+        aria-label={cartHasItems ? `Request draft · ${cartItemCount}` : 'Request draft'}
       >
         {/* Unified pill content — same visual structure as Search / Login:
             a 16-px outlined icon followed by the label. No coloured icon
@@ -247,7 +247,7 @@ export const NavbarAccountActions = memo(function NavbarAccountActions({
           <ShoppingCart className="h-4 w-4" strokeWidth={2.2} />
           {cartHasItems && <CountBadge count={cartCountLabel} color="cyan" isDark={isDark} />}
         </span>
-        <span className="hidden text-[12px] font-semibold sm:inline">Cart</span>
+        <span className="hidden font-display text-[12px] font-semibold sm:inline">Request Draft</span>
       </Link>
 
       {(quoteHasItems || quoteActive) && (
@@ -260,7 +260,7 @@ export const NavbarAccountActions = memo(function NavbarAccountActions({
             <FileText className="h-3.5 w-3.5" strokeWidth={2} />
             {quoteHasItems && <CountBadge count={quoteCountLabel} color="pink" isDark={isDark} />}
           </IconCircle>
-          <span className="text-[12px] font-medium">Quote</span>
+          <span className="font-display text-[12px] font-medium">Quote</span>
         </Link>
       )}
 
@@ -290,7 +290,7 @@ export const NavbarAccountActions = memo(function NavbarAccountActions({
                 }
               />
             </div>
-            <span className="hidden text-[12px] font-medium md:inline">{firstName}</span>
+            <span className="hidden font-display text-[12px] font-medium md:inline">{firstName}</span>
             <ChevronDown
               className={`h-3 w-3 transition-transform duration-200 ${userMenu ? 'rotate-180' : ''} ${
                 heroMode ? 'text-white/45' : isDark ? 'text-purple-100/44' : 'text-violet-600/55'
@@ -302,7 +302,7 @@ export const NavbarAccountActions = memo(function NavbarAccountActions({
       ) : (
         <Link
           to="/login"
-          className={`hidden h-10 items-center gap-2 rounded-md border px-3.5 text-[12px] font-semibold transition-all sm:inline-flex ${utilityPill} ${focus}`}
+          className={`hidden h-10 items-center gap-2 rounded-md border px-3.5 font-display text-[12px] font-semibold transition-all sm:inline-flex ${utilityPill} ${focus}`}
         >
           <User2 className="h-4 w-4" strokeWidth={2.2} />
           <span>Login</span>
@@ -347,7 +347,7 @@ export const NavbarMobileUtilityGrid = memo(function NavbarMobileUtilityGrid({
       <button
         type="button"
         onClick={openSearchDialog}
-        className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+        className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 font-display text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
       >
         <Search className="h-4 w-4 opacity-70" strokeWidth={2} />
         Search
@@ -355,12 +355,12 @@ export const NavbarMobileUtilityGrid = memo(function NavbarMobileUtilityGrid({
 
       <Link
         to="/rental-cart"
-        className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-semibold transition-all ${
+        className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 font-display text-[13px] font-semibold transition-all ${
           cartActive ? mobileActiveTile : mobileTile
         } ${focus}`}
       >
         <ShoppingCart className="h-4 w-4 opacity-70" strokeWidth={2} />
-        Cart
+        Request Draft
         {cartHasItems && (
           <span className={`inline-flex min-w-[1.3rem] items-center justify-center rounded-full px-1 py-[2px] text-[8.5px] font-mono font-bold leading-none ${
             isDark
@@ -375,7 +375,7 @@ export const NavbarMobileUtilityGrid = memo(function NavbarMobileUtilityGrid({
       {(quoteHasItems || quoteActive) && (
         <Link
           to="/purchase-quote"
-          className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${
+          className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 font-display text-[13px] font-medium transition-all ${
             quoteActive ? mobileActiveTile : mobileTile
           } ${focus}`}
         >
@@ -397,14 +397,14 @@ export const NavbarMobileUtilityGrid = memo(function NavbarMobileUtilityGrid({
         <>
           <Link
             to="/my-requests"
-            className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+            className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 font-display text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
           >
             <FileText className="h-4 w-4 opacity-70" strokeWidth={2} />
             Requests
           </Link>
           <Link
             to="/profile"
-            className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+            className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 font-display text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
           >
             <User2 className="h-4 w-4 opacity-70" strokeWidth={2} />
             {firstName}
@@ -412,7 +412,7 @@ export const NavbarMobileUtilityGrid = memo(function NavbarMobileUtilityGrid({
           {isAuth && (
             <Link
               to="/admin"
-              className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
+              className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 font-display text-[13px] font-medium transition-all ${mobileTile} ${focus}`}
             >
               <ShieldCheck className="h-4 w-4 opacity-70" strokeWidth={2} />
               Admin
@@ -421,7 +421,7 @@ export const NavbarMobileUtilityGrid = memo(function NavbarMobileUtilityGrid({
           <button
             type="button"
             onClick={() => void logout()}
-            className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 text-[13px] font-medium transition-all ${
+            className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[15px] border px-4 font-display text-[13px] font-medium transition-all ${
               isDark
                 ? 'border-red-400/20 bg-red-500/10 text-red-300 hover:bg-red-500/16'
                 : 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100'
@@ -434,7 +434,7 @@ export const NavbarMobileUtilityGrid = memo(function NavbarMobileUtilityGrid({
       ) : (
         <Link
           to="/login"
-          className={`col-span-2 inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-[15px] border px-4 text-[13px] font-semibold transition-all ${
+          className={`col-span-2 inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-[15px] border px-4 font-display text-[13px] font-semibold transition-all ${
             isDark
               ? 'border-violet-400/22 bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(236,72,153,0.08))] text-white hover:border-violet-400/35'
               : 'border-violet-300/45 bg-[linear-gradient(135deg,rgba(124,58,237,0.08),rgba(236,72,153,0.04))] text-violet-800 hover:border-violet-300/65'
@@ -516,7 +516,7 @@ export const NavbarUserMenuPortal = memo(function NavbarUserMenuPortal({
               />
             </div>
             <div className="min-w-0">
-              <div className={`truncate text-[13px] font-bold tracking-[-0.01em] ${isDark ? 'text-white' : 'text-ink-900'}`}>
+              <div className={`truncate font-display text-[13px] font-bold tracking-[-0.01em] ${isDark ? 'text-white' : 'text-ink-900'}`}>
                 {deferredUser?.name || 'User'}
               </div>
               <div className={`truncate text-[11px] ${isDark ? 'text-purple-100/42' : 'text-ink-500'}`}>
@@ -537,7 +537,7 @@ export const NavbarUserMenuPortal = memo(function NavbarUserMenuPortal({
                   key={item.to}
                   to={item.to}
                   onClick={onClose}
-                  className={`flex items-center gap-3 rounded-[13px] px-3 py-2.5 text-[12.5px] font-semibold transition-all duration-200 ${
+                  className={`flex items-center gap-3 rounded-[13px] px-3 py-2.5 font-display text-[12.5px] font-semibold transition-all duration-200 ${
                     isDark
                       ? 'text-purple-100/70 hover:bg-white/[0.06] hover:text-white'
                       : 'text-ink-800 hover:bg-violet-100/70 hover:text-violet-950'
@@ -557,7 +557,7 @@ export const NavbarUserMenuPortal = memo(function NavbarUserMenuPortal({
                 onClose()
                 void logout()
               }}
-              className={`flex w-full items-center gap-3 rounded-[13px] px-3 py-2.5 text-left text-[12.5px] font-semibold transition-all duration-200 ${
+              className={`flex w-full items-center gap-3 rounded-[13px] px-3 py-2.5 text-left font-display text-[12.5px] font-semibold transition-all duration-200 ${
                 isDark
                   ? 'text-red-300/72 hover:bg-red-500/[0.10] hover:text-red-200'
                   : 'text-red-600 hover:bg-red-50 hover:text-red-700'

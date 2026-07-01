@@ -1,439 +1,266 @@
-import { useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useReducedMotion } from 'framer-motion'
-import { ArrowRight, Building2, Sparkles, Stars } from 'lucide-react'
-import { useMediaQuery } from '../../hooks/useMediaQuery'
-import { usePerfMode } from '../../hooks/usePerfMode'
+import { motion } from 'framer-motion'
+import { ArrowRight, CalendarCheck, Sparkles, Store } from 'lucide-react'
+import { useCategoriesData } from '../../contexts/DataContext'
+import { useHeroEntranceMotion } from '../../hooks/useHeroEntranceMotion'
+import { useMotionEnabled } from '../../hooks/useMotionEnabled'
 import { preloadRoute } from '../../utils/route-preload'
+import { useI18n } from '../../contexts/LanguageContext'
 
-const ease = [0.16, 1, 0.3, 1] as const
+const HERO_IMAGE = '/images/hero-bg-event.webp'
+const HERO_FALLBACK_IMAGE = '/images/image-fallback.svg'
+const EASE = [0.4, 0, 0.2, 1] as const
+const heroFadeUp = {
+  hidden: { opacity: 0, y: 34 },
+  visible: { opacity: 1, y: 0 },
+}
 
-const heroStats = [
-  { value: '100+', label: 'Services' },
-  { value: '30+', label: 'Vendors' },
-  { value: '12+', label: 'Categories' },
-]
+const heroTransition = (delay = 0) => ({ duration: 0.92, delay, ease: EASE })
 
-const journeySteps = [
-  { label: 'Discover', num: '01' },
-  { label: 'Compare', num: '02' },
-  { label: 'Request', num: '03' },
-]
+const PulsingBorder = lazy(() =>
+  import('@paper-design/shaders-react').then(module => ({ default: module.PulsingBorder }))
+)
 
-export default function Hero() {
-  const reducedMotion = useReducedMotion()
-  const { perfLow } = usePerfMode()
-  const compactViewport = useMediaQuery('(max-width: 1023px)')
-  const motionEnabled = !reducedMotion && !perfLow
-  const richHeroAtmosphere = !perfLow && !compactViewport
-  const glassEnabled = !compactViewport && !perfLow
-  const [heroImageReady, setHeroImageReady] = useState(false)
+export default function Hero({ image = HERO_IMAGE }: { image?: string }) {
+  const { categories } = useCategoriesData()
+  const { translateText } = useI18n()
+  const motionEnabled = useMotionEnabled()
+  const heroEntrance = useHeroEntranceMotion()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
+  const shadersOn = mounted && motionEnabled
+
+  const chips = useMemo(
+    () => categories.filter(category => category.slug.trim().length > 0).slice(0, 5),
+    [categories]
+  )
+
+  const float = (delay: number) =>
+    motionEnabled
+      ? { animate: { y: [0, -9, 0] }, transition: { duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay } }
+      : {}
 
   return (
-    <section className="relative isolate flex min-h-screen flex-col overflow-hidden">
-
-      {/* ════ BACKGROUND SYSTEM ════ */}
-
-      {/* Layer 0 – soft white/lavender base */}
-      <div className="absolute inset-0 -z-40 bg-[#f5edff]" />
-
-      {/* Layer 1 – hero image (prominent, tinted by a soft lavender wash
-          that protects text readability on the left, fades cleanly into
-          the page background at the bottom). */}
-      <div className="absolute inset-0 -z-30">
-        <img
-          src="/images/hero-bg-event.webp"
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          loading="eager"
-          decoding="async"
-          {...{ fetchpriority: 'high' }}
-          className={`h-full w-full object-cover object-right md:object-center transition-opacity duration-700 ${
-            heroImageReady ? 'opacity-[0.72]' : 'opacity-0'
-          }`}
-          onLoad={() => setHeroImageReady(true)}
-        />
-        {/* Readability scrim:
-            - Left side (where headline + CTA sit) gets a stronger lavender wash.
-            - Right side stays clearer so the event scene comes through.
-            - Bottom fades to the page background for a clean transition. */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(90deg, rgba(245,237,255,0.41) 0%, rgba(245,237,255,0.275) 38%, rgba(245,237,255,0.09) 70%, rgba(245,237,255,0.025) 100%), ' +
-              'linear-gradient(180deg, rgba(245,237,255,0.175) 0%, transparent 22%, transparent 72%, rgba(248,243,255,0.48) 100%), ' +
-              'radial-gradient(55% 42% at 14% 18%, rgba(113,38,227,0.18) 0%, transparent 70%)',
-          }}
-        />
-      </div>
-
-      {/* Layer 2 – atmospheric light orbs */}
-      {richHeroAtmosphere ? (
-        <>
-          <div
-            className={`pointer-events-none absolute -z-20${motionEnabled ? ' animate-hero-orb-violet' : ''}`}
-            style={{
-              left: '-8%', top: '-10%',
-              width: '58%', height: '64%',
-              opacity: 0.50,
-              background: 'radial-gradient(circle, rgba(168,85,247,0.45) 0%, rgba(124,58,237,0.12) 42%, transparent 70%)',
-              filter: 'blur(58px)',
-            }}
-          />
-
-          <div
-            className={`pointer-events-none absolute -z-20${motionEnabled ? ' animate-hero-orb-cyan' : ''}`}
-            style={{
-              right: '-8%', top: '-12%',
-              width: '50%', height: '58%',
-              opacity: 0.32,
-              background: 'radial-gradient(circle, rgba(217,70,239,0.34) 0%, rgba(168,85,247,0.10) 40%, transparent 68%)',
-              filter: 'blur(54px)',
-            }}
-          />
-
-          <div
-            className={`pointer-events-none absolute -z-20${motionEnabled ? ' animate-hero-orb-pink' : ''}`}
-            style={{
-              left: '30%', bottom: '-12%',
-              width: '46%', height: '52%',
-              opacity: 0.28,
-              background: 'radial-gradient(circle, rgba(196,165,255,0.40) 0%, rgba(168,85,247,0.10) 46%, transparent 72%)',
-              filter: 'blur(54px)',
-            }}
-          />
-        </>
-      ) : (
-        <div
-          className="pointer-events-none absolute inset-x-[-8%] top-[-4%] -z-20 h-[42%]"
-          style={{
-            background:
-              'radial-gradient(40% 75% at 22% 16%, rgba(124,58,237,0.18) 0%, transparent 76%), ' +
-              'radial-gradient(34% 70% at 78% 18%, rgba(217,70,239,0.12) 0%, transparent 74%)',
-          }}
-        />
-      )}
-
-      {/* Layer 3 – subtle dot grid texture */}
+    <section className="relative w-full overflow-hidden">
+      {/* Content */}
       <div
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          backgroundImage: 'radial-gradient(rgba(124,58,237,0.20) 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
-          opacity: 0.10,
-          maskImage: 'radial-gradient(ellipse 70% 50% at 50% 50%, black 60%, transparent 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 70% 50% at 50% 50%, black 60%, transparent 100%)',
-        }}
-      />
-
-      {/* Layer 4 – bottom fade to page background */}
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-80"
-        style={{
-          background:
-            'linear-gradient(to top, rgba(248,243,255,0.5) 0%, rgba(248,243,255,0.46) 28%, rgba(248,243,255,0.225) 62%, transparent 100%)',
-        }}
-      />
-
-      {/* ════ HERO CONTENT ════ */}
-      <div
-        className="site-container relative z-20 flex flex-1 flex-col"
-        style={{ paddingTop: 'calc(var(--app-navbar-height, 72px) + clamp(0.25rem, 1.5vw, 2.5rem))' }}
+        className="eventies-hero-shell site-container-wide relative z-20 grid grid-cols-1 items-center gap-10 pb-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12 lg:pb-20"
+        style={{ paddingTop: 'calc(var(--app-navbar-height, 72px) + clamp(1.5rem, 4vw, 3rem))' }}
       >
-        <div className="grid flex-1 grid-cols-1 items-start gap-10 pb-20 pt-3 sm:pb-28 sm:pt-5 lg:grid-cols-[1fr_0.58fr] lg:items-center lg:gap-6 lg:pb-32 lg:pt-0 xl:gap-12">
-
-          {/* ── LEFT: Text content ── */}
+        {/* ── LEFT ── */}
+        <div className="max-w-5xl">
           <motion.div
-            initial={motionEnabled ? { opacity: 0, y: 32 } : false}
-            animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
-            transition={motionEnabled ? { duration: 0.85, ease } : undefined}
-            className="flex max-w-[44rem] flex-col"
+            className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-4 py-2 backdrop-blur-md"
+            initial={heroEntrance ? heroFadeUp.hidden : false}
+            animate={heroEntrance ? heroFadeUp.visible : undefined}
+            transition={heroTransition(0)}
           >
-            {/* Eyebrow badge */}
-            <motion.div
-              initial={motionEnabled ? { opacity: 0, y: -10 } : false}
-              animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
-              transition={motionEnabled ? { duration: 0.5, delay: 0.06, ease } : undefined}
-              className="mb-5 inline-flex w-fit sm:mb-7"
-            >
-              <div
-                className={`inline-flex items-center gap-2.5 rounded-full border border-violet-400/55 bg-white/95 px-3.5 py-1.5 ${glassEnabled ? 'backdrop-blur-md' : ''} sm:px-4 sm:py-2 shadow-[0_10px_30px_-10px_rgba(89,23,196,0.35)]`}
-              >
-                <Stars className="h-3.5 w-3.5 text-violet-700" strokeWidth={2.4} />
-                <span className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-violet-800 sm:text-[10.5px] sm:tracking-[0.18em]">
-                  Event Services Marketplace
-                </span>
-                <span
-                  className="ml-1 h-1.5 w-1.5 shrink-0 rounded-full bg-violet-600"
-                  style={{ boxShadow: '0 0 9px rgba(168,85,247,0.95)' }}
-                />
-              </div>
-            </motion.div>
-
-            {/* Main heading */}
-            <h1
-              className="font-sans text-[clamp(2.6rem,6vw,4.9rem)] font-extrabold leading-[0.96] tracking-[-0.04em] text-ink-900"
-              style={{
-                fontFamily: '"Alexandria", system-ui, sans-serif',
-                fontKerning: 'normal',
-                textRendering: 'optimizeLegibility',
-                color: '#140832',
-              }}
-            >
-              <span className="block" style={{ color: '#1a0b3d' }}>
-                Book Everything
-              </span>
-              <span className="relative isolate mt-2 block pb-[0.08em] tracking-[-0.028em]">
-                <span
-                  className="relative z-10 inline-block bg-clip-text text-transparent"
-                  style={{
-                    backgroundImage:
-                      'linear-gradient(100deg, #5d18c4 0%, #7126e3 18%, #8344f5 34%, #c026d3 50%, #8344f5 66%, #7126e3 82%, #5d18c4 100%)',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundSize: '200% auto',
-                    animation: motionEnabled ? 'text-color-flow 6s linear infinite' : undefined,
-                  }}
-                >
-                  Your Event Needs
-                </span>
-                <span
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute inset-x-[5%] bottom-[0.02em] z-0 h-[0.24em] rounded-full ${richHeroAtmosphere ? 'opacity-55 blur-3xl' : 'opacity-40 blur-xl'}`}
-                  style={{ background: 'linear-gradient(90deg, rgba(113,38,227,0.5), rgba(217,70,239,0.36), rgba(168,85,247,0.26))' }}
-                />
-              </span>
-            </h1>
-
-            {/* Description */}
-            <p className="mt-7 max-w-[36rem] text-[1rem] font-medium leading-[1.78] text-ink-800 sm:text-[1.08rem]" style={{ color: '#31195f' }}>
-              Find and book games, LED screens, performers, booths, rentals, and production
-              services from trusted vendors — all in one place.
-            </p>
-
-            {/* Journey step pills */}
-            <div className="mt-7 flex flex-wrap items-center gap-2">
-              {journeySteps.map((step, index) => (
-                <motion.div
-                  key={step.label}
-                  initial={motionEnabled ? { opacity: 0, x: -12 } : false}
-                  animate={motionEnabled ? { opacity: 1, x: 0 } : undefined}
-                  transition={motionEnabled ? { duration: 0.42, delay: 0.22 + index * 0.07, ease } : undefined}
-                  className={`inline-flex items-center gap-2.5 rounded-full border border-violet-400/55 bg-white/95 px-3.5 py-1.5 ${glassEnabled ? 'backdrop-blur-sm' : ''} shadow-[0_6px_16px_-6px_rgba(89,23,196,0.28)]`}
-                >
-                  <span className="text-[10px] font-extrabold tracking-[0.12em] text-violet-700">{step.num}</span>
-                  <span className="text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: '#211049' }}>{step.label}</span>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* CTAs */}
-            <motion.div
-              initial={motionEnabled ? { opacity: 0, y: 16 } : false}
-              animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
-              transition={motionEnabled ? { duration: 0.56, delay: 0.3, ease } : undefined}
-              className="mt-8 flex flex-wrap items-center gap-3"
-            >
-              <Link
-                to="/products"
-                onMouseEnter={() => preloadRoute('/products')}
-                onFocus={() => preloadRoute('/products')}
-                className="btn-primary group relative !min-h-[52px] !overflow-hidden !rounded-[18px] !px-7 !text-[12px]"
-              >
-                <span className="pointer-events-none absolute inset-0 -translate-x-full skew-x-[-20deg] bg-white/22 transition-transform duration-700 group-hover:translate-x-[200%]" />
-                Explore Services
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={2.2} />
-              </Link>
-
-              <Link
-                to="/contact"
-                onMouseEnter={() => preloadRoute('/contact')}
-                onFocus={() => preloadRoute('/contact')}
-                className={`inline-flex min-h-[52px] items-center gap-2 rounded-[18px] border border-violet-400/65 bg-white/95 px-7 text-[12px] font-bold tracking-[0.02em] text-violet-800 transition-all hover:border-violet-600 hover:bg-white hover:text-violet-900 hover:shadow-[0_14px_30px_-12px_rgba(89,23,196,0.36)] ${glassEnabled ? 'backdrop-blur-sm' : ''}`}
-              >
-                Talk to the Team
-              </Link>
-            </motion.div>
-
-            {/* Stats row */}
-            <motion.div
-              initial={motionEnabled ? { opacity: 0, y: 18 } : false}
-              animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
-              transition={motionEnabled ? { duration: 0.52, delay: 0.4, ease } : undefined}
-              className="mt-10 flex items-stretch gap-0"
-            >
-              {heroStats.map((stat, index) => (
-                <div key={stat.label} className="relative flex items-center">
-                  {index > 0 && (
-                    <div className="mx-6 h-10 w-px bg-violet-400/55 sm:mx-8" />
-                  )}
-                  <div>
-                    <div
-                      className="font-display text-[clamp(1.6rem,3.8vw,2.1rem)] font-black leading-none tracking-[-0.07em]"
-                      style={{
-                        background: 'linear-gradient(135deg, #140832 0%, #5d18c4 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
-                      }}
-                    >
-                      {stat.value}
-                    </div>
-                    <div className="mt-1.5 text-[9.5px] font-bold uppercase tracking-[0.18em] text-violet-800">
-                      {stat.label}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </motion.div>
+            <Sparkles className="h-3.5 w-3.5 text-fuchsia-200" strokeWidth={2.2} />
+            <span className="text-[12px] font-semibold tracking-wide text-white">
+              {translateText('Event Services Marketplace · Jordan')}
+            </span>
           </motion.div>
 
-          {/* ── RIGHT: Floating card composition (desktop only) ── */}
-          {!perfLow && <div className="relative hidden h-full min-h-[500px] lg:block">
+          {/* Headline — crisp, no blur glow */}
+          <motion.h1
+            className="hero-title-silver max-w-[960px] font-display text-[clamp(2.45rem,5vw,4.35rem)] font-bold tracking-[-0.03em]"
+            initial={heroEntrance ? heroFadeUp.hidden : false}
+            animate={heroEntrance ? heroFadeUp.visible : undefined}
+            transition={heroTransition(0.06)}
+          >
+            {translateText('Plan and request event services from one organized marketplace.')}
+          </motion.h1>
 
-            {/* Card 1: For Clients – upper right */}
-            <motion.div
-              className="absolute right-0 top-[2%]"
-              initial={motionEnabled ? { opacity: 0, y: 20 } : false}
-              animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
-              transition={motionEnabled ? { duration: 0.9, delay: 0.35, ease } : undefined}
+          <motion.p
+            className="mt-6 max-w-2xl text-[1rem] font-medium leading-[1.7] text-white/85 sm:text-[1.05rem]"
+            initial={heroEntrance ? heroFadeUp.hidden : false}
+            animate={heroEntrance ? heroFadeUp.visible : undefined}
+            transition={heroTransition(0.14)}
+          >
+            {translateText('Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan — then submit a rental or purchase quote request for review.')}
+          </motion.p>
+
+          <motion.div
+            className="mt-8 flex flex-wrap items-center gap-3.5"
+            initial={heroEntrance ? heroFadeUp.hidden : false}
+            animate={heroEntrance ? heroFadeUp.visible : undefined}
+            transition={heroTransition(0.22)}
+          >
+            <Link
+              to="/products"
+              onMouseEnter={() => preloadRoute('/products')}
+              onFocus={() => preloadRoute('/products')}
+              className="group inline-flex items-center gap-2.5 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-8 py-3.5 text-[13px] font-bold text-white shadow-[0_18px_44px_-16px_rgba(192,38,211,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:from-violet-500 hover:to-fuchsia-400"
             >
-              <div
-                className={`w-[268px] rounded-[24px] border border-violet-300/70 bg-white p-5 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-up' : ''}`}
-                style={{
-                  boxShadow:
-                    '0 34px 84px -18px rgba(89,23,196,0.34), 0 10px 24px -8px rgba(89,23,196,0.20), inset 0 1px 0 rgba(255,255,255,0.95)',
-                }}
-              >
-                <div
-                  className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-[24px]"
-                  style={{ background: 'linear-gradient(90deg, transparent 8%, rgba(124,58,237,0.7) 50%, transparent 92%)' }}
-                />
-                <div className="mb-5 flex items-center gap-3">
-                  <div
-                    className="flex h-11 w-11 items-center justify-center rounded-[14px]"
-                    style={{
-                      background: 'linear-gradient(135deg, #7c3aed, #c026d3)',
-                      boxShadow: '0 10px 28px -8px rgba(124,58,237,0.55)',
-                    }}
+              {translateText('Explore Services')}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={2.4} />
+            </Link>
+            <Link
+              to="/contact"
+              onMouseEnter={() => preloadRoute('/contact')}
+              onFocus={() => preloadRoute('/contact')}
+              className="inline-flex items-center rounded-full border border-white/30 bg-white/[0.07] px-8 py-3.5 text-[13px] font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-fuchsia-300/60 hover:bg-white/12"
+            >
+              {translateText('Request a Quote')}
+            </Link>
+          </motion.div>
+
+          {chips.length > 0 && (
+            <motion.div
+              className="mt-8 flex flex-wrap items-center gap-2"
+              initial={heroEntrance ? heroFadeUp.hidden : false}
+              animate={heroEntrance ? heroFadeUp.visible : undefined}
+              transition={heroTransition(0.3)}
+            >
+              <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">{translateText('Browse')}</span>
+              {chips.map(category => {
+                const href = `/categories/${encodeURIComponent(category.slug)}`
+                return (
+                  <Link
+                    key={category.id}
+                    to={href}
+                    onMouseEnter={() => preloadRoute(href)}
+                    className="inline-flex items-center rounded-full border border-white/20 bg-white/[0.08] px-3.5 py-1.5 text-[11.5px] font-semibold text-white/90 backdrop-blur-sm transition-all hover:border-fuchsia-300/55 hover:bg-white/15 hover:text-white"
                   >
-                    <Sparkles className="h-5 w-5 text-white" strokeWidth={2.0} />
-                  </div>
-                  <div>
-                    <div className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-violet-700">For Clients</div>
-                    <div className="text-[13.5px] font-bold" style={{ color: '#140832' }}>Browse &amp; Book</div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  {['LED Screens & Displays', 'Games & Activations', 'Live Production'].map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-center gap-2.5 rounded-[12px] border border-violet-300/65 bg-violet-50/85 px-3 py-2.5"
-                    >
-                      <div
-                        className="h-1.5 w-1.5 shrink-0 rounded-full bg-violet-600"
-                        style={{ boxShadow: '0 0 7px rgba(168,85,247,0.95)' }}
-                      />
-                      <span className="text-[11.5px] font-semibold" style={{ color: '#211049' }}>{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                    {translateText(category.name)}
+                  </Link>
+                )
+              })}
             </motion.div>
-
-            {/* Card 2: Stats – lower right */}
-            <motion.div
-              className="absolute bottom-[6%] right-[8%]"
-              initial={motionEnabled ? { opacity: 0, y: 20 } : false}
-              animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
-              transition={motionEnabled ? { duration: 0.9, delay: 0.55, ease } : undefined}
-            >
-              <div
-                className={`w-[210px] rounded-[20px] border border-fuchsia-300/70 bg-white p-4 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-down' : ''}`}
-                style={{
-                  boxShadow:
-                    '0 24px 60px -16px rgba(192,38,211,0.34), 0 8px 22px -8px rgba(89,23,196,0.22), inset 0 1px 0 rgba(255,255,255,0.95)',
-                }}
-              >
-                <div
-                  className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-[20px]"
-                  style={{ background: 'linear-gradient(90deg, transparent 8%, rgba(192,38,211,0.6) 50%, transparent 92%)' }}
-                />
-                <div className="mb-4 text-[9px] font-bold uppercase tracking-[0.22em] text-fuchsia-700">
-                  Platform Stats
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {heroStats.map(stat => (
-                    <div key={stat.label} className="text-center">
-                      <div
-                        className="font-display text-[1.2rem] font-black leading-none tracking-[-0.06em]"
-                        style={{
-                          background: 'linear-gradient(135deg, #140832 0%, #7126e3 100%)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          backgroundClip: 'text',
-                        }}
-                      >
-                        {stat.value}
-                      </div>
-                      <div className="mt-1 text-[8px] font-bold uppercase tracking-[0.12em] text-violet-700">
-                        {stat.label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Card 3: For Providers – middle left */}
-            <motion.div
-              className="absolute left-0 top-[36%] hidden xl:block"
-              initial={motionEnabled ? { opacity: 0, y: 20 } : false}
-              animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
-              transition={motionEnabled ? { duration: 0.9, delay: 0.72, ease } : undefined}
-            >
-              <div
-                className={`w-[236px] rounded-[20px] border border-violet-300/70 bg-white p-4 ${glassEnabled ? 'backdrop-blur-md' : ''}${motionEnabled ? ' animate-hero-float-up-sm' : ''}`}
-                style={{
-                  boxShadow:
-                    '0 24px 58px -16px rgba(89,23,196,0.32), 0 8px 22px -8px rgba(89,23,196,0.20), inset 0 1px 0 rgba(255,255,255,0.95)',
-                }}
-              >
-                <div
-                  className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-[20px]"
-                  style={{ background: 'linear-gradient(90deg, transparent 8%, rgba(168,85,247,0.55) 50%, transparent 92%)' }}
-                />
-                <div className="mb-3 flex items-center gap-2.5">
-                  <div
-                    className="flex h-10 w-10 items-center justify-center rounded-[12px]"
-                    style={{
-                      background: 'linear-gradient(135deg, #a855f7, #7c3aed)',
-                      boxShadow: '0 8px 22px -6px rgba(168,85,247,0.55)',
-                    }}
-                  >
-                    <Building2 className="h-4 w-4 text-white" strokeWidth={2.0} />
-                  </div>
-                  <div>
-                    <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-700">For Providers</div>
-                    <div className="text-[12.5px] font-bold" style={{ color: '#140832' }}>Grow with Us</div>
-                  </div>
-                </div>
-                <p className="text-[11.5px] font-medium leading-[1.65]" style={{ color: '#31195f' }}>
-                  Showcase your services and receive inquiries from premium event organizers.
-                </p>
-                <div className="mt-3 flex items-center gap-2">
-                  <div
-                    className="h-2 w-2 rounded-full bg-emerald-500"
-                    style={{ boxShadow: '0 0 8px rgba(16,185,129,0.95)' }}
-                  />
-                  <span className="text-[10px] font-bold text-emerald-700">30+ Active Vendors</span>
-                </div>
-              </div>
-            </motion.div>
-
-          </div>}
+          )}
         </div>
+
+        {/* ── RIGHT: showcase card ── */}
+        <motion.div
+          className="relative"
+          initial={heroEntrance ? { opacity: 0, y: 40, scale: 0.985 } : false}
+          animate={heroEntrance ? { opacity: 1, y: 0, scale: 1 } : undefined}
+          transition={heroTransition(0.08)}
+        >
+          <div
+            className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.07] p-3 backdrop-blur-xl"
+            style={{ boxShadow: '0 40px 90px -34px rgba(8,3,26,0.8), inset 0 1px 0 rgba(255,255,255,0.18)' }}
+          >
+            <div className="relative overflow-hidden rounded-[22px]">
+              <img
+                src={image}
+                alt="A vibrant event powered by Eventies providers"
+                width={960}
+                height={720}
+                draggable={false}
+                loading="eager"
+                decoding="async"
+                {...{ fetchpriority: 'high' }}
+                className="h-[300px] w-full object-cover object-center sm:h-[360px] lg:h-[420px]"
+                style={{ filter: 'saturate(1.1) contrast(1.04)' }}
+                onError={event => {
+                  const target = event.currentTarget
+                  if (target.dataset.fallbackHero === 'true') return
+                  target.dataset.fallbackHero = 'true'
+                  target.src = HERO_FALLBACK_IMAGE
+                }}
+              />
+              <div
+                className="absolute inset-0"
+                style={{ background: 'linear-gradient(180deg, rgba(8,3,26,0.28) 0%, transparent 30%, transparent 55%, rgba(8,3,26,0.7) 100%)' }}
+              />
+
+              {/* Live badge */}
+              <div className="absolute right-3.5 top-3.5 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/30 px-3 py-1.5 backdrop-blur-md">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" style={{ boxShadow: '0 0 8px rgba(52,211,153,0.9)' }} />
+                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/90">{translateText('Trusted across Jordan')}</span>
+              </div>
+
+              {/* For Clients — floating */}
+              <motion.div className="absolute left-3.5 top-14 w-[208px]" {...float(0)}>
+                <div className="rounded-[16px] border border-white/20 bg-white/[0.12] p-3 backdrop-blur-xl">
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-[11px]" style={{ background: 'linear-gradient(135deg,#7c3aed,#c026d3)' }}>
+                      <CalendarCheck className="h-5 w-5 text-white" strokeWidth={2} />
+                    </span>
+                    <div>
+                      <div className="text-[8.5px] font-bold uppercase tracking-[0.16em] text-fuchsia-100">{translateText('For Clients')}</div>
+                      <div className="text-[12px] font-bold text-white">{translateText('Browse & Request')}</div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* For Providers — floating */}
+              <motion.div className="absolute bottom-16 right-3.5 w-[208px]" {...float(1.2)}>
+                <div className="rounded-[16px] border border-white/20 bg-white/[0.12] p-3 backdrop-blur-xl">
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-[11px]" style={{ background: 'linear-gradient(135deg,#a855f7,#7126e3)' }}>
+                      <Store className="h-5 w-5 text-white" strokeWidth={2} />
+                    </span>
+                    <div>
+                      <div className="text-[8.5px] font-bold uppercase tracking-[0.16em] text-violet-100">{translateText('For Providers')}</div>
+                      <div className="text-[12px] font-bold text-white">{translateText('Grow with Us')}</div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Pulsing rotating identity badge */}
+              {shadersOn && (
+                <div className="absolute bottom-3.5 left-3.5">
+                  <div className="relative flex h-16 w-16 items-center justify-center">
+                    <Suspense fallback={null}>
+                      <PulsingBorder
+                        colors={['#7126e3', '#a855f7', '#c026d3', '#8344f5', '#d946ef', '#ffffff']}
+                        colorBack="#00000000"
+                        speed={1.5}
+                        roundness={1}
+                        thickness={0.1}
+                        softness={0.2}
+                        intensity={5}
+                        spotSize={0.1}
+                        pulse={0.1}
+                        smoke={0.5}
+                        smokeSize={4}
+                        scale={0.6}
+                        style={{ width: '48px', height: '48px', borderRadius: '50%' }}
+                      />
+                    </Suspense>
+                    <motion.svg
+                      className="absolute inset-0 h-full w-full"
+                      viewBox="0 0 100 100"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+                      style={{ transform: 'scale(1.55)' }}
+                    >
+                      <defs>
+                        <path id="hero-card-circle" d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
+                      </defs>
+                      <text className="fill-white/85 text-[8px] font-bold uppercase tracking-[0.12em]">
+                        <textPath href="#hero-card-circle" startOffset="0%">
+                          Eventies · Plan · Request · Celebrate ·
+                        </textPath>
+                      </text>
+                    </motion.svg>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom info strip — what we offer */}
+            <div className="flex items-center justify-between gap-3 px-2 pb-1 pt-3">
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-[9px] bg-gradient-to-br from-violet-500 to-fuchsia-500 text-[12px] font-black text-white">E</span>
+                <span className="font-display text-[13px] font-bold text-white">Eventies</span>
+              </div>
+              <div className="flex flex-wrap items-center justify-end gap-1.5">
+                {['Games', 'VR', 'LED Screens', 'Booths', 'Production'].map(tag => (
+                  <span key={tag} className="rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold text-white/80">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   )

@@ -55,7 +55,7 @@ export function formatRequestStatusLabel(status: string) {
 }
 
 export function formatRequestTypeLabel(type: RequestType) {
-  return type === 'rental' ? 'Rental Request' : 'Purchase Quote'
+  return type === 'rental' ? 'Rental Request' : 'Purchase Quote Request'
 }
 
 export function isRentalRequestNumber(requestNumber: string) {

@@ -1,0 +1,40 @@
+6:26:26 PM [vite] warning: Duplicate key "Purchase Quote Request" in object literal
+227|    'Clear draft': 'مسح المسودة',
+228|    'Submit Purchase Quote Request': '????? ??? ??? ??? ??????',
+229|    'Purchase Quote Request': '??? ??? ??? ??????',
+   |    ^
+230|    'Send Request': 'إرسال الطلب',
+231|    'Open Request Draft': 'فتح مسودة الطلب',
+
+  Plugin: vite:esbuild
+  File: C:/Users/PC/Desktop/Main-Site/src/lib/i18n.ts
+6:26:26 PM [vite] warning: Duplicate key "Request a Custom Build Quote" in object literal
+254|    'International shipping available for eligible purchase and custom-build requests': '????? ?????? ???? ?????? ?????? ?????????? ??????? ???????',
+255|    'Request a Custom Build Quote': '???? ??? ??? ?????? ????',
+256|    'Request a Custom Build Quote': '???? ??? ??? ?????? ????',
+   |    ^
+257|    'Submit a custom build request. Eventies can review your idea and, when feasible, help design and build a custom interactive experience for your event, including software, hardware, branding, and setup requirements.':
+258|      'أرسل طلب تنفيذ مخصص. يمكن لفريق Eventies مراجعة فكرتك، وعند الإمكانية، المساعدة في تصميم وبناء تجربة تفاعلية مخصصة لفعاليتك تشمل البرمجيات والأجهزة والهوية ومتطلبات الإعداد.',
+
+  Plugin: vite:esbuild
+  File: C:/Users/PC/Desktop/Main-Site/src/lib/i18n.ts
+6:28:45 PM [vite] warning: Duplicate key "Purchase Quote Request" in object literal
+231|    'Clear draft': 'مسح المسودة',
+232|    'Submit Purchase Quote Request': '????? ??? ??? ??? ??????',
+233|    'Purchase Quote Request': '??? ??? ??? ??????',
+   |    ^
+234|    'Send Request': 'إرسال الطلب',
+235|    'Open Request Draft': 'فتح مسودة الطلب',
+
+  Plugin: vite:esbuild
+  File: C:/Users/PC/Desktop/Main-Site/src/lib/i18n.ts
+6:28:45 PM [vite] warning: Duplicate key "Request a Custom Build Quote" in object literal
+258|    'International shipping available for eligible purchase and custom-build requests': '????? ?????? ???? ?????? ?????? ?????????? ??????? ???????',
+259|    'Request a Custom Build Quote': '???? ??? ??? ?????? ????',
+260|    'Request a Custom Build Quote': '???? ??? ??? ?????? ????',
+   |    ^
+261|    'Submit a custom build request. Eventies can review your idea and, when feasible, help design and build a custom interactive experience for your event, including software, hardware, branding, and setup requirements.':
+262|      'أرسل طلب تنفيذ مخصص. يمكن لفريق Eventies مراجعة فكرتك، وعند الإمكانية، المساعدة في تصميم وبناء تجربة تفاعلية مخصصة لفعاليتك تشمل البرمجيات والأجهزة والهوية ومتطلبات الإعداد.',
+
+  Plugin: vite:esbuild
+  File: C:/Users/PC/Desktop/Main-Site/src/lib/i18n.ts

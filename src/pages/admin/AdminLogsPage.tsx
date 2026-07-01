@@ -195,7 +195,7 @@ export default function AdminLogsPage() {
                         email={log.admin_email}
                         className="h-full w-full rounded-[18px]"
                         fallbackClassName={cn(
-                          'text-[1.75rem] font-display font-bold',
+                          'text-[1.75rem] font-sans font-bold',
                           isDark
                             ? 'bg-gradient-to-br from-prism-violet to-prism-cyan text-void-950'
                             : 'bg-gradient-to-br from-violet-400 to-cyan-400 text-white'

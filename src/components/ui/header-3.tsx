@@ -61,7 +61,7 @@ export function HeaderThreeReference({
               Home
             </a>
             <a href="/products" className="rounded-md px-4 py-2 text-sm font-medium text-white/78 transition-colors hover:bg-white/[0.08] hover:text-white">
-              Products
+              Services
             </a>
             <a href="/customers" className="rounded-md px-4 py-2 text-sm font-medium text-white/78 transition-colors hover:bg-white/[0.08] hover:text-white">
               Customers
@@ -79,7 +79,7 @@ export function HeaderThreeReference({
             Login
           </Button>
           <Button className="h-10 rounded-md px-4">
-            Cart
+            Request Draft
           </Button>
         </div>
         <button
@@ -123,7 +123,7 @@ export function HeaderThreeListItem({
 }
 
 export const headerThreeProductLinks: HeaderThreeLinkItem[] = [
-  { title: 'Products', href: '/products', description: 'Browse rental-ready event services', icon: LayoutGrid },
+  { title: 'Services', href: '/products', description: 'Browse rental-ready event services', icon: LayoutGrid },
   { title: 'Gallery', href: '/gallery', description: 'See visual highlights and setups', icon: GalleryVerticalEnd },
   { title: 'Customers', href: '/customers', description: 'Trusted brands and partner stories', icon: Star },
   { title: 'Analytics', href: '/products', description: 'Explore categories and service depth', icon: BarChart },
@@ -141,9 +141,9 @@ export const headerThreeCompanyLinks2: HeaderThreeLinkItem[] = [
   { title: 'Contact', href: '/contact', icon: MessageCircleMore },
   { title: 'Profile', href: '/profile', icon: Shield },
   { title: 'My Requests', href: '/my-requests', icon: FileText },
-  { title: 'Products', href: '/products', icon: GlobeIcon },
+  { title: 'Services', href: '/products', icon: GlobeIcon },
   { title: 'Help Center', href: '/contact', icon: HelpCircle },
-  { title: 'Cart', href: '/rental-cart', icon: ShoppingCart },
+  { title: 'Request Draft', href: '/rental-cart', icon: ShoppingCart },
   { title: 'Marketplace', href: '/', icon: ShieldCheck },
 ]
 

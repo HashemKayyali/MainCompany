@@ -44,7 +44,7 @@ export function AdminEditorSection({
           />
           <div className="min-w-0">
             {title ? (
-              <h3 className="font-display text-[1.05rem] font-extrabold tracking-[-0.01em] text-[#1a0b3d]">
+              <h3 className="font-sans text-[1.05rem] font-extrabold tracking-[-0.01em] text-[#1a0b3d]">
                 {title}
               </h3>
             ) : null}

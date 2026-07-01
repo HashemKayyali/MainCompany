@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useLocation, useNavigationType } from 'react-router-dom'
 import Lenis from 'lenis'
 import { usePerfMode } from './usePerfMode'
@@ -20,7 +20,7 @@ export function useSmoothScroll(enabled = true) {
   const shouldEnable = enabled && !perfLow && !prefersReducedMotion
   const previousKeyRef = useRef(location.key)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (typeof window === 'undefined') return
 
     if (!shouldEnable) {
@@ -130,19 +130,18 @@ export function useSmoothScroll(enabled = true) {
       if (attempts <= 80) retryTimer = window.setTimeout(scrollToHashTarget, 75)
     }
 
-    const frame = window.requestAnimationFrame(() => {
-      if (location.hash) {
-        scrollToHashTarget()
-        return
-      }
+    let frame = 0
 
+    if (location.hash) {
+      frame = window.requestAnimationFrame(scrollToHashTarget)
+    } else {
       const nextTop =
         navigationType === 'POP'
           ? scrollPositions.get(location.key) ?? 0
           : 0
 
       restoreScroll(nextTop)
-    })
+    }
 
     return () => {
       window.cancelAnimationFrame(frame)

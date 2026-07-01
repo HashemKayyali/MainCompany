@@ -103,6 +103,8 @@ const CustomerLogoCardView = memo(function CustomerLogoCardView({
         <FramedImage
           media={customer.logo}
           alt={customer.name}
+          width={320}
+          height={180}
           loading="lazy"
           sizes={variant === 'marquee' ? '(max-width: 640px) 160px, 200px' : '220px'}
           className={cn(

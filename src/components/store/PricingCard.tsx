@@ -4,10 +4,10 @@ import type { Product } from '../../data/products/types'
 import { useSpotlight, SpotlightOverlay } from '../ui/spotlight-card'
 
 const INCLUDED = [
-  { label: 'Equipment setup & dismantling', icon: PackageCheck },
-  { label: 'Professional on-site staff', icon: null },
-  { label: 'Full equipment insurance', icon: null },
-  { label: 'Custom branding options', icon: null },
+  { label: 'Setup and dismantling on eligible services', icon: PackageCheck },
+  { label: 'On-site staff confirmed after review', icon: null },
+  { label: 'Insured equipment on eligible services', icon: null },
+  { label: 'Custom branding depends on service scope', icon: null },
 ]
 
 export default function PricingCard({ product }: { product: Product }) {
@@ -43,20 +43,20 @@ export default function PricingCard({ product }: { product: Product }) {
                 isDark ? 'text-violet-300/80' : 'text-violet-500'
               }`}
             >
-              Rental Pricing
+              Rental Request Pricing
             </span>
 
             {product.showPrice === false ? (
               <div className="mt-2">
                 <div
-                  className={`font-display text-[2rem] font-black leading-none tracking-[-0.04em] ${
+                  className={`font-sans text-[2rem] font-black leading-none tracking-[-0.04em] ${
                     isDark ? 'text-white' : 'text-slate-900'
                   }`}
                 >
                   Custom
                 </div>
                 <div className={`mt-1.5 text-[12px] font-semibold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                  Quote reviewed by sales team
+                  Request reviewed by Eventies team
                 </div>
               </div>
             ) : (
@@ -66,7 +66,7 @@ export default function PricingCard({ product }: { product: Product }) {
                 </div>
                 <div className="flex items-baseline gap-2">
                   <span
-                    className={`font-display text-[2.6rem] font-black leading-none tracking-[-0.05em] ${
+                    className={`font-sans text-[2.6rem] font-black leading-none tracking-[-0.05em] ${
                       isDark ? 'text-white' : 'text-slate-900'
                     }`}
                   >
@@ -99,10 +99,10 @@ export default function PricingCard({ product }: { product: Product }) {
               }`}
             >
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.7)]" />
-              In Stock
+              Reviewed
             </div>
             <div className={`mt-1 text-[11.5px] font-bold ${isDark ? 'text-emerald-300' : 'text-emerald-600'}`}>
-              Available
+              After review
             </div>
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function PricingCard({ product }: { product: Product }) {
               : 'bg-cyan-50/80 border border-cyan-100 text-cyan-800/80'
           }`}
         >
-          Use the actions below to start a rental request or request a direct purchase quote without leaving this page.
+          Use the actions below to start a rental request or purchase quote request without leaving this page. Final availability, pricing, setup, delivery, shipping, and scope are confirmed after review.
         </div>
       </div>
     </div>

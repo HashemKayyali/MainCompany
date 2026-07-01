@@ -15,7 +15,7 @@ import { cn } from '../utils/cn'
 
 export default function CheckoutPage() {
   usePageMeta({
-    title: 'Checkout',
+    title: 'Submit Request',
     description: 'Complete your rental request and submit it for review.',
     noIndex: true,
   })
@@ -45,13 +45,13 @@ export default function CheckoutPage() {
   }, [currentUser, contactSynced])
 
   const validationMessage = useMemo(() => {
-    if (!rentalCart.items.length) return 'Your rental cart is empty.'
+    if (!rentalCart.items.length) return 'Your rental request draft is empty.'
     if (!form.customerName.trim() || !form.email.trim() || !form.phone.trim()) return 'Please complete your contact details.'
     if (!form.city.trim() || !form.address.trim()) return 'City and address are required.'
 
     for (const item of rentalCart.items) {
       const { startDate, endDate } = rentalCart.getItemDates(item)
-      if (!item.productId) return `Product id is missing for ${item.productTitle}.`
+      if (!item.productId) return `Service id is missing for ${item.productTitle}.`
       if (!hasValidDateRange(startDate, endDate)) return `Choose valid rental dates for ${item.productTitle}.`
       if (rentalCart.getItemDays(item) < item.minimumRentalDays) {
         return `${item.productTitle} requires at least ${item.minimumRentalDays} rental day(s).`
@@ -64,9 +64,9 @@ export default function CheckoutPage() {
   const submit = async () => {
     const canContinue = await requireAuthAction({
       redirectTo: '/checkout',
-      title: 'Sign in to confirm your rental request',
+      title: 'Sign in to submit your rental request',
       message:
-        'You need to sign in before we can submit this rental request. Your cart will stay saved and you will return here after login.',
+        'You need to sign in before we can submit this rental request. Your request draft will stay saved and you will return here after login.',
     })
     if (!canContinue) return
 
@@ -107,14 +107,14 @@ export default function CheckoutPage() {
         <div className="site-container max-w-3xl">
           <div className={cn('rounded-[24px] border p-6 sm:p-7 text-center', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
             <h1 className={cn('font-display text-3xl font-black', isDark ? 'text-white' : 'text-gray-900')}>
-              Checkout
+              Submit Request
             </h1>
             <p className={cn('mt-4 text-sm leading-7', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
-              There are no rental items to submit yet.
+              There are no rental services to submit yet.
             </p>
             <div className="mt-6">
               <Link to="/rental-cart" className="btn-primary !rounded-xl !px-5 !py-3 !text-sm">
-                Go to Rental Cart
+                Go to Request Draft
               </Link>
             </div>
           </div>
@@ -129,14 +129,14 @@ export default function CheckoutPage() {
         <div className="site-container max-w-3xl">
           <div className={cn('rounded-[24px] border p-6 sm:p-7 text-center', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
             <h1 className={cn('font-display text-3xl font-black', isDark ? 'text-white' : 'text-gray-900')}>
-              Sign in to Continue
+              Sign in to Submit Request
             </h1>
             <p className={cn('mt-4 text-sm leading-7', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
-              Sign in or create an account to complete this rental request and track it later from My Requests. Your cart will stay saved on this device.
+              Sign in or create an account to submit this rental request and track it later from My Requests. Your request draft will stay saved on this device.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link to="/rental-cart" className="btn-outline !rounded-xl !px-5 !py-3 !text-sm">
-                Back to Rental Cart
+                Back to Request Draft
               </Link>
               <button
                 type="button"
@@ -145,7 +145,7 @@ export default function CheckoutPage() {
                     .alert({
                       title: 'Sign in to continue',
                       message:
-                        'Please sign in first. Your rental cart will stay saved and you will return to checkout right after login.',
+                        'Please sign in first. Your rental request draft will stay saved and you will return here right after login.',
                       confirmLabel: 'Go to Login',
                       variant: 'info',
                     })
@@ -166,10 +166,10 @@ export default function CheckoutPage() {
     <section className="site-section">
       <div className="site-container">
         <div className="mb-6">
-          <span className="section-label">// Checkout</span>
-          <h1 className={cn('section-title !text-left', !isDark && 'text-gray-900')}>Confirm Your Rental Request</h1>
+          <span className="section-label">// Submit Request</span>
+          <h1 className={cn('section-title !text-left', !isDark && 'text-gray-900')}>Submit Your Rental Request</h1>
           <p className={cn('mt-2.5 max-w-2xl text-[0.95rem] leading-6.5', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
-            Review your items, complete your contact details, and submit the rental request for admin approval.
+            Review your services, complete your contact details, and submit the rental request for Eventies review.
           </p>
         </div>
 
@@ -189,17 +189,17 @@ export default function CheckoutPage() {
 
             <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
               <Link to="/rental-cart" className="btn-outline !w-full !rounded-[14px] !px-5 !py-3 !text-[0.95rem] sm:!w-auto">
-                Back to Cart
+                Back to Request Draft
               </Link>
               <button type="button" onClick={submit} disabled={saving || !!validationMessage} className="btn-primary !w-full !rounded-[14px] !px-5 !py-3 !text-[0.95rem] disabled:opacity-50 sm:!w-auto">
-                {saving ? 'Submitting...' : 'Confirm Request'}
+                {saving ? 'Submitting...' : 'Submit Request'}
               </button>
             </div>
           </div>
 
           <div className={cn('order-first h-fit rounded-[22px] border p-4 xl:order-none xl:sticky xl:top-28', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-white')}>
             <div className={cn('text-[11px] font-mono uppercase tracking-[0.16em]', isDark ? 'text-purple-100/50' : 'text-gray-400')}>
-              Order Preview
+              Request Preview
             </div>
             <div className="mt-4 space-y-3.5">
               {rentalCart.items.map(item => {
@@ -230,8 +230,8 @@ export default function CheckoutPage() {
                 Estimated total: {rentalCart.grandTotal.toFixed(2)} {currency}
               </div>
               <div className={cn('mt-1 text-[11.5px] font-medium leading-5', isDark ? 'text-cyan-100/70' : 'text-violet-700/75')}>
-                Estimate based on current day rates. The final price is calculated by the
-                database and shown on your order summary after you confirm.
+                Estimate based on current day rates. Final pricing, availability, and setup details
+                are reviewed by the Eventies team after you submit.
               </div>
             </div>
           </div>

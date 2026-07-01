@@ -76,7 +76,7 @@ export async function createPurchaseQuoteRequest(input: PurchaseQuoteCreateInput
 
   if (error) throw error
   const row = normalizeRpcSingle(data as CreatePurchaseQuoteRpcRow[] | CreatePurchaseQuoteRpcRow | null)
-  if (!row) throw new Error('Could not create purchase quote request')
+  if (!row) throw new Error('Could not create purchase request')
   return { id: row.id, requestNumber: row.request_number }
 }
 

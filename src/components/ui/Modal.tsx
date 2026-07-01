@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useI18n } from '../../contexts/LanguageContext'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import { cn } from '../../utils/cn'
 
@@ -54,6 +55,7 @@ export default function Modal({
   bodyClassName = '',
 }: ModalProps) {
   const { isDark } = useTheme()
+  const { t, translateText, dir } = useI18n()
   const titleId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -161,6 +163,7 @@ export default function Modal({
           aria-modal="true"
           aria-labelledby={titleId}
           data-native-scroll
+          dir={dir}
         >
           <motion.div
             initial={{ opacity: 0 }}
@@ -190,10 +193,10 @@ export default function Modal({
               >
                 <h2
                   id={titleId}
-                  className="font-display text-[0.98rem] font-bold sm:text-[1.04rem]"
+                  className="font-sans text-[0.98rem] font-bold sm:text-[1.04rem]"
                   style={{ color: '#1a0b3d' }}
                 >
-                  {title}
+                  {translateText(title)}
                 </h2>
 
                 <button
@@ -201,7 +204,7 @@ export default function Modal({
                   type="button"
                   onClick={onClose}
                   className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200 transition hover:bg-violet-100 hover:text-violet-900"
-                  aria-label="Close modal"
+                  aria-label={t('admin.dialog.closeModal')}
                 >
                   <X size={18} strokeWidth={2.2} />
                 </button>

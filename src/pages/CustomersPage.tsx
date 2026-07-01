@@ -1,25 +1,74 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Building2, Search, SlidersHorizontal, UsersRound } from 'lucide-react'
+import { ArrowRight, Building2 } from 'lucide-react'
 import CustomersGrid from '../components/customer/CustomersGrid'
-import Chip from '../components/ui/Chip'
+import ShuffleGrid, { type ShuffleGridItem } from '../components/ui/shuffle-grid'
+import EventiesHero from '../components/layout/EventiesHero'
 import { useData } from '../contexts/DataContext'
-import { useTheme } from '../contexts/ThemeContext'
 import { usePageMeta } from '../hooks/usePageMeta'
+import { preloadRoute } from '../utils/route-preload'
+import { useI18n } from '../contexts/LanguageContext'
 
-const ease = [0.16, 1, 0.3, 1]
+const ease = [0.16, 1, 0.3, 1] as const
+
+/** Light, theme-consistent filter pill used for the category row. */
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`shrink-0 rounded-full border px-4 py-2 text-[12px] font-bold transition ${
+        active
+          ? 'border-[#190453] bg-[#190453] text-white shadow-[0_14px_30px_-18px_rgba(25,4,83,0.7)]'
+          : 'border-violet-200 bg-white text-[#31195f] hover:border-violet-400 hover:bg-violet-50'
+      }`}
+    >
+      {children}
+    </button>
+  )
+}
+
+function CustomersHeroShowcase({ items }: { items: ShuffleGridItem[] }) {
+  return (
+    <>
+      <div
+        className="pointer-events-none absolute inset-0 opacity-80"
+        style={{
+          background:
+            'radial-gradient(58% 48% at 47% 38%, rgba(255,255,255,0.18) 0%, transparent 62%),' +
+            'radial-gradient(46% 38% at 72% 18%, rgba(217,70,239,0.18) 0%, transparent 68%)',
+        }}
+        aria-hidden="true"
+      />
+      <ShuffleGrid
+        items={items}
+        className="relative h-[300px] sm:h-[360px] lg:h-[420px]"
+        cellClassName="border-white/50 bg-white/[0.94]"
+        logoClassName="max-h-[64%] max-w-[86%]"
+      />
+    </>
+  )
+}
 
 export default function CustomersPage() {
   usePageMeta({
     title: 'Eventies Clients & Event Partners in Jordan',
     description:
-      'See the brands, schools, venues, and organizations that trust Eventies for event activations and experiences across Jordan.',
+      'A curated look at brands, schools, venues, and organizations connected to Eventies activations, custom builds, and event services across Jordan and the region.',
     canonical: 'https://www.eventiesjo.com/customers',
   })
 
   const { customers } = useData()
-  const { isDark } = useTheme()
-  const [search, setSearch] = useState('')
+  const { translateText } = useI18n()
   const [cat, setCat] = useState('All')
 
   const cats = useMemo(
@@ -30,222 +79,127 @@ export default function CustomersPage() {
     [customers]
   )
 
-  const filtered = useMemo(() => {
-    const needle = search.trim().toLowerCase()
+  const heroLogos = useMemo<ShuffleGridItem[]>(
+    () =>
+      customers.map(customer => ({
+        id: customer.slug,
+        name: customer.name,
+        image: customer.logo,
+      })),
+    [customers]
+  )
 
-    return customers.filter(customer => {
-      const matchesCategory = cat === 'All' || customer.category === cat
-      if (!matchesCategory) return false
-      if (!needle) return true
+  const filtered = useMemo(
+    () => customers.filter(customer => cat === 'All' || customer.category === cat),
+    [cat, customers]
+  )
 
-      return (
-        customer.name.toLowerCase().includes(needle) ||
-        (customer.category || '').toLowerCase().includes(needle)
-      )
-    })
-  }, [cat, customers, search])
+  const heroCats = useMemo(() => cats.slice(0, 5), [cats])
 
   const countForCat = (category: string) =>
     customers.filter(customer => customer.category === category).length
 
   const clearFilters = () => {
-    setSearch('')
     setCat('All')
   }
 
   return (
-    <section className="site-section bg-transparent">
-      <div className="site-container">
-        <div
-          className={`relative overflow-hidden rounded-[28px] border px-5 py-9 sm:px-7 sm:py-11 lg:px-10 lg:py-13 ${
-            isDark
-              ? 'border-white/[0.07] bg-[linear-gradient(180deg,rgba(14,12,32,0.74),rgba(8,8,20,0.56))] shadow-[0_28px_84px_rgba(2,4,16,0.42),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-sm'
-              : 'border-violet-100/80 bg-white/93 shadow-[0_24px_64px_rgba(15,23,42,0.07)]'
-          }`}
-        >
-          {isDark && (
-            <div
-              className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-violet-600/[0.07] blur-[100px]"
-              aria-hidden="true"
-            />
-          )}
+    <>
+      <EventiesHero
+        eyebrow="Partner Network - Jordan"
+        title="Trusted by leading brands and teams."
+        description="A curated look at brands, schools, venues, and organizations connected to Eventies activations, custom builds, and event services across Jordan and the region."
+        primaryAction={{ label: 'Browse Partners', href: '#customers-list' }}
+        secondaryAction={{ label: 'See our work', to: '/gallery' }}
+        chips={heroCats.map(category => ({ label: category, onClick: () => setCat(category) }))}
+        rightSlot={<CustomersHeroShowcase items={heroLogos} />}
+      />
 
-          <motion.div
-            initial={{ opacity: 0, y: 22 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.62, ease }}
-            className="relative mb-10 flex flex-col gap-6 lg:mb-12 lg:flex-row lg:items-end lg:justify-between"
-          >
-            <div className="max-w-2xl">
-              <div className="mb-3 flex items-center gap-2.5">
-                <span className="section-label">// Partner Network</span>
-                <div className={`h-px w-8 ${isDark ? 'bg-violet-500/30' : 'bg-violet-300/50'}`} />
-              </div>
-              <h1 className={`section-title !text-left ${!isDark ? 'text-gray-900' : ''}`}>
-                Trusted <span className="text-glow">partners</span>
-              </h1>
-              <p
-                className={`mt-4 max-w-xl text-[0.98rem] leading-[1.72] ${
-                  isDark ? 'text-slate-300/70' : 'text-slate-500'
-                }`}
-              >
-                A curated view of the brands, schools, venues, and organizations that have trusted
-                Eventies experiences across the region.
-              </p>
-            </div>
+      <div className="bg-[#f8f3ff]">
+      <section id="customers-list" className="site-section scroll-mt-[96px]">
+        <div className="site-container-wide">
+          {/* Category filter row */}
+          <div className="mt-7 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
+            <FilterChip active={cat === 'All'} onClick={() => setCat('All')}>
+              {translateText('All')} ({customers.length})
+            </FilterChip>
+            {cats.map(category => (
+              <FilterChip key={category} active={cat === category} onClick={() => setCat(category)}>
+                {translateText(category)} ({countForCat(category)})
+              </FilterChip>
+            ))}
+          </div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.94 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.52, delay: 0.1, ease }}
-              className={`shrink-0 rounded-[20px] border px-6 py-5 ${
-                isDark
-                  ? 'border-white/[0.09] bg-white/[0.04]'
-                  : 'border-violet-200/60 bg-white shadow-[0_6px_24px_rgba(124,58,237,0.07)]'
-              }`}
-            >
-              <div
-                className={`flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.18em] ${
-                  isDark ? 'text-slate-500' : 'text-slate-400'
-                }`}
-              >
-                <UsersRound size={10} />
-                Partners
-              </div>
-              <div
-                className={`mt-1.5 font-display text-[2.6rem] font-black leading-none tracking-[-0.05em] ${
-                  isDark ? 'text-white' : 'text-slate-900'
-                }`}
-              >
-                {filtered.length}
-              </div>
-              <div className={`mt-1.5 text-[11.5px] font-medium ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                {cat === 'All' ? 'trusted partners' : `in ${cat}`}
-              </div>
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.52, delay: 0.08, ease }}
-            className={`relative mb-9 rounded-[22px] border p-4 ${
-              isDark
-                ? 'border-white/[0.07] bg-white/[0.025]'
-                : 'border-violet-100/80 bg-white/80 shadow-[0_14px_36px_-24px_rgba(89,23,196,0.20)]'
-            }`}
-          >
-            <div className="grid gap-4 lg:grid-cols-[minmax(240px,320px)_1fr] lg:items-start">
-              <div>
-                <div className="mb-3.5 flex items-center gap-2">
-                  <Search size={12} className={isDark ? 'text-slate-600' : 'text-slate-400'} />
-                  <span
-                    className={`text-[9.5px] font-bold uppercase tracking-[0.18em] ${
-                      isDark ? 'text-slate-600' : 'text-slate-400'
-                    }`}
-                  >
-                    Search partners
-                  </span>
-                </div>
-                <div className="relative">
-                  <Search
-                    size={15}
-                    className={`pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 ${
-                      isDark ? 'text-slate-500' : 'text-slate-400'
-                    }`}
-                  />
-                  <input
-                    type="search"
-                    value={search}
-                    onChange={event => setSearch(event.target.value)}
-                    placeholder="Search by name or category..."
-                    className={`h-11 w-full rounded-[14px] border py-2 pl-10 pr-3 text-[13px] font-medium outline-none transition ${
-                      isDark
-                        ? 'border-white/[0.08] bg-white/[0.04] text-white placeholder:text-slate-600 focus:border-violet-400/40 focus:bg-white/[0.06]'
-                        : 'border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:border-violet-300 focus:ring-2 focus:ring-violet-100'
-                    }`}
-                  />
-                </div>
-              </div>
-
-              <div className="min-w-0">
-                <div className="mb-3.5 flex items-center gap-2">
-                  <SlidersHorizontal size={12} className={isDark ? 'text-slate-600' : 'text-slate-400'} />
-                  <span
-                    className={`text-[9.5px] font-bold uppercase tracking-[0.18em] ${
-                      isDark ? 'text-slate-600' : 'text-slate-400'
-                    }`}
-                  >
-                    Filter by category
-                  </span>
-                </div>
-                <div className="-mx-4 overflow-x-auto px-4 pb-1">
-                  <div className="flex w-max min-w-full gap-2 sm:flex-wrap">
-                    <Chip active={cat === 'All'} onClick={() => setCat('All')}>
-                      All ({customers.length})
-                    </Chip>
-                    {cats.map(category => (
-                      <Chip key={category} active={cat === category} onClick={() => setCat(category)}>
-                        {category} ({countForCat(category)})
-                      </Chip>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          <hr className="hr-glow mb-9" />
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`${cat}-${search}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease }}
-            >
+          {/* Grid */}
+          <div className="mt-8">
+            <AnimatePresence mode="wait">
               {filtered.length > 0 ? (
-                <CustomersGrid customers={filtered} />
+                <motion.div
+                  key={cat}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3, ease }}
+                >
+                  <CustomersGrid customers={filtered} />
+                </motion.div>
               ) : (
                 <motion.div
+                  key="empty"
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className={`rounded-[22px] border border-dashed py-18 text-center ${
-                    isDark
-                      ? 'border-white/[0.10] bg-white/[0.025]'
-                      : 'border-violet-200/70 bg-slate-50/60'
-                  }`}
+                  className="rounded-[22px] border border-dashed border-violet-200 bg-violet-50/40 py-16 text-center"
                 >
-                  <div
-                    className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] ${
-                      isDark ? 'border border-white/[0.07] bg-white/[0.06]' : 'border border-violet-100 bg-violet-50'
-                    }`}
-                  >
-                    <Building2 size={20} className={isDark ? 'text-slate-600' : 'text-violet-400'} />
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] border border-violet-100 bg-white">
+                    <Building2 className="h-5 w-5 text-violet-400" strokeWidth={2.2} />
                   </div>
-                  <p className={`font-display text-[1.08rem] font-semibold ${isDark ? 'text-white/55' : 'text-slate-700'}`}>
-                    No partners match this filter
-                  </p>
-                  <p className={`mt-2 text-[13px] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
-                    Try adjusting the search or selecting a different category.
+                  <p className="text-[1.08rem] font-bold text-ink-800">{translateText('No partners match this filter')}</p>
+                  <p className="mt-2 text-[13px] text-ink-500">
+                    {translateText('Try selecting a different category.')}
                   </p>
                   <button
+                    type="button"
                     onClick={clearFilters}
-                    className={`mt-5 rounded-[12px] border px-5 py-2.5 text-[12px] font-semibold transition-all duration-300 hover:-translate-y-0.5 ${
-                      isDark
-                        ? 'border-white/[0.10] bg-white/[0.04] text-white/70 hover:border-white/[0.16] hover:bg-white/[0.08]'
-                        : 'border-slate-200 bg-white text-slate-600 shadow-sm hover:border-violet-300 hover:text-violet-700'
-                    }`}
+                    className="mt-5 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-5 py-2.5 text-[12px] font-bold text-violet-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-50"
                   >
-                    Clear filters
+                    {translateText('Clear filters')}
                   </button>
                 </motion.div>
               )}
-            </motion.div>
-          </AnimatePresence>
+            </AnimatePresence>
+          </div>
+
+          {/* Footer CTA */}
+          <div className="mt-12 flex flex-col items-center justify-between gap-4 rounded-[22px] border border-violet-200/70 bg-white p-6 text-center sm:flex-row sm:text-left">
+            <div>
+              <div className="font-display text-[1.2rem] font-bold tracking-[-0.02em] text-ink-900">
+                {translateText('Want your brand on this wall?')}
+              </div>
+              <p className="mt-1 text-[13px] text-ink-600">
+                {translateText('Join the brands that trust Eventies for their event experiences across the region.')}
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-3">
+              <Link
+                to="/contact"
+                onMouseEnter={() => preloadRoute('/contact')}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-6 py-3 text-[12.5px] font-bold text-white transition-all hover:-translate-y-0.5"
+              >
+                {translateText('Become a partner')}
+                <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.4} />
+              </Link>
+              <Link
+                to="/gallery"
+                onMouseEnter={() => preloadRoute('/gallery')}
+                className="inline-flex items-center rounded-full border border-violet-200 bg-white px-6 py-3 text-[12.5px] font-bold text-ink-800 transition-colors hover:border-violet-300 hover:bg-violet-50"
+              >
+                {translateText('See our work')}
+              </Link>
+            </div>
+          </div>
         </div>
+      </section>
       </div>
-    </section>
+    </>
   )
 }

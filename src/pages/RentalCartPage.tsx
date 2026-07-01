@@ -66,7 +66,7 @@ function CartSection({
   )
 }
 
-// ── Centered status shell (empty cart) ───────────────────────────────────────
+// ── Centered status shell (empty request draft) ──────────────────────────────
 function StatusShell({ children }: { children: ReactNode }) {
   return (
     <section className="site-section">
@@ -201,7 +201,7 @@ function AvailabilitySticker({
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-red-300 bg-red-50 px-3 py-1 text-[11.5px] font-bold text-red-800">
       <AlertTriangle size={11} strokeWidth={2.4} />
-      Only {availability.availableQuantity} in stock
+      Only {availability.availableQuantity} available for these dates
     </span>
   )
 }
@@ -270,6 +270,10 @@ function RentalItemCard({
             <FramedImage
               media={item.productImage}
               alt={item.productTitle}
+              width={160}
+              height={160}
+              loading="lazy"
+              sizes="80px"
               className="h-full w-full object-cover"
               fallbackTransform={{ fit: 'cover' }}
             />
@@ -337,7 +341,7 @@ function RentalItemCard({
       {minDaysMissed && (
         <div className="mt-3 flex items-center gap-2 rounded-[12px] border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[12px] font-semibold text-amber-800">
           <AlertTriangle size={13} strokeWidth={2} className="shrink-0" />
-          Minimum {item.minimumRentalDays} day{item.minimumRentalDays === 1 ? '' : 's'} required for this product.
+          Minimum {item.minimumRentalDays} day{item.minimumRentalDays === 1 ? '' : 's'} required for this service.
         </div>
       )}
     </motion.div>
@@ -346,8 +350,8 @@ function RentalItemCard({
 
 export default function RentalCartPage() {
   usePageMeta({
-    title: 'Rental Cart',
-    description: 'Review your rental cart, set event dates, and continue to checkout.',
+    title: 'Rental Request Draft',
+    description: 'Review your rental request draft, set event dates, and submit it for review.',
     noIndex: true,
   })
 
@@ -404,9 +408,9 @@ export default function RentalCartPage() {
   const handleCheckout = async () => {
     if (!allItemsReady) {
       await dialog.alert({
-        title: 'Complete your cart first',
-        message: 'Choose valid rental dates for every item before continuing to checkout.',
-        confirmLabel: 'Review Cart',
+        title: 'Complete your request first',
+        message: 'Choose valid rental dates for every service before submitting your request.',
+        confirmLabel: 'Review Request',
         variant: 'warning',
       })
       return
@@ -414,8 +418,8 @@ export default function RentalCartPage() {
     if (!isLoggedIn) {
       const canContinue = await requireAuthAction({
         redirectTo: '/checkout',
-        title: 'Sign in to continue to checkout',
-        message: 'You can keep building your rental cart as a guest, but you need to sign in before confirming the request. Your cart will stay saved.',
+        title: 'Sign in to submit your request',
+        message: 'You can keep building your request draft as a guest, but you need to sign in before submitting it. Your draft will stay saved.',
       })
       if (!canContinue) return
     }
@@ -426,9 +430,9 @@ export default function RentalCartPage() {
   const sharedDatesValid = hasValidDateRange(rentalCart.sharedStartDate, rentalCart.sharedEndDate)
   const readinessMessage = allItemsReady
     ? isLoggedIn
-      ? 'All items are ready for checkout.'
-      : 'All items ready. Sign in to confirm the request.'
-    : 'Set valid dates for every item before checkout.'
+      ? 'All services are ready to submit for review.'
+      : 'All services are ready. Sign in to submit the request.'
+    : 'Set valid dates for every service before submitting.'
 
   // ── Empty State ────────────────────────────────────────────────────────────
   if (!hasItems) {
@@ -437,9 +441,9 @@ export default function RentalCartPage() {
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-[20px] border border-violet-200 bg-violet-50">
           <ShoppingBag className="h-7 w-7 text-[#7126e3]" strokeWidth={2} />
         </div>
-        <span className="section-label justify-center">// Rental Cart</span>
+        <span className="section-label justify-center">// Rental Request Draft</span>
         <h1 className="mt-3 font-display text-3xl font-black tracking-[-0.03em] text-[#1a0b3d] sm:text-4xl">
-          Your rental cart is empty
+          Your rental request draft is empty
         </h1>
         <p className="mx-auto mt-3 max-w-md text-[0.95rem] leading-7 text-[#4b3a63]">
           Browse our event services and start building your request. Pick your dates and we'll
@@ -467,12 +471,12 @@ export default function RentalCartPage() {
             transition={motionEnabled ? { duration: 0.6, ease } : undefined}
             className="mx-auto mb-10 max-w-3xl text-center"
           >
-            <span className="section-label justify-center">// Rental Cart</span>
+            <span className="section-label justify-center">// Rental Request Draft</span>
             <h1 className="mt-3 font-display text-3xl font-black leading-[1.05] tracking-[-0.035em] sm:text-5xl">
               <span className="text-glow">Prepare Your Request</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-[0.98rem] leading-7 text-[#4b3a63]">
-              Set shared event dates for the whole cart, or switch to per-item mode. We check
+              Set shared event dates for the whole request, or switch to per-item mode. We review
               availability against your selected rental range.
             </p>
             <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-violet-300 to-transparent" />
@@ -625,7 +629,7 @@ export default function RentalCartPage() {
             >
               <div className="glass !rounded-[22px] p-5 xl:sticky xl:top-24">
                 <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#7126e3]">
-                  Cart Summary
+                  Rental Request Draft Summary
                 </div>
 
                 <div className="mt-3 flex items-end gap-2">
@@ -637,7 +641,7 @@ export default function RentalCartPage() {
                   </span>
                 </div>
                 <div className="mt-1 text-[0.85rem] text-[#6b5a82]">
-                  across {rentalCart.items.length} product{rentalCart.items.length === 1 ? '' : 's'}
+                  across {rentalCart.items.length} service{rentalCart.items.length === 1 ? '' : 's'}
                 </div>
 
                 {/* Breakdown */}
@@ -664,7 +668,7 @@ export default function RentalCartPage() {
                     <span className="text-[1.1rem] font-bold text-[#4b3a63]">{currency}</span>
                   </div>
                   <div className="mt-1 text-[11.5px] font-semibold text-[#4b3a63]">
-                    {allItemsReady ? 'Based on current day rates' : 'Set dates to see the full total'}
+                    {allItemsReady ? 'Based on current day rates; final pricing is reviewed before confirmation' : 'Set dates to see the full estimate'}
                   </div>
                 </div>
 
@@ -694,7 +698,7 @@ export default function RentalCartPage() {
                     title={!allItemsReady ? readinessMessage : undefined}
                     className="btn-primary !w-full !rounded-[14px] !py-3 !text-[13px] disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {isLoggedIn ? 'Continue to Checkout' : 'Sign In to Checkout'}
+                    {isLoggedIn ? 'Submit Rental Request' : 'Sign In to Submit'}
                     <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
                   </button>
                   <Link

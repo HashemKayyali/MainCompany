@@ -74,8 +74,9 @@ function StatusShell({ children }: { children: ReactNode }) {
 
 export default function PurchaseQuotePage() {
   usePageMeta({
-    title: 'Purchase Quote',
-    description: 'Review your purchase quote draft and send it to the sales team.',
+    title: 'Purchase Quote Request',
+    description:
+      'Request pricing for eligible services, items, or custom builds you would like to purchase. The Eventies team reviews scope, availability, delivery or shipping, and final pricing before confirmation.',
     noIndex: true,
   })
 
@@ -104,19 +105,19 @@ export default function PurchaseQuotePage() {
   }, [currentUser])
 
   const validationMessage = useMemo(() => {
-    if (!purchaseQuote.items.length) return 'Your purchase quote draft is empty.'
+    if (!purchaseQuote.items.length) return 'Your purchase quote request draft is empty.'
     if (!form.customerName.trim() || !form.email.trim() || !form.phone.trim()) return 'Please complete your contact details.'
     if (!form.city.trim() || !form.address.trim()) return 'City and address are required.'
-    if (purchaseQuote.items.some(item => !item.productId)) return 'One or more products are missing a valid id.'
+    if (purchaseQuote.items.some(item => !item.productId)) return 'One or more services are missing a valid id.'
     return ''
   }, [form, purchaseQuote.items])
 
   const submit = async () => {
     const canContinue = await requireAuthAction({
       redirectTo: '/purchase-quote',
-      title: 'Sign in to send your purchase quote',
+      title: 'Sign in to submit your purchase quote request',
       message:
-        'You need to sign in before we can send this purchase quote request. Your selected items will stay saved on this device.',
+        'You need to sign in before we can submit this purchase quote request. Your selected services will stay saved on this device.',
     })
     if (!canContinue) return
 
@@ -138,7 +139,7 @@ export default function PurchaseQuotePage() {
       })
 
       purchaseQuote.clearDraft()
-      toast('Purchase quote request sent successfully.', 'success')
+      toast('Purchase quote request submitted successfully.', 'success')
       navigate(`/my-requests/${response.requestNumber}`)
     } catch (error: unknown) {
       toast(getErrorMessage(error, 'Could not submit purchase quote request.'), 'error')
@@ -154,16 +155,16 @@ export default function PurchaseQuotePage() {
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-[20px] border border-violet-200 bg-violet-50">
           <FileText className="h-7 w-7 text-[#7126e3]" strokeWidth={2} />
         </div>
-        <span className="section-label justify-center">// Purchase Quote</span>
+        <span className="section-label justify-center">// Purchase Quote Request</span>
         <h1 className="mt-3 font-display text-3xl font-black tracking-[-0.03em] text-[#1a0b3d] sm:text-4xl">
-          Your quote draft is empty
+          Your request draft is empty
         </h1>
         <p className="mx-auto mt-3 max-w-md text-[0.95rem] leading-7 text-[#4b3a63]">
-          Add products from the catalog to prepare a multi-product RFQ. Drafts stay on this device until you send them.
+          Add eligible services from the catalog to prepare a purchase quote request. Drafts stay on this device until you submit them.
         </p>
         <div className="mt-7 flex flex-col items-center gap-3">
           <Link to="/products" className="btn-primary !rounded-[14px] !px-6 !py-3 !text-sm">
-            Browse Products
+            Browse Services
             <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
           </Link>
           {rentalCart.itemCount > 0 && (
@@ -172,7 +173,7 @@ export default function PurchaseQuotePage() {
               className="btn-outline !rounded-[12px] !px-4 !py-2 !text-[12px]"
             >
               <ShoppingCart className="h-3.5 w-3.5" strokeWidth={2} />
-              You have {rentalCart.itemCount} item{rentalCart.itemCount === 1 ? '' : 's'} in rental cart
+              You have {rentalCart.itemCount} item{rentalCart.itemCount === 1 ? '' : 's'} in your rental request draft
             </Link>
           )}
         </div>
@@ -184,16 +185,16 @@ export default function PurchaseQuotePage() {
   if (!isLoggedIn) {
     return (
       <StatusShell>
-        <span className="section-label justify-center">// Purchase Quote</span>
+        <span className="section-label justify-center">// Purchase Quote Request</span>
         <h1 className="mt-3 font-display text-3xl font-black tracking-[-0.03em] text-[#1a0b3d] sm:text-4xl">
-          Sign in to send your quote request
+          Sign in to submit your purchase quote request
         </h1>
         <p className="mx-auto mt-3 max-w-lg text-[0.95rem] leading-7 text-[#4b3a63]">
-          Sign in or create an account to send this RFQ and track updates from My Requests later. Your quote draft stays saved on this device.
+          Sign in or create an account to submit this purchase quote request and track updates from My Requests later. Your request draft stays saved on this device.
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
           <Link to="/products" className="btn-outline !rounded-[14px] !px-5 !py-3 !text-sm">
-            Back to Products
+            Back to Services
           </Link>
           <button
             type="button"
@@ -202,7 +203,7 @@ export default function PurchaseQuotePage() {
                 .alert({
                   title: 'Sign in to continue',
                   message:
-                    'Please sign in first. Your purchase quote draft will stay saved and you will return here right after login.',
+                    'Please sign in first. Your purchase quote request draft will stay saved and you will return here right after login.',
                   confirmLabel: 'Go to Login',
                   variant: 'info',
                 })
@@ -229,13 +230,12 @@ export default function PurchaseQuotePage() {
           transition={motionEnabled ? { duration: 0.6, ease } : undefined}
           className="mx-auto mb-10 max-w-3xl text-center"
         >
-          <span className="section-label justify-center">// Purchase Quote</span>
+          <span className="section-label justify-center">// Purchase Quote Request</span>
           <h1 className="mt-3 font-display text-3xl font-black leading-[1.05] tracking-[-0.035em] sm:text-5xl">
-            <span className="text-glow">Send a Purchase RFQ</span>
+            <span className="text-glow">Purchase Quote Request</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-[0.98rem] leading-7 text-[#4b3a63]">
-            Review your selected products, fine-tune quantities, and send the request to the
-            sales team. This draft is saved locally on this device until you submit it.
+            Request pricing for eligible services, items, or custom builds you would like to purchase. The Eventies team reviews scope, availability, delivery or shipping, and final pricing before confirmation.
           </p>
           <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-violet-300 to-transparent" />
         </motion.div>
@@ -249,8 +249,8 @@ export default function PurchaseQuotePage() {
             <QuoteSection
               index="01"
               eyebrow="ITEMS"
-              title="Quote draft items"
-              description="Adjust quantities or remove products. Each item can carry its own note."
+              title="Request draft services"
+              description="Adjust quantities or remove services. Each item can carry its own note."
               motionEnabled={motionEnabled}
             >
               <div className="divide-y divide-violet-100">
@@ -262,6 +262,10 @@ export default function PurchaseQuotePage() {
                         <FramedImage
                           media={item.productImage}
                           alt={item.productTitle}
+                          width={128}
+                          height={128}
+                          loading="lazy"
+                          sizes="64px"
                           className="h-full w-full object-cover"
                           fallbackTransform={{ fit: 'cover' }}
                         />
@@ -339,14 +343,14 @@ export default function PurchaseQuotePage() {
                           </div>
                         </div>
 
-                        {/* Item note */}
+                        {/* Service note */}
                         <div>
                           <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#4b3a63]">
-                            Item note
+                            Service note
                           </label>
                           <textarea
                             rows={2}
-                            placeholder="Optional note for the sales team…"
+                            placeholder="Optional note for the Eventies team..."
                             className="form-field resize-none"
                             value={item.note}
                             onChange={event => purchaseQuote.updateNote(item.productSlug, event.target.value)}
@@ -360,13 +364,13 @@ export default function PurchaseQuotePage() {
 
               <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
                 <Link to="/products" className="btn-outline !rounded-[12px] !px-4 !py-2 !text-[12px]">
-                  Add more products
+                  Add more services
                 </Link>
                 <button
                   type="button"
                   onClick={() => {
                     purchaseQuote.clearDraft()
-                    toast('Purchase quote draft cleared from this device.', 'success')
+                    toast('Purchase quote request draft cleared from this device.', 'success')
                   }}
                   className="btn-outline !rounded-[12px] !px-4 !py-2 !text-[12px]"
                 >
@@ -378,9 +382,9 @@ export default function PurchaseQuotePage() {
             {/* 02 — CONTACT & DELIVERY */}
             <QuoteSection
               index="02"
-              eyebrow="CONTACT & DELIVERY"
-              title="Where should we reach you?"
-              description="The sales team uses these details to follow up on your RFQ."
+              eyebrow="CONTACT & REQUEST DETAILS"
+              title="Where should the Eventies team reach you?"
+              description="The Eventies team uses these details to review and follow up on your request."
               motionEnabled={motionEnabled}
               delay={0.08}
             >
@@ -400,7 +404,7 @@ export default function PurchaseQuotePage() {
           >
             <div className="glass !rounded-[22px] p-5 xl:sticky xl:top-24">
               <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#7126e3]">
-                Quote Draft
+                Purchase Quote Request Draft
               </div>
 
               <div className="mt-3 flex items-end gap-2">
@@ -412,7 +416,7 @@ export default function PurchaseQuotePage() {
                 </span>
               </div>
               <div className="mt-1 text-[0.85rem] text-[#6b5a82]">
-                across {purchaseQuote.items.length} product{purchaseQuote.items.length === 1 ? '' : 's'}
+                across {purchaseQuote.items.length} service{purchaseQuote.items.length === 1 ? '' : 's'}
               </div>
 
               {/* Breakdown — vertical mini-rows */}
@@ -430,7 +434,7 @@ export default function PurchaseQuotePage() {
               </div>
 
               <div className="mt-4 rounded-[12px] bg-violet-50 px-3.5 py-3 text-[0.8rem] leading-5 text-[#4b3a63]">
-                Drafts stay local until you send. RFQs don't reserve inventory.
+                Drafts stay local until you submit. Requests do not reserve inventory or confirm pricing.
               </div>
 
               <div className="mt-5 space-y-2.5">
@@ -447,7 +451,7 @@ export default function PurchaseQuotePage() {
                     </>
                   ) : (
                     <>
-                      Send RFQ
+                      Submit Purchase Quote Request
                       <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
                     </>
                   )}
@@ -465,7 +469,7 @@ export default function PurchaseQuotePage() {
                     className="btn-outline !w-full !rounded-[14px] !py-2.5 !text-[12px]"
                   >
                     <ShoppingCart className="h-3.5 w-3.5" strokeWidth={2} />
-                    Open Rental Cart
+                    Open Rental Request Draft
                   </Link>
                 )}
                 <Link

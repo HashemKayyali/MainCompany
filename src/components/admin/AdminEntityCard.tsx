@@ -165,7 +165,7 @@ export default function AdminEntityCard({
 
             <div className="min-w-0 space-y-1.25">
               <div className={cn('min-w-0 space-y-0.5', titleBlockClassName)}>
-                <div className={cn(titleClampClass, 'font-display text-[1rem] font-bold leading-tight', isDark ? 'text-white' : 'text-gray-900')}>
+                <div className={cn(titleClampClass, 'font-sans text-[1rem] font-bold leading-tight', isDark ? 'text-white' : 'text-gray-900')}>
                   {title}
                 </div>
 
@@ -262,7 +262,7 @@ export default function AdminEntityCard({
 
         <div className={cn('relative flex min-w-0 flex-1 flex-col gap-3 p-3.5', bodyClassName)}>
           <div className={cn('space-y-1', titleBlockClassName)}>
-          <div className={cn(gridTitleClampClass, 'font-display text-[1.02rem] font-extrabold leading-tight tracking-[-0.01em]', isDark ? 'text-white' : 'text-[#07041a]')}>
+          <div className={cn(gridTitleClampClass, 'font-sans text-[1.02rem] font-extrabold leading-tight tracking-[-0.01em]', isDark ? 'text-white' : 'text-[#07041a]')}>
             {title}
           </div>
 
@@ -289,7 +289,7 @@ export default function AdminEntityCard({
                 <div className={cn('text-[8.5px] font-mono font-bold uppercase tracking-[0.14em]', gridFactLabelClass)}>
                   {fact.label}
                 </div>
-                <div className={cn('mt-1 min-w-0 truncate text-[0.92rem] font-display font-bold leading-tight', gridFactValueClass)}>
+                <div className={cn('mt-1 min-w-0 truncate text-[0.92rem] font-sans font-bold leading-tight', gridFactValueClass)}>
                   {fact.value}
                 </div>
               </div>

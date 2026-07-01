@@ -234,7 +234,7 @@ export default function AdminRequestDetailsPage() {
           <div className={cn('text-[10px] font-mono uppercase tracking-[0.22em]', isDark ? 'text-rose-200/70' : 'text-rose-600/80')}>
             Request Details
           </div>
-          <div className={cn('mt-3 font-display text-[1.25rem] font-black', isDark ? 'text-white' : 'text-gray-900')}>
+          <div className={cn('mt-3 font-sans text-[1.25rem] font-black', isDark ? 'text-white' : 'text-gray-900')}>
             We couldn&apos;t load this request
           </div>
           <p className="mt-3 max-w-2xl leading-7">{loadError}</p>
@@ -252,7 +252,7 @@ export default function AdminRequestDetailsPage() {
                   <div className={cn('text-[12px] font-mono uppercase tracking-[0.18em]', isDark ? 'text-purple-100/50' : 'text-gray-400')}>
                     {formatRequestTypeLabel(type as RequestType)}
                   </div>
-                  <div className={cn('mt-2 text-[1.85rem] font-display font-black leading-tight sm:text-[2rem]', isDark ? 'text-white' : 'text-gray-900')}>
+                  <div className={cn('mt-2 text-[1.85rem] font-sans font-black leading-tight sm:text-[2rem]', isDark ? 'text-white' : 'text-gray-900')}>
                     {request.requestNumber}
                   </div>
                   <div className={cn('mt-2 break-words text-[0.95rem] leading-7', isDark ? 'text-purple-100/66' : 'text-gray-500')}>

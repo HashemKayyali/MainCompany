@@ -209,7 +209,7 @@ export default function ProductSuggestionsCarousel({
       <div className="mb-4 flex items-end justify-between gap-4">
         <div>
           <h2 className={cn('font-display text-[1.25rem] font-black tracking-[-0.035em] sm:text-[1.55rem]', isDark ? 'text-white' : 'text-slate-950')}>
-            Similar products
+            Similar services
           </h2>
           <p className={cn('mt-1 max-w-xl text-[12.5px] leading-6', isDark ? 'text-slate-400/88' : 'text-slate-500')}>
             More options from {categoryName || 'the same category'}.
@@ -227,7 +227,7 @@ export default function ProductSuggestionsCarousel({
                   ? 'border-white/[0.10] bg-white/[0.04] text-white/72 hover:bg-white/[0.08] hover:text-white'
                   : 'border-slate-200 bg-white text-slate-600 shadow-sm hover:border-violet-300 hover:text-violet-700'
               )}
-              aria-label="Previous similar products"
+              aria-label="Previous similar services"
             >
               <ChevronLeft size={16} />
             </button>
@@ -240,7 +240,7 @@ export default function ProductSuggestionsCarousel({
                   ? 'border-white/[0.10] bg-white/[0.04] text-white/72 hover:bg-white/[0.08] hover:text-white'
                   : 'border-slate-200 bg-white text-slate-600 shadow-sm hover:border-violet-300 hover:text-violet-700'
               )}
-              aria-label="Next similar products"
+              aria-label="Next similar services"
             >
               <ChevronRight size={16} />
             </button>
@@ -272,7 +272,7 @@ export default function ProductSuggestionsCarousel({
         onClickCapture={handleClickCapture}
         onDragStart={handleNativeDragStart}
         style={{ touchAction: canScroll ? 'pan-x pan-y' : undefined }}
-        aria-label="Similar products scroll row"
+        aria-label="Similar services scroll row"
       >
         {products.map((item, index) => (
           <div
@@ -285,8 +285,8 @@ export default function ProductSuggestionsCarousel({
               index={index}
               compact
               revealOnScroll={false}
-              imageLoading={index < 2 ? 'eager' : 'lazy'}
-              imageFetchPriority={index === 0 ? 'high' : 'auto'}
+              imageLoading="lazy"
+              imageFetchPriority="auto"
             />
           </div>
         ))}

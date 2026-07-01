@@ -4,8 +4,7 @@
 // `supabase/migrations/` (newest wins). After applying a new migration you
 // should regenerate / reconcile these types, e.g.:
 //   supabase gen types typescript --project-id <id> --schema public > src/lib/database.types.ts
-// Last reconciled against: 20260515_drop_avatar_columns.sql (avatar_* columns
-// removed from `profiles`).
+// Last reconciled against: 20260629_custom_build_categories.sql.
 // ----------------------------------------------------------------------------
 
 export type Json =
@@ -137,6 +136,73 @@ export interface Database {
           images?: string[] | null
           category?: string | null
           sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+
+      custom_builds: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          image_url: string | null
+          images: string[] | null
+          category: string | null
+          sort_order: number | null
+          is_featured: boolean | null
+          is_active: boolean | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          image_url?: string | null
+          images?: string[] | null
+          category?: string | null
+          sort_order?: number | null
+          is_featured?: boolean | null
+          is_active?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          title?: string
+          description?: string | null
+          image_url?: string | null
+          images?: string[] | null
+          category?: string | null
+          sort_order?: number | null
+          is_featured?: boolean | null
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+
+      custom_build_categories: {
+        Row: {
+          id: string
+          name: string
+          sort_order: number | null
+          is_active: boolean | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          sort_order?: number | null
+          is_active?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          name?: string
+          sort_order?: number | null
+          is_active?: boolean | null
           updated_at?: string | null
         }
         Relationships: []
@@ -725,6 +791,8 @@ export type PartRow = Database['public']['Tables']['parts']['Row']
 export type ContactSubmissionRow = Database['public']['Tables']['contact_submissions']['Row']
 export type ProductImageRow = Database['public']['Tables']['product_images']['Row']
 export type GalleryAlbumRow = Database['public']['Tables']['gallery_albums']['Row']
+export type CustomBuildRow = Database['public']['Tables']['custom_builds']['Row']
+export type CustomBuildCategoryRow = Database['public']['Tables']['custom_build_categories']['Row']
 export type RentalRequestRow = Database['public']['Tables']['rental_requests']['Row']
 export type RentalRequestItemRow = Database['public']['Tables']['rental_request_items']['Row']
 export type PurchaseQuoteRequestRow = Database['public']['Tables']['purchase_quote_requests']['Row']

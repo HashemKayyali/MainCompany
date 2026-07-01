@@ -49,7 +49,7 @@ export default function UserAvatar({
     >
       <span
         className={cn(
-          'flex h-full w-full items-center justify-center text-[0.95em] font-display font-bold',
+          'flex h-full w-full items-center justify-center text-[0.95em] font-sans font-bold',
           fallbackClassName || 'bg-[linear-gradient(135deg,#7c3aed,#c026d3)] text-white'
         )}
       >

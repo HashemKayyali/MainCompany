@@ -140,7 +140,7 @@ function SectionCard({
       )}
     >
       <div className="mb-3">
-        <h2 className={cn('font-display text-base font-bold', isDark ? 'text-white' : 'text-gray-900')}>{title}</h2>
+        <h2 className={cn('font-sans text-base font-bold', isDark ? 'text-white' : 'text-gray-900')}>{title}</h2>
         {subtitle && <p className={cn('mt-1 text-[13px] leading-5', isDark ? 'text-purple-100/64' : 'text-gray-500')}>{subtitle}</p>}
       </div>
       {children}

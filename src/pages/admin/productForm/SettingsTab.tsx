@@ -65,7 +65,7 @@ export default function SettingsTab({ form, setForm, isDark, sub, soft2, txt }: 
                   onChange={e => setForm({ ...form, saleEnabled: e.target.checked })}
                   className="h-4 w-4 rounded accent-violet-400"
                 />
-                <span className={cn('text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>Available for purchase quote</span>
+                <span className={cn('text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>Available for purchase quote request</span>
               </label>
             </div>
           </div>
@@ -138,7 +138,7 @@ export default function SettingsTab({ form, setForm, isDark, sub, soft2, txt }: 
                 </span>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <span className={sub}>Quote request status</span>
+                <span className={sub}>Purchase quote request status</span>
                 <span className={cn('font-semibold', form.saleEnabled !== false ? txt : isDark ? 'text-red-200' : 'text-red-600')}>
                   {form.saleEnabled !== false ? 'Enabled' : 'Disabled'}
                 </span>

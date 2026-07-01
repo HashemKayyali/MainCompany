@@ -121,7 +121,7 @@ export default function AdminRequestsPage() {
                     : 'bg-gray-100 text-gray-600 ring-1 ring-inset ring-gray-200'
               )}
             >
-              {value === 'all' ? 'All' : value === 'rental' ? 'Rental Requests' : 'Purchase Quotes'}
+              {value === 'all' ? 'All Requests' : value === 'rental' ? 'Rental Requests' : 'Purchase Quote Requests'}
             </button>
           ))}
         </div>
@@ -157,7 +157,7 @@ export default function AdminRequestsPage() {
             <div className={cn('text-[10px] font-mono uppercase tracking-[0.22em]', isDark ? 'text-rose-200/70' : 'text-rose-600/80')}>
               Request Center
             </div>
-            <div className={cn('mt-3 font-display text-[1.25rem] font-black', isDark ? 'text-white' : 'text-gray-900')}>
+            <div className={cn('mt-3 font-sans text-[1.25rem] font-black', isDark ? 'text-white' : 'text-gray-900')}>
               Requests are not ready on this environment
             </div>
             <p className="mt-3 max-w-2xl leading-7">{loadError}</p>

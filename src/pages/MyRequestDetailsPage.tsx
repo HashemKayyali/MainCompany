@@ -113,7 +113,7 @@ export default function MyRequestDetailsPage() {
                 Back to My Requests
               </Link>
               <Link to="/products" className="btn-outline !rounded-xl !px-4 !py-2 !text-sm">
-                Browse Products
+                Browse Services
               </Link>
             </div>
           </div>
@@ -130,7 +130,7 @@ export default function MyRequestDetailsPage() {
                 Back to My Requests
               </Link>
               <Link to="/products" className="btn-outline !rounded-xl !px-4 !py-2 !text-sm">
-                Browse Products
+                Browse Services
               </Link>
             </div>
           </div>
@@ -174,7 +174,7 @@ export default function MyRequestDetailsPage() {
               {'grandTotal' in request && (
                 <div className="mx-5 mb-5 flex items-center justify-between rounded-[14px] bg-[linear-gradient(135deg,#7c3aed,#9d6bff)] px-4 py-3.5 sm:mx-6 sm:mb-6">
                   <span className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-white/80">
-                    Grand Total
+                    Estimated Total
                   </span>
                   <span className="font-display text-[1.15rem] font-black text-white">
                     {request.grandTotal.toFixed(2)} JOD
@@ -186,7 +186,7 @@ export default function MyRequestDetailsPage() {
             {/* Items */}
             <div className={sectionCard}>
               <div className="mb-4 flex items-center justify-between border-b border-violet-100 pb-3">
-                <h2 className="font-display text-[1.05rem] font-extrabold text-[#1a0b3d]">Items</h2>
+                <h2 className="font-display text-[1.05rem] font-extrabold text-[#1a0b3d]">Services</h2>
                 <span className="rounded-full bg-violet-100 px-2.5 py-1 text-[11px] font-bold text-[#7126e3]">
                   {request.items.length} item{request.items.length === 1 ? '' : 's'}
                 </span>

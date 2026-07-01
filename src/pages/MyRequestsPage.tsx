@@ -16,7 +16,7 @@ type RequestTab = 'all' | RequestType
 export default function MyRequestsPage() {
   usePageMeta({
     title: 'My Requests',
-    description: 'Track rental requests and purchase quotes in one place.',
+    description: 'Track rental requests and purchase quote requests in one place.',
     noIndex: true,
   })
 
@@ -77,7 +77,7 @@ export default function MyRequestsPage() {
               Sign in to View Your Requests
             </h1>
             <p className={cn('mt-4 text-sm leading-7', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
-              Rental requests and purchase quotes are tied to your account.
+              Rental requests and purchase quote requests are tied to your account.
             </p>
             <div className="mt-6">
               <Link to={`/login?redirect=${encodeURIComponent('/my-requests')}`} className="btn-primary !rounded-xl !px-5 !py-3 !text-sm">
@@ -97,7 +97,7 @@ export default function MyRequestsPage() {
           <span className="section-label">// My Requests</span>
           <h1 className={cn('section-title !text-left', !isDark && 'text-gray-900')}>Track Every Request</h1>
           <p className={cn('mt-2.5 max-w-2xl text-[0.96rem] leading-6.5', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
-            Review rental requests, purchase quotes, and follow their latest status updates from one place.
+            Review rental requests, purchase quote requests, and follow their latest status updates from one place.
           </p>
         </div>
 
@@ -118,7 +118,7 @@ export default function MyRequestsPage() {
                     : 'bg-gray-100 text-gray-600'
               )}
             >
-              {value === 'all' ? 'All' : value === 'rental' ? 'Rental Requests' : 'Purchase Quotes'}
+              {value === 'all' ? 'All Requests' : value === 'rental' ? 'Rental Requests' : 'Purchase Quote Requests'}
             </button>
           ))}
         </div>
@@ -129,14 +129,14 @@ export default function MyRequestsPage() {
               Local Draft
             </div>
             <h2 className={cn('mt-3 font-display text-[1.2rem] font-black', isDark ? 'text-white' : 'text-gray-900')}>
-              Your purchase quote draft is saved on this device
+              Your purchase quote request draft is saved on this device
             </h2>
             <p className={cn('mt-2.5 text-[0.95rem] leading-6.5', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
-              Drafts do not appear in My Requests until you submit them. You currently have {purchaseQuote.itemCount} unit(s) saved across {purchaseQuote.items.length} product(s).
+              Drafts do not appear in My Requests until you submit them. You currently have {purchaseQuote.itemCount} unit(s) saved across {purchaseQuote.items.length} service(s).
             </p>
             <div className="mt-4">
               <Link to="/purchase-quote" className="btn-outline !rounded-[14px] !px-4 !py-2 !text-[0.92rem]">
-                Open Quote Draft
+                Open Request Draft
               </Link>
             </div>
           </div>
@@ -151,7 +151,7 @@ export default function MyRequestsPage() {
               Loading your requests...
             </div>
             <div className={cn('mt-2 text-sm', isDark ? 'text-purple-100/60' : 'text-gray-500')}>
-              Pulling your latest rental and quote activity.
+              Pulling your latest rental and purchase quote request activity.
             </div>
           </div>
         ) : loadError ? (
@@ -170,7 +170,7 @@ export default function MyRequestsPage() {
                 Refresh
               </button>
               <Link to="/products" className="btn-outline !rounded-xl !px-4 !py-2 !text-[0.84rem]">
-                Browse Products
+                Browse Services
               </Link>
             </div>
           </div>
@@ -184,12 +184,12 @@ export default function MyRequestsPage() {
             </h2>
             <p className={cn('mt-3 text-sm leading-7', isDark ? 'text-purple-100/68' : 'text-gray-500')}>
               {requests.length
-                ? 'Try another tab to review the rest of your rental requests and purchase quotes.'
-                : 'Add products to the rental cart or build a purchase quote draft, then track every update from here.'}
+                ? 'Try another tab to review the rest of your rental requests and purchase quote requests.'
+                : 'Add services to your request draft, submit your request, and track every update from here.'}
             </p>
             <div className="mt-5">
               <Link to="/products" className="btn-outline !rounded-xl !px-4 !py-2 !text-[0.84rem]">
-                Browse Products
+                Browse Services
               </Link>
             </div>
           </div>

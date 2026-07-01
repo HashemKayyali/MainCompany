@@ -24,7 +24,7 @@ export type DesktopNavItem = {
 export const MOBILE_NAV = [
   { to: '/', label: 'Home' },
   { to: '/#categories', label: 'Categories' },
-  { to: '/products', label: 'Products' },
+  { to: '/products', label: 'Services' },
   { to: '/customers', label: 'Customers' },
   { to: '/gallery', label: 'Gallery' },
   { to: '/about', label: 'About' },
@@ -34,7 +34,7 @@ export const MOBILE_NAV = [
 export const MOBILE_CHIPS = [
   { to: '/', label: 'Home' },
   { to: '/#categories', label: 'Categories' },
-  { to: '/products', label: 'Products' },
+  { to: '/products', label: 'Services' },
   { to: '/customers', label: 'Customers' },
   { to: '/gallery', label: 'Gallery' },
   { to: '/about', label: 'About' },
@@ -44,7 +44,7 @@ export const MOBILE_CHIPS = [
 export const DESKTOP_NAV: DesktopNavItem[] = [
   { key: 'home', label: 'Home', to: '/' },
   { key: 'categories', label: 'Categories', to: '/#categories' },
-  { key: 'products', label: 'Products', to: '/products' },
+  { key: 'products', label: 'Services', to: '/products' },
   { key: 'customers', label: 'Customers', to: '/customers' },
   { key: 'gallery', label: 'Gallery', to: '/gallery' },
   { key: 'about', label: 'About', to: '/about' },

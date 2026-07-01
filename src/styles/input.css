@@ -1,3 +1,5 @@
+@import url('https://api.fontshare.com/v2/css?f[]=zodiak@400,500,600,700,800,900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -137,7 +139,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Sora', 'Alexandria', system-ui, sans-serif;
+    font-family: 'Zodiak', 'Alexandria', system-ui, serif;
     letter-spacing: -0.03em;
     color: var(--ink-900);
   }
@@ -170,6 +172,33 @@
 }
 
 @layer components {
+
+  .hero-title-silver {
+    color: #f8fbff;
+    background-image: linear-gradient(180deg, #ffffff 0%, #f5f7fb 30%, #d8dee8 63%, #9ca5b6 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 0.25px rgba(255, 255, 255, 0.16);
+    text-shadow: none;
+    filter:
+      drop-shadow(0 2px 0 rgba(25, 29, 42, 0.42))
+      drop-shadow(0 13px 22px rgba(0, 0, 0, 0.38));
+  }
+
+  .hero-title-silver span {
+    color: inherit;
+    background-image: inherit;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-title-silver-on-light {
+    filter:
+      drop-shadow(0 2px 0 rgba(25, 4, 83, 0.36))
+      drop-shadow(0 14px 24px rgba(25, 4, 83, 0.28));
+  }
 
   /* ─── Glass surface ─── */
   .glass {
@@ -259,12 +288,15 @@
 
   /* ─── Section title ─── */
   .section-title {
-    font-family: 'Sora', 'Alexandria', sans-serif;
+    font-family: 'Zodiak', 'Alexandria', system-ui, serif;
     font-size: clamp(1.85rem, 4.4vw, 2.85rem);
     font-weight: 800;
     margin-top: 12px;
+    margin-bottom: -0.04em;
+    padding-bottom: 0.08em;
     letter-spacing: -0.045em;
-    line-height: 0.98;
+    line-height: 1.08;
+    overflow: visible;
     color: var(--ink-900);
   }
 
@@ -564,8 +596,18 @@
 
   /* ─── Site container ─── */
   .site-container {
-    width: min(114rem, calc(100% - clamp(0.85rem, 1.8vw, 1.5rem)));
-    max-width: calc(100vw - clamp(0.85rem, 1.8vw, 1.5rem));
+    width: min(140rem, calc(100% - clamp(0.5rem, 1.1vw, 1rem)));
+    max-width: calc(100vw - clamp(0.5rem, 1.1vw, 1rem));
+    margin-inline: auto;
+    min-width: 0;
+  }
+
+  /* ─── Wide site container (homepage bento) ───
+     A slimmer max-width than the default with a comfortable side margin,
+     so wide bento grids sit on a confident, gallery-like gutter. */
+  .site-container-wide {
+    width: min(140rem, calc(100% - clamp(0.5rem, 1.1vw, 1rem)));
+    max-width: calc(100vw - clamp(0.5rem, 1.1vw, 1rem));
     margin-inline: auto;
     min-width: 0;
   }
@@ -811,7 +853,7 @@
   }
 
   .logo-cloud-row--fwd {
-    animation: logo-cloud-fwd 48s linear infinite;
+    animation: logo-cloud-fwd 52s linear infinite;
   }
 
   .logo-cloud-row--rev {
@@ -825,7 +867,7 @@
   }
 
   html.perf-low .logo-cloud-row--fwd {
-    animation-duration: 60s;
+    animation-duration: 66s;
   }
 
   html.perf-low .logo-cloud-row--rev {
@@ -833,7 +875,7 @@
   }
 
   @media (max-width: 640px) {
-    html.perf-low .logo-cloud-row--fwd { animation-duration: 64s; }
+    html.perf-low .logo-cloud-row--fwd { animation-duration: 72s; }
     html.perf-low .logo-cloud-row--rev { animation-duration: 72s; }
   }
 
@@ -950,7 +992,7 @@
 
     .section-title {
       font-size: clamp(1.85rem, 8vw, 2.3rem);
-      line-height: 1.0;
+      line-height: 1.1;
     }
 
     .btn-primary,
@@ -967,9 +1009,10 @@
       font-size: 13.5px;
     }
 
-    .site-container {
-      width: min(100%, calc(100% - 0.85rem));
-      max-width: calc(100vw - 0.85rem);
+    .site-container,
+    .site-container-wide {
+      width: min(100%, calc(100% - 0.5rem));
+      max-width: calc(100vw - 0.5rem);
     }
 
     .site-shell-pad {

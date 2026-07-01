@@ -20,7 +20,7 @@ export function useRequireAuthAction() {
     async ({
       redirectTo,
       title = 'Sign in required',
-      message = 'Please sign in first. Your cart and request draft will stay saved on this device.',
+      message = 'Please sign in first. Your request drafts will stay saved on this device.',
     }: RequireAuthActionOptions = {}) => {
       if (authUser) return true
 

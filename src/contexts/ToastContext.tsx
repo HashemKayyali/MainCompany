@@ -1,5 +1,7 @@
 import { createContext, useContext, useMemo, useRef, useState, useCallback, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useI18n } from './LanguageContext'
+import { cn } from '../utils/cn'
 
 type ToastType = 'success' | 'error' | 'info'
 
@@ -10,6 +12,7 @@ interface ToastCtx { toast: (message: string, type?: ToastType) => void }
 const Ctx = createContext<ToastCtx>({} as ToastCtx)
 
 export function ToastProvider({ children }: { children: ReactNode }) {
+  const { dir, translateText } = useI18n()
   const [toasts, setToasts] = useState<Toast[]>([])
   const idRef = useRef(0)
 
@@ -30,7 +33,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <Ctx.Provider value={value}>
       {children}
-      <div className="fixed bottom-6 right-6 z-[999] space-y-2 max-w-sm pointer-events-none">
+      <div className={cn('fixed bottom-6 z-[999] max-w-sm space-y-2 pointer-events-none', dir === 'rtl' ? 'left-6' : 'right-6')}>
         <AnimatePresence>
           {toasts.map(t => (
             <motion.div
@@ -40,7 +43,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               className={`px-4 py-3 rounded-xl border backdrop-blur-xl text-sm font-medium pointer-events-auto ${colors[t.type]}`}
             >
-              {t.type === 'success' && '✅ '}{t.type === 'error' && '❌ '}{t.message}
+              {t.type === 'success' && '✅ '}{t.type === 'error' && '❌ '}{translateText(t.message)}
             </motion.div>
           ))}
         </AnimatePresence>

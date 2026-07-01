@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from './ThemeContext'
+import { useI18n } from './LanguageContext'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
 /* ── Types ── */
@@ -96,6 +97,7 @@ function DialogOverlay({
   onCancel: () => void
 }) {
   const { isDark } = useTheme()
+  const { t, translateText, dir } = useI18n()
   useBodyScrollLock(true)
 
   const isAlert = dialog.type === 'alert'
@@ -112,8 +114,12 @@ function DialogOverlay({
   }, [isAlert, onCancel, onConfirm])
   const variant = dialog.variant || 'danger'
 
-  const confirmLabel = dialog.confirmLabel || (isAlert ? 'OK' : 'Delete')
-  const cancelLabel = dialog.cancelLabel || 'Cancel'
+  const confirmLabel = dialog.confirmLabel
+    ? translateText(dialog.confirmLabel)
+    : isAlert
+      ? t('admin.dialog.ok')
+      : t('admin.dialog.delete')
+  const cancelLabel = dialog.cancelLabel ? translateText(dialog.cancelLabel) : t('admin.dialog.cancel')
 
   const confirmCls =
     variant === 'danger'
@@ -133,7 +139,7 @@ function DialogOverlay({
     : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" data-native-scroll>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" data-native-scroll dir={dir}>
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -158,11 +164,11 @@ function DialogOverlay({
       >
         {/* Title */}
         <h3
-          className={`font-display text-lg font-bold ${
+          className={`font-sans text-lg font-bold ${
             isDark ? 'text-white' : 'text-gray-900'
           }`}
         >
-          {dialog.title}
+          {translateText(dialog.title)}
         </h3>
 
         {/* Message */}
@@ -171,11 +177,11 @@ function DialogOverlay({
             isDark ? 'text-purple-200/70' : 'text-gray-500'
           }`}
         >
-          {dialog.message}
+          {translateText(dialog.message)}
         </p>
 
         {/* Actions */}
-        <div className="flex items-center gap-3 mt-6 justify-end">
+        <div className="mt-6 flex items-center justify-end gap-3">
           {!isAlert && (
             <button
               onClick={onCancel}

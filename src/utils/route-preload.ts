@@ -13,14 +13,8 @@ function lazyRoute<T extends ComponentType<any>>(importer: RouteImporter<T>) {
 }
 
 export const routeImporters = {
-  home: () => import('../pages/HomePage'),
-  products: () => import('../pages/ProductsPage'),
   category: () => import('../pages/CategoryPage'),
   productDetails: () => import('../pages/ProductDetailsPage'),
-  customers: () => import('../pages/CustomersPage'),
-  gallery: () => import('../pages/GalleryPage'),
-  about: () => import('../pages/AboutPage'),
-  contact: () => import('../pages/ContactPage'),
   notFound: () => import('../pages/NotFoundPage'),
   authCallback: () => import('../pages/AuthCallback'),
   profile: () => import('../pages/ProfilePage'),
@@ -38,6 +32,7 @@ export const routeImporters = {
   adminParts: () => import('../pages/admin/AdminPartsPage'),
   adminCustomers: () => import('../pages/admin/AdminCustomersPage'),
   adminCategories: () => import('../pages/admin/AdminCategoriesPage'),
+  adminCustomBuilds: () => import('../pages/admin/AdminCustomBuildsPage'),
   adminAdmins: () => import('../pages/admin/AdminAdminsPage'),
   adminUsers: () => import('../pages/admin/AdminUsersPage'),
   adminLogs: () => import('../pages/admin/AdminLogsPage'),
@@ -47,14 +42,8 @@ export const routeImporters = {
 } as const
 
 export const lazyRoutes = {
-  HomePage: lazyRoute(routeImporters.home),
-  ProductsPage: lazyRoute(routeImporters.products),
   CategoryPage: lazyRoute(routeImporters.category),
   ProductDetailsPage: lazyRoute(routeImporters.productDetails),
-  CustomersPage: lazyRoute(routeImporters.customers),
-  GalleryPage: lazyRoute(routeImporters.gallery),
-  AboutPage: lazyRoute(routeImporters.about),
-  ContactPage: lazyRoute(routeImporters.contact),
   NotFoundPage: lazyRoute(routeImporters.notFound),
   AuthCallback: lazyRoute(routeImporters.authCallback),
   ProfilePage: lazyRoute(routeImporters.profile),
@@ -72,6 +61,7 @@ export const lazyRoutes = {
   AdminPartsPage: lazyRoute(routeImporters.adminParts),
   AdminCustomersPage: lazyRoute(routeImporters.adminCustomers),
   AdminCategoriesPage: lazyRoute(routeImporters.adminCategories),
+  AdminCustomBuildsPage: lazyRoute(routeImporters.adminCustomBuilds),
   AdminAdminsPage: lazyRoute(routeImporters.adminAdmins),
   AdminUsersPage: lazyRoute(routeImporters.adminUsers),
   AdminLogsPage: lazyRoute(routeImporters.adminLogs),
@@ -80,24 +70,70 @@ export const lazyRoutes = {
   AdminRequestDetailsPage: lazyRoute(routeImporters.adminRequestDetails),
 } as const
 
+// Main public pages are eager in router.tsx so hero-page transitions do not wait
+// for route chunks or restart the persistent hero background.
+const EAGER_PUBLIC_PATHS = new Set([
+  '/',
+  '/products',
+  '/custom-builds',
+  '/categories',
+  '/customers',
+  '/gallery',
+  '/about',
+  '/contact',
+])
+
 const PUBLIC_ROUTE_PRELOADERS: Record<string, (() => Promise<unknown>) | undefined> = {
-  '/': routeImporters.home,
-  '/products': routeImporters.products,
-  '/customers': routeImporters.customers,
-  '/gallery': routeImporters.gallery,
-  '/about': routeImporters.about,
-  '/contact': routeImporters.contact,
+  '/profile': routeImporters.profile,
+  '/rental-cart': routeImporters.rentalCart,
+  '/checkout': routeImporters.checkout,
+  '/purchase-quote': routeImporters.purchaseQuote,
+  '/my-requests': routeImporters.myRequests,
+  '/login': undefined,
+  '/register': undefined,
+  '/reset-password': routeImporters.resetPassword,
+  '/forgot-password': routeImporters.resetPassword,
+  '/update-password': routeImporters.updatePassword,
 }
 
-const PRIORITY_PUBLIC_PATHS = ['/products', '/contact'] as const
-const SECONDARY_PUBLIC_PATHS = ['/customers', '/gallery', '/about'] as const
+const PUBLIC_ROUTE_PREFIX_PRELOADERS: Array<[string, () => Promise<unknown>]> = [
+  ['/products/', routeImporters.productDetails],
+  ['/categories/', routeImporters.category],
+  ['/order-summary/', routeImporters.orderSummary],
+  ['/my-requests/', routeImporters.myRequestDetails],
+]
+
+const SECONDARY_PUBLIC_PATHS = ['/rental-cart', '/purchase-quote', '/my-requests', '/profile'] as const
 
 const warmedPaths = new Set<string>()
 let commonRoutesWarmed = false
+let linkPreloadListenersInstalled = false
+
+function normalizeRoutePath(path: string) {
+  if (!path) return ''
+
+  try {
+    const url = path.startsWith('http')
+      ? new URL(path)
+      : new URL(path, window.location.origin)
+
+    if (url.origin !== window.location.origin) return ''
+    return url.pathname
+  } catch {
+    return path.split('?')[0].split('#')[0]
+  }
+}
+
+function importerForPath(path: string) {
+  if (EAGER_PUBLIC_PATHS.has(path)) return undefined
+  return PUBLIC_ROUTE_PRELOADERS[path] ?? PUBLIC_ROUTE_PREFIX_PRELOADERS.find(([prefix]) => path.startsWith(prefix))?.[1]
+}
 
 export function preloadRoute(path: string) {
-  const normalizedPath = path.split('?')[0].split('#')[0]
-  const importer = PUBLIC_ROUTE_PRELOADERS[normalizedPath]
+  if (typeof window === 'undefined') return
+
+  const normalizedPath = normalizeRoutePath(path)
+  const importer = importerForPath(normalizedPath)
   if (!importer || warmedPaths.has(normalizedPath)) return
 
   warmedPaths.add(normalizedPath)
@@ -114,10 +150,7 @@ export function warmCommonRoutes() {
   if (commonRoutesWarmed || typeof window === 'undefined') return
   commonRoutesWarmed = true
 
-  const warmPriority = () => preloadRoutes(PRIORITY_PUBLIC_PATHS)
   const warmSecondary = () => preloadRoutes(SECONDARY_PUBLIC_PATHS)
-
-  setTimeout(warmPriority, 120)
 
   type WindowWithIdle = Window & {
     requestIdleCallback?: (
@@ -127,9 +160,40 @@ export function warmCommonRoutes() {
   }
   const w = window as WindowWithIdle
   if (typeof w.requestIdleCallback === 'function') {
-    w.requestIdleCallback(() => warmSecondary(), { timeout: 1400 })
+    w.requestIdleCallback(() => warmSecondary(), { timeout: 900 })
     return
   }
 
-  setTimeout(warmSecondary, 360)
+  setTimeout(warmSecondary, 240)
+}
+
+export function installLinkPreloadListeners() {
+  if (linkPreloadListenersInstalled || typeof document === 'undefined') return () => {}
+  linkPreloadListenersInstalled = true
+
+  const preloadFromEvent = (event: Event) => {
+    const target = event.target
+    if (!(target instanceof Element)) return
+
+    const link = target.closest('a[href]')
+    if (!(link instanceof HTMLAnchorElement)) return
+    if (link.target && link.target !== '_self') return
+    if (link.download) return
+
+    preloadRoute(link.href)
+  }
+
+  const options: AddEventListenerOptions = { capture: true, passive: true }
+  document.addEventListener('pointerover', preloadFromEvent, options)
+  document.addEventListener('focusin', preloadFromEvent, options)
+  document.addEventListener('touchstart', preloadFromEvent, options)
+  document.addEventListener('pointerdown', preloadFromEvent, options)
+
+  return () => {
+    document.removeEventListener('pointerover', preloadFromEvent, options)
+    document.removeEventListener('focusin', preloadFromEvent, options)
+    document.removeEventListener('touchstart', preloadFromEvent, options)
+    document.removeEventListener('pointerdown', preloadFromEvent, options)
+    linkPreloadListenersInstalled = false
+  }
 }

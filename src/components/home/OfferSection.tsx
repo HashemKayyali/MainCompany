@@ -96,7 +96,7 @@ function ViewAllTile({ isDark, reducedVisualEffects }: { isDark: boolean; reduce
             </div>
             <h3
               className={cn(
-                'font-display text-[1rem] font-bold tracking-tight',
+                'font-sans text-[1rem] font-bold tracking-tight',
                 isDark ? 'text-white' : 'text-slate-900'
               )}
             >
@@ -130,7 +130,7 @@ function ViewAllTile({ isDark, reducedVisualEffects }: { isDark: boolean; reduce
           </div>
           <h3
             className={cn(
-              'font-display text-[1.08rem] font-bold leading-tight tracking-[-0.02em] sm:text-[1.13rem]',
+              'font-sans text-[1.08rem] font-bold leading-tight tracking-[-0.02em] sm:text-[1.13rem]',
               isDark ? 'text-white/92' : 'text-slate-900'
             )}
           >
