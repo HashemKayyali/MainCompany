@@ -66,7 +66,7 @@ function FaqItem({
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="flex w-full items-center gap-4 px-4 py-4 text-left sm:px-5"
+        className="flex w-full items-center gap-4 px-4 py-3.5 text-left sm:px-5"
       >
         <span
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-sans text-[12px] font-black transition-all duration-300 ${
@@ -114,10 +114,11 @@ export default function FAQ() {
   return (
     <section className="site-section">
       <div className="site-container-wide">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-14">
+        <div className="grid grid-cols-1 gap-6 lg:gap-8">
           {/* Left: heading panel */}
           <Reveal y={24}>
-            <div className="lg:sticky lg:top-28">
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-end">
+              <div>
               <div className="mb-4 inline-flex items-center gap-2.5">
                 <span className="h-px w-7 bg-gradient-to-r from-transparent to-violet-400" aria-hidden="true" />
                 <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-violet-600">{translateText('FAQ')}</span>
@@ -131,9 +132,10 @@ export default function FAQ() {
               <p className="mt-4 max-w-md text-[14.5px] leading-[1.72] text-ink-600">
                 {translateText('Everything you need to know about planning, requesting, and providing event services on Eventies.')}
               </p>
+              </div>
 
               <div
-                className="mt-7 overflow-hidden rounded-[20px] border border-white/10 p-6"
+                className="overflow-hidden rounded-[20px] border border-white/10 p-6"
                 style={{
                   background: 'linear-gradient(150deg, #2a0a63 0%, #4912a0 55%, #7126e3 100%)',
                   boxShadow: '0 30px 64px -34px rgba(89,23,196,0.6)',
@@ -158,7 +160,7 @@ export default function FAQ() {
 
           {/* Right: accordion */}
           <Reveal y={24} delay={0.08}>
-            <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {FAQS.map((faq, index) => (
                 <FaqItem
                   key={faq.q}

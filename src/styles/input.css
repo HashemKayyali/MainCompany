@@ -1011,8 +1011,8 @@
 
     .site-container,
     .site-container-wide {
-      width: min(100%, calc(100% - 0.5rem));
-      max-width: calc(100vw - 0.5rem);
+      width: min(100%, calc(100% - 1rem));
+      max-width: calc(100vw - 1rem);
     }
 
     .site-shell-pad {

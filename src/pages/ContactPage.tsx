@@ -253,7 +253,7 @@ function FaqAccordion({ items }: { items: { q: string; a: string }[] }) {
   const [open, setOpen] = useState(0)
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-3">
+    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       {items.map((item, index) => {
         const isOpen = open === index
         return (
@@ -269,7 +269,7 @@ function FaqAccordion({ items }: { items: { q: string; a: string }[] }) {
                 type="button"
                 onClick={() => setOpen(current => (current === index ? -1 : index))}
                 aria-expanded={isOpen}
-                className="flex w-full items-center gap-4 px-4 py-4 text-left sm:px-5"
+                className="flex w-full items-center gap-4 px-4 py-3.5 text-left sm:px-5"
               >
                 <span
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-sans text-[12px] font-black transition-all duration-300 ${
@@ -652,7 +652,7 @@ export default function ContactPage() {
             eyebrow="FAQ"
             title="Useful questions before you contact us"
             description="Which channel to use, what to include, and what to expect after you send a message."
-            className="mb-12"
+            className="mb-8"
           />
           <FaqAccordion items={faqs} />
         </div>

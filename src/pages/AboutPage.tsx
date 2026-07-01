@@ -257,7 +257,7 @@ function FaqAccordion({ items }: { items: { q: string; a: string }[] }) {
   const [open, setOpen] = useState(0)
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-3">
+    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       {items.map((item, index) => {
         const isOpen = open === index
         return (
@@ -273,7 +273,7 @@ function FaqAccordion({ items }: { items: { q: string; a: string }[] }) {
                 type="button"
                 onClick={() => setOpen(current => (current === index ? -1 : index))}
                 aria-expanded={isOpen}
-                className="flex w-full items-center gap-4 px-4 py-4 text-left sm:px-5"
+                className="flex w-full items-center gap-4 px-4 py-3.5 text-left sm:px-5"
               >
                 <span
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-sans text-[12px] font-black transition-all duration-300 ${
@@ -320,6 +320,8 @@ function FaqAccordion({ items }: { items: { q: string; a: string }[] }) {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AboutPage() {
+  const { translateText } = useI18n()
+
   const faqJsonLd = useMemo(
     () => ({
       '@context': 'https://schema.org',
@@ -544,7 +546,7 @@ export default function AboutPage() {
             eyebrow="Capabilities"
             title="What You Can Do with Eventies"
             description="One marketplace that takes you from browsing to a reviewed, organized request."
-            className="mb-12"
+            className="mb-8"
           />
           <Reveal y={22}>
             <div className="relative overflow-hidden rounded-[30px] border border-white/60 bg-white/78 p-5 shadow-[0_24px_60px_-42px_rgba(89,23,196,0.5)] backdrop-blur-sm sm:p-7">
@@ -753,18 +755,18 @@ export default function AboutPage() {
                   <div className="relative flex h-full flex-col">
                     <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/18 bg-white/[0.1] px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-violet-100">
                       <Sparkles className="h-3.5 w-3.5" strokeWidth={2.2} />
-                      Built for events
+                      {translateText('Built for events')}
                     </span>
                     <h3 className="mt-6 max-w-sm font-display text-3xl font-extrabold leading-tight tracking-normal text-white sm:text-4xl lg:text-[2.6rem]">
-                      Not a generic catalog with event items inside.
+                      {translateText('Not a generic catalog with event items inside.')}
                     </h3>
                     <p className="mt-4 max-w-md text-[14px] leading-[1.75] text-white/76">
-                      Eventies is shaped around rental timing, request review, local behavior, and provider coordination from the start.
+                      {translateText('Eventies is shaped around rental timing, request review, local behavior, and provider coordination from the start.')}
                     </p>
                     <div className="mt-auto grid grid-cols-3 gap-2 pt-8">
                       {['Requests', 'Review', 'Providers'].map(label => (
                         <span key={label} className="rounded-[14px] border border-white/14 bg-white/[0.08] px-3 py-3 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-white/72">
-                          {label}
+                          {translateText(label)}
                         </span>
                       ))}
                     </div>
@@ -886,7 +888,7 @@ export default function AboutPage() {
             eyebrow="FAQ"
             title="Questions worth answering before you request"
             description="How requests, pricing, availability, and review work on Eventies."
-            className="mb-12"
+            className="mb-8"
           />
           <FaqAccordion items={faqs} />
         </div>

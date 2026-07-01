@@ -133,6 +133,20 @@ const GLOBE_MARKERS: { location: [number, number]; size: number }[] = [
   { location: [1.3521, 103.8198], size: 0.05 }, // Singapore
 ]
 
+const GLOBE_TEXTURE_SRC = '/assets/globe/earth-blue-marble.jpg'
+let globeAssetsPreloadStarted = false
+
+function preloadGlobeAssets(): void {
+  if (globeAssetsPreloadStarted || typeof window === 'undefined') return
+  globeAssetsPreloadStarted = true
+
+  void import('three').catch(() => undefined)
+
+  const image = new Image()
+  image.decoding = 'async'
+  image.src = GLOBE_TEXTURE_SRC
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 type FlowParticle = {
@@ -330,6 +344,87 @@ function CornerTicks({ color = 'rgba(124,58,237,0.45)' }: { color?: string }) {
   )
 }
 
+
+function WorkSideDecor({ side }: { side: 'left' | 'right' }) {
+  const motionEnabled = useMotionEnabled()
+  const isLeft = side === 'left'
+  const sideClass = isLeft ? 'left-8 2xl:left-20' : 'right-8 2xl:right-20'
+  const cardAlign = isLeft ? 'items-start text-left' : 'items-end text-right'
+  const rowDir = isLeft ? 'flex-row' : 'flex-row-reverse'
+
+  return (
+    <div className={`pointer-events-none absolute top-1/2 z-[1] hidden -translate-y-1/2 ${sideClass} xl:block`} aria-hidden="true">
+      <div className="relative h-[300px] w-[190px] 2xl:h-[330px] 2xl:w-[230px]">
+        <div className={`absolute inset-y-8 ${isLeft ? 'left-1/2 right-0' : 'left-0 right-1/2'} rounded-full bg-gradient-to-b ${isLeft ? 'from-fuchsia-500/8 via-violet-500/8 to-cyan-400/6' : 'from-cyan-400/6 via-violet-500/8 to-fuchsia-500/8'} blur-3xl`} />
+
+        <motion.div
+          className={`absolute ${isLeft ? 'left-3 top-1' : 'right-3 top-1'} h-[112px] w-[112px] rounded-full border border-white/12 bg-white/[0.04] backdrop-blur-sm`}
+          animate={motionEnabled ? { y: [0, -7, 0], rotate: isLeft ? [0, 6, 0] : [0, -6, 0] } : undefined}
+          transition={motionEnabled ? { duration: 8.5, repeat: Infinity, ease: 'easeInOut' } : undefined}
+        >
+          <span className="absolute inset-[13px] rounded-full border border-dashed border-white/18" />
+          <span className="absolute inset-[29px] rounded-full border border-white/12" />
+          <span className="absolute inset-0 flex items-center justify-center text-fuchsia-200/90">
+            <CircuitBoard className="h-6 w-6" strokeWidth={1.8} />
+          </span>
+          <span className="absolute left-[12px] top-[40px] flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-[#16053a]/80 text-violet-100 shadow-[0_12px_28px_-20px_rgba(217,70,239,0.85)]"><Cpu className="h-3.5 w-3.5" strokeWidth={2} /></span>
+          <span className="absolute right-[10px] top-[18px] flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-[#16053a]/80 text-fuchsia-100 shadow-[0_12px_28px_-20px_rgba(217,70,239,0.85)]"><Radio className="h-3.5 w-3.5" strokeWidth={2} /></span>
+          <span className="absolute bottom-[14px] left-1/2 flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border border-white/10 bg-[#16053a]/80 text-cyan-100 shadow-[0_12px_28px_-20px_rgba(59,130,246,0.85)]"><Lightbulb className="h-3.5 w-3.5" strokeWidth={2} /></span>
+        </motion.div>
+
+        <motion.div
+          className={`absolute ${isLeft ? 'left-0 top-[138px]' : 'right-0 top-[132px]'} flex w-[170px] flex-col gap-2.5 rounded-[22px] border border-white/10 bg-white/[0.05] p-3.5 shadow-[0_26px_60px_-44px_rgba(0,0,0,0.88)] backdrop-blur-md 2xl:w-[200px]`}
+          animate={motionEnabled ? { y: [0, 8, 0] } : undefined}
+          transition={motionEnabled ? { duration: 9.5, repeat: Infinity, ease: 'easeInOut', delay: isLeft ? 0.6 : 0.2 } : undefined}
+        >
+          <div className={`flex ${rowDir} items-center gap-2`}>
+            <span className="flex h-8 w-8 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/85 to-fuchsia-500/85 text-white shadow-[0_16px_32px_-18px_rgba(217,70,239,0.92)]">
+              {isLeft ? <Wrench className="h-4 w-4" strokeWidth={2.2} /> : <Cpu className="h-4 w-4" strokeWidth={2.2} />}
+            </span>
+            <div className={`flex flex-1 flex-col ${cardAlign}`}>
+              <span className="h-2 w-14 rounded-full bg-white/70" />
+              <span className="mt-2 h-1.5 w-20 rounded-full bg-white/18" />
+            </div>
+          </div>
+          <div className="rounded-[16px] border border-white/10 bg-[#12052f]/55 p-2.5">
+            <div className={`flex ${rowDir} items-center gap-2`}>
+              <span className="h-2 w-2 rounded-full bg-fuchsia-300 shadow-[0_0_14px_rgba(244,114,182,0.95)]" />
+              <span className="h-1.5 flex-1 rounded-full bg-white/12" />
+            </div>
+            <div className={`mt-2.5 flex ${rowDir} items-center gap-2`}>
+              <span className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_14px_rgba(103,232,249,0.95)]" />
+              <span className="h-1.5 flex-1 rounded-full bg-white/12" />
+            </div>
+            <div className={`mt-2.5 flex ${rowDir} items-center gap-2`}>
+              <span className="h-2 w-2 rounded-full bg-violet-300 shadow-[0_0_14px_rgba(196,181,253,0.95)]" />
+              <span className="h-1.5 flex-1 rounded-full bg-white/12" />
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          className={`absolute ${isLeft ? 'bottom-1 left-6' : 'bottom-1 right-6'} flex ${rowDir} gap-2`}
+          animate={motionEnabled ? { y: [0, -5, 0] } : undefined}
+          transition={motionEnabled ? { duration: 7.5, repeat: Infinity, ease: 'easeInOut', delay: isLeft ? 0.3 : 0.8 } : undefined}
+        >
+          {[CircuitBoard, Radio, Cpu].map((Icon, idx) => (
+            <span key={idx} className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-white/70 backdrop-blur-sm">
+              <Icon className="h-4 w-4" strokeWidth={2} />
+            </span>
+          ))}
+        </motion.div>
+
+        <svg className={`absolute ${isLeft ? 'left-[58px] top-[86px]' : 'right-[58px] top-[88px]'} h-[158px] w-[118px] opacity-55`} viewBox="0 0 132 188" fill="none">
+          <path d={isLeft ? 'M10 18 C54 18, 54 54, 88 54 S122 86, 80 98 S40 132, 76 150 S108 174, 120 174' : 'M122 18 C78 18, 78 54, 44 54 S10 86, 52 98 S92 132, 56 150 S24 174, 12 174'} stroke="rgba(244,114,182,0.42)" strokeWidth="2" strokeDasharray="6 7" strokeLinecap="round" />
+          <circle cx={isLeft ? '88' : '44'} cy="54" r="4.5" fill="rgba(255,255,255,0.9)" />
+          <circle cx={isLeft ? '80' : '52'} cy="98" r="4.5" fill="rgba(196,181,253,0.95)" />
+          <circle cx={isLeft ? '76' : '56'} cy="150" r="4.5" fill="rgba(103,232,249,0.95)" />
+        </svg>
+      </div>
+    </div>
+  )
+}
+
 function CustomBuildSectionBackdrop({ variant }: { variant: 'electric' | 'waves' | 'deployment' | 'circuit' | 'hero' }) {
   return (
     <div className={`custom-builds-bg custom-builds-bg--${variant} pointer-events-none absolute inset-0 z-0 overflow-hidden`} aria-hidden="true" />
@@ -388,7 +483,7 @@ function Globe() {
       const globeRadius = 1.52
       const textureLoader = new THREE.TextureLoader()
       const earthTexture = textureLoader.load(
-        '/assets/globe/earth-blue-marble.jpg',
+        GLOBE_TEXTURE_SRC,
         () => {
           if (canvasRef.current) canvasRef.current.style.opacity = '1'
         },
@@ -551,7 +646,7 @@ function Globe() {
         ref={canvasRef}
         aria-label="Realistic Earth globe showing Eventies delivery and shipping reach"
         className="relative h-full w-full"
-        style={{ contain: 'layout paint size', opacity: 0, transition: 'opacity 0.8s ease' }}
+        style={{ contain: 'layout paint size', opacity: 0, transition: 'opacity 0.25s ease' }}
       />
     </div>
   )
@@ -562,6 +657,7 @@ function LazyGlobe() {
   const [shouldRender, setShouldRender] = useState(false)
 
   useEffect(() => {
+    preloadGlobeAssets()
     if (shouldRender) return undefined
 
     const element = frameRef.current
@@ -578,7 +674,7 @@ function LazyGlobe() {
         setShouldRender(true)
         observer.disconnect()
       },
-      { rootMargin: '420px 0px' }
+      { rootMargin: '2200px 0px 1600px 0px' }
     )
 
     observer.observe(element)
@@ -608,13 +704,13 @@ function FaqAccordion({ items }: { items: { q: string; a: string }[] }) {
   const [open, setOpen] = useState(0)
 
   return (
-    <div className="mx-auto grid max-w-5xl grid-cols-1 gap-3 md:grid-cols-2">
+    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       {items.map((item, index) => {
         const isOpen = open === index
         return (
           <Reveal key={item.q} delay={Math.min(index * 0.03, 0.24)} y={14}>
             <div className={`overflow-hidden rounded-[16px] border transition-colors duration-300 ${isOpen ? 'border-violet-300/80 bg-gradient-to-br from-violet-50 to-fuchsia-50/60 shadow-[0_22px_48px_-28px_rgba(124,58,237,0.5)]' : 'border-violet-200/70 bg-white hover:border-violet-300/70'}`}>
-              <button type="button" onClick={() => setOpen(current => (current === index ? -1 : index))} aria-expanded={isOpen} className="flex w-full items-center gap-4 px-4 py-4 text-left sm:px-5">
+              <button type="button" onClick={() => setOpen(current => (current === index ? -1 : index))} aria-expanded={isOpen} className="flex w-full items-center gap-4 px-4 py-3.5 text-left sm:px-5">
                 <span className={`flex h-8 w-9 shrink-0 items-center justify-center rounded-[7px] text-[11px] font-bold transition-all duration-300 ${isOpen ? 'bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white' : 'bg-violet-100 text-violet-700'}`} style={MONO}>{String(index + 1).padStart(2, '0')}</span>
                 <span className="flex-1 font-sans text-[14px] font-bold tracking-[-0.01em] text-ink-900 sm:text-[15px]">{translateText(item.q)}</span>
                 <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${isOpen ? 'rotate-45 border-violet-300 bg-white text-violet-700' : 'border-violet-200 bg-violet-50 text-violet-600'}`}><Plus className="h-4 w-4" strokeWidth={2.4} /></span>
@@ -753,7 +849,7 @@ function CustomBuildsHeroShowcase({ motionEnabled }: { motionEnabled: boolean })
           </div>
 
           <div className="relative mt-4 overflow-hidden rounded-[16px] border border-white/12 bg-black/22 p-3">
-            <div className="mb-2 flex items-center justify-between gap-3" style={MONO}>
+            <div className="mb-1.5 flex items-center justify-between gap-3" style={MONO}>
               <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/45">{translateText('Build pipeline')}</span>
               <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-fuchsia-100/70">{translateText('Field tested')}</span>
             </div>
@@ -796,7 +892,7 @@ function CustomBuildsHeroShowcase({ motionEnabled }: { motionEnabled: boolean })
 export default function CustomBuildsPage() {
   const { customBuilds, customBuildCategories } = useCustomBuildsData()
   const motionEnabled = useMotionEnabled()
-  const { translateText } = useI18n()
+  const { translateText, locale } = useI18n()
 
   const faqJsonLd = useMemo(
     () => ({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(item => ({ '@type': 'Question', name: item.q, acceptedAnswer: { '@type': 'Answer', text: item.a } })) }),
@@ -808,6 +904,23 @@ export default function CustomBuildsPage() {
     canonical: 'https://www.eventiesjo.com/custom-builds',
     jsonLd: faqJsonLd,
   })
+
+  useEffect(() => {
+    const scheduleGlobePreload = () => preloadGlobeAssets()
+    const win = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout?: number }) => number
+      cancelIdleCallback?: (handle: number) => void
+    }
+
+    if (win.requestIdleCallback) {
+      const handle = win.requestIdleCallback(scheduleGlobePreload, { timeout: 900 })
+      return () => win.cancelIdleCallback?.(handle)
+    }
+
+    const timer = window.setTimeout(scheduleGlobePreload, 350)
+    return () => window.clearTimeout(timer)
+  }, [])
+
   useEffect(() => {
     if (window.location.hash !== '#global-reach') return
 
@@ -887,7 +1000,7 @@ export default function CustomBuildsPage() {
       <section className="relative w-full overflow-hidden bg-[#f7f4ff] py-[clamp(3rem,6vw,5rem)]">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-200 to-transparent" aria-hidden="true" />
         <div className="site-container-wide">
-          <Reveal className="mb-10 flex justify-center" y={20}>
+          <Reveal className="mb-8 flex justify-center" y={20}>
             <SectionHead icon={Cpu} eyebrow="Capabilities" title="Modules we design & build" />
           </Reveal>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -921,22 +1034,24 @@ export default function CustomBuildsPage() {
         </div>
       </section>
       {/* ══ 3. OUR WORK — inspection console (compact viewer) ══ */}
-      <section id="work" className="relative scroll-mt-[calc(var(--app-navbar-height)+1rem)] w-full overflow-hidden bg-[#0b0322] py-6 text-white lg:h-[calc(100svh-var(--app-navbar-height,72px))] lg:py-0">
+      <section id="work" className="relative scroll-mt-[calc(var(--app-navbar-height)+1rem)] w-full overflow-hidden bg-[#0b0322] py-[clamp(1.75rem,3.4vw,2.75rem)] text-white">
         <CustomBuildSectionBackdrop variant="hero" />
-        <div className="relative z-10 mx-auto flex h-full w-full max-w-[1280px] flex-col justify-center px-[clamp(1rem,3vw,2.25rem)]">
-          <Reveal className="mb-3 flex justify-center" y={20}>
+        <WorkSideDecor side="left" />
+        <WorkSideDecor side="right" />
+        <div className="relative z-10 mx-auto flex w-full max-w-[940px] flex-col justify-center px-[clamp(0.85rem,2vw,1.4rem)]">
+          <Reveal className="mb-1.5 flex justify-center" y={16}>
             <div className="mx-auto max-w-2xl text-center">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/[0.08] px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-violet-100 backdrop-blur-md">
                 <Boxes className="h-3.5 w-3.5 text-fuchsia-200" strokeWidth={2.4} />
                 Our Work
               </span>
-              <h2 className="mt-2 font-display text-[clamp(1.55rem,3vw,2.25rem)] font-extrabold leading-[1.02] tracking-[-0.035em] text-white">Built, tested, event-ready</h2>
-              <p className="mx-auto mt-1.5 max-w-lg text-[12px] leading-[1.45] text-white/64">Preview a build, switch photos, then pick the next project from the list beside it.</p>
+              <h2 className="mt-2 font-display text-[clamp(1.22rem,2.15vw,1.65rem)] font-extrabold leading-[1.02] tracking-[-0.035em] text-white">{locale === 'ar' ? 'استعرض أعمال Eventies الحقيقية' : 'Explore real Eventies builds'}</h2>
+              <p className="mx-auto mt-1.5 max-w-sm text-[10.5px] leading-[1.45] text-white/64">Preview a build, switch photos, then pick the next project from the list beside it.</p>
             </div>
           </Reveal>
 
           {builds.length === 0 ? (
-            <div className="mx-auto max-w-xl rounded-[20px] border border-dashed border-white/20 bg-white/[0.04] py-14 text-center">
+            <div className="mx-auto max-w-xl rounded-[18px] border border-dashed border-white/20 bg-white/[0.04] py-14 text-center">
               <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-violet-200"><Boxes className="h-7 w-7" strokeWidth={1.8} /></span>
               <p className="mt-4 text-[1.05rem] font-bold">Builds coming soon</p>
               <p className="mt-1 text-[13px] text-white/55">Have a project in mind? Start the conversation.</p>
@@ -945,11 +1060,11 @@ export default function CustomBuildsPage() {
           ) : (
             <>
               {tabs.length > 0 && (
-                <div className="mb-3 flex flex-wrap items-center justify-center gap-2">
+                <div className="mb-2.5 flex flex-wrap items-center justify-center gap-1.5">
                   {['All', ...tabs].map(tab => {
                     const isActive = activeTab === tab
                     return (
-                      <button key={tab} type="button" onClick={() => setActiveTab(tab)} aria-pressed={isActive} className={`relative rounded-full border px-4 py-1.5 text-[11.5px] font-bold transition-colors ${isActive ? 'border-transparent text-white' : 'border-white/15 bg-white/[0.04] text-white/70 hover:border-white/30 hover:text-white'}`}>
+                      <button key={tab} type="button" onClick={() => setActiveTab(tab)} aria-pressed={isActive} className={`relative rounded-full border px-3.5 py-1 text-[10.5px] font-bold transition-colors ${isActive ? 'border-transparent text-white' : 'border-white/15 bg-white/[0.04] text-white/70 hover:border-white/30 hover:text-white'}`}>
                         {isActive && <motion.span layoutId="cbTabPill" className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500" transition={{ type: 'spring', stiffness: 380, damping: 32 }} aria-hidden="true" />}
                         {tab}
                       </button>
@@ -958,9 +1073,9 @@ export default function CustomBuildsPage() {
                 </div>
               )}
 
-              <div className="grid min-h-0 w-full grid-cols-1 gap-3 lg:grid-cols-[minmax(250px,310px)_minmax(0,1fr)] lg:items-start">
+              <div className="relative mx-auto flex min-h-0 w-full max-w-[1080px] flex-col gap-3 lg:min-h-[330px] lg:justify-center">
                 {/* Registry list */}
-                <div className="scrollbar-hide order-2 flex gap-2 overflow-x-auto rounded-[18px] border border-white/10 bg-white/[0.05] p-2 backdrop-blur-xl lg:order-1 lg:max-h-[520px] lg:flex-col lg:overflow-y-auto lg:overflow-x-hidden lg:p-2.5">
+                <div className="order-2 flex gap-2 overflow-x-auto overflow-y-hidden rounded-[16px] border border-white/10 bg-white/[0.05] p-2 backdrop-blur-xl [scrollbar-color:rgba(240,171,252,0.82)_rgba(255,255,255,0.12)] [scrollbar-gutter:stable] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-fuchsia-300/80 [&::-webkit-scrollbar-thumb]:shadow-[0_0_14px_rgba(240,171,252,0.55)] hover:[&::-webkit-scrollbar-thumb]:bg-fuchsia-200 lg:absolute lg:bottom-0 lg:left-[calc(50%+360px)] lg:top-0 lg:z-20 lg:order-none lg:w-[190px] lg:flex-col lg:overflow-x-hidden lg:overflow-y-scroll xl:left-[calc(50%+372px)] xl:w-[220px]">
                   {visibleBuilds.map((build, index) => {
                     const key = buildKey(build, index)
                     const isActive = key === selectedKey
@@ -969,16 +1084,16 @@ export default function CustomBuildsPage() {
                     const count = images.length
                     const description = cleanRepeatedText(build.description)
                     return (
-                      <button key={key} type="button" onClick={() => setSelectedKey(key)} aria-pressed={isActive} className={`group flex w-[230px] shrink-0 items-start gap-3 rounded-[16px] border p-2.5 text-left transition-all sm:w-[250px] lg:w-full ${isActive ? 'border-fuchsia-300/70 bg-white/[0.14] shadow-[0_22px_46px_-28px_rgba(217,70,239,0.75)]' : 'border-white/10 bg-white/[0.035] hover:border-white/25 hover:bg-white/[0.08]'}`}>
-                        <span className="relative h-14 w-20 shrink-0 overflow-hidden rounded-[12px]">
+                      <button key={key} type="button" onClick={() => setSelectedKey(key)} aria-pressed={isActive} className={`group flex w-[190px] shrink-0 items-start gap-2.5 rounded-[14px] border p-2 text-left transition-all sm:w-[210px] lg:w-full ${isActive ? 'border-fuchsia-300/70 bg-white/[0.14] shadow-[0_22px_46px_-28px_rgba(217,70,239,0.75)]' : 'border-white/10 bg-white/[0.035] hover:border-white/25 hover:bg-white/[0.08]'}`}>
+                        <span className="relative h-10 w-14 shrink-0 overflow-hidden rounded-[10px]">
                           <FramedImage media={cover} alt={build.title} width={320} height={240} loading="lazy" sizes="64px" fallbackTransform={{ fit: 'cover' }} className="h-full w-full object-cover" />
                           <span className="absolute right-0.5 top-0.5 inline-flex items-center gap-0.5 rounded-full bg-black/55 px-1.5 py-0.5 text-[8px] font-bold text-white backdrop-blur-sm" style={MONO}><Images className="h-2.5 w-2.5" strokeWidth={2.4} />{count}</span>
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate font-sans text-[13.5px] font-bold tracking-[-0.01em] text-white">{build.title}</span>
+                          <span className="block truncate font-sans text-[12px] font-bold tracking-[-0.01em] text-white">{build.title}</span>
                           <span className="mt-0.5 block truncate text-[10px] font-semibold text-white/45" style={MONO}>{(build.category || 'CUSTOM').toUpperCase()}</span>
-                          {description && <span className="mt-1 hidden line-clamp-2 text-[11px] font-medium leading-[1.35] text-white/55 lg:block">{description}</span>}
-                          <span className={`mt-2 block h-1.5 rounded-full transition-colors ${isActive ? 'bg-gradient-to-r from-violet-400 to-fuchsia-400' : 'bg-white/10 group-hover:bg-white/20'}`} aria-hidden="true" />
+                          {description && <span className="mt-1 hidden line-clamp-1 text-[10.5px] font-medium leading-[1.3] text-white/55 lg:block">{description}</span>}
+                          <span className={`mt-1.5 block h-1 rounded-full transition-colors ${isActive ? 'bg-gradient-to-r from-violet-400 to-fuchsia-400' : 'bg-white/10 group-hover:bg-white/20'}`} aria-hidden="true" />
                         </span>
                         <ChevronRight className={`h-4 w-4 shrink-0 transition-colors ${isActive ? 'text-fuchsia-300' : 'text-white/25 group-hover:text-white/50'}`} strokeWidth={2.4} />
                       </button>
@@ -988,48 +1103,50 @@ export default function CustomBuildsPage() {
 
                 {/* Viewer / monitor — constrained size */}
                 {selectedBuild && (
-                  <div className="order-1 relative mx-auto w-full max-w-[900px] overflow-hidden rounded-[24px] border border-white/14 bg-[#0f0630]/88 p-2.5 shadow-[0_30px_76px_-44px_rgba(0,0,0,0.9)] lg:order-2">
-                    <CornerTicks color="rgba(240,171,252,0.45)" />
-                    <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-1.5" style={MONO}>
-                      <span className="flex items-center gap-2 text-[10px] font-bold tracking-[0.16em] text-white/50"><span className="h-2 w-2 animate-pulse rounded-full bg-fuchsia-400" /> LIVE BUILD VIEWER · {String(safeIdx + 1).padStart(2, '0')}/{String(photos.length).padStart(2, '0')}</span>
-                      <button type="button" onClick={() => setLightbox({ open: true, images: photos, index: safeIdx })} className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[10px] font-bold text-white/75 transition-colors hover:bg-white/[0.14] hover:text-white"><Maximize2 className="h-3 w-3" strokeWidth={2.4} /> FULLSCREEN</button>
-                    </div>
-
-                    <button type="button" onClick={() => setLightbox({ open: true, images: photos, index: safeIdx })} className="group relative block aspect-video w-full overflow-hidden rounded-[18px] bg-[#050214] outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400">
-                      <AnimatePresence mode="wait">
-                        <motion.div key={photos[safeIdx]} initial={motionEnabled ? { opacity: 0, scale: 1.03 } : false} animate={{ opacity: 1, scale: 1 }} exit={motionEnabled ? { opacity: 0 } : undefined} transition={{ duration: 0.45, ease: EASE }} className="absolute inset-0">
-                          <FramedImage media={photos[safeIdx]} alt={`${selectedBuild.title} — photo ${safeIdx + 1}`} width={1600} height={900} loading="eager" fetchPriority="high" sizes="(max-width: 1280px) 100vw, 1050px" fallbackTransform={{ fit: 'contain' }} className="h-full w-full object-contain" />
-                        </motion.div>
-                      </AnimatePresence>
-                      <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(5,2,18,0.42)_0%,rgba(5,2,18,0.12)_38%,rgba(5,2,18,0.04)_70%),linear-gradient(0deg,rgba(5,2,18,0.72)_0%,transparent_42%)]" aria-hidden="true" />
-                      <span className="pointer-events-none absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-black/45 text-white opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100"><Maximize2 className="h-5 w-5" strokeWidth={2.2} /></span>
-                      <span className="absolute inset-x-5 bottom-5 sm:inset-x-7 sm:bottom-7">
-                        {selectedBuild.category && <span className="inline-flex items-center rounded-[6px] border border-white/20 bg-black/40 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-violet-100 backdrop-blur-md" style={MONO}>{selectedBuild.category}</span>}
-                        <span className="mt-2 block max-w-2xl font-display text-[clamp(1.45rem,3vw,2.4rem)] font-black leading-[1] tracking-[-0.035em] text-white">{selectedBuild.title}</span>
-                        {selectedDescription && <span className="mt-2 line-clamp-2 block max-w-xl text-[12.5px] font-semibold leading-[1.55] text-white/75 sm:text-[13.5px]">{selectedDescription}</span>}
-                      </span>
-                      {photos.length > 1 && (
-                        <>
-                          <span role="button" tabIndex={-1} onClick={e => { e.stopPropagation(); stepPhoto(-1) }} className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition-colors hover:bg-black/70 sm:left-5"><ChevronLeft className="h-6 w-6" strokeWidth={2.2} /></span>
-                          <span role="button" tabIndex={-1} onClick={e => { e.stopPropagation(); stepPhoto(1) }} className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition-colors hover:bg-black/70 sm:right-5"><ChevronRight className="h-6 w-6" strokeWidth={2.2} /></span>
-                        </>
-                      )}
-                    </button>
-
+                  <div className="order-1 relative mx-auto flex w-full max-w-[620px] flex-col lg:order-none" dir="ltr">
                     {photos.length > 1 && (
-                      <div className="scrollbar-hide mx-auto mt-3 flex max-w-[760px] justify-start gap-2.5 overflow-x-auto px-1 pb-1 sm:justify-center">
+                      <div className="order-2 mt-2 flex justify-start gap-2.5 overflow-x-auto px-1 pb-1 sm:justify-center lg:absolute lg:right-[calc(100%+14px)] lg:top-[31px] lg:z-20 lg:mt-0 lg:max-h-[315px] lg:w-20 lg:flex-col lg:justify-start lg:overflow-x-hidden lg:overflow-y-auto lg:px-0 lg:pb-0 lg:pr-1" dir="ltr">
                         {photos.map((src, i) => (
-                          <button key={`${src}-${i}`} type="button" onClick={() => setPhotoIdx(i)} aria-pressed={i === safeIdx} className={`relative h-14 w-24 shrink-0 overflow-hidden rounded-[12px] border transition-all ${i === safeIdx ? 'border-fuchsia-400 ring-2 ring-fuchsia-400/55' : 'border-white/10 opacity-65 hover:opacity-100'}`}>
+                          <button key={`${src}-${i}`} type="button" onClick={() => setPhotoIdx(i)} aria-pressed={i === safeIdx} className={`relative h-12 w-20 shrink-0 overflow-hidden rounded-[12px] border transition-all lg:h-12 lg:w-20 ${i === safeIdx ? 'border-fuchsia-400 ring-2 ring-fuchsia-400/55' : 'border-white/10 opacity-70 hover:opacity-100'}`}>
                             <FramedImage media={src} alt="" width={384} height={216} loading="lazy" sizes="96px" fallbackTransform={{ fit: 'cover' }} className="h-full w-full object-cover" />
                           </button>
                         ))}
                       </div>
                     )}
+
+                    <div className="relative order-1 w-full overflow-hidden rounded-[18px] border border-white/14 bg-[#0f0630]/88 p-1.5 shadow-[0_26px_64px_-42px_rgba(0,0,0,0.9)]" dir="auto">
+                      <CornerTicks color="rgba(240,171,252,0.45)" />
+                      <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2 px-1" style={MONO}>
+                        <span className="flex items-center gap-2 text-[9px] font-bold tracking-[0.12em] text-white/50"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-fuchsia-400" /> LIVE BUILD VIEWER · {String(safeIdx + 1).padStart(2, '0')}/{String(photos.length).padStart(2, '0')}</span>
+                        <button type="button" onClick={() => setLightbox({ open: true, images: photos, index: safeIdx })} className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.08] px-2 py-1 text-[9px] font-bold text-white/75 transition-colors hover:bg-white/[0.14] hover:text-white"><Maximize2 className="h-3 w-3" strokeWidth={2.4} /> FULLSCREEN</button>
+                      </div>
+
+                      <button type="button" onClick={() => setLightbox({ open: true, images: photos, index: safeIdx })} className="group relative block aspect-video w-full overflow-hidden rounded-[14px] bg-[#050214] outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400">
+                        <AnimatePresence mode="wait">
+                          <motion.div key={photos[safeIdx]} initial={motionEnabled ? { opacity: 0, scale: 1.03 } : false} animate={{ opacity: 1, scale: 1 }} exit={motionEnabled ? { opacity: 0 } : undefined} transition={{ duration: 0.45, ease: EASE }} className="absolute inset-0">
+                            <FramedImage media={photos[safeIdx]} alt={`${selectedBuild.title} — photo ${safeIdx + 1}`} width={1600} height={900} loading="eager" fetchPriority="high" sizes="(max-width: 1280px) 100vw, 1050px" fallbackTransform={{ fit: 'contain' }} className="h-full w-full object-contain" />
+                          </motion.div>
+                        </AnimatePresence>
+                        <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(5,2,18,0.42)_0%,rgba(5,2,18,0.12)_38%,rgba(5,2,18,0.04)_70%),linear-gradient(0deg,rgba(5,2,18,0.72)_0%,transparent_42%)]" aria-hidden="true" />
+                        <span className="pointer-events-none absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-black/45 text-white opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100"><Maximize2 className="h-5 w-5" strokeWidth={2.2} /></span>
+                        <span className="absolute inset-x-3 bottom-3 sm:inset-x-4 sm:bottom-4">
+                          {selectedBuild.category && <span className="inline-flex items-center rounded-[6px] border border-white/20 bg-black/40 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-violet-100 backdrop-blur-md" style={MONO}>{selectedBuild.category}</span>}
+                          <span className="mt-1.5 block max-w-2xl font-display text-[clamp(1.05rem,2vw,1.45rem)] font-black leading-[1] tracking-[-0.035em] text-white">{selectedBuild.title}</span>
+                          {selectedDescription && <span className="mt-1.5 line-clamp-1 block max-w-xl text-[10.5px] font-semibold leading-[1.35] text-white/75 sm:text-[11.5px]">{selectedDescription}</span>}
+                        </span>
+                        {photos.length > 1 && (
+                          <>
+                            <span role="button" tabIndex={-1} onClick={e => { e.stopPropagation(); stepPhoto(-1) }} className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition-colors hover:bg-black/70 sm:left-5"><ChevronLeft className="h-6 w-6" strokeWidth={2.2} /></span>
+                            <span role="button" tabIndex={-1} onClick={e => { e.stopPropagation(); stepPhoto(1) }} className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition-colors hover:bg-black/70 sm:right-5"><ChevronRight className="h-6 w-6" strokeWidth={2.2} /></span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
 
-              <div className="mt-4 flex justify-center lg:hidden">
+              <div className="mt-2.5 flex justify-center lg:hidden">
                 <Link to="/contact" onMouseEnter={() => preloadRoute('/contact')} className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-6 py-3 text-[12px] font-bold text-white transition-all hover:-translate-y-0.5">Request a Custom Build Quote <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.4} /></Link>
               </div>
             </>
@@ -1052,7 +1169,7 @@ export default function CustomBuildsPage() {
             {processSteps.map((step, index) => (
               <Reveal key={step.title} delay={Math.min(index * 0.1, 0.3)} y={22} className="h-full">
                 <div className="relative flex h-full flex-col items-center text-center">
-                  <span className="relative z-10 flex h-[72px] w-[72px] items-center justify-center rounded-[20px] border border-violet-200/80 bg-white text-violet-700 shadow-[0_24px_52px_-34px_rgba(124,58,237,0.55)]">
+                  <span className="relative z-10 flex h-[72px] w-[72px] items-center justify-center rounded-[18px] border border-violet-200/80 bg-white text-violet-700 shadow-[0_24px_52px_-34px_rgba(124,58,237,0.55)]">
                     <step.icon className="h-7 w-7" strokeWidth={1.9} />
                   </span>
                   <h3 className="mt-1 font-display text-[1.05rem] font-bold tracking-[-0.02em] text-ink-900">{translateText(step.title)}</h3>
@@ -1090,13 +1207,13 @@ export default function CustomBuildsPage() {
                 <div className="pointer-events-none absolute inset-x-0 top-1/2 h-px bg-gradient-to-r from-transparent via-white/24 to-transparent" aria-hidden="true" />
                 <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="max-w-3xl">
-                    <span className="text-[10px] font-black uppercase tracking-[0.22em] text-fuchsia-100" style={MONO}>Who we build for</span>
-                    <h3 className="mt-2 font-display text-2xl font-black leading-tight tracking-normal text-white sm:text-3xl lg:text-4xl">Built around the audience, space, and delivery.</h3>
+                    <span className="text-[10px] font-black uppercase tracking-[0.22em] text-fuchsia-100" style={MONO}>{translateText('Who we build for')}</span>
+                    <h3 className="mt-2 font-display text-2xl font-black leading-tight tracking-normal text-white sm:text-3xl lg:text-4xl">{translateText('Built around the audience, space, and delivery.')}</h3>
                   </div>
                   <div className="grid w-full grid-cols-3 gap-2 lg:max-w-[470px]">
                     {['Audience', 'Venue', 'Delivery'].map((label) => (
                       <span key={label} className="rounded-[16px] border border-white/18 bg-white/10 px-3.5 py-3 text-center text-[12px] font-extrabold leading-tight text-white backdrop-blur-md">
-                        {label}
+                        {translateText(label)}
                       </span>
                     ))}
                   </div>
@@ -1124,14 +1241,14 @@ export default function CustomBuildsPage() {
                         </span>
                       </div>
 
-                      <h3 className="mt-5 font-display text-[1.18rem] font-black tracking-normal text-ink-950 sm:text-[1.28rem]">{card.title}</h3>
-                      <p className="mt-2 text-[13px] leading-[1.6] text-ink-600">{card.desc}</p>
+                      <h3 className="mt-5 font-display text-[1.18rem] font-black tracking-normal text-ink-950 sm:text-[1.28rem]">{translateText(card.title)}</h3>
+                      <p className="mt-2 text-[13px] leading-[1.6] text-ink-600">{translateText(card.desc)}</p>
 
                       <div className="mt-5 grid gap-2">
                         {(audienceFitNotes[index] ?? []).map((note) => (
                           <span key={note} className="inline-flex min-h-9 items-center gap-2 rounded-full border border-violet-200/80 bg-violet-50/65 px-3 text-[11px] font-extrabold text-violet-800">
                             <Check className="h-3.5 w-3.5 text-fuchsia-500" strokeWidth={3} />
-                            {note}
+                            {translateText(note)}
                           </span>
                         ))}
                       </div>
@@ -1176,7 +1293,7 @@ export default function CustomBuildsPage() {
                   {reviewChecklist.map((item, index) => (
                     <motion.div key={item} initial={motionEnabled ? { opacity: 0, y: 12 } : false} whileInView={motionEnabled ? { opacity: 1, y: 0 } : undefined} viewport={{ once: true, margin: '0px 0px -10% 0px' }} transition={motionEnabled ? { duration: 0.5, delay: Math.min(index * 0.05, 0.3), ease: EASE } : undefined} className="flex items-center gap-3 rounded-[12px] border border-violet-200/70 bg-violet-50/40 px-3.5 py-3">
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white"><Check className="h-3 w-3" strokeWidth={3} /></span>
-                      <span className="text-[12.5px] font-semibold leading-[1.35] text-ink-700">{item}</span>
+                      <span className="text-[12.5px] font-semibold leading-[1.35] text-ink-700">{translateText(item)}</span>
                     </motion.div>
                   ))}
                 </div>
@@ -1200,8 +1317,8 @@ export default function CustomBuildsPage() {
                     <div className="flex h-full items-start gap-3 rounded-[14px] border border-white/12 bg-white/[0.05] p-3.5">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white"><mode.icon className="h-4 w-4" strokeWidth={2.1} /></span>
                       <div>
-                        <h3 className="font-sans text-[13px] font-bold tracking-[-0.01em] text-white">{mode.title}</h3>
-                        <p className="mt-0.5 text-[11px] leading-[1.45] text-white/55">{mode.desc}</p>
+                        <h3 className="font-sans text-[13px] font-bold tracking-[-0.01em] text-white">{translateText(mode.title)}</h3>
+                        <p className="mt-0.5 text-[11px] leading-[1.45] text-white/55">{translateText(mode.desc)}</p>
                       </div>
                     </div>
                   </Reveal>
@@ -1221,7 +1338,7 @@ export default function CustomBuildsPage() {
       {/* ══ 8. FAQ — knowledge base ══ */}
       <section className="site-section">
         <div className="site-container-wide">
-          <Reveal className="mb-10 flex justify-center" y={20}>
+          <Reveal className="mb-8 flex justify-center" y={20}>
             <SectionHead icon={HelpCircle} eyebrow="Knowledge base" title="Before you start a build" />
           </Reveal>
           <FaqAccordion items={faqs} />

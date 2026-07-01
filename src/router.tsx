@@ -13,6 +13,7 @@ import ContactPage from './pages/ContactPage'
 import CustomBuildsPage from './pages/CustomBuildsPage'
 import CustomersPage from './pages/CustomersPage'
 import GalleryPage from './pages/GalleryPage'
+import LegalPage from './pages/LegalPage'
 import { lazyRoutes } from './utils/route-preload'
 
 const {
@@ -68,6 +69,14 @@ export const router = createBrowserRouter([
       { path: 'gallery', element: <GalleryPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'contact', element: <ContactPage /> },
+      { path: 'privacy-policy', element: <LegalPage documentKey="privacy" /> },
+      { path: 'privacy', element: <LegalPage documentKey="privacy" /> },
+      { path: 'terms', element: <LegalPage documentKey="terms" /> },
+      { path: 'terms-of-service', element: <LegalPage documentKey="terms" /> },
+      { path: 'vendor-terms', element: <LegalPage documentKey="vendorTerms" /> },
+      { path: 'refund-policy', element: <LegalPage documentKey="refund" /> },
+      { path: 'cookie-policy', element: <LegalPage documentKey="cookies" /> },
+      { path: 'cookies', element: <LegalPage documentKey="cookies" /> },
       { path: 'profile', element: <S><ProfilePage /></S> },
       { path: 'rental-cart', element: <S><RentalCartPage /></S> },
       { path: 'checkout', element: <S><CheckoutPage /></S> },
