@@ -147,8 +147,8 @@ const DataActionsCtx = createContext<DataActionsCtx>({} as DataActionsCtx)
 // call it on mount, so a page only pays for the tables it renders.
 const RESOURCE_KEYS = ['products', 'categories', 'customers', 'gallery', 'parts', 'customBuilds'] as const
 type ResourceKey = (typeof RESOURCE_KEYS)[number]
-// Loaded eagerly at app mount because the global Navbar mega-menu, Footer,
-// ProductCard and SearchDialog need them on every route.
+// Loaded eagerly at app mount because the global Navbar mega-menu, Footer
+// and ProductCard need them on every route.
 const EAGER_RESOURCES: ResourceKey[] = ['products', 'categories']
 
 const EnsureCtx = createContext<(key: ResourceKey) => Promise<void>>(async () => {})
