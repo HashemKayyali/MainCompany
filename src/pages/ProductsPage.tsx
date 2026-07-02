@@ -11,7 +11,7 @@ import SectionHeading from '../components/home/SectionHeading'
 import Chip from '../components/ui/Chip'
 import FramedImage from '../components/ui/FramedImage'
 import EventiesHero from '../components/layout/EventiesHero'
-import { useData } from '../contexts/DataContext'
+import { useCategoriesData, useProductsData } from '../contexts/DataContext'
 import type { Category, Product } from '../data/products/types'
 import { useMotionEnabled } from '../hooks/useMotionEnabled'
 import { usePageMeta } from '../hooks/usePageMeta'
@@ -360,7 +360,9 @@ export default function ProductsPage() {
     canonical: 'https://www.eventiesjo.com/products',
   })
 
-  const { products, categories, getProductsByCategory } = useData()
+  // Split hooks so this page only ensures products + categories (batch 2).
+  const { products, getProductsByCategory } = useProductsData()
+  const { categories } = useCategoriesData()
   const { isDark } = useTheme()
   const { translateText } = useI18n()
   const [searchParams] = useSearchParams()

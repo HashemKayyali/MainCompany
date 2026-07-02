@@ -81,7 +81,9 @@ type ProductDataCtx = Pick<
   'products' | 'getProductBySlug' | 'getProductsByCategory' | 'featuredProducts' | 'allCategoryTags'
 >
 
-type PartDataCtx = Pick<DataCtx, 'parts' | 'getPartsByProduct'>
+// partsLoading lets ProductDetails distinguish "parts still loading" from
+// "product genuinely has no parts" now that parts are lazy (batch 2).
+type PartDataCtx = Pick<DataCtx, 'parts' | 'getPartsByProduct'> & { partsLoading: boolean }
 type CustomerDataCtx = Pick<DataCtx, 'customers'>
 type CategoryDataCtx = Pick<DataCtx, 'categories'>
 type GalleryDataCtx = Pick<DataCtx, 'galleryAlbums'>
@@ -260,6 +262,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [customBuildCategories, setCustomBuildCategories] = useState<CustomBuildCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // Resources that have data ready to display: a completed network load
+  // (success or default fallback) or a non-empty cached slice. Drives the
+  // per-resource loading flags (currently just partsLoading).
+  const [loadedResources, setLoadedResources] = useState<ReadonlySet<ResourceKey>>(new Set())
 
   const snapshotTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const mountedRef = useRef(true)
@@ -292,13 +298,40 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [safeSet]
   )
 
+  const markLoaded = useCallback(
+    (keys: ResourceKey[]) => {
+      if (!keys.length) return
+      safeSet(() =>
+        setLoadedResources(prev => {
+          if (keys.every(key => prev.has(key))) return prev
+          const next = new Set(prev)
+          keys.forEach(key => next.add(key))
+          return next
+        })
+      )
+    },
+    [safeSet]
+  )
+
   const hydrateCache = useCallback(() => {
     const snapshot = readSnapshot()
     if (!snapshot) return false
 
     applySnapshot(snapshot, null, false)
+    // A cached slice only counts as "loaded" when it actually has rows. An
+    // empty slice may just mean it was never fetched in the session that
+    // wrote the snapshot (e.g. a Home-only visit never loads parts), so it
+    // must not masquerade as a confirmed empty result.
+    const hydrated: ResourceKey[] = []
+    if (snapshot.products.length) hydrated.push('products')
+    if (snapshot.categories.length) hydrated.push('categories')
+    if (snapshot.customers.length) hydrated.push('customers')
+    if (snapshot.galleryAlbums.length) hydrated.push('gallery')
+    if (snapshot.parts.length) hydrated.push('parts')
+    if (snapshot.customBuilds.length || snapshot.customBuildCategories.length) hydrated.push('customBuilds')
+    markLoaded(hydrated)
     return true
-  }, [applySnapshot])
+  }, [applySnapshot, markLoaded])
 
   const writeLog = useCallback(
     (
@@ -356,6 +389,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         for (let attempt = 0; ; attempt += 1) {
           try {
             applyResourcePart(await RESOURCE_LOADERS[key]())
+            markLoaded([key])
             return
           } catch (loadError: unknown) {
             if (attempt < MAX_RETRIES) {
@@ -365,6 +399,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
             }
             console.error(`Failed to load "${key}" from Supabase:`, loadError)
             applyResourcePart(RESOURCE_DEFAULTS[key])
+            // Even a failed load resolves the resource's loading state — the
+            // default fallback is what we display, so consumers must not spin
+            // forever waiting for it.
+            markLoaded([key])
             throw loadError
           }
         }
@@ -375,7 +413,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       inFlightRef.current.set(key, run)
       return run
     },
-    [applyResourcePart]
+    [applyResourcePart, markLoaded]
   )
 
   // Public entry point: load a resource at most once per session (revalidation
@@ -404,6 +442,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     if (!isSupabaseConfigured()) {
       applySnapshot(DEFAULT_SNAPSHOT, null, false)
+      markLoaded([...RESOURCE_KEYS])
       return () => {
         mountedRef.current = false
       }
@@ -435,7 +474,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return () => {
       mountedRef.current = false
     }
-  }, [applySnapshot, hydrateCache, loadResource, safeSet, sessionLoading])
+  }, [applySnapshot, hydrateCache, loadResource, markLoaded, safeSet, sessionLoading])
 
   useEffect(() => {
     if (loading) return
@@ -848,7 +887,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     requestedRef.current.clear()
     inFlightRef.current.clear()
     applySnapshot(DEFAULT_SNAPSHOT, null, false)
-  }, [applySnapshot])
+    markLoaded([...RESOURCE_KEYS])
+  }, [applySnapshot, markLoaded])
 
   const productValue = useMemo<ProductDataCtx>(
     () => ({
@@ -871,8 +911,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     () => ({
       parts,
       getPartsByProduct,
+      partsLoading: !loadedResources.has('parts'),
     }),
-    [getPartsByProduct, parts]
+    [getPartsByProduct, loadedResources, parts]
   )
 
   const customerValue = useMemo<CustomerDataCtx>(() => ({ customers }), [customers])

@@ -19,7 +19,12 @@ import ProductGallery from '../components/product/ProductGallery'
 import ProductOptions from '../components/product/ProductOptions'
 import ProductSuggestionsCarousel from '../components/product/ProductSuggestionsCarousel'
 import PageLoader from '../components/ui/PageLoader'
-import { useData } from '../contexts/DataContext'
+import {
+  useCategoriesData,
+  useDataMeta,
+  usePartsData,
+  useProductsData,
+} from '../contexts/DataContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { social } from '../data/social'
 import { usePageMeta } from '../hooks/usePageMeta'
@@ -60,7 +65,11 @@ function getPublicImageUrl(value?: string) {
 
 export default function ProductDetailsPage() {
   const { slug } = useParams<{ slug: string }>()
-  const { categories, products, getProductBySlug, getPartsByProduct, loading } = useData()
+  // Split hooks (batch 2): this page ensures products + categories + parts.
+  const { products, getProductBySlug } = useProductsData()
+  const { getPartsByProduct, partsLoading } = usePartsData()
+  const { categories } = useCategoriesData()
+  const { loading } = useDataMeta()
   const { isDark } = useTheme()
   const [includedOpen, setIncludedOpen] = useState(false)
 
@@ -127,6 +136,11 @@ export default function ProductDetailsPage() {
 
   if (loading && !product) return <PageLoader />
   if (!product) return <NotFoundPage />
+  // Parts are lazy-loaded (batch 2). Hold the page loader until they resolve
+  // so the "What's included" section never flashes in late or reads as
+  // "no parts" while the fetch is still in flight. Cached non-empty parts
+  // count as loaded, so warm visits still paint instantly.
+  if (partsLoading) return <PageLoader />
 
   const categoryName =
     categories.find(category => category.id === product.categoryId)?.name || 'Marketplace'
