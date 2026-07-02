@@ -137,6 +137,18 @@ const CustomBuildsCtx = createContext<CustomBuildDataCtx>({} as CustomBuildDataC
 const DataMetaCtx = createContext<DataMetaCtx>({} as DataMetaCtx)
 const DataActionsCtx = createContext<DataActionsCtx>({} as DataActionsCtx)
 
+// Resource-level lazy loading (Batch 1). Each key is loaded independently and
+// only when a consumer actually needs it. `ensureResource` (exposed through
+// EnsureCtx) loads a resource at most once per session; the split hooks below
+// call it on mount, so a page only pays for the tables it renders.
+const RESOURCE_KEYS = ['products', 'categories', 'customers', 'gallery', 'parts', 'customBuilds'] as const
+type ResourceKey = (typeof RESOURCE_KEYS)[number]
+// Loaded eagerly at app mount because the global Navbar mega-menu, Footer,
+// ProductCard and SearchDialog need them on every route.
+const EAGER_RESOURCES: ResourceKey[] = ['products', 'categories']
+
+const EnsureCtx = createContext<(key: ResourceKey) => Promise<void>>(async () => {})
+
 const CACHE_KEY = 'eventies:data-cache:v5'
 const CACHE_VERSION = 5 as const
 const MAX_RETRIES = 3
@@ -149,6 +161,38 @@ const DEFAULT_SNAPSHOT: DataSnapshot = {
   galleryAlbums: [],
   customBuilds: DEFAULT_CUSTOM_BUILDS,
   customBuildCategories: DEFAULT_CUSTOM_BUILD_CATEGORIES,
+}
+
+// One fetcher per resource. Each returns only the snapshot slice it owns, so a
+// resource load never touches unrelated state. gallery/custom builds keep the
+// same defensive `.catch(() => [])` the previous monolithic loader had.
+const RESOURCE_LOADERS: Record<ResourceKey, () => Promise<Partial<DataSnapshot>>> = {
+  products: async () => ({ products: sortProductsForDisplay(await productsApi.getAll()) }),
+  categories: async () => ({ categories: await categoriesApi.getAll() }),
+  customers: async () => ({ customers: await customersApi.getAll() }),
+  gallery: async () => ({ galleryAlbums: await galleryApi.getAll().catch(() => []) }),
+  parts: async () => ({ parts: await partsApi.getAll() }),
+  customBuilds: async () => {
+    const [builds, buildCategories] = await Promise.all([
+      customBuildsApi.getAll().catch(() => []),
+      customBuildsApi.getCategories().catch(() => []),
+    ])
+    return { customBuilds: builds, customBuildCategories: buildCategories }
+  },
+}
+
+// Fallback slice applied when a resource load fails after all retries — mirrors
+// the previous "show default content" behavior, but scoped to one resource.
+const RESOURCE_DEFAULTS: Record<ResourceKey, Partial<DataSnapshot>> = {
+  products: { products: DEFAULT_SNAPSHOT.products },
+  categories: { categories: DEFAULT_SNAPSHOT.categories },
+  customers: { customers: DEFAULT_SNAPSHOT.customers },
+  gallery: { galleryAlbums: DEFAULT_SNAPSHOT.galleryAlbums },
+  parts: { parts: DEFAULT_SNAPSHOT.parts },
+  customBuilds: {
+    customBuilds: DEFAULT_SNAPSHOT.customBuilds,
+    customBuildCategories: DEFAULT_SNAPSHOT.customBuildCategories,
+  },
 }
 
 function readSnapshot() {
@@ -217,11 +261,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const retryCount = useRef(0)
-  const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const snapshotTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const mountedRef = useRef(true)
   const cacheVisibleRef = useRef(false)
+  // Per-resource load bookkeeping: which resources have been requested this
+  // session, and the in-flight promise for each (so concurrent callers and
+  // React StrictMode double-invokes share one request instead of racing).
+  const requestedRef = useRef<Set<ResourceKey>>(new Set())
+  const inFlightRef = useRef<Map<ResourceKey, Promise<void>>>(new Map())
 
   const safeSet = useCallback((fn: () => void) => {
     if (mountedRef.current) fn()
@@ -281,106 +328,114 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [currentUser]
   )
 
-  const loadAllOnce = useCallback(async (): Promise<DataSnapshot> => {
-    const [
-      nextProducts,
-      nextParts,
-      nextCustomers,
-      nextCategories,
-      nextGalleryAlbums,
-      nextCustomBuilds,
-      nextCustomBuildCategories,
-    ] =
-      await Promise.all([
-        productsApi.getAll(),
-        partsApi.getAll(),
-        customersApi.getAll(),
-        categoriesApi.getAll(),
-        galleryApi.getAll().catch(() => []),
-        customBuildsApi.getAll().catch(() => []),
-        customBuildsApi.getCategories().catch(() => []),
-      ])
-
-    return {
-      products: sortProductsForDisplay(nextProducts),
-      parts: nextParts,
-      customers: nextCustomers,
-      categories: nextCategories,
-      galleryAlbums: nextGalleryAlbums,
-      customBuilds: nextCustomBuilds,
-      customBuildCategories: nextCustomBuildCategories,
-    }
-  }, [])
-
-  const loadData = useCallback(
-    async (background = false) => {
-      if (sessionLoading) return
-
-      const keepVisibleContent = background || cacheVisibleRef.current
-
-      if (!keepVisibleContent) {
-        safeSet(() => {
-          setLoading(true)
-          setError(null)
-        })
-      }
-
-      if (!isSupabaseConfigured()) {
-        retryCount.current = 0
-        applySnapshot(DEFAULT_SNAPSHOT, null, false)
-        return
-      }
-
-      try {
-        const snapshot = await loadAllOnce()
-        retryCount.current = 0
-        applySnapshot(snapshot, null, false)
-      } catch (loadError: unknown) {
-        console.error('Failed to load data from Supabase:', loadError)
-
-        if (!keepVisibleContent) {
-          safeSet(() => setError(getErrorMessage(loadError, 'Failed to load data')))
-        }
-
-        if (retryCount.current < MAX_RETRIES) {
-          retryCount.current += 1
-          const delay = RETRY_DELAY * retryCount.current
-
-          if (retryTimer.current) clearTimeout(retryTimer.current)
-          retryTimer.current = setTimeout(() => {
-            void loadData(background || cacheVisibleRef.current)
-          }, delay)
-
-          return
-        }
-
-        retryCount.current = 0
-
-        if (keepVisibleContent) {
-          safeSet(() => setLoading(false))
-          return
-        }
-
-        applySnapshot(DEFAULT_SNAPSHOT, 'Supabase unavailable. Showing default content.', false)
-      }
+  const applyResourcePart = useCallback(
+    (part: Partial<DataSnapshot>) => {
+      safeSet(() => {
+        if (part.products) setProducts(part.products)
+        if (part.parts) setParts(part.parts)
+        if (part.customers) setCustomers(part.customers)
+        if (part.categories) setCategories(part.categories)
+        if (part.galleryAlbums) setGalleryAlbums(part.galleryAlbums)
+        if (part.customBuilds) setCustomBuilds(part.customBuilds)
+        if (part.customBuildCategories) setCustomBuildCategories(part.customBuildCategories)
+      })
     },
-    [applySnapshot, loadAllOnce, safeSet, sessionLoading]
+    [safeSet]
   )
 
+  // Fetch a single resource with the same retry/backoff the monolithic loader
+  // used, applying the result (or its default fallback) to just that slice.
+  // Concurrent callers share one in-flight promise. Rejects on final failure so
+  // the eager mount load can surface a global error; lazy callers swallow it.
+  const loadResource = useCallback(
+    (key: ResourceKey): Promise<void> => {
+      const existing = inFlightRef.current.get(key)
+      if (existing) return existing
+
+      const run = (async () => {
+        for (let attempt = 0; ; attempt += 1) {
+          try {
+            applyResourcePart(await RESOURCE_LOADERS[key]())
+            return
+          } catch (loadError: unknown) {
+            if (attempt < MAX_RETRIES) {
+              await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (attempt + 1)))
+              if (!mountedRef.current) return
+              continue
+            }
+            console.error(`Failed to load "${key}" from Supabase:`, loadError)
+            applyResourcePart(RESOURCE_DEFAULTS[key])
+            throw loadError
+          }
+        }
+      })().finally(() => {
+        inFlightRef.current.delete(key)
+      })
+
+      inFlightRef.current.set(key, run)
+      return run
+    },
+    [applyResourcePart]
+  )
+
+  // Public entry point: load a resource at most once per session (revalidation
+  // still happens once even when hydrated from cache — SWR). Never throws.
+  const ensureResource = useCallback(
+    (key: ResourceKey): Promise<void> => {
+      if (requestedRef.current.has(key)) {
+        return inFlightRef.current.get(key) ?? Promise.resolve()
+      }
+      requestedRef.current.add(key)
+      return loadResource(key).catch(() => {})
+    },
+    [loadResource]
+  )
+
+  // refreshAll re-fetches every resource (used by admin screens). Forces a
+  // fresh load rather than honoring the once-per-session guard.
   const refreshAll = useCallback(async () => {
-    await loadData(cacheVisibleRef.current)
-  }, [loadData])
+    RESOURCE_KEYS.forEach(key => requestedRef.current.add(key))
+    await Promise.all(RESOURCE_KEYS.map(key => loadResource(key).catch(() => {})))
+  }, [loadResource])
 
   useEffect(() => {
     mountedRef.current = true
     const hasCache = hydrateCache()
-    void loadData(hasCache)
+
+    if (!isSupabaseConfigured()) {
+      applySnapshot(DEFAULT_SNAPSHOT, null, false)
+      return () => {
+        mountedRef.current = false
+      }
+    }
+
+    if (sessionLoading) return
+
+    // Only products + categories load at mount; everything else is pulled in
+    // lazily by the split hooks when a page that needs it renders. The global
+    // `loading`/`error` state now tracks just this eager pair — lazy resources
+    // stream in silently without toggling the app-level spinner.
+    if (!hasCache) {
+      safeSet(() => {
+        setLoading(true)
+        setError(null)
+      })
+    }
+
+    EAGER_RESOURCES.forEach(key => requestedRef.current.add(key))
+    void Promise.allSettled(EAGER_RESOURCES.map(key => loadResource(key))).then(results => {
+      cacheVisibleRef.current = true
+      const allFailed = results.every(result => result.status === 'rejected')
+      safeSet(() => {
+        setLoading(false)
+        setError(allFailed && !hasCache ? 'Supabase unavailable. Showing default content.' : null)
+      })
+    })
 
     return () => {
       mountedRef.current = false
-      if (retryTimer.current) clearTimeout(retryTimer.current)
     }
-  }, [hydrateCache, loadData])
+  }, [applySnapshot, hydrateCache, loadResource, safeSet, sessionLoading])
 
   useEffect(() => {
     if (loading) return
@@ -790,7 +845,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   )
 
   const resetToDefaults = useCallback(() => {
-    retryCount.current = 0
+    requestedRef.current.clear()
+    inFlightRef.current.clear()
     applySnapshot(DEFAULT_SNAPSHOT, null, false)
   }, [applySnapshot])
 
@@ -901,32 +957,70 @@ export function DataProvider({ children }: { children: ReactNode }) {
   )
 
   return (
-    <ProductsCtx.Provider value={productValue}>
-      <PartsCtx.Provider value={partValue}>
-        <CustomersCtx.Provider value={customerValue}>
-          <CategoriesCtx.Provider value={categoryValue}>
-            <GalleryCtx.Provider value={galleryValue}>
-              <CustomBuildsCtx.Provider value={customBuildValue}>
-                <DataMetaCtx.Provider value={metaValue}>
-                  <DataActionsCtx.Provider value={actionsValue}>
-                    <Ctx.Provider value={value}>{children}</Ctx.Provider>
-                  </DataActionsCtx.Provider>
-                </DataMetaCtx.Provider>
-              </CustomBuildsCtx.Provider>
-            </GalleryCtx.Provider>
-          </CategoriesCtx.Provider>
-        </CustomersCtx.Provider>
-      </PartsCtx.Provider>
-    </ProductsCtx.Provider>
+    <EnsureCtx.Provider value={ensureResource}>
+      <ProductsCtx.Provider value={productValue}>
+        <PartsCtx.Provider value={partValue}>
+          <CustomersCtx.Provider value={customerValue}>
+            <CategoriesCtx.Provider value={categoryValue}>
+              <GalleryCtx.Provider value={galleryValue}>
+                <CustomBuildsCtx.Provider value={customBuildValue}>
+                  <DataMetaCtx.Provider value={metaValue}>
+                    <DataActionsCtx.Provider value={actionsValue}>
+                      <Ctx.Provider value={value}>{children}</Ctx.Provider>
+                    </DataActionsCtx.Provider>
+                  </DataMetaCtx.Provider>
+                </CustomBuildsCtx.Provider>
+              </GalleryCtx.Provider>
+            </CategoriesCtx.Provider>
+          </CustomersCtx.Provider>
+        </PartsCtx.Provider>
+      </ProductsCtx.Provider>
+    </EnsureCtx.Provider>
   )
 }
 
-export const useData = () => useContext(Ctx)
-export const useProductsData = () => useContext(ProductsCtx)
-export const usePartsData = () => useContext(PartsCtx)
-export const useCustomersData = () => useContext(CustomersCtx)
-export const useCategoriesData = () => useContext(CategoriesCtx)
-export const useGalleryData = () => useContext(GalleryCtx)
-export const useCustomBuildsData = () => useContext(CustomBuildsCtx)
+// Ensure one resource is loaded when a consumer that needs it mounts. Stable
+// identity of ensureResource keeps this effect to a single run per key.
+function useEnsureResource(key: ResourceKey) {
+  const ensure = useContext(EnsureCtx)
+  useEffect(() => {
+    void ensure(key)
+  }, [ensure, key])
+}
+
+// Compatibility hook: legacy consumers of the whole data bag still get every
+// resource. Kept until each page is migrated to the split hooks (later batches).
+export const useData = () => {
+  const ensure = useContext(EnsureCtx)
+  useEffect(() => {
+    RESOURCE_KEYS.forEach(key => void ensure(key))
+  }, [ensure])
+  return useContext(Ctx)
+}
+
+export const useProductsData = () => {
+  useEnsureResource('products')
+  return useContext(ProductsCtx)
+}
+export const usePartsData = () => {
+  useEnsureResource('parts')
+  return useContext(PartsCtx)
+}
+export const useCustomersData = () => {
+  useEnsureResource('customers')
+  return useContext(CustomersCtx)
+}
+export const useCategoriesData = () => {
+  useEnsureResource('categories')
+  return useContext(CategoriesCtx)
+}
+export const useGalleryData = () => {
+  useEnsureResource('gallery')
+  return useContext(GalleryCtx)
+}
+export const useCustomBuildsData = () => {
+  useEnsureResource('customBuilds')
+  return useContext(CustomBuildsCtx)
+}
 export const useDataMeta = () => useContext(DataMetaCtx)
 export const useDataActions = () => useContext(DataActionsCtx)
