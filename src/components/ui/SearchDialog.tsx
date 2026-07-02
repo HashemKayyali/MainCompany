@@ -42,7 +42,9 @@ function getResultIndexFromElement(element: HTMLElement | null, resultsListId: s
 
 export default function SearchDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { products } = useProductsData()
-  const { customers } = useCustomersData()
+  // Customers load only once the dialog is open (batch 3) — never on app
+  // startup. Products/categories stay eager so product search is instant.
+  const { customers, customersLoading } = useCustomersData(open)
   const { isDark } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
@@ -382,7 +384,7 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
                 </div>
               )}
 
-              {query && results.length === 0 && (
+              {query && results.length === 0 && !customersLoading && (
                 <div
                   className={`px-4 py-5 text-center ${
                     isDark ? 'text-purple-300/50' : 'text-gray-400'

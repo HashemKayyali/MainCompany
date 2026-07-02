@@ -84,7 +84,9 @@ type ProductDataCtx = Pick<
 // partsLoading lets ProductDetails distinguish "parts still loading" from
 // "product genuinely has no parts" now that parts are lazy (batch 2).
 type PartDataCtx = Pick<DataCtx, 'parts' | 'getPartsByProduct'> & { partsLoading: boolean }
-type CustomerDataCtx = Pick<DataCtx, 'customers'>
+// customersLoading lets lazy consumers (e.g. the search dialog) avoid
+// rendering a premature "no customer results" state while customers load.
+type CustomerDataCtx = Pick<DataCtx, 'customers'> & { customersLoading: boolean }
 type CategoryDataCtx = Pick<DataCtx, 'categories'>
 type GalleryDataCtx = Pick<DataCtx, 'galleryAlbums'>
 type CustomBuildDataCtx = Pick<DataCtx, 'customBuilds' | 'customBuildCategories'>
@@ -916,7 +918,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [getPartsByProduct, loadedResources, parts]
   )
 
-  const customerValue = useMemo<CustomerDataCtx>(() => ({ customers }), [customers])
+  const customerValue = useMemo<CustomerDataCtx>(
+    () => ({ customers, customersLoading: !loadedResources.has('customers') }),
+    [customers, loadedResources]
+  )
   const categoryValue = useMemo<CategoryDataCtx>(() => ({ categories }), [categories])
   const galleryValue = useMemo<GalleryDataCtx>(() => ({ galleryAlbums }), [galleryAlbums])
   const customBuildValue = useMemo<CustomBuildDataCtx>(
@@ -1022,11 +1027,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
 // Ensure one resource is loaded when a consumer that needs it mounts. Stable
 // identity of ensureResource keeps this effect to a single run per key.
-function useEnsureResource(key: ResourceKey) {
+// `enabled` lets a consumer defer the load (e.g. a dialog that only needs the
+// resource once opened); the load fires the first time enabled becomes true.
+function useEnsureResource(key: ResourceKey, enabled = true) {
   const ensure = useContext(EnsureCtx)
   useEffect(() => {
-    void ensure(key)
-  }, [ensure, key])
+    if (enabled) void ensure(key)
+  }, [ensure, key, enabled])
 }
 
 // Compatibility hook: legacy consumers of the whole data bag still get every
@@ -1047,8 +1054,11 @@ export const usePartsData = () => {
   useEnsureResource('parts')
   return useContext(PartsCtx)
 }
-export const useCustomersData = () => {
-  useEnsureResource('customers')
+// `enabled` defaults true (all existing callers load customers on mount). Pass
+// a boolean to defer — the search dialog uses this to load customers only once
+// it is opened, keeping customers off the app-startup path.
+export const useCustomersData = (enabled = true) => {
+  useEnsureResource('customers', enabled)
   return useContext(CustomersCtx)
 }
 export const useCategoriesData = () => {

@@ -5,7 +5,7 @@ import { ArrowRight, Building2 } from 'lucide-react'
 import CustomersGrid from '../components/customer/CustomersGrid'
 import ShuffleGrid, { type ShuffleGridItem } from '../components/ui/shuffle-grid'
 import EventiesHero from '../components/layout/EventiesHero'
-import { useData } from '../contexts/DataContext'
+import { useCustomersData } from '../contexts/DataContext'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { preloadRoute } from '../utils/route-preload'
 import { useI18n } from '../contexts/LanguageContext'
@@ -67,7 +67,8 @@ export default function CustomersPage() {
     canonical: 'https://www.eventiesjo.com/customers',
   })
 
-  const { customers } = useData()
+  // Split hook (batch 3): this page only ensures customers.
+  const { customers } = useCustomersData()
   const { translateText } = useI18n()
   const [cat, setCat] = useState('All')
 

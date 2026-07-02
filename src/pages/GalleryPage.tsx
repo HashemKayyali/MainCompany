@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ImageIcon, Images } from 'lucide-react'
-import { useData } from '../contexts/DataContext'
+import { useGalleryData } from '../contexts/DataContext'
 import { galleryAlbums as staticAlbums, type GalleryAlbum } from '../data/gallery'
 import { usePageMeta } from '../hooks/usePageMeta'
 import FramedImage from '../components/ui/FramedImage'
@@ -155,7 +155,8 @@ function GalleryHeroShowcase({ albums }: { albums: GalleryAlbum[] }) {
 }
 
 export default function GalleryPage() {
-  const { galleryAlbums } = useData()
+  // Split hook (batch 3): this page only ensures gallery_albums.
+  const { galleryAlbums } = useGalleryData()
   usePageMeta({
     title: 'Event Gallery & Activations in Jordan | Eventies',
     description:
