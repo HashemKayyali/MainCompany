@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, ChevronRight, LayoutGrid, Search } from 'lucide-react'
 import ProductCard from '../components/product/ProductCard'
 import PageLoader from '../components/ui/PageLoader'
-import { useData } from '../contexts/DataContext'
+import { useCategoriesData, useDataMeta, useProductsData } from '../contexts/DataContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { cn } from '../utils/cn'
@@ -39,7 +39,10 @@ function getPublicHttpsUrl(value?: string) {
 
 export default function CategoryPage() {
   const { slug = '' } = useParams<{ slug: string }>()
-  const { categories, getProductsByCategory, loading } = useData()
+  // Split hooks (batch 4): this page only ensures products + categories.
+  const { categories } = useCategoriesData()
+  const { getProductsByCategory } = useProductsData()
+  const { loading } = useDataMeta()
   const { isDark } = useTheme()
   const { locale, translateText } = useI18n()
 

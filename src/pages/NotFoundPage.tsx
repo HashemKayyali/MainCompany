@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Home, Search, MessageCircle } from 'lucide-react'
-import { useData } from '../contexts/DataContext'
+import { useProductsData } from '../contexts/DataContext'
 import { usePageMeta } from '../hooks/usePageMeta'
 
 const ease = [0.16, 1, 0.3, 1] as const
@@ -9,7 +9,8 @@ const ease = [0.16, 1, 0.3, 1] as const
 export default function NotFoundPage() {
   usePageMeta({ title: '404 - Not Found', noIndex: true })
 
-  const { products } = useData()
+  // Split hook (batch 4): a 404 only ensures products (for suggestions).
+  const { products } = useProductsData()
   const suggested = products.slice(0, 3)
 
   return (

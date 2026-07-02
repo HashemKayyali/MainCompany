@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { allCountries } from 'country-region-data'
-import { useData } from '../../contexts/DataContext'
+import { useProductsData } from '../../contexts/DataContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useRateLimit } from '../../hooks/useRateLimit'
@@ -109,7 +109,8 @@ const getRegionOptions = (countryCode: string): LocationOption[] => {
 export default function ContactForm() {
   const [searchParams] = useSearchParams()
   const preselectedProduct = searchParams.get('product') || ''
-  const { products } = useData()
+  // Split hook (batch 4): the contact form only ensures products.
+  const { products } = useProductsData()
   const { isDark } = useTheme()
   const { toast } = useToast()
   const { check: checkRate, remaining } = useRateLimit(3, 60_000)
