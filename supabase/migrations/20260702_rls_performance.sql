@@ -125,6 +125,9 @@ CREATE POLICY "Users read own request history" ON public.request_status_history
 
 -- categories
 DROP POLICY IF EXISTS categories_admin_write ON public.categories;
+DROP POLICY IF EXISTS categories_admin_insert ON public.categories;
+DROP POLICY IF EXISTS categories_admin_update ON public.categories;
+DROP POLICY IF EXISTS categories_admin_delete ON public.categories;
 CREATE POLICY categories_admin_insert ON public.categories
   FOR INSERT TO authenticated WITH CHECK (is_admin());
 CREATE POLICY categories_admin_update ON public.categories
@@ -134,6 +137,9 @@ CREATE POLICY categories_admin_delete ON public.categories
 
 -- customers
 DROP POLICY IF EXISTS customers_admin_write ON public.customers;
+DROP POLICY IF EXISTS customers_admin_insert ON public.customers;
+DROP POLICY IF EXISTS customers_admin_update ON public.customers;
+DROP POLICY IF EXISTS customers_admin_delete ON public.customers;
 CREATE POLICY customers_admin_insert ON public.customers
   FOR INSERT TO authenticated WITH CHECK (is_admin());
 CREATE POLICY customers_admin_update ON public.customers
@@ -143,6 +149,9 @@ CREATE POLICY customers_admin_delete ON public.customers
 
 -- gallery_albums
 DROP POLICY IF EXISTS gallery_albums_admin_write ON public.gallery_albums;
+DROP POLICY IF EXISTS gallery_albums_admin_insert ON public.gallery_albums;
+DROP POLICY IF EXISTS gallery_albums_admin_update ON public.gallery_albums;
+DROP POLICY IF EXISTS gallery_albums_admin_delete ON public.gallery_albums;
 CREATE POLICY gallery_albums_admin_insert ON public.gallery_albums
   FOR INSERT TO authenticated WITH CHECK (is_admin());
 CREATE POLICY gallery_albums_admin_update ON public.gallery_albums
@@ -152,6 +161,9 @@ CREATE POLICY gallery_albums_admin_delete ON public.gallery_albums
 
 -- parts
 DROP POLICY IF EXISTS parts_admin_write ON public.parts;
+DROP POLICY IF EXISTS parts_admin_insert ON public.parts;
+DROP POLICY IF EXISTS parts_admin_update ON public.parts;
+DROP POLICY IF EXISTS parts_admin_delete ON public.parts;
 CREATE POLICY parts_admin_insert ON public.parts
   FOR INSERT TO authenticated WITH CHECK (is_admin());
 CREATE POLICY parts_admin_update ON public.parts
@@ -161,6 +173,9 @@ CREATE POLICY parts_admin_delete ON public.parts
 
 -- product_images
 DROP POLICY IF EXISTS product_images_admin_write ON public.product_images;
+DROP POLICY IF EXISTS product_images_admin_insert ON public.product_images;
+DROP POLICY IF EXISTS product_images_admin_update ON public.product_images;
+DROP POLICY IF EXISTS product_images_admin_delete ON public.product_images;
 CREATE POLICY product_images_admin_insert ON public.product_images
   FOR INSERT TO authenticated WITH CHECK (is_admin());
 CREATE POLICY product_images_admin_update ON public.product_images
@@ -170,6 +185,9 @@ CREATE POLICY product_images_admin_delete ON public.product_images
 
 -- products
 DROP POLICY IF EXISTS products_admin_write ON public.products;
+DROP POLICY IF EXISTS products_admin_insert ON public.products;
+DROP POLICY IF EXISTS products_admin_update ON public.products;
+DROP POLICY IF EXISTS products_admin_delete ON public.products;
 CREATE POLICY products_admin_insert ON public.products
   FOR INSERT TO authenticated WITH CHECK (is_admin());
 CREATE POLICY products_admin_update ON public.products
