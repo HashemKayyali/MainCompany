@@ -26,6 +26,7 @@ type GoogleIdentityConfiguration = {
   callback: (response: GoogleCredentialResponse) => void
   auto_select?: boolean
   cancel_on_tap_outside?: boolean
+  ux_mode?: 'popup' | 'redirect'
   use_fedcm_for_prompt?: boolean
 }
 

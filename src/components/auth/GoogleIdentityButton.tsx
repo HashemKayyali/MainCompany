@@ -4,7 +4,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { isSupabaseConfigured, supabase } from '../../lib/supabase'
 import { cn } from '../../utils/cn'
 
-const GOOGLE_IDENTITY_SCRIPT_SRC = 'https://accounts.google.com/gsi/client'
+const GOOGLE_IDENTITY_SCRIPT_SRC = 'https://accounts.google.com/gsi/client?hl=en'
+const GOOGLE_BUTTON_WIDTH = 400
+const GOOGLE_BUTTON_MIN_WIDTH = 240
 
 let googleIdentityScriptPromise: Promise<void> | null = null
 let initializedClientId: string | null = null
@@ -91,6 +93,8 @@ function initializeGoogleIdentity(clientId: string) {
 
   googleIdentity.initialize({
     client_id: clientId,
+    auto_select: false,
+    ux_mode: 'popup',
     callback: response => {
       activeCredentialCallback?.(response)
     },
@@ -101,6 +105,13 @@ function initializeGoogleIdentity(clientId: string) {
 function getSafeAuthError(error: unknown, fallback: string) {
   if (error instanceof Error && error.message.trim()) return error.message
   return fallback
+}
+
+function getGoogleButtonWidth(container: HTMLElement) {
+  const measuredWidth = Math.floor(container.getBoundingClientRect().width)
+  if (!measuredWidth) return GOOGLE_BUTTON_WIDTH
+
+  return Math.min(GOOGLE_BUTTON_WIDTH, Math.max(measuredWidth, GOOGLE_BUTTON_MIN_WIDTH))
 }
 
 export default function GoogleIdentityButton({
@@ -215,17 +226,17 @@ export default function GoogleIdentityButton({
 
         const buttonContainer = buttonRef.current
         buttonContainer.innerHTML = ''
-        const measuredWidth = Math.floor(buttonContainer.getBoundingClientRect().width)
-        const buttonWidth = Math.min(Math.max(measuredWidth || 320, 240), 400)
+        const buttonWidth = getGoogleButtonWidth(buttonContainer)
 
         window.google?.accounts?.id?.renderButton(buttonContainer, {
           type: 'standard',
           theme: 'outline',
           size: 'large',
-          text: mode === 'register' ? 'signup_with' : 'signin_with',
-          shape: 'rectangular',
+          text: 'continue_with',
+          shape: 'pill',
           logo_alignment: 'left',
           width: buttonWidth,
+          locale: 'en',
         })
 
         callback = (response: GoogleCredentialResponse) => {
@@ -249,41 +260,59 @@ export default function GoogleIdentityButton({
   }, [handleCredential, mode, reportError])
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('space-y-2.5', className)}>
       <div
         className={cn(
-          'relative flex min-h-[44px] w-full items-center justify-center overflow-hidden rounded-xl',
-          disabled || signingIn ? 'pointer-events-none opacity-75' : ''
+          'relative flex min-h-[44px] w-full items-center justify-center',
+          disabled || signingIn ? 'pointer-events-none opacity-80' : ''
         )}
       >
-        {!scriptReady && !localError && (
-          <div
-            role="status"
-            className="flex h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-[12px] font-bold text-[#150628]/70 shadow-sm"
-          >
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-violet-200 border-t-violet-600" />
-            Loading Google...
-          </div>
-        )}
+        <div className="relative mx-auto flex min-h-[44px] w-full max-w-[400px] items-center justify-center">
+          {!scriptReady && !localError && (
+            <div
+              role="status"
+              aria-label="Loading Google sign-in"
+              className="flex h-[44px] w-full items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white text-[12px] font-bold text-[#150628]/62 shadow-sm"
+            >
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-violet-200 border-t-violet-600" />
+              Loading Google...
+            </div>
+          )}
 
-        <div
-          ref={buttonRef}
-          className={cn('flex min-h-[44px] w-full justify-center', !scriptReady ? 'hidden' : '')}
-        />
+          {localError && (
+            <div
+              aria-hidden="true"
+              className="flex h-[44px] w-full items-center justify-center rounded-full border border-slate-200/90 bg-white text-[13px] font-semibold text-[#150628]/45 shadow-sm"
+            >
+              Continue with Google
+            </div>
+          )}
 
-        {signingIn && (
           <div
-            role="status"
-            className="absolute inset-0 flex items-center justify-center gap-2 rounded-xl border border-violet-200 bg-white/90 text-[12px] font-bold text-violet-700 shadow-sm backdrop-blur-sm"
-          >
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-violet-200 border-t-violet-600" />
-            Signing in...
-          </div>
-        )}
+            ref={buttonRef}
+            className={cn(
+              'google-identity-button-frame flex min-h-[44px] w-full items-center justify-center overflow-hidden rounded-full',
+              !scriptReady ? 'absolute inset-0 invisible' : ''
+            )}
+          />
+
+          {signingIn && (
+            <div
+              role="status"
+              className="absolute inset-0 flex items-center justify-center gap-2 rounded-full border border-violet-200 bg-white/[0.92] text-[12px] font-bold text-violet-700 shadow-sm backdrop-blur-sm"
+            >
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-violet-200 border-t-violet-600" />
+              Signing in...
+            </div>
+          )}
+        </div>
       </div>
 
       {localError && !onError && (
-        <p role="alert" className="text-center text-[11px] font-semibold text-red-600">
+        <p
+          role="alert"
+          className="rounded-full border border-red-100 bg-red-50/70 px-3 py-2 text-center text-[11.5px] font-semibold text-red-600"
+        >
           {localError}
         </p>
       )}

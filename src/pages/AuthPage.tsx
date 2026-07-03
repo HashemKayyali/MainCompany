@@ -12,7 +12,7 @@ import { usePageMeta } from '../hooks/usePageMeta'
 
 type Mode = 'login' | 'register'
 
-type OAuthProvider = 'google' | 'facebook' | 'apple'
+type OAuthProvider = 'google' | 'facebook'
 
 type AuthLocationState = {
   authModeSwitch?: boolean
@@ -105,29 +105,10 @@ const primaryButtonClass =
 const secondaryButtonClass =
   'h-[44px] w-full rounded-xl border border-slate-200/90 bg-white px-4 text-[12.5px] font-bold text-[#150628]/80 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-[0_14px_30px_-28px_rgba(76,29,149,0.5)] focus:outline-none focus-visible:ring-4 focus-visible:ring-violet-500/15'
 
-function GoogleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[22px] w-[22px] shrink-0">
-      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09Z" />
-      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23Z" />
-      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62Z" />
-      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53Z" />
-    </svg>
-  )
-}
-
 function FacebookIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[22px] w-[22px] shrink-0">
       <path fill="#1877F2" d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.12 24v-8.44H7.08v-3.5h3.04V9.41c0-3.02 1.79-4.7 4.53-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.89v2.26h3.33l-.53 3.5h-2.8V24C19.61 23.1 24 18.1 24 12.07Z" />
-    </svg>
-  )
-}
-
-function AppleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[22px] w-[22px] shrink-0">
-      <path fill="#111827" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35-4.88-5.03-4.16-12.69 1.38-12.97 1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.14 1.88-2.4 6.03.48 7.19-.57 1.5-1.31 2.99-2.53 4.02ZM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25Z" />
     </svg>
   )
 }
@@ -148,13 +129,10 @@ function SocialAuthOptions({
   disabled?: boolean
 }) {
   const action = mode === 'login' ? 'Sign in' : 'Sign up'
-  const providers: { name: string; provider: Exclude<OAuthProvider, 'google'>; icon: React.ReactNode }[] = [
-    { name: 'Facebook', provider: 'facebook', icon: <FacebookIcon /> },
-    { name: 'Apple', provider: 'apple', icon: <AppleIcon /> },
-  ]
+  const facebookLoading = loadingProvider === 'facebook'
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-3">
       <div className="flex items-center gap-3">
         <span className="h-px flex-1 bg-slate-200" />
         <span className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">or</span>
@@ -168,31 +146,23 @@ function SocialAuthOptions({
         onError={onGoogleError}
       />
 
-      <div className="-m-1 grid grid-cols-2 gap-2.5 overflow-visible p-1">
-        {providers.map(({ name, provider, icon }) => {
-          const isLoading = loadingProvider === provider
-          return (
-            <button
-              key={provider}
-              type="button"
-              onClick={() => onProviderClick?.(provider)}
-              disabled={disabled || !!loadingProvider}
-              aria-label={`${action} with ${name}`}
-              aria-busy={isLoading}
-              className="auth-social-button group flex h-[46px] min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-slate-200/90 bg-white shadow-sm transition-all duration-300 enabled:hover:-translate-y-0.5 enabled:hover:border-violet-300 enabled:hover:bg-violet-50/60 enabled:hover:shadow-[0_14px_30px_-30px_rgba(76,29,149,0.5)] focus:outline-none active:border-violet-300 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isLoading ? (
-                <span className="h-[22px] w-[22px] animate-spin rounded-full border-2 border-violet-300 border-t-violet-600" />
-              ) : (
-                icon
-              )}
-              <span className="truncate text-[9px] font-bold tracking-wide text-[#150628]/75 group-hover:text-violet-700">
-                {isLoading ? 'Connecting...' : name}
-              </span>
-            </button>
-          )
-        })}
-      </div>
+      <button
+        type="button"
+        onClick={() => onProviderClick?.('facebook')}
+        disabled={disabled || !!loadingProvider}
+        aria-label={`${action} with Facebook`}
+        aria-busy={facebookLoading}
+        className="auth-social-button group relative mx-auto flex h-[44px] w-full max-w-[400px] items-center justify-center rounded-full border border-[#dadce0] bg-white px-4 text-[14px] font-medium text-[#3c4043] shadow-sm transition-all duration-300 enabled:hover:border-violet-200 enabled:hover:text-violet-700 enabled:hover:shadow-[0_14px_30px_-28px_rgba(76,29,149,0.42)] focus:outline-none active:border-violet-200 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <span className="absolute left-4 flex h-[22px] w-[22px] items-center justify-center">
+          {facebookLoading ? (
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-violet-200 border-t-violet-600" />
+          ) : (
+            <FacebookIcon />
+          )}
+        </span>
+        {facebookLoading ? 'Connecting...' : 'Continue with Facebook'}
+      </button>
     </div>
   )
 }
@@ -490,8 +460,7 @@ export default function AuthPage() {
       return
     }
 
-    const label = provider === 'facebook' ? 'Facebook' : 'Apple'
-    setSuccess(`${label} login is coming soon.`)
+    setSuccess('Facebook login is coming soon.')
   }
 
   const EyeToggle = ({ show, onToggle }: { show: boolean; onToggle: () => void }) => (
