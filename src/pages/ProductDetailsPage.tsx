@@ -3,12 +3,14 @@ import { Link, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowLeft,
+  BadgeCheck,
   Check,
   ChevronDown,
   ChevronRight,
   CircleDot,
   Package,
   ShieldCheck,
+  Sparkles,
   Star,
   Truck,
   Wrench,
@@ -35,19 +37,87 @@ const ease = [0.16, 1, 0.3, 1]
 const SITE_URL = 'https://www.eventiesjo.com'
 
 const TRUST_BADGES = [
-  { icon: ShieldCheck, label: 'Insured equipment on eligible services' },
-  { icon: Truck, label: 'Delivery and setup confirmed after review' },
-  { icon: Wrench, label: 'On-site support depends on service scope and location' },
+  { icon: ShieldCheck, label: 'Insured equipment' },
+  { icon: Truck, label: 'Delivery & setup' },
+  { icon: Wrench, label: 'On-site support' },
 ]
 
 const INCLUDED_ITEMS = [
-  'Rental availability confirmed after review',
-  'Delivery and setup on eligible services',
-  'Professional on-site support when included in scope',
-  'Custom branding options when available',
-  'Insured equipment on eligible services',
-  'Spare parts availability when required',
+  'Availability confirmed after review',
+  'Delivery & setup on eligible services',
+  'On-site support when in scope',
+  'Custom branding when available',
+  'Insured equipment',
+  'Spare parts when required',
 ]
+
+// ── Description parsing ──────────────────────────────────────────────────────
+// Admin descriptions mix long prose with short bullet-like note lines (and
+// sometimes label lines such as "Notes (one per line)"). Parse them into
+// typed blocks so prose renders as paragraphs and notes get their own design.
+type AboutBlock =
+  | { type: 'paragraph'; text: string }
+  | { type: 'list'; title?: string; items: string[] }
+
+const LIST_LABEL_RE = /^notes?\s*(\(one per line\))?\s*:?$/i
+
+function groupSentences(text: string): string[] {
+  const sentences = text.match(/.+?[.!?](?=\s+[A-Z"“(]|\s*$)/g)
+  if (!sentences || sentences.length <= 3) return [text]
+
+  const paragraphs: string[] = []
+  for (let i = 0; i < sentences.length; i += 3) {
+    paragraphs.push(sentences.slice(i, i + 3).join(' ').replace(/\s+/g, ' ').trim())
+  }
+  return paragraphs.filter(Boolean)
+}
+
+function isNoteLine(line: string) {
+  if (/^[-•*]\s+/.test(line)) return true
+  return line.length <= 100 && !/[.!?]$/.test(line)
+}
+
+function parseDescriptionBlocks(text: string): AboutBlock[] {
+  const trimmed = text.trim()
+  if (!trimmed) return []
+
+  const lines = trimmed.split(/\n+/).map(line => line.trim()).filter(Boolean)
+  if (lines.length === 1) {
+    return groupSentences(lines[0]).map(paragraph => ({ type: 'paragraph', text: paragraph }))
+  }
+
+  const blocks: AboutBlock[] = []
+  let pendingTitle: string | undefined
+
+  for (const raw of lines) {
+    if (LIST_LABEL_RE.test(raw)) {
+      pendingTitle = 'Notes'
+      continue
+    }
+    if (raw.length <= 48 && raw.endsWith(':')) {
+      pendingTitle = raw.slice(0, -1).trim()
+      continue
+    }
+
+    if (isNoteLine(raw)) {
+      const item = raw.replace(/^[-•*]\s+/, '')
+      const last = blocks[blocks.length - 1]
+      if (last?.type === 'list' && !pendingTitle) {
+        last.items.push(item)
+      } else {
+        blocks.push({ type: 'list', title: pendingTitle, items: [item] })
+        pendingTitle = undefined
+      }
+    } else {
+      for (const paragraph of groupSentences(raw)) {
+        blocks.push({ type: 'paragraph', text: paragraph })
+      }
+      pendingTitle = undefined
+    }
+  }
+
+  return blocks
+}
 
 function getPublicImageUrl(value?: string) {
   const trimmed = value?.trim()
@@ -153,20 +223,31 @@ export default function ProductDetailsPage() {
     ? 'border-white/[0.09] bg-white/[0.035] shadow-[0_18px_54px_-42px_rgba(0,0,0,0.82)]'
     : 'border-slate-200/90 bg-white/96 shadow-[0_16px_46px_-38px_rgba(15,23,42,0.40)]'
 
-  const priceDisplay = showPrice
-    ? `${product.rentalPricePerDay} ${product.currency}`
-    : 'Reviewed pricing'
-  const priceCaption = showPrice ? 'Starting per day' : 'Reviewed pricing'
+  const rentalEnabled = product.rentalEnabled !== false
+  const saleEnabled = product.saleEnabled !== false
+
+  // Short description = lead under the title; full description = "About this
+  // service" section. When only the full text exists, its first paragraph
+  // becomes the lead so the header never carries a wall of text.
+  const shortDescription = product.shortDescription?.trim() || ''
+  const fullDescription = product.description?.trim() || ''
+  let leadDescription = shortDescription
+  let aboutBlocks: AboutBlock[] = []
+  if (shortDescription && fullDescription && fullDescription !== shortDescription) {
+    aboutBlocks = parseDescriptionBlocks(fullDescription)
+  } else if (!shortDescription && fullDescription) {
+    const blocks = parseDescriptionBlocks(fullDescription)
+    if (blocks[0]?.type === 'paragraph') {
+      leadDescription = blocks[0].text
+      aboutBlocks = blocks.slice(1)
+    } else {
+      aboutBlocks = blocks
+    }
+  }
 
   return (
     <section className="site-section bg-transparent">
-      <div
-        className="mx-auto min-w-0"
-        style={{
-          width: 'min(114rem, calc(100% - clamp(0.85rem, 1.8vw, 1.5rem)))',
-          maxWidth: 'calc(100vw - clamp(0.85rem, 1.8vw, 1.5rem))',
-        }}
-      >
+      <div className="site-container">
         <motion.nav
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -255,9 +336,16 @@ export default function ProductDetailsPage() {
                   {product.name}
                 </h1>
 
-                <p className={cn('mt-3 text-[14px] leading-[1.75] sm:text-[15px]', bodyText)}>
-                  {product.description}
-                </p>
+                {!!leadDescription && (
+                  <p
+                    className={cn(
+                      'mt-3.5 max-w-[68ch] text-[15px] font-medium leading-[1.7] sm:text-[16px]',
+                      isDark ? 'text-slate-200/88' : 'text-slate-700'
+                    )}
+                  >
+                    {leadDescription}
+                  </p>
+                )}
               </div>
             </motion.main>
 
@@ -267,6 +355,61 @@ export default function ProductDetailsPage() {
               transition={{ duration: 0.58, delay: 0.12, ease }}
               className="order-4 min-w-0"
             >
+              {aboutBlocks.length > 0 && (
+                <DetailSection
+                  title="About this service"
+                  isDark={isDark}
+                >
+                  <div className="space-y-4">
+                    {aboutBlocks.map((block, index) =>
+                      block.type === 'paragraph' ? (
+                        <p
+                          key={index}
+                          className={cn('max-w-[78ch] text-[14px] leading-[1.85] sm:text-[14.5px]', bodyText)}
+                        >
+                          {block.text}
+                        </p>
+                      ) : (
+                        <div
+                          key={index}
+                          className={cn(
+                            'rounded-[16px] border p-4',
+                            isDark
+                              ? 'border-white/[0.07] bg-white/[0.03]'
+                              : 'border-violet-100 bg-violet-50/50'
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              'mb-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em]',
+                              isDark ? 'text-violet-300' : 'text-violet-600'
+                            )}
+                          >
+                            <Sparkles size={11} strokeWidth={2.4} />
+                            {block.title || 'Highlights'}
+                          </div>
+                          <div className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
+                            {block.items.map(item => (
+                              <div key={item} className="flex items-start gap-2">
+                                <span
+                                  className={cn(
+                                    'mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full',
+                                    isDark ? 'bg-violet-400/80' : 'bg-violet-500'
+                                  )}
+                                />
+                                <span className={cn('text-[13px] leading-[1.6]', bodyText)}>
+                                  {item}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </DetailSection>
+              )}
+
               {product.quickOptions.length > 0 && (
                 <DetailSection
                   title="Choose your setup"
@@ -290,12 +433,28 @@ export default function ProductDetailsPage() {
                   title="Before requesting"
                   isDark={isDark}
                 >
-                  <div className="space-y-3">
+                  <div
+                    className={cn(
+                      'space-y-3 rounded-[16px] border p-4',
+                      isDark
+                        ? 'border-amber-400/[0.14] bg-amber-400/[0.04]'
+                        : 'border-amber-200/70 bg-amber-50/60'
+                    )}
+                  >
                     {product.notes.map((note, index) => (
-                      <p key={index} className={cn('flex items-start gap-2.5 text-[13px] leading-[1.65]', bodyText)}>
-                        <span className={cn('mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full', isDark ? 'bg-violet-400/70' : 'bg-violet-500')} />
-                        {note}
-                      </p>
+                      <div key={index} className="flex items-start gap-3">
+                        <span
+                          className={cn(
+                            'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black',
+                            isDark
+                              ? 'bg-amber-400/[0.15] text-amber-300'
+                              : 'bg-amber-100 text-amber-700'
+                          )}
+                        >
+                          {index + 1}
+                        </span>
+                        <p className={cn('text-[13px] leading-[1.65]', bodyText)}>{note}</p>
+                      </div>
                     ))}
                   </div>
                 </DetailSection>
@@ -363,27 +522,78 @@ export default function ProductDetailsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.58, delay: 0.08, ease }}
             className={cn(
-              'order-3 min-w-0 rounded-[18px] border p-3.5 lg:sticky lg:top-[calc(var(--app-navbar-height)+1.25rem)]',
+              'order-3 min-w-0 overflow-hidden rounded-[20px] border lg:sticky lg:top-[calc(var(--app-navbar-height)+1.25rem)]',
               buyBoxClass
             )}
           >
-            <div className={cn('border-b pb-3.5', divider)}>
-              <div className={cn('text-[9.5px] font-bold uppercase tracking-[0.18em]', mutedText)}>
-                {priceCaption}
-              </div>
-              <div className={cn('mt-1 font-display text-[1.65rem] font-black leading-none tracking-[-0.04em] sm:text-[1.75rem]', headingText)}>
-                {priceDisplay}
-              </div>
-              <p className={cn('mt-2.5 text-[11.5px] leading-[1.65]', bodyText)}>
-                Final availability and delivery timing are confirmed by the Eventies team.
-              </p>
+            <div
+              className={cn(
+                'border-b px-4 pb-4 pt-4',
+                divider,
+                isDark
+                  ? 'bg-white/[0.02]'
+                  : 'bg-gradient-to-br from-violet-50/90 via-white to-fuchsia-50/60'
+              )}
+            >
+              {showPrice ? (
+                <>
+                  <div className={cn('text-[9.5px] font-bold uppercase tracking-[0.18em]', mutedText)}>
+                    Starting per day
+                  </div>
+                  <div className="mt-1.5 flex items-baseline gap-1.5">
+                    <span className={cn('font-display text-[2.1rem] font-black leading-none tracking-[-0.04em]', headingText)}>
+                      {product.rentalPricePerDay}
+                    </span>
+                    <span className={cn('text-[13px] font-bold', mutedText)}>{product.currency}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[13px] bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-[0_8px_20px_-8px_rgba(124,58,237,0.55)]">
+                    <BadgeCheck size={19} strokeWidth={2.2} />
+                  </span>
+                  <div className="min-w-0">
+                    <div className={cn('font-display text-[1.3rem] font-black leading-tight tracking-[-0.03em]', headingText)}>
+                      Reviewed pricing
+                    </div>
+                    <div className={cn('text-[11px] font-medium', mutedText)}>
+                      Tailored quote for your event
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(rentalEnabled || saleEnabled) && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {rentalEnabled && (
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-full px-2.5 py-[3px] text-[9px] font-bold uppercase tracking-[0.12em]',
+                        isDark
+                          ? 'bg-violet-500/[0.14] text-violet-300 ring-1 ring-violet-400/[0.2]'
+                          : 'bg-violet-100/80 text-violet-700 ring-1 ring-violet-200/70'
+                      )}
+                    >
+                      Rental
+                    </span>
+                  )}
+                  {saleEnabled && (
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-full px-2.5 py-[3px] text-[9px] font-bold uppercase tracking-[0.12em]',
+                        isDark
+                          ? 'bg-fuchsia-500/[0.12] text-fuchsia-300 ring-1 ring-fuchsia-400/[0.18]'
+                          : 'bg-fuchsia-100/70 text-fuchsia-700 ring-1 ring-fuchsia-200/70'
+                      )}
+                    >
+                      Purchase quote
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div className="pt-3.5">
-              <div className={cn('mb-2.5 text-[12.5px] font-bold', isDark ? 'text-emerald-300' : 'text-emerald-700')}>
-                Available for rental or purchase quote
-              </div>
-
+            <div className="px-4 pb-4 pt-4">
               <ProductCommerceActions product={product} variant="detail" />
 
               <a
@@ -393,7 +603,7 @@ export default function ProductDetailsPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
-                  'mt-2.5 flex min-h-[40px] w-full items-center justify-center gap-2 rounded-[12px] px-3.5 py-2 text-[11.5px] font-semibold transition-all duration-300',
+                  'mt-2 flex min-h-[42px] w-full items-center justify-center gap-2 rounded-[13px] px-3.5 py-2 text-[12px] font-bold transition-all duration-300',
                   isDark
                     ? 'border border-emerald-500/20 bg-emerald-500/[0.08] text-emerald-300 hover:border-emerald-500/32 hover:bg-emerald-500/[0.14]'
                     : 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100/80'
@@ -402,22 +612,32 @@ export default function ProductDetailsPage() {
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
                 </svg>
-                Ask About This Service
+                Ask on WhatsApp
               </a>
+
+              <p className={cn('mt-3.5 text-center text-[10.75px] leading-[1.6]', mutedText)}>
+                Every request is reviewed first — we confirm availability, pricing, and delivery before anything is final.
+              </p>
             </div>
 
-            <div className={cn('mt-3.5 grid gap-2 border-t pt-3.5', divider)}>
+            <div
+              className={cn(
+                'grid grid-cols-3 border-t',
+                divider,
+                isDark ? 'divide-x divide-white/[0.06]' : 'divide-x divide-slate-100'
+              )}
+            >
               {TRUST_BADGES.map(({ icon: Icon, label }) => (
-                <div key={label} className="flex items-center gap-2.5">
-                  <Icon size={13} className={isDark ? 'text-violet-300/85' : 'text-violet-600'} />
-                  <span className={cn('text-[11.5px] font-semibold', isDark ? 'text-slate-300/88' : 'text-slate-600')}>
+                <div key={label} className="flex flex-col items-center gap-1.5 px-2 py-3.5 text-center">
+                  <Icon size={15} strokeWidth={2.2} className={isDark ? 'text-violet-300/85' : 'text-violet-600'} />
+                  <span className={cn('text-[9.75px] font-bold leading-tight', isDark ? 'text-slate-300/88' : 'text-slate-600')}>
                     {label}
                   </span>
                 </div>
               ))}
             </div>
 
-            <div className={cn('mt-3.5 border-t pt-3.5', subtleDivider)}>
+            <div className={cn('border-t px-4 py-3.5', subtleDivider)}>
               <button
                 type="button"
                 onClick={() => setIncludedOpen(value => !value)}

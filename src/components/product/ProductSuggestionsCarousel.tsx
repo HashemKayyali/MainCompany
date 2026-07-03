@@ -278,7 +278,7 @@ export default function ProductSuggestionsCarousel({
           <div
             key={item.slug}
             data-suggestion-card
-            className="w-[64vw] max-w-[220px] flex-none snap-start sm:w-[225px] sm:max-w-none lg:w-[232px]"
+            className="w-[82vw] max-w-[330px] flex-none snap-start sm:w-[300px] sm:max-w-none lg:w-[318px] xl:w-[330px]"
           >
             <ProductCard
               product={item}

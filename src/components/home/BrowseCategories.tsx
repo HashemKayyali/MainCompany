@@ -17,6 +17,7 @@ export default function BrowseCategories() {
         .map(category => ({
           name: category.name,
           slug: category.slug,
+          description: category.description,
           icon: category.icon,
           image: category.image,
           count: getProductsByCategory(category.id).length,
@@ -60,7 +61,7 @@ export default function BrowseCategories() {
           className="mb-12"
         />
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
           {items.slice(0, 10).map((category, index) => (
             <Reveal key={category.slug} delay={Math.min(index * 0.05, 0.35)} y={22} className="h-full">
               <CategoryGridCard category={category} imageLoading="lazy" />

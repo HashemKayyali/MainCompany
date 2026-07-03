@@ -481,7 +481,7 @@ export default function AuthPage() {
         }
 
   return (
-    <main className="relative flex h-[100dvh] min-h-[100dvh] w-full items-center justify-center overflow-x-hidden overflow-y-auto bg-[#fbf8ff] p-3 sm:p-4">
+    <main className="relative flex min-h-[100dvh] w-full items-start justify-center overflow-x-hidden overflow-y-auto bg-[#fbf8ff] px-3 py-5 sm:px-4 sm:py-6 lg:items-center lg:py-4">
       <img
         src={AUTH_HERO_IMAGE}
         alt=""

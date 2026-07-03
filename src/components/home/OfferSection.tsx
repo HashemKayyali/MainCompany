@@ -15,6 +15,7 @@ type CategoryItem = {
   id: string
   name: string
   slug: string
+  description?: string
   image?: string
   count: number
 }
@@ -36,6 +37,7 @@ const CategoryTile = memo(function CategoryTile({
     >
       <CategoryTileView
         name={category.name}
+        description={category.description}
         image={category.image}
         count={category.count}
         reducedVisualEffects={reducedVisualEffects}
@@ -196,6 +198,7 @@ export default function OfferSection() {
           id: category.id,
           name: category.name,
           slug: category.slug,
+          description: category.description,
           image: category.image,
           count: productsByCategory.get(category.id)?.length ?? 0,
         }))

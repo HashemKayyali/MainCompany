@@ -1,6 +1,5 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowRight,
   Building2,
@@ -17,7 +16,6 @@ import {
   MapPin,
   MessagesSquare,
   PackagePlus,
-  Plus,
   Repeat,
   ScanSearch,
   Scale,
@@ -30,12 +28,12 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { usePageMeta } from '../hooks/usePageMeta'
-import { useMotionEnabled } from '../hooks/useMotionEnabled'
 import { social } from '../data/social'
 import { preloadRoute } from '../utils/route-preload'
 import SectionHeading from '../components/home/SectionHeading'
 import Reveal from '../components/home/Reveal'
 import EventiesHero from '../components/layout/EventiesHero'
+import FaqFlipGrid from '../components/ui/FaqFlipGrid'
 import { useI18n } from '../contexts/LanguageContext'
 
 // ── Data ─────────────────────────────────────────────────────────────────────
@@ -139,19 +137,6 @@ const faqs: { q: string; a: string }[] = [
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Render answer text, turning Eventies email addresses into mailto links. */
-function renderAnswer(text: string): ReactNode {
-  return text.split(/([a-z0-9._%+-]+@eventies(?:jo)?\.com)/gi).map((part, index) =>
-    part.toLowerCase().includes('@eventies') ? (
-      <a key={index} href={`mailto:${part}`} className="font-semibold text-violet-700 underline decoration-violet-300 underline-offset-2 hover:text-violet-900">
-        {part}
-      </a>
-    ) : (
-      <span key={index}>{part}</span>
-    )
-  )
-}
-
 function StorySection({
   id,
   variant = 'plain',
@@ -250,72 +235,6 @@ function AboutHeroShowcase() {
 }
 
 // ── Accordion ────────────────────────────────────────────────────────────────
-
-function FaqAccordion({ items }: { items: { q: string; a: string }[] }) {
-  const motionEnabled = useMotionEnabled()
-  const { translateText } = useI18n()
-  const [open, setOpen] = useState(0)
-
-  return (
-    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      {items.map((item, index) => {
-        const isOpen = open === index
-        return (
-          <Reveal key={item.q} delay={Math.min(index * 0.03, 0.24)} y={14}>
-            <div
-              className={`overflow-hidden rounded-[18px] border transition-colors duration-300 ${
-                isOpen
-                  ? 'border-violet-300/80 bg-gradient-to-br from-violet-50 to-fuchsia-50/60 shadow-[0_22px_48px_-28px_rgba(124,58,237,0.5)]'
-                  : 'border-violet-200/70 bg-white hover:border-violet-300/70'
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() => setOpen(current => (current === index ? -1 : index))}
-                aria-expanded={isOpen}
-                className="flex w-full items-center gap-4 px-4 py-3.5 text-left sm:px-5"
-              >
-                <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-sans text-[12px] font-black transition-all duration-300 ${
-                    isOpen ? 'bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white' : 'bg-violet-100 text-violet-700'
-                  }`}
-                >
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-                <span className="flex-1 font-sans text-[14.5px] font-bold tracking-[-0.01em] text-ink-900 sm:text-[15.5px]">
-                  {translateText(item.q)}
-                </span>
-                <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${
-                    isOpen ? 'rotate-45 border-violet-300 bg-white text-violet-700' : 'border-violet-200 bg-violet-50 text-violet-600'
-                  }`}
-                >
-                  <Plus className="h-4 w-4" strokeWidth={2.4} />
-                </span>
-              </button>
-
-              <AnimatePresence initial={false}>
-                {isOpen && (
-                  <motion.div
-                    initial={motionEnabled ? { height: 0, opacity: 0 } : false}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={motionEnabled ? { height: 0, opacity: 0 } : undefined}
-                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    className="overflow-hidden"
-                  >
-                    <p className="px-4 pb-4 pl-16 text-[13px] leading-[1.75] text-ink-600 sm:px-5 sm:pb-5 sm:pl-[4.25rem]">
-                      {renderAnswer(translateText(item.a))}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </Reveal>
-        )
-      })}
-    </div>
-  )
-}
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
@@ -890,7 +809,7 @@ export default function AboutPage() {
             description="How requests, pricing, availability, and review work on Eventies."
             className="mb-8"
           />
-          <FaqAccordion items={faqs} />
+          <FaqFlipGrid items={faqs} />
         </div>
       </StorySection>
 

@@ -197,6 +197,7 @@ export default function AdminCategoriesPage() {
       >
         <CategoryTileView
           name={preview.name || 'Category Name'}
+          description={preview.description || undefined}
           image={preview.image || undefined}
           count={linkedCount}
           active={false}

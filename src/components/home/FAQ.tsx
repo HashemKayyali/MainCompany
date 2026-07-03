@@ -1,9 +1,7 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, Plus } from 'lucide-react'
-import { useMotionEnabled } from '../../hooks/useMotionEnabled'
+import { ArrowRight } from 'lucide-react'
 import { preloadRoute } from '../../utils/route-preload'
+import FaqFlipGrid from '../ui/FaqFlipGrid'
 import Reveal from './Reveal'
 import { useI18n } from '../../contexts/LanguageContext'
 
@@ -34,82 +32,8 @@ const FAQS = [
   },
 ]
 
-function FaqItem({
-  index,
-  question,
-  answer,
-  open,
-  onToggle,
-  motionEnabled,
-}: {
-  index: number
-  question: string
-  answer: string
-  open: boolean
-  onToggle: () => void
-  motionEnabled: boolean
-}) {
-  const { translateText } = useI18n()
-
-  return (
-    <div
-      className={`overflow-hidden rounded-[18px] border transition-colors duration-300 ${
-        open
-          ? 'border-violet-300/80 bg-gradient-to-br from-violet-50 to-fuchsia-50/60'
-          : 'border-violet-200/70 bg-white hover:border-violet-300/70'
-      }`}
-      style={{
-        boxShadow: open ? '0 22px 48px -28px rgba(124,58,237,0.5)' : '0 1px 2px rgba(20,8,50,0.04)',
-      }}
-    >
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className="flex w-full items-center gap-4 px-4 py-3.5 text-left sm:px-5"
-      >
-        <span
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-sans text-[12px] font-black transition-all duration-300 ${
-            open ? 'bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white' : 'bg-violet-100 text-violet-700'
-          }`}
-        >
-          {String(index + 1).padStart(2, '0')}
-        </span>
-        <span className="flex-1 font-sans text-[14.5px] font-bold tracking-[-0.01em] text-ink-900 sm:text-[15.5px]">
-          {translateText(question)}
-        </span>
-        <span
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${
-            open ? 'rotate-45 border-violet-300 bg-white text-violet-700' : 'border-violet-200 bg-violet-50 text-violet-600'
-          }`}
-        >
-          <Plus className="h-4 w-4" strokeWidth={2.4} />
-        </span>
-      </button>
-
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={motionEnabled ? { height: 0, opacity: 0 } : false}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={motionEnabled ? { height: 0, opacity: 0 } : undefined}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden"
-          >
-            <p className="px-4 pb-4 pl-16 text-[13px] leading-[1.7] text-ink-600 sm:px-5 sm:pb-5 sm:pl-[4.25rem]">
-              {translateText(answer)}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
-
 export default function FAQ() {
-  const motionEnabled = useMotionEnabled()
   const { translateText } = useI18n()
-  const [open, setOpen] = useState(0)
 
   return (
     <section className="site-section">
@@ -158,22 +82,8 @@ export default function FAQ() {
             </div>
           </Reveal>
 
-          {/* Right: accordion */}
-          <Reveal y={24} delay={0.08}>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {FAQS.map((faq, index) => (
-                <FaqItem
-                  key={faq.q}
-                  index={index}
-                  question={faq.q}
-                  answer={faq.a}
-                  open={open === index}
-                  onToggle={() => setOpen(current => (current === index ? -1 : index))}
-                  motionEnabled={motionEnabled}
-                />
-              ))}
-            </div>
-          </Reveal>
+          {/* Right: flip-card grid */}
+          <FaqFlipGrid items={FAQS} />
         </div>
       </div>
     </section>

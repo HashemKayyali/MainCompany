@@ -61,6 +61,16 @@
   * {
     box-sizing: border-box;
     margin: 0;
+    /* Hide the blinking text caret when clicking non-editable content. */
+    caret-color: transparent;
+  }
+
+  /* Editable fields keep their caret so typing stays visible. */
+  input,
+  textarea,
+  select,
+  [contenteditable]:not([contenteditable='false']) {
+    caret-color: auto;
   }
 
   html {

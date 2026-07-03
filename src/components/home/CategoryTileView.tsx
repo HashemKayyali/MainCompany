@@ -4,7 +4,7 @@ import { cn } from '../../utils/cn'
 import FramedImage from '../ui/FramedImage'
 
 /**
- * Presentational category tile used by the public homepage (OfferSection)
+ * Presentational category tile used by the public category grids
  * and by the admin Categories editor preview. This is the SINGLE source of
  * truth for what a category card looks like — admin previews and the public
  * grid must render through this component so the two never drift.
@@ -14,6 +14,7 @@ import FramedImage from '../ui/FramedImage'
  */
 export interface CategoryTileViewProps {
   name: string
+  description?: string
   image?: string
   count: number
   active?: boolean
@@ -22,6 +23,7 @@ export interface CategoryTileViewProps {
    * contexts, and also for admin previews where animation would be noisy.
    */
   reducedVisualEffects?: boolean
+  imageLoading?: 'eager' | 'lazy'
   /**
    * Optional override — by default, theme is read from ThemeContext.
    * Admin previews can force light mode if they want.
@@ -32,10 +34,12 @@ export interface CategoryTileViewProps {
 
 const CategoryTileView = memo(function CategoryTileView({
   name,
+  description,
   image,
   count,
   active = false,
   reducedVisualEffects = false,
+  imageLoading = 'lazy',
   isDarkOverride,
   className,
 }: CategoryTileViewProps) {
@@ -45,7 +49,7 @@ const CategoryTileView = memo(function CategoryTileView({
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-[18px]',
+        'group relative flex h-full flex-col overflow-hidden rounded-[18px]',
         !reducedVisualEffects && 'transition-all duration-400',
         isDark
           ? cn(
@@ -73,7 +77,7 @@ const CategoryTileView = memo(function CategoryTileView({
         />
       )}
 
-      <div className="relative aspect-[4/3] overflow-hidden">
+      <div className="relative aspect-[4/3] shrink-0 overflow-hidden">
         {image ? (
           <div
             className={cn(
@@ -87,7 +91,7 @@ const CategoryTileView = memo(function CategoryTileView({
               alt={name}
               width={800}
               height={600}
-              loading="lazy"
+              loading={imageLoading}
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               draggable={false}
               fallbackTransform={{ fit: 'cover' }}
@@ -129,7 +133,7 @@ const CategoryTileView = memo(function CategoryTileView({
 
       <div
         className={cn(
-          'px-3.5 py-3 transition-colors duration-300',
+          'flex flex-1 flex-col px-3.5 py-3 transition-colors duration-300',
           isDark ? 'bg-[rgba(9,8,22,0.97)]' : 'bg-white'
         )}
       >
@@ -154,6 +158,17 @@ const CategoryTileView = memo(function CategoryTileView({
         >
           {name}
         </h3>
+
+        {description && (
+          <p
+            className={cn(
+              'mt-1.5 line-clamp-2 text-[11.5px] font-medium leading-snug',
+              isDark ? 'text-slate-300/66' : 'text-slate-500'
+            )}
+          >
+            {description}
+          </p>
+        )}
       </div>
 
       {active && (

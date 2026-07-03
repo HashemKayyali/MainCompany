@@ -1,6 +1,6 @@
 import { memo, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ShoppingCart, FileText, MessageCircle, Check, X, ArrowRight } from 'lucide-react'
+import { ShoppingCart, FileText, MessageCircle, X, ArrowRight } from 'lucide-react'
 import type { Product } from '../../data/products/types'
 import { usePurchaseQuote } from '../../contexts/PurchaseQuoteContext'
 import { useRentalCart } from '../../contexts/RentalCartContext'
@@ -44,9 +44,15 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
   // ── Detail variant button classes ──────────────────────────────────────────
   const detailClass = {
     primary:
-      'btn-primary !inline-flex !min-h-[40px] !w-full !items-center !justify-center !gap-1.5 !whitespace-nowrap !rounded-[12px] !px-3 !py-2 !text-center !text-[10.75px] !font-bold !leading-none sm:!min-h-[42px] sm:!text-[11px]',
+      'btn-primary !inline-flex !min-h-[44px] !w-full !min-w-0 !items-center !justify-center !gap-2 !whitespace-normal !rounded-[13px] !px-4 !py-2.5 !text-center !text-[12px] !font-bold !leading-snug !tracking-normal',
     secondary:
-      'btn-outline !inline-flex !min-h-[40px] !w-full !items-center !justify-center !gap-1.5 !whitespace-nowrap !rounded-[12px] !px-3 !py-2 !text-center !text-[10.75px] !font-bold !leading-none sm:!min-h-[42px] sm:!text-[11px]',
+      'btn-outline !inline-flex !min-h-[44px] !w-full !min-w-0 !items-center !justify-center !gap-2 !whitespace-normal !rounded-[13px] !px-4 !py-2.5 !text-center !text-[12px] !font-bold !leading-snug !tracking-normal',
+    remove: cn(
+      'inline-flex min-h-[44px] w-full min-w-0 items-center justify-center gap-2 whitespace-normal rounded-[13px] px-4 py-2.5 text-center text-[12px] font-bold leading-snug transition-all duration-300',
+      isDark
+        ? 'border border-red-500/25 bg-red-500/[0.08] text-red-300 hover:border-red-500/40 hover:bg-red-500/[0.15]'
+        : 'border border-red-200 bg-red-50 text-red-600 hover:border-red-300 hover:bg-red-100'
+    ),
   }
 
   // ── Request draft actions ──────────────────────────────────────────────────
@@ -85,35 +91,30 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
     return (
       <>
         <div className="space-y-2">
-          <div className={cn(
-            'grid gap-2',
-            rentalEnabled && saleEnabled ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'
-          )}>
-            {rentalEnabled && (
+          {rentalEnabled && (
+            isInRentalCart ? (
+              <button type="button" onClick={removeFromRentalCart} className={detailClass.remove}>
+                <X size={13} strokeWidth={2.5} className="shrink-0" />
+                <span className="min-w-0">Remove from Rental Request</span>
+              </button>
+            ) : (
               <button type="button" onClick={addToRentalCart} className={detailClass.primary}>
                 <ShoppingCart size={13} className="shrink-0" />
-                Add to Rental Request
+                <span className="min-w-0">Add to Rental Request</span>
               </button>
-            )}
-            {saleEnabled && (
-              <button type="button" onClick={() => setModalOpen(true)} className={detailClass.secondary}>
-                <FileText size={13} className="shrink-0" />
-                Request a Purchase Quote
-              </button>
-            )}
-          </div>
-
-          <div className={cn(
-            'rounded-[13px] px-3.5 py-2.5 text-[11px] leading-[1.65]',
-            isDark ? 'bg-white/[0.035] text-purple-100/70' : 'bg-violet-50/80 text-slate-600'
-          )}>
-            Rental requests and purchase quote requests are reviewed before confirmation. Availability, pricing, setup, delivery, shipping, and scope are confirmed after review.
-          </div>
+            )
+          )}
+          {saleEnabled && (
+            <button type="button" onClick={() => setModalOpen(true)} className={detailClass.secondary}>
+              <FileText size={13} className="shrink-0" />
+              <span className="min-w-0">Request a Purchase Quote</span>
+            </button>
+          )}
 
           {showContactLink && (
             <Link to={`/contact?product=${product.slug}`} className={detailClass.secondary}>
               <MessageCircle size={13} className="shrink-0" />
-              Ask About This Service
+              <span className="min-w-0">Ask About This Service</span>
             </Link>
           )}
         </div>
@@ -152,58 +153,39 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
     <>
       <div className={cardStackClass}>
 
-        {/* ── Row 1: Rental request draft action ── */}
+        {/* ── Row 1: Rental request draft toggle ── */}
         {rentalEnabled && (
-          <div className={cn('grid', cardGridGapClass, isInRentalCart ? 'grid-cols-2' : 'grid-cols-1')}>
-            {isInRentalCart ? (
-              <>
-                {/* Added state */}
-                <button
-                  type="button"
-                  disabled
-                  className={cn(
-                    cardPrimaryButtonClass,
-                    isDark
-                      ? 'border border-emerald-500/30 bg-emerald-500/12 text-emerald-400'
-                      : 'border border-emerald-400/40 bg-emerald-50 text-emerald-700'
-                  )}
-                >
-                  <Check size={12} strokeWidth={2.5} />
-                  Added
-                </button>
-
-                {/* Remove state */}
-                <button
-                  type="button"
-                  onClick={removeFromRentalCart}
-                  className={cn(
-                    cardPrimaryButtonClass,
-                    isDark
-                      ? 'border border-red-500/22 bg-red-500/8 text-red-400 hover:border-red-500/38 hover:bg-red-500/14'
-                      : 'border border-red-300/60 bg-red-50 text-red-600 hover:bg-red-100'
-                  )}
-                >
-                  <X size={12} strokeWidth={2.5} />
-                  Remove
-                </button>
-              </>
-            ) : (
-              /* Add to Request */
-              <button
-                type="button"
-                onClick={addToRentalCart}
-                className={cn(
-                  cardPrimaryButtonClass,
-                  isDark
-                    ? 'bg-[linear-gradient(135deg,#1cc4ff_0%,#4f5fff_26%,#8b5cf6_64%,#ec4899_100%)] text-white shadow-[0_12px_32px_-10px_rgba(76,29,149,0.38)] hover:shadow-[0_16px_38px_-10px_rgba(76,29,149,0.48)] hover:brightness-105'
-                    : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-[0_10px_26px_-8px_rgba(124,58,237,0.3)] hover:brightness-105'
-                )}
-              >
-                <ShoppingCart size={primaryIconSize} />
-                Add to Rental Request
-              </button>
-            )}
-          </div>
+          isInRentalCart ? (
+            <button
+              type="button"
+              onClick={removeFromRentalCart}
+              className={cn(
+                'w-full',
+                cardPrimaryButtonClass,
+                isDark
+                  ? 'border border-red-500/22 bg-red-500/8 text-red-400 hover:border-red-500/38 hover:bg-red-500/14'
+                  : 'border border-red-300/60 bg-red-50 text-red-600 hover:bg-red-100'
+              )}
+            >
+              <X size={primaryIconSize} strokeWidth={2.5} />
+              Remove from Rental Request
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={addToRentalCart}
+              className={cn(
+                'w-full',
+                cardPrimaryButtonClass,
+                isDark
+                  ? 'bg-[linear-gradient(135deg,#1cc4ff_0%,#4f5fff_26%,#8b5cf6_64%,#ec4899_100%)] text-white shadow-[0_12px_32px_-10px_rgba(76,29,149,0.38)] hover:shadow-[0_16px_38px_-10px_rgba(76,29,149,0.48)] hover:brightness-105'
+                  : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-[0_10px_26px_-8px_rgba(124,58,237,0.3)] hover:brightness-105'
+              )}
+            >
+              <ShoppingCart size={primaryIconSize} />
+              Add to Rental Request
+            </button>
+          )
         )}
 
         {/* ── Row 2: Details + optional Quote ── */}

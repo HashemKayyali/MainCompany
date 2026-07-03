@@ -32,9 +32,11 @@ export default function HeroBackground({ active = true, className, fixed = false
       data-hero-background
       data-hero-background-instance={instanceId.current}
       className={cn(
-        'hero-background-surface pointer-events-none inset-0 overflow-hidden transition-opacity duration-300',
+        'hero-background-surface pointer-events-none inset-0 overflow-hidden',
         fixed ? 'fixed' : 'absolute',
-        active ? 'opacity-100' : 'opacity-0',
+        active
+          ? 'visible opacity-100 transition-opacity duration-300'
+          : 'invisible opacity-0 transition-none duration-0',
         className
       )}
       aria-hidden="true"

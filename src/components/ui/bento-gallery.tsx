@@ -120,16 +120,16 @@ export default function BentoGallery({ imageItems, eager = false }: BentoGallery
       >
         <motion.div
           ref={gridRef}
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.05 }}
+          variants={eager ? undefined : containerVariants}
+          initial={eager ? false : 'hidden'}
+          whileInView={eager ? undefined : 'visible'}
+          viewport={eager ? undefined : { once: true, amount: 0.05 }}
           className="grid w-max auto-cols-[8.75rem] grid-flow-col-dense grid-rows-[9.25rem_9.25rem] gap-[3px] px-[max(1rem,calc((100vw-112rem)/2+1.125rem))] sm:auto-cols-[10.5rem] sm:grid-rows-[11.25rem_11.25rem] sm:gap-1 lg:auto-cols-[12.25rem] lg:grid-rows-[13.25rem_13.25rem]"
         >
           {imageItems.map((item, index) => (
             <motion.div
               key={item.id}
-              variants={itemVariants}
+              variants={eager ? undefined : itemVariants}
               className={cn(
                 'group relative flex h-full min-w-0 cursor-grab select-none items-end overflow-hidden rounded-[9px] bg-violet-50 text-left active:cursor-grabbing',
                 item.span
@@ -140,8 +140,8 @@ export default function BentoGallery({ imageItems, eager = false }: BentoGallery
                 alt={item.title}
                 width={640}
                 height={640}
-                loading={eager && index < 10 ? 'eager' : 'lazy'}
-                fetchPriority={eager && index < 4 ? 'high' : 'auto'}
+                loading={eager ? 'eager' : 'lazy'}
+                fetchPriority={eager ? (index < 4 ? 'high' : 'low') : 'auto'}
                 draggable={false}
                 revealMode={eager ? 'crisp' : 'soft'}
                 fallbackTransform={{ fit: 'cover' }}
