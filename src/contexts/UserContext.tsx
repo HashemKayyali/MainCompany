@@ -457,6 +457,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.warn('Failed to sign out cleanly:', error)
     } finally {
+      if (typeof window !== 'undefined') {
+        window.google?.accounts?.id?.disableAutoSelect?.()
+      }
       clearAuthPersistence()
       safeSet(() => setCurrentUser(null))
     }

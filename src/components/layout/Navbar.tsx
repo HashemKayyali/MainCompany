@@ -83,7 +83,7 @@ function BrandLogo({ overHero, compact = false }: { overHero: boolean; compact?:
   // white over dark hero sections, original colored/black logo after scrolling.
   const logoSize = compact
     ? 'h-[38px] w-[176px]'
-    : 'h-[48px] w-[220px] sm:h-[52px] sm:w-[238px]'
+    : 'h-[36px] w-[165px] min-[420px]:h-[42px] min-[420px]:w-[192px] sm:h-[52px] sm:w-[238px]'
   const logoTone = overHero ? 'eventies-logo-full--hero' : 'eventies-logo-full--original'
 
   return (
@@ -356,7 +356,7 @@ export default function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <div className={`border-b transition-colors duration-300 ${barSurface}`} dir="ltr">
-        <div className={`site-container flex h-[74px] items-center gap-4 ${isArabic ? 'nav-shell-ar' : ''}`}>
+        <div className={`site-container flex h-[74px] items-center gap-2.5 sm:gap-4 ${isArabic ? 'nav-shell-ar' : ''}`}>
           {/* Logo — larger */}
           <Link
             to="/"
@@ -484,7 +484,7 @@ export default function Navbar() {
           </nav>
 
           {/* Right cluster: search + utilities */}
-          <div className="ml-auto flex items-center gap-2.5">
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2.5">
             {/* Inline search — wider */}
             <div ref={searchRef} className="relative hidden lg:block">
               <div className={`flex h-11 w-[clamp(260px,28vw,430px)] items-center gap-2.5 rounded-full border px-4 transition-all duration-200 ${searchSurface}`}>
@@ -572,7 +572,7 @@ export default function Navbar() {
               onFocus={() => preloadRoute('/rental-cart')}
               {...fastNavProps('/rental-cart')}
               aria-label={itemCount > 0 ? `${tr('Request draft')}, ${itemCount} ${tr('items')}` : tr('Request draft')}
-              className={`relative inline-flex h-11 items-center gap-2 rounded-full border px-3.5 transition-all ${utilityBtn}`}
+              className={`relative inline-flex h-11 w-11 items-center justify-center gap-2 rounded-full border px-0 transition-all sm:w-auto sm:justify-start sm:px-3.5 ${utilityBtn}`}
             >
               <span className="relative inline-flex">
                 <ShoppingCart className="h-[18px] w-[18px]" strokeWidth={2.2} />
@@ -593,13 +593,13 @@ export default function Navbar() {
                   onClick={() => setUserOpen(open => !open)}
                   aria-expanded={userOpen}
                   aria-label={tr('Account menu')}
-                  className={`inline-flex h-11 items-center gap-2 rounded-full border pl-1.5 pr-3 transition-all ${utilityBtn}`}
+                  className={`inline-flex h-11 w-11 items-center justify-center rounded-full border p-0 transition-all sm:w-auto sm:justify-start sm:gap-2 sm:pl-1.5 sm:pr-3 ${utilityBtn}`}
                 >
                   <Avatar name={currentUser?.name} email={currentUser?.email} className="h-8 w-8 text-[12px]" ring={overHero ? 'ring-2 ring-white/50' : 'ring-2 ring-white'} />
                   <span className="hidden max-w-[96px] truncate font-display text-[13px] font-bold md:inline">
                     {accountButtonLabel}
                   </span>
-                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${userOpen ? 'rotate-180' : ''}`} strokeWidth={2.2} />
+                  <ChevronDown className={`hidden h-3.5 w-3.5 transition-transform sm:block ${userOpen ? 'rotate-180' : ''}`} strokeWidth={2.2} />
                 </button>
 
                 <AnimatePresence>
@@ -660,7 +660,7 @@ export default function Navbar() {
                 onMouseEnter={() => preloadRoute('/login')}
                 onFocus={() => preloadRoute('/login')}
                 {...fastNavProps('/login')}
-                className={`group inline-flex h-11 items-center gap-2 rounded-full border pl-1.5 pr-4 font-bold transition-all hover:-translate-y-0.5 ${
+                className={`group inline-flex h-11 w-11 items-center justify-center rounded-full border p-0 font-bold transition-all hover:-translate-y-0.5 sm:w-auto sm:justify-start sm:gap-2 sm:pl-1.5 sm:pr-4 ${
                   overHero
                     ? 'border-white/45 bg-white text-ink-900'
                     : 'border-violet-200 bg-white text-ink-900 hover:border-violet-300 hover:shadow-[0_12px_26px_-12px_rgba(124,58,237,0.45)]'
@@ -796,22 +796,23 @@ export default function Navbar() {
                 ))}
               </div>
 
-              <div className="mt-3 font-display text-[10px] font-bold uppercase tracking-[0.18em] text-violet-500">{tr('Categories')}</div>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {categoryList.slice(0, 8).map(category => (
-                  <Link
-                    key={category.id}
-                    to={`/categories/${encodeURIComponent(category.slug)}`}
-                    onMouseEnter={() => preloadRoute(`/categories/${encodeURIComponent(category.slug)}`)}
-                    onFocus={() => preloadRoute(`/categories/${encodeURIComponent(category.slug)}`)}
-                    {...fastNavProps(`/categories/${encodeURIComponent(category.slug)}`, () => setMobileOpen(false))}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-white px-3 py-1.5 font-display text-[12px] font-semibold text-ink-700 hover:bg-violet-50"
-                  >
-                    <span>{category.icon || '*'}</span>
-                    {category.name}
-                  </Link>
-                ))}
-              </div>
+              <Link
+                to="/categories"
+                onMouseEnter={() => preloadRoute('/categories')}
+                onFocus={() => preloadRoute('/categories')}
+                {...fastNavProps('/categories', () => setMobileOpen(false))}
+                className={`mt-3 inline-flex min-h-[48px] w-full items-center justify-between rounded-xl border px-3.5 font-display text-[13px] font-semibold transition-all ${
+                  active('/categories')
+                    ? 'border-violet-300 bg-violet-50 text-violet-900'
+                    : 'border-violet-100 bg-white text-ink-700 hover:bg-violet-50'
+                }`}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <LayoutGrid className="h-4 w-4 text-violet-600" strokeWidth={2.2} />
+                  {tr('Categories')}
+                </span>
+                <ArrowRight className="h-4 w-4 text-violet-500" strokeWidth={2.2} />
+              </Link>
 
               <div className="mt-4 grid grid-cols-2 gap-1.5">
                 <Link

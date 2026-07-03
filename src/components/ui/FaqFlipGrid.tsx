@@ -45,7 +45,7 @@ function FaqFlipCard({
   }
 
   return (
-    <div className="h-[13.5rem] sm:h-[14.5rem] [perspective:1400px]">
+    <div className="h-[10.75rem] sm:h-[11.25rem] [perspective:1400px]">
       <div
         className={cn(
           'relative h-full w-full [transform-style:preserve-3d]',

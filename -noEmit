@@ -1,0 +1,23 @@
+warning: in the working copy of '.env.example', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/layout/Navbar.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/contexts/UserContext.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/pages/AuthPage.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/pages/CheckoutPage.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/pages/MyRequestDetailsPage.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/pages/MyRequestsPage.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/pages/OrderSummaryPage.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/vite-env.d.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'vite.config.ts', LF will be replaced by CRLF the next time Git touches it
+ .env.example                             |  15 [32m+[m[31m-[m
+ src/components/home/CategoryTileView.tsx |   2 [32m+[m[31m-[m
+ src/components/layout/Navbar.tsx         |  47 [32m++[m[31m--[m
+ src/components/ui/FaqFlipGrid.tsx        |   2 [32m+[m[31m-[m
+ src/contexts/UserContext.tsx             |   3 [32m+[m
+ src/pages/AuthPage.tsx                   |  99 [32m+++++[m[31m--[m
+ src/pages/CheckoutPage.tsx               | 432 [32m++++++++++++++++++++++++++[m[31m-----[m
+ src/pages/MyRequestDetailsPage.tsx       | 372 [32m++++++++++++++++[m[31m----------[m
+ src/pages/MyRequestsPage.tsx             | 338 [32m+++++++++++++++++[m[31m-------[m
+ src/pages/OrderSummaryPage.tsx           | 278 [32m+++++++++++++[m[31m-------[m
+ src/vite-env.d.ts                        |  42 [32m+++[m
+ vite.config.ts                           |   1 [32m+[m
+ 12 files changed, 1195 insertions(+), 436 deletions(-)

@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, Eye, EyeOff, Lock, Mail, Phone, User } from 'lucide-react'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useUser } from '../contexts/UserContext'
+import GoogleIdentityButton from '../components/auth/GoogleIdentityButton'
 import { BRAND_LOGO_HORIZONTAL } from '../config/brand'
 import { getSafeRedirectPath } from '../lib/auth-routing'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
@@ -135,14 +136,19 @@ function SocialAuthOptions({
   mode,
   loadingProvider,
   onProviderClick,
+  onGoogleSuccess,
+  onGoogleError,
+  disabled,
 }: {
   mode: Mode
   loadingProvider?: OAuthProvider | null
   onProviderClick?: (provider: OAuthProvider) => void
+  onGoogleSuccess?: () => void | Promise<void>
+  onGoogleError?: (message: string) => void
+  disabled?: boolean
 }) {
   const action = mode === 'login' ? 'Sign in' : 'Sign up'
-  const providers: { name: string; provider: OAuthProvider; icon: React.ReactNode }[] = [
-    { name: 'Google', provider: 'google', icon: <GoogleIcon /> },
+  const providers: { name: string; provider: Exclude<OAuthProvider, 'google'>; icon: React.ReactNode }[] = [
     { name: 'Facebook', provider: 'facebook', icon: <FacebookIcon /> },
     { name: 'Apple', provider: 'apple', icon: <AppleIcon /> },
   ]
@@ -155,7 +161,14 @@ function SocialAuthOptions({
         <span className="h-px flex-1 bg-slate-200" />
       </div>
 
-      <div className="-m-1 grid grid-cols-3 gap-2.5 overflow-visible p-1">
+      <GoogleIdentityButton
+        mode={mode}
+        disabled={disabled || !!loadingProvider}
+        onSuccess={onGoogleSuccess}
+        onError={onGoogleError}
+      />
+
+      <div className="-m-1 grid grid-cols-2 gap-2.5 overflow-visible p-1">
         {providers.map(({ name, provider, icon }) => {
           const isLoading = loadingProvider === provider
           return (
@@ -163,7 +176,7 @@ function SocialAuthOptions({
               key={provider}
               type="button"
               onClick={() => onProviderClick?.(provider)}
-              disabled={!!loadingProvider}
+              disabled={disabled || !!loadingProvider}
               aria-label={`${action} with ${name}`}
               aria-busy={isLoading}
               className="auth-social-button group flex h-[46px] min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-slate-200/90 bg-white shadow-sm transition-all duration-300 enabled:hover:-translate-y-0.5 enabled:hover:border-violet-300 enabled:hover:bg-violet-50/60 enabled:hover:shadow-[0_14px_30px_-30px_rgba(76,29,149,0.5)] focus:outline-none active:border-violet-300 disabled:cursor-not-allowed disabled:opacity-60"
@@ -415,22 +428,29 @@ export default function AuthPage() {
     }
   }
 
-  const handleSocialClick = async (provider: OAuthProvider) => {
+  const handleGoogleIdentitySuccess = () => {
+    setError('')
+    setSuccess('Signed in successfully.')
+    navigate(defaultDestination, { replace: true })
+  }
+
+  const handleGoogleIdentityError = (message: string) => {
+    setSuccess('')
+    setError(getFriendlyAuthError(message || 'Google login failed'))
+  }
+
+  // Temporary rollback fallback only. The visible Google button uses Google
+  // Identity Services + signInWithIdToken and does not call this path.
+  const handleGoogleOAuthFallback = async () => {
     setError('')
     setSuccess('')
-
-    if (provider !== 'google') {
-      const label = provider === 'facebook' ? 'Facebook' : 'Apple'
-      setSuccess(`${label} login is coming soon.`)
-      return
-    }
 
     if (!isSupabaseConfigured()) {
       setError('Authentication is not configured')
       return
     }
 
-    setSocialLoading(provider)
+    setSocialLoading('google')
 
     // Preserve the intended post-login destination across the OAuth redirect.
     // The redirect URL passed to Supabase must be an exact allow-list match, so
@@ -443,18 +463,35 @@ export default function AuthPage() {
       }
     }
 
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
+    try {
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
 
-    setSocialLoading(null)
-
-    if (oauthError) {
-      setError(oauthError.message || 'Google login failed')
+      if (oauthError) {
+        setError(oauthError.message || 'Google login failed')
+      }
+    } catch {
+      setError('Google login failed')
+    } finally {
+      setSocialLoading(null)
     }
+  }
+
+  const handleSocialClick = async (provider: OAuthProvider) => {
+    setError('')
+    setSuccess('')
+
+    if (provider === 'google') {
+      await handleGoogleOAuthFallback()
+      return
+    }
+
+    const label = provider === 'facebook' ? 'Facebook' : 'Apple'
+    setSuccess(`${label} login is coming soon.`)
   }
 
   const EyeToggle = ({ show, onToggle }: { show: boolean; onToggle: () => void }) => (
@@ -659,7 +696,16 @@ export default function AuthPage() {
                       {busy ? 'Signing in...' : 'Sign In'}
                     </button>
 
-                    <SocialAuthOptions mode="login" loadingProvider={socialLoading} onProviderClick={handleSocialClick} />
+                    {uiMode === 'login' && (
+                      <SocialAuthOptions
+                        mode="login"
+                        loadingProvider={socialLoading}
+                        onProviderClick={handleSocialClick}
+                        onGoogleSuccess={handleGoogleIdentitySuccess}
+                        onGoogleError={handleGoogleIdentityError}
+                        disabled={busy}
+                      />
+                    )}
 
                     <button type="button" onClick={() => switchTo('register')} className={secondaryButtonClass}>
                       Create a new account
@@ -793,7 +839,16 @@ export default function AuthPage() {
                       {busy ? 'Creating...' : success ? 'Check email' : 'Create Account'}
                     </button>
 
-                    <SocialAuthOptions mode="register" loadingProvider={socialLoading} onProviderClick={handleSocialClick} />
+                    {uiMode === 'register' && (
+                      <SocialAuthOptions
+                        mode="register"
+                        loadingProvider={socialLoading}
+                        onProviderClick={handleSocialClick}
+                        onGoogleSuccess={handleGoogleIdentitySuccess}
+                        onGoogleError={handleGoogleIdentityError}
+                        disabled={busy}
+                      />
+                    )}
 
                     <button type="button" onClick={() => switchTo('login')} className={secondaryButtonClass}>
                       Back to sign in
