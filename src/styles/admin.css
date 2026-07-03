@@ -1,0 +1,267 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Eventies Admin design tokens (Phase 0)
+   ─────────────────────────────────────────────────────────────────────────
+   Single source of truth for the admin panel redesign. Every later phase
+   consumes these variables — no raw hex values in admin components.
+   Scoped under `.admin-scope` so nothing leaks into the public site.
+   Values are derived from the existing brand palette in input.css
+   (brand-600 #7126e3, ink-900 #1a0b3d family) so the violet identity
+   stays intact.
+   ───────────────────────────────────────────────────────────────────── */
+
+.admin-scope {
+  --admin-bg: #f4eeff;
+  --admin-surface: #ffffff;
+  --admin-surface-2: #faf6ff;
+  --admin-border: rgba(113, 38, 227, 0.16);
+  --admin-text: #1a0b3d;
+  --admin-text-muted: #6b5a82;
+  --admin-accent: #7126e3;
+  --admin-accent-soft: rgba(113, 38, 227, 0.1);
+  --admin-danger: #dc2626;
+  --admin-success: #059669;
+  --admin-warning: #d97706;
+  --admin-radius: 16px;
+  --admin-radius-sm: 10px;
+  --admin-header-h: 64px;
+  --admin-sidebar-w: 264px;
+  --admin-bottombar-h: 64px;
+}
+
+@media (min-width: 768px) {
+  .admin-scope {
+    --admin-header-h: 72px;
+  }
+}
+
+/* ─── Card surface ─── */
+.admin-scope .admin-card {
+  border-radius: var(--admin-radius);
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  box-shadow: 0 2px 6px rgba(20, 8, 50, 0.04), 0 14px 36px -18px rgba(89, 23, 196, 0.14);
+}
+
+/* ─── Form controls ─── */
+.admin-scope .admin-input {
+  width: 100%;
+  min-height: 44px;
+  padding-block: 10px;
+  padding-inline: 14px;
+  border-radius: var(--admin-radius-sm);
+  font-size: 13px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-scope .admin-input::placeholder {
+  color: var(--admin-text-muted);
+  opacity: 0.75;
+}
+
+.admin-scope .admin-input:hover:not(:disabled) {
+  border-color: var(--admin-accent);
+}
+
+.admin-scope .admin-input:focus,
+.admin-scope .admin-input:focus-visible {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px var(--admin-accent-soft);
+}
+
+.admin-scope .admin-input:disabled {
+  background: var(--admin-surface-2);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.admin-scope .admin-input--error {
+  border-color: var(--admin-danger);
+}
+
+.admin-scope .admin-input--error:focus,
+.admin-scope .admin-input--error:focus-visible {
+  border-color: var(--admin-danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-danger) 14%, transparent);
+}
+
+.admin-scope textarea.admin-input {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.admin-scope select.admin-input {
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%237126e3' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+  padding-inline-end: 40px;
+}
+
+.admin-scope[dir='rtl'] select.admin-input,
+[dir='rtl'] .admin-scope select.admin-input {
+  background-position: left 14px center;
+}
+
+/* ─── Field label ─── */
+.admin-scope .admin-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--admin-text);
+  letter-spacing: -0.01em;
+}
+
+/* ─── Table wrapper (horizontal scroll shell) ─── */
+.admin-scope .admin-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--admin-radius);
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Chip / badge pill ─── */
+.admin-scope .admin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-block: 4px;
+  padding-inline: 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  background: var(--admin-surface-2);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text-muted);
+}
+
+.admin-scope .admin-chip--accent {
+  background: var(--admin-accent-soft);
+  border-color: color-mix(in srgb, var(--admin-accent) 28%, transparent);
+  color: var(--admin-accent);
+}
+
+.admin-scope .admin-chip--success {
+  background: color-mix(in srgb, var(--admin-success) 10%, transparent);
+  border-color: color-mix(in srgb, var(--admin-success) 28%, transparent);
+  color: var(--admin-success);
+}
+
+.admin-scope .admin-chip--warning {
+  background: color-mix(in srgb, var(--admin-warning) 10%, transparent);
+  border-color: color-mix(in srgb, var(--admin-warning) 28%, transparent);
+  color: var(--admin-warning);
+}
+
+.admin-scope .admin-chip--danger {
+  background: color-mix(in srgb, var(--admin-danger) 10%, transparent);
+  border-color: color-mix(in srgb, var(--admin-danger) 28%, transparent);
+  color: var(--admin-danger);
+}
+
+/* ─── Icon-only button (requires aria-label on the element) ─── */
+.admin-scope .admin-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--admin-radius-sm);
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text-muted);
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.admin-scope .admin-icon-btn:hover:not(:disabled) {
+  border-color: var(--admin-accent);
+  color: var(--admin-accent);
+  background: var(--admin-surface-2);
+}
+
+.admin-scope .admin-icon-btn:focus-visible {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px var(--admin-accent-soft);
+}
+
+.admin-scope .admin-icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (min-width: 768px) {
+  .admin-scope .admin-icon-btn {
+    min-width: 38px;
+    min-height: 38px;
+  }
+}
+
+/* ─── Section title ─── */
+.admin-scope .admin-section-title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--admin-text);
+}
+
+/* ─── Shell surfaces (topbar / bottom tab bar) ─── */
+.admin-scope .admin-topbar {
+  background: color-mix(in srgb, var(--admin-surface) 86%, transparent);
+  border-bottom: 1px solid var(--admin-border);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  backdrop-filter: blur(14px) saturate(1.15);
+}
+
+.admin-scope .admin-bottombar {
+  background: color-mix(in srgb, var(--admin-surface) 92%, transparent);
+  border-top: 1px solid var(--admin-border);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  backdrop-filter: blur(16px) saturate(1.15);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ─── Skeleton loading block ─── */
+.admin-scope .admin-skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--admin-radius-sm);
+  background: var(--admin-accent-soft);
+}
+
+.admin-scope .admin-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.65),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: admin-skeleton-sweep 1.6s ease-in-out infinite;
+}
+
+@keyframes admin-skeleton-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-scope .admin-skeleton::after {
+    animation: none;
+  }
+}
