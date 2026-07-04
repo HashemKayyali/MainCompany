@@ -171,14 +171,14 @@ export default function ImageUploader({
               />
 
               <div
-                className={`absolute inset-0 flex items-center justify-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100 ${
+                className={`absolute inset-0 flex flex-wrap items-center justify-center gap-1.5 p-2 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 ${
                   isDark ? 'bg-black/60' : 'bg-white/70'
                 }`}
               >
                 <button
                   type="button"
                   onClick={() => openFrameEditor(value)}
-                  className={`rounded-lg px-2 py-1 text-[10px] font-semibold ${
+                  className={`min-h-[44px] rounded-lg px-2 py-1 text-[10px] font-semibold md:min-h-[32px] ${
                     isDark ? 'bg-cyan-500/25 text-white' : 'bg-violet-100 text-violet-700'
                   }`}
                 >
@@ -187,7 +187,7 @@ export default function ImageUploader({
                 <button
                   type="button"
                   onClick={() => inputRef.current?.click()}
-                  className={`rounded-lg px-2 py-1 text-[10px] font-semibold ${
+                  className={`min-h-[44px] rounded-lg px-2 py-1 text-[10px] font-semibold md:min-h-[32px] ${
                     isDark ? 'bg-purple-500/30 text-white' : 'bg-violet-100 text-violet-700'
                   }`}
                 >
@@ -197,7 +197,7 @@ export default function ImageUploader({
                   <button
                     type="button"
                     onClick={onRemove}
-                    className="rounded-lg bg-red-500/30 px-2 py-1 text-[10px] font-semibold text-white"
+                    className="min-h-[44px] rounded-lg bg-red-500/30 px-2 py-1 text-[10px] font-semibold text-white md:min-h-[32px]"
                   >
                     Remove
                   </button>
@@ -270,7 +270,7 @@ export default function ImageUploader({
                 <button
                   type="button"
                   onClick={() => openFrameEditor(value)}
-                  className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-[10px] border border-violet-300/80 bg-violet-50 px-3 text-[11.5px] font-bold text-violet-800 transition hover:border-violet-500 hover:bg-violet-100 hover:text-violet-900"
+                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-[10px] border border-violet-300/80 bg-violet-50 px-3 text-[11.5px] font-bold text-violet-800 transition hover:border-violet-500 hover:bg-violet-100 hover:text-violet-900 md:min-h-[34px]"
                 >
                   Adjust Logo
                 </button>
@@ -278,7 +278,7 @@ export default function ImageUploader({
                   type="button"
                   onClick={() => inputRef.current?.click()}
                   disabled={uploading}
-                  className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-[10px] border border-violet-200/80 bg-white px-3 text-[11.5px] font-semibold text-[#211049] transition hover:border-violet-400 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-[10px] border border-violet-200/80 bg-white px-3 text-[11.5px] font-semibold text-[#211049] transition hover:border-violet-400 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60 md:min-h-[34px]"
                 >
                   {uploading ? 'Uploading…' : 'Replace'}
                 </button>
@@ -286,7 +286,7 @@ export default function ImageUploader({
                   <button
                     type="button"
                     onClick={onRemove}
-                    className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-[10px] border border-red-200 bg-red-50 px-3 text-[11.5px] font-bold text-red-700 transition hover:border-red-300 hover:bg-red-100 hover:text-red-800"
+                    className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-[10px] border border-red-200 bg-red-50 px-3 text-[11.5px] font-bold text-red-700 transition hover:border-red-300 hover:bg-red-100 hover:text-red-800 md:min-h-[34px]"
                   >
                     Remove
                   </button>
@@ -359,14 +359,14 @@ export default function ImageUploader({
             </div>
 
             <div
-              className={`absolute inset-0 flex items-center justify-center gap-2.5 opacity-0 transition-opacity group-hover:opacity-100 ${
+              className={`absolute inset-0 flex flex-wrap items-center justify-center gap-2.5 p-2 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 ${
                 isDark ? 'bg-black/60' : 'bg-white/60'
               }`}
             >
               <button
                 type="button"
                 onClick={() => openFrameEditor(value)}
-                className={`rounded-xl px-3.5 py-2 text-[11px] font-semibold ${
+                className={`min-h-[44px] rounded-xl px-3.5 py-2 text-[11px] font-semibold md:min-h-[38px] ${
                   isDark ? 'bg-cyan-500/25 text-white' : 'bg-violet-100 text-violet-700'
                 }`}
               >
@@ -376,7 +376,7 @@ export default function ImageUploader({
                 type="button"
                 onClick={() => inputRef.current?.click()}
                 disabled={uploading}
-                className={`rounded-xl px-3.5 py-2 text-[11px] font-semibold ${
+                className={`min-h-[44px] rounded-xl px-3.5 py-2 text-[11px] font-semibold md:min-h-[38px] ${
                   isDark ? 'bg-purple-500/40 text-white' : 'bg-violet-100 text-violet-700'
                 }`}
               >
@@ -386,7 +386,7 @@ export default function ImageUploader({
                 <button
                   type="button"
                   onClick={onRemove}
-                  className="rounded-xl bg-red-500/40 px-3.5 py-2 text-[11px] font-semibold text-white"
+                  className="min-h-[44px] rounded-xl bg-red-500/40 px-3.5 py-2 text-[11px] font-semibold text-white md:min-h-[38px]"
                 >
                   Remove
                 </button>

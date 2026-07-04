@@ -16,7 +16,8 @@ interface ModalProps {
   persistent?: boolean
   /** Alias-style opt-out of dismiss affordances; defaults to dismissable. */
   dismissable?: boolean
-  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full'
+  overlayClassName?: string
   contentClassName?: string
   bodyClassName?: string
   /** Optional sticky footer region (actions). Stays visible while the body scrolls. */
@@ -29,6 +30,7 @@ const SIZE_CLASSES: Record<NonNullable<ModalProps['size']>, string> = {
   lg: 'sm:max-w-[48rem]',
   xl: 'sm:max-w-[58rem]',
   '2xl': 'sm:max-w-[66rem]',
+  '3xl': 'sm:max-w-[min(90rem,calc(100vw-2rem))]',
   full: 'sm:max-w-[min(78rem,calc(100vw-1rem))]',
 }
 
@@ -57,6 +59,7 @@ export default function Modal({
   persistent = false,
   dismissable = true,
   size = 'md',
+  overlayClassName = '',
   contentClassName = '',
   bodyClassName = '',
   footer,
@@ -178,7 +181,7 @@ export default function Modal({
     <AnimatePresence>
       {open && (
         <div
-          className="fixed inset-0 z-[100] overflow-y-auto"
+          className={cn('fixed inset-0 z-[100] overflow-y-auto', overlayClassName)}
           onClick={handleBackdropClick}
           role="dialog"
           aria-modal="true"

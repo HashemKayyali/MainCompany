@@ -1,10 +1,12 @@
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 
 let lockCount = 0
 let previousHtmlOverflow = ''
 let previousBodyOverflow = ''
 let previousBodyPaddingRight = ''
 let previousBodyOverscroll = ''
+
+const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
 function emitScrollLockChange() {
   window.dispatchEvent(
@@ -58,11 +60,10 @@ function unlockBodyScroll() {
 }
 
 export function useBodyScrollLock(active: boolean) {
-  useEffect(() => {
+  useIsoLayoutEffect(() => {
     if (!active) return
 
     lockBodyScroll()
     return () => unlockBodyScroll()
   }, [active])
 }
-

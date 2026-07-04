@@ -1,156 +1,98 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { AdminEditorSection } from '../../../components/admin/AdminEditorWorkspace'
-import { cn } from '../../../utils/cn'
+import { Store } from 'lucide-react'
+import AdminInput from '../../../components/admin/primitives/AdminInput'
 
 interface SettingsTabProps {
   form: any
   setForm: Dispatch<SetStateAction<any>>
-  isDark: boolean
-  sub: string
-  soft2: string
-  txt: string
 }
 
-export default function SettingsTab({ form, setForm, isDark, sub, soft2, txt }: SettingsTabProps) {
+function StorefrontTag() {
   return (
-    <>
-      <AdminEditorSection title="Pricing & Commerce">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <div>
-            <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Day Price</label>
-            <input
-              type="number"
-              value={form.rentalPricePerDay || 0}
-              onChange={e => setForm({ ...form, rentalPricePerDay: e.target.value })}
-              className="form-field"
-            />
-          </div>
-          <div>
-            <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Currency</label>
-            <input
-              value={form.currency || 'JOD'}
-              onChange={e => setForm({ ...form, currency: e.target.value.toUpperCase() })}
-              className="form-field"
-              placeholder="JOD"
-              maxLength={6}
-            />
-          <p className={`mt-1 text-[11px] ${isDark ? 'text-purple-200/50' : 'text-gray-400'}`}></p>
-          </div>
+    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--admin-accent-soft)] px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.1em] text-[var(--admin-accent)]">
+      <Store className="h-3 w-3" strokeWidth={2.2} aria-hidden="true" />
+      Storefront
+    </span>
+  )
+}
 
-          <div className={`rounded-[18px] p-4 sm:col-span-2 xl:col-span-1 ${soft2}`}>
-            <p className={`text-[11px] font-mono uppercase tracking-[0.2em] ${sub}`}>Pricing Behavior</p>
-            <div className="mt-3 flex flex-wrap gap-3">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={form.showPrice !== false}
-                  onChange={e => setForm({ ...form, showPrice: e.target.checked })}
-                  className="h-4 w-4 rounded accent-violet-400"
-                />
-                <span className={cn('text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>Show pricing publicly</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={form.rentalEnabled !== false}
-                  onChange={e => setForm({ ...form, rentalEnabled: e.target.checked })}
-                  className="h-4 w-4 rounded accent-violet-400"
-                />
-                <span className={cn('text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>Available for rental</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={form.saleEnabled !== false}
-                  onChange={e => setForm({ ...form, saleEnabled: e.target.checked })}
-                  className="h-4 w-4 rounded accent-violet-400"
-                />
-                <span className={cn('text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>Available for purchase quote request</span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </AdminEditorSection>
+function Toggle({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean
+  onChange: (value: boolean) => void
+  label: string
+}) {
+  return (
+    <label className="flex cursor-pointer items-center gap-2.5 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2.5">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={e => onChange(e.target.checked)}
+        className="h-4 w-4 rounded accent-[var(--admin-accent)]"
+      />
+      <span className="text-[12.5px] font-semibold text-[var(--admin-text)]">{label}</span>
+    </label>
+  )
+}
 
-      <AdminEditorSection
-        title="Rental & Inventory"
-        hint="Stock and buffer windows live here so availability checks and request approval stay aligned."
-      >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <div>
-            <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Total Stock</label>
-            <input
-              type="number"
-              min={0}
-              value={form.stockTotal ?? 0}
-              onChange={e => setForm({ ...form, stockTotal: e.target.value })}
-              className="form-field"
-            />
-          </div>
-          <div>
-            <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Active Stock</label>
-            <input
-              type="number"
-              min={0}
-              value={form.stockActive ?? 0}
-              onChange={e => setForm({ ...form, stockActive: e.target.value })}
-              className="form-field"
-            />
-            <p className={`mt-1 text-[11px] ${isDark ? 'text-purple-200/50' : 'text-gray-400'}`}>Must stay less than or equal to total stock.</p>
-          </div>
-          <div>
-            <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Minimum Rental Days</label>
-            <input
-              type="number"
-              min={1}
-              value={form.minimumRentalDays ?? 1}
-              onChange={e => setForm({ ...form, minimumRentalDays: e.target.value })}
-              className="form-field"
-            />
-          </div>
-          <div>
-            <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Buffer Before (days)</label>
-            <input
-              type="number"
-              min={0}
-              value={form.bufferBeforeDays ?? 0}
-              onChange={e => setForm({ ...form, bufferBeforeDays: e.target.value })}
-              className="form-field"
-            />
-          </div>
-          <div>
-            <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Buffer After (days)</label>
-            <input
-              type="number"
-              min={0}
-              value={form.bufferAfterDays ?? 0}
-              onChange={e => setForm({ ...form, bufferAfterDays: e.target.value })}
-              className="form-field"
-            />
-          </div>
-          <div className={`rounded-[18px] p-4 ${soft2}`}>
-            <p className={`text-[11px] font-mono uppercase tracking-[0.2em] ${sub}`}>Availability Summary</p>
-            <div className="mt-3 space-y-2 text-sm">
-              <div className="flex items-center justify-between gap-3">
-                <span className={sub}>Storefront rental status</span>
-                <span className={cn('font-semibold', form.rentalEnabled !== false ? txt : isDark ? 'text-red-200' : 'text-red-600')}>
-                  {form.rentalEnabled !== false ? 'Enabled' : 'Disabled'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className={sub}>Purchase quote request status</span>
-                <span className={cn('font-semibold', form.saleEnabled !== false ? txt : isDark ? 'text-red-200' : 'text-red-600')}>
-                  {form.saleEnabled !== false ? 'Enabled' : 'Disabled'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className={sub}>Available units today</span>
-                <span className={txt}>{Math.max(0, Number(form.stockActive) || 0)}</span>
-              </div>
-            </div>
-          </div>
+export default function SettingsTab({ form, setForm }: SettingsTabProps) {
+  return (
+    <div className="space-y-3.5">
+      <section className="admin-card space-y-4 p-4">
+        <div className="flex items-center gap-2">
+          <h3 className="admin-section-title">Pricing &amp; visibility</h3>
+          <StorefrontTag />
         </div>
-      </AdminEditorSection>
-    </>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <AdminInput
+            label="Day price"
+            type="number"
+            value={form.rentalPricePerDay ?? 0}
+            onChange={e => setForm({ ...form, rentalPricePerDay: e.target.value })}
+          />
+          <AdminInput
+            label="Currency"
+            value={form.currency || 'JOD'}
+            onChange={e => setForm({ ...form, currency: e.target.value.toUpperCase() })}
+            placeholder="JOD"
+            maxLength={6}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+          <Toggle label="Show pricing publicly" checked={form.showPrice !== false} onChange={v => setForm({ ...form, showPrice: v })} />
+          <Toggle label="Available for rental" checked={form.rentalEnabled !== false} onChange={v => setForm({ ...form, rentalEnabled: v })} />
+          <Toggle label="Available for purchase quote" checked={form.saleEnabled !== false} onChange={v => setForm({ ...form, saleEnabled: v })} />
+        </div>
+      </section>
+
+      <section className="admin-card space-y-4 p-4">
+        <div>
+          <h3 className="admin-section-title">Rental &amp; inventory</h3>
+          <p className="mt-1 text-[12px] text-[var(--admin-text-muted)]">
+            Stock and buffer windows keep availability checks and request approvals aligned.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <AdminInput label="Total stock" type="number" min={0} value={form.stockTotal ?? 0} onChange={e => setForm({ ...form, stockTotal: e.target.value })} />
+          <AdminInput
+            label="Active stock"
+            type="number"
+            min={0}
+            value={form.stockActive ?? 0}
+            onChange={e => setForm({ ...form, stockActive: e.target.value })}
+            hint="Must be less than or equal to total stock."
+          />
+          <AdminInput label="Minimum rental days" type="number" min={1} value={form.minimumRentalDays ?? 1} onChange={e => setForm({ ...form, minimumRentalDays: e.target.value })} />
+          <AdminInput label="Buffer before (days)" type="number" min={0} value={form.bufferBeforeDays ?? 0} onChange={e => setForm({ ...form, bufferBeforeDays: e.target.value })} />
+          <AdminInput label="Buffer after (days)" type="number" min={0} value={form.bufferAfterDays ?? 0} onChange={e => setForm({ ...form, bufferAfterDays: e.target.value })} />
+        </div>
+      </section>
+    </div>
   )
 }

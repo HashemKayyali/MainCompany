@@ -1,20 +1,17 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Edit, Eye, Plus, Search } from 'lucide-react'
 import { useData } from '../../contexts/DataContext'
-import { useTheme } from '../../contexts/ThemeContext'
 import { useDialog } from '../../contexts/DialogContext'
 import type { ProductPart } from '../../data/products/types'
 import Modal from '../../components/ui/Modal'
 import ImageUploader from '../../components/ui/ImageUploader'
 import FramedImage from '../../components/ui/FramedImage'
-import AdminActionButton from '../../components/admin/AdminActionButton'
-import AdminDetailModal from '../../components/admin/AdminDetailModal'
-import AdminEntityCard from '../../components/admin/AdminEntityCard'
-import AdminEditorWorkspace, { AdminEditorSection } from '../../components/admin/AdminEditorWorkspace'
+import AdminConfirmDialog from '../../components/admin/AdminConfirmDialog'
+import AdminKebabMenu, { type AdminKebabItem } from '../../components/admin/AdminKebabMenu'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
-import AdminStatCard from '../../components/admin/AdminStatCard'
-import AdminViewToggle from '../../components/admin/AdminViewToggle'
-import useAdminCardView from '../../components/admin/useAdminCardView'
-import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
+import AdminBadge from '../../components/admin/primitives/AdminBadge'
+import AdminButton from '../../components/admin/primitives/AdminButton'
+import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
 import { cn } from '../../utils/cn'
 import { getErrorMessage } from '../../lib/errors'
 
@@ -27,30 +24,149 @@ const emptyPart: ProductPart = {
   currency: 'JOD',
   image: '',
   inStock: true,
+  showPrice: true,
 }
 
+const PAGE_SIZE_OPTIONS = [12, 24, 48]
+
+type PartStatusFilter = 'all' | 'in_stock' | 'out_of_stock' | 'price_visible' | 'price_hidden'
+type PartSort = 'name' | 'product' | 'price_desc' | 'price_asc' | 'stock'
+
+function FieldSection({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+  return (
+    <section className="admin-card p-4">
+      <div className="flex flex-col gap-1.5 border-b border-[var(--admin-border)] pb-3">
+        <h3 className="admin-section-title">{title}</h3>
+        {description && <p className="text-[12px] leading-5 text-[var(--admin-text-muted)]">{description}</p>}
+      </div>
+      <div className="mt-3.5">{children}</div>
+    </section>
+  )
+}
+
+function Fact({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="min-w-0 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3 py-2.5">
+      <div className="text-[9.5px] font-extrabold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">{label}</div>
+      <div className="mt-1 truncate text-[13px] font-bold leading-5 text-[var(--admin-text)]">{value}</div>
+    </div>
+  )
+}
+
+function PartThumb({ part, compact = false }: { part: ProductPart; compact?: boolean }) {
+  return (
+    <div
+      className={cn(
+        'flex items-center justify-center overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)]',
+        compact ? 'h-12 w-16' : 'aspect-[16/10] w-full p-4'
+      )}
+    >
+      {part.image ? (
+        <FramedImage
+          media={part.image}
+          alt={part.name}
+          className="h-full w-full"
+          fallbackTransform={{ fit: 'contain' }}
+          onError={event => {
+            ;(event.target as HTMLImageElement).style.display = 'none'
+          }}
+        />
+      ) : (
+        <span className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--admin-text-muted)]">No image</span>
+      )}
+    </div>
+  )
+}
+
+function CompactPartPreview({ part, productName }: { part: ProductPart; productName: string }) {
+  return (
+    <div className="mx-auto w-full max-w-[18rem] overflow-hidden rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface)]">
+      <PartThumb part={part} />
+      <div className="space-y-2 p-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <div className="truncate text-[14px] font-black text-[var(--admin-text)]">{part.name || 'Part name'}</div>
+            <div className="truncate text-[11px] font-semibold text-[var(--admin-text-muted)]">{productName || 'Linked product'}</div>
+          </div>
+          <AdminBadge tone={part.inStock ? 'success' : 'danger'}>{part.inStock ? 'In stock' : 'Out'}</AdminBadge>
+        </div>
+        <p className="line-clamp-2 text-[12px] font-semibold leading-5 text-[var(--admin-text-muted)]">
+          {part.description || 'Short part description appears here.'}
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          <AdminBadge tone={part.showPrice === false ? 'warning' : 'accent'}>
+            {part.showPrice === false ? 'Price hidden' : `${Number(part.price || 0).toFixed(2)} ${part.currency || 'JOD'}`}
+          </AdminBadge>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function AdminPartsPage() {
   const { parts, products, addPart, updatePart, deletePart } = useData()
-  const { isDark } = useTheme()
   const dialog = useDialog()
 
   const [editing, setEditing] = useState<ProductPart | null>(null)
   const [details, setDetails] = useState<ProductPart | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<ProductPart | null>(null)
   const [isNew, setIsNew] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [filterSlug, setFilterSlug] = useState('all')
-  const { cardView, displayCardView, viewTransitionClassName, setCardView } = useAdminCardView('parts')
+  const [deleting, setDeleting] = useState(false)
+  const [search, setSearch] = useState('')
+  const [productFilter, setProductFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState<PartStatusFilter>('all')
+  const [sortKey, setSortKey] = useState<PartSort>('name')
+  const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0])
+  const [page, setPage] = useState(1)
 
-  const sub = isDark ? 'text-purple-200/80' : 'text-gray-500'
-  const cardsLayoutClass = getAdminCardsLayoutClass(displayCardView)
+  const getProductName = (slug: string) => products.find(product => product.slug === slug)?.name || slug || 'Unlinked'
+  const countForProduct = (slug: string) => parts.filter(part => part.productSlug === slug).length
 
-  const getProductName = (slug: string) => products.find(p => p.slug === slug)?.name || slug
-  const countFor = (slug: string) => parts.filter(part => part.productSlug === slug).length
+  const rows = useMemo(
+    () =>
+      parts.map(part => ({
+        part,
+        productName: getProductName(part.productSlug),
+      })),
+    [parts, products]
+  )
 
   const filtered = useMemo(() => {
-    return filterSlug === 'all' ? parts : parts.filter(part => part.productSlug === filterSlug)
-  }, [parts, filterSlug])
+    const needle = search.trim().toLowerCase()
+    return rows
+      .filter(({ part, productName }) => {
+        if (productFilter !== 'all' && part.productSlug !== productFilter) return false
+        if (statusFilter === 'in_stock' && !part.inStock) return false
+        if (statusFilter === 'out_of_stock' && part.inStock) return false
+        if (statusFilter === 'price_visible' && part.showPrice === false) return false
+        if (statusFilter === 'price_hidden' && part.showPrice !== false) return false
+        if (!needle) return true
+        return (
+          part.name.toLowerCase().includes(needle) ||
+          part.description.toLowerCase().includes(needle) ||
+          part.productSlug.toLowerCase().includes(needle) ||
+          productName.toLowerCase().includes(needle)
+        )
+      })
+      .sort((a, b) => {
+        if (sortKey === 'product') return a.productName.localeCompare(b.productName) || a.part.name.localeCompare(b.part.name)
+        if (sortKey === 'price_desc') return b.part.price - a.part.price || a.part.name.localeCompare(b.part.name)
+        if (sortKey === 'price_asc') return a.part.price - b.part.price || a.part.name.localeCompare(b.part.name)
+        if (sortKey === 'stock') return Number(b.part.inStock) - Number(a.part.inStock) || a.part.name.localeCompare(b.part.name)
+        return a.part.name.localeCompare(b.part.name)
+      })
+  }, [productFilter, rows, search, sortKey, statusFilter])
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize))
+  const currentPage = Math.min(page, pageCount)
+  const pageItems = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  const showingStart = filtered.length ? (currentPage - 1) * pageSize + 1 : 0
+  const showingEnd = Math.min(currentPage * pageSize, filtered.length)
+
+  useEffect(() => {
+    setPage(1)
+  }, [pageSize, productFilter, search, sortKey, statusFilter])
 
   const openNew = () => {
     setEditing({ ...emptyPart, id: `part-${Date.now()}` })
@@ -58,422 +174,487 @@ export default function AdminPartsPage() {
   }
 
   const openEdit = (part: ProductPart) => {
-    setEditing({ ...part })
+    setEditing({ ...part, showPrice: part.showPrice !== false })
     setIsNew(false)
   }
 
-  const close = () => {
+  const closeEditor = () => {
     setEditing(null)
     setIsNew(false)
   }
 
-  const up = (f: keyof ProductPart, v: any) => setEditing(e => (e ? { ...e, [f]: v } : null))
-  const canSave = !!editing?.productSlug && !!editing?.name?.trim()
+  const updateEditing = <K extends keyof ProductPart>(key: K, value: ProductPart[K]) => {
+    setEditing(current => (current ? { ...current, [key]: value } : null))
+  }
+
+  const canSave = Boolean(editing?.productSlug && editing?.name?.trim())
 
   const save = async () => {
     if (!editing || !canSave) return
+    const payload: ProductPart = {
+      ...editing,
+      name: editing.name.trim(),
+      description: editing.description.trim(),
+      price: Number(editing.price || 0),
+      currency: editing.currency || 'JOD',
+      inStock: Boolean(editing.inStock),
+      showPrice: editing.showPrice !== false,
+    }
+
     setSaving(true)
     try {
-      if (isNew) await addPart(editing)
-      else await updatePart(editing.id, editing)
-      close()
-    } catch (err: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to save'), variant: 'danger' })
+      if (isNew) await addPart(payload)
+      else await updatePart(payload.id, payload)
+      closeEditor()
+    } catch (error: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to save'), variant: 'danger' })
     } finally {
       setSaving(false)
     }
   }
 
-  const removePart = async (part: ProductPart) => {
-    const ok = await dialog.confirm({
-      title: 'Delete Part?',
-      message: 'This will permanently remove this part.',
-      confirmLabel: 'Delete',
-      variant: 'danger',
-    })
-    if (!ok) return
-
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
     try {
-      await deletePart(part.id)
-      if (details?.id === part.id) setDetails(null)
-    } catch (e: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(e, 'Failed to delete'), variant: 'danger' })
+      await deletePart(deleteTarget.id)
+      if (details?.id === deleteTarget.id) setDetails(null)
+      setDeleteTarget(null)
+    } catch (error: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to delete'), variant: 'danger' })
+    } finally {
+      setDeleting(false)
     }
   }
 
-  const chipCls = (active: boolean) =>
-    active
-      ? isDark
-        ? 'bg-[linear-gradient(180deg,rgba(24,56,78,0.96),rgba(14,36,54,0.98))] text-cyan-100 ring-1 ring-inset ring-cyan-300/24 shadow-[0_12px_28px_-18px_rgba(34,211,238,0.3)]'
-        : 'bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200 shadow-[0_10px_24px_-18px_rgba(124,58,237,0.22)]'
-      : isDark
-        ? 'bg-[#0f1630]/96 text-purple-100/78 ring-1 ring-inset ring-cyan-400/10 shadow-[0_10px_24px_-18px_rgba(4,8,20,0.8)] hover:bg-[#111a39]'
-        : 'bg-white text-gray-600 ring-1 ring-inset ring-gray-200 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.14)] hover:bg-gray-50'
+  const actionItems = (part: ProductPart): AdminKebabItem[] => [
+    { label: 'Delete part', tone: 'danger', onSelect: () => setDeleteTarget(part) },
+  ]
 
-  const previewPart: ProductPart = editing || emptyPart
+  const statusChips: Array<[PartStatusFilter, string]> = [
+    ['all', `All (${parts.length})`],
+    ['in_stock', `In stock (${parts.filter(part => part.inStock).length})`],
+    ['out_of_stock', `Out (${parts.filter(part => !part.inStock).length})`],
+    ['price_visible', `Price shown (${parts.filter(part => part.showPrice !== false).length})`],
+    ['price_hidden', `Price hidden (${parts.filter(part => part.showPrice === false).length})`],
+  ]
 
-  const renderPartPreview = (overrides?: Partial<ProductPart>) => {
-    const preview = { ...previewPart, ...overrides }
-
-    return (
-      <div aria-hidden="true" className="mx-auto max-w-[320px] select-none">
-        <AdminEntityCard
-          variant="grid"
-          minHeightClassName="min-h-[228px]"
-          bodyClassName="gap-2 p-3"
-          media={
-            preview.image ? (
-              <div className={cn('aspect-[16/10] h-full w-full overflow-hidden rounded-[20px] p-4', isDark ? 'bg-[radial-gradient(circle,rgba(34,211,238,0.10),transparent_60%)]' : 'bg-[radial-gradient(circle,rgba(139,92,246,0.08),transparent_60%)]')}>
-                <FramedImage media={preview.image} alt={preview.name} className="h-full w-full" fallbackTransform={{ fit: 'contain' }} />
-              </div>
-            ) : (
-              <div className={cn('flex h-full w-full items-center justify-center rounded-[20px]', isDark ? 'bg-purple-500/10' : 'bg-gray-50')}>
-                <div className={cn('text-[11px] font-mono uppercase tracking-[0.24em]', sub)}>No image</div>
-              </div>
-            )
-          }
-          mediaOverlayLeft={
-            <span className={cn('rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.22em]', isDark ? 'border-white/10 bg-black/35 text-purple-100/75' : 'border-white/80 bg-white/90 text-gray-600')}>
-              Part
-            </span>
-          }
-          mediaOverlayRight={
-            <span className={cn('rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.22em]', preview.inStock ? (isDark ? 'border-cyan-400/20 bg-cyan-400/12 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700') : (isDark ? 'border-red-400/20 bg-red-400/12 text-red-200' : 'border-red-200 bg-red-50 text-red-700'))}>
-              {preview.inStock ? 'In stock' : 'Out'}
-            </span>
-          }
-          title={preview.name || 'Part Name'}
-          subtitle={preview.description || undefined}
-          badges={
-            <>
-              <span className={cn('rounded-full border px-3 py-1 text-[11px] font-medium', isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700')}>
-                {preview.productSlug ? getProductName(preview.productSlug) : 'Linked product'}
-              </span>
-            </>
-          }
-        />
-      </div>
-    )
-  }
+  const previewPart = editing || emptyPart
+  const previewProductName = getProductName(previewPart.productSlug)
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
       <AdminPageHeader
         title="Parts & Spares"
         actions={
-          <>
-            <AdminViewToggle value={cardView} onChange={setCardView} />
-            <button onClick={openNew} className="btn-admin-create">
-              + Add Part
-            </button>
-          </>
+          <AdminButton size="sm" onClick={openNew}>
+            <Plus className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
+            Add Part
+          </AdminButton>
         }
       />
 
-      <div className="grid shrink-0 gap-2 sm:grid-cols-2 xl:grid-cols-4">
-        <AdminStatCard label="Total Parts" value={parts.length} />
-        <AdminStatCard label="Shown" value={filtered.length} />
-        <AdminStatCard label="Products Covered" value={parts.filter(part => !!part.productSlug).length} />
-        <AdminStatCard label="In Stock" value={parts.filter(part => part.inStock).length} />
-      </div>
+      <div className="admin-card flex min-h-0 flex-1 flex-col p-3 sm:p-4">
+        <div className="grid gap-2.5 xl:grid-cols-[minmax(0,1fr)_180px_170px_160px]">
+          <div className="relative min-w-0">
+            <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-text-muted)]" strokeWidth={2} aria-hidden="true" />
+            <input
+              className="admin-input ps-9 pe-16"
+              value={search}
+              onChange={event => setSearch(event.target.value)}
+              placeholder="Search part, product, description..."
+              aria-label="Search parts"
+            />
+            <span className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-2 py-0.5 text-[10.5px] font-bold tabular-nums text-[var(--admin-text-muted)]">
+              {filtered.length}/{parts.length}
+            </span>
+          </div>
 
-      <div
-        className={cn(
-          'min-h-0 flex flex-1 flex-col rounded-[22px] p-2.5',
-          isDark
-            ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(8,11,27,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_28px_90px_-58px_rgba(7,15,36,0.96)]'
-            : 'bg-white ring-1 ring-inset ring-gray-200'
-        )}
-      >
-        <div className="mb-3 flex flex-wrap gap-1.5">
-          <button
-            onClick={() => setFilterSlug('all')}
-            className={cn('inline-flex min-h-[36px] items-center justify-center rounded-xl px-3.5 py-2 text-[11px] font-semibold transition active:translate-y-[1px]', chipCls(filterSlug === 'all'))}
-          >
-            All ({parts.length})
-          </button>
-          {products.map(product => (
+          <select className="admin-input" value={productFilter} onChange={event => setProductFilter(event.target.value)} aria-label="Filter by linked product">
+            <option value="all">All products</option>
+            {products.map(product => (
+              <option key={product.slug} value={product.slug}>
+                {product.name} ({countForProduct(product.slug)})
+              </option>
+            ))}
+          </select>
+
+          <select className="admin-input" value={sortKey} onChange={event => setSortKey(event.target.value as PartSort)} aria-label="Sort parts">
+            <option value="name">Name</option>
+            <option value="product">Linked product</option>
+            <option value="price_desc">Price high to low</option>
+            <option value="price_asc">Price low to high</option>
+            <option value="stock">Stock status</option>
+          </select>
+
+          <select className="admin-input" value={pageSize} onChange={event => setPageSize(Number(event.target.value))} aria-label="Page size">
+            {PAGE_SIZE_OPTIONS.map(value => (
+              <option key={value} value={value}>
+                {value} per page
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mt-2.5 flex snap-x gap-1.5 overflow-x-auto pb-1 [scrollbar-width:thin]">
+          {statusChips.map(([value, label]) => (
             <button
-              key={product.slug}
-              onClick={() => setFilterSlug(product.slug)}
-              className={cn('inline-flex min-h-[36px] items-center justify-center rounded-xl px-3.5 py-2 text-[11px] font-semibold transition active:translate-y-[1px]', chipCls(filterSlug === product.slug))}
+              key={value}
+              type="button"
+              onClick={() => setStatusFilter(value)}
+              className={cn(
+                'inline-flex min-h-[44px] shrink-0 snap-start items-center justify-center rounded-full border px-3.5 text-[12px] font-bold transition',
+                statusFilter === value
+                  ? 'border-transparent bg-[var(--admin-accent)] text-white'
+                  : 'border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-text-muted)] hover:border-[var(--admin-accent)] hover:text-[var(--admin-accent)]'
+              )}
             >
-              {product.name} ({countFor(product.slug)})
+              {label}
             </button>
           ))}
         </div>
 
         {filtered.length === 0 ? (
-          <div className={cn('flex flex-1 items-center justify-center rounded-[18px] border px-5 py-11 text-center text-[13px]', isDark ? 'border-white/10 text-purple-200/70' : 'border-gray-100 text-gray-500')}>
-            No parts match this filter.
+          <div className="flex flex-1 items-center justify-center py-8">
+            <AdminEmptyState
+              title={parts.length ? 'No parts match this view' : 'No parts yet'}
+              description={parts.length ? 'Try another product, status, sort, or search.' : 'Add the first spare part and link it to a product.'}
+              action={
+                <AdminButton size="sm" onClick={openNew}>
+                  <Plus className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
+                  Add Part
+                </AdminButton>
+              }
+            />
           </div>
         ) : (
-          <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
-            <div className={cn('origin-top transition-[opacity,transform,filter] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform,filter]', viewTransitionClassName)}>
-            <div className={cardsLayoutClass}>
-              {filtered.map(part => (
-                <AdminEntityCard
-                key={part.id}
-                variant={getAdminEntityVariant(displayCardView)}
-                minHeightClassName={displayCardView === 'grid' ? 'min-h-[228px]' : 'min-h-[98px]'}
-                bodyClassName={displayCardView === 'grid' ? 'gap-2 p-3' : 'gap-1.5 p-2.5'}
-                  listMediaWrapClassName="md:self-center"
-                listMediaFrameClassName="!h-[78px] !w-[116px] md:!h-[78px] md:!w-[116px] !rounded-[18px] !bg-transparent !ring-0 !p-0"
-                factsWrapClassName={displayCardView === 'list' ? 'xl:w-[156px]' : undefined}
-                actionsWrapClassName={displayCardView === 'list' ? 'xl:w-[118px]' : undefined}
-                media={
-                  part.image ? (
-                    <div className={cn('aspect-[16/10] h-full w-full overflow-hidden rounded-[20px] p-4', isDark ? 'bg-[radial-gradient(circle,rgba(34,211,238,0.10),transparent_60%)]' : 'bg-[radial-gradient(circle,rgba(139,92,246,0.08),transparent_60%)]')}>
-                      <FramedImage media={part.image} alt={part.name} className="h-full w-full" fallbackTransform={{ fit: 'contain' }} />
-                    </div>
-                  ) : (
-                    <div className={cn('flex h-full w-full items-center justify-center rounded-[20px]', isDark ? 'bg-purple-500/10' : 'bg-gray-50')}>
-                      <div className={cn('text-[11px] font-mono uppercase tracking-[0.24em]', sub)}>No image</div>
-                    </div>
-                  )
-                }
-                mediaOverlayLeft={
-                  <span className={cn('rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.22em]', isDark ? 'border-white/10 bg-black/35 text-purple-100/75' : 'border-white/80 bg-white/90 text-gray-600')}>
-                    Part
-                  </span>
-                }
-                mediaOverlayRight={
-                  <span className={cn('rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.22em]', part.inStock ? (isDark ? 'border-cyan-400/20 bg-cyan-400/12 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700') : (isDark ? 'border-red-400/20 bg-red-400/12 text-red-200' : 'border-red-200 bg-red-50 text-red-700'))}>
-                    {part.inStock ? 'In stock' : 'Out'}
-                  </span>
-                }
-                title={part.name}
-                  subtitle={part.description || undefined}
-                badges={
-                  <>
-                    <span className={cn('rounded-full border px-3 py-1 text-[11px] font-medium', isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700')}>
-                      {getProductName(part.productSlug)}
-                    </span>
-                  </>
-                }
-                facts={[
-                  { label: 'Stock', value: part.inStock ? 'Available' : 'Out of stock' },
-                  { label: 'Price', value: `${part.price} ${part.currency}` },
-                ]}
-                actions={
-                  <>
-                    <AdminActionButton
-                      tone="primary"
-                      onClick={event => {
-                        event.stopPropagation()
-                        setDetails(part)
-                      }}
-                    >
-                      Details
-                    </AdminActionButton>
-                    <AdminActionButton
-                      onClick={event => {
-                        event.stopPropagation()
-                        openEdit(part)
-                      }}
-                    >
-                      Edit
-                    </AdminActionButton>
-                    <AdminActionButton
-                      tone="danger"
-                      onClick={event => {
-                        event.stopPropagation()
-                        void removePart(part)
-                      }}
-                    >
-                      Delete
-                    </AdminActionButton>
-                  </>
-                }
-                />
-              ))}
+          <>
+            <div className="mt-3 hidden min-h-0 flex-1 overflow-y-auto md:block">
+              <div className="admin-table-wrap">
+                <table className="min-w-[920px] w-full border-collapse text-start">
+                  <thead className="sticky top-0 z-10 bg-[var(--admin-surface-2)]">
+                    <tr className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">
+                      <th className="px-3 py-2.5 text-start">Part</th>
+                      <th className="px-3 py-2.5 text-start">Product</th>
+                      <th className="px-3 py-2.5 text-start">Stock</th>
+                      <th className="px-3 py-2.5 text-start">Price</th>
+                      <th className="px-3 py-2.5 text-start">Flags</th>
+                      <th className="px-3 py-2.5 text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pageItems.map(({ part, productName }) => (
+                      <tr key={part.id} className="border-t border-[var(--admin-border)] align-middle">
+                        <td className="px-3 py-2.5">
+                          <div className="flex max-w-[320px] items-center gap-2.5">
+                            <PartThumb part={part} compact />
+                            <div className="min-w-0">
+                              <div className="truncate text-[13px] font-bold text-[var(--admin-text)]">{part.name}</div>
+                              <div className="line-clamp-1 text-[11px] text-[var(--admin-text-muted)]">{part.description || 'No description'}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <AdminBadge tone="accent">{productName}</AdminBadge>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <AdminBadge tone={part.inStock ? 'success' : 'danger'}>{part.inStock ? 'In stock' : 'Out of stock'}</AdminBadge>
+                        </td>
+                        <td className="px-3 py-2.5 text-[13px] font-bold tabular-nums text-[var(--admin-text)]">
+                          {Number(part.price || 0).toFixed(2)} {part.currency || 'JOD'}
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="flex flex-wrap gap-1.5">
+                            {part.showPrice === false ? <AdminBadge tone="warning">Price hidden</AdminBadge> : <AdminBadge tone="accent">Price shown</AdminBadge>}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <AdminButton size="sm" variant="outline" onClick={() => setDetails(part)}>
+                              <Eye className="h-4 w-4" aria-hidden="true" />
+                              Details
+                            </AdminButton>
+                            <AdminButton size="sm" onClick={() => openEdit(part)}>
+                              <Edit className="h-4 w-4" aria-hidden="true" />
+                              Edit
+                            </AdminButton>
+                            <AdminKebabMenu label={`More actions for ${part.name}`} items={actionItems(part)} />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
+
+            <div className="mt-3 min-h-0 flex-1 overflow-y-auto pe-0.5 md:hidden">
+              <div className="grid grid-cols-1 gap-2.5">
+                {pageItems.map(({ part, productName }) => (
+                  <article key={part.id} className="admin-card p-3">
+                    <div className="flex items-start gap-3">
+                      <PartThumb part={part} compact />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <h2 className="truncate text-[14px] font-black text-[var(--admin-text)]">{part.name}</h2>
+                            <p className="truncate text-[11px] font-semibold text-[var(--admin-text-muted)]">{productName}</p>
+                          </div>
+                          <AdminBadge tone={part.inStock ? 'success' : 'danger'}>{part.inStock ? 'In stock' : 'Out'}</AdminBadge>
+                        </div>
+                        <p className="mt-2 line-clamp-2 text-[12px] leading-5 text-[var(--admin-text-muted)]">{part.description || 'No description'}</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 grid grid-cols-3 gap-2">
+                      <Fact label="Price" value={`${Number(part.price || 0).toFixed(2)} ${part.currency || 'JOD'}`} />
+                      <Fact label="Price shown" value={part.showPrice === false ? 'No' : 'Yes'} />
+                      <Fact label="Image" value={part.image ? 'Ready' : 'Missing'} />
+                    </div>
+                    <div className="mt-3 grid grid-cols-[1fr_1fr_auto] gap-2">
+                      <AdminButton size="sm" variant="outline" onClick={() => setDetails(part)}>Details</AdminButton>
+                      <AdminButton size="sm" onClick={() => openEdit(part)}>Edit</AdminButton>
+                      <AdminKebabMenu label={`More actions for ${part.name}`} items={actionItems(part)} />
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
-          </div>
+
+            <div className="mt-3 flex flex-col gap-2.5 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2.5 text-[12px] font-semibold text-[var(--admin-text-muted)] sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                Showing {showingStart}-{showingEnd} of {filtered.length}
+              </div>
+              <div className="flex items-center gap-2">
+                <AdminButton size="sm" variant="outline" disabled={currentPage <= 1} onClick={() => setPage(value => Math.max(1, value - 1))}>
+                  Previous
+                </AdminButton>
+                <span className="min-w-[72px] text-center tabular-nums">
+                  {currentPage} / {pageCount}
+                </span>
+                <AdminButton size="sm" variant="outline" disabled={currentPage >= pageCount} onClick={() => setPage(value => Math.min(pageCount, value + 1))}>
+                  Next
+                </AdminButton>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
-      <AdminDetailModal
+      <Modal
         open={!!details}
         onClose={() => setDetails(null)}
         title={details?.name || 'Part Details'}
-        subtitle={details ? 'Details now carry the longer context, so the listing card stays clean and easy to scan.' : undefined}
-        media={
+        size="2xl"
+        bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+        footer={
           details ? (
-            details.image ? (
-              <div className={cn('aspect-[16/9] p-10', isDark ? 'bg-[radial-gradient(circle,rgba(34,211,238,0.16),transparent_58%)]' : 'bg-[radial-gradient(circle,rgba(139,92,246,0.10),transparent_55%)]')}>
-                <FramedImage media={details.image} alt={details.name} className="h-full w-full" fallbackTransform={{ fit: 'contain' }} />
-              </div>
-            ) : (
-              <div className={cn('flex aspect-[16/9] items-center justify-center', isDark ? 'bg-purple-500/10' : 'bg-gray-50')}>
-                <div className={cn('text-sm', sub)}>No part image uploaded yet.</div>
-              </div>
-            )
-          ) : null
-        }
-        badges={
-          details ? (
-            <>
-              <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold', isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700')}>
-                {getProductName(details.productSlug)}
-              </span>
-              <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold', details.inStock ? (isDark ? 'border-white/10 bg-white/[0.04] text-purple-100/80' : 'border-gray-200 bg-white text-gray-700') : (isDark ? 'border-red-400/20 bg-red-400/12 text-red-200' : 'border-red-200 bg-red-50 text-red-700'))}>
-                {details.inStock ? 'In stock' : 'Out of stock'}
-              </span>
-            </>
-          ) : null
-        }
-        summaryFacts={
-          details
-            ? [
-                { label: 'Product', value: getProductName(details.productSlug) },
-                { label: 'Price', value: `${details.price} ${details.currency}` },
-                { label: 'Stock', value: details.inStock ? 'Available' : 'Out of stock' },
-                { label: 'Image', value: details.image ? 'Uploaded' : 'Missing' },
-              ]
-            : []
-        }
-        sections={
-          details
-            ? [
-                {
-                  title: 'Part Info',
-                  facts: [
-                    { label: 'Name', value: details.name },
-                    { label: 'Linked product', value: getProductName(details.productSlug) },
-                    { label: 'Price', value: `${details.price} ${details.currency}` },
-                  ],
-                },
-                {
-                  title: 'Description',
-                  content: (
-                    <p className={cn('text-sm leading-6', isDark ? 'text-purple-100/80' : 'text-gray-700')}>
-                      {details.description || 'No description has been added for this part yet.'}
-                    </p>
-                  ),
-                },
-              ]
-            : []
-        }
-        actions={
-          details && (
-            <>
-              <AdminActionButton
+            <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
+              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="sm:min-w-[96px]">Close</AdminButton>
+              <AdminButton
+                variant="outline"
                 onClick={() => {
+                  const part = details
                   setDetails(null)
-                  openEdit(details)
+                  openEdit(part)
                 }}
+                className="sm:min-w-[120px]"
               >
                 Edit Part
-              </AdminActionButton>
-              <AdminActionButton tone="danger" onClick={() => void removePart(details)}>
-                Delete Part
-              </AdminActionButton>
-            </>
-          )
+              </AdminButton>
+              <AdminKebabMenu label={`More actions for ${details.name}`} items={actionItems(details)} />
+            </div>
+          ) : undefined
         }
-      />
+      >
+        {details && (
+          <div className="admin-scope space-y-4">
+            <section className="admin-card overflow-hidden">
+              <div className="grid gap-0 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1fr)]">
+                <div className="bg-[var(--admin-surface-2)] p-3">
+                  <PartThumb part={details} />
+                </div>
+                <div className="flex min-w-0 flex-col justify-between gap-4 p-4">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <AdminBadge tone="accent">{getProductName(details.productSlug)}</AdminBadge>
+                      <AdminBadge tone={details.inStock ? 'success' : 'danger'}>{details.inStock ? 'In stock' : 'Out of stock'}</AdminBadge>
+                      {details.showPrice === false && <AdminBadge tone="warning">Price hidden</AdminBadge>}
+                    </div>
+                    <h3 className="mt-3 text-[1.2rem] font-black text-[var(--admin-text)]">{details.name}</h3>
+                    <p className="mt-2 text-[13px] leading-6 text-[var(--admin-text-muted)]">{details.description || 'No description has been added.'}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Fact label="Price" value={`${Number(details.price || 0).toFixed(2)} ${details.currency || 'JOD'}`} />
+                    <Fact label="Image" value={details.image ? 'Uploaded' : 'Missing'} />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+              <Fact label="Name" value={details.name} />
+              <Fact label="Product" value={getProductName(details.productSlug)} />
+              <Fact label="Stock" value={details.inStock ? 'Available' : 'Out of stock'} />
+              <Fact label="Price visible" value={details.showPrice === false ? 'No' : 'Yes'} />
+            </div>
+          </div>
+        )}
+      </Modal>
 
       <Modal
         open={!!editing}
-        onClose={close}
+        onClose={closeEditor}
         title={isNew ? 'Add Part' : 'Edit Part'}
         persistent
-        size="xl"
-        bodyClassName="px-4 pb-4 pt-3 sm:px-5 sm:pb-5 sm:pt-4"
+        size="3xl"
+        bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+        footer={
+          <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-[11px] leading-5 text-[var(--admin-text-muted)]">
+              Stock: <span className="font-bold text-[var(--admin-text)]">{editing?.inStock ? 'In stock' : 'Out'}</span>
+              {' | '}Price: <span className="font-bold text-[var(--admin-text)]">{editing?.showPrice === false ? 'Hidden' : 'Shown'}</span>
+            </div>
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:justify-end">
+              <AdminButton variant="ghost" onClick={closeEditor} disabled={saving} className="sm:min-w-[110px]">Cancel</AdminButton>
+              <AdminButton onClick={save} loading={saving} disabled={!canSave} className="sm:min-w-[130px]">
+                {isNew ? 'Add Part' : 'Save Changes'}
+              </AdminButton>
+            </div>
+          </div>
+        }
       >
         {editing && (
-          <AdminEditorWorkspace
-            preview={renderPartPreview()}
-            previewTitle="Live Part Card"
-            previewHint="See the real part card result while you update the linked product, stock state, and image framing."
-            footer={
-              <div className="flex flex-wrap justify-end gap-3">
-                <button onClick={close} className="btn-outline !rounded-xl !px-5 !py-2.5 !text-sm">
-                  Cancel
-                </button>
-                <button
-                  onClick={save}
-                  disabled={saving || !canSave}
-                  className="btn-primary !rounded-xl !px-6 !py-2.5 !text-xs disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : isNew ? 'Add' : 'Save'}
-                </button>
-              </div>
-            }
-          >
-            <AdminEditorSection
-              title="Part Details"
-              hint="Link the part to a product, set the short description and price, and keep the stock state visible in the live preview."
-            >
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className={cn('mb-1.5 block text-[12px] font-medium', sub)}>Product *</label>
-                  <select className="form-field" value={editing.productSlug} onChange={e => up('productSlug', e.target.value)}>
-                    <option value="">Select...</option>
-                    {products.map(product => (
-                      <option key={product.slug} value={product.slug}>
-                        {product.name}
-                      </option>
-                    ))}
-                  </select>
-                  {!editing.productSlug && <div className="mt-1 text-[11px] text-red-400">Please select a product.</div>}
+          <div className="admin-scope grid min-h-0 gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+            <div className="min-w-0 space-y-4">
+              <FieldSection title="Part Content" description="Keep identity, product relation, price, and stock scannable in one compact form.">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="admin-label mb-1.5" htmlFor="part-product">Linked product *</label>
+                    <select
+                      id="part-product"
+                      className={cn('admin-input', !editing.productSlug && 'admin-input--error')}
+                      value={editing.productSlug}
+                      onChange={event => updateEditing('productSlug', event.target.value)}
+                    >
+                      <option value="">Select product...</option>
+                      {products.map(product => (
+                        <option key={product.slug} value={product.slug}>
+                          {product.name}
+                        </option>
+                      ))}
+                    </select>
+                    {!editing.productSlug && <p className="mt-1 text-[11px] font-semibold text-[var(--admin-danger)]">Product is required.</p>}
+                  </div>
+                  <div>
+                    <label className="admin-label mb-1.5" htmlFor="part-name">Name *</label>
+                    <input
+                      id="part-name"
+                      className={cn('admin-input', !editing.name.trim() && 'admin-input--error')}
+                      value={editing.name}
+                      onChange={event => updateEditing('name', event.target.value)}
+                      placeholder="Part name"
+                    />
+                    {!editing.name.trim() && <p className="mt-1 text-[11px] font-semibold text-[var(--admin-danger)]">Name is required.</p>}
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="admin-label mb-1.5" htmlFor="part-description">Description</label>
+                    <input
+                      id="part-description"
+                      className="admin-input"
+                      value={editing.description}
+                      onChange={event => updateEditing('description', event.target.value)}
+                      placeholder="Short description"
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label mb-1.5" htmlFor="part-price">Price</label>
+                    <input
+                      id="part-price"
+                      className="admin-input"
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={editing.price}
+                      onChange={event => updateEditing('price', Number(event.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label mb-1.5" htmlFor="part-currency">Currency</label>
+                    <input
+                      id="part-currency"
+                      className="admin-input"
+                      value={editing.currency}
+                      onChange={event => updateEditing('currency', event.target.value)}
+                      placeholder="JOD"
+                    />
+                  </div>
                 </div>
+              </FieldSection>
 
-                <div>
-                  <label className={cn('mb-1.5 block text-[12px] font-medium', sub)}>Name *</label>
-                  <input className="form-field" value={editing.name} onChange={e => up('name', e.target.value)} />
-                  {!editing.name.trim() && <div className="mt-1 text-[11px] text-red-400">Name is required.</div>}
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className={cn('mb-1.5 block text-[12px] font-medium', sub)}>Description</label>
-                  <input className="form-field" value={editing.description} onChange={e => up('description', e.target.value)} />
-                </div>
-
-                <div>
-                  <label className={cn('mb-1.5 block text-[12px] font-medium', sub)}>Price ({editing.currency})</label>
-                  <input className="form-field" type="number" value={editing.price} onChange={e => up('price', +e.target.value)} />
-                </div>
-
-                <div className="flex items-center pt-7">
-                  <label className="flex items-center gap-2">
+              <FieldSection title="Stock / Flags" description="Status toggles are large enough for mobile and easy to scan on desktop.">
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                  <label className="flex min-h-[52px] cursor-pointer items-center gap-3 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3">
                     <input
                       type="checkbox"
                       checked={editing.inStock}
-                      onChange={e => up('inStock', e.target.checked)}
-                      className="h-4 w-4 rounded accent-violet-400"
+                      onChange={event => updateEditing('inStock', event.target.checked)}
+                      className="h-5 w-5 accent-violet-600"
                     />
-                    <span className={cn('text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>In Stock</span>
+                    <span className="text-[13px] font-bold text-[var(--admin-text)]">In stock</span>
+                  </label>
+                  <label className="flex min-h-[52px] cursor-pointer items-center gap-3 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3">
+                    <input
+                      type="checkbox"
+                      checked={editing.showPrice !== false}
+                      onChange={event => updateEditing('showPrice', event.target.checked)}
+                      className="h-5 w-5 accent-violet-600"
+                    />
+                    <span className="text-[13px] font-bold text-[var(--admin-text)]">Show price</span>
                   </label>
                 </div>
-              </div>
-            </AdminEditorSection>
+              </FieldSection>
 
-            <AdminEditorSection
-              title="Part Image"
-              hint="Adjust the square part image while watching the final part card result update on the right."
-            >
-              <ImageUploader
-                label="Part Image"
-                value={editing.image}
-                onChange={url => setEditing(e => (e ? { ...e, image: url } : null))}
-                removable
-                onRemove={() => setEditing(e => (e ? { ...e, image: '' } : null))}
-                folder="parts"
-                frameAspect={1}
-                defaultFit="contain"
-                frameTitle="Adjust Part Image"
-                frameHint="Place the part neatly inside the square product-part frame."
-                previewAspectClass="aspect-square"
-                renderFrameContextPreview={media => renderPartPreview({ image: media })}
-                frameContextTitle="Part Card Result"
-                frameContextHint="Inspect the final part card result while you refine the image framing."
-              />
-            </AdminEditorSection>
-          </AdminEditorWorkspace>
+              <FieldSection title="Part Image" description="Frame the part image without letting the preview dominate the editor.">
+                <ImageUploader
+                  label="Part image"
+                  value={editing.image}
+                  onChange={url => updateEditing('image', url)}
+                  removable
+                  onRemove={() => updateEditing('image', '')}
+                  folder="parts"
+                  frameAspect={1}
+                  defaultFit="contain"
+                  frameTitle="Adjust Part Image"
+                  frameHint="Place the part neatly inside the square product-part frame."
+                  previewAspectClass="aspect-square"
+                  renderFrameContextPreview={media => (
+                    <CompactPartPreview part={{ ...previewPart, image: media }} productName={previewProductName} />
+                  )}
+                  frameContextTitle="Part Card"
+                  frameContextHint="Check the compact part card while framing."
+                />
+              </FieldSection>
+            </div>
+
+            <aside className="min-w-0 xl:sticky xl:top-0 xl:self-start">
+              <FieldSection title="Compact Preview" description="A small admin preview of the part listing card.">
+                <CompactPartPreview part={previewPart} productName={previewProductName} />
+              </FieldSection>
+            </aside>
+          </div>
         )}
       </Modal>
+
+      <AdminConfirmDialog
+        open={!!deleteTarget}
+        title="Delete Part?"
+        description={deleteTarget ? `This will permanently remove ${deleteTarget.name}.` : undefined}
+        tone="danger"
+        confirmLabel="Delete"
+        loading={deleting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => void confirmDelete()}
+      />
     </div>
   )
 }

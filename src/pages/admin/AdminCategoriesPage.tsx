@@ -1,26 +1,29 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
+import { Edit, Eye, Plus, Search } from 'lucide-react'
 import { useData } from '../../contexts/DataContext'
-import { useTheme } from '../../contexts/ThemeContext'
 import { useDialog } from '../../contexts/DialogContext'
+import { useI18n } from '../../contexts/LanguageContext'
 import type { Category } from '../../data/products/types'
 import Modal from '../../components/ui/Modal'
 import ImageUploader from '../../components/ui/ImageUploader'
 import FramedImage from '../../components/ui/FramedImage'
-import AdminActionButton from '../../components/admin/AdminActionButton'
-import AdminDetailModal from '../../components/admin/AdminDetailModal'
-import AdminEntityCard from '../../components/admin/AdminEntityCard'
-import AdminEditorWorkspace, { AdminEditorSection } from '../../components/admin/AdminEditorWorkspace'
+import AdminConfirmDialog from '../../components/admin/AdminConfirmDialog'
+import AdminKebabMenu, { type AdminKebabItem } from '../../components/admin/AdminKebabMenu'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
-import AdminViewToggle from '../../components/admin/AdminViewToggle'
-import useAdminCardView from '../../components/admin/useAdminCardView'
-import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
-import CategoryTileView from '../../components/home/CategoryTileView'
+import AdminBadge from '../../components/admin/primitives/AdminBadge'
+import AdminButton from '../../components/admin/primitives/AdminButton'
+import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { cn } from '../../utils/cn'
 import { getErrorMessage } from '../../lib/errors'
 
 const empty: Category = { id: '', name: '', slug: '', icon: '', description: '', image: '' }
+const PAGE_SIZE_OPTIONS = [12, 24, 48]
+const ICON_OPTIONS = ['🎪', '🎮', '🕶️', '🛠️', '🧠', '🎯', '⚡', '🏁', '🔍', '🎥', '🖥️', '🎉', '💡', '🚀', '🎨', '🧩', '🛡️', '🌊', '🏆', '📸', '🤖', '🔧', '🎭', '🧃']
 
+type CategoryFilter = 'all' | 'in_use' | 'unused'
+type CategorySort = 'name' | 'slug' | 'products_desc' | 'products_asc'
 
 function makeSlug(name: string) {
   return name
@@ -30,79 +33,236 @@ function makeSlug(name: string) {
     .replace(/[^a-z0-9-]/g, '')
 }
 
-const EMOJI_ICONS = [
-  '🚲',
-  '🎮',
-  '🕶️',
-  '🛠️',
-  '🧠',
-  '🎯',
-  '⚡',
-  '🏁',
-  '🔊',
-  '🎥',
-  '🖥️',
-  '🎉',
-  '💡',
-  '🚀',
-  '🎨',
-  '🧩',
-  '🛍️',
-  '🌟',
-  '🏆',
-  '📸',
-  '🤖',
-  '🔧',
-  '🎪',
-  '🧃',
-]
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max)
+}
+
+function FieldSection({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+  return (
+    <section className="admin-card p-4">
+      <div className="flex flex-col gap-1.5 border-b border-[var(--admin-border)] pb-3">
+        <h3 className="admin-section-title">{title}</h3>
+        {description && <p className="text-[12px] leading-5 text-[var(--admin-text-muted)]">{description}</p>}
+      </div>
+      <div className="mt-3.5">{children}</div>
+    </section>
+  )
+}
+
+function Fact({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="min-w-0 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3 py-2.5">
+      <div className="text-[9.5px] font-extrabold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">{label}</div>
+      <div className="mt-1 truncate text-[13px] font-bold leading-5 text-[var(--admin-text)]">{value}</div>
+    </div>
+  )
+}
+
+function CategoryThumb({ category, compact = false }: { category: Category; compact?: boolean }) {
+  return (
+    <div
+      className={cn(
+        'overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)]',
+        compact ? 'h-12 w-16' : 'aspect-[16/10] w-full'
+      )}
+    >
+      {category.image ? (
+        <FramedImage
+          media={category.image}
+          alt={category.name}
+          className="h-full w-full"
+          fallbackTransform={{ fit: 'cover' }}
+          onError={event => {
+            ;(event.target as HTMLImageElement).style.display = 'none'
+          }}
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--admin-text-muted)]">
+          {category.icon || 'No image'}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CompactCategoryPreview({ category, productCount }: { category: Category; productCount: number }) {
+  return (
+    <div className="mx-auto w-full max-w-[18rem] overflow-hidden rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface)]">
+      <CategoryThumb category={category} />
+      <div className="space-y-2 p-3">
+        <div className="flex items-center gap-2">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--admin-radius-sm)] bg-[var(--admin-accent-soft)] text-[18px]">
+            {category.icon || '•'}
+          </span>
+          <div className="min-w-0">
+            <div className="truncate text-[14px] font-black text-[var(--admin-text)]">{category.name || 'Category name'}</div>
+            <div className="truncate font-mono text-[10.5px] font-semibold text-[var(--admin-text-muted)]">{category.slug || 'auto-slug'}</div>
+          </div>
+        </div>
+        <p className="line-clamp-2 text-[12px] font-semibold leading-5 text-[var(--admin-text-muted)]">
+          {category.description || 'Short category description appears here.'}
+        </p>
+        <AdminBadge tone={productCount > 0 ? 'accent' : 'warning'}>{productCount > 0 ? `${productCount} products` : 'Unused'}</AdminBadge>
+      </div>
+    </div>
+  )
+}
 
 export default function AdminCategoriesPage() {
   const { categories, products, addCategory, updateCategory, deleteCategory } = useData()
-  const { isDark } = useTheme()
   const dialog = useDialog()
+  const { dir } = useI18n()
+  const isDesktop = useMediaQuery('(min-width: 768px)', true)
 
   const [editing, setEditing] = useState<Category | null>(null)
   const [details, setDetails] = useState<Category | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null)
   const [isNew, setIsNew] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [emojiQuery, setEmojiQuery] = useState('')
-  const [showEmoji, setShowEmoji] = useState(false)
-  const { cardView, displayCardView, viewTransitionClassName, setCardView } = useAdminCardView('categories')
+  const [deleting, setDeleting] = useState(false)
+  const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState<CategoryFilter>('all')
+  const [sortKey, setSortKey] = useState<CategorySort>('name')
+  const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0])
+  const [page, setPage] = useState(1)
+  const [iconQuery, setIconQuery] = useState('')
+  const [iconPickerOpen, setIconPickerOpen] = useState(false)
+  const [iconPosition, setIconPosition] = useState<{ blockStart: number; inlineStart: number; width: number; maxHeight: number } | null>(null)
 
-  const iconWrapRef = useRef<HTMLDivElement | null>(null)
-  const popoverRef = useRef<HTMLDivElement | null>(null)
-  const isDesktop = useMediaQuery('(min-width: 768px)', true)
+  const iconButtonRef = useRef<HTMLButtonElement | null>(null)
+  const iconPopoverRef = useRef<HTMLDivElement | null>(null)
 
-  const sub = isDark ? 'text-purple-200/80' : 'text-gray-500'
-  const cardsLayoutClass = getAdminCardsLayoutClass(displayCardView)
+  const countForCategory = (id: string) => products.filter(product => product.categoryId === id).length
+
+  const rows = useMemo(
+    () =>
+      categories.map(category => ({
+        category,
+        productCount: products.filter(product => product.categoryId === category.id).length,
+      })),
+    [categories, products]
+  )
+
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase()
+    return rows
+      .filter(row => {
+        if (filter === 'in_use' && row.productCount === 0) return false
+        if (filter === 'unused' && row.productCount > 0) return false
+        if (!needle) return true
+        return (
+          row.category.name.toLowerCase().includes(needle) ||
+          row.category.slug.toLowerCase().includes(needle) ||
+          (row.category.description || '').toLowerCase().includes(needle)
+        )
+      })
+      .sort((a, b) => {
+        if (sortKey === 'products_desc') return b.productCount - a.productCount || a.category.name.localeCompare(b.category.name)
+        if (sortKey === 'products_asc') return a.productCount - b.productCount || a.category.name.localeCompare(b.category.name)
+        if (sortKey === 'slug') return a.category.slug.localeCompare(b.category.slug)
+        return a.category.name.localeCompare(b.category.name)
+      })
+  }, [filter, rows, search, sortKey])
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize))
+  const currentPage = Math.min(page, pageCount)
+  const pageItems = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  const showingStart = filtered.length ? (currentPage - 1) * pageSize + 1 : 0
+  const showingEnd = Math.min(currentPage * pageSize, filtered.length)
+
+  const filteredIcons = useMemo(() => {
+    const needle = iconQuery.trim()
+    if (!needle) return ICON_OPTIONS
+    return ICON_OPTIONS.filter(icon => icon.includes(needle))
+  }, [iconQuery])
+
+  useEffect(() => {
+    setPage(1)
+  }, [filter, pageSize, search, sortKey])
+
+  useLayoutEffect(() => {
+    if (!iconPickerOpen || !isDesktop) {
+      setIconPosition(null)
+      return
+    }
+
+    const updatePosition = () => {
+      const trigger = iconButtonRef.current
+      if (!trigger) return
+      const rect = trigger.getBoundingClientRect()
+      const margin = 12
+      const width = Math.min(340, window.innerWidth - margin * 2)
+      const maxHeight = Math.min(360, window.innerHeight - margin * 2)
+      const spaceBelow = window.innerHeight - rect.bottom - margin
+      const placeAbove = spaceBelow < 280 && rect.top > spaceBelow
+      const blockStart = placeAbove ? Math.max(margin, rect.top - maxHeight - 8) : Math.min(rect.bottom + 8, window.innerHeight - margin - maxHeight)
+      const rawInlineStart = dir === 'rtl' ? window.innerWidth - rect.left - width : rect.right - width
+      setIconPosition({
+        blockStart,
+        inlineStart: clamp(rawInlineStart, margin, window.innerWidth - margin - width),
+        width,
+        maxHeight,
+      })
+    }
+
+    updatePosition()
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+    return () => {
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
+    }
+  }, [dir, iconPickerOpen, isDesktop])
+
+  useEffect(() => {
+    if (!iconPickerOpen || !isDesktop) return
+
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node
+      if (iconButtonRef.current?.contains(target) || iconPopoverRef.current?.contains(target)) return
+      setIconPickerOpen(false)
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIconPickerOpen(false)
+    }
+
+    document.addEventListener('pointerdown', onPointerDown, true)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown, true)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [iconPickerOpen, isDesktop])
 
   const openNew = () => {
     setEditing({ ...empty, id: `cat-${Date.now()}` })
     setIsNew(true)
-    setEmojiQuery('')
-    setShowEmoji(false)
+    setIconQuery('')
+    setIconPickerOpen(false)
   }
 
   const openEdit = (category: Category) => {
     setEditing({ ...category })
     setIsNew(false)
-    setEmojiQuery('')
-    setShowEmoji(false)
+    setIconQuery('')
+    setIconPickerOpen(false)
   }
 
-  const close = () => {
+  const closeEditor = () => {
     setEditing(null)
     setIsNew(false)
-    setEmojiQuery('')
-    setShowEmoji(false)
+    setIconQuery('')
+    setIconPickerOpen(false)
   }
 
-  const up = (f: keyof Category, v: string) => setEditing(e => (e ? { ...e, [f]: v } : null))
-  const canSave = !!editing?.name?.trim()
+  const updateEditing = <K extends keyof Category>(key: K, value: Category[K]) => {
+    setEditing(current => (current ? { ...current, [key]: value } : null))
+  }
+
+  const canSave = Boolean(editing?.name?.trim())
 
   const save = async () => {
-    if (!editing || !editing.name?.trim()) return
+    if (!editing || !canSave) return
     const slug = (editing.slug || makeSlug(editing.name)).trim()
     const data = { ...editing, slug }
 
@@ -110,26 +270,17 @@ export default function AdminCategoriesPage() {
     try {
       if (isNew) await addCategory(data)
       else await updateCategory(data.id, data)
-      close()
-    } catch (err: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to save'), variant: 'danger' })
+      closeEditor()
+    } catch (error: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to save'), variant: 'danger' })
     } finally {
       setSaving(false)
     }
   }
 
-  const catCards = useMemo(() => {
-    return categories.map(c => {
-      const count = products.filter(p => p.categoryId === c.id).length
-      return { c, count }
-    })
-  }, [categories, products])
-
-  const countForCategory = (id: string) => products.filter(p => p.categoryId === id).length
-
-  const handleDeleteCategory = async (category: Category) => {
-    const count = countForCategory(category.id)
-    if (count > 0) {
+  const requestDelete = (category: Category) => {
+    const productCount = countForCategory(category.id)
+    if (productCount > 0) {
       dialog.alert({
         title: 'Cannot Delete',
         message: 'Remove products from this category first.',
@@ -137,132 +288,54 @@ export default function AdminCategoriesPage() {
       })
       return
     }
+    setDeleteTarget(category)
+  }
 
-    const ok = await dialog.confirm({
-      title: 'Delete Category?',
-      message: 'This will permanently remove this category.',
-      confirmLabel: 'Delete',
-      variant: 'danger',
-    })
-    if (!ok) return
-
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
     try {
-      await deleteCategory(category.id)
-      if (details?.id === category.id) setDetails(null)
-    } catch (e: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(e, 'Failed to delete'), variant: 'danger' })
+      await deleteCategory(deleteTarget.id)
+      if (details?.id === deleteTarget.id) setDetails(null)
+      setDeleteTarget(null)
+    } catch (error: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to delete'), variant: 'danger' })
+    } finally {
+      setDeleting(false)
     }
   }
 
-  const filteredEmojis = useMemo(() => {
-    const q = emojiQuery.trim()
-    if (!q) return EMOJI_ICONS
-    return EMOJI_ICONS.filter(icon => icon.includes(q))
-  }, [emojiQuery])
+  const actionItems = (category: Category): AdminKebabItem[] => [
+    { label: 'Delete category', tone: 'danger', onSelect: () => requestDelete(category) },
+  ]
 
-  useEffect(() => {
-    // Desktop uses an absolute popover with outside-click dismissal; on mobile
-    // the picker renders inside a Modal that manages its own dismissal.
-    if (!showEmoji || !isDesktop) return
-
-    const onPointerDown = (ev: PointerEvent) => {
-      const t = ev.target as Node
-      const wrap = iconWrapRef.current
-      const pop = popoverRef.current
-      if (wrap?.contains(t) || pop?.contains(t)) return
-      setShowEmoji(false)
-    }
-
-    document.addEventListener('pointerdown', onPointerDown, true)
-    return () => document.removeEventListener('pointerdown', onPointerDown, true)
-  }, [showEmoji, isDesktop])
-
-  const previewCategory: Category = editing
-    ? {
-        ...editing,
-        slug: editing.slug?.trim() || makeSlug(editing.name || 'category'),
-      }
-    : empty
-
-  const renderCategoryPreview = (overrides?: Partial<Category>) => {
-    const preview = { ...previewCategory, ...overrides }
-    const linkedCount = preview.id ? countForCategory(preview.id) : 0
-
-    // Admin live preview uses the SAME presentational tile that the public
-    // homepage shows (OfferSection → CategoryTileView), so the admin editor
-    // can never drift from the customer-facing category card.
-    //
-    // The outer wrapper is non-interactive (aria-hidden + pointer-events-none)
-    // so hover effects render but clicks never fire while editing.
-    return (
-      <div
-        aria-hidden="true"
-        className="mx-auto w-full max-w-[280px] select-none pointer-events-none"
-      >
-        <CategoryTileView
-          name={preview.name || 'Category Name'}
-          description={preview.description || undefined}
-          image={preview.image || undefined}
-          count={linkedCount}
-          active={false}
-          reducedVisualEffects
-        />
-      </div>
-    )
-  }
-
-  // Shared icon-picker content — rendered inside an absolute popover on
-  // desktop and a bottom-sheet Modal on mobile (so it never overflows a
-  // narrow viewport). Logic/state is identical in both surfaces.
-  const emojiPickerBody = (
-    <>
-      <div className="mb-3 flex items-center gap-2">
-        <span className={cn('text-[11px] font-mono', sub)}>Filter</span>
-        <input
-          className={cn(
-            'flex-1 rounded-xl border px-3 py-2 text-sm outline-none',
-            isDark
-              ? 'border-purple-500/25 bg-transparent text-purple-50 placeholder:text-purple-200/60'
-              : 'border-gray-200 bg-transparent text-gray-800 placeholder:text-gray-500'
-          )}
-          placeholder="Type or paste emoji to filter..."
-          value={emojiQuery}
-          onChange={e => setEmojiQuery(e.target.value)}
-        />
-        <button
-          type="button"
-          onClick={() => setEmojiQuery('')}
-          className={cn(
-            'rounded-xl px-3 py-2 text-[11px] font-semibold active:translate-y-[1px]',
-            isDark
-              ? 'bg-[linear-gradient(180deg,rgba(20,29,56,0.98),rgba(13,20,42,0.98))] text-purple-100 ring-1 ring-inset ring-cyan-400/14 shadow-[0_10px_24px_-18px_rgba(4,8,20,0.8)]'
-              : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.14)]'
-          )}
-        >
-          Clear
-        </button>
-      </div>
-
-      <div className="grid max-h-56 grid-cols-6 gap-2 overflow-y-auto overscroll-contain pe-1 sm:max-h-72">
-        {filteredEmojis.map(icon => {
-          const active = editing?.icon === icon
+  const iconPickerBody = editing ? (
+    <div className="admin-scope space-y-3">
+      <input
+        className="admin-input"
+        value={iconQuery}
+        onChange={event => setIconQuery(event.target.value)}
+        placeholder="Filter or paste an icon..."
+        aria-label="Filter category icons"
+      />
+      <div className="grid max-h-72 grid-cols-6 gap-1.5 overflow-y-auto overscroll-contain pe-1">
+        {filteredIcons.map(icon => {
+          const active = editing.icon === icon
           return (
             <button
               key={icon}
               type="button"
+              aria-label={`Select icon ${icon}`}
+              aria-pressed={active}
               onClick={() => {
-                setEditing(x => (x ? { ...x, icon } : x))
-                setShowEmoji(false)
+                updateEditing('icon', icon)
+                setIconPickerOpen(false)
               }}
               className={cn(
-                'flex h-11 items-center justify-center rounded-xl border text-xl transition',
+                'flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border text-[20px] transition',
                 active
-                  ? isDark
-                    ? 'border-cyan-400/40 bg-cyan-400/15'
-                    : 'border-violet-300 bg-violet-50'
-                  : isDark
-                    ? 'border-purple-500/20 bg-purple-500/10 hover:bg-purple-500/15'
-                    : 'border-gray-200 bg-white hover:bg-gray-50'
+                  ? 'border-[var(--admin-accent)] bg-[var(--admin-accent-soft)]'
+                  : 'border-[var(--admin-border)] bg-[var(--admin-surface)] hover:border-[var(--admin-accent)]'
               )}
             >
               {icon}
@@ -270,339 +343,418 @@ export default function AdminCategoriesPage() {
           )
         })}
       </div>
-    </>
-  )
+    </div>
+  ) : null
+
+  const desktopIconPicker =
+    iconPickerOpen && editing && isDesktop && typeof document !== 'undefined'
+      ? createPortal(
+          <div className="admin-scope pointer-events-none fixed inset-0 z-[160]" dir={dir}>
+            <div
+              ref={iconPopoverRef}
+              className="surface-floating pointer-events-auto fixed rounded-[var(--admin-radius)] p-3"
+              style={{
+                insetBlockStart: iconPosition?.blockStart ?? 0,
+                insetInlineStart: iconPosition?.inlineStart ?? 0,
+                width: iconPosition?.width ?? 340,
+                maxHeight: iconPosition?.maxHeight ?? 360,
+                overflowY: 'auto',
+                visibility: iconPosition ? 'visible' : 'hidden',
+              }}
+            >
+              {iconPickerBody}
+            </div>
+          </div>,
+          document.body
+        )
+      : null
+
+  const previewCategory = editing
+    ? {
+        ...editing,
+        slug: editing.slug?.trim() || makeSlug(editing.name || 'category'),
+      }
+    : empty
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
       <AdminPageHeader
         title="Categories / Brands"
         actions={
-          <>
-            <AdminViewToggle value={cardView} onChange={setCardView} />
-            <button onClick={openNew} className="btn-admin-create">
-              + Add Category
-            </button>
-          </>
+          <AdminButton size="sm" onClick={openNew}>
+            <Plus className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
+            Add Category
+          </AdminButton>
         }
       />
 
-      <div
-        className={cn(
-          'min-h-0 flex flex-1 flex-col rounded-[22px] p-3 sm:p-4',
-          isDark
-            ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(8,11,27,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_28px_90px_-58px_rgba(7,15,36,0.96)]'
-            : 'bg-white ring-1 ring-inset ring-violet-200/70 shadow-[0_18px_44px_-28px_rgba(89,23,196,0.18)]'
-        )}
-      >
-        {catCards.length === 0 ? (
-          <div className={cn('flex flex-1 items-center justify-center rounded-[18px] border px-5 py-11 text-center text-[13px]', isDark ? 'border-white/10 text-purple-200/70' : 'border-gray-100 text-gray-500')}>
-            No categories yet.
+      <div className="admin-card flex min-h-0 flex-1 flex-col p-3 sm:p-4">
+        <div className="grid gap-2.5 xl:grid-cols-[minmax(0,1fr)_170px_160px]">
+          <div className="relative min-w-0">
+            <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-text-muted)]" strokeWidth={2} aria-hidden="true" />
+            <input
+              className="admin-input ps-9 pe-16"
+              value={search}
+              onChange={event => setSearch(event.target.value)}
+              placeholder="Search name, slug, description..."
+              aria-label="Search categories"
+            />
+            <span className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-2 py-0.5 text-[10.5px] font-bold tabular-nums text-[var(--admin-text-muted)]">
+              {filtered.length}/{rows.length}
+            </span>
+          </div>
+
+          <select className="admin-input" value={sortKey} onChange={event => setSortKey(event.target.value as CategorySort)} aria-label="Sort categories">
+            <option value="name">Name</option>
+            <option value="slug">Slug</option>
+            <option value="products_desc">Products high to low</option>
+            <option value="products_asc">Products low to high</option>
+          </select>
+
+          <select className="admin-input" value={pageSize} onChange={event => setPageSize(Number(event.target.value))} aria-label="Page size">
+            {PAGE_SIZE_OPTIONS.map(value => (
+              <option key={value} value={value}>
+                {value} per page
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mt-2.5 flex snap-x gap-1.5 overflow-x-auto pb-1 [scrollbar-width:thin]">
+          {([
+            ['all', `All (${rows.length})`],
+            ['in_use', `In use (${rows.filter(row => row.productCount > 0).length})`],
+            ['unused', `Unused (${rows.filter(row => row.productCount === 0).length})`],
+          ] as Array<[CategoryFilter, string]>).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setFilter(value)}
+              className={cn(
+                'inline-flex min-h-[44px] shrink-0 snap-start items-center justify-center rounded-full border px-3.5 text-[12px] font-bold transition',
+                filter === value
+                  ? 'border-transparent bg-[var(--admin-accent)] text-white'
+                  : 'border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-text-muted)] hover:border-[var(--admin-accent)] hover:text-[var(--admin-accent)]'
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="flex flex-1 items-center justify-center py-8">
+            <AdminEmptyState
+              title={rows.length ? 'No categories match this view' : 'No categories yet'}
+              description={rows.length ? 'Try another search, filter, or sort option.' : 'Add the first catalog category or brand.'}
+              action={
+                <AdminButton size="sm" onClick={openNew}>
+                  <Plus className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
+                  Add Category
+                </AdminButton>
+              }
+            />
           </div>
         ) : (
-          <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
-            <div className={cn('origin-top transition-[opacity,transform,filter] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform,filter]', viewTransitionClassName)}>
-            <div className={cardsLayoutClass}>
-              {catCards.map(({ c, count }) => (
-                <AdminEntityCard
-                key={c.id}
-                variant={getAdminEntityVariant(displayCardView)}
-                minHeightClassName={displayCardView === 'grid' ? '' : 'min-h-[96px]'}
-                listMediaWrapClassName="md:self-center"
-                listMediaFrameClassName="!h-[76px] !w-[112px] md:!h-[76px] md:!w-[112px] !rounded-[18px] !bg-transparent !ring-0 !p-0"
-                factsWrapClassName={displayCardView === 'list' ? 'xl:w-[156px]' : undefined}
-                actionsWrapClassName={displayCardView === 'list' ? 'xl:w-[118px]' : undefined}
-                gridActionsPlacement="bottom"
-                media={
-                  c.image ? (
-                    <div className={cn('aspect-[16/9] h-full w-full overflow-hidden rounded-[14px]', isDark ? 'bg-purple-500/10' : 'bg-violet-50')}>
-                      <FramedImage
-                        media={c.image}
-                        alt={c.name}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        fallbackTransform={{ fit: 'cover' }}
-                        onError={e => {
-                          ;(e.target as HTMLImageElement).style.display = 'none'
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <div className={cn('flex aspect-[16/9] h-full w-full items-center justify-center rounded-[14px]', isDark ? 'bg-purple-500/10' : 'bg-violet-50')}>
-                      <div className={cn('text-[11px] font-mono uppercase tracking-[0.24em]', sub)}>No image</div>
-                    </div>
-                  )
-                }
-                title={c.name}
-                subtitle={c.description || undefined}
-                badges={
-                  <>
-                    <span className={cn('rounded-full border px-3 py-1 text-[11px] font-bold', count > 0 ? (isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200' : 'border-violet-300 bg-violet-100/80 text-[#2e0a72]') : (isDark ? 'border-amber-400/15 bg-amber-400/10 text-amber-200' : 'border-amber-300 bg-amber-50 text-amber-900'))}>
-                      {count > 0 ? 'In use' : 'Unused'}
-                    </span>
-                  </>
-                }
-                facts={[
-                  { label: 'Slug', value: <span className="block truncate font-mono text-[0.85rem]" title={c.slug}>{c.slug || '—'}</span> },
-                  { label: 'Products', value: <span className="font-mono tabular-nums">{count}</span> },
-                ]}
-                actions={
-                  <>
-                    <AdminActionButton
-                      tone="primary"
-                      onClick={event => {
-                        event.stopPropagation()
-                        setDetails(c)
-                      }}
-                    >
-                      Details
-                    </AdminActionButton>
-                    <AdminActionButton
-                      onClick={event => {
-                        event.stopPropagation()
-                        openEdit(c)
-                      }}
-                    >
-                      Edit
-                    </AdminActionButton>
-                    <AdminActionButton
-                      tone="danger"
-                      onClick={event => {
-                        event.stopPropagation()
-                        void handleDeleteCategory(c)
-                      }}
-                    >
-                      Delete
-                    </AdminActionButton>
-                  </>
-                }
-                />
-              ))}
+          <>
+            <div className="mt-3 hidden min-h-0 flex-1 overflow-y-auto md:block">
+              <div className="admin-table-wrap">
+                <table className="min-w-[860px] w-full border-collapse text-start">
+                  <thead className="sticky top-0 z-10 bg-[var(--admin-surface-2)]">
+                    <tr className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">
+                      <th className="px-3 py-2.5 text-start">Category</th>
+                      <th className="px-3 py-2.5 text-start">Slug</th>
+                      <th className="px-3 py-2.5 text-start">Status</th>
+                      <th className="px-3 py-2.5 text-start">Products</th>
+                      <th className="px-3 py-2.5 text-start">Visibility</th>
+                      <th className="px-3 py-2.5 text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pageItems.map(({ category, productCount }) => (
+                      <tr key={category.id} className="border-t border-[var(--admin-border)] align-middle">
+                        <td className="px-3 py-2.5">
+                          <div className="flex max-w-[300px] items-center gap-2.5">
+                            <CategoryThumb category={category} compact />
+                            <div className="min-w-0">
+                              <div className="truncate text-[13px] font-bold text-[var(--admin-text)]">{category.name}</div>
+                              <div className="line-clamp-1 text-[11px] text-[var(--admin-text-muted)]">{category.description || 'No description'}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5 font-mono text-[12px] font-semibold text-[var(--admin-text-muted)]">{category.slug || '-'}</td>
+                        <td className="px-3 py-2.5">
+                          <AdminBadge tone={productCount > 0 ? 'success' : 'warning'}>{productCount > 0 ? 'In use' : 'Unused'}</AdminBadge>
+                        </td>
+                        <td className="px-3 py-2.5 text-[13px] font-bold tabular-nums text-[var(--admin-text)]">{productCount}</td>
+                        <td className="px-3 py-2.5">
+                          <AdminBadge tone="accent">Visible</AdminBadge>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <AdminButton size="sm" variant="outline" onClick={() => setDetails(category)}>
+                              <Eye className="h-4 w-4" aria-hidden="true" />
+                              Details
+                            </AdminButton>
+                            <AdminButton size="sm" onClick={() => openEdit(category)}>
+                              <Edit className="h-4 w-4" aria-hidden="true" />
+                              Edit
+                            </AdminButton>
+                            <AdminKebabMenu label={`More actions for ${category.name}`} items={actionItems(category)} />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
+
+            <div className="mt-3 min-h-0 flex-1 overflow-y-auto pe-0.5 md:hidden">
+              <div className="grid grid-cols-1 gap-2.5">
+                {pageItems.map(({ category, productCount }) => (
+                  <article key={category.id} className="admin-card p-3">
+                    <div className="flex items-start gap-3">
+                      <CategoryThumb category={category} compact />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <h2 className="truncate text-[14px] font-black text-[var(--admin-text)]">{category.name}</h2>
+                            <p className="truncate font-mono text-[11px] font-semibold text-[var(--admin-text-muted)]">{category.slug || '-'}</p>
+                          </div>
+                          <AdminBadge tone={productCount > 0 ? 'success' : 'warning'}>{productCount > 0 ? 'In use' : 'Unused'}</AdminBadge>
+                        </div>
+                        <p className="mt-2 line-clamp-2 text-[12px] leading-5 text-[var(--admin-text-muted)]">{category.description || 'No description'}</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 grid grid-cols-3 gap-2">
+                      <Fact label="Products" value={productCount} />
+                      <Fact label="Media" value={category.image ? 'Ready' : 'Missing'} />
+                      <Fact label="Visible" value="Yes" />
+                    </div>
+                    <div className="mt-3 grid grid-cols-[1fr_1fr_auto] gap-2">
+                      <AdminButton size="sm" variant="outline" onClick={() => setDetails(category)}>Details</AdminButton>
+                      <AdminButton size="sm" onClick={() => openEdit(category)}>Edit</AdminButton>
+                      <AdminKebabMenu label={`More actions for ${category.name}`} items={actionItems(category)} />
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
-          </div>
+
+            <div className="mt-3 flex flex-col gap-2.5 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2.5 text-[12px] font-semibold text-[var(--admin-text-muted)] sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                Showing {showingStart}-{showingEnd} of {filtered.length}
+              </div>
+              <div className="flex items-center gap-2">
+                <AdminButton size="sm" variant="outline" disabled={currentPage <= 1} onClick={() => setPage(value => Math.max(1, value - 1))}>
+                  Previous
+                </AdminButton>
+                <span className="min-w-[72px] text-center tabular-nums">
+                  {currentPage} / {pageCount}
+                </span>
+                <AdminButton size="sm" variant="outline" disabled={currentPage >= pageCount} onClick={() => setPage(value => Math.min(pageCount, value + 1))}>
+                  Next
+                </AdminButton>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
-      <AdminDetailModal
+      <Modal
         open={!!details}
         onClose={() => setDetails(null)}
         title={details?.name || 'Category Details'}
-        subtitle={details ? 'This panel keeps the listing tidy while giving the category enough room for identity and usage context.' : undefined}
-        media={
+        size="2xl"
+        bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+        footer={
           details ? (
-            details.image ? (
-              <div className={cn('aspect-[16/9] overflow-hidden', isDark ? 'bg-purple-500/10' : 'bg-gray-50')}>
-                <FramedImage media={details.image} alt={details.name} className="h-full w-full" fallbackTransform={{ fit: 'cover' }} />
-              </div>
-            ) : (
-              <div className={cn('flex aspect-[16/9] items-center justify-center', isDark ? 'bg-purple-500/10' : 'bg-gray-50')}>
-                <div className={cn('text-sm', sub)}>No category image uploaded yet.</div>
-              </div>
-            )
-          ) : null
-        }
-        badges={
-          details ? (
-            <>
-              <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold', countForCategory(details.id) > 0 ? (isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700') : (isDark ? 'border-amber-400/15 bg-amber-400/10 text-amber-200' : 'border-amber-200 bg-amber-50 text-amber-700'))}>
-                {countForCategory(details.id)} linked products
-              </span>
-            </>
-          ) : null
-        }
-        summaryFacts={
-          details
-            ? [
-                { label: 'Name', value: details.name },
-                { label: 'Slug', value: <span className="font-mono text-xs">{details.slug}</span> },
-                { label: 'Products', value: String(countForCategory(details.id)) },
-                { label: 'Media', value: details.image ? 'Banner uploaded' : 'No banner yet' },
-              ]
-            : []
-        }
-        sections={
-          details
-            ? [
-                {
-                  title: 'Identity',
-                  facts: [
-                    { label: 'Display name', value: details.name },
-                    { label: 'Public slug', value: <span className="font-mono text-xs">{details.slug}</span> },
-                    { label: 'Products', value: String(countForCategory(details.id)) },
-                  ],
-                },
-                {
-                  title: 'Description',
-                  content: (
-                    <p className={cn('text-sm leading-6', isDark ? 'text-purple-100/80' : 'text-gray-700')}>
-                      {details.description || 'No description has been added to this category yet.'}
-                    </p>
-                  ),
-                },
-              ]
-            : []
-        }
-        actions={
-          details && (
-            <>
-              <AdminActionButton
+            <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
+              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="sm:min-w-[96px]">Close</AdminButton>
+              <AdminButton
+                variant="outline"
                 onClick={() => {
+                  const category = details
                   setDetails(null)
-                  openEdit(details)
+                  openEdit(category)
                 }}
+                className="sm:min-w-[128px]"
               >
                 Edit Category
-              </AdminActionButton>
-              <AdminActionButton tone="danger" onClick={() => void handleDeleteCategory(details)}>
-                Delete Category
-              </AdminActionButton>
-            </>
-          )
+              </AdminButton>
+              <AdminKebabMenu label={`More actions for ${details.name}`} items={actionItems(details)} />
+            </div>
+          ) : undefined
         }
-      />
-
-      <Modal
-        open={!!editing}
-        onClose={close}
-        title={isNew ? 'Add Category / Brand' : 'Edit Category'}
-        persistent
-        size="xl"
-        bodyClassName="px-3.5 pb-3.5 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
       >
-        {editing && (
-          <AdminEditorWorkspace
-            preview={renderCategoryPreview()}
-            previewTitle="Live Category Card"
-            previewHint="See the actual category card outcome while you tune the name, icon, description, and banner image."
-            footer={
-              <div className="flex flex-wrap justify-end gap-2.5">
-                <button onClick={close} className="btn-outline !rounded-xl !px-4 !py-2 !text-sm">
-                  Cancel
-                </button>
-                <button
-                  onClick={save}
-                  disabled={saving || !canSave}
-                  className="btn-primary !rounded-xl !px-5 !py-2 !text-xs disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : isNew ? 'Add' : 'Save'}
-                </button>
-              </div>
-            }
-          >
-            <AdminEditorSection
-              title="Identity"
-              hint="Name, slug, and icon stay together here so the live category card preview remains trustworthy while you edit."
-            >
-              <div className="relative z-[1] grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <label className={cn('mb-1.5 block text-[12px] font-medium', sub)}>
-                    Name * (e.g. "The Terminal VR", "Eventies")
-                  </label>
-                  <input
-                    className="form-field"
-                    value={editing.name}
-                    onChange={e => up('name', e.target.value)}
-                    placeholder="Brand or category name"
-                  />
-                  {!editing.name.trim() && <div className="mt-1 text-[11px] text-red-400">Name is required.</div>}
+        {details && (
+          <div className="admin-scope space-y-4">
+            <section className="admin-card overflow-hidden">
+              <div className="grid gap-0 lg:grid-cols-[minmax(0,0.84fr)_minmax(0,1fr)]">
+                <div className="bg-[var(--admin-surface-2)] p-3">
+                  <CategoryThumb category={details} />
                 </div>
-
-                <div>
-                  <label className={cn('mb-1.5 block text-[12px] font-medium', sub)}>Slug</label>
-                  <input
-                    className="form-field"
-                    value={editing.slug}
-                    onChange={e => up('slug', e.target.value)}
-                    placeholder={editing.name ? makeSlug(editing.name) : 'auto-generated-from-name'}
-                  />
-                </div>
-
-                <div ref={iconWrapRef} className="relative">
-                  <label className={cn('mb-1.5 block text-[12px] font-medium', sub)}>Icon</label>
-
-                  <button
-                    type="button"
-                    onClick={() => setShowEmoji(v => !v)}
-                    className={cn(
-                      'relative z-[20] flex min-h-[44px] w-full items-center justify-between gap-3 rounded-xl px-4 py-3 transition active:translate-y-[1px]',
-                      isDark
-                        ? 'bg-[linear-gradient(180deg,rgba(20,29,56,0.98),rgba(13,20,42,0.98))] ring-1 ring-inset ring-cyan-400/14 shadow-[0_10px_24px_-18px_rgba(4,8,20,0.8)] hover:bg-[#152347]'
-                        : 'bg-white ring-1 ring-inset ring-gray-200 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.14)] hover:bg-gray-50'
-                    )}
-                  >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <span className="text-xl">{editing.icon || '??'}</span>
-                      <span className={cn('truncate text-sm', isDark ? 'text-purple-100/90' : 'text-gray-700')}>
-                        {editing.icon ? 'Selected icon' : 'Choose an icon'}
-                      </span>
+                <div className="flex min-w-0 flex-col justify-between gap-4 p-4">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <AdminBadge tone={countForCategory(details.id) > 0 ? 'success' : 'warning'}>
+                        {countForCategory(details.id) > 0 ? 'In use' : 'Unused'}
+                      </AdminBadge>
+                      <AdminBadge tone="accent">Visible</AdminBadge>
                     </div>
-                    <span className={cn('text-xs font-mono', sub)}>{showEmoji ? 'Close' : 'Pick'}</span>
-                  </button>
-
-                  {showEmoji && isDesktop && (
-                    <div
-                      ref={popoverRef}
-                      className={cn(
-                        'absolute end-0 z-[1000] mt-2 w-[340px] max-w-[calc(100vw-2rem)] rounded-2xl border p-3 shadow-2xl',
-                        isDark ? 'border-purple-500/20 bg-[#0b0b1a]' : 'border-gray-200 bg-white'
-                      )}
-                      onWheelCapture={event => event.stopPropagation()}
-                      onTouchMove={event => event.stopPropagation()}
-                    >
-                      {emojiPickerBody}
-                    </div>
-                  )}
+                    <h3 className="mt-3 text-[1.2rem] font-black text-[var(--admin-text)]">{details.name}</h3>
+                    <p className="mt-2 text-[13px] leading-6 text-[var(--admin-text-muted)]">{details.description || 'No description has been added.'}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Fact label="Products" value={countForCategory(details.id)} />
+                    <Fact label="Media" value={details.image ? 'Banner ready' : 'No banner'} />
+                  </div>
                 </div>
               </div>
-            </AdminEditorSection>
+            </section>
 
-            <AdminEditorSection
-              title="Description"
-              hint="Keep the category description compact and clear so the preview card still feels balanced."
-            >
-              <textarea
-                className="form-field resize-none"
-                rows={4}
-                value={editing.description || ''}
-                onChange={e => up('description', e.target.value)}
-                placeholder="Brief description of this brand/category..."
-              />
-            </AdminEditorSection>
-
-            <AdminEditorSection
-              title="Category Banner"
-              hint="Adjust the banner image while seeing the actual category card result side by side."
-            >
-              <ImageUploader
-                label="Category / Brand Image"
-                value={editing.image}
-                onChange={url => setEditing(e => (e ? { ...e, image: url } : null))}
-                removable
-                onRemove={() => setEditing(e => (e ? { ...e, image: '' } : null))}
-                folder="categories"
-                frameAspect={4 / 3}
-                defaultFit="cover"
-                frameTitle="Adjust Category Image"
-                frameHint="Position the image inside the same category card frame used on the website."
-                previewAspectClass="aspect-[4/3]"
-                renderFrameContextPreview={media => renderCategoryPreview({ image: media })}
-                frameContextTitle="Category Card Result"
-                frameContextHint="Inspect the actual category card result while you refine the banner framing."
-              />
-            </AdminEditorSection>
-          </AdminEditorWorkspace>
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+              <Fact label="Name" value={details.name} />
+              <Fact label="Slug" value={<span className="font-mono text-[11px]">{details.slug || '-'}</span>} />
+              <Fact label="Icon" value={details.icon || '-'} />
+              <Fact label="Visibility" value="Visible" />
+            </div>
+          </div>
         )}
       </Modal>
 
-      {/* Mobile icon picker: bottom sheet instead of an overflowing popover.
-          Rendered last so it stacks above the category edit modal. */}
+      <Modal
+        open={!!editing}
+        onClose={closeEditor}
+        title={isNew ? 'Add Category / Brand' : 'Edit Category'}
+        persistent
+        size="3xl"
+        bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+        footer={
+          <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-[11px] leading-5 text-[var(--admin-text-muted)]">
+              Products linked: <span className="font-bold text-[var(--admin-text)]">{editing?.id ? countForCategory(editing.id) : 0}</span>
+              {' | '}Banner: <span className="font-bold text-[var(--admin-text)]">{editing?.image ? 'Ready' : 'Missing'}</span>
+            </div>
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:justify-end">
+              <AdminButton variant="ghost" onClick={closeEditor} disabled={saving} className="sm:min-w-[110px]">Cancel</AdminButton>
+              <AdminButton onClick={save} loading={saving} disabled={!canSave} className="sm:min-w-[140px]">
+                {isNew ? 'Add Category' : 'Save Changes'}
+              </AdminButton>
+            </div>
+          </div>
+        }
+      >
+        {editing && (
+          <div className="admin-scope grid min-h-0 gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+            <div className="min-w-0 space-y-4">
+              <FieldSection title="Identity" description="Name, slug, and icon are grouped so the catalog label stays easy to scan.">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <label className="admin-label mb-1.5" htmlFor="category-name">Name *</label>
+                    <input
+                      id="category-name"
+                      className={cn('admin-input', !editing.name.trim() && 'admin-input--error')}
+                      value={editing.name}
+                      onChange={event => updateEditing('name', event.target.value)}
+                      placeholder="Brand or category name"
+                    />
+                    {!editing.name.trim() && <p className="mt-1 text-[11px] font-semibold text-[var(--admin-danger)]">Name is required.</p>}
+                  </div>
+                  <div>
+                    <label className="admin-label mb-1.5" htmlFor="category-slug">Slug</label>
+                    <input
+                      id="category-slug"
+                      className="admin-input"
+                      value={editing.slug}
+                      onChange={event => updateEditing('slug', event.target.value)}
+                      placeholder={editing.name ? makeSlug(editing.name) : 'auto-generated'}
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label mb-1.5" htmlFor="category-icon">Icon</label>
+                    <button
+                      ref={iconButtonRef}
+                      id="category-icon"
+                      type="button"
+                      onClick={() => setIconPickerOpen(value => !value)}
+                      aria-haspopup="dialog"
+                      aria-expanded={iconPickerOpen}
+                      className="admin-input flex items-center justify-between gap-3 text-start"
+                    >
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <span className="text-[20px]" aria-hidden="true">{editing.icon || '•'}</span>
+                        <span className="truncate font-bold">{editing.icon ? 'Selected icon' : 'Choose an icon'}</span>
+                      </span>
+                      <span className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--admin-accent)]">
+                        {iconPickerOpen ? 'Close' : 'Pick'}
+                      </span>
+                    </button>
+                    {desktopIconPicker}
+                  </div>
+                </div>
+              </FieldSection>
+
+              <FieldSection title="Description">
+                <label className="sr-only" htmlFor="category-description">Description</label>
+                <textarea
+                  id="category-description"
+                  className="admin-input resize-y"
+                  rows={4}
+                  value={editing.description || ''}
+                  onChange={event => updateEditing('description', event.target.value)}
+                  placeholder="Brief description of this brand or category..."
+                />
+              </FieldSection>
+
+              <FieldSection title="Banner / Image" description="The banner remains compact here; framing opens in the shared image placement dialog.">
+                <ImageUploader
+                  label="Category image"
+                  value={editing.image}
+                  onChange={url => updateEditing('image', url)}
+                  removable
+                  onRemove={() => updateEditing('image', '')}
+                  folder="categories"
+                  frameAspect={4 / 3}
+                  defaultFit="cover"
+                  frameTitle="Adjust Category Image"
+                  frameHint="Position the image inside the category card frame."
+                  previewAspectClass="aspect-[4/3]"
+                  renderFrameContextPreview={media => (
+                    <CompactCategoryPreview category={{ ...previewCategory, image: media }} productCount={editing.id ? countForCategory(editing.id) : 0} />
+                  )}
+                  frameContextTitle="Category Card"
+                  frameContextHint="Check the compact catalog card while framing."
+                />
+              </FieldSection>
+            </div>
+
+            <aside className="min-w-0 xl:sticky xl:top-0 xl:self-start">
+              <FieldSection title="Compact Preview" description="A small admin preview, not a dominating public card.">
+                <CompactCategoryPreview category={previewCategory} productCount={editing.id ? countForCategory(editing.id) : 0} />
+              </FieldSection>
+            </aside>
+          </div>
+        )}
+      </Modal>
+
       {!isDesktop && (
-        <Modal open={showEmoji} onClose={() => setShowEmoji(false)} title="Choose an icon" size="sm">
-          {emojiPickerBody}
+        <Modal open={iconPickerOpen} onClose={() => setIconPickerOpen(false)} title="Choose an icon" size="sm">
+          {iconPickerBody}
         </Modal>
       )}
+
+      <AdminConfirmDialog
+        open={!!deleteTarget}
+        title="Delete Category?"
+        description={deleteTarget ? `This will permanently remove ${deleteTarget.name}.` : undefined}
+        tone="danger"
+        confirmLabel="Delete"
+        loading={deleting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => void confirmDelete()}
+      />
     </div>
   )
 }
-
-
