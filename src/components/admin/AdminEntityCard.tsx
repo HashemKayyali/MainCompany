@@ -166,12 +166,12 @@ export default function AdminEntityCard({
 
             <div className="min-w-0 space-y-1.25">
               <div className={cn('min-w-0 space-y-0.5', titleBlockClassName)}>
-                <div className={cn(titleClampClass, 'font-sans text-[1rem] font-bold leading-tight', isDark ? 'text-white' : 'text-gray-900')}>
+                <div dir="auto" className={cn(titleClampClass, 'font-sans text-[1rem] font-bold leading-tight', isDark ? 'text-white' : 'text-gray-900')}>
                   <BidiText>{title}</BidiText>
                 </div>
 
                 {subtitle && (
-                  <p className={cn(subtitleClampClass, 'max-w-[54ch] text-[10.5px] leading-[1.45]', isDark ? 'text-purple-100/62' : 'text-gray-500')}>
+                  <p dir="auto" className={cn(subtitleClampClass, 'max-w-[54ch] text-[10.5px] leading-[1.45]', isDark ? 'text-purple-100/62' : 'text-gray-500')}>
                     <BidiText>{subtitle}</BidiText>
                   </p>
                 )}
@@ -195,7 +195,7 @@ export default function AdminEntityCard({
                   <div className={cn('text-[8px] font-mono font-semibold uppercase tracking-[0.12em]', isDark ? 'text-cyan-100/38' : 'text-gray-400')}>
                     {fact.label}
                   </div>
-                  <div className={cn('mt-1 min-w-0 truncate text-[11.25px] font-semibold leading-tight', isDark ? 'text-white' : 'text-gray-800')}>
+                  <div dir="auto" className={cn('mt-1 min-w-0 truncate text-[11.25px] font-semibold leading-tight', isDark ? 'text-white' : 'text-gray-800')}>
                     {fact.value}
                   </div>
                 </div>
@@ -263,12 +263,12 @@ export default function AdminEntityCard({
 
         <div className={cn('relative flex min-w-0 flex-1 flex-col gap-3 p-3.5', bodyClassName)}>
           <div className={cn('space-y-1', titleBlockClassName)}>
-          <div className={cn(gridTitleClampClass, 'font-sans text-[1.02rem] font-extrabold leading-tight tracking-[-0.01em]', isDark ? 'text-white' : 'text-[#07041a]')}>
+          <div dir="auto" className={cn(gridTitleClampClass, 'font-sans text-[1.02rem] font-extrabold leading-tight tracking-[-0.01em]', isDark ? 'text-white' : 'text-[#07041a]')}>
             <BidiText>{title}</BidiText>
           </div>
 
           {subtitle && (
-            <p className={cn(gridSubtitleClampClass, 'max-w-3xl text-[11.5px] font-medium leading-[1.5]', isDark ? 'text-purple-100/64' : 'text-[#31195f]')}>
+            <p dir="auto" className={cn(gridSubtitleClampClass, 'max-w-3xl text-[11.5px] font-medium leading-[1.5]', isDark ? 'text-purple-100/64' : 'text-[#31195f]')}>
               <BidiText>{subtitle}</BidiText>
             </p>
           )}
@@ -290,7 +290,7 @@ export default function AdminEntityCard({
                 <div className={cn('text-[8.5px] font-mono font-bold uppercase tracking-[0.14em]', gridFactLabelClass)}>
                   {fact.label}
                 </div>
-                <div className={cn('mt-1 min-w-0 truncate text-[0.92rem] font-sans font-bold leading-tight', gridFactValueClass)}>
+                <div dir="auto" className={cn('mt-1 min-w-0 truncate text-[0.92rem] font-sans font-bold leading-tight', gridFactValueClass)}>
                   {fact.value}
                 </div>
               </div>

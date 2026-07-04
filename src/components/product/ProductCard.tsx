@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Play } from 'lucide-react'
 import { useCategoriesData } from '../../contexts/DataContext'
+import { useI18n } from '../../contexts/LanguageContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { Product } from '../../data/products/types'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
@@ -39,6 +40,7 @@ const ProductCard = memo(function ProductCard({
   compact?: boolean
 }) {
   const { isDark } = useTheme()
+  const { dir, translateText } = useI18n()
   const navigate = useNavigate()
   const { categories = [] } = useCategoriesData()
   const { perfLow } = usePerfMode()
@@ -70,8 +72,8 @@ const ProductCard = memo(function ProductCard({
   const showRentalPrice = product.rentalEnabled !== false && product.showPrice !== false
   const priceDisplay = showRentalPrice
     ? `${product.rentalPricePerDay} ${product.currency}`
-    : 'Reviewed pricing'
-  const priceLabel = showRentalPrice ? 'Per Day' : 'Reviewed Pricing'
+    : translateText('Reviewed pricing')
+  const priceLabel = translateText(showRentalPrice ? 'Per Day' : 'Reviewed Pricing')
 
   // Pause and reset the video when the card scrolls out of the viewport.
   // Never autoplay — on desktop, hover events handle playback; on mobile, no autoplay at all.
@@ -164,7 +166,7 @@ const ProductCard = memo(function ProductCard({
 
       <Link
         to={`/products/${product.slug}`}
-        aria-label={`Open ${product.name}`}
+        aria-label={`${translateText('Open')} ${product.name}`}
         draggable={false}
         className="relative z-10 block aspect-[4/3] w-full shrink-0 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2"
       >
@@ -215,11 +217,11 @@ const ProductCard = memo(function ProductCard({
               'inline-flex items-center rounded-[8px] border border-cyan-400/40 bg-cyan-500/90 px-2.5 py-1 text-[9.5px] font-bold tracking-wide text-white shadow-[0_4px_12px_rgba(34,211,238,0.3)]',
               reducedCardEffects ? '' : 'backdrop-blur-sm'
             )}>
-              Featured
+              {translateText('Featured')}
             </span>
           )}
           {product.badge && (
-            <span className={cn(
+            <span dir="ltr" lang="en" data-i18n-skip className={cn(
               'inline-flex items-center rounded-[8px] border border-white/20 bg-black/50 px-2.5 py-1 text-[9.5px] font-medium text-white/90',
               reducedCardEffects ? '' : 'backdrop-blur-sm'
             )}>
@@ -272,7 +274,7 @@ const ProductCard = memo(function ProductCard({
                 : 'bg-violet-50 text-violet-700 ring-1 ring-violet-200/80'
             )}
           >
-            <bdi dir="auto">{categoryLabel}</bdi>
+            <bdi dir="ltr" lang="en">{categoryLabel}</bdi>
           </span>
         </div>
 
@@ -283,10 +285,11 @@ const ProductCard = memo(function ProductCard({
             className="outline-none focus-visible:underline"
           >
             <h3
-              dir="auto"
+              dir="ltr"
+              lang="en"
               data-i18n-skip
               className={cn(
-                'font-sans font-bold leading-tight tracking-[-0.028em] line-clamp-1 transition-colors duration-300',
+                'product-data-ltr font-sans font-bold leading-tight tracking-[-0.028em] line-clamp-1 transition-colors duration-300',
                 compact ? 'text-[1rem]' : 'text-[0.98rem] sm:text-[1.16rem]',
                 isDark ? 'text-white group-hover:text-violet-100' : 'text-slate-900 group-hover:text-violet-900'
               )}
@@ -295,12 +298,13 @@ const ProductCard = memo(function ProductCard({
             </h3>
           </Link>
           <p
-            dir="auto"
+            dir="ltr"
+            lang="en"
             data-i18n-skip
             className={cn(
               compact
-                ? 'mt-1 text-[10.5px] leading-[1.45] line-clamp-1'
-                : 'mt-1 text-[11px] leading-[1.55] line-clamp-2 sm:mt-1.5 sm:text-[12.5px] sm:leading-[1.6]',
+                ? 'product-data-ltr mt-1 text-[10.5px] leading-[1.45] line-clamp-1'
+                : 'product-data-ltr mt-1 text-[11px] leading-[1.55] line-clamp-2 sm:mt-1.5 sm:text-[12.5px] sm:leading-[1.6]',
               isDark ? 'text-slate-400/88' : 'text-slate-500'
             )}
           >
@@ -317,6 +321,7 @@ const ProductCard = memo(function ProductCard({
         >
           <div>
             <div
+              dir={dir}
               className={cn(
                 'font-semibold uppercase tracking-[0.12em]',
                 compact ? 'text-[8.5px]' : 'text-[10px]',
@@ -326,6 +331,7 @@ const ProductCard = memo(function ProductCard({
               {priceLabel}
             </div>
             <div
+              dir={showRentalPrice ? 'ltr' : dir}
               className={cn(
                 'mt-0.5 font-sans font-black tracking-[-0.04em]',
                 compact ? 'text-[0.92rem]' : 'text-[0.95rem] sm:text-[1.18rem]',

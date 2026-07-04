@@ -27,6 +27,7 @@ import {
   usePartsData,
   useProductsData,
 } from '../contexts/DataContext'
+import { useI18n } from '../contexts/LanguageContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { social } from '../data/social'
 import { usePageMeta } from '../hooks/usePageMeta'
@@ -141,6 +142,7 @@ export default function ProductDetailsPage() {
   const { categories } = useCategoriesData()
   const { loading } = useDataMeta()
   const { isDark } = useTheme()
+  const { dir, translateText } = useI18n()
   const [includedOpen, setIncludedOpen] = useState(false)
 
   const product = getProductBySlug(slug || '')
@@ -246,13 +248,14 @@ export default function ProductDetailsPage() {
   }
 
   return (
-    <section className="site-section bg-transparent">
+    <section className="site-section product-details-page bg-transparent" data-i18n-manual>
       <div className="site-container">
         <motion.nav
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease }}
-          aria-label="breadcrumb"
+          aria-label={translateText('Breadcrumb')}
+          dir={dir}
           className="mb-6 flex min-w-0 flex-wrap items-center gap-2"
         >
           <Link
@@ -265,17 +268,17 @@ export default function ProductDetailsPage() {
             )}
           >
             <ArrowLeft size={11} strokeWidth={2.5} />
-            All Services
+            {translateText('All Services')}
           </Link>
           <ChevronRight size={11} className={isDark ? 'text-white/18' : 'text-slate-300'} />
-          <span className={cn('text-[11px] font-medium', mutedText)}>{categoryName}</span>
+          <span dir="ltr" lang="en" className={cn('product-data-ltr text-[11px] font-medium', mutedText)}>{categoryName}</span>
           <ChevronRight size={11} className={isDark ? 'text-white/18' : 'text-slate-300'} />
-          <span dir="auto" data-i18n-skip className={cn('max-w-[220px] truncate text-[11px] font-semibold sm:max-w-sm', isDark ? 'text-slate-300' : 'text-slate-700')}>
+          <span dir="ltr" lang="en" className={cn('product-data-ltr max-w-[220px] truncate text-[11px] font-semibold sm:max-w-sm', isDark ? 'text-slate-300' : 'text-slate-700')}>
             {product.name}
           </span>
         </motion.nav>
 
-        <div className="grid gap-7 lg:grid-cols-[minmax(0,42%)_minmax(0,1fr)_280px] lg:items-start xl:grid-cols-[minmax(460px,34vw)_minmax(0,1fr)_320px] xl:gap-8 2xl:grid-cols-[minmax(560px,36vw)_minmax(0,1fr)_330px]">
+        <div dir="ltr" className="grid gap-7 lg:grid-cols-[minmax(0,42%)_minmax(0,1fr)_280px] lg:items-start xl:grid-cols-[minmax(460px,34vw)_minmax(0,1fr)_320px] xl:gap-8 2xl:grid-cols-[minmax(560px,36vw)_minmax(0,1fr)_330px]">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -289,19 +292,21 @@ export default function ProductDetailsPage() {
             />
           </motion.div>
 
-          <div className="contents lg:order-2 lg:block lg:min-w-0">
+          <div dir={dir} className="contents lg:order-2 lg:block lg:min-w-0">
             <motion.main
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.58, delay: 0.04, ease }}
               className="order-1 min-w-0"
             >
-              <div className={cn('border-b pb-5', divider)}>
+              <div dir="ltr" className={cn('product-data-ltr-row border-b pb-5', divider)}>
                 <div className="mb-3 flex flex-wrap items-center gap-2">
                   {!!product.badge?.trim() && (
                     <span
+                      dir="ltr"
+                      lang="en"
                       className={cn(
-                        'inline-flex items-center gap-1 rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_4px_14px_rgba(0,0,0,0.18)]',
+                        'product-data-ltr inline-flex items-center gap-1 rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_4px_14px_rgba(0,0,0,0.18)]',
                         String(product.badgeColor || '').includes('linear-gradient') ? '' : `bg-gradient-to-r ${product.badgeColor}`
                       )}
                       style={
@@ -315,8 +320,10 @@ export default function ProductDetailsPage() {
                     </span>
                   )}
                   <span
+                    dir="ltr"
+                    lang="en"
                     className={cn(
-                      'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[9.5px] font-bold uppercase tracking-[0.14em]',
+                      'product-data-ltr inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[9.5px] font-bold uppercase tracking-[0.14em]',
                       isDark
                         ? 'bg-violet-500/[0.15] text-violet-300/92 ring-1 ring-violet-400/[0.2]'
                         : 'bg-violet-50 text-violet-700 ring-1 ring-violet-200/70'
@@ -328,10 +335,10 @@ export default function ProductDetailsPage() {
                 </div>
 
                 <h1
-                  dir="auto"
-                  data-i18n-skip
+                  dir="ltr"
+                  lang="en"
                   className={cn(
-                    'font-display text-[2rem] font-black leading-[1.02] tracking-[-0.05em] sm:text-[2.45rem] lg:text-[2.2rem] xl:text-[2.55rem]',
+                    'product-data-ltr font-display text-[2rem] font-black leading-[1.02] tracking-[-0.05em] sm:text-[2.45rem] lg:text-[2.2rem] xl:text-[2.55rem]',
                     headingText
                   )}
                 >
@@ -340,10 +347,10 @@ export default function ProductDetailsPage() {
 
                 {!!leadDescription && (
                   <p
-                    dir="auto"
-                    data-i18n-skip
+                    dir="ltr"
+                    lang="en"
                     className={cn(
-                      'mt-3.5 max-w-[68ch] text-[15px] font-medium leading-[1.7] sm:text-[16px]',
+                      'product-data-ltr mt-3.5 max-w-[68ch] text-[15px] font-medium leading-[1.7] sm:text-[16px]',
                       isDark ? 'text-slate-200/88' : 'text-slate-700'
                     )}
                   >
@@ -361,7 +368,7 @@ export default function ProductDetailsPage() {
             >
               {aboutBlocks.length > 0 && (
                 <DetailSection
-                  title="About this service"
+                  title={translateText('About this service')}
                   isDark={isDark}
                 >
                   <div className="space-y-4">
@@ -369,7 +376,9 @@ export default function ProductDetailsPage() {
                       block.type === 'paragraph' ? (
                         <p
                           key={index}
-                          className={cn('max-w-[78ch] text-[14px] leading-[1.85] sm:text-[14.5px]', bodyText)}
+                          dir="ltr"
+                          lang="en"
+                          className={cn('product-data-ltr max-w-[78ch] text-[14px] leading-[1.85] sm:text-[14.5px]', bodyText)}
                         >
                           {block.text}
                         </p>
@@ -384,15 +393,18 @@ export default function ProductDetailsPage() {
                           )}
                         >
                           <div
+                            dir={block.title ? 'ltr' : dir}
+                            lang={block.title ? 'en' : undefined}
                             className={cn(
                               'mb-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em]',
+                              block.title && 'product-data-ltr',
                               isDark ? 'text-violet-300' : 'text-violet-600'
                             )}
                           >
                             <Sparkles size={11} strokeWidth={2.4} />
-                            {block.title || 'Highlights'}
+                            {block.title || translateText('Highlights')}
                           </div>
-                          <div className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
+                          <div dir="ltr" className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
                             {block.items.map(item => (
                               <div key={item} className="flex items-start gap-2">
                                 <span
@@ -401,7 +413,7 @@ export default function ProductDetailsPage() {
                                     isDark ? 'bg-violet-400/80' : 'bg-violet-500'
                                   )}
                                 />
-                                <span className={cn('text-[13px] leading-[1.6]', bodyText)}>
+                                <span dir="ltr" lang="en" className={cn('product-data-ltr text-[13px] leading-[1.6]', bodyText)}>
                                   {item}
                                 </span>
                               </div>
@@ -416,7 +428,7 @@ export default function ProductDetailsPage() {
 
               {product.quickOptions.length > 0 && (
                 <DetailSection
-                  title="Choose your setup"
+                  title={translateText('Choose your setup')}
                   isDark={isDark}
                 >
                   <ProductOptions options={product.quickOptions} />
@@ -425,7 +437,7 @@ export default function ProductDetailsPage() {
 
               {(product.features.left.length > 0 || product.features.right.length > 0) && (
                 <DetailSection
-                  title="Service Details"
+                  title={translateText('Service Details')}
                   isDark={isDark}
                 >
                   <ProductFeatures features={product.features} />
@@ -434,12 +446,12 @@ export default function ProductDetailsPage() {
 
               {product.notes.length > 0 && (
                 <DetailSection
-                  title="Before requesting"
+                  title={translateText('Before requesting')}
                   isDark={isDark}
                 >
                   <div
                     className={cn(
-                      'space-y-3 rounded-[16px] border p-4',
+                      'product-data-ltr-row space-y-3 rounded-[16px] border p-4',
                       isDark
                         ? 'border-amber-400/[0.14] bg-amber-400/[0.04]'
                         : 'border-amber-200/70 bg-amber-50/60'
@@ -457,7 +469,7 @@ export default function ProductDetailsPage() {
                         >
                           {index + 1}
                         </span>
-                        <p className={cn('text-[13px] leading-[1.65]', bodyText)}>{note}</p>
+                        <p dir="ltr" lang="en" className={cn('product-data-ltr text-[13px] leading-[1.65]', bodyText)}>{note}</p>
                       </div>
                     ))}
                   </div>
@@ -466,10 +478,10 @@ export default function ProductDetailsPage() {
 
               {parts.length > 0 && (
                 <DetailSection
-                  title="Parts and accessories"
+                  title={translateText('Parts and accessories')}
                   isDark={isDark}
                 >
-                  <div className={cn('divide-y', subtleDivider)}>
+                  <div dir="ltr" className={cn('product-data-ltr-row divide-y', subtleDivider)}>
                     {parts.map(part => (
                       <div key={part.id} className="flex gap-3 py-3 first:pt-0 last:pb-0">
                         <div
@@ -497,19 +509,19 @@ export default function ProductDetailsPage() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-3">
-                            <h3 className={cn('truncate text-[13px] font-bold', headingText)}>
+                            <h3 dir="ltr" lang="en" className={cn('product-data-ltr truncate text-[13px] font-bold', headingText)}>
                               {part.name}
                             </h3>
                             <span className={cn('shrink-0 text-[12px] font-black', headingText)}>
-                              {part.showPrice === false ? 'Request' : `${part.price} ${part.currency}`}
+                              {part.showPrice === false ? translateText('Request') : `${part.price} ${part.currency}`}
                             </span>
                           </div>
-                          <p className={cn('mt-1 line-clamp-2 text-[11.5px] leading-[1.5]', mutedText)}>
+                          <p dir="ltr" lang="en" className={cn('product-data-ltr mt-1 line-clamp-2 text-[11.5px] leading-[1.5]', mutedText)}>
                             {part.description}
                           </p>
                           <span className={cn('mt-2 inline-flex items-center gap-1.5 text-[10.5px] font-semibold', part.inStock ? 'text-emerald-500' : 'text-red-500')}>
                             <span className={cn('h-1.5 w-1.5 rounded-full', part.inStock ? 'bg-emerald-400' : 'bg-red-400')} />
-                            {part.inStock ? 'In Stock' : 'Out of Stock'}
+                            {translateText(part.inStock ? 'In Stock' : 'Out of Stock')}
                           </span>
                         </div>
                       </div>
@@ -522,6 +534,7 @@ export default function ProductDetailsPage() {
 
           <motion.aside
             id="product-commerce-actions"
+            dir={dir}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.58, delay: 0.08, ease }}
@@ -542,9 +555,9 @@ export default function ProductDetailsPage() {
               {showPrice ? (
                 <>
                   <div className={cn('text-[9.5px] font-bold uppercase tracking-[0.18em]', mutedText)}>
-                    Starting per day
+                    {translateText('Starting per day')}
                   </div>
-                  <div className="mt-1.5 flex items-baseline gap-1.5">
+                  <div dir="ltr" className="mt-1.5 flex items-baseline gap-1.5">
                     <span className={cn('font-display text-[2.1rem] font-black leading-none tracking-[-0.04em]', headingText)}>
                       {product.rentalPricePerDay}
                     </span>
@@ -558,10 +571,10 @@ export default function ProductDetailsPage() {
                   </span>
                   <div className="min-w-0">
                     <div className={cn('font-display text-[1.3rem] font-black leading-tight tracking-[-0.03em]', headingText)}>
-                      Reviewed pricing
+                      {translateText('Reviewed pricing')}
                     </div>
                     <div className={cn('text-[11px] font-medium', mutedText)}>
-                      Tailored quote for your event
+                      {translateText('Tailored quote for your event')}
                     </div>
                   </div>
                 </div>
@@ -578,7 +591,7 @@ export default function ProductDetailsPage() {
                           : 'bg-violet-100/80 text-violet-700 ring-1 ring-violet-200/70'
                       )}
                     >
-                      Rental
+                      {translateText('Rental')}
                     </span>
                   )}
                   {saleEnabled && (
@@ -590,7 +603,7 @@ export default function ProductDetailsPage() {
                           : 'bg-fuchsia-100/70 text-fuchsia-700 ring-1 ring-fuchsia-200/70'
                       )}
                     >
-                      Purchase quote
+                      {translateText('Purchase quote')}
                     </span>
                   )}
                 </div>
@@ -616,11 +629,11 @@ export default function ProductDetailsPage() {
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
                 </svg>
-                Ask on WhatsApp
+                {translateText('Ask on WhatsApp')}
               </a>
 
               <p className={cn('mt-3.5 text-center text-[10.75px] leading-[1.6]', mutedText)}>
-                Every request is reviewed first — we confirm availability, pricing, and delivery before anything is final.
+                {translateText('Every request is reviewed first — we confirm availability, pricing, and delivery before anything is final.')}
               </p>
             </div>
 
@@ -635,7 +648,7 @@ export default function ProductDetailsPage() {
                 <div key={label} className="flex flex-col items-center gap-1.5 px-2 py-3.5 text-center">
                   <Icon size={15} strokeWidth={2.2} className={isDark ? 'text-violet-300/85' : 'text-violet-600'} />
                   <span className={cn('text-[9.75px] font-bold leading-tight', isDark ? 'text-slate-300/88' : 'text-slate-600')}>
-                    {label}
+                    {translateText(label)}
                   </span>
                 </div>
               ))}
@@ -647,7 +660,7 @@ export default function ProductDetailsPage() {
                 onClick={() => setIncludedOpen(value => !value)}
                 className={cn('flex w-full items-center justify-between text-left text-[11.5px] font-bold uppercase tracking-[0.14em]', mutedText)}
               >
-                What's included
+                {translateText("What's included")}
                 <ChevronDown size={14} className={cn('transition-transform duration-300', includedOpen && 'rotate-180')} />
               </button>
               <AnimatePresence>
@@ -663,7 +676,7 @@ export default function ProductDetailsPage() {
                       {INCLUDED_ITEMS.map(item => (
                         <div key={item} className="flex items-center gap-2.5">
                           <Check size={12} strokeWidth={3} className={isDark ? 'text-cyan-400' : 'text-violet-600'} />
-                          <span className={cn('text-[12px]', bodyText)}>{item}</span>
+                          <span className={cn('text-[12px]', bodyText)}>{translateText(item)}</span>
                         </div>
                       ))}
                     </div>
@@ -692,18 +705,22 @@ export default function ProductDetailsPage() {
             )}
           >
             <div className="min-w-0 flex-1">
-              <div className={cn('truncate text-[13.5px] font-bold', headingText)}>
+              <div dir="ltr" lang="en" className={cn('product-data-ltr truncate text-[13.5px] font-bold', headingText)}>
                 {product.name}
               </div>
               <div className={cn('text-[12px] font-bold tracking-tight', showPrice ? (isDark ? 'text-cyan-400' : 'text-violet-600') : mutedText)}>
-                {showPrice ? `From ${product.rentalPricePerDay} ${product.currency}/day` : 'Reviewed pricing available'}
+                {showPrice
+                  ? (dir === 'rtl'
+                      ? `ابتداء من ${product.rentalPricePerDay} ${product.currency} / يوم`
+                      : `From ${product.rentalPricePerDay} ${product.currency}/day`)
+                  : translateText('Reviewed pricing available')}
               </div>
             </div>
             <a
               href="#product-commerce-actions"
               className="btn-primary shrink-0 !min-h-[46px] !rounded-[15px] !px-6 !text-[12px]"
             >
-              Get Options
+              {translateText('Get Options')}
             </a>
           </div>
         </div>

@@ -22,7 +22,8 @@ const HERO_BACKGROUND_PATHS = new Set([
 export default function PageContainer({ children }: { children: ReactNode }) {
   const { pathname } = useLocation()
   const { perfLow, saveData } = usePerfMode()
-  useSmoothScroll()
+  const isProductDetailsRoute = /^\/products\/[^/]+\/?$/.test(pathname)
+  useSmoothScroll(!isProductDetailsRoute)
 
   const isHome = pathname === '/'
   const showHeroBackground = HERO_BACKGROUND_PATHS.has(pathname)

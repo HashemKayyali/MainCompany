@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Maximize2, Play, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useI18n } from '../../contexts/LanguageContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { cn } from '../../utils/cn'
 import FramedImage from '../ui/FramedImage'
@@ -24,6 +25,7 @@ const thumbnailMedia =
 
 export default function ProductGallery({ images, name, videoUrl }: Props) {
   const { isDark } = useTheme()
+  const { translateText } = useI18n()
 
   const hasVideo = !!videoUrl
   const totalItems = (hasVideo ? 1 : 0) + images.length
@@ -72,7 +74,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
                   <button
                     type="button"
                     onClick={() => setZoomOpen(false)}
-                    aria-label="Close enlarged image"
+                    aria-label={translateText('Close enlarged image')}
                     className="absolute right-2 top-2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/60 text-white shadow-lg transition hover:bg-black/80 sm:right-4 sm:top-4"
                   >
                     <X size={18} strokeWidth={2.3} />
@@ -101,7 +103,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
 
   return (
     <>
-    <div className="grid gap-3 lg:grid-cols-[94px_minmax(0,1fr)] lg:items-start">
+    <div dir="ltr" className="grid gap-3 lg:grid-cols-[94px_minmax(0,1fr)] lg:items-start">
       <div
         className={cn(
           'order-2 flex gap-2 overflow-x-auto pb-2 lg:order-1 lg:max-h-[560px] lg:flex-col lg:overflow-y-auto lg:overflow-x-hidden lg:pb-0 lg:pr-1',
@@ -110,13 +112,13 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
           '[&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent',
           '[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-violet-300/60'
         )}
-        aria-label="Service media thumbnails"
+        aria-label={translateText('Service media thumbnails')}
       >
         {hasVideo && (
           <button
             type="button"
             onClick={() => navigate(0)}
-            aria-label="Play video"
+            aria-label={translateText('Play video')}
             className={cn(
               'relative h-[64px] w-[86px] shrink-0 overflow-hidden rounded-[12px] border bg-white transition-all duration-250',
               active === 0
@@ -152,7 +154,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
               key={`${img}-${index}`}
               type="button"
               onClick={() => navigate(itemIndex)}
-              aria-label={`View photo ${index + 1}`}
+              aria-label={`${translateText('View photo')} ${index + 1}`}
               className={cn(
                 'relative h-[64px] w-[86px] shrink-0 overflow-hidden rounded-[12px] border bg-white transition-all duration-250',
                 isActive
@@ -218,7 +220,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
                 )}
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
-                Live Preview
+                {translateText('Live Preview')}
               </div>
             </motion.div>
           ) : (
@@ -257,8 +259,8 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
           <button
             type="button"
             onClick={() => setZoomOpen(true)}
-            aria-label="Enlarge image"
-            title="Enlarge image"
+            aria-label={translateText('Enlarge image')}
+            title={translateText('Enlarge image')}
             className={cn(
               'absolute right-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-250',
               isDark

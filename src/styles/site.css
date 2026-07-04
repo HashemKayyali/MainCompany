@@ -7,7 +7,8 @@ html.lenis-root body {
 }
 
 [data-native-scroll] {
-  overscroll-behavior: contain;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
 }
 
 /* ── Focus Styles ── */
@@ -1048,4 +1049,41 @@ html[dir='rtl'] [data-i18n-skip] * {
 html[dir='rtl'] [data-i18n-skip][dir='auto'],
 html[dir='rtl'] [data-i18n-skip][dir='ltr'] {
   text-align: start;
+}
+
+/* ── Natural bidi direction for mixed-language pages ──
+   The language bridge marks text blocks from their own first strong character.
+   English database content therefore remains LTR inside the Arabic shell while
+   Arabic UI copy stays RTL. The isolate keeps punctuation and adjacent badges
+   from borrowing the surrounding page direction. */
+html[dir='rtl'] [data-bidi-managed='true'][dir='ltr'] {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+html[dir='rtl'] [data-bidi-managed='true'][dir='rtl'] {
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+
+
+/* ── Product details mixed-direction contract ──
+   Database product content is English by design, while the surrounding UI can
+   be Arabic. Direction is explicit instead of being inferred after paint. */
+.product-details-page .product-data-ltr {
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  text-align: left !important;
+}
+
+.product-details-page .product-data-ltr-row {
+  direction: ltr !important;
+}
+
+.product-details-page [aria-label='Similar services scroll row'],
+.product-details-page [data-product-suggestions-track] {
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  -webkit-overflow-scrolling: touch;
 }

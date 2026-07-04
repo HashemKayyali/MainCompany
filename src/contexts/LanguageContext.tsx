@@ -42,10 +42,117 @@ function readInitialLocale(): Locale {
 const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA'])
 const TRANSLATABLE_ATTRS = ['placeholder', 'aria-label', 'title', 'alt'] as const
 
+// Text blocks should follow the language of their own content rather than the
+// page shell. This matters in Arabic mode because product/category data is
+// intentionally stored in English and must stay visually LTR.
+const NATURAL_DIRECTION_BLOCK_SELECTOR = [
+  'p',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'li',
+  'dt',
+  'dd',
+  'blockquote',
+  'figcaption',
+  'td',
+  'th',
+  '[data-bidi-auto]',
+].join(',')
+
+const NATURAL_DIRECTION_LEAF_TAGS = new Set([
+  'DIV',
+  'SPAN',
+  'SMALL',
+  'STRONG',
+  'EM',
+  'B',
+  'I',
+  'A',
+  'BUTTON',
+  'BDI',
+])
+
+const ARABIC_STRONG_RE = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\ufb50-\ufdff\ufe70-\ufeff]/
+const LATIN_STRONG_RE = /[A-Za-z\u00c0-\u024f]/
+
+function getNaturalDirection(value: string): 'ltr' | 'rtl' | null {
+  for (const character of value) {
+    if (ARABIC_STRONG_RE.test(character)) return 'rtl'
+    if (LATIN_STRONG_RE.test(character)) return 'ltr'
+  }
+  return null
+}
+
+function hasMeaningfulDirectText(element: Element) {
+  return Array.from(element.childNodes).some(
+    node => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent?.trim())
+  )
+}
+
+function isBidiManaged(element: HTMLElement) {
+  return element.dataset.bidiManaged === 'true'
+}
+
+function canManageDirection(element: HTMLElement) {
+  const currentDir = element.getAttribute('dir')
+  if (element.hasAttribute('data-bidi-fixed')) return false
+  if ((currentDir === 'ltr' || currentDir === 'rtl') && !isBidiManaged(element)) return false
+  return true
+}
+
+function applyNaturalTextDirections() {
+  if (typeof document === 'undefined' || !document.body) return
+
+  const candidates = new Set<HTMLElement>()
+
+  document.body
+    .querySelectorAll<HTMLElement>(NATURAL_DIRECTION_BLOCK_SELECTOR)
+    .forEach(element => candidates.add(element))
+
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT, {
+    acceptNode(node) {
+      const element = node as HTMLElement
+      if (!NATURAL_DIRECTION_LEAF_TAGS.has(element.tagName)) {
+        return NodeFilter.FILTER_SKIP
+      }
+
+      const isLeafText = element.childElementCount === 0 && hasMeaningfulDirectText(element)
+      const wrapsSingleBidi =
+        element.childElementCount === 1 &&
+        element.firstElementChild?.tagName === 'BDI' &&
+        !hasMeaningfulDirectText(element)
+
+      return isLeafText || wrapsSingleBidi
+        ? NodeFilter.FILTER_ACCEPT
+        : NodeFilter.FILTER_SKIP
+    },
+  })
+
+  while (walker.nextNode()) candidates.add(walker.currentNode as HTMLElement)
+
+  for (const element of candidates) {
+    if (element.closest('[data-i18n-manual]')) continue
+    if (!canManageDirection(element)) continue
+    const direction = getNaturalDirection(element.textContent ?? '')
+    if (!direction) continue
+
+    if (element.getAttribute('dir') !== direction) element.setAttribute('dir', direction)
+    if (!isBidiManaged(element)) element.dataset.bidiManaged = 'true'
+  }
+
+  document.body
+    .querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input:not([dir]), textarea:not([dir])')
+    .forEach(element => element.setAttribute('dir', 'auto'))
+}
+
 function shouldSkipElement(element: Element | null) {
   if (!element) return true
   if (SKIP_TAGS.has(element.tagName)) return true
-  if (element.closest('[data-i18n-skip]')) return true
+  if (element.closest('[data-i18n-skip], [data-i18n-manual]')) return true
   if (element instanceof HTMLElement && element.isContentEditable) return true
   return false
 }
@@ -121,6 +228,8 @@ function DocumentI18nBridge({ locale }: { locale: Locale }) {
         }
       }
     }
+
+    applyNaturalTextDirections()
   }, [locale])
 
   const scheduleApply = useCallback(() => {
@@ -137,7 +246,16 @@ function DocumentI18nBridge({ locale }: { locale: Locale }) {
 
     if (typeof document === 'undefined' || !document.body) return undefined
     observerRef.current?.disconnect()
-    observerRef.current = new MutationObserver(scheduleApply)
+    observerRef.current = new MutationObserver(mutations => {
+      const needsApply = mutations.some(mutation => {
+        const target = mutation.target instanceof Element
+          ? mutation.target
+          : mutation.target.parentElement
+        return !target?.closest('[data-i18n-manual]')
+      })
+
+      if (needsApply) scheduleApply()
+    })
     observerRef.current.observe(document.body, {
       subtree: true,
       childList: true,

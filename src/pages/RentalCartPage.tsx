@@ -13,6 +13,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import FramedImage from '../components/ui/FramedImage'
+import ThemedDatePicker from '../components/ui/ThemedDatePicker'
 import { useDialog } from '../contexts/DialogContext'
 import { useI18n } from '../contexts/LanguageContext'
 import { useRentalCart } from '../contexts/RentalCartContext'
@@ -84,7 +85,7 @@ function StatusShell({ children }: { children: ReactNode }) {
   )
 }
 
-// ── Date field with calendar icon + native picker ────────────────────────────
+// ── Date field with themed calendar picker ─────────────────────────────────────
 function DateField({
   label,
   value,
@@ -98,30 +99,14 @@ function DateField({
   disabled?: boolean
   onChange: (value: string) => void
 }) {
-  const { dir, translateText } = useI18n()
-
   return (
-    <div>
-      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#4b3a63]">
-        {translateText(label)}
-      </label>
-      <div className="relative">
-        <CalendarDays
-          size={15}
-          strokeWidth={2}
-          className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-[#7126e3]"
-        />
-        <input
-          type="date"
-          lang={dir === 'rtl' ? 'ar-JO' : 'en-US'}
-          value={value}
-          min={min}
-          disabled={disabled}
-          onChange={event => onChange(event.target.value)}
-          className="form-field !ps-10 disabled:cursor-not-allowed disabled:opacity-55"
-        />
-      </div>
-    </div>
+    <ThemedDatePicker
+      label={label}
+      value={value}
+      min={min}
+      disabled={disabled}
+      onChange={onChange}
+    />
   )
 }
 
@@ -136,17 +121,20 @@ function QtyStepper({
   const { translateText } = useI18n()
 
   return (
-    <div>
-      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#4b3a63]">
+    <div className="flex w-full flex-col items-center">
+      <label className="mb-1.5 block w-full text-center text-[11px] font-semibold uppercase tracking-wide text-[#4b3a63]">
         {translateText('Quantity')}
       </label>
-      <div className="inline-flex items-center rounded-[12px] border border-violet-200 bg-white">
+      <div
+        dir="ltr"
+        className="grid grid-cols-[2.5rem_3.5rem_2.5rem] items-center overflow-hidden rounded-[12px] border border-violet-200 bg-white"
+      >
         <button
           type="button"
           aria-label={translateText('Decrease quantity')}
           disabled={quantity <= 1}
           onClick={() => onChange(quantity - 1)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-s-[12px] text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
+          className="inline-flex h-10 w-10 items-center justify-center text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
         >
           <Minus size={15} strokeWidth={2.4} />
         </button>
@@ -158,14 +146,16 @@ function QtyStepper({
           value={quantity}
           onChange={event => onChange(Number(event.target.value) || 1)}
           onBlur={event => onChange(Math.max(1, Math.min(999, Number(event.target.value) || 1)))}
-          className="h-10 w-14 border-x border-violet-200 bg-transparent text-center text-[14px] font-bold tabular-nums text-[#1a0b3d] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          dir="ltr"
+          className="h-10 w-14 border-x border-violet-200 bg-transparent px-0 !text-center text-[14px] font-bold tabular-nums text-[#1a0b3d] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          style={{ direction: 'ltr', textAlign: 'center' }}
         />
         <button
           type="button"
           aria-label={translateText('Increase quantity')}
           disabled={quantity >= 999}
           onClick={() => onChange(quantity + 1)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-e-[12px] text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
+          className="inline-flex h-10 w-10 items-center justify-center text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
         >
           <Plus size={15} strokeWidth={2.4} />
         </button>
@@ -659,8 +649,8 @@ export default function RentalCartPage() {
                 </div>
 
                 <div className="mt-3 flex items-end gap-2">
-                  <span className="font-display text-5xl font-black leading-none">
-                    <span className="text-glow">{rentalCart.itemCount}</span>
+                  <span dir="ltr" className="font-display text-5xl font-black leading-none text-center">
+                    <span className="inline-block min-w-[1.1ch] text-center text-glow">{rentalCart.itemCount}</span>
                   </span>
                   <span className="pb-1 text-[0.85rem] font-medium text-[#4b3a63]">
                     {translateText(rentalCart.itemCount === 1 ? 'item' : 'items')}

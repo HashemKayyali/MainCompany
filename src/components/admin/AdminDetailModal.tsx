@@ -142,6 +142,7 @@ export default function AdminDetailModal({
                 {subtitle && (
                   <div>
                     <p
+                      dir="auto"
                       className={cn(
                         'max-w-3xl text-[13px] leading-6 text-[#4b3a63]',
                         !subtitleExpanded && 'line-clamp-3'

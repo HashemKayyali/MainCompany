@@ -23,7 +23,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
 }) {
   const { isDark } = useTheme()
   const { toast } = useToast()
-  const { t } = useI18n()
+  const { t, dir, translateText } = useI18n()
   const rentalCart = useRentalCart()
   const purchaseQuote = usePurchaseQuote()
   const [modalOpen, setModalOpen] = useState(false)
@@ -95,31 +95,31 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
             isInRentalCart ? (
               <button type="button" onClick={removeFromRentalCart} className={detailClass.remove}>
                 <X size={13} strokeWidth={2.5} className="shrink-0" />
-                <span className="min-w-0">Remove from Rental Request</span>
+                <span className="min-w-0">{translateText('Remove from Rental Request')}</span>
               </button>
             ) : (
               <button type="button" onClick={addToRentalCart} className={detailClass.primary}>
                 <ShoppingCart size={13} className="shrink-0" />
-                <span className="min-w-0">Add to Rental Request</span>
+                <span className="min-w-0">{translateText('Add to Rental Request')}</span>
               </button>
             )
           )}
           {saleEnabled && (
             <button type="button" onClick={() => setModalOpen(true)} className={detailClass.secondary}>
               <FileText size={13} className="shrink-0" />
-              <span className="min-w-0">Request a Purchase Quote</span>
+              <span className="min-w-0">{translateText('Request a Purchase Quote')}</span>
             </button>
           )}
 
           {showContactLink && (
             <Link to={`/contact?product=${product.slug}`} className={detailClass.secondary}>
               <MessageCircle size={13} className="shrink-0" />
-              <span className="min-w-0">Ask About This Service</span>
+              <span className="min-w-0">{translateText('Ask About This Service')}</span>
             </Link>
           )}
         </div>
 
-        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={`Purchase Quote Request for ${product.name}`} size="md">
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={dir === 'rtl' ? `${translateText('Purchase Quote Request')} — ⁦${product.name}⁩` : `Purchase Quote Request for ${product.name}`} size="md">
           <PurchaseQuoteModalBody
             product={product}
             isDark={isDark}
@@ -131,6 +131,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
             addToPurchaseDraft={addToPurchaseDraft}
             addAndReviewDraft={addAndReviewDraft}
             onClose={() => setModalOpen(false)}
+            translateText={translateText}
           />
         </Modal>
       </>
@@ -168,7 +169,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
               )}
             >
               <X size={primaryIconSize} strokeWidth={2.5} />
-              Remove from Rental Request
+              {translateText('Remove from Rental Request')}
             </button>
           ) : (
             <button
@@ -183,7 +184,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
               )}
             >
               <ShoppingCart size={primaryIconSize} />
-              Add to Rental Request
+              {translateText('Add to Rental Request')}
             </button>
           )
         )}
@@ -203,7 +204,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
                 : 'border border-slate-200/80 bg-white text-slate-600 hover:border-violet-300/60 hover:bg-violet-50/60 hover:text-violet-700'
             )}
           >
-            Service Details
+            {translateText('Service Details')}
             <ArrowRight size={secondaryIconSize} />
           </Link>
 
@@ -219,7 +220,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
               )}
             >
               <FileText size={secondaryIconSize} />
-              Request a Purchase Quote
+              {translateText('Request a Purchase Quote')}
             </button>
           )}
         </div>
@@ -236,12 +237,12 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
             )}
           >
             <MessageCircle size={secondaryIconSize} />
-            Ask
+            {translateText('Ask')}
           </Link>
         )}
       </div>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={`Purchase Quote Request for ${product.name}`} size="md">
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={dir === 'rtl' ? `${translateText('Purchase Quote Request')} — ⁦${product.name}⁩` : `Purchase Quote Request for ${product.name}`} size="md">
         <PurchaseQuoteModalBody
           product={product}
           isDark={isDark}
@@ -253,6 +254,7 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
           addToPurchaseDraft={addToPurchaseDraft}
           addAndReviewDraft={addAndReviewDraft}
           onClose={() => setModalOpen(false)}
+          translateText={translateText}
         />
       </Modal>
     </>
@@ -273,6 +275,7 @@ function PurchaseQuoteModalBody({
   addToPurchaseDraft,
   addAndReviewDraft,
   onClose,
+  translateText,
 }: {
   product: Product
   isDark: boolean
@@ -284,25 +287,26 @@ function PurchaseQuoteModalBody({
   addToPurchaseDraft: () => void
   addAndReviewDraft: () => void
   onClose: () => void
+  translateText: (value: string) => string
 }) {
   return (
     <div className="space-y-4">
       <div className={cn('rounded-[18px] border p-3.5', isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-200 bg-gray-50')}>
-        <div className={cn('text-sm font-semibold', isDark ? 'text-white' : 'text-gray-900')}>{product.name}</div>
+        <div dir="ltr" lang="en" className={cn('product-data-ltr text-sm font-semibold', isDark ? 'text-white' : 'text-gray-900')}>{product.name}</div>
         <div className={cn('mt-1.5 text-[12px] leading-5', isDark ? 'text-purple-100/65' : 'text-gray-500')}>
-          Add this service to your purchase quote request draft. Drafts are saved locally on this device until you submit them, then they appear in My Requests.
+          {translateText('Add this service to your purchase quote request draft. Drafts are saved locally on this device until you submit them, then they appear in My Requests.')}
         </div>
       </div>
 
       {productAlreadyInDraft && (
         <div className={cn('rounded-[15px] px-3.5 py-2.5 text-[11.5px] leading-5', isDark ? 'bg-fuchsia-500/10 text-fuchsia-100/82' : 'bg-fuchsia-50 text-fuchsia-700')}>
-          This service is already in your draft. Adding it again will increase the quantity and keep your latest note.
+          {translateText('This service is already in your draft. Adding it again will increase the quantity and keep your latest note.')}
         </div>
       )}
 
       <div>
         <label className={cn('mb-1.5 block text-[13px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
-          Quantity
+          {translateText('Quantity')}
         </label>
         <input
           type="number"
@@ -316,13 +320,13 @@ function PurchaseQuoteModalBody({
 
       <div>
         <label className={cn('mb-1.5 block text-[13px] font-medium', isDark ? 'text-purple-200/80' : 'text-gray-600')}>
-          Service Note
+          {translateText('Service Note')}
         </label>
         <textarea
           rows={4}
           value={note}
           onChange={e => setNote(e.target.value)}
-          placeholder="Optional note for the Eventies team..."
+          placeholder={translateText('Optional note for the Eventies team...')}
           className="form-field resize-none"
         />
       </div>
@@ -333,10 +337,10 @@ function PurchaseQuoteModalBody({
           className="btn-outline !w-full !rounded-[14px] !px-4 !py-2 !text-[11.5px] sm:!w-auto"
           onClick={addAndReviewDraft}
         >
-          Review Purchase Quote Request
+          {translateText('Review Purchase Quote Request')}
         </Link>
         <button type="button" onClick={addToPurchaseDraft} className="btn-primary !w-full !rounded-[14px] !px-4 !py-2 !text-[11.5px] sm:!w-auto">
-          Save to Purchase Quote Draft
+          {translateText('Save to Purchase Quote Draft')}
         </button>
       </div>
     </div>

@@ -6,7 +6,7 @@ export default function ProductOptions({ options }: { options: QuickOption[] }) 
   const { isDark } = useTheme()
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div dir="ltr" className="product-data-ltr-row grid gap-3 sm:grid-cols-2">
       {options.map(option => (
         <div
           key={option.label}
@@ -18,8 +18,10 @@ export default function ProductOptions({ options }: { options: QuickOption[] }) 
           )}
         >
           <div
+            dir="ltr"
+            lang="en"
             className={cn(
-              'mb-2.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em]',
+              'product-data-ltr mb-2.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em]',
               isDark ? 'text-violet-300/90' : 'text-violet-600'
             )}
           >
@@ -30,8 +32,10 @@ export default function ProductOptions({ options }: { options: QuickOption[] }) 
             {option.values.map(value => (
               <span
                 key={value}
+                dir="ltr"
+                lang="en"
                 className={cn(
-                  'rounded-full border px-3 py-1 text-[12px] font-semibold',
+                  'product-data-ltr rounded-full border px-3 py-1 text-[12px] font-semibold',
                   isDark
                     ? 'border-violet-400/[0.16] bg-violet-500/[0.08] text-slate-200'
                     : 'border-violet-200/70 bg-violet-50/80 text-violet-900'

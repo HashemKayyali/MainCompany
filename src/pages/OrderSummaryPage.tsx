@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
 import { RequestJourneyTracker } from '../components/requests/RequestJourney'
+import { useI18n } from '../contexts/LanguageContext'
 import { useUser } from '../contexts/UserContext'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { getRentalRequestByNumber } from '../services/rental-requests.service'
@@ -26,13 +27,16 @@ const cardShell =
 export default function OrderSummaryPage() {
   const { requestNumber = '' } = useParams<{ requestNumber: string }>()
   const { currentUser, isLoggedIn } = useUser()
+  const { locale, translateText } = useI18n()
   const [request, setRequest] = useState<RentalRequestDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
 
   usePageMeta({
-    title: requestNumber ? `Request Summary ${requestNumber}` : 'Request Summary',
-    description: 'Review the rental request you just submitted.',
+    title: requestNumber
+      ? `${translateText('Request Summary')} ${requestNumber}`
+      : translateText('Request Summary'),
+    description: translateText('Review the rental request you just submitted.'),
     noIndex: true,
   })
 
@@ -82,17 +86,17 @@ export default function OrderSummaryPage() {
               <LockKeyhole size={20} strokeWidth={2.2} />
             </span>
             <h1 className="mt-4 font-display text-[1.7rem] font-black tracking-[-0.03em] text-ink-900">
-              Sign in to view this request
+              {translateText('Sign in to view this request')}
             </h1>
             <p className="mx-auto mt-3 max-w-md text-[13.5px] leading-[1.7] text-ink-600">
-              This request summary belongs to your account.
+              {translateText('This request summary belongs to your account.')}
             </p>
             <div className="mt-6">
               <Link
                 to={`/login?redirect=${encodeURIComponent(`/order-summary/${requestNumber}`)}`}
                 className="btn-primary !rounded-[14px] !px-6 !py-3 !text-[13px]"
               >
-                Sign In
+                {translateText('Sign In')}
               </Link>
             </div>
           </div>
@@ -113,33 +117,34 @@ export default function OrderSummaryPage() {
         ) : loadError ? (
           <div className={cn(cardShell, '!border-rose-200 p-6 sm:p-7')}>
             <h2 className="font-display text-[1.35rem] font-black text-ink-900">
-              We couldn&apos;t load this request
+              {translateText("We couldn't load this request")}
             </h2>
-            <p className="mt-2.5 text-[13px] leading-[1.7] text-ink-600">{loadError}</p>
+            <p className="mt-2.5 text-[13px] leading-[1.7] text-ink-600">{translateText(loadError)}</p>
             <div className="mt-5 flex flex-wrap gap-2.5">
               <Link to="/my-requests" className="btn-primary !rounded-[13px] !px-4 !py-2 !text-[12.5px]">
-                Go to My Requests
+                {translateText('Go to My Requests')}
               </Link>
               <Link to="/products" className="btn-outline !rounded-[13px] !px-4 !py-2 !text-[12.5px]">
-                Browse Services
+                {translateText('Browse Services')}
               </Link>
             </div>
           </div>
         ) : !request ? (
           <div className={cn(cardShell, 'p-6 sm:p-7')}>
             <h2 className="font-display text-[1.35rem] font-black text-ink-900">
-              We could not find this rental request
+              {translateText('We could not find this rental request')}
             </h2>
             <p className="mt-2.5 text-[13px] leading-[1.7] text-ink-600">
-              The request may have been removed, or this page may have been opened before the account session finished
-              syncing.
+              {translateText(
+                'The request may have been removed, or this page may have been opened before the account session finished syncing.'
+              )}
             </p>
             <div className="mt-5 flex flex-wrap gap-2.5">
               <Link to="/my-requests" className="btn-primary !rounded-[13px] !px-4 !py-2 !text-[12.5px]">
-                Go to My Requests
+                {translateText('Go to My Requests')}
               </Link>
               <Link to="/products" className="btn-outline !rounded-[13px] !px-4 !py-2 !text-[12.5px]">
-                Browse Services
+                {translateText('Browse Services')}
               </Link>
             </div>
           </div>
@@ -158,14 +163,26 @@ export default function OrderSummaryPage() {
                 </span>
 
                 <h1 className="mt-5 font-display text-[clamp(1.7rem,3.6vw,2.4rem)] font-extrabold leading-[1.05] tracking-[-0.04em] text-ink-900">
-                  Request{' '}
-                  <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
-                    submitted!
-                  </span>
+                  {locale === 'ar' ? (
+                    <>
+                      تم إرسال{' '}
+                      <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
+                        الطلب!
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      Request{' '}
+                      <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
+                        submitted!
+                      </span>
+                    </>
+                  )}
                 </h1>
                 <p className="mx-auto mt-3 max-w-lg text-[13.5px] leading-[1.7] text-ink-600">
-                  Your rental request was saved and is now waiting for Eventies review. We&apos;ll confirm availability,
-                  pricing, and delivery details with you.
+                  {translateText(
+                    "Your rental request was saved and is now waiting for Eventies review. We'll confirm availability, pricing, and delivery details with you."
+                  )}
                 </p>
 
                 <div className="mt-5 inline-flex flex-wrap items-center justify-center gap-2.5">
@@ -184,7 +201,7 @@ export default function OrderSummaryPage() {
                   <Sparkles size={14} strokeWidth={2.2} />
                 </span>
                 <h2 className="font-display text-[1.1rem] font-black tracking-[-0.02em] text-ink-900">
-                  What happens next
+                  {translateText('What happens next')}
                 </h2>
               </div>
               <RequestJourneyTracker type="rental" status={request.status} stepDates={stepDates} />
@@ -194,9 +211,9 @@ export default function OrderSummaryPage() {
               {/* ── Services ── */}
               <div className={cn(cardShell, 'p-5 sm:p-6')}>
                 <div className="mb-4 flex items-center justify-between">
-                  <h2 className="font-display text-[1.1rem] font-black tracking-[-0.02em] text-ink-900">Services</h2>
+                  <h2 className="font-display text-[1.1rem] font-black tracking-[-0.02em] text-ink-900">{translateText('Services')}</h2>
                   <span className="rounded-full bg-violet-100 px-2.5 py-1 text-[10.5px] font-black text-violet-700">
-                    {request.items.length} item{request.items.length === 1 ? '' : 's'}
+                    {translateText(`${request.items.length} item${request.items.length === 1 ? '' : 's'}`)}
                   </span>
                 </div>
 
@@ -211,22 +228,22 @@ export default function OrderSummaryPage() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="font-display text-[14.5px] font-bold text-ink-900">
-                          {item.productTitleSnapshot}
+                          <bdi dir="auto">{item.productTitleSnapshot}</bdi>
                         </div>
                         <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11.5px] font-semibold text-ink-500">
                           <CalendarDays size={11} className="text-violet-400" />
-                          {item.rentalStartDate} → {item.rentalEndDate}
+                          <bdi dir="ltr">{item.rentalStartDate} → {item.rentalEndDate}</bdi>
                           <span className="text-ink-300">·</span>
-                          {item.rentalDays} day{item.rentalDays === 1 ? '' : 's'}
+                          <span>{translateText(`${item.rentalDays} day${item.rentalDays === 1 ? '' : 's'}`)}</span>
                           <span className="text-ink-300">·</span>
-                          {item.quantity} × {item.unitPrice} JOD/day
+                          <bdi dir="ltr">{item.quantity} × {item.unitPrice} JOD/{translateText('day')}</bdi>
                         </div>
                         <div className="mt-1.5 text-[12.5px] font-black text-violet-700">
-                          {item.lineTotal.toFixed(2)} JOD
+                          <bdi dir="ltr">{item.lineTotal.toFixed(2)} JOD</bdi>
                         </div>
                       </div>
                       <span className="shrink-0 self-center rounded-full bg-white px-2.5 py-1 text-[11.5px] font-black text-ink-800 ring-1 ring-inset ring-violet-200">
-                        ×{item.quantity}
+                        <bdi dir="ltr">×{item.quantity}</bdi>
                       </span>
                     </div>
                   ))}
@@ -234,10 +251,10 @@ export default function OrderSummaryPage() {
 
                 <div className="mt-4 flex items-center justify-between rounded-[15px] bg-[linear-gradient(135deg,#7c3aed,#a855f7,#d946ef)] px-4 py-3.5 shadow-[0_14px_32px_-18px_rgba(124,58,237,0.6)]">
                   <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/75">
-                    Estimated Total
+                    {translateText('Estimated Total')}
                   </span>
                   <span className="font-display text-[1.2rem] font-black text-white">
-                    {request.grandTotal.toFixed(2)} <span className="text-[0.8rem] font-bold text-white/80">JOD</span>
+                    <bdi dir="ltr">{request.grandTotal.toFixed(2)} <span className="text-[0.8rem] font-bold text-white/80">JOD</span></bdi>
                   </span>
                 </div>
               </div>
@@ -246,11 +263,15 @@ export default function OrderSummaryPage() {
               <div className="space-y-5">
                 <div className={cn(cardShell, 'p-5')}>
                   <h2 className="mb-3.5 font-display text-[1.05rem] font-black tracking-[-0.02em] text-ink-900">
-                    Request details
+                    {translateText('Request details')}
                   </h2>
                   <div className="space-y-2.5">
                     {[
-                      { icon: ClipboardList, label: 'Created', value: new Date(request.createdAt).toLocaleString() },
+                      {
+                        icon: ClipboardList,
+                        label: 'Created',
+                        value: new Date(request.createdAt).toLocaleString(locale === 'ar' ? 'ar-JO' : undefined),
+                      },
                       { icon: Mail, label: 'Email', value: request.email },
                       { icon: Phone, label: 'Phone', value: request.phone },
                       { icon: MapPin, label: 'City', value: request.city || '—' },
@@ -264,9 +285,9 @@ export default function OrderSummaryPage() {
                         </span>
                         <div className="min-w-0">
                           <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-violet-600/80">
-                            {label}
+                            {translateText(label)}
                           </div>
-                          <div className="truncate text-[12.5px] font-bold text-ink-800">{value}</div>
+                          <div className="truncate text-[12.5px] font-bold text-ink-800"><bdi dir="auto">{value}</bdi></div>
                         </div>
                       </div>
                     ))}
@@ -275,19 +296,20 @@ export default function OrderSummaryPage() {
 
                 <div className={cn(cardShell, 'p-5')}>
                   <p className="text-[12px] leading-[1.7] text-ink-500">
-                    You can follow every status update for this request — including confirmation, preparation, and
-                    completion — from My Requests.
+                    {translateText(
+                      'You can follow every status update for this request — including confirmation, preparation, and completion — from My Requests.'
+                    )}
                   </p>
                   <div className="mt-4 flex flex-col gap-2.5">
                     <Link
                       to={`/my-requests/${request.requestNumber}`}
                       className="btn-primary !w-full !rounded-[14px] !px-5 !py-3 !text-[13px]"
                     >
-                      Track This Request
-                      <ArrowRight size={14} className="ml-1.5 inline" />
+                      {translateText('Track This Request')}
+                      <ArrowRight size={14} className="ms-1.5 inline rtl:rotate-180" />
                     </Link>
                     <Link to="/products" className="btn-outline !w-full !rounded-[14px] !px-5 !py-3 !text-[13px]">
-                      Continue Browsing
+                      {translateText('Continue Browsing')}
                     </Link>
                   </div>
                 </div>

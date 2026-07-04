@@ -109,6 +109,18 @@ export function t(key: string, vars?: Record<string, string | number>): string {
 
 const arPhraseMap: Record<string, string> = {
   // ── Public site UI (Phase 7.6 localization audit) ──
+  Breadcrumb: 'مسار التنقل',
+  Highlights: 'أبرز النقاط',
+  'More options from': 'خيارات إضافية من',
+  Open: 'فتح',
+  'In Stock': 'متوفر',
+  'Out of Stock': 'غير متوفر',
+  'View photo': 'عرض الصورة',
+  'Availability confirmed after review': 'يتم تأكيد التوفر بعد المراجعة',
+  'Delivery & setup on eligible services': 'التوصيل والتجهيز للخدمات المؤهلة',
+  'On-site support when in scope': 'دعم في الموقع عندما يكون ضمن نطاق الخدمة',
+  'Custom branding when available': 'تخصيص الهوية البصرية عند توفره',
+  'Spare parts when required': 'قطع غيار عند الحاجة',
   'About Eventies': 'عن Eventies',
   'About this service': 'عن هذه الخدمة',
   'About Us': 'من نحن',
@@ -221,6 +233,19 @@ const arPhraseMap: Record<string, string> = {
   'Request received — the team is reviewing it': 'تم استلام الطلب — الفريق يراجعه الآن',
   'Request reviewed by Eventies team': 'يراجع فريق Eventies الطلب',
   'Review the rental request you just submitted.': 'راجع طلب التأجير الذي أرسلته للتو.',
+  'The request may have been removed, or this page may have been opened before the account session finished syncing.':
+    'قد يكون الطلب حُذف، أو ربما فُتحت هذه الصفحة قبل اكتمال مزامنة جلسة الحساب.',
+  'We could not load this rental request right now.': 'تعذر تحميل طلب التأجير الآن.',
+  "Your rental request was saved and is now waiting for Eventies review. We'll confirm availability, pricing, and delivery details with you.":
+    'تم حفظ طلب التأجير وهو الآن بانتظار مراجعة فريق Eventies. سنتواصل معك لتأكيد التوفر والسعر وتفاصيل التوصيل.',
+  'You can follow every status update for this request — including confirmation, preparation, and completion — from My Requests.':
+    'يمكنك متابعة كل تحديث على حالة هذا الطلب، بما في ذلك التأكيد والتجهيز والإكمال، من صفحة طلباتي.',
+  'Select date': 'اختر التاريخ',
+  'Choose date': 'اختر تاريخًا',
+  'Close calendar': 'إغلاق التقويم',
+  'Previous month': 'الشهر السابق',
+  'Next month': 'الشهر التالي',
+  Today: 'اليوم',
   'Review your rental request draft, set event dates, and submit it for review.': 'راجع مسودة طلب التأجير، وحدد تواريخ الفعالية، ثم أرسلها للمراجعة.',
   'Scattered planning signals': 'إشارات تخطيط مبعثرة',
   'See visual highlights and setups': 'شاهد أبرز اللقطات والتجهيزات',
