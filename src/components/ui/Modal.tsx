@@ -196,7 +196,7 @@ export default function Modal({
     <AnimatePresence>
       {open && (
         <div
-          className={cn('fixed inset-0 z-[100] overflow-y-auto', overlayClassName)}
+          className={cn('fixed inset-0 z-[100] overflow-hidden overscroll-none', overlayClassName)}
           onClick={handleBackdropClick}
           role="dialog"
           aria-modal="true"
@@ -213,7 +213,7 @@ export default function Modal({
 
           <div
             className={cn(
-              'relative flex min-h-full justify-center',
+              'relative flex h-full min-h-0 justify-center',
               resolvedMobilePresentation === 'fullscreen' ? 'items-stretch' : 'items-end',
               'sm:items-start sm:px-3.5 sm:pt-5 sm:pb-[max(0.875rem,env(safe-area-inset-bottom))] lg:pt-6'
             )}
@@ -264,7 +264,7 @@ export default function Modal({
               <div
                 data-native-scroll
                 className={cn(
-                  'min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-3.5 pt-2.75 [-webkit-overflow-scrolling:touch] sm:px-4 sm:pb-4 sm:pt-3',
+                  'min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-3.5 pt-2.75 [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] sm:px-4 sm:pb-4 sm:pt-3',
                   bodyClassName
                 )}
               >
