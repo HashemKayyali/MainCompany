@@ -1,19 +1,18 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { ArrowDown, ArrowUp, Eye, Pencil, Plus, Search } from 'lucide-react'
 import { useData } from '../../contexts/DataContext'
-import { useTheme } from '../../contexts/ThemeContext'
 import { useDialog } from '../../contexts/DialogContext'
 import type { CustomBuild } from '../../data/custom-builds'
 import Modal from '../../components/ui/Modal'
 import ImageUploader from '../../components/ui/ImageUploader'
 import FramedImage from '../../components/ui/FramedImage'
 import MediaPlacementModal from '../../components/ui/MediaPlacementModal'
-import AdminActionButton from '../../components/admin/AdminActionButton'
-import AdminEditorWorkspace, { AdminEditorSection } from '../../components/admin/AdminEditorWorkspace'
-import AdminEntityCard from '../../components/admin/AdminEntityCard'
+import AdminConfirmDialog from '../../components/admin/AdminConfirmDialog'
+import AdminKebabMenu, { type AdminKebabItem } from '../../components/admin/AdminKebabMenu'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
-import AdminViewToggle from '../../components/admin/AdminViewToggle'
-import useAdminCardView from '../../components/admin/useAdminCardView'
-import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
+import AdminBadge from '../../components/admin/primitives/AdminBadge'
+import AdminButton from '../../components/admin/primitives/AdminButton'
+import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
 import { cn } from '../../utils/cn'
 import { getErrorMessage } from '../../lib/errors'
 
@@ -28,9 +27,29 @@ const emptyBuild: CustomBuild = {
   active: true,
 }
 
-function normaliseOrder(value: string) {
-  const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : 0
+const PAGE_SIZE_OPTIONS = [12, 24, 48]
+
+type BuildFilter = 'all' | 'active' | 'hidden' | 'featured'
+type BuildSort = 'order' | 'title' | 'category' | 'photos_desc' | 'photos_asc'
+
+function orderValueForPosition(orderedWithoutCurrent: CustomBuild[], targetIndex: number) {
+  const previous = orderedWithoutCurrent[targetIndex - 1]?.sortOrder
+  const next = orderedWithoutCurrent[targetIndex]?.sortOrder
+
+  if (previous === undefined && next === undefined) return 10
+  if (previous === undefined) return next - 10
+  if (next === undefined) return previous + 10
+  if (previous === next) return previous + 0.01
+  return previous + (next - previous) / 2
+}
+
+function buildOrderIndex(build: CustomBuild, orderedBuilds: CustomBuild[]) {
+  return orderedBuilds.findIndex(item => (build.id ? item.id === build.id : item.title === build.title))
+}
+
+function buildPositionLabel(build: CustomBuild, orderedBuilds: CustomBuild[]) {
+  const index = buildOrderIndex(build, orderedBuilds)
+  return index >= 0 ? `#${index + 1}` : '-'
 }
 
 function buildImages(build: CustomBuild) {
@@ -42,41 +61,174 @@ function buildImages(build: CustomBuild) {
   })
 }
 
-function buildPreview(build: CustomBuild, isDark = false) {
-  const images = buildImages(build)
+function FieldSection({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+  return (
+    <section className="admin-card p-4">
+      <div className="flex flex-col gap-1.5 border-b border-[var(--admin-border)] pb-3">
+        <h3 className="admin-section-title">{title}</h3>
+        {description && <p className="text-[12px] leading-5 text-[var(--admin-text-muted)]">{description}</p>}
+      </div>
+      <div className="mt-3.5">{children}</div>
+    </section>
+  )
+}
+
+function Fact({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="min-w-0 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3 py-2.5">
+      <div className="text-[9.5px] font-extrabold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">{label}</div>
+      <div className="mt-1 truncate text-[13px] font-bold leading-5 text-[var(--admin-text)]">{value}</div>
+    </div>
+  )
+}
+
+function BuildThumb({ build, compact = false }: { build: CustomBuild; compact?: boolean }) {
+  const cover = buildImages(build)[0]
+  return (
+    <div className={cn('overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)]', compact ? 'h-14 w-24 shrink-0' : 'aspect-video w-full')}>
+      {cover ? (
+        <FramedImage
+          media={cover}
+          alt={build.title || 'Custom build'}
+          className="h-full w-full"
+          fallbackTransform={{ fit: 'cover' }}
+          onError={event => {
+            ;(event.target as HTMLImageElement).style.display = 'none'
+          }}
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--admin-text-muted)]">
+          No image
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CustomBuildViewerPreview({ build, images: imageOverride }: { build: CustomBuild; images?: string[] }) {
+  const images = imageOverride?.filter(Boolean) ?? buildImages(build)
   const cover = images[0] || ''
+  const title = build.title.trim() || 'Build title'
+  const category = (build.category.trim() || 'Custom').toUpperCase()
+  const description = build.description.trim() || 'Preview how this photo sits in the public build viewer.'
+  const previewThumbs = images.length ? images.slice(0, 3) : ['']
 
   return (
-    <div className="mx-auto w-full max-w-[360px] overflow-hidden rounded-[8px] border border-violet-200/70 bg-white shadow-[0_20px_44px_-30px_rgba(89,23,196,0.35)]">
-      <div className="relative aspect-[16/10] overflow-hidden bg-violet-50">
-        {cover ? (
+    <div className="relative mx-auto w-full max-w-[20rem] overflow-hidden rounded-[var(--admin-radius)] border border-[color-mix(in_srgb,var(--admin-accent)_32%,transparent)] bg-[color-mix(in_srgb,var(--admin-accent)_30%,var(--admin-text))] p-2.5 text-white shadow-[0_18px_46px_-30px_rgba(20,8,50,0.65)]">
+      <div className="relative grid grid-cols-[44px_minmax(0,1fr)] gap-2" dir="ltr">
+        <div className="flex flex-col gap-1.5 pt-8">
+          {previewThumbs.map((image, index) => (
+            <div
+              key={`${image}-${index}`}
+              className={cn(
+                'aspect-video overflow-hidden rounded-[8px] border bg-white/10',
+                index === 0 ? 'border-fuchsia-200 ring-1 ring-fuchsia-200/45' : 'border-white/15 opacity-75'
+              )}
+            >
+              {image ? (
+                <FramedImage media={image} alt="" className="h-full w-full" fallbackTransform={{ fit: 'contain' }} />
+              ) : (
+                <div className="h-full w-full bg-white/10" />
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="relative overflow-hidden rounded-[14px] border border-white/15 bg-black/25 p-1.5">
+          <div className="mb-1.5 flex items-center justify-between gap-2 px-1">
+            <span className="flex min-w-0 items-center gap-1.5 truncate text-[8px] font-black uppercase tracking-[0.12em] text-white/58">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-fuchsia-300" />
+              Live Build Viewer
+            </span>
+            <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-1.5 py-0.5 text-[8px] font-bold text-white/70">
+              01/{String(Math.max(images.length, 1)).padStart(2, '0')}
+            </span>
+          </div>
+
+          <div className="relative aspect-video overflow-hidden rounded-[10px] bg-black/35">
+            {cover ? (
+              <FramedImage media={cover} alt={title} className="h-full w-full" fallbackTransform={{ fit: 'contain' }} />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-[10px] font-bold uppercase tracking-[0.14em] text-white/50">
+                No photo
+              </div>
+            )}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/18 to-transparent p-2.5">
+              <div className="inline-flex max-w-full rounded-[6px] border border-white/20 bg-black/35 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-[0.14em] text-violet-100">
+                <span className="truncate">{category}</span>
+              </div>
+              <div className="mt-1 truncate text-[14px] font-black leading-none">{title}</div>
+              <div className="mt-1 line-clamp-1 text-[9.5px] font-semibold leading-4 text-white/72">{description}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PhotoTile({
+  url,
+  index,
+  isCover,
+  canMoveUp,
+  canMoveDown,
+  onFrame,
+  onMoveUp,
+  onMoveDown,
+  onRemove,
+}: {
+  url: string
+  index: number
+  isCover: boolean
+  canMoveUp: boolean
+  canMoveDown: boolean
+  onFrame: () => void
+  onMoveUp: () => void
+  onMoveDown: () => void
+  onRemove: () => void
+}) {
+  return (
+    <div className="rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] p-2">
+      <div className="relative overflow-hidden rounded-[var(--admin-radius-sm)] bg-[var(--admin-surface-2)]">
+        <div className="aspect-video overflow-hidden">
           <FramedImage
-            media={cover}
-            alt={build.title || 'Custom build'}
+            media={url}
+            alt=""
             className="h-full w-full"
             fallbackTransform={{ fit: 'cover' }}
+            onError={event => {
+              ;(event.target as HTMLImageElement).style.display = 'none'
+            }}
           />
-        ) : (
-          <div className={cn('flex h-full w-full items-center justify-center text-[11px] font-bold uppercase tracking-normal', isDark ? 'text-purple-200/60' : 'text-violet-500')}>
-            No image
-          </div>
-        )}
-        <span className="absolute left-3 top-3 rounded-full border border-white/40 bg-white/90 px-3 py-1 text-[10px] font-black uppercase tracking-normal text-[#2e0a72] backdrop-blur">
-          {build.category || 'Custom'}
+        </div>
+        <span className="absolute start-2 top-2 rounded-md border border-white/70 bg-white/90 px-1.5 py-0.5 text-[8px] font-black uppercase text-[var(--admin-accent)]">
+          {isCover ? 'Cover' : `#${index + 1}`}
         </span>
-        {images.length > 1 && (
-          <span className="absolute bottom-3 right-3 rounded-full border border-white/40 bg-white/90 px-2.5 py-1 text-[10px] font-black text-[#2e0a72] backdrop-blur">
-            {images.length} photos
-          </span>
-        )}
       </div>
-      <div className="space-y-2 p-4">
-        <h3 className="font-sans text-[1.1rem] font-extrabold tracking-normal text-[#140832]">
-          {build.title || 'Build title'}
-        </h3>
-        <p className="line-clamp-3 text-[12px] font-semibold leading-5 text-[#4a2c8f]">
-          {build.description || 'Short build description appears here.'}
-        </p>
+      <div className="mt-2 grid grid-cols-2 gap-1.5">
+        <button type="button" onClick={onFrame} className="min-h-[44px] rounded-[8px] bg-[var(--admin-accent-soft)] px-2 text-[11px] font-bold text-[var(--admin-accent)] md:min-h-[34px]">
+          Frame
+        </button>
+        <button type="button" onClick={onRemove} className="min-h-[44px] rounded-[8px] bg-[color-mix(in_srgb,var(--admin-danger)_11%,transparent)] px-2 text-[11px] font-bold text-[var(--admin-danger)] md:min-h-[34px]">
+          Remove
+        </button>
+        <button
+          type="button"
+          onClick={onMoveUp}
+          disabled={!canMoveUp}
+          className="min-h-[44px] rounded-[8px] border border-[var(--admin-border)] px-2 text-[11px] font-bold text-[var(--admin-text-muted)] disabled:opacity-45 md:min-h-[34px]"
+        >
+          Up
+        </button>
+        <button
+          type="button"
+          onClick={onMoveDown}
+          disabled={!canMoveDown}
+          className="min-h-[44px] rounded-[8px] border border-[var(--admin-border)] px-2 text-[11px] font-bold text-[var(--admin-text-muted)] disabled:opacity-45 md:min-h-[34px]"
+        >
+          Down
+        </button>
       </div>
     </div>
   )
@@ -91,24 +243,45 @@ export default function AdminCustomBuildsPage() {
     deleteCustomBuild,
     addCustomBuildCategory,
   } = useData()
-  const { isDark } = useTheme()
   const dialog = useDialog()
 
   const [editing, setEditing] = useState<CustomBuild | null>(null)
+  const [details, setDetails] = useState<CustomBuild | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<CustomBuild | null>(null)
   const [isNew, setIsNew] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [reorderingId, setReorderingId] = useState<string | null>(null)
   const [creatingCategory, setCreatingCategory] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState('')
-  const [filter, setFilter] = useState('all')
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<BuildFilter>('all')
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [sortKey, setSortKey] = useState<BuildSort>('order')
+  const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0])
+  const [page, setPage] = useState(1)
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
-  const { cardView, displayCardView, viewTransitionClassName, setCardView } = useAdminCardView('custom-builds')
-
-  const sub = isDark ? 'text-purple-200/80' : 'text-gray-500'
-  const cardsLayoutClass = getAdminCardsLayoutClass(displayCardView)
 
   const sortedBuilds = useMemo(
-    () => [...customBuilds].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)),
+    () => [...customBuilds].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.title.localeCompare(b.title)),
     [customBuilds]
+  )
+
+  const buildsWithoutEditing = useMemo(
+    () => (editing?.id ? sortedBuilds.filter(build => build.id !== editing.id) : sortedBuilds),
+    [editing?.id, sortedBuilds]
+  )
+
+  const editingPosition = useMemo(() => {
+    if (!editing) return 1
+    const orderedWithEditing = [...buildsWithoutEditing, editing].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.title.localeCompare(b.title))
+    const index = orderedWithEditing.indexOf(editing)
+    return index >= 0 ? index + 1 : orderedWithEditing.length
+  }, [buildsWithoutEditing, editing])
+
+  const orderOptions = useMemo(
+    () => Array.from({ length: buildsWithoutEditing.length + 1 }, (_, index) => index + 1),
+    [buildsWithoutEditing.length]
   )
 
   const categoryNames = useMemo(
@@ -125,20 +298,52 @@ export default function AdminCustomBuildsPage() {
     [customBuildCategories, customBuilds]
   )
 
-  const filteredBuilds = useMemo(() => {
-    if (filter === 'active') return sortedBuilds.filter(build => build.active)
-    if (filter === 'featured') return sortedBuilds.filter(build => build.featured)
-    if (filter !== 'all') return sortedBuilds.filter(build => build.category === filter)
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase()
     return sortedBuilds
-  }, [filter, sortedBuilds])
+      .filter(build => {
+        if (statusFilter === 'active' && build.active === false) return false
+        if (statusFilter === 'hidden' && build.active !== false) return false
+        if (statusFilter === 'featured' && !build.featured) return false
+        if (categoryFilter !== 'all' && build.category !== categoryFilter) return false
+        if (!needle) return true
+        return (
+          build.title.toLowerCase().includes(needle) ||
+          build.description.toLowerCase().includes(needle) ||
+          build.category.toLowerCase().includes(needle)
+        )
+      })
+      .sort((a, b) => {
+        if (sortKey === 'title') return a.title.localeCompare(b.title)
+        if (sortKey === 'category') return a.category.localeCompare(b.category) || a.title.localeCompare(b.title)
+        if (sortKey === 'photos_desc') return buildImages(b).length - buildImages(a).length || a.title.localeCompare(b.title)
+        if (sortKey === 'photos_asc') return buildImages(a).length - buildImages(b).length || a.title.localeCompare(b.title)
+        return (a.sortOrder || 0) - (b.sortOrder || 0) || a.title.localeCompare(b.title)
+      })
+  }, [categoryFilter, search, sortKey, sortedBuilds, statusFilter])
 
-  const filterClass = (active: boolean) =>
-    cn(
-      'inline-flex min-h-[36px] items-center justify-center rounded-xl px-3.5 py-2 text-[11px] font-semibold transition active:translate-y-[1px]',
-      active
-        ? 'bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200 shadow-[0_10px_24px_-18px_rgba(124,58,237,0.22)]'
-        : 'bg-white text-gray-600 ring-1 ring-inset ring-gray-200 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.14)] hover:bg-gray-50'
-    )
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize))
+  const currentPage = Math.min(page, pageCount)
+  const pageItems = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  const showingStart = filtered.length ? (currentPage - 1) * pageSize + 1 : 0
+  const showingEnd = Math.min(currentPage * pageSize, filtered.length)
+
+  useEffect(() => {
+    setPage(1)
+  }, [categoryFilter, pageSize, search, sortKey, statusFilter])
+
+  const patchEditing = <K extends keyof CustomBuild>(key: K, value: CustomBuild[K]) => {
+    setEditing(current => (current ? { ...current, [key]: value } : null))
+  }
+
+  const setEditingPosition = (position: number) => {
+    const targetIndex = Math.min(Math.max(position - 1, 0), buildsWithoutEditing.length)
+    patchEditing('sortOrder', orderValueForPosition(buildsWithoutEditing, targetIndex))
+  }
+
+  const moveEditingPosition = (direction: -1 | 1) => {
+    setEditingPosition(editingPosition + direction)
+  }
 
   const createCategory = async () => {
     const name = newCategoryName.trim()
@@ -164,8 +369,8 @@ export default function AdminCustomBuildsPage() {
       })
       patchEditing('category', name)
       setNewCategoryName('')
-    } catch (err: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to create custom build category'), variant: 'danger' })
+    } catch (error: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to create custom build category'), variant: 'danger' })
     } finally {
       setCreatingCategory(false)
     }
@@ -187,15 +392,11 @@ export default function AdminCustomBuildsPage() {
     setIsNew(false)
   }
 
-  const close = () => {
+  const closeEditor = () => {
     setEditing(null)
     setIsNew(false)
     setActiveImageIndex(null)
     setNewCategoryName('')
-  }
-
-  const patchEditing = <K extends keyof CustomBuild>(key: K, value: CustomBuild[K]) => {
-    setEditing(current => (current ? { ...current, [key]: value } : null))
   }
 
   const save = async () => {
@@ -218,29 +419,26 @@ export default function AdminCustomBuildsPage() {
     try {
       if (isNew) await addCustomBuild(payload)
       else if (editing.id) await updateCustomBuild(editing.id, payload)
-      close()
-    } catch (err: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to save custom build'), variant: 'danger' })
+      closeEditor()
+    } catch (error: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to save custom build'), variant: 'danger' })
     } finally {
       setSaving(false)
     }
   }
 
-  const remove = async (build: CustomBuild) => {
-    if (!build.id) return
+  const confirmDelete = async () => {
+    if (!deleteTarget?.id) return
 
-    const ok = await dialog.confirm({
-      title: 'Delete Custom Build?',
-      message: `This will remove "${build.title}" from the custom builds page.`,
-      confirmLabel: 'Delete',
-      variant: 'danger',
-    })
-    if (!ok) return
-
+    setDeleting(true)
     try {
-      await deleteCustomBuild(build.id)
-    } catch (err: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to delete custom build'), variant: 'danger' })
+      await deleteCustomBuild(deleteTarget.id)
+      if (details?.id === deleteTarget.id) setDetails(null)
+      setDeleteTarget(null)
+    } catch (error: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to delete custom build'), variant: 'danger' })
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -279,6 +477,53 @@ export default function AdminCustomBuildsPage() {
     })
   }
 
+  const moveBuildInOrder = async (build: CustomBuild, direction: -1 | 1) => {
+    if (!build.id) return
+    const currentIndex = buildOrderIndex(build, sortedBuilds)
+    const targetIndex = currentIndex + direction
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= sortedBuilds.length) return
+
+    const withoutCurrent = sortedBuilds.filter(item => item.id !== build.id)
+    const nextSortOrder = orderValueForPosition(withoutCurrent, targetIndex)
+
+    setReorderingId(build.id)
+    try {
+      await updateCustomBuild(build.id, { sortOrder: nextSortOrder })
+    } catch (error: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to reorder custom build'), variant: 'danger' })
+    } finally {
+      setReorderingId(null)
+    }
+  }
+
+  const actionItems = (build: CustomBuild): AdminKebabItem[] => [
+    {
+      label: 'Move up',
+      icon: <ArrowUp className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />,
+      disabled: !build.id || buildOrderIndex(build, sortedBuilds) <= 0 || reorderingId === build.id,
+      onSelect: () => void moveBuildInOrder(build, -1),
+    },
+    {
+      label: 'Move down',
+      icon: <ArrowDown className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />,
+      disabled: !build.id || buildOrderIndex(build, sortedBuilds) < 0 || buildOrderIndex(build, sortedBuilds) >= sortedBuilds.length - 1 || reorderingId === build.id,
+      onSelect: () => void moveBuildInOrder(build, 1),
+    },
+    {
+      label: build.id ? 'Delete build' : 'Delete unavailable',
+      tone: 'danger',
+      disabled: !build.id,
+      onSelect: () => setDeleteTarget(build),
+    },
+  ]
+
+  const statusChips: Array<[BuildFilter, string]> = [
+    ['all', `All (${customBuilds.length})`],
+    ['active', `Active (${customBuilds.filter(build => build.active !== false).length})`],
+    ['hidden', `Hidden (${customBuilds.filter(build => build.active === false).length})`],
+    ['featured', `Featured (${customBuilds.filter(build => build.featured).length})`],
+  ]
+
   const previewBuild = editing || emptyBuild
   const previewImages = buildImages(previewBuild)
 
@@ -287,333 +532,495 @@ export default function AdminCustomBuildsPage() {
       <AdminPageHeader
         title="Custom Builds"
         actions={
-          <>
-            <AdminViewToggle value={cardView} onChange={setCardView} />
-            <button onClick={openNew} className="btn-admin-create">
-              + Add Build
-            </button>
-          </>
+          <AdminButton size="sm" onClick={openNew}>
+            <Plus className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
+            Add Build
+          </AdminButton>
         }
       />
 
-      <div
-        className={cn(
-          'min-h-0 flex flex-1 flex-col rounded-[22px] p-2.5',
-          isDark
-            ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(8,11,27,0.98))] ring-1 ring-inset ring-cyan-400/10 shadow-[0_28px_90px_-58px_rgba(7,15,36,0.96)]'
-            : 'bg-white ring-1 ring-inset ring-gray-200'
-        )}
-      >
-        <div className="mb-3 flex flex-wrap gap-1.5">
-          <button onClick={() => setFilter('all')} className={filterClass(filter === 'all')}>
-            All ({customBuilds.length})
-          </button>
-          <button onClick={() => setFilter('active')} className={filterClass(filter === 'active')}>
-            Active ({customBuilds.filter(build => build.active).length})
-          </button>
-          <button onClick={() => setFilter('featured')} className={filterClass(filter === 'featured')}>
-            Featured ({customBuilds.filter(build => build.featured).length})
-          </button>
-          {categoryNames.map(category => (
-            <button key={category} onClick={() => setFilter(category)} className={filterClass(filter === category)}>
-              {category} ({customBuilds.filter(build => build.category === category).length})
+      <div className="admin-card flex min-h-0 flex-1 flex-col p-3 sm:p-4">
+        <div className="grid gap-2.5 xl:grid-cols-[minmax(0,1fr)_170px_160px_160px]">
+          <div className="relative min-w-0">
+            <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-text-muted)]" strokeWidth={2} aria-hidden="true" />
+            <input
+              className="admin-input ps-9 pe-16"
+              value={search}
+              onChange={event => setSearch(event.target.value)}
+              placeholder="Search title, category, description..."
+              aria-label="Search custom builds"
+            />
+            <span className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-2 py-0.5 text-[10.5px] font-bold tabular-nums text-[var(--admin-text-muted)]">
+              {filtered.length}/{customBuilds.length}
+            </span>
+          </div>
+
+          <select className="admin-input" value={categoryFilter} onChange={event => setCategoryFilter(event.target.value)} aria-label="Filter by category">
+            <option value="all">All categories</option>
+            {categoryNames.map(category => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+
+          <select className="admin-input" value={sortKey} onChange={event => setSortKey(event.target.value as BuildSort)} aria-label="Sort custom builds">
+            <option value="order">Order</option>
+            <option value="title">Title</option>
+            <option value="category">Category</option>
+            <option value="photos_desc">Photos high to low</option>
+            <option value="photos_asc">Photos low to high</option>
+          </select>
+
+          <select className="admin-input" value={pageSize} onChange={event => setPageSize(Number(event.target.value))} aria-label="Page size">
+            {PAGE_SIZE_OPTIONS.map(value => (
+              <option key={value} value={value}>
+                {value} per page
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mt-2.5 flex snap-x gap-1.5 overflow-x-auto pb-1 [scrollbar-width:thin]">
+          {statusChips.map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setStatusFilter(value)}
+              className={cn(
+                'inline-flex min-h-[44px] shrink-0 snap-start items-center justify-center rounded-full border px-3.5 text-[12px] font-bold transition',
+                statusFilter === value
+                  ? 'border-transparent bg-[var(--admin-accent)] text-white'
+                  : 'border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-text-muted)] hover:border-[var(--admin-accent)] hover:text-[var(--admin-accent)]'
+              )}
+            >
+              {label}
             </button>
           ))}
         </div>
 
-        {filteredBuilds.length === 0 ? (
-          <div className={cn('flex flex-1 items-center justify-center rounded-[18px] border px-5 py-11 text-center text-[13px]', isDark ? 'border-white/10 text-purple-200/70' : 'border-gray-100 text-gray-500')}>
-            No custom builds match this filter.
+        {filtered.length === 0 ? (
+          <div className="flex flex-1 items-center justify-center py-8">
+            <AdminEmptyState
+              title={customBuilds.length ? 'No custom builds match this view' : 'No custom builds yet'}
+              description={customBuilds.length ? 'Try another status, category, sort, or search.' : 'Create the first custom build entry.'}
+              action={
+                <AdminButton size="sm" onClick={openNew}>
+                  <Plus className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
+                  Add Build
+                </AdminButton>
+              }
+            />
           </div>
         ) : (
-          <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
-            <div className={cn('origin-top transition-[opacity,transform,filter] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform,filter]', viewTransitionClassName)}>
-              <div className={cardsLayoutClass}>
-                {filteredBuilds.map(build => (
-                  <AdminEntityCard
-                    key={build.id || build.title}
-                    variant={getAdminEntityVariant(displayCardView)}
-                    minHeightClassName={displayCardView === 'grid' ? 'min-h-[284px]' : 'min-h-[104px]'}
-                    listMediaWrapClassName="md:self-center"
-                    listMediaFrameClassName="!h-[78px] !w-[118px] md:!h-[78px] md:!w-[118px] !rounded-[14px] !bg-transparent !ring-0 !p-0"
-                    actionsWrapClassName={displayCardView === 'list' ? 'xl:w-[118px]' : undefined}
-                    media={
-                      buildImages(build)[0] ? (
-                        <div className="aspect-[16/10] h-full w-full overflow-hidden rounded-[12px]">
-                          <FramedImage
-                            media={buildImages(build)[0]}
-                            alt={build.title}
-                            className="h-full w-full transition-transform duration-700 group-hover:scale-105"
-                            fallbackTransform={{ fit: 'cover' }}
-                          />
-                        </div>
-                      ) : (
-                        <div className={cn('flex aspect-[16/10] h-full w-full items-center justify-center rounded-[12px]', isDark ? 'bg-purple-500/10' : 'bg-violet-50')}>
-                          <span className={cn('text-[11px] font-mono uppercase tracking-normal', sub)}>No image</span>
-                        </div>
+          <>
+            <div className="mt-3 hidden min-h-0 flex-1 overflow-y-auto md:block">
+              <div className="admin-table-wrap">
+                <table className="min-w-[900px] w-full border-collapse text-start">
+                  <thead className="sticky top-0 z-10 bg-[var(--admin-surface-2)]">
+                    <tr className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">
+                      <th className="px-3 py-2.5 text-start">Build</th>
+                      <th className="px-3 py-2.5 text-start">Position</th>
+                      <th className="px-3 py-2.5 text-start">Photos</th>
+                      <th className="px-3 py-2.5 text-start">Category</th>
+                      <th className="px-3 py-2.5 text-start">Status</th>
+                      <th className="px-3 py-2.5 text-start">Featured</th>
+                      <th className="px-3 py-2.5 text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pageItems.map(build => {
+                      const images = buildImages(build)
+                      const orderIndex = buildOrderIndex(build, sortedBuilds)
+                      const isReordering = reorderingId === build.id
+                      return (
+                        <tr key={build.id || build.title} className="border-t border-[var(--admin-border)] align-middle hover:bg-[var(--admin-surface-2)]">
+                          <td className="px-3 py-2.5">
+                            <div className="flex max-w-[420px] items-center gap-3">
+                              <BuildThumb build={build} compact />
+                              <div className="min-w-0">
+                                <div className="truncate text-[13px] font-bold text-[var(--admin-text)]">{build.title}</div>
+                                <div className="line-clamp-1 text-[11px] text-[var(--admin-text-muted)]">{build.description || 'No description'}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="inline-flex min-h-[32px] min-w-[3rem] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-2 text-[12px] font-black tabular-nums text-[var(--admin-text)]">
+                                {buildPositionLabel(build, sortedBuilds)}
+                              </span>
+                              <button
+                                type="button"
+                                className="admin-icon-btn"
+                                aria-label={`Move ${build.title} up`}
+                                disabled={!build.id || orderIndex <= 0 || isReordering}
+                                onClick={() => void moveBuildInOrder(build, -1)}
+                              >
+                                <ArrowUp className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                              </button>
+                              <button
+                                type="button"
+                                className="admin-icon-btn"
+                                aria-label={`Move ${build.title} down`}
+                                disabled={!build.id || orderIndex < 0 || orderIndex >= sortedBuilds.length - 1 || isReordering}
+                                onClick={() => void moveBuildInOrder(build, 1)}
+                              >
+                                <ArrowDown className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                              </button>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5 text-[13px] font-bold tabular-nums text-[var(--admin-text)]">{images.length}</td>
+                          <td className="px-3 py-2.5">
+                            <span className="block max-w-[150px] truncate text-[12px] font-semibold text-[var(--admin-text-muted)]">{build.category || 'Uncategorized'}</span>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <AdminBadge tone={build.active !== false ? 'success' : 'warning'}>{build.active !== false ? 'Active' : 'Hidden'}</AdminBadge>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <AdminBadge tone={build.featured ? 'accent' : 'warning'}>{build.featured ? 'Featured' : 'No'}</AdminBadge>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <AdminButton size="sm" variant="outline" onClick={() => setDetails(build)}>
+                                <Eye className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                                Details
+                              </AdminButton>
+                              <AdminButton size="sm" onClick={() => openEdit(build)}>
+                                <Pencil className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                                Edit
+                              </AdminButton>
+                              <AdminKebabMenu label={`More actions for ${build.title}`} items={actionItems(build)} />
+                            </div>
+                          </td>
+                        </tr>
                       )
-                    }
-                    title={build.title}
-                    subtitle={build.description || undefined}
-                    badges={
-                      <>
-                        <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold', build.active ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-amber-200 bg-amber-50 text-amber-700')}>
-                          {build.active ? 'Active' : 'Hidden'}
-                        </span>
-                        {build.featured && (
-                          <span className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[11px] font-semibold text-violet-700">
-                            Featured
-                          </span>
-                        )}
-                        {build.category && (
-                          <span className="rounded-full border border-gray-200 bg-white px-3 py-1 text-[11px] font-semibold text-gray-600">
-                            {build.category}
-                          </span>
-                        )}
-                      </>
-                    }
-                    facts={[
-                      { label: 'Order', value: String(build.sortOrder || 0) },
-                      { label: 'Photos', value: String(buildImages(build).length) },
-                    ]}
-                    actions={
-                      <>
-                        <AdminActionButton
-                          onClick={event => {
-                            event.stopPropagation()
-                            openEdit(build)
-                          }}
-                        >
-                          Edit
-                        </AdminActionButton>
-                        <AdminActionButton
-                          tone="danger"
-                          onClick={event => {
-                            event.stopPropagation()
-                            void remove(build)
-                          }}
-                        >
-                          Delete
-                        </AdminActionButton>
-                      </>
-                    }
-                  />
-                ))}
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
-          </div>
+
+            <div className="mt-3 min-h-0 flex-1 overflow-y-auto pe-0.5 md:hidden">
+              <div className="grid grid-cols-1 gap-2.5">
+                {pageItems.map(build => {
+                  const images = buildImages(build)
+                  return (
+                    <article key={build.id || build.title} className="admin-card min-w-0 p-3">
+                      <div className="flex items-start gap-3">
+                        <BuildThumb build={build} compact />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <h2 className="truncate text-[14px] font-black text-[var(--admin-text)]">{build.title}</h2>
+                              <p className="truncate text-[11px] font-semibold text-[var(--admin-text-muted)]">{build.category || 'Uncategorized'}</p>
+                            </div>
+                            <AdminBadge tone={build.active !== false ? 'success' : 'warning'}>{build.active !== false ? 'Active' : 'Hidden'}</AdminBadge>
+                          </div>
+                          <p className="mt-2 line-clamp-2 text-[12px] leading-5 text-[var(--admin-text-muted)]">{build.description || 'No description'}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-3 gap-2">
+                        <Fact label="Position" value={buildPositionLabel(build, sortedBuilds)} />
+                        <Fact label="Photos" value={images.length} />
+                        <Fact label="Featured" value={build.featured ? 'Yes' : 'No'} />
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {build.featured && <AdminBadge tone="accent">Featured</AdminBadge>}
+                        <AdminBadge tone={images.length > 0 ? 'success' : 'warning'}>{images.length > 0 ? 'Photos ready' : 'Needs photos'}</AdminBadge>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-[1fr_1fr_auto] gap-2">
+                        <AdminButton size="sm" variant="outline" onClick={() => setDetails(build)}>
+                          <Eye className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                          Details
+                        </AdminButton>
+                        <AdminButton size="sm" onClick={() => openEdit(build)}>
+                          <Pencil className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                          Edit
+                        </AdminButton>
+                        <AdminKebabMenu label={`More actions for ${build.title}`} items={actionItems(build)} />
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="mt-3 flex flex-col gap-2.5 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2.5 text-[12px] font-semibold text-[var(--admin-text-muted)] sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                Showing {showingStart}-{showingEnd} of {filtered.length}
+              </div>
+              <div className="flex items-center gap-2">
+                <AdminButton size="sm" variant="outline" disabled={currentPage <= 1} onClick={() => setPage(value => Math.max(1, value - 1))}>
+                  Previous
+                </AdminButton>
+                <span className="min-w-[72px] text-center tabular-nums">
+                  {currentPage} / {pageCount}
+                </span>
+                <AdminButton size="sm" variant="outline" disabled={currentPage >= pageCount} onClick={() => setPage(value => Math.min(pageCount, value + 1))}>
+                  Next
+                </AdminButton>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
       <Modal
+        open={!!details}
+        onClose={() => setDetails(null)}
+        title={details?.title || 'Build Details'}
+        size="2xl"
+        bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+        footer={
+          details ? (
+            <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
+              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="sm:min-w-[96px]">Close</AdminButton>
+              <AdminButton
+                variant="outline"
+                onClick={() => {
+                  const build = details
+                  setDetails(null)
+                  openEdit(build)
+                }}
+                className="sm:min-w-[120px]"
+              >
+                Edit Build
+              </AdminButton>
+              <AdminKebabMenu label={`More actions for ${details.title}`} items={actionItems(details)} />
+            </div>
+          ) : undefined
+        }
+      >
+        {details && (
+          <div className="admin-scope space-y-4">
+            <section className="admin-card overflow-hidden">
+              <div className="grid gap-0 lg:grid-cols-[minmax(0,0.84fr)_minmax(0,1fr)]">
+                <div className="bg-[var(--admin-surface-2)] p-3">
+                  <BuildThumb build={details} />
+                </div>
+                <div className="flex min-w-0 flex-col justify-between gap-4 p-4">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <AdminBadge tone={details.active !== false ? 'success' : 'warning'}>{details.active !== false ? 'Active' : 'Hidden'}</AdminBadge>
+                      {details.featured && <AdminBadge tone="accent">Featured</AdminBadge>}
+                      <AdminBadge tone="accent">{details.category || 'Uncategorized'}</AdminBadge>
+                    </div>
+                    <h3 className="mt-3 text-[1.2rem] font-black text-[var(--admin-text)]">{details.title}</h3>
+                    <p className="mt-2 text-[13px] leading-6 text-[var(--admin-text-muted)]">{details.description || 'No description has been added.'}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Fact label="Position" value={buildPositionLabel(details, sortedBuilds)} />
+                    <Fact label="Photos" value={buildImages(details).length} />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <FieldSection title="Photos">
+              {buildImages(details).length > 0 ? (
+                <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                  {buildImages(details).slice(0, 8).map((image, index) => (
+                    <div key={`${image}-${index}`} className="aspect-video overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)]">
+                      <FramedImage media={image} alt="" className="h-full w-full" fallbackTransform={{ fit: 'cover' }} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[13px] text-[var(--admin-text-muted)]">No photos uploaded yet.</p>
+              )}
+            </FieldSection>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
         open={!!editing}
-        onClose={close}
+        onClose={closeEditor}
         title={isNew ? 'Add Custom Build' : 'Edit Custom Build'}
         persistent
-        size="xl"
-        bodyClassName="px-3.5 pb-3.5 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+        size="3xl"
+        bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+        footer={
+          <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-[11px] leading-5 text-[var(--admin-text-muted)]">
+              Photos: <span className="font-bold text-[var(--admin-text)]">{previewImages.length}</span>
+              {' | '}Status: <span className="font-bold text-[var(--admin-text)]">{editing?.active !== false ? 'Active' : 'Hidden'}</span>
+            </div>
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:justify-end">
+              <AdminButton variant="ghost" onClick={closeEditor} disabled={saving} className="sm:min-w-[110px]">Cancel</AdminButton>
+              <AdminButton onClick={save} loading={saving} disabled={!editing?.title.trim()} className="sm:min-w-[140px]">
+                {isNew ? 'Create Build' : 'Save Changes'}
+              </AdminButton>
+            </div>
+          </div>
+        }
       >
         {editing && (
-          <AdminEditorWorkspace
-            preview={buildPreview(previewBuild, isDark)}
-            previewTitle="Public Card Preview"
-            previewHint="This is the same image, title, and description that will feed the custom builds page."
-            footer={
-              <div className="flex flex-wrap items-center justify-between gap-2.5">
-                <div className={cn('text-[11px] leading-5', sub)}>
-                  Photos: <span className="font-bold text-[#1a0b3d]">{previewImages.length}</span>
-                  {' · '}Status: <span className="font-bold text-[#1a0b3d]">{editing.active ? 'Active' : 'Hidden'}</span>
-                </div>
-                <div className="flex gap-2.5">
-                  <button
-                    onClick={save}
-                    disabled={saving || !editing.title.trim()}
-                    className="btn-primary !rounded-xl !px-5 !py-2 disabled:opacity-50"
-                  >
-                    {saving ? 'Saving...' : isNew ? 'Create Build' : 'Save Changes'}
-                  </button>
-                  <button onClick={close} className="btn-outline !rounded-xl !px-5 !py-2">
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            }
-          >
-            <AdminEditorSection title="Build Content" hint="Each item becomes one visual card on the custom builds page and one rotating hero image.">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <label className={cn('mb-1.5 block text-[12px] font-medium', sub)}>Title *</label>
-                  <input
-                    className="form-field"
-                    value={editing.title}
-                    onChange={event => patchEditing('title', event.target.value)}
-                    placeholder="Bike Blender activation"
-                  />
-                </div>
-
-                <div>
-                  <label className={cn('mb-1.5 block text-[12px] font-medium', sub)}>Category</label>
-                  <select
-                    className="form-field"
-                    value={editing.category}
-                    onChange={event => patchEditing('category', event.target.value)}
-                  >
-                    <option value="">Select category</option>
-                    {categoryNames.map(category => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
+          <div className="admin-scope min-h-0">
+            <div className="min-w-0 space-y-4">
+              <FieldSection title="Content / Category" description="Title, category, and public position stay in one compact editing group.">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <label className="admin-label mb-1.5" htmlFor="build-title">Title *</label>
                     <input
-                      className="form-field !min-h-[42px] !rounded-xl !px-3 !py-2 text-[12.5px]"
-                      value={newCategoryName}
-                      onChange={event => setNewCategoryName(event.target.value)}
-                      onKeyDown={event => {
-                        if (event.key !== 'Enter') return
-                        event.preventDefault()
-                        void createCategory()
-                      }}
-                      placeholder="New category"
+                      id="build-title"
+                      className={cn('admin-input', !editing.title.trim() && 'admin-input--error')}
+                      value={editing.title}
+                      onChange={event => patchEditing('title', event.target.value)}
+                      placeholder="Bike Blender activation"
                     />
-                    <button
-                      type="button"
-                      onClick={() => void createCategory()}
-                      disabled={creatingCategory || !newCategoryName.trim()}
-                      className="rounded-xl border border-violet-200 bg-violet-50 px-3 text-[11px] font-bold text-violet-700 transition hover:border-violet-300 hover:bg-violet-100 disabled:opacity-50"
+                    {!editing.title.trim() && <p className="mt-1 text-[11px] font-semibold text-[var(--admin-danger)]">Title is required.</p>}
+                  </div>
+                  <div>
+                    <label className="admin-label mb-1.5" htmlFor="build-category">Category</label>
+                    <select
+                      id="build-category"
+                      className="admin-input"
+                      value={editing.category}
+                      onChange={event => patchEditing('category', event.target.value)}
                     >
-                      {creatingCategory ? 'Adding...' : 'Add'}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className={cn('mb-1.5 block text-[12px] font-medium', sub)}>Sort Order</label>
-                  <input
-                    className="form-field"
-                    type="number"
-                    value={editing.sortOrder}
-                    onChange={event => patchEditing('sortOrder', normaliseOrder(event.target.value))}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className={cn('mb-1.5 block text-[12px] font-medium', sub)}>Description</label>
-                <textarea
-                  className="form-field min-h-[112px] resize-none"
-                  value={editing.description}
-                  onChange={event => patchEditing('description', event.target.value)}
-                  placeholder="A short visual description. Keep it tight."
-                />
-              </div>
-            </AdminEditorSection>
-
-            <AdminEditorSection title="Build Photos" hint="Upload multiple related photos for the same card. The first photo is the cover used in listings and the hero.">
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
-                {previewImages.map((url, index) => (
-                  <div key={`${url}-${index}`} className="group relative">
-                    <div className="aspect-[16/10] overflow-hidden rounded-xl bg-violet-50">
-                      <FramedImage
-                        media={url}
-                        alt=""
-                        className="h-full w-full"
-                        fallbackTransform={{ fit: 'cover' }}
+                      <option value="">Select category</option>
+                      {categoryNames.map(category => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+                      <input
+                        className="admin-input"
+                        value={newCategoryName}
+                        onChange={event => setNewCategoryName(event.target.value)}
+                        onKeyDown={event => {
+                          if (event.key !== 'Enter') return
+                          event.preventDefault()
+                          void createCategory()
+                        }}
+                        placeholder="New category"
+                        aria-label="New custom build category"
                       />
-                    </div>
-
-                    {index === 0 && (
-                      <span className="absolute left-2 top-2 rounded-md bg-white/90 px-1.5 py-0.5 text-[8px] font-black uppercase text-violet-700">
-                        Cover
-                      </span>
-                    )}
-
-                    <div className="absolute inset-0 flex flex-wrap content-start items-start gap-1.5 rounded-xl bg-white/75 p-2 opacity-0 transition-opacity group-hover:opacity-100">
-                      <button
-                        type="button"
-                        onClick={() => setActiveImageIndex(index)}
-                        className="rounded-lg bg-violet-100 px-2.5 py-1 text-[10px] font-semibold text-violet-700"
+                      <AdminButton
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void createCategory()}
+                        loading={creatingCategory}
+                        disabled={!newCategoryName.trim()}
                       >
-                        Frame
-                      </button>
-                      {index > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => moveImage(index, -1)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-100 text-[11px] font-bold text-violet-700"
-                        >
-                          {'<'}
-                        </button>
-                      )}
-                      {index < previewImages.length - 1 && (
-                        <button
-                          type="button"
-                          onClick={() => moveImage(index, 1)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-100 text-[11px] font-bold text-violet-700"
-                        >
-                          {'>'}
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="ml-auto flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/80 text-[11px] font-bold text-white"
-                      >
-                        x
-                      </button>
+                        Add
+                      </AdminButton>
                     </div>
                   </div>
-                ))}
+                  <div className="rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] p-3">
+                    <label className="admin-label mb-1.5" htmlFor="build-position">Public position</label>
+                    <select
+                      id="build-position"
+                      className="admin-input bg-[var(--admin-surface)]"
+                      value={editingPosition}
+                      onChange={event => setEditingPosition(Number(event.target.value))}
+                    >
+                      {orderOptions.map(position => (
+                        <option key={position} value={position}>
+                          Position {position} of {orderOptions.length}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <AdminButton
+                        size="sm"
+                        variant="outline"
+                        onClick={() => moveEditingPosition(-1)}
+                        disabled={editingPosition <= 1}
+                      >
+                        <ArrowUp className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                        Move up
+                      </AdminButton>
+                      <AdminButton
+                        size="sm"
+                        variant="outline"
+                        onClick={() => moveEditingPosition(1)}
+                        disabled={editingPosition >= orderOptions.length}
+                      >
+                        <ArrowDown className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                        Move down
+                      </AdminButton>
+                    </div>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="admin-label mb-1.5" htmlFor="build-description">Description</label>
+                    <textarea
+                      id="build-description"
+                      className="admin-input resize-y"
+                      rows={4}
+                      value={editing.description}
+                      onChange={event => patchEditing('description', event.target.value)}
+                      placeholder="A short visual description. Keep it tight."
+                    />
+                  </div>
+                </div>
+              </FieldSection>
 
-                <ImageUploader
-                  compact
-                  onChange={addImage}
-                  folder="custom-builds"
-                  frameAspect={16 / 10}
-                  defaultFit="cover"
-                  frameTitle="Adjust Custom Build Photo"
-                  frameHint="Choose the crop used inside this custom build card."
-                  previewAspectClass="aspect-[16/10]"
-                  renderFrameContextPreview={media =>
-                    buildPreview(
-                      {
-                        ...previewBuild,
-                        image: previewImages[0] || media,
-                        images: media ? [...previewImages, media] : previewImages,
-                      },
-                      isDark
-                    )
-                  }
-                  frameContextTitle="Custom Build Card"
-                  frameContextHint="Inspect the card while you refine this photo."
-                />
-              </div>
-            </AdminEditorSection>
+              <FieldSection title="Build Photos" description="The first photo is the cover. Controls remain visible on touch devices.">
+                <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-4">
+                  {previewImages.map((url, index) => (
+                    <PhotoTile
+                      key={`${url}-${index}`}
+                      url={url}
+                      index={index}
+                      isCover={index === 0}
+                      canMoveUp={index > 0}
+                      canMoveDown={index < previewImages.length - 1}
+                      onFrame={() => setActiveImageIndex(index)}
+                      onMoveUp={() => moveImage(index, -1)}
+                      onMoveDown={() => moveImage(index, 1)}
+                      onRemove={() => removeImage(index)}
+                    />
+                  ))}
 
-            <AdminEditorSection title="Visibility" hint="Hide drafts from the public page, or feature a build in the hero/stat treatment.">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label className="flex min-h-[52px] cursor-pointer items-center gap-3 rounded-[12px] border border-violet-200 bg-white px-4 py-3">
-                  <input
-                    type="checkbox"
-                    checked={editing.active}
-                    onChange={event => patchEditing('active', event.target.checked)}
-                    className="h-4 w-4 accent-violet-600"
+                  <ImageUploader
+                    compact
+                    onChange={addImage}
+                    folder="custom-builds"
+                    frameAspect={16 / 9}
+                    defaultFit="contain"
+                    frameTitle="Adjust Custom Build Photo"
+                    frameHint="Position the photo inside the public custom build viewer."
+                    previewAspectClass="aspect-video"
+                    renderFrameContextPreview={media =>
+                      <CustomBuildViewerPreview build={previewBuild} images={media ? [media, ...previewImages.filter(image => image !== media)] : previewImages} />
+                    }
+                    frameContextTitle="Public Build Viewer"
+                    frameContextHint="Matches the large image container on the custom builds page."
                   />
-                  <span className="text-[12.5px] font-bold text-[#1a0b3d]">Show on public page</span>
-                </label>
-                <label className="flex min-h-[52px] cursor-pointer items-center gap-3 rounded-[12px] border border-violet-200 bg-white px-4 py-3">
-                  <input
-                    type="checkbox"
-                    checked={editing.featured}
-                    onChange={event => patchEditing('featured', event.target.checked)}
-                    className="h-4 w-4 accent-violet-600"
-                  />
-                  <span className="text-[12.5px] font-bold text-[#1a0b3d]">Feature this build</span>
-                </label>
-              </div>
-            </AdminEditorSection>
-          </AdminEditorWorkspace>
+                </div>
+              </FieldSection>
+
+              <FieldSection title="Visibility / Featured">
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                  <label className="flex min-h-[52px] cursor-pointer items-center gap-3 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3">
+                    <input
+                      type="checkbox"
+                      checked={editing.active}
+                      onChange={event => patchEditing('active', event.target.checked)}
+                      className="h-5 w-5 accent-violet-600"
+                    />
+                    <span className="text-[13px] font-bold text-[var(--admin-text)]">Show on public page</span>
+                  </label>
+                  <label className="flex min-h-[52px] cursor-pointer items-center gap-3 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3">
+                    <input
+                      type="checkbox"
+                      checked={editing.featured}
+                      onChange={event => patchEditing('featured', event.target.checked)}
+                      className="h-5 w-5 accent-violet-600"
+                    />
+                    <span className="text-[13px] font-bold text-[var(--admin-text)]">Feature this build</span>
+                  </label>
+                </div>
+              </FieldSection>
+            </div>
+          </div>
         )}
       </Modal>
 
@@ -622,31 +1029,35 @@ export default function AdminCustomBuildsPage() {
         media={activeImageIndex !== null ? previewImages[activeImageIndex] : ''}
         title="Adjust Custom Build Photo"
         type="image"
-        aspectRatio={16 / 10}
-        defaultFit="cover"
-        hint="Choose what should stay visible inside this custom build card frame."
+        aspectRatio={16 / 9}
+        defaultFit="contain"
+        hint="Position the photo inside the public custom build viewer frame."
         contextPreview={media => {
           const nextImages =
             activeImageIndex === null
               ? previewImages
               : previewImages.map((image, index) => (index === activeImageIndex ? media : image))
 
-          return buildPreview(
-            {
-              ...previewBuild,
-              image: nextImages[0] || '',
-              images: nextImages,
-            },
-            isDark
-          )
+          return <CustomBuildViewerPreview build={previewBuild} images={nextImages} />
         }}
-        contextPreviewTitle="Custom Build Card"
-        contextPreviewHint="Refine this related photo while seeing the same card context."
+        contextPreviewTitle="Public Build Viewer"
+        contextPreviewHint="Matches the large image container on the custom builds page."
         onApply={media => {
           if (activeImageIndex === null) return
           updateImageFrame(activeImageIndex, media)
         }}
         onClose={() => setActiveImageIndex(null)}
+      />
+
+      <AdminConfirmDialog
+        open={!!deleteTarget}
+        title="Delete Custom Build?"
+        description={deleteTarget ? `This will remove ${deleteTarget.title} from the custom builds page.` : undefined}
+        tone="danger"
+        confirmLabel="Delete"
+        loading={deleting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => void confirmDelete()}
       />
     </div>
   )

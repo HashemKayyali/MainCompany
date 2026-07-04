@@ -1,27 +1,78 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { Eye, Pencil, Search, Shield, Trash2, UserCog, UserPlus } from 'lucide-react'
 import { useAuth, type AdminRole } from '../../contexts/AuthContext'
 import { useDialog } from '../../contexts/DialogContext'
-import { useTheme } from '../../contexts/ThemeContext'
 import { useToast } from '../../contexts/ToastContext'
 import Modal from '../../components/ui/Modal'
 import UserAvatar from '../../components/ui/UserAvatar'
 import AdminActionButton from '../../components/admin/AdminActionButton'
 import AdminDetailModal from '../../components/admin/AdminDetailModal'
-import AdminEntityCard from '../../components/admin/AdminEntityCard'
+import AdminKebabMenu from '../../components/admin/AdminKebabMenu'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminStatCard from '../../components/admin/AdminStatCard'
-import AdminViewToggle from '../../components/admin/AdminViewToggle'
-import useAdminCardView from '../../components/admin/useAdminCardView'
-import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
+import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
+import AdminField from '../../components/admin/primitives/AdminField'
+import AdminPagination from '../../components/admin/primitives/AdminPagination'
 import { cn } from '../../utils/cn'
 import { getErrorMessage } from '../../lib/errors'
 
 type AdminMember = { id: string; name: string; email: string; role: AdminRole }
+type RoleFilter = 'all' | 'superadmin' | 'admin'
+type SortKey = 'role' | 'name' | 'email'
+
+const ROLE_ORDER: Record<AdminRole, number> = { superadmin: 0, admin: 1 }
+const PAGE_SIZE_OPTIONS = [10, 20, 40]
+
+const ROLE_FILTERS: { value: RoleFilter; label: string }[] = [
+  { value: 'all', label: 'All admins' },
+  { value: 'superadmin', label: 'Super admins' },
+  { value: 'admin', label: 'Admins' },
+]
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: 'role', label: 'Role' },
+  { value: 'name', label: 'Name A-Z' },
+  { value: 'email', label: 'Email A-Z' },
+]
+
+function roleLabel(role: AdminRole) {
+  return role === 'superadmin' ? 'Super Admin' : 'Admin'
+}
+
+function roleChipClass(role: AdminRole) {
+  return role === 'superadmin' ? 'admin-chip admin-chip--warning' : 'admin-chip admin-chip--accent'
+}
+
+function avatarClass(role: AdminRole) {
+  return role === 'superadmin' ? 'bg-[var(--admin-warning)] text-white' : 'bg-[var(--admin-accent)] text-white'
+}
+
+function sortAdmins(admins: AdminMember[], sortBy: SortKey) {
+  const list = [...admins]
+  switch (sortBy) {
+    case 'role':
+      return list.sort((a, b) => ROLE_ORDER[a.role] - ROLE_ORDER[b.role] || a.email.localeCompare(b.email))
+    case 'name':
+      return list.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+    case 'email':
+      return list.sort((a, b) => a.email.localeCompare(b.email))
+    default:
+      return list
+  }
+}
+
+const controlButtonClass =
+  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3.5 text-[13px] font-bold text-[var(--admin-text)] transition hover:border-[var(--admin-accent)] hover:bg-[var(--admin-accent-soft)] hover:text-[var(--admin-accent)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--admin-accent-soft)] disabled:cursor-not-allowed disabled:opacity-50'
+
+const primaryButtonClass =
+  'inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] bg-[var(--admin-accent)] px-4 text-[13px] font-bold text-white transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--admin-accent-soft)] disabled:cursor-not-allowed disabled:opacity-50'
+
+const dangerButtonClass =
+  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[var(--admin-radius-sm)] border border-[color-mix(in_srgb,var(--admin-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--admin-danger)_10%,transparent)] px-4 text-[13px] font-bold text-[var(--admin-danger)] transition hover:bg-[color-mix(in_srgb,var(--admin-danger)_16%,transparent)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[color-mix(in_srgb,var(--admin-danger)_14%,transparent)] disabled:cursor-not-allowed disabled:opacity-50'
 
 export default function AdminAdminsPage() {
   const { admins, addAdmin, removeAdmin, changeAdminRole, user, isSuperAdmin } = useAuth()
   const dialog = useDialog()
-  const { isDark } = useTheme()
   const { toast } = useToast()
 
   const [showAdd, setShowAdd] = useState(false)
@@ -34,11 +85,50 @@ export default function AdminAdminsPage() {
   const [details, setDetails] = useState<AdminMember | null>(null)
   const [editRole, setEditRole] = useState<AdminRole>('admin')
   const [editSaving, setEditSaving] = useState(false)
-  const { cardView, displayCardView, viewTransitionClassName, setCardView } = useAdminCardView('admins')
 
-  const txt = isDark ? 'text-white' : 'text-gray-900'
-  const sub = isDark ? 'text-purple-200/80' : 'text-gray-500'
-  const cardsLayoutClass = getAdminCardsLayoutClass(displayCardView)
+  const [search, setSearch] = useState('')
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
+  const [sortBy, setSortBy] = useState<SortKey>('role')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+
+  const adminMembers = useMemo<AdminMember[]>(
+    () =>
+      admins.map(admin => ({
+        id: admin.id,
+        name: admin.name || admin.email,
+        email: admin.email,
+        role: admin.role === 'superadmin' ? 'superadmin' : 'admin',
+      })),
+    [admins]
+  )
+
+  const filteredAdmins = useMemo(() => {
+    let list = adminMembers
+    if (roleFilter !== 'all') list = list.filter(admin => admin.role === roleFilter)
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      list = list.filter(
+        admin => admin.name.toLowerCase().includes(q) || admin.email.toLowerCase().includes(q)
+      )
+    }
+    return sortAdmins(list, sortBy)
+  }, [adminMembers, roleFilter, search, sortBy])
+
+  const totalPages = Math.max(1, Math.ceil(filteredAdmins.length / pageSize))
+  const pagedAdmins = useMemo(() => {
+    const safePage = Math.min(Math.max(page, 1), totalPages)
+    const start = (safePage - 1) * pageSize
+    return filteredAdmins.slice(start, start + pageSize)
+  }, [filteredAdmins, page, pageSize, totalPages])
+
+  useEffect(() => {
+    setPage(1)
+  }, [search, roleFilter, sortBy, pageSize])
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages)
+  }, [page, totalPages])
 
   const handleAdd = async () => {
     setAddError('')
@@ -105,182 +195,241 @@ export default function AdminAdminsPage() {
   }
 
   const openEdit = (admin: AdminMember) => {
-    setEditAdmin({
-      id: admin.id,
-      name: admin.name,
-      email: admin.email,
-      role: admin.role,
-    })
+    setEditAdmin(admin)
     setEditRole(admin.role)
   }
 
-  const cardRoleTone = (role: AdminRole) =>
-    role === 'superadmin'
-      ? isDark
-        ? 'bg-amber-400/10 text-amber-200 ring-amber-400/18'
-        : 'bg-amber-50 text-amber-700 ring-amber-200'
-      : isDark
-        ? 'bg-cyan-400/10 text-cyan-200 ring-cyan-400/18'
-        : 'bg-violet-50 text-violet-700 ring-violet-200'
+  const openAdd = () => {
+    setShowAdd(true)
+    setAddError('')
+    setAddEmail('')
+    setAddRole('admin')
+  }
 
-  const avatarClass = (role: AdminRole) =>
-    role === 'superadmin'
-      ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white'
-      : 'bg-gradient-to-br from-prism-violet to-prism-cyan text-void-950'
+  const canManage = (admin: AdminMember) => isSuperAdmin && admin.id !== user?.id && admin.role !== 'superadmin'
+
+  const renderActions = (admin: AdminMember) => {
+    const manage = canManage(admin)
+    return (
+      <AdminKebabMenu
+        label={`Actions for ${admin.name || admin.email}`}
+        items={[
+          {
+            label: 'Details',
+            icon: <Eye className="h-4 w-4" strokeWidth={2} aria-hidden="true" />,
+            onSelect: () => setDetails(admin),
+          },
+          {
+            label: 'Edit role',
+            icon: <Pencil className="h-4 w-4" strokeWidth={2} aria-hidden="true" />,
+            disabled: !manage,
+            onSelect: () => openEdit(admin),
+          },
+          {
+            label: 'Remove admin',
+            icon: <Trash2 className="h-4 w-4" strokeWidth={2} aria-hidden="true" />,
+            tone: 'danger',
+            disabled: !manage,
+            onSelect: () => void handleRemove(admin),
+          },
+        ]}
+      />
+    )
+  }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="admin-scope flex h-full min-h-0 flex-col gap-4 pb-[calc(var(--admin-bottombar-h)+0.75rem)] md:pb-0">
       <AdminPageHeader
         title="Admin Users"
         actions={
-          <>
-            <AdminViewToggle value={cardView} onChange={setCardView} />
-            {isSuperAdmin ? (
-              <button
-                onClick={() => {
-                  setShowAdd(true)
-                  setAddError('')
-                  setAddEmail('')
-                }}
-                className="btn-admin-create"
-              >
-                + Add Admin
-              </button>
-            ) : null}
-          </>
+          isSuperAdmin ? (
+            <button type="button" onClick={openAdd} className={primaryButtonClass}>
+              <UserPlus className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+              Add Admin
+            </button>
+          ) : null
         }
       />
 
       <div className="grid shrink-0 gap-2 sm:grid-cols-2 xl:grid-cols-4">
-        <AdminStatCard label="Admins" value={admins.length} />
-        <AdminStatCard label="Super Admins" value={admins.filter(admin => admin.role === 'superadmin').length} />
-        <AdminStatCard label="Standard Admins" value={admins.filter(admin => admin.role === 'admin').length} />
-        <AdminStatCard label="You" value={admins.some(admin => admin.id === user?.id) ? 'Included' : 'No'} />
+        <AdminStatCard label="Admins" value={adminMembers.length} />
+        <AdminStatCard label="Super Admins" value={adminMembers.filter(admin => admin.role === 'superadmin').length} />
+        <AdminStatCard label="Standard Admins" value={adminMembers.filter(admin => admin.role === 'admin').length} />
+        <AdminStatCard label="You" value={adminMembers.some(admin => admin.id === user?.id) ? 'Included' : 'No'} />
       </div>
 
       {!isSuperAdmin && (
-        <div className={cn('rounded-[18px] border px-3.5 py-2.75 text-[13px]', isDark ? 'border-amber-400/20 bg-amber-400/10 text-amber-300' : 'border-amber-200 bg-amber-50 text-amber-700')}>
-          Only super admins can manage admins.
+        <div className="flex gap-2 rounded-[var(--admin-radius)] border border-[color-mix(in_srgb,var(--admin-warning)_28%,transparent)] bg-[color-mix(in_srgb,var(--admin-warning)_10%,transparent)] px-3.5 py-3 text-[13px] font-semibold text-[var(--admin-warning)]">
+          <Shield className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+          <span>Only super admins can manage admin access.</span>
         </div>
       )}
 
-      <div
-        className={cn(
-          'min-h-0 flex flex-1 flex-col rounded-[22px] p-2.5',
-          isDark
-            ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(8,11,27,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_28px_90px_-58px_rgba(7,15,36,0.96)]'
-            : 'bg-white ring-1 ring-inset ring-gray-200'
-        )}
-      >
-        {admins.length === 0 ? (
-          <div className={cn('flex flex-1 items-center justify-center rounded-[18px] border px-5 py-11 text-center text-[13px]', isDark ? 'border-white/10 text-purple-200/70' : 'border-gray-100 text-gray-500')}>
-            No admins loaded.
-          </div>
-        ) : (
-          <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
-            <div className={cn('origin-top transition-[opacity,transform,filter] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform,filter]', viewTransitionClassName)}>
-            <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(250px,1fr))]">
-              {admins.map(admin => {
-                const safeRole = admin.role === 'superadmin' ? 'superadmin' : 'admin'
-                const isYou = admin.id === user?.id
-                const member: AdminMember = {
-                  id: admin.id,
-                  name: admin.name,
-                  email: admin.email,
-                  role: safeRole,
-                }
-                const canManage = isSuperAdmin && !isYou && safeRole !== 'superadmin'
+      <section className="admin-card flex min-h-0 flex-1 flex-col gap-3 p-3">
+        <div className="grid gap-2.5 lg:grid-cols-[minmax(0,1fr)_180px_180px]">
+          <label className="relative block min-w-0">
+            <span className="sr-only">Search admins</span>
+            <Search
+              className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-text-muted)]"
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+            <input
+              className="admin-input ps-10"
+              placeholder="Search by name or email"
+              value={search}
+              onChange={event => setSearch(event.target.value)}
+            />
+          </label>
 
+          <label className="sr-only" htmlFor="admins-role-filter">
+            Filter admin role
+          </label>
+          <select
+            id="admins-role-filter"
+            className="admin-input"
+            value={roleFilter}
+            onChange={event => setRoleFilter(event.target.value as RoleFilter)}
+          >
+            {ROLE_FILTERS.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+
+          <label className="sr-only" htmlFor="admins-sort">
+            Sort admins
+          </label>
+          <select
+            id="admins-sort"
+            className="admin-input"
+            value={sortBy}
+            onChange={event => setSortBy(event.target.value as SortKey)}
+          >
+            {SORT_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {filteredAdmins.length === 0 ? (
+          <AdminEmptyState
+            icon={<UserCog className="h-5 w-5" strokeWidth={2} aria-hidden="true" />}
+            title={adminMembers.length === 0 ? 'No admins loaded' : 'No admins match the current filters'}
+            description="Admin team members appear here after they are available from the existing auth context."
+            action={isSuperAdmin ? <button type="button" className={primaryButtonClass} onClick={openAdd}>Add Admin</button> : null}
+          />
+        ) : (
+          <>
+            <div className="hidden min-h-0 flex-1 md:block">
+              <div className="admin-table-wrap h-full">
+                <table className="w-full min-w-[760px] text-start">
+                  <thead className="sticky top-0 z-10 bg-[var(--admin-surface-2)]">
+                    <tr className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">
+                      <th className="px-3 py-3 text-start">Admin</th>
+                      <th className="px-3 py-3 text-start">Email</th>
+                      <th className="px-3 py-3 text-start">Role</th>
+                      <th className="px-3 py-3 text-start">Session</th>
+                      <th className="px-3 py-3 text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pagedAdmins.map(admin => {
+                      const isYou = admin.id === user?.id
+                      return (
+                        <tr key={admin.id} className="border-t border-[var(--admin-border)] align-middle hover:bg-[var(--admin-surface-2)]">
+                          <td className="px-3 py-2.5">
+                            <div className="flex min-w-0 items-center gap-2.5">
+                              <UserAvatar
+                                name={admin.name}
+                                email={admin.email}
+                                className={cn('h-10 w-10 rounded-[var(--admin-radius-sm)] text-[13px] font-bold', avatarClass(admin.role))}
+                              />
+                              <div className="min-w-0">
+                                <div className="truncate text-[13px] font-bold text-[var(--admin-text)]">{admin.name}</div>
+                                <div className="mt-0.5 truncate font-mono text-[11px] text-[var(--admin-text-muted)]">{admin.id}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <a className="block max-w-[260px] truncate text-[12px] font-semibold text-[var(--admin-accent)] hover:underline" href={`mailto:${admin.email}`}>
+                              {admin.email}
+                            </a>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <span className={roleChipClass(admin.role)}>{roleLabel(admin.role)}</span>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            {isYou ? <span className="admin-chip admin-chip--accent">Current session</span> : <span className="admin-chip">Team member</span>}
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="flex justify-end">{renderActions(admin)}</div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:hidden">
+              {pagedAdmins.map(admin => {
+                const isYou = admin.id === user?.id
                 return (
-                  <div
-                    key={admin.id}
-                    className="flex flex-col rounded-[16px] border border-violet-200/70 bg-white p-3.5 shadow-[0_8px_24px_-18px_rgba(89,23,196,0.20)] transition-shadow duration-200 hover:shadow-[0_14px_32px_-16px_rgba(89,23,196,0.30)]"
-                  >
+                  <article key={admin.id} className="admin-card p-3">
                     <div className="flex items-start gap-3">
                       <UserAvatar
                         name={admin.name}
                         email={admin.email}
-                        className={cn(
-                          'h-11 w-11 shrink-0 rounded-[12px] text-[0.95rem] font-sans font-bold',
-                          avatarClass(safeRole)
-                        )}
+                        className={cn('h-11 w-11 rounded-[var(--admin-radius-sm)] text-[14px] font-bold', avatarClass(admin.role))}
                       />
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="truncate font-sans text-[14px] font-extrabold text-[#1a0b3d]">
-                            {admin.name}
-                          </span>
-                          {isYou && (
-                            <span className="shrink-0 rounded-full border border-violet-300 bg-violet-100/80 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#2e0a72]">
-                              You
-                            </span>
-                          )}
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
+                          <h2 className="truncate text-[14px] font-black text-[var(--admin-text)]">{admin.name}</h2>
+                          {isYou && <span className="admin-chip admin-chip--accent !py-0.5 !text-[10px]">You</span>}
                         </div>
-                        <div className="mt-0.5 truncate text-[12px] font-medium text-[#6b5a82]">
-                          {admin.email}
-                        </div>
+                        <p className="mt-0.5 truncate text-[12px] font-semibold text-[var(--admin-text-muted)]">{admin.email}</p>
                       </div>
-                      <span
-                        className={cn(
-                          'shrink-0 rounded-full border px-2.5 py-1 text-[9.5px] font-extrabold uppercase tracking-[0.14em] ring-1 ring-inset',
-                          cardRoleTone(safeRole)
-                        )}
-                      >
-                        {safeRole}
-                      </span>
+                      {renderActions(admin)}
                     </div>
-
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <AdminActionButton
-                        tone="primary"
-                        className="!min-h-[34px] flex-1"
-                        onClick={() => setDetails(member)}
-                      >
-                        Details
-                      </AdminActionButton>
-                      {canManage && (
-                        <>
-                          <AdminActionButton
-                            className="!min-h-[34px] flex-1"
-                            onClick={() => openEdit(member)}
-                          >
-                            Edit
-                          </AdminActionButton>
-                          <AdminActionButton
-                            tone="danger"
-                            className="!min-h-[34px] flex-1"
-                            onClick={() => void handleRemove(member)}
-                          >
-                            Remove
-                          </AdminActionButton>
-                        </>
-                      )}
+                      <span className={roleChipClass(admin.role)}>{roleLabel(admin.role)}</span>
+                      {isYou ? <span className="admin-chip admin-chip--accent">Current session</span> : <span className="admin-chip">Team member</span>}
                     </div>
-                  </div>
+                  </article>
                 )
               })}
             </div>
-            </div>
-          </div>
+
+            <AdminPagination
+              page={page}
+              pageSize={pageSize}
+              totalItems={filteredAdmins.length}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+            />
+          </>
         )}
-      </div>
+      </section>
 
       <AdminDetailModal
         open={!!details}
         onClose={() => setDetails(null)}
         title={details?.name || 'Admin Details'}
-        subtitle={details ? 'A simplified account view with the core identity and role information only.' : undefined}
+        subtitle={details ? 'Core identity and access information for this admin account.' : undefined}
         media={
           details ? (
-            <div className={cn('flex aspect-[16/9] items-center justify-center', isDark ? 'bg-[radial-gradient(circle,rgba(34,211,238,0.15),transparent_58%)]' : 'bg-[radial-gradient(circle,rgba(139,92,246,0.10),transparent_55%)]')}>
+            <div className="flex aspect-[16/9] items-center justify-center bg-[var(--admin-surface-2)]">
               <UserAvatar
                 name={details.name}
                 email={details.email}
-                className="h-28 w-28 rounded-[32px]"
-                fallbackClassName={cn(
-                  'text-5xl font-sans font-bold shadow-lg',
-                  avatarClass(details.role)
-                )}
+                className="h-24 w-24 rounded-[24px]"
+                fallbackClassName={cn('text-5xl font-bold', avatarClass(details.role))}
               />
             </div>
           ) : null
@@ -288,14 +437,8 @@ export default function AdminAdminsPage() {
         badges={
           details ? (
             <>
-              <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold', cardRoleTone(details.role))}>
-                {details.role}
-              </span>
-              {details.id === user?.id && (
-                <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold', isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700')}>
-                  Current session
-                </span>
-              )}
+              <span className={roleChipClass(details.role)}>{roleLabel(details.role)}</span>
+              {details.id === user?.id && <span className="admin-chip admin-chip--accent">Current session</span>}
             </>
           ) : null
         }
@@ -303,7 +446,7 @@ export default function AdminAdminsPage() {
           details
             ? [
                 { label: 'Email', value: details.email },
-                { label: 'Role', value: details.role },
+                { label: 'Role', value: roleLabel(details.role) },
               ]
             : []
         }
@@ -315,14 +458,14 @@ export default function AdminAdminsPage() {
                   facts: [
                     { label: 'Name', value: details.name },
                     { label: 'Email', value: details.email },
-                    { label: 'Role', value: details.role },
+                    { label: 'Role', value: roleLabel(details.role) },
                   ],
                 },
               ]
             : []
         }
         actions={
-          details && isSuperAdmin && details.role !== 'superadmin' && details.id !== user?.id ? (
+          details && canManage(details) ? (
             <>
               <AdminActionButton
                 onClick={() => {
@@ -340,88 +483,121 @@ export default function AdminAdminsPage() {
         }
       />
 
-      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Add Admin" persistent size="lg">
-        <div className="space-y-4">
-          <p className={`text-sm ${sub}`}>Enter the email of a registered user to make them an admin.</p>
-
-          <div>
-            <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Email *</label>
-            <input
-              className={`form-field ${addError ? '!border-red-400/40' : ''}`}
-              type="email"
-              placeholder="user@example.com"
-              value={addEmail}
-              onChange={e => {
-                setAddEmail(e.target.value)
-                setAddError('')
-              }}
-              onKeyDown={e => e.key === 'Enter' && handleAdd()}
-            />
-          </div>
-
-          <div>
-            <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Role</label>
-            <select className="form-field" value={addRole} onChange={e => setAddRole(e.target.value as AdminRole)}>
-              <option value="admin">Admin</option>
-              <option value="superadmin">Super Admin</option>
-            </select>
-          </div>
-
-          {addError && (
-            <div className={`rounded-xl px-3 py-2.5 text-sm ${isDark ? 'bg-red-400/15 text-red-400' : 'bg-red-50 text-red-600'}`}>
-              {addError}
-            </div>
-          )}
-
-          <div className="mt-6 flex justify-end gap-3">
-            <button onClick={() => setShowAdd(false)} className="btn-outline !rounded-xl !px-5 !py-2.5 !text-sm">
+      <Modal
+        open={showAdd}
+        onClose={() => {
+          if (!addSaving) setShowAdd(false)
+        }}
+        title="Add Admin"
+        size="lg"
+        dismissable={!addSaving}
+        footer={
+          <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
+            <button type="button" onClick={() => setShowAdd(false)} className={controlButtonClass} disabled={addSaving}>
               Cancel
             </button>
-            <button onClick={handleAdd} disabled={addSaving} className="btn-primary !rounded-xl !px-6 !py-2.5 !text-xs disabled:opacity-50">
+            <button type="button" onClick={handleAdd} disabled={addSaving} className={primaryButtonClass}>
               {addSaving ? 'Searching...' : 'Add Admin'}
             </button>
           </div>
+        }
+      >
+        <div className="admin-scope space-y-4">
+          <p className="text-[13px] leading-6 text-[var(--admin-text-muted)]">
+            Enter the email of a registered user to make them an admin.
+          </p>
+
+          <AdminField label="Email" htmlFor="add-admin-email" required error={addError || undefined}>
+            <input
+              id="add-admin-email"
+              className={cn('admin-input', addError && 'admin-input--error')}
+              type="email"
+              placeholder="user@example.com"
+              value={addEmail}
+              onChange={event => {
+                setAddEmail(event.target.value)
+                setAddError('')
+              }}
+              onKeyDown={event => {
+                if (event.key === 'Enter') void handleAdd()
+              }}
+            />
+          </AdminField>
+
+          <AdminField label="Role" htmlFor="add-admin-role">
+            <select
+              id="add-admin-role"
+              className="admin-input"
+              value={addRole}
+              onChange={event => setAddRole(event.target.value as AdminRole)}
+            >
+              <option value="admin">Admin</option>
+              <option value="superadmin">Super Admin</option>
+            </select>
+          </AdminField>
         </div>
       </Modal>
 
-      <Modal open={!!editAdmin} onClose={() => setEditAdmin(null)} title={`Edit - ${editAdmin?.name || ''}`} persistent size="lg">
+      <Modal
+        open={!!editAdmin}
+        onClose={() => {
+          if (!editSaving) setEditAdmin(null)
+        }}
+        title={`Edit Role - ${editAdmin?.name || ''}`}
+        size="lg"
+        dismissable={!editSaving}
+        footer={
+          <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <button type="button" onClick={() => void handleRemove()} disabled={editSaving} className={dangerButtonClass}>
+              <Trash2 className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+              Remove Admin
+            </button>
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+              <button type="button" onClick={() => setEditAdmin(null)} className={controlButtonClass} disabled={editSaving}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleChangeRole}
+                disabled={editSaving || !editAdmin || editRole === editAdmin.role}
+                className={primaryButtonClass}
+              >
+                {editSaving ? 'Saving...' : 'Save Role'}
+              </button>
+            </div>
+          </div>
+        }
+      >
         {editAdmin && (
-          <div className="space-y-5">
-            <div className={`rounded-xl px-4 py-3 ${isDark ? 'border border-white/10 bg-white/[0.03]' : 'border border-gray-200 bg-gray-50'}`}>
-              <div className={`text-sm font-medium ${txt}`}>{editAdmin.name}</div>
-              <div className={`text-xs ${sub}`}>{editAdmin.email}</div>
+          <div className="admin-scope space-y-4">
+            <div className="flex items-center gap-3 rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] p-3">
+              <UserAvatar
+                name={editAdmin.name}
+                email={editAdmin.email}
+                className="h-11 w-11 rounded-[var(--admin-radius-sm)]"
+                fallbackClassName={cn('text-sm font-bold', avatarClass(editAdmin.role))}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[13px] font-bold text-[var(--admin-text)]">{editAdmin.name}</div>
+                <div className="mt-0.5 truncate text-[12px] font-semibold text-[var(--admin-text-muted)]">{editAdmin.email}</div>
+              </div>
+              <span className={roleChipClass(editAdmin.role)}>{roleLabel(editAdmin.role)}</span>
             </div>
 
-            <div>
-              <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Role</label>
-              <select className="form-field" value={editRole} onChange={e => setEditRole(e.target.value as AdminRole)}>
+            <AdminField label="Role" htmlFor="edit-admin-role">
+              <select
+                id="edit-admin-role"
+                className="admin-input"
+                value={editRole}
+                onChange={event => setEditRole(event.target.value as AdminRole)}
+              >
                 <option value="admin">Admin</option>
                 <option value="superadmin">Super Admin</option>
               </select>
-            </div>
-
-            <div className="mt-6 flex justify-between gap-3">
-              <button onClick={() => void handleRemove()} disabled={editSaving} className="btn-danger !text-xs disabled:opacity-50">
-                Remove Admin
-              </button>
-
-              <div className="flex gap-3">
-                <button onClick={() => setEditAdmin(null)} className="btn-outline !rounded-xl !px-5 !py-2.5 !text-sm">
-                  Cancel
-                </button>
-                <button
-                  onClick={handleChangeRole}
-                  disabled={editSaving || editRole === editAdmin.role}
-                  className="btn-primary !rounded-xl !px-6 !py-2.5 !text-xs disabled:opacity-50"
-                >
-                  {editSaving ? 'Saving...' : 'Save Role'}
-                </button>
-              </div>
-            </div>
+            </AdminField>
           </div>
         )}
       </Modal>
     </div>
   )
 }
-

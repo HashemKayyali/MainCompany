@@ -1,22 +1,27 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState, type ReactNode } from 'react'
+import { Plus, Search } from 'lucide-react'
 import { useData } from '../../contexts/DataContext'
-import { useTheme } from '../../contexts/ThemeContext'
 import { useDialog } from '../../contexts/DialogContext'
 import * as productsApi from '../../services/products.service'
+import { deleteImage } from '../../services/storage.service'
 import Modal from '../../components/ui/Modal'
 import FramedImage from '../../components/ui/FramedImage'
 import MediaPlacementModal from '../../components/ui/MediaPlacementModal'
-import AdminActionButton from '../../components/admin/AdminActionButton'
-import AdminDetailModal from '../../components/admin/AdminDetailModal'
-import AdminEntityCard from '../../components/admin/AdminEntityCard'
 import AdminEditorWorkspace from '../../components/admin/AdminEditorWorkspace'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminViewToggle from '../../components/admin/AdminViewToggle'
+import AdminButton from '../../components/admin/primitives/AdminButton'
+import AdminBadge from '../../components/admin/primitives/AdminBadge'
+import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
+import AdminKebabMenu, { type AdminKebabItem } from '../../components/admin/AdminKebabMenu'
+import BidiText from '../../components/admin/BidiText'
 import useAdminCardView from '../../components/admin/useAdminCardView'
-import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
 import ProductCard from '../../components/product/ProductCard'
+import ProductAdminCard from './productForm/ProductAdminCard'
 import { slugify } from '../../utils/format'
 import { getErrorMessage } from '../../lib/errors'
+import { stripMediaTransform } from '../../utils/media-frame'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import type { Product } from '../../data/products/types'
 import { cn } from '../../utils/cn'
 import {
@@ -24,19 +29,49 @@ import {
   getProductDisplayOrder,
   sanitizeProductDisplayOrder,
 } from '../../utils/product-order'
-import { DEFAULT_FROM, DEFAULT_TO, EMPTY, TAB_ORDER, type TabKey } from './productForm/constants'
-import { normalizeHex, parseGradient } from './productForm/helpers'
+import { EMPTY, type TabKey } from './productForm/constants'
 import BasicTab from './productForm/BasicTab'
 import ContentTab from './productForm/ContentTab'
 import MediaTab from './productForm/MediaTab'
 import OptionsTab from './productForm/OptionsTab'
 import SettingsTab from './productForm/SettingsTab'
 
+const TABS_META: Array<{ k: TabKey; label: string }> = [
+  { k: 'basic', label: 'Basic' },
+  { k: 'content', label: 'Content' },
+  { k: 'media', label: 'Media' },
+  { k: 'options', label: 'Options' },
+  { k: 'settings', label: 'Pricing/Settings' },
+]
+
+const storageBase = (url: string) => stripMediaTransform(url || '')
+
+function DetailFact({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2.5">
+      <div className="text-[9.5px] font-extrabold uppercase tracking-[0.14em] text-[var(--admin-accent)]">
+        {label}
+      </div>
+      <div className="mt-1 text-[13px] font-semibold leading-5 text-[var(--admin-text)]">
+        {value}
+      </div>
+    </div>
+  )
+}
+
+function DetailSection({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="admin-card p-4">
+      <h3 className="admin-section-title">{title}</h3>
+      <div className="mt-3">{children}</div>
+    </section>
+  )
+}
 
 export default function AdminProductsPage() {
   const { products, categories, addProduct, updateProduct, deleteProduct, refreshAll } = useData()
-  const { isDark } = useTheme()
   const dialog = useDialog()
+  const isMdUp = useMediaQuery('(min-width: 768px)', true)
 
   const [modal, setModal] = useState(false)
   const [edit, setEdit] = useState<Product | null>(null)
@@ -48,37 +83,23 @@ export default function AdminProductsPage() {
   const [filterCat, setFilterCat] = useState<string>('all')
   const [activeGalleryIndex, setActiveGalleryIndex] = useState<number | null>(null)
   const [optimisticProducts, setOptimisticProducts] = useState<Product[] | null>(null)
-  const [reorderingSlug, setReorderingSlug] = useState<string | null>(null)
-  const { cardView, displayCardView, viewTransitionClassName, setCardView } = useAdminCardView('products')
+  const { cardView, setCardView } = useAdminCardView('products')
 
-  const txt = isDark ? 'text-white' : 'text-gray-900'
-  const sub = isDark ? 'text-purple-200/70' : 'text-gray-500'
-  const soft = isDark ? 'bg-[#101732]/92 ring-1 ring-inset ring-cyan-400/12' : 'bg-white border border-gray-200 shadow-sm'
-  const soft2 = isDark ? 'bg-[#0f1430]/88 ring-1 ring-inset ring-cyan-400/10' : 'bg-gray-50 border border-gray-100'
-  const chipOn = isDark
-    ? 'bg-[linear-gradient(180deg,rgba(24,56,78,0.96),rgba(14,36,54,0.98))] text-cyan-100 ring-1 ring-inset ring-cyan-300/24 shadow-[0_12px_28px_-18px_rgba(34,211,238,0.3)]'
-    : 'bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200 shadow-[0_10px_24px_-18px_rgba(124,58,237,0.22)]'
-  const chipOff = isDark
-    ? 'bg-[#0f1630]/96 text-purple-100/78 ring-1 ring-inset ring-cyan-400/10 shadow-[0_10px_24px_-18px_rgba(4,8,20,0.8)] hover:bg-[#111a39]'
-    : 'bg-white text-gray-600 ring-1 ring-inset ring-gray-200 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.14)] hover:bg-gray-50'
+  // Tracks storage objects uploaded during the current editor session so we
+  // can delete orphans when they are removed before saving or the editor is
+  // cancelled. (See storage cleanup notes below.)
+  const sessionUploadsRef = useRef<Set<string>>(new Set())
+
   const orderedProducts = optimisticProducts ?? products
-  const cardsLayoutClass = getAdminCardsLayoutClass(displayCardView)
-
-  const setBadgeGradient = (fromHex: string, toHex: string) => {
-    const from = normalizeHex(fromHex, DEFAULT_FROM)
-    const to = normalizeHex(toHex, DEFAULT_TO)
-    setForm((f: any) => ({ ...f, badgeColor: `linear-gradient(90deg, ${from}, ${to})`, badgeFromHex: from, badgeToHex: to }))
-  }
 
   const fallbackDisplayOrderForSlug = (slug?: string) => {
     const index = orderedProducts.findIndex(product => product.slug === slug)
     return index >= 0 ? index + 1 : orderedProducts.length + 1
   }
 
-
   const openNew = () => {
+    sessionUploadsRef.current = new Set()
     setEdit(null)
-    const g = parseGradient(EMPTY.badgeColor)
     setForm({
       ...EMPTY,
       notes: '',
@@ -87,8 +108,6 @@ export default function AdminProductsPage() {
       gallery: [],
       videoUrl: '',
       displayOrder: orderedProducts.length + 1,
-      badgeFromHex: g.fromHex,
-      badgeToHex: g.toHex,
       showPrice: true,
       rentalEnabled: true,
       saleEnabled: true,
@@ -103,8 +122,8 @@ export default function AdminProductsPage() {
   }
 
   const openEdit = (product: Product) => {
+    sessionUploadsRef.current = new Set()
     setEdit(product)
-    const g = parseGradient(product.badgeColor || EMPTY.badgeColor)
     setForm({
       ...product,
       notes: product.notes.join('\n'),
@@ -113,8 +132,6 @@ export default function AdminProductsPage() {
       gallery: [...product.gallery],
       videoUrl: product.videoUrl || '',
       displayOrder: getProductDisplayOrder(product, fallbackDisplayOrderForSlug(product.slug)),
-      badgeFromHex: g.fromHex,
-      badgeToHex: g.toHex,
       showPrice: product.showPrice !== false,
       rentalEnabled: product.rentalEnabled !== false,
       saleEnabled: product.saleEnabled !== false,
@@ -129,41 +146,12 @@ export default function AdminProductsPage() {
   }
 
   const closeModal = () => {
+    // Cancel/close: any images uploaded this session were never persisted to a
+    // saved product, so remove their orphan objects from storage.
+    sessionUploadsRef.current.forEach(url => void deleteImage(url))
+    sessionUploadsRef.current.clear()
     setModal(false)
     setActiveGalleryIndex(null)
-  }
-
-  const moveProductCard = async (slug: string, direction: -1 | 1) => {
-    if (reorderingSlug) return
-    const currentIndex = orderedProducts.findIndex(product => product.slug === slug)
-    if (currentIndex === -1) return
-    const nextIndex = currentIndex + direction
-    if (nextIndex < 0 || nextIndex >= orderedProducts.length) return
-
-    const reorderedProducts = buildReorderedProducts(orderedProducts, slug, nextIndex + 1)
-    const changedProducts = reorderedProducts.filter(product => {
-      const existing = orderedProducts.find(item => item.slug === product.slug)
-      if (!existing) return false
-      return getProductDisplayOrder(existing, fallbackDisplayOrderForSlug(existing.slug)) !== product.displayOrder
-    })
-
-    setOptimisticProducts(reorderedProducts)
-    setReorderingSlug(slug)
-
-    try {
-      await Promise.all(changedProducts.map(product => productsApi.update(product.slug, { displayOrder: product.displayOrder })))
-      await refreshAll()
-    } catch (err: unknown) {
-      setOptimisticProducts(null)
-      dialog.alert({
-        title: 'Reorder Failed',
-        message: getErrorMessage(err, 'Failed to update product order.'),
-        variant: 'danger',
-      })
-    } finally {
-      setReorderingSlug(null)
-      setOptimisticProducts(null)
-    }
   }
 
   const productCategoryName = (product: Product) =>
@@ -283,6 +271,20 @@ export default function AdminProductsPage() {
       }
 
       await refreshAll()
+
+      // Storage cleanup: when editing, delete storage objects for original
+      // images that are no longer referenced by the saved product. Comparison
+      // is on the underlying storage object (transform-stripped) so re-framing
+      // the same image is never treated as a removal.
+      if (edit) {
+        const keptBases = new Set((data.gallery || []).map(storageBase))
+        ;(edit.gallery || []).forEach(url => {
+          if (!keptBases.has(storageBase(url))) void deleteImage(url)
+        })
+      }
+      // Session uploads are now persisted; clear so closeModal does not remove them.
+      sessionUploadsRef.current.clear()
+
       setOptimisticProducts(null)
       closeModal()
     } catch (err: unknown) {
@@ -324,8 +326,26 @@ export default function AdminProductsPage() {
     }
   }
 
-  const addGalleryImage = (url: string) => setForm((f: any) => ({ ...f, gallery: [...(f.gallery || []), url] }))
-  const removeGalleryImage = (idx: number) => setForm((f: any) => ({ ...f, gallery: (f.gallery || []).filter((_: any, i: number) => i !== idx) }))
+  const addGalleryImage = (url: string) => {
+    sessionUploadsRef.current.add(storageBase(url))
+    setForm((f: any) => ({ ...f, gallery: [...(f.gallery || []), url] }))
+  }
+  const removeGalleryImage = (idx: number) =>
+    setForm((f: any) => {
+      const gallery = [...(f.gallery || [])]
+      const [removed] = gallery.splice(idx, 1)
+      if (removed) {
+        const base = storageBase(removed)
+        const stillReferenced = gallery.some((url: string) => storageBase(url) === base)
+        // Only auto-delete objects uploaded in THIS session. Original saved
+        // images are left untouched here and handled on save (so Cancel is safe).
+        if (!stillReferenced && sessionUploadsRef.current.has(base)) {
+          void deleteImage(removed)
+          sessionUploadsRef.current.delete(base)
+        }
+      }
+      return { ...f, gallery }
+    })
   const moveGalleryImage = (idx: number, dir: -1 | 1) =>
     setForm((f: any) => {
       const gallery = [...(f.gallery || [])]
@@ -352,81 +372,6 @@ export default function AdminProductsPage() {
   const removeOption = (idx: number) => setForm((f: any) => ({ ...f, quickOptions: (f.quickOptions || []).filter((_: any, i: number) => i !== idx) }))
 
   const catName = (id: string) => categories.find(category => category.id === id)?.name || '-'
-
-  const renderCardPrice = (product: Product) => (
-    <div
-      className={cn(
-        'flex min-w-0 items-end justify-between gap-3 rounded-[16px] px-1 py-0.5',
-        isDark ? 'border-b border-cyan-400/10' : 'border-b border-violet-100'
-      )}
-    >
-      <div className="min-w-0">
-        <div className={`text-[9px] font-mono font-semibold uppercase tracking-[0.18em] ${sub}`}>Day Price</div>
-        {product.showPrice === false ? (
-          <div className="mt-1 flex items-end gap-2">
-            <div className="flex items-end gap-1.5 opacity-45">
-              <span className={cn('font-sans text-[1.15rem] font-semibold leading-none', txt)}>
-                {product.rentalPricePerDay}
-              </span>
-              <span className={`pb-[1px] text-[9px] font-mono uppercase tracking-[0.16em] ${sub}`}>
-                {product.currency}/day
-              </span>
-            </div>
-            <span className={cn(
-              'mb-[1px] rounded-full px-2 py-[2px] text-[8.5px] font-mono font-bold uppercase tracking-[0.16em]',
-              isDark ? 'bg-purple-400/15 text-purple-200/80' : 'bg-violet-100 text-violet-600'
-            )}>
-              Hidden
-            </span>
-          </div>
-        ) : (
-          <div className="mt-1 flex items-end gap-1.5">
-            <span className={cn('font-sans text-[1.15rem] font-semibold leading-none', txt)}>
-              {product.rentalPricePerDay}
-            </span>
-            <span className={`pb-[1px] text-[9px] font-mono uppercase tracking-[0.16em] ${sub}`}>
-              {product.currency}/day
-            </span>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-
-  const Step = ({ k, label, hint }: { k: TabKey; label: string; hint: string }) => {
-    const active = tab === k
-    const stepIndex = TAB_ORDER.indexOf(k) + 1
-    return (
-      <button
-        onClick={() => setTab(k)}
-        type="button"
-        aria-current={active ? 'step' : undefined}
-        className={cn(
-          'group flex min-w-[150px] flex-1 items-center gap-2.5 rounded-[14px] px-3 py-2.5 text-left transition-all active:translate-y-[1px]',
-          active
-            ? 'bg-white shadow-[0_12px_26px_-16px_rgba(89,23,196,0.5)] ring-1 ring-inset ring-violet-300'
-            : 'bg-transparent hover:bg-white/70'
-        )}
-      >
-        <span
-          className={cn(
-            'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[12px] font-black tabular-nums transition-all',
-            active
-              ? 'bg-[linear-gradient(135deg,#7c3aed,#9d6bff)] text-white shadow-[0_6px_14px_-6px_rgba(124,58,237,0.65)]'
-              : 'bg-violet-100 text-[#7126e3] group-hover:bg-violet-200'
-          )}
-        >
-          {stepIndex}
-        </span>
-        <span className="min-w-0 leading-tight">
-          <span className={cn('block truncate text-[13px] font-extrabold', active ? 'text-[#1a0b3d]' : 'text-[#4b3a63]')}>
-            {label}
-          </span>
-          <span className="mt-0.5 block truncate text-[10.5px] font-semibold text-[#6b5a82]">{hint}</span>
-        </span>
-      </button>
-    )
-  }
 
   const BadgePill = ({ p }: { p: Product }) => {
     if (!p.badge) return null
@@ -483,268 +428,353 @@ export default function AdminProductsPage() {
     return (
       <div
         aria-hidden="true"
-        className="mx-auto max-w-[320px] select-none [&_a]:pointer-events-none [&_button]:pointer-events-none [&_input]:pointer-events-none [&_select]:pointer-events-none [&_textarea]:pointer-events-none"
+        className="mx-auto max-w-[300px] select-none [&_a]:pointer-events-none [&_button]:pointer-events-none [&_input]:pointer-events-none [&_select]:pointer-events-none [&_textarea]:pointer-events-none"
       >
-        <ProductCard product={preview} />
+        <ProductCard product={preview} revealOnScroll={false} />
       </div>
     )
   }
 
+  const chipClass = (active: boolean) =>
+    cn(
+      'inline-flex min-h-[38px] shrink-0 snap-start items-center justify-center whitespace-nowrap rounded-full border px-3.5 text-[12.5px] font-bold transition',
+      active
+        ? 'border-transparent bg-[var(--admin-accent)] text-white'
+        : 'border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-text-muted)] hover:border-[var(--admin-accent)] hover:text-[var(--admin-accent)]'
+    )
+
+  const useTableView = cardView === 'list' && isMdUp
+
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4.5">
+    <div className="flex h-full min-h-0 flex-col gap-4">
       <AdminPageHeader
         title="Products"
         actions={
           <>
             <AdminViewToggle value={cardView} onChange={setCardView} />
-            <button onClick={openNew} className="btn-admin-create">
-              + Add Product
-            </button>
+            <AdminButton size="sm" onClick={openNew}>
+              <Plus className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
+              Add Product
+            </AdminButton>
           </>
         }
       />
 
-      <div
-        className={cn(
-          'min-h-0 flex flex-1 flex-col rounded-[22px] p-3 sm:p-4',
-          isDark
-            ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(8,11,27,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_28px_90px_-58px_rgba(7,15,36,0.96)]'
-            : 'bg-white ring-1 ring-inset ring-gray-200'
-        )}
-      >
-        <div className="-mx-0.5 mb-3 flex gap-2 overflow-x-auto px-0.5 pb-1 sm:flex-wrap">
-          <button
-            onClick={() => setFilterCat('all')}
-            className={cn('inline-flex min-h-[42px] shrink-0 items-center justify-center rounded-[16px] px-4 py-2.5 text-[13px] font-semibold transition active:translate-y-[1px] sm:text-[13.5px]', filterCat === 'all' ? chipOn : chipOff)}
-          >
+      <div className="admin-card flex min-h-0 flex-1 flex-col p-3 sm:p-4">
+        {/* Toolbar */}
+        <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center">
+          <div className="relative flex-1">
+            <Search
+              className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-text-muted)]"
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+            <input
+              value={q}
+              onChange={e => setQ(e.target.value)}
+              className="admin-input ps-9 pe-16"
+              placeholder="Search by name, badge, category..."
+              aria-label="Search products"
+            />
+            <span className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-2 py-0.5 text-[10.5px] font-bold tabular-nums text-[var(--admin-text-muted)]">
+              {filtered.length}/{products.length}
+            </span>
+          </div>
+        </div>
+
+        {/* Category chips */}
+        <div className="mt-2.5 flex snap-x gap-1.5 overflow-x-auto pb-1 [scrollbar-width:thin]">
+          <button type="button" onClick={() => setFilterCat('all')} className={chipClass(filterCat === 'all')}>
             All ({orderedProducts.length})
           </button>
-
           {productCats.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setFilterCat(cat)}
-              className={cn('inline-flex min-h-[42px] shrink-0 items-center justify-center rounded-[16px] px-4 py-2.5 text-[13px] font-semibold transition active:translate-y-[1px] sm:text-[13.5px]', filterCat === cat ? chipOn : chipOff)}
-            >
+            <button key={cat} type="button" onClick={() => setFilterCat(cat)} className={chipClass(filterCat === cat)}>
               {cat} ({countForCat(cat)})
             </button>
           ))}
         </div>
 
-        <div className="mb-3 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-          <div className={`flex min-h-[46px] w-full items-center gap-2.5 rounded-[18px] px-3.5 py-2.5 ${soft}`}>
-            <span className={isDark ? 'text-purple-200/60' : 'text-gray-400'}>⌕</span>
-            <input
-              value={q}
-              onChange={e => setQ(e.target.value)}
-              className={`min-w-0 flex-1 bg-transparent text-[13px] outline-none sm:text-[13.5px] ${isDark ? 'placeholder:text-purple-200/40' : 'placeholder:text-gray-400'}`}
-              placeholder="Search by name, badge, category..."
-            />
-            <span className={`shrink-0 rounded-xl px-2.5 py-1 text-[11px] font-mono ${isDark ? 'text-purple-200/60 ring-1 ring-inset ring-cyan-400/10' : 'border-gray-200 text-gray-500'}`}>
-              {filtered.length}/{products.length}
-            </span>
-          </div>
-          <span className={`text-[12.5px] leading-5 ${sub}`}>Products are organized by category</span>
-        </div>
-
+        {/* Results */}
         {filtered.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center p-8 text-center">
-            <span className="text-2xl">📦</span>
-            <p className={`mt-4 text-[1rem] font-semibold ${txt}`}>No products match this filter.</p>
-            <button onClick={openNew} className="btn-admin-create !mt-5">
-              + Add Product
-            </button>
+          <div className="flex flex-1 items-center justify-center py-8">
+            <AdminEmptyState
+              title="No products match this filter"
+              description="Try a different search or category, or add a new product."
+              action={
+                <AdminButton size="sm" onClick={openNew}>
+                  <Plus className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
+                  Add Product
+                </AdminButton>
+              }
+            />
+          </div>
+        ) : useTableView ? (
+          <div className="mt-3 min-h-0 flex-1 overflow-y-auto">
+            <div className="admin-table-wrap">
+              <table className="w-full border-collapse text-start">
+                <thead className="sticky top-0 z-10 bg-[var(--admin-surface-2)]">
+                  <tr className="text-start text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">
+                    <th className="px-3 py-2.5 text-start font-bold">Product</th>
+                    <th className="px-3 py-2.5 text-start font-bold">Category</th>
+                    <th className="px-3 py-2.5 text-start font-bold">Price</th>
+                    <th className="px-3 py-2.5 text-start font-bold">Status</th>
+                    <th className="px-3 py-2.5 text-end font-bold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map(product => {
+                    const showRentalPrice = product.rentalEnabled !== false && product.showPrice !== false
+                    return (
+                      <tr key={product.slug} className="border-t border-[var(--admin-border)] align-middle">
+                        <td className="px-3 py-2.5">
+                          <div className="flex max-w-[300px] items-center gap-2.5">
+                            <div className="h-11 w-14 shrink-0 overflow-hidden rounded-[10px] bg-[var(--admin-surface-2)]">
+                              {product.heroImage ? (
+                                <FramedImage media={product.heroImage} alt={product.name} className="h-full w-full" fallbackTransform={{ fit: 'cover' }} />
+                              ) : null}
+                            </div>
+                            <div className="min-w-0 text-start">
+                              <div className="truncate text-[13px] font-bold text-[var(--admin-text)]"><BidiText>{product.name}</BidiText></div>
+                              <div className="truncate text-[11px] text-[var(--admin-text-muted)]">{product.shortDescription ? <BidiText>{product.shortDescription}</BidiText> : '-'}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <AdminBadge tone="accent">{productCategoryName(product)}</AdminBadge>
+                        </td>
+                        <td className="px-3 py-2.5 text-[13px] font-semibold tabular-nums text-[var(--admin-text)]">
+                          {showRentalPrice ? `${product.rentalPricePerDay} ${product.currency}` : 'On request'}
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="flex flex-wrap gap-1.5">
+                            {product.featured && <AdminBadge tone="accent">Featured</AdminBadge>}
+                            {product.showPrice === false && <AdminBadge tone="warning">Price hidden</AdminBadge>}
+                            {product.rentalEnabled === false && product.saleEnabled === false && <AdminBadge tone="danger">Off storefront</AdminBadge>}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <AdminButton size="sm" variant="outline" onClick={() => setDetails(product)}>Details</AdminButton>
+                            <AdminButton size="sm" onClick={() => openEdit(product)}>Edit</AdminButton>
+                            <AdminKebabMenu
+                              label="More product actions"
+                              items={[{ label: 'Delete', onSelect: () => void removeProduct(product.slug), tone: 'danger' } as AdminKebabItem]}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
-          <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
-            <div className={cn('origin-top p-1 transition-[opacity,transform,filter] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform,filter] sm:p-2', viewTransitionClassName)}>
-            <div className={cardsLayoutClass}>
-              {filtered.map((product) => {
-                return (
-                  <div key={product.slug} className="relative">
-                    <AdminEntityCard
-                      variant={getAdminEntityVariant(displayCardView)}
-                      className={displayCardView === 'grid' ? '!h-auto' : undefined}
-                      minHeightClassName={displayCardView === 'grid' ? 'min-h-[304px]' : 'min-h-[96px]'}
-                      bodyClassName={displayCardView === 'grid' ? 'gap-1.75 p-2.75' : 'gap-1.5 p-2.5'}
-                      titleBlockClassName={displayCardView === 'grid' ? 'min-h-[4.1rem]' : undefined}
-                      childrenWrapClassName={displayCardView === 'grid' ? 'pt-0.5' : 'pt-0'}
-                      actionsWrapClassName={displayCardView === 'grid' ? 'pt-1' : 'xl:w-[118px] xl:self-center'}
-                      gridActionsPlacement={displayCardView === 'grid' ? 'flow' : 'bottom'}
-                      listMediaWrapClassName="md:self-center"
-                      listMediaFrameClassName="!h-[72px] !w-[120px] md:!h-[76px] md:!w-[124px] !rounded-[16px] !bg-transparent !ring-0 !p-0"
-                      media={
-                        product.heroImage ? (
-                          <div
-                            className={cn(
-                              'aspect-[16/10] overflow-hidden rounded-[18px] p-[2px]',
-                              isDark
-                                ? 'bg-[linear-gradient(145deg,rgba(14,24,48,0.98),rgba(11,19,39,0.96))] ring-1 ring-inset ring-cyan-400/16 shadow-[0_20px_40px_-30px_rgba(34,211,238,0.32)]'
-                                : 'bg-white ring-1 ring-inset ring-violet-200 shadow-[0_18px_36px_-28px_rgba(124,58,237,0.22)]'
-                            )}
-                          >
-                            <div className={cn('h-full w-full overflow-hidden rounded-[16px]', isDark ? 'bg-[#07101f]' : 'bg-gray-50')}>
-                              <FramedImage
-                                media={product.heroImage}
-                                alt={product.name}
-                                className="h-full w-full transition-transform duration-700 group-hover:scale-[1.035]"
-                                fallbackTransform={{ fit: 'cover' }}
-                              />
-                            </div>
-                          </div>
-                        ) : (
-                          <div
-                            className={cn(
-                              'flex aspect-[16/10] items-center justify-center rounded-[18px] p-[2px]',
-                              isDark
-                                ? 'bg-[linear-gradient(145deg,rgba(14,24,48,0.98),rgba(11,19,39,0.96))] ring-1 ring-inset ring-cyan-400/16'
-                                : 'bg-white ring-1 ring-inset ring-violet-200'
-                            )}
-                          >
-                            <div className={cn('flex h-full w-full items-center justify-center rounded-[16px]', soft2)}>
-                              <div className={`text-[10px] font-mono uppercase tracking-[0.24em] ${sub}`}>No image</div>
-                            </div>
-                          </div>
-                        )
-                      }
-                      mediaOverlayLeft={
-                        product.featured ? <span className={`rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.22em] ${isDark ? 'border-prism-violet/30 bg-prism-violet/15 text-prism-violet' : 'border-violet-200 bg-violet-50 text-violet-700'}`}>Featured</span> : undefined
-                      }
-                      title={product.name}
-                      subtitle={product.shortDescription || undefined}
-                      children={
-                        displayCardView === 'grid' ? (
-                          <div className="space-y-2">
-                            {renderCardPrice(product)}
-                          </div>
-                        ) : (
-                            <div className="flex flex-wrap items-center gap-2.5">
-                              <div className="min-w-[162px] flex-1">{renderCardPrice(product)}</div>
-                            </div>
-                          )
-                        }
-                      actions={
-                        <>
-                          <AdminActionButton tone="primary" onClick={event => { event.stopPropagation(); setDetails(product) }}>Details</AdminActionButton>
-                          <AdminActionButton onClick={event => { event.stopPropagation(); openEdit(product) }}>Edit</AdminActionButton>
-                          <AdminActionButton tone="danger" onClick={event => { event.stopPropagation(); void removeProduct(product.slug) }}>Delete</AdminActionButton>
-                        </>
-                      }
-                    />
-                  </div>
-                )
-              })}
-            </div>
+          <div className="mt-3 min-h-0 flex-1 overflow-y-auto pe-0.5">
+            <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+              {filtered.map(product => (
+                <ProductAdminCard
+                  key={product.slug}
+                  product={product}
+                  categoryName={productCategoryName(product)}
+                  onDetails={() => setDetails(product)}
+                  onEdit={() => openEdit(product)}
+                  onDelete={() => void removeProduct(product.slug)}
+                />
+              ))}
             </div>
           </div>
         )}
       </div>
 
-      <AdminDetailModal
+      <Modal
         open={!!details}
         onClose={() => setDetails(null)}
         title={details?.name || 'Product Details'}
-        subtitle={details ? 'This panel moves the deeper product information out of the grid, so the product card can stay focused and easier to scan.' : undefined}
-        media={details ? (details.heroImage ? <div className="aspect-[16/9] overflow-hidden"><FramedImage media={details.heroImage} alt={details.name} className="h-full w-full" fallbackTransform={{ fit: 'cover' }} /></div> : <div className={`flex aspect-[16/9] items-center justify-center ${soft2}`}><div className={`text-sm ${sub}`}>No hero image uploaded yet.</div></div>) : null}
-        badges={details ? (<><BadgePill p={details} /><span className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${isDark ? 'border-white/10 bg-white/[0.04] text-purple-100/80' : 'border-gray-200 bg-white text-gray-700'}`}>{catName(details.categoryId)}</span>{details.featured && <span className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${isDark ? 'border-prism-violet/30 bg-prism-violet/15 text-prism-violet' : 'border-violet-200 bg-violet-50 text-violet-700'}`}>Featured</span>}</>) : null}
-        summaryFacts={details ? [
-          { label: 'Slug', value: <span className="font-mono text-xs">{details.slug}</span> },
-          { label: 'Category', value: catName(details.categoryId) },
-          { label: 'Day Price', value: details.showPrice === false ? 'Hidden' : `${details.rentalPricePerDay} ${details.currency}` },
-          { label: 'Rental', value: details.rentalEnabled !== false ? 'Enabled' : 'Disabled' },
-          { label: 'Sales', value: details.saleEnabled !== false ? 'Enabled' : 'Disabled' },
-          { label: 'Stock', value: `${details.stockActive ?? 0} active / ${details.stockTotal ?? 0} total` },
-        ] : []}
-        sections={details ? [{ title: 'Descriptions', content: <div className="space-y-3"><p className={`text-sm font-semibold ${txt}`}>Short Description</p><p className={`text-sm leading-6 ${isDark ? 'text-purple-100/80' : 'text-gray-700'}`}>{details.shortDescription || 'No short description yet.'}</p><p className={`pt-2 text-sm font-semibold ${txt}`}>Long Description</p><p className={`text-sm leading-6 ${isDark ? 'text-purple-100/80' : 'text-gray-700'}`}>{details.description || 'No long description yet.'}</p></div> }, { title: 'Configuration', facts: [{ label: 'Gallery items', value: String(details.gallery.length) }, { label: 'Video', value: details.videoUrl ? 'Uploaded' : 'Not uploaded' }, { label: 'Quick options', value: String(details.quickOptions.length) }], content: <div className="space-y-3">{details.notes.length > 0 ? <div><p className={`mb-2 text-[11px] font-mono uppercase tracking-[0.22em] ${sub}`}>Notes</p><div className="flex flex-wrap gap-2">{details.notes.slice(0, 6).map(note => <span key={note} className={`rounded-full border px-3 py-1 text-[11px] ${isDark ? 'border-white/10 bg-white/[0.04] text-purple-100/80' : 'border-gray-200 bg-gray-50 text-gray-600'}`}>{note}</span>)}</div></div> : null}{details.quickOptions.length > 0 ? <div><p className={`mb-2 text-[11px] font-mono uppercase tracking-[0.22em] ${sub}`}>Quick Options</p><div className="space-y-2">{details.quickOptions.map(option => <div key={option.label} className={`rounded-xl border px-3 py-2 ${isDark ? 'border-white/10 bg-white/[0.03]' : 'border-gray-100 bg-gray-50'}`}><div className={`text-sm font-semibold ${txt}`}>{option.label}</div><div className={`mt-1 text-xs ${sub}`}>{option.values.join(', ') || 'No values'}</div></div>)}</div></div> : null}</div> }] : []}
-        actions={details ? (<><AdminActionButton onClick={() => { setDetails(null); openEdit(details) }}>Edit Product</AdminActionButton><AdminActionButton tone="danger" onClick={() => { setDetails(null); void removeProduct(details.slug) }}>Delete Product</AdminActionButton></>) : null}
-      />
+        size="2xl"
+        bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+        footer={
+          details ? (
+            <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
+              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="sm:min-w-[96px]">
+                Close
+              </AdminButton>
+              <AdminButton
+                variant="outline"
+                onClick={() => {
+                  const product = details
+                  setDetails(null)
+                  openEdit(product)
+                }}
+                className="sm:min-w-[124px]"
+              >
+                Edit Product
+              </AdminButton>
+              <AdminButton
+                variant="danger"
+                size="sm"
+                onClick={() => {
+                  const slug = details.slug
+                  setDetails(null)
+                  void removeProduct(slug)
+                }}
+                className="sm:min-w-[124px]"
+              >
+                Delete Product
+              </AdminButton>
+            </div>
+          ) : undefined
+        }
+      >
+        {details && (
+          <div className="admin-scope space-y-4">
+            <section className="admin-card overflow-hidden">
+              <div className="grid gap-0 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
+                <div className="bg-[var(--admin-surface-2)] p-3">
+                  <div className="aspect-[4/3] overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)]">
+                    {details.heroImage ? (
+                      <FramedImage media={details.heroImage} alt={details.name} className="h-full w-full" fallbackTransform={{ fit: 'cover' }} />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-[12px] font-semibold text-[var(--admin-text-muted)]">
+                        No hero image uploaded
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex min-w-0 flex-col justify-between gap-4 p-4">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <AdminBadge tone="accent">{catName(details.categoryId)}</AdminBadge>
+                      <BadgePill p={details} />
+                      {details.featured && <AdminBadge tone="accent">Featured</AdminBadge>}
+                      {details.showPrice === false && <AdminBadge tone="warning">Price hidden</AdminBadge>}
+                      {details.rentalEnabled === false && details.saleEnabled === false && <AdminBadge tone="danger">Off storefront</AdminBadge>}
+                    </div>
+                    <h3 className="mt-3 font-sans text-[1.25rem] font-black leading-tight tracking-[-0.03em] text-[var(--admin-text)]">
+                      {details.name}
+                    </h3>
+                    <p className="mt-2 text-[13px] leading-6 text-[var(--admin-text-muted)]">
+                      {details.shortDescription || 'No short description added.'}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <DetailFact label="Price" value={details.showPrice === false ? 'Hidden' : `${details.rentalPricePerDay} ${details.currency}`} />
+                    <DetailFact label="Stock" value={`${details.stockActive ?? 0} active / ${details.stockTotal ?? 0} total`} />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+              <DetailFact label="Category" value={catName(details.categoryId)} />
+              <DetailFact label="Badge" value={details.badge || 'None'} />
+              <DetailFact label="Rental" value={details.rentalEnabled !== false ? 'Enabled' : 'Disabled'} />
+              <DetailFact label="Sale" value={details.saleEnabled !== false ? 'Enabled' : 'Disabled'} />
+              <DetailFact label="Gallery" value={`${details.gallery.length} image${details.gallery.length === 1 ? '' : 's'}`} />
+              <DetailFact label="Video" value={details.videoUrl ? 'Uploaded' : 'Not uploaded'} />
+              <DetailFact label="Options" value={`${details.quickOptions.length} quick option${details.quickOptions.length === 1 ? '' : 's'}`} />
+              <DetailFact label="Slug" value={<span dir="ltr" data-i18n-skip className="break-all font-mono text-[11px]">{details.slug}</span>} />
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <DetailSection title="Short Description">
+                <p className="text-[13px] leading-6 text-[var(--admin-text-muted)]">
+                  {details.shortDescription || 'No short description added.'}
+                </p>
+              </DetailSection>
+
+              {details.description && (
+                <DetailSection title="Long Description">
+                  <p className="text-[13px] leading-6 text-[var(--admin-text-muted)]">
+                    {details.description}
+                  </p>
+                </DetailSection>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
 
       <Modal
         open={modal}
         onClose={closeModal}
         title={edit ? 'Edit Product' : 'Add Product'}
         persistent
-        size="2xl"
-        bodyClassName="px-3.5 pb-3.5 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+        size="3xl"
+        bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+        footer={
+          <div className="admin-scope flex flex-col items-stretch gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-[11px] leading-5 text-[var(--admin-text-muted)]">
+              Hero image: <span className="font-semibold text-[var(--admin-text)]">{(form.gallery || [])[0] ? 'Ready' : 'None'}</span>
+              {' | '}Video: <span className="font-semibold text-[var(--admin-text)]">{form.videoUrl ? 'Uploaded' : 'None'}</span>
+            </div>
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:justify-end">
+              <AdminButton variant="ghost" onClick={closeModal} disabled={saving} className="sm:min-w-[110px]">
+                Cancel
+              </AdminButton>
+              <AdminButton onClick={save} loading={saving} className="sm:min-w-[140px]">
+                {edit ? 'Save Changes' : 'Add Product'}
+              </AdminButton>
+            </div>
+          </div>
+        }
       >
         <AdminEditorWorkspace
           preview={renderProductPreview()}
           previewTitle="Live Product Card"
-          
-          footer={
-            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className={cn('text-[11px] leading-5', sub)}>
-                Hero image: <span className={txt}>{(form.gallery || [])[0] ? 'Ready' : 'None'}</span>
-                {' | '}Video: <span className={txt}>{form.videoUrl ? 'Uploaded' : 'None'}</span>
-              </div>
-              <div className="flex flex-col gap-2.5 sm:flex-row sm:justify-end">
-                <button onClick={closeModal} className="btn-outline !w-full !rounded-xl !px-4 !py-2 !text-sm sm:!w-auto">
-                  Cancel
-                </button>
-                <button
-                  onClick={save}
-                  disabled={saving}
-                  className="btn-primary !w-full !rounded-xl !px-5 !py-2 !text-sm disabled:opacity-50 sm:!w-auto"
-                >
-                  {saving ? 'Saving...' : edit ? 'Save Changes' : 'Add Product'}
-                </button>
-              </div>
-            </div>
-          }
+          previewHint="This is the exact public storefront card customers will see."
         >
-          <div className="flex flex-wrap gap-1.5 rounded-[18px] border border-violet-200/70 bg-[linear-gradient(180deg,#faf6ff,#f1e9ff)] p-1.5">
-            <Step k="basic" label="Basic" hint="Name / Category / Badge" />
-            <Step k="content" label="Content" hint="Descriptions / Notes" />
-            <Step k="media" label={`Media (${(form.gallery || []).length}${form.videoUrl ? ' + video' : ''})`} hint="Images / Video" />
-            <Step k="options" label="Options" hint="Quick options / Features" />
-            <Step k="settings" label="Settings" hint="Pricing / Rental / Inventory" />
+          {/* Compact tab bar: scrollable pills on mobile, inline on desktop */}
+          <div className="flex snap-x gap-1.5 overflow-x-auto rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] p-1.5 [scrollbar-width:thin] md:grid md:grid-cols-5 md:overflow-visible">
+            {TABS_META.map(meta => {
+              const active = tab === meta.k
+              const count = meta.k === 'media' ? (form.gallery || []).length : 0
+              return (
+                <button
+                  key={meta.k}
+                  type="button"
+                  onClick={() => setTab(meta.k)}
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'inline-flex min-h-[44px] shrink-0 snap-start items-center justify-center gap-1.5 rounded-[var(--admin-radius-sm)] px-3.5 text-center text-[12.5px] font-bold transition md:min-h-[40px] md:w-full md:px-2',
+                    active
+                      ? 'bg-[var(--admin-accent)] text-white shadow-[0_8px_18px_-10px_rgba(89,23,196,0.5)]'
+                      : 'text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface)] hover:text-[var(--admin-text)]'
+                  )}
+                >
+                  {meta.label}
+                  {meta.k === 'media' && count > 0 && (
+                    <span className={cn('rounded-full px-1.5 text-[10px] font-extrabold tabular-nums', active ? 'bg-white/25' : 'bg-[var(--admin-accent-soft)] text-[var(--admin-accent)]')}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
           </div>
 
-          {tab === 'basic' && (
-            <BasicTab
-              form={form}
-              setForm={setForm}
-              categories={categories}
-              setBadgeGradient={setBadgeGradient}
-              isDark={isDark}
-              sub={sub}
-              soft2={soft2}
-            />
-          )}
-
-          {tab === 'content' && <ContentTab form={form} setForm={setForm} sub={sub} />}
-
-          {tab === 'media' && (
-            <MediaTab
-              form={form}
-              setForm={setForm}
-              setActiveGalleryIndex={setActiveGalleryIndex}
-              moveGalleryImage={moveGalleryImage}
-              removeGalleryImage={removeGalleryImage}
-              addGalleryImage={addGalleryImage}
-              renderProductPreview={renderProductPreview}
-              previewProduct={previewProduct}
-              isDark={isDark}
-              sub={sub}
-            />
-          )}
-
-          {tab === 'options' && (
-            <OptionsTab
-              form={form}
-              setForm={setForm}
-              addOption={addOption}
-              updateOption={updateOption}
-              removeOption={removeOption}
-              isDark={isDark}
-              sub={sub}
-              soft2={soft2}
-            />
-          )}
-
-          {tab === 'settings' && (
-            <SettingsTab form={form} setForm={setForm} isDark={isDark} sub={sub} soft2={soft2} txt={txt} />
-          )}
+          <div className="mt-3.5">
+            {tab === 'basic' && <BasicTab form={form} setForm={setForm} categories={categories} />}
+            {tab === 'content' && <ContentTab form={form} setForm={setForm} />}
+            {tab === 'media' && (
+              <MediaTab
+                form={form}
+                setForm={setForm}
+                setActiveGalleryIndex={setActiveGalleryIndex}
+                moveGalleryImage={moveGalleryImage}
+                removeGalleryImage={removeGalleryImage}
+                addGalleryImage={addGalleryImage}
+                renderProductPreview={renderProductPreview}
+                previewProduct={previewProduct}
+              />
+            )}
+            {tab === 'options' && (
+              <OptionsTab form={form} setForm={setForm} addOption={addOption} updateOption={updateOption} removeOption={removeOption} />
+            )}
+            {tab === 'settings' && <SettingsTab form={form} setForm={setForm} />}
+          </div>
         </AdminEditorWorkspace>
       </Modal>
 
@@ -753,7 +783,7 @@ export default function AdminProductsPage() {
         media={activeGalleryIndex !== null ? (form.gallery || [])[activeGalleryIndex] : ''}
         title="Adjust Product Image"
         type="image"
-        aspectRatio={16 / 10}
+        aspectRatio={4 / 3}
         defaultFit="cover"
         hint="Choose what stays visible inside product cards and previews."
         contextPreview={media =>
@@ -766,7 +796,7 @@ export default function AdminProductsPage() {
           })
         }
         contextPreviewTitle="Product Card Result"
-        contextPreviewHint="Refine the image while seeing the real storefront card result on the right."
+        contextPreviewHint="Refine the image while seeing the real storefront card result."
         onApply={media => {
           if (activeGalleryIndex === null) return
           updateGalleryFrame(activeGalleryIndex, media)

@@ -1,17 +1,21 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronRight, Menu } from 'lucide-react'
 import { usePageMeta } from '../../hooks/usePageMeta'
+import { useLocalStorage } from '../../hooks/useLocalStorage'
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import { useUser } from '../../contexts/UserContext'
 import Sidebar from '../../components/admin/Sidebar'
+import AdminBottomBar from '../../components/admin/AdminBottomBar'
+import AdminUserMenu from '../../components/admin/AdminUserMenu'
 import LanguageSwitcher from '../../components/layout/LanguageSwitcher'
 import { useI18n } from '../../contexts/LanguageContext'
-import UserAvatar from '../../components/ui/UserAvatar'
 import AnimatedBackground from '../../components/theme/AnimatedBackground'
 import { cn } from '../../utils/cn'
+import '../../styles/admin.css'
 
 type Crumb = { label: string; to?: string }
-
-const ADMIN_HEADER_HEIGHT = 72
 
 function usePageTitle(pathname: string) {
   return useMemo(() => {
@@ -78,44 +82,127 @@ function buildBreadcrumbs(pathname: string): Crumb[] {
   return crumbs
 }
 
-function Icon({ name, className }: { name: 'menu' | 'logout' | 'chev' | 'external'; className?: string }) {
-  const cls = `h-[18px] w-[18px] ${className || ''}`
-  switch (name) {
-    case 'menu':
-      return (
-        <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        </svg>
-      )
-    case 'logout':
-      return (
-        <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M10 7V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-1" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-          <path d="M3 12h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-          <path d="M7 8l-4 4 4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )
-    case 'chev':
-      return (
-        <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )
-    case 'external':
-      return (
-        <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M14 5h5v5M19 5l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )
-  }
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'textarea:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ')
+
+function getFocusableElements(container: HTMLElement | null) {
+  if (!container) return []
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    element => !element.hasAttribute('disabled') && element.getAttribute('aria-hidden') !== 'true'
+  )
+}
+
+/**
+ * Overlay navigation drawer for < lg viewports. Slides in from the start
+ * side (dir-aware), traps focus, closes on Escape/backdrop, and locks
+ * body scroll while open.
+ */
+function MobileDrawer({
+  open,
+  onClose,
+  dir,
+  label,
+  children,
+}: {
+  open: boolean
+  onClose: () => void
+  dir: 'ltr' | 'rtl'
+  label: string
+  children: ReactNode
+}) {
+  const panelRef = useRef<HTMLDivElement | null>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
+
+  useBodyScrollLock(open)
+
+  useEffect(() => {
+    if (!open) return
+
+    previousFocusRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null
+
+    const frame = window.requestAnimationFrame(() => {
+      getFocusableElements(panelRef.current)[0]?.focus()
+    })
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onClose()
+        return
+      }
+      if (event.key !== 'Tab') return
+
+      const focusable = getFocusableElements(panelRef.current)
+      if (!focusable.length) return
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      const active = document.activeElement instanceof HTMLElement ? document.activeElement : null
+
+      if (event.shiftKey) {
+        if (active === first || !panelRef.current?.contains(active)) {
+          event.preventDefault()
+          last.focus()
+        }
+        return
+      }
+
+      if (active === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.cancelAnimationFrame(frame)
+      document.removeEventListener('keydown', handleKeyDown)
+      previousFocusRef.current?.focus()
+    }
+  }, [open, onClose])
+
+  const hiddenX = dir === 'rtl' ? '100%' : '-100%'
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label={label}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-[rgba(26,11,61,0.45)] backdrop-blur-sm"
+            onClick={onClose}
+            aria-hidden="true"
+          />
+          <motion.div
+            ref={panelRef}
+            initial={{ x: hiddenX }}
+            animate={{ x: 0 }}
+            exit={{ x: hiddenX }}
+            transition={{ type: 'spring', stiffness: 380, damping: 36 }}
+            className="absolute inset-y-0 start-0 flex"
+          >
+            {children}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  )
 }
 
 export default function AdminLayout() {
   const { currentUser, logout } = useUser()
   const { pathname } = useLocation()
-  const { t, translateText, dir } = useI18n()
-  usePageMeta({ title: t('admin.meta.title'), noIndex: true })
+  const { translateText, dir } = useI18n()
+  usePageMeta({ title: translateText('Admin Panel'), noIndex: true })
   const rawTitle = usePageTitle(pathname)
   const title = translateText(rawTitle)
   const rawCrumbs = useMemo(() => buildBreadcrumbs(pathname), [pathname])
@@ -127,12 +214,13 @@ export default function AdminLayout() {
   const layoutVars = useMemo(
     () =>
       ({
-        '--app-header-offset': `${ADMIN_HEADER_HEIGHT}px`,
+        '--app-header-offset': 'var(--admin-header-h)',
       }) as CSSProperties,
     []
   )
 
   const [open, setOpen] = useState(false)
+  const [collapsed, setCollapsed] = useLocalStorage('eventies.admin.sidebar-collapsed', false)
   useEffect(() => setOpen(false), [pathname])
 
   useEffect(() => {
@@ -141,147 +229,112 @@ export default function AdminLayout() {
     container.scrollTop = 0
   }, [pathname])
 
-  const displayName = currentUser?.name?.trim() || t('admin.layout.admin')
-
-  const quickLinkClass = (target: string) =>
-    cn(
-      'inline-flex min-h-[38px] items-center justify-center rounded-[12px] px-4 text-[12px] font-bold transition active:translate-y-[1px]',
-      pathname.startsWith(target)
-        ? 'border border-violet-200 bg-[linear-gradient(135deg,rgba(124,58,237,0.14),rgba(157,107,255,0.10))] text-[#2e0a72] shadow-[0_8px_22px_-12px_rgba(89,23,196,0.35)]'
-        : 'border border-violet-200/70 bg-white text-[#4b3a63] hover:border-violet-400 hover:text-[#1a0b3d]'
-    )
+  const displayName = currentUser?.name?.trim() || translateText('Admin')
 
   return (
     <div
-      className="admin-scope relative h-screen overflow-hidden bg-[#f4eeff] text-ink-900"
+      className="admin-scope relative h-[100dvh] overflow-hidden bg-[var(--admin-bg)] text-[var(--admin-text)]"
       dir={dir}
       style={layoutVars}
     >
       <AnimatedBackground position="absolute" className="z-0 overflow-hidden" variant="lightweight" />
 
-      {/* Mobile drawer */}
-      {open && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div
-            className="absolute inset-0 bg-[#1a0b3d]/55 backdrop-blur-sm"
-            onClick={() => setOpen(false)}
-            aria-hidden="true"
-          />
-          <div className={cn('absolute inset-y-0', dir === 'rtl' ? 'right-0' : 'left-0')}>
-            <Sidebar variant="drawer" onNavigate={() => setOpen(false)} />
-          </div>
-        </div>
-      )}
+      <MobileDrawer open={open} onClose={() => setOpen(false)} dir={dir} label={translateText('Admin navigation')}>
+        <Sidebar variant="drawer" onNavigate={() => setOpen(false)} />
+      </MobileDrawer>
 
-      <div className="relative z-10 grid h-full grid-rows-[72px_minmax(0,1fr)]">
+      <div className="relative z-10 grid h-full grid-rows-[var(--admin-header-h)_minmax(0,1fr)]">
         {/* Topbar */}
-        <header className="sticky top-0 z-30 border-b border-violet-200/60 bg-white/85 backdrop-blur-xl">
-          <div className="flex h-full items-center gap-3 px-4 sm:px-5 md:px-6">
+        <header className="admin-topbar sticky top-0 z-30">
+          <div className="flex h-full items-center gap-2.5 px-3 sm:px-5 md:px-6">
             <button
+              type="button"
               onClick={() => setOpen(true)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-[12px] border border-violet-200 bg-white text-[#4b3a63] transition hover:border-violet-400 hover:text-[#1a0b3d] active:translate-y-[1px] md:hidden"
-              aria-label={t('admin.layout.openSidebar')}
-              title={t('Menu')}
+              className="admin-icon-btn lg:!hidden"
+              aria-label={translateText('Open navigation')}
             >
-              <Icon name="menu" />
+              <Menu className="h-[18px] w-[18px]" strokeWidth={2.1} aria-hidden="true" />
             </button>
 
             <div className="min-w-0 flex-1">
-              <div className="truncate font-sans text-[1.15rem] font-extrabold tracking-[-0.03em] text-[#1a0b3d] sm:text-[1.28rem]">
+              <div className="truncate font-sans text-[1.05rem] font-extrabold tracking-[-0.03em] text-[var(--admin-text)] sm:text-[1.2rem]">
                 {title}
               </div>
-              <div className="mt-0.5 hidden items-center gap-1.5 sm:flex">
+              <nav
+                aria-label={translateText('Breadcrumbs')}
+                className="mt-0.5 hidden items-center gap-1.5 md:flex"
+              >
                 {crumbs.map((crumb, index) => {
                   const last = index === crumbs.length - 1
                   return (
                     <div key={`${crumb.label}-${index}`} className="flex items-center gap-1.5">
                       {index > 0 && (
-                        <Icon name="chev" className={cn('h-3 w-3 text-violet-300', dir === 'rtl' && 'rotate-180')} />
+                        <ChevronRight
+                          className="h-3 w-3 text-[var(--admin-text-muted)] rtl:rotate-180"
+                          aria-hidden="true"
+                        />
                       )}
                       {crumb.to && !last ? (
                         <Link
                           to={crumb.to}
-                          className="text-[11px] font-semibold text-[#6b5a82] transition hover:text-[#7126e3]"
+                          className="text-[11px] font-semibold text-[var(--admin-text-muted)] transition hover:text-[var(--admin-accent)]"
                         >
                           {crumb.label}
                         </Link>
                       ) : (
-                        <span className="text-[11px] font-bold text-[#2e0a72]">{crumb.label}</span>
+                        <span aria-current="page" className="text-[11px] font-bold text-[var(--admin-accent)]">
+                          {crumb.label}
+                        </span>
                       )}
                     </div>
                   )
                 })}
-              </div>
+              </nav>
             </div>
 
-            <div className="hidden items-center gap-2 lg:flex">
-              <Link to="/admin/requests" className={quickLinkClass('/admin/requests')}>
-                {t('admin.nav.requests')}
-              </Link>
-              <Link to="/admin/products" className={quickLinkClass('/admin/products')}>
-                {t('admin.nav.services')}
-              </Link>
-            </div>
+            <LanguageSwitcher
+              compact
+              className="hidden border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-text-muted)] hover:border-[var(--admin-accent)] hover:text-[var(--admin-accent)] sm:inline-flex"
+            />
 
-            <div className="hidden items-center gap-2.5 sm:flex">
-              <Link
-                to="/"
-                className="inline-flex min-h-[38px] items-center gap-1.5 rounded-[12px] border border-violet-200/70 bg-white px-3.5 text-[11px] font-bold text-[#4b3a63] transition hover:border-violet-400 hover:text-[#1a0b3d] active:translate-y-[1px]"
-              >
-                <Icon name="external" className="h-3.5 w-3.5" />
-                {t('admin.layout.openSite')}
-              </Link>
-
-              <LanguageSwitcher
-                compact
-                className="min-h-[38px] border-violet-200/70 bg-white px-3 text-[#4b3a63] hover:border-violet-400 hover:text-[#1a0b3d]"
-              />
-
-              <div className="flex items-center gap-2.5 rounded-[14px] border border-violet-200/70 bg-white px-3 py-1.5">
-                <div className="flex h-[34px] w-[34px] items-center justify-center overflow-hidden rounded-[11px] bg-[linear-gradient(135deg,#7c3aed,#c026d3)] text-[10px] font-bold text-white">
-                  <UserAvatar
-                    name={currentUser?.name || displayName}
-                    email={currentUser?.email || null}
-                    className="h-full w-full rounded-[11px]"
-                    fallbackClassName="bg-[linear-gradient(135deg,#7c3aed,#c026d3)] text-white"
-                  />
-                </div>
-                <div className="hidden leading-4 xl:block">
-                  <div className="text-[11.5px] font-bold text-[#1a0b3d]">{displayName}</div>
-                  <div className="mt-0.5 text-[10px] font-semibold text-[#6b5a82]">
-                    {t('admin.layout.controlShell')}
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => {
-                  void logout()
-                }}
-                className="inline-flex min-h-[38px] items-center gap-2 rounded-[12px] border border-red-200 bg-red-50 px-3.5 text-[11px] font-bold text-red-700 transition hover:border-red-300 hover:bg-red-100 hover:text-red-800 active:translate-y-[1px]"
-                title={t('Logout')}
-              >
-                <Icon name="logout" className="h-4 w-4" />
-                <span>{t('admin.layout.exit')}</span>
-              </button>
-            </div>
+            <AdminUserMenu
+              name={displayName}
+              email={currentUser?.email || null}
+              subtitle={translateText('Eventies Admin')}
+              onLogout={() => {
+                void logout()
+              }}
+            />
           </div>
         </header>
 
-        <div className="h-full min-h-0 overflow-hidden md:grid md:grid-cols-[270px_minmax(0,1fr)]">
-          <Sidebar variant="desktop" />
+        <div
+          className={cn(
+            'h-full min-h-0 overflow-hidden transition-[grid-template-columns] duration-300 lg:grid',
+            collapsed
+              ? 'lg:grid-cols-[72px_minmax(0,1fr)]'
+              : 'lg:grid-cols-[var(--admin-sidebar-w)_minmax(0,1fr)]'
+          )}
+        >
+          <Sidebar
+            variant="desktop"
+            collapsed={collapsed}
+            onToggleCollapse={() => setCollapsed(value => !value)}
+          />
 
           <main
             ref={mainScrollRef}
-            className="min-h-0 overflow-y-auto overflow-x-hidden"
+            className="h-full min-h-0 overflow-y-auto overflow-x-hidden"
             style={{ scrollPaddingTop: 'calc(var(--app-header-offset) + var(--app-header-gap))' }}
           >
-            <div className="admin-scope mx-auto flex h-full min-h-0 w-full max-w-[1640px] flex-col px-4 py-6 sm:px-6 sm:py-7 md:px-8 md:py-8 2xl:px-10">
+            <div className="admin-scope mx-auto flex h-full min-h-0 w-full max-w-[1640px] flex-col px-4 pt-6 pb-[calc(var(--admin-bottombar-h)+16px)] sm:px-6 sm:pt-7 md:px-8 md:pt-8 md:pb-8 2xl:px-10">
               <Outlet />
             </div>
           </main>
         </div>
       </div>
+
+      <AdminBottomBar onMore={() => setOpen(true)} />
     </div>
   )
 }

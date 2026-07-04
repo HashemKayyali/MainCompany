@@ -1,47 +1,215 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Plus, Search } from 'lucide-react'
 import { useData } from '../../contexts/DataContext'
-import { useTheme } from '../../contexts/ThemeContext'
 import { useDialog } from '../../contexts/DialogContext'
 import type { GalleryAlbum } from '../../data/gallery'
 import Modal from '../../components/ui/Modal'
 import ImageUploader from '../../components/ui/ImageUploader'
 import FramedImage from '../../components/ui/FramedImage'
 import MediaPlacementModal from '../../components/ui/MediaPlacementModal'
-import AdminActionButton from '../../components/admin/AdminActionButton'
-import AdminDetailModal from '../../components/admin/AdminDetailModal'
-import AdminEntityCard from '../../components/admin/AdminEntityCard'
-import AdminEditorWorkspace, { AdminEditorSection } from '../../components/admin/AdminEditorWorkspace'
+import AdminConfirmDialog from '../../components/admin/AdminConfirmDialog'
+import AdminKebabMenu, { type AdminKebabItem } from '../../components/admin/AdminKebabMenu'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
-import AdminViewToggle from '../../components/admin/AdminViewToggle'
-import useAdminCardView from '../../components/admin/useAdminCardView'
-import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
-import AlbumCard from '../../components/gallery/AlbumCard'
+import AdminBadge from '../../components/admin/primitives/AdminBadge'
+import AdminButton from '../../components/admin/primitives/AdminButton'
+import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
 import { cn } from '../../utils/cn'
 import { getErrorMessage } from '../../lib/errors'
 
 const emptyAlbum: GalleryAlbum = { slug: '', title: '', cover: '', images: [], category: '' }
+const PAGE_SIZE_OPTIONS = [16, 32, 64]
 
+type GallerySort = 'title' | 'category' | 'photos_desc' | 'photos_asc'
+
+function slugify(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+}
+
+function FieldSection({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+  return (
+    <section className="admin-card p-4">
+      <div className="flex flex-col gap-1.5 border-b border-[var(--admin-border)] pb-3">
+        <h3 className="admin-section-title">{title}</h3>
+        {description && <p className="text-[12px] leading-5 text-[var(--admin-text-muted)]">{description}</p>}
+      </div>
+      <div className="mt-3.5">{children}</div>
+    </section>
+  )
+}
+
+function Fact({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="min-w-0 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3 py-2.5">
+      <div className="text-[9.5px] font-extrabold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">{label}</div>
+      <div className="mt-1 truncate text-[13px] font-bold leading-5 text-[var(--admin-text)]">{value}</div>
+    </div>
+  )
+}
+
+function albumCover(album: GalleryAlbum) {
+  return album.images[0] || album.cover || ''
+}
+
+function AlbumThumb({ album, compact = false }: { album: GalleryAlbum; compact?: boolean }) {
+  const cover = albumCover(album)
+  return (
+    <div className={cn('overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)]', compact ? 'aspect-[4/3]' : 'aspect-[16/10]')}>
+      {cover ? (
+        <FramedImage
+          media={cover}
+          alt={album.title}
+          className="h-full w-full"
+          fallbackTransform={{ fit: 'cover' }}
+          onError={event => {
+            ;(event.target as HTMLImageElement).style.display = 'none'
+          }}
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--admin-text-muted)]">
+          No cover
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CompactAlbumPreview({ album }: { album: GalleryAlbum }) {
+  return (
+    <div className="mx-auto w-full max-w-[18rem] overflow-hidden rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface)]">
+      <AlbumThumb album={album} />
+      <div className="space-y-2 p-3">
+        <div className="min-w-0">
+          <div className="truncate text-[14px] font-black text-[var(--admin-text)]">{album.title || 'Album title'}</div>
+          <div className="truncate font-mono text-[10.5px] font-semibold text-[var(--admin-text-muted)]">{album.slug || 'auto-slug'}</div>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <AdminBadge tone="accent">{album.category || 'Uncategorized'}</AdminBadge>
+          <AdminBadge tone={album.images.length > 0 ? 'success' : 'warning'}>{album.images.length} photos</AdminBadge>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PhotoTile({
+  url,
+  index,
+  isCover,
+  canMoveUp,
+  canMoveDown,
+  onFrame,
+  onMoveUp,
+  onMoveDown,
+  onRemove,
+}: {
+  url: string
+  index: number
+  isCover: boolean
+  canMoveUp: boolean
+  canMoveDown: boolean
+  onFrame: () => void
+  onMoveUp: () => void
+  onMoveDown: () => void
+  onRemove: () => void
+}) {
+  return (
+    <div className="rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] p-2">
+      <div className="relative overflow-hidden rounded-[var(--admin-radius-sm)] bg-[var(--admin-surface-2)]">
+        <div className="aspect-square overflow-hidden">
+          <FramedImage
+            media={url}
+            alt=""
+            className="h-full w-full"
+            fallbackTransform={{ fit: 'cover' }}
+            onError={event => {
+              ;(event.target as HTMLImageElement).style.display = 'none'
+            }}
+          />
+        </div>
+        <span className="absolute start-2 top-2 rounded-md border border-white/70 bg-white/90 px-1.5 py-0.5 text-[8px] font-black uppercase text-[var(--admin-accent)]">
+          {isCover ? 'Cover' : `#${index + 1}`}
+        </span>
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-1.5">
+        <button type="button" onClick={onFrame} className="min-h-[44px] rounded-[8px] bg-[var(--admin-accent-soft)] px-2 text-[11px] font-bold text-[var(--admin-accent)] md:min-h-[34px]">
+          Frame
+        </button>
+        <button type="button" onClick={onRemove} className="min-h-[44px] rounded-[8px] bg-[color-mix(in_srgb,var(--admin-danger)_11%,transparent)] px-2 text-[11px] font-bold text-[var(--admin-danger)] md:min-h-[34px]">
+          Remove
+        </button>
+        <button
+          type="button"
+          onClick={onMoveUp}
+          disabled={!canMoveUp}
+          className="min-h-[44px] rounded-[8px] border border-[var(--admin-border)] px-2 text-[11px] font-bold text-[var(--admin-text-muted)] disabled:opacity-45 md:min-h-[34px]"
+        >
+          Up
+        </button>
+        <button
+          type="button"
+          onClick={onMoveDown}
+          disabled={!canMoveDown}
+          className="min-h-[44px] rounded-[8px] border border-[var(--admin-border)] px-2 text-[11px] font-bold text-[var(--admin-text-muted)] disabled:opacity-45 md:min-h-[34px]"
+        >
+          Down
+        </button>
+      </div>
+    </div>
+  )
+}
 
 export default function AdminGalleryPage() {
   const { galleryAlbums, addGalleryAlbum, updateGalleryAlbum, deleteGalleryAlbum } = useData()
-  const { isDark } = useTheme()
   const dialog = useDialog()
 
   const [editing, setEditing] = useState<GalleryAlbum | null>(null)
   const [details, setDetails] = useState<GalleryAlbum | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<GalleryAlbum | null>(null)
   const [isNew, setIsNew] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [confirm, setConfirm] = useState<string | null>(null)
-  const [filterCat, setFilterCat] = useState('All')
+  const [deleting, setDeleting] = useState(false)
+  const [search, setSearch] = useState('')
+  const [filterCat, setFilterCat] = useState('all')
+  const [sortKey, setSortKey] = useState<GallerySort>('title')
+  const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0])
+  const [page, setPage] = useState(1)
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
-  const { cardView, displayCardView, viewTransitionClassName, setCardView } = useAdminCardView('gallery')
 
-  const txt = isDark ? 'text-white' : 'text-gray-900'
-  const sub = isDark ? 'text-purple-200/80' : 'text-gray-500'
-  const cardsLayoutClass = getAdminCardsLayoutClass(displayCardView)
+  const categories = useMemo(
+    () => Array.from(new Set(galleryAlbums.map(album => album.category).filter(Boolean))).sort((a, b) => a.localeCompare(b)),
+    [galleryAlbums]
+  )
 
-  const cats = ['All', ...Array.from(new Set(galleryAlbums.map(a => a.category).filter(Boolean)))]
-  const filtered = filterCat === 'All' ? galleryAlbums : galleryAlbums.filter(a => a.category === filterCat)
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase()
+    return galleryAlbums
+      .filter(album => {
+        if (filterCat !== 'all' && album.category !== filterCat) return false
+        if (!needle) return true
+        return (
+          album.title.toLowerCase().includes(needle) ||
+          album.slug.toLowerCase().includes(needle) ||
+          album.category.toLowerCase().includes(needle)
+        )
+      })
+      .sort((a, b) => {
+        if (sortKey === 'category') return a.category.localeCompare(b.category) || a.title.localeCompare(b.title)
+        if (sortKey === 'photos_desc') return b.images.length - a.images.length || a.title.localeCompare(b.title)
+        if (sortKey === 'photos_asc') return a.images.length - b.images.length || a.title.localeCompare(b.title)
+        return a.title.localeCompare(b.title)
+      })
+  }, [filterCat, galleryAlbums, search, sortKey])
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize))
+  const currentPage = Math.min(page, pageCount)
+  const pageItems = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  const showingStart = filtered.length ? (currentPage - 1) * pageSize + 1 : 0
+  const showingEnd = Math.min(currentPage * pageSize, filtered.length)
+
+  useEffect(() => {
+    setPage(1)
+  }, [filterCat, pageSize, search, sortKey])
+
   const openNew = () => {
     setEditing({ ...emptyAlbum, images: [] })
     setIsNew(true)
@@ -52,474 +220,406 @@ export default function AdminGalleryPage() {
     setIsNew(false)
   }
 
-  const close = () => {
+  const closeEditor = () => {
     setEditing(null)
     setIsNew(false)
     setActiveImageIndex(null)
   }
 
   const save = async () => {
-    if (!editing || !editing.title) return
-    const slug =
-      editing.slug || editing.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    if (!editing || !editing.title.trim()) return
+    const slug = editing.slug || slugify(editing.title)
     const data: GalleryAlbum = {
       ...editing,
+      title: editing.title.trim(),
       slug,
+      category: editing.category.trim(),
       cover: editing.images?.[0] || editing.cover || '',
     }
     setSaving(true)
     try {
       if (isNew) await addGalleryAlbum(data)
       else await updateGalleryAlbum(editing.slug || slug, data)
-      close()
-    } catch (err: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to save'), variant: 'danger' })
+      closeEditor()
+    } catch (error: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to save'), variant: 'danger' })
     } finally {
       setSaving(false)
     }
   }
 
-  const del = async (slug: string) => {
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
     try {
-      await deleteGalleryAlbum(slug)
-      if (details?.slug === slug) setDetails(null)
-    } catch (err: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to delete'), variant: 'danger' })
+      await deleteGalleryAlbum(deleteTarget.slug)
+      if (details?.slug === deleteTarget.slug) setDetails(null)
+      setDeleteTarget(null)
+    } catch (error: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to delete'), variant: 'danger' })
+    } finally {
+      setDeleting(false)
     }
-    setConfirm(null)
   }
 
   const addImage = (url: string) => {
-    setEditing(e => (e ? { ...e, images: [...e.images, url] } : null))
+    setEditing(current => (current ? { ...current, images: [...current.images, url], cover: current.images[0] || current.cover || url } : null))
   }
 
-  const removeImage = (idx: number) => {
-    setEditing(e => (e ? { ...e, images: e.images.filter((_, i) => i !== idx) } : null))
-  }
-
-  const moveImage = (idx: number, dir: -1 | 1) => {
-    setEditing(e => {
-      if (!e) return null
-      const imgs = [...e.images]
-      const newIdx = idx + dir
-      if (newIdx < 0 || newIdx >= imgs.length) return e
-      ;[imgs[idx], imgs[newIdx]] = [imgs[newIdx], imgs[idx]]
-      return { ...e, images: imgs }
+  const removeImage = (index: number) => {
+    setEditing(current => {
+      if (!current) return current
+      const images = current.images.filter((_, imageIndex) => imageIndex !== index)
+      return { ...current, images, cover: images[0] || current.cover || '' }
     })
   }
 
-  const updateImageFrame = (idx: number, media: string) => {
-    setEditing(e => {
-      if (!e) return null
-      const images = e.images.map((img, i) => (i === idx ? media : img))
-      return { ...e, images, cover: images[0] || e.cover || '' }
+  const moveImage = (index: number, direction: -1 | 1) => {
+    setEditing(current => {
+      if (!current) return current
+      const images = [...current.images]
+      const nextIndex = index + direction
+      if (nextIndex < 0 || nextIndex >= images.length) return current
+      ;[images[index], images[nextIndex]] = [images[nextIndex], images[index]]
+      return { ...current, images, cover: images[0] || current.cover || '' }
     })
   }
 
-  const filterChip = (active: boolean) =>
-    active
-      ? isDark
-        ? 'bg-[linear-gradient(180deg,rgba(24,56,78,0.96),rgba(14,36,54,0.98))] text-cyan-100 ring-1 ring-inset ring-cyan-300/24 shadow-[0_12px_28px_-18px_rgba(34,211,238,0.3)]'
-        : 'bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200 shadow-[0_10px_24px_-18px_rgba(124,58,237,0.22)]'
-      : isDark
-        ? 'bg-[#0f1630]/96 text-purple-100/78 ring-1 ring-inset ring-cyan-400/10 shadow-[0_10px_24px_-18px_rgba(4,8,20,0.8)] hover:bg-[#111a39]'
-        : 'bg-white text-gray-600 ring-1 ring-inset ring-gray-200 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.14)] hover:bg-gray-50'
+  const updateImageFrame = (index: number, media: string) => {
+    setEditing(current => {
+      if (!current) return current
+      const images = current.images.map((image, imageIndex) => (imageIndex === index ? media : image))
+      return { ...current, images, cover: images[0] || current.cover || '' }
+    })
+  }
+
+  const actionItems = (album: GalleryAlbum): AdminKebabItem[] => [
+    { label: 'Delete album', tone: 'danger', onSelect: () => setDeleteTarget(album) },
+  ]
 
   const previewAlbum: GalleryAlbum = editing
     ? {
         ...editing,
-        slug:
-          editing.slug || editing.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        slug: editing.slug || slugify(editing.title || 'album'),
         cover: editing.images[0] || editing.cover || '',
       }
     : emptyAlbum
-
-  const renderAlbumPreview = (overrides?: Partial<GalleryAlbum>) => {
-    const merged = { ...previewAlbum, ...overrides }
-    const preview = { ...merged, cover: merged.images[0] || merged.cover || '' }
-
-    return (
-      <div aria-hidden="true" className="mx-auto max-w-[340px] select-none [&_button]:pointer-events-none">
-        <AlbumCard album={preview} onClick={() => {}} />
-      </div>
-    )
-  }
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
       <AdminPageHeader
         title="Gallery"
         actions={
-          <>
-            <AdminViewToggle value={cardView} onChange={setCardView} />
-            <button onClick={openNew} className="btn-admin-create">
-              + Add Album
-            </button>
-          </>
+          <AdminButton size="sm" onClick={openNew}>
+            <Plus className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
+            Add Album
+          </AdminButton>
         }
       />
 
-      <div
-        className={cn(
-          'min-h-0 flex flex-1 flex-col rounded-[22px] p-2.5',
-          isDark
-            ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(8,11,27,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_28px_90px_-58px_rgba(7,15,36,0.96)]'
-            : 'bg-white ring-1 ring-inset ring-gray-200'
-        )}
-      >
-        <div className="mb-3 flex flex-wrap gap-1.5">
-          {cats.map(category => (
+      <div className="admin-card flex min-h-0 flex-1 flex-col p-3 sm:p-4">
+        <div className="grid gap-2.5 xl:grid-cols-[minmax(0,1fr)_170px_160px]">
+          <div className="relative min-w-0">
+            <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-text-muted)]" strokeWidth={2} aria-hidden="true" />
+            <input
+              className="admin-input ps-9 pe-16"
+              value={search}
+              onChange={event => setSearch(event.target.value)}
+              placeholder="Search album, slug, category..."
+              aria-label="Search gallery albums"
+            />
+            <span className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-2 py-0.5 text-[10.5px] font-bold tabular-nums text-[var(--admin-text-muted)]">
+              {filtered.length}/{galleryAlbums.length}
+            </span>
+          </div>
+
+          <select className="admin-input" value={sortKey} onChange={event => setSortKey(event.target.value as GallerySort)} aria-label="Sort albums">
+            <option value="title">Title</option>
+            <option value="category">Category</option>
+            <option value="photos_desc">Photos high to low</option>
+            <option value="photos_asc">Photos low to high</option>
+          </select>
+
+          <select className="admin-input" value={pageSize} onChange={event => setPageSize(Number(event.target.value))} aria-label="Page size">
+            {PAGE_SIZE_OPTIONS.map(value => (
+              <option key={value} value={value}>
+                {value} per page
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mt-2.5 flex snap-x gap-1.5 overflow-x-auto pb-1 [scrollbar-width:thin]">
+          <button
+            type="button"
+            onClick={() => setFilterCat('all')}
+            className={cn(
+              'inline-flex min-h-[44px] shrink-0 snap-start items-center justify-center rounded-full border px-3.5 text-[12px] font-bold transition',
+              filterCat === 'all'
+                ? 'border-transparent bg-[var(--admin-accent)] text-white'
+                : 'border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-text-muted)] hover:border-[var(--admin-accent)] hover:text-[var(--admin-accent)]'
+            )}
+          >
+            All ({galleryAlbums.length})
+          </button>
+          {categories.map(category => (
             <button
               key={category}
+              type="button"
               onClick={() => setFilterCat(category)}
-              className={cn('inline-flex min-h-[36px] items-center justify-center rounded-xl px-3.5 py-2 text-[11px] font-semibold transition active:translate-y-[1px]', filterChip(filterCat === category))}
+              className={cn(
+                'inline-flex min-h-[44px] shrink-0 snap-start items-center justify-center rounded-full border px-3.5 text-[12px] font-bold transition',
+                filterCat === category
+                  ? 'border-transparent bg-[var(--admin-accent)] text-white'
+                  : 'border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-text-muted)] hover:border-[var(--admin-accent)] hover:text-[var(--admin-accent)]'
+              )}
             >
-              {category} ({category === 'All' ? galleryAlbums.length : galleryAlbums.filter(a => a.category === category).length})
+              {category} ({galleryAlbums.filter(album => album.category === category).length})
             </button>
           ))}
         </div>
 
         {filtered.length === 0 ? (
-          <div className={cn('flex flex-1 items-center justify-center rounded-[18px] border px-5 py-11 text-center text-[13px]', isDark ? 'border-white/10 text-purple-200/70' : 'border-gray-100 text-gray-500')}>
-            No albums match this filter.
+          <div className="flex flex-1 items-center justify-center py-8">
+            <AdminEmptyState
+              title={galleryAlbums.length ? 'No albums match this view' : 'No gallery albums yet'}
+              description={galleryAlbums.length ? 'Try another category, sort, or search.' : 'Create an album and upload the first gallery photos.'}
+              action={
+                <AdminButton size="sm" onClick={openNew}>
+                  <Plus className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
+                  Add Album
+                </AdminButton>
+              }
+            />
           </div>
         ) : (
-          <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
-            <div className={cn('origin-top transition-[opacity,transform,filter] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform,filter]', viewTransitionClassName)}>
-            <div className={cardsLayoutClass}>
-              {filtered.map(album => (
-                <AdminEntityCard
-                key={album.slug}
-                  variant={getAdminEntityVariant(displayCardView)}
-                minHeightClassName={displayCardView === 'grid' ? 'min-h-[226px]' : 'min-h-[96px]'}
-                bodyClassName={displayCardView === 'grid' ? 'gap-2 p-3' : 'gap-1.5 p-2.5'}
-                  listMediaWrapClassName="md:self-center"
-                listMediaFrameClassName="!h-[76px] !w-[112px] md:!h-[76px] md:!w-[112px] !rounded-[18px] !bg-transparent !ring-0 !p-0"
-                factsWrapClassName={displayCardView === 'list' ? 'xl:w-[156px]' : undefined}
-                actionsWrapClassName={displayCardView === 'list' ? 'xl:w-[118px]' : undefined}
-                media={
-                  album.cover || album.images[0] ? (
-                    <div className="aspect-[16/10] h-full w-full overflow-hidden rounded-[20px]">
-                      <FramedImage
-                        media={album.cover || album.images[0]}
-                        alt={album.title}
-                        className="h-full w-full transition-transform duration-700 group-hover:scale-105"
-                        fallbackTransform={{ fit: 'cover' }}
-                        onError={e => {
-                          ;(e.target as HTMLImageElement).style.display = 'none'
-                        }}
-                      />
+          <>
+            <div className="mt-3 min-h-0 flex-1 overflow-y-auto pe-0.5">
+              <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4 2xl:grid-cols-5">
+                {pageItems.map(album => (
+                  <article key={album.slug} className="admin-card min-w-0 overflow-hidden p-2.5">
+                    <AlbumThumb album={album} compact />
+                    <div className="mt-2.5 min-w-0 space-y-2">
+                      <div className="min-w-0">
+                        <h2 className="truncate text-[13px] font-black text-[var(--admin-text)]">{album.title}</h2>
+                        <p className="truncate font-mono text-[10.5px] font-semibold text-[var(--admin-text-muted)]">{album.slug || '-'}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        <AdminBadge tone="accent" className="max-w-full truncate">{album.category || 'Uncategorized'}</AdminBadge>
+                        <AdminBadge tone={album.images.length > 0 ? 'success' : 'warning'}>{album.images.length}</AdminBadge>
+                      </div>
+                      <div className="grid grid-cols-[1fr_1fr_auto] gap-1.5">
+                        <AdminButton size="sm" variant="outline" onClick={() => setDetails(album)} className="px-2">
+                          Details
+                        </AdminButton>
+                        <AdminButton size="sm" onClick={() => openEdit(album)} className="px-2">
+                          Edit
+                        </AdminButton>
+                        <AdminKebabMenu label={`More actions for ${album.title}`} items={actionItems(album)} />
+                      </div>
                     </div>
-                  ) : (
-                    <div className={cn('flex h-full w-full items-center justify-center rounded-[20px]', isDark ? 'bg-purple-500/10' : 'bg-gray-50')}>
-                      <span className={cn('text-[11px] font-mono uppercase tracking-[0.24em]', sub)}>No cover</span>
-                    </div>
-                  )
-                }
-                mediaOverlayRight={
-                  <span className={cn('rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.22em]', isDark ? 'border-cyan-400/20 bg-cyan-400/12 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700')}>
-                    {album.images.length} photos
-                  </span>
-                }
-                title={album.title}
-                  subtitle={
-                    album.images.length > 0
-                      ? `${album.images.length} ${album.images.length === 1 ? 'image' : 'images'}${album.category ? ` in ${album.category}` : ''}.`
-                      : album.category
-                        ? `Album in ${album.category}.`
-                        : undefined
-                  }
-                badges={
-                  <>
-                    <span className={cn('rounded-full border px-3 py-1 text-[11px] font-medium', isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700')}>
-                      {album.category || 'Uncategorized'}
-                    </span>
-                    <span className={cn('rounded-full border px-3 py-1 text-[11px] font-medium', album.images.length > 0 ? (isDark ? 'border-white/10 bg-white/[0.04] text-purple-100/80' : 'border-gray-200 bg-gray-50 text-gray-600') : (isDark ? 'border-amber-400/15 bg-amber-400/10 text-amber-200' : 'border-amber-200 bg-amber-50 text-amber-700'))}>
-                      {album.images.length > 0 ? 'Cover ready' : 'Needs photos'}
-                    </span>
-                  </>
-                }
-                facts={[
-                  { label: 'Slug', value: <span className="block truncate text-xs font-mono">{album.slug}</span> },
-                  { label: 'Images', value: String(album.images.length) },
-                ]}
-                actions={
-                  <>
-                    <AdminActionButton
-                      tone="primary"
-                      onClick={event => {
-                        event.stopPropagation()
-                        setDetails(album)
-                      }}
-                    >
-                      Details
-                    </AdminActionButton>
-                    <AdminActionButton
-                      onClick={event => {
-                        event.stopPropagation()
-                        openEdit(album)
-                      }}
-                    >
-                      Edit
-                    </AdminActionButton>
-                    <AdminActionButton
-                      tone="danger"
-                      onClick={event => {
-                        event.stopPropagation()
-                        setConfirm(album.slug)
-                      }}
-                    >
-                      Delete
-                    </AdminActionButton>
-                  </>
-                }
-                />
-              ))}
+                  </article>
+                ))}
+              </div>
             </div>
+
+            <div className="mt-3 flex flex-col gap-2.5 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2.5 text-[12px] font-semibold text-[var(--admin-text-muted)] sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                Showing {showingStart}-{showingEnd} of {filtered.length}
+              </div>
+              <div className="flex items-center gap-2">
+                <AdminButton size="sm" variant="outline" disabled={currentPage <= 1} onClick={() => setPage(value => Math.max(1, value - 1))}>
+                  Previous
+                </AdminButton>
+                <span className="min-w-[72px] text-center tabular-nums">
+                  {currentPage} / {pageCount}
+                </span>
+                <AdminButton size="sm" variant="outline" disabled={currentPage >= pageCount} onClick={() => setPage(value => Math.min(pageCount, value + 1))}>
+                  Next
+                </AdminButton>
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
 
-      <AdminDetailModal
+      <Modal
         open={!!details}
         onClose={() => setDetails(null)}
         title={details?.title || 'Album Details'}
-        subtitle={details ? 'This panel lets the album card stay compact while still exposing category, slug, cover state, and image previews.' : undefined}
-        media={
+        size="2xl"
+        bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+        footer={
           details ? (
-            details.cover || details.images[0] ? (
-              <div className="aspect-[16/9] overflow-hidden">
-                <FramedImage media={details.cover || details.images[0]} alt={details.title} className="h-full w-full" fallbackTransform={{ fit: 'cover' }} />
-              </div>
-            ) : (
-              <div className={cn('flex aspect-[16/9] items-center justify-center', isDark ? 'bg-purple-500/10' : 'bg-gray-50')}>
-                <div className={cn('text-sm', sub)}>No images uploaded yet.</div>
-              </div>
-            )
-          ) : null
-        }
-        badges={
-          details ? (
-            <>
-              <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold', isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700')}>
-                {details.category || 'Uncategorized'}
-              </span>
-              <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold', isDark ? 'border-white/10 bg-white/[0.04] text-purple-100/80' : 'border-gray-200 bg-white text-gray-700')}>
-                {details.images.length} images
-              </span>
-            </>
-          ) : null
-        }
-        summaryFacts={
-          details
-            ? [
-                { label: 'Slug', value: <span className="font-mono text-xs">{details.slug}</span> },
-                { label: 'Category', value: details.category || 'Not set' },
-                { label: 'Cover', value: details.cover || details.images[0] ? 'Ready' : 'Missing' },
-                { label: 'Image count', value: String(details.images.length) },
-              ]
-            : []
-        }
-        sections={
-          details
-            ? [
-                {
-                  title: 'Album Identity',
-                  facts: [
-                    { label: 'Title', value: details.title },
-                    { label: 'Public slug', value: <span className="font-mono text-xs">{details.slug}</span> },
-                    { label: 'Category', value: details.category || 'Not categorized' },
-                  ],
-                },
-                {
-                  title: 'Preview Strip',
-                  content: details.images.length > 0 ? (
-                    <div className="grid grid-cols-3 gap-3">
-                      {details.images.slice(0, 6).map((image, index) => (
-                        <div key={`${image}-${index}`} className={cn('overflow-hidden rounded-2xl border', isDark ? 'border-white/10 bg-black/20' : 'border-gray-100 bg-gray-50')}>
-                          <div className="aspect-square overflow-hidden">
-                            <FramedImage media={image} alt="" className="h-full w-full" fallbackTransform={{ fit: 'cover' }} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className={cn('text-sm', sub)}>No images in this album yet.</p>
-                  ),
-                },
-              ]
-            : []
-        }
-        actions={
-          details && (
-            <>
-              <AdminActionButton
+            <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
+              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="sm:min-w-[96px]">Close</AdminButton>
+              <AdminButton
+                variant="outline"
                 onClick={() => {
+                  const album = details
                   setDetails(null)
-                  openEdit(details)
+                  openEdit(album)
                 }}
+                className="sm:min-w-[120px]"
               >
                 Edit Album
-              </AdminActionButton>
-              <AdminActionButton tone="danger" onClick={() => setConfirm(details.slug)}>
-                Delete Album
-              </AdminActionButton>
-            </>
-          )
+              </AdminButton>
+              <AdminKebabMenu label={`More actions for ${details.title}`} items={actionItems(details)} />
+            </div>
+          ) : undefined
         }
-      />
+      >
+        {details && (
+          <div className="admin-scope space-y-4">
+            <section className="admin-card overflow-hidden">
+              <div className="grid gap-0 lg:grid-cols-[minmax(0,0.84fr)_minmax(0,1fr)]">
+                <div className="bg-[var(--admin-surface-2)] p-3">
+                  <AlbumThumb album={details} />
+                </div>
+                <div className="flex min-w-0 flex-col justify-between gap-4 p-4">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <AdminBadge tone="accent">{details.category || 'Uncategorized'}</AdminBadge>
+                      <AdminBadge tone={details.images.length > 0 ? 'success' : 'warning'}>{details.images.length} photos</AdminBadge>
+                    </div>
+                    <h3 className="mt-3 text-[1.2rem] font-black text-[var(--admin-text)]">{details.title}</h3>
+                    <p className="mt-2 break-all font-mono text-[12px] font-semibold text-[var(--admin-text-muted)]">{details.slug || '-'}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Fact label="Cover" value={albumCover(details) ? 'Ready' : 'Missing'} />
+                    <Fact label="Category" value={details.category || 'Not set'} />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <FieldSection title="Preview Strip">
+              {details.images.length > 0 ? (
+                <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
+                  {details.images.slice(0, 12).map((image, index) => (
+                    <div key={`${image}-${index}`} className="aspect-square overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)]">
+                      <FramedImage media={image} alt="" className="h-full w-full" fallbackTransform={{ fit: 'cover' }} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[13px] text-[var(--admin-text-muted)]">No images in this album yet.</p>
+              )}
+            </FieldSection>
+          </div>
+        )}
+      </Modal>
 
       <Modal
         open={!!editing}
-        onClose={close}
-        title={isNew ? 'Create Album' : `Edit: ${editing?.title}`}
+        onClose={closeEditor}
+        title={isNew ? 'Create Album' : 'Edit Album'}
         persistent
-        size="2xl"
-        bodyClassName="px-3.5 pb-3.5 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+        size="3xl"
+        bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+        footer={
+          <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-[11px] leading-5 text-[var(--admin-text-muted)]">
+              Cover: <span className="font-bold text-[var(--admin-text)]">{editing?.images[0] || editing?.cover ? 'Ready' : 'Missing'}</span>
+              {' | '}Photos: <span className="font-bold text-[var(--admin-text)]">{editing?.images.length ?? 0}</span>
+            </div>
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:justify-end">
+              <AdminButton variant="ghost" onClick={closeEditor} disabled={saving} className="sm:min-w-[110px]">Cancel</AdminButton>
+              <AdminButton onClick={save} loading={saving} disabled={!editing?.title.trim()} className="sm:min-w-[140px]">
+                {isNew ? 'Create Album' : 'Save Changes'}
+              </AdminButton>
+            </div>
+          </div>
+        }
       >
         {editing && (
-          <AdminEditorWorkspace
-            preview={renderAlbumPreview()}
-            previewTitle="Live Album Card"
-            previewHint="The preview uses the real album card, so cover ordering and gallery framing stay trustworthy while you edit."
-            footer={
-              <div className="flex flex-wrap items-center justify-between gap-2.5">
-                <div className={cn('text-[11px] leading-5', sub)}>
-                  Cover: <span className={txt}>{editing.images[0] || editing.cover ? 'Ready' : 'Missing'}</span>
-                  {' ? '}Photos: <span className={txt}>{editing.images.length}</span>
-                </div>
-                <div className="flex gap-2.5">
-                  <button
-                    onClick={save}
-                    disabled={saving || !editing.title}
-                    className="btn-primary !rounded-xl !px-5 !py-2 disabled:opacity-50"
-                  >
-                    <span>{saving ? 'Saving...' : isNew ? 'Create Album' : 'Save Changes'}</span>
-                  </button>
-                  <button onClick={close} className="btn-outline !rounded-xl !px-5 !py-2">Cancel</button>
-                </div>
-              </div>
-            }
-          >
-            <AdminEditorSection
-              title="Album Identity"
-              hint="Keep the title, category, and slug close together while the real album card preview remains visible on the side."
-            >
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <div>
-                  <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Album Title *</label>
-                  <input
-                    className="form-field"
-                    value={editing.title}
-                    onChange={e => setEditing(prev => (prev ? { ...prev, title: e.target.value } : null))}
-                    placeholder="Events 2025"
-                  />
-                </div>
-                <div>
-                  <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Category</label>
-                  <input
-                    className="form-field"
-                    value={editing.category}
-                    onChange={e => setEditing(prev => (prev ? { ...prev, category: e.target.value } : null))}
-                    placeholder="Events, BTS, Products..."
-                    list="gallery-cats"
-                  />
-                  <datalist id="gallery-cats">
-                    {Array.from(new Set(galleryAlbums.map(a => a.category).filter(Boolean))).map(category => (
-                      <option key={category} value={category} />
-                    ))}
-                  </datalist>
-                </div>
-              </div>
-
-              <div>
-                <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>Slug (URL)</label>
-                <input
-                  className="form-field"
-                  value={editing.slug}
-                  onChange={e => setEditing(prev => (prev ? { ...prev, slug: e.target.value } : null))}
-                  placeholder="auto-generated-from-title"
-                  disabled={!isNew}
-                />
-              </div>
-            </AdminEditorSection>
-
-            <AdminEditorSection
-              title="Photos"
-              hint="The first photo becomes the cover automatically. Frame and reorder images here while watching the real album card update live."
-            >
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
-                {editing.images.map((url, idx) => (
-                  <div key={idx} className="group relative">
-                    <div className="aspect-square overflow-hidden rounded-xl">
-                      <FramedImage media={url} alt="" className="h-full w-full" fallbackTransform={{ fit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                    </div>
-
-                    {idx === 0 && (
-                      <span className={`absolute left-2 top-2 rounded-md px-1.5 py-0.5 text-[8px] font-bold ${isDark ? 'bg-cyan-400/20 text-cyan-300' : 'bg-violet-100 text-violet-700'}`}>
-                        COVER
-                      </span>
-                    )}
-
-                    <div className={`absolute inset-0 flex flex-wrap content-start items-start gap-1.5 rounded-xl p-2 opacity-0 transition-opacity group-hover:opacity-100 ${isDark ? 'bg-black/65' : 'bg-white/75'}`}>
-                      <button
-                        type="button"
-                        onClick={() => setActiveImageIndex(idx)}
-                        className={`rounded-lg px-2.5 py-1 text-[10px] font-semibold ${isDark ? 'bg-cyan-500/25 text-white' : 'bg-violet-100 text-violet-700'}`}
-                      >
-                        Frame
-                      </button>
-                      {idx > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => moveImage(idx, -1)}
-                          className={`flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-bold ${isDark ? 'bg-purple-500/30 text-white' : 'bg-violet-100 text-violet-700'}`}
-                        >
-                          {'<'}
-                        </button>
-                      )}
-                      {idx < editing.images.length - 1 && (
-                        <button
-                          type="button"
-                          onClick={() => moveImage(idx, 1)}
-                          className={`flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-bold ${isDark ? 'bg-purple-500/30 text-white' : 'bg-violet-100 text-violet-700'}`}
-                        >
-                          {'>'}
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removeImage(idx)}
-                        className="ml-auto flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/75 text-[11px] font-bold text-white"
-                      >
-                        x
-                      </button>
-                    </div>
+          <div className="admin-scope grid min-h-0 gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+            <div className="min-w-0 space-y-4">
+              <FieldSection title="Album Identity" description="Title, category, and slug stay compact and close to the photo manager.">
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                  <div>
+                    <label className="admin-label mb-1.5" htmlFor="album-title">Album title *</label>
+                    <input
+                      id="album-title"
+                      className={cn('admin-input', !editing.title.trim() && 'admin-input--error')}
+                      value={editing.title}
+                      onChange={event => setEditing(current => (current ? { ...current, title: event.target.value } : null))}
+                      placeholder="Events 2026"
+                    />
+                    {!editing.title.trim() && <p className="mt-1 text-[11px] font-semibold text-[var(--admin-danger)]">Title is required.</p>}
                   </div>
-                ))}
+                  <div>
+                    <label className="admin-label mb-1.5" htmlFor="album-category">Category</label>
+                    <input
+                      id="album-category"
+                      className="admin-input"
+                      value={editing.category}
+                      onChange={event => setEditing(current => (current ? { ...current, category: event.target.value } : null))}
+                      placeholder="Events, BTS, Products..."
+                      list="gallery-categories"
+                    />
+                    <datalist id="gallery-categories">
+                      {categories.map(category => (
+                        <option key={category} value={category} />
+                      ))}
+                    </datalist>
+                  </div>
+                  <div className="lg:col-span-2">
+                    <label className="admin-label mb-1.5" htmlFor="album-slug">Slug</label>
+                    <input
+                      id="album-slug"
+                      className="admin-input"
+                      value={editing.slug}
+                      onChange={event => setEditing(current => (current ? { ...current, slug: event.target.value } : null))}
+                      placeholder="auto-generated-from-title"
+                      disabled={!isNew}
+                    />
+                  </div>
+                </div>
+              </FieldSection>
 
-                <ImageUploader
-                  compact
-                  onChange={addImage}
-                  folder="gallery"
-                  frameAspect={1}
-                  defaultFit="cover"
-                  frameTitle="Adjust Gallery Photo"
-                  frameHint="Choose what should stay visible inside the gallery photo frame."
-                  previewAspectClass="aspect-square"
-                  renderFrameContextPreview={media =>
-                    renderAlbumPreview({
-                      images: media ? [media, ...(previewAlbum.images || []).filter(item => item !== media)] : previewAlbum.images,
-                      cover: media || previewAlbum.cover,
-                    })
-                  }
-                  frameContextTitle="Album Card Result"
-                  frameContextHint="Inspect the real album card result while you refine the gallery cover framing."
-                />
-              </div>
-            </AdminEditorSection>
-          </AdminEditorWorkspace>
+              <FieldSection title="Photos" description="The first photo becomes the cover. Controls stay visible for tap users.">
+                <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-4">
+                  {editing.images.map((url, index) => (
+                    <PhotoTile
+                      key={`${url}-${index}`}
+                      url={url}
+                      index={index}
+                      isCover={index === 0}
+                      canMoveUp={index > 0}
+                      canMoveDown={index < editing.images.length - 1}
+                      onFrame={() => setActiveImageIndex(index)}
+                      onMoveUp={() => moveImage(index, -1)}
+                      onMoveDown={() => moveImage(index, 1)}
+                      onRemove={() => removeImage(index)}
+                    />
+                  ))}
+
+                  <ImageUploader
+                    compact
+                    onChange={addImage}
+                    folder="gallery"
+                    frameAspect={1}
+                    defaultFit="cover"
+                    frameTitle="Adjust Gallery Photo"
+                    frameHint="Choose what should stay visible inside the gallery photo frame."
+                    previewAspectClass="aspect-square"
+                    renderFrameContextPreview={media =>
+                      <CompactAlbumPreview album={{ ...previewAlbum, images: media ? [media, ...previewAlbum.images.filter(item => item !== media)] : previewAlbum.images, cover: media || previewAlbum.cover }} />
+                    }
+                    frameContextTitle="Album Card"
+                    frameContextHint="Check the compact album tile while framing."
+                  />
+                </div>
+              </FieldSection>
+            </div>
+
+            <aside className="min-w-0 xl:sticky xl:top-0 xl:self-start">
+              <FieldSection title="Compact Preview" description="A small admin preview of the gallery tile.">
+                <CompactAlbumPreview album={previewAlbum} />
+              </FieldSection>
+            </aside>
+          </div>
         )}
       </Modal>
 
@@ -531,17 +631,20 @@ export default function AdminGalleryPage() {
         aspectRatio={1}
         defaultFit="cover"
         hint="Choose what should stay visible inside the gallery photo frame."
-        contextPreview={media =>
-          renderAlbumPreview({
-            images:
-              activeImageIndex === null
-                ? previewAlbum.images
-                : previewAlbum.images.map((image, index) => (index === activeImageIndex ? media : image)),
-            cover: activeImageIndex === 0 ? media : previewAlbum.cover,
-          })
-        }
-        contextPreviewTitle="Album Card Result"
-        contextPreviewHint="Refine the gallery photo while seeing the real album card result on the right."
+        contextPreview={media => (
+          <CompactAlbumPreview
+            album={{
+              ...previewAlbum,
+              images:
+                activeImageIndex === null
+                  ? previewAlbum.images
+                  : previewAlbum.images.map((image, index) => (index === activeImageIndex ? media : image)),
+              cover: activeImageIndex === 0 ? media : previewAlbum.cover,
+            }}
+          />
+        )}
+        contextPreviewTitle="Album Card"
+        contextPreviewHint="Refine the gallery photo while checking the compact tile."
         onApply={media => {
           if (activeImageIndex === null) return
           updateImageFrame(activeImageIndex, media)
@@ -549,13 +652,16 @@ export default function AdminGalleryPage() {
         onClose={() => setActiveImageIndex(null)}
       />
 
-      <Modal open={!!confirm} onClose={() => setConfirm(null)} title="Delete Album?">
-        <p className={`mb-5 text-sm ${sub}`}>This will permanently remove the album and all its photos from the gallery.</p>
-        <div className="flex gap-3">
-          <button onClick={() => del(confirm!)} className="btn-danger !px-5 !py-2.5">Delete</button>
-          <button onClick={() => setConfirm(null)} className="btn-outline !rounded-xl !px-5 !py-2.5">Cancel</button>
-        </div>
-      </Modal>
+      <AdminConfirmDialog
+        open={!!deleteTarget}
+        title="Delete Album?"
+        description={deleteTarget ? `This will permanently remove ${deleteTarget.title} and its gallery photos.` : undefined}
+        tone="danger"
+        confirmLabel="Delete"
+        loading={deleting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => void confirmDelete()}
+      />
     </div>
   )
 }

@@ -1,8 +1,9 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useDialog } from '../../contexts/DialogContext'
 import { uploadImageVariants } from '../../services/storage.service'
-import type { MediaFit } from '../../utils/media-frame'
+import { stripMediaTransform, type MediaFit } from '../../utils/media-frame'
+import { cn } from '../../utils/cn'
 import FramedImage from './FramedImage'
 import MediaPlacementModal from './MediaPlacementModal'
 
@@ -29,6 +30,9 @@ interface Props {
   frameContextTitle?: string
   frameContextHint?: string
   maxWidthClassName?: string
+  compactPreview?: boolean
+  ignoreTransformPreview?: boolean
+  resetFrameOnOpen?: boolean
 }
 
 export default function ImageUploader({
@@ -49,6 +53,9 @@ export default function ImageUploader({
   frameContextTitle,
   frameContextHint,
   maxWidthClassName,
+  compactPreview = false,
+  ignoreTransformPreview = false,
+  resetFrameOnOpen = false,
 }: Props) {
   const { isDark } = useTheme()
   const dialog = useDialog()
@@ -58,6 +65,7 @@ export default function ImageUploader({
   const [dragOver, setDragOver] = useState(false)
   const [editorOpen, setEditorOpen] = useState(false)
   const [editorMedia, setEditorMedia] = useState('')
+  const [previewExpanded, setPreviewExpanded] = useState(false)
   // Synchronous guard: MediaPlacementModal.apply() calls onApply() then
   // onClose() in the same tick. setPendingNewMedia(null) inside
   // commitEditorValue is async, so closeEditor would still read the stale
@@ -71,11 +79,16 @@ export default function ImageUploader({
   const aspectClass = previewAspectClass || (compact ? 'aspect-square' : 'aspect-video')
   const isCollectionUploader = typeof value === 'undefined'
 
+  useEffect(() => {
+    setPreviewExpanded(false)
+  }, [value])
+
   const openFrameEditor = (media: string, pending = false) => {
     if (!media) return
+    const nextMedia = resetFrameOnOpen ? stripMediaTransform(media) : media
     committedRef.current = false
-    pendingRef.current = pending ? media : null
-    setEditorMedia(media)
+    pendingRef.current = pending ? nextMedia : null
+    setEditorMedia(nextMedia)
     setEditorOpen(true)
   }
 
@@ -171,14 +184,14 @@ export default function ImageUploader({
               />
 
               <div
-                className={`absolute inset-0 flex items-center justify-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100 ${
+                className={`absolute inset-0 flex flex-wrap items-center justify-center gap-1.5 p-2 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 ${
                   isDark ? 'bg-black/60' : 'bg-white/70'
                 }`}
               >
                 <button
                   type="button"
                   onClick={() => openFrameEditor(value)}
-                  className={`rounded-lg px-2 py-1 text-[10px] font-semibold ${
+                  className={`min-h-[44px] rounded-lg px-2 py-1 text-[10px] font-semibold md:min-h-[32px] ${
                     isDark ? 'bg-cyan-500/25 text-white' : 'bg-violet-100 text-violet-700'
                   }`}
                 >
@@ -187,7 +200,7 @@ export default function ImageUploader({
                 <button
                   type="button"
                   onClick={() => inputRef.current?.click()}
-                  className={`rounded-lg px-2 py-1 text-[10px] font-semibold ${
+                  className={`min-h-[44px] rounded-lg px-2 py-1 text-[10px] font-semibold md:min-h-[32px] ${
                     isDark ? 'bg-purple-500/30 text-white' : 'bg-violet-100 text-violet-700'
                   }`}
                 >
@@ -197,7 +210,7 @@ export default function ImageUploader({
                   <button
                     type="button"
                     onClick={onRemove}
-                    className="rounded-lg bg-red-500/30 px-2 py-1 text-[10px] font-semibold text-white"
+                    className="min-h-[44px] rounded-lg bg-red-500/30 px-2 py-1 text-[10px] font-semibold text-white md:min-h-[32px]"
                   >
                     Remove
                   </button>
@@ -240,6 +253,8 @@ export default function ImageUploader({
   }
 
   if (variant === 'logo') {
+    const logoPreviewMedia = value && ignoreTransformPreview ? stripMediaTransform(value) : value
+
     return (
       <>
         <div className={maxWidthClassName}>
@@ -251,26 +266,44 @@ export default function ImageUploader({
           <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleChange} className="hidden" />
 
           {value ? (
-            <div className="flex items-stretch gap-3 rounded-[16px] border border-violet-200/80 bg-white p-2.5 shadow-[0_1px_2px_rgba(20,8,50,0.04),0_8px_20px_-10px_rgba(89,23,196,0.14)]">
+            <div className="flex flex-col gap-3 rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface)] p-2.5 shadow-[0_1px_2px_rgba(20,8,50,0.04)] sm:flex-row sm:items-center">
               {/* Thumbnail */}
-              <div className="flex h-[96px] w-[96px] shrink-0 items-center justify-center rounded-[12px] border border-violet-100 bg-violet-50/70">
+              <div className="relative flex aspect-[4/3] w-full shrink-0 items-center justify-center overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] p-4 sm:w-36">
                 <FramedImage
-                  media={value}
+                  media={logoPreviewMedia}
                   alt="Logo"
-                  className="h-[72px] w-[72px] object-contain mix-blend-multiply"
+                  className="h-full w-full object-contain mix-blend-multiply"
+                  loading="eager"
                   fallbackTransform={{ fit: 'contain' }}
                   onError={e => {
                     ;(e.target as HTMLImageElement).style.display = 'none'
                   }}
                 />
+                <span className="absolute start-2 top-2 rounded-full bg-[var(--admin-surface)]/90 px-2 py-1 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[var(--admin-success)] ring-1 ring-[var(--admin-border)]">
+                  Uploaded
+                </span>
               </div>
 
               {/* Always-visible action stack */}
-              <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
+              <div className="flex min-w-0 flex-1 flex-col justify-center">
+                <div className="mb-3 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-[color-mix(in_srgb,var(--admin-success)_10%,transparent)] px-2 py-1 text-[10px] font-bold text-[var(--admin-success)]">
+                      Logo ready
+                    </span>
+                    <span className="text-[11px] font-medium text-[var(--admin-text-muted)]">
+                      Public customer card logo
+                    </span>
+                  </div>
+                  <div className="mt-1.5 truncate font-mono text-[11px] text-[var(--admin-text-muted)]">
+                    {stripMediaTransform(value).split('/').pop()?.split('#')[0] || label || 'Customer logo'}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                 <button
                   type="button"
                   onClick={() => openFrameEditor(value)}
-                  className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-[10px] border border-violet-300/80 bg-violet-50 px-3 text-[11.5px] font-bold text-violet-800 transition hover:border-violet-500 hover:bg-violet-100 hover:text-violet-900"
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 text-[12px] font-bold text-[var(--admin-accent)] transition hover:border-[var(--admin-accent)] hover:bg-[var(--admin-surface-2)]"
                 >
                   Adjust Logo
                 </button>
@@ -278,20 +311,21 @@ export default function ImageUploader({
                   type="button"
                   onClick={() => inputRef.current?.click()}
                   disabled={uploading}
-                  className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-[10px] border border-violet-200/80 bg-white px-3 text-[11.5px] font-semibold text-[#211049] transition hover:border-violet-400 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 text-[12px] font-bold text-[var(--admin-accent)] transition hover:border-[var(--admin-accent)] hover:bg-[var(--admin-surface-2)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {uploading ? 'Uploading…' : 'Replace'}
+                  {uploading ? 'Uploading...' : 'Replace'}
                 </button>
                 {removable && onRemove && (
                   <button
                     type="button"
                     onClick={onRemove}
-                    className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-[10px] border border-red-200 bg-red-50 px-3 text-[11.5px] font-bold text-red-700 transition hover:border-red-300 hover:bg-red-100 hover:text-red-800"
+                    className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[color-mix(in_srgb,var(--admin-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--admin-danger)_8%,transparent)] px-3 text-[12px] font-bold text-[var(--admin-danger)] transition hover:bg-[color-mix(in_srgb,var(--admin-danger)_12%,transparent)]"
                   >
                     Remove
                   </button>
                 )}
               </div>
+            </div>
             </div>
           ) : (
             <button
@@ -311,7 +345,7 @@ export default function ImageUploader({
               }`}
             >
               <span className="text-[12.5px] font-bold text-[#07041a]">
-                {uploading ? 'Uploading…' : 'Click or drop logo'}
+                {uploading ? 'Uploading...' : 'Click or drop logo'}
               </span>
               <span className="text-[10.5px] font-medium text-[#4a2c8f]">
                 PNG / SVG / JPG · transparent background recommended
@@ -338,13 +372,93 @@ export default function ImageUploader({
     )
   }
 
+  const compactImageCard = value ? (
+    <div className="rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface)] p-2.5 shadow-[0_1px_2px_rgba(20,8,50,0.04)]">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] sm:w-36">
+          <FramedImage
+            media={value}
+            alt={label || 'Uploaded image'}
+            className="h-full w-full"
+            loading="eager"
+            fallbackTransform={{ fit: defaultFit }}
+          />
+          <span className="absolute start-2 top-2 rounded-full bg-[var(--admin-surface)]/90 px-2 py-1 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[var(--admin-success)] ring-1 ring-[var(--admin-border)]">
+            Uploaded
+          </span>
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-[color-mix(in_srgb,var(--admin-success)_10%,transparent)] px-2 py-1 text-[10px] font-bold text-[var(--admin-success)]">
+              Image ready
+            </span>
+            <span className="text-[11px] font-medium text-[var(--admin-text-muted)]">
+              Category card image
+            </span>
+          </div>
+          <div className="mt-1.5 truncate font-mono text-[11px] text-[var(--admin-text-muted)]">
+            {value.split('/').pop()?.split('#')[0] || label || 'Category image'}
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+            <button
+              type="button"
+              onClick={() => openFrameEditor(value)}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 text-[12px] font-bold text-[var(--admin-accent)] transition hover:border-[var(--admin-accent)] hover:bg-[var(--admin-surface-2)]"
+            >
+              Adjust frame
+            </button>
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              disabled={uploading}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 text-[12px] font-bold text-[var(--admin-accent)] transition hover:border-[var(--admin-accent)] hover:bg-[var(--admin-surface-2)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {uploading ? 'Uploading...' : 'Replace'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setPreviewExpanded(value => !value)}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 text-[12px] font-bold text-[var(--admin-text-muted)] transition hover:border-[var(--admin-accent)] hover:bg-[var(--admin-surface-2)] hover:text-[var(--admin-accent)]"
+            >
+              {previewExpanded ? 'Hide preview' : 'Preview'}
+            </button>
+            {removable && onRemove && (
+              <button
+                type="button"
+                onClick={onRemove}
+                className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[color-mix(in_srgb,var(--admin-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--admin-danger)_8%,transparent)] px-3 text-[12px] font-bold text-[var(--admin-danger)] transition hover:bg-[color-mix(in_srgb,var(--admin-danger)_12%,transparent)]"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {previewExpanded && (
+        <div className="mt-3 overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)]">
+          <div className={cn('max-h-[240px]', aspectClass)}>
+            <FramedImage
+              media={value}
+              alt={label || 'Uploaded image preview'}
+              className="h-full w-full"
+              fallbackTransform={{ fit: defaultFit }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  ) : null
+
   return (
     <>
       <div className={maxWidthClassName}>
         {label && <label className={`mb-1.5 block text-[12px] font-medium ${sub}`}>{label}</label>}
         <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleChange} className="hidden" />
 
-        {value ? (
+        {value && compactPreview ? compactImageCard : value ? (
           <div className="group relative overflow-hidden rounded-xl">
             <div className={`overflow-hidden rounded-xl ${aspectClass}`}>
               <FramedImage
@@ -359,14 +473,14 @@ export default function ImageUploader({
             </div>
 
             <div
-              className={`absolute inset-0 flex items-center justify-center gap-2.5 opacity-0 transition-opacity group-hover:opacity-100 ${
+              className={`absolute inset-0 flex flex-wrap items-center justify-center gap-2.5 p-2 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 ${
                 isDark ? 'bg-black/60' : 'bg-white/60'
               }`}
             >
               <button
                 type="button"
                 onClick={() => openFrameEditor(value)}
-                className={`rounded-xl px-3.5 py-2 text-[11px] font-semibold ${
+                className={`min-h-[44px] rounded-xl px-3.5 py-2 text-[11px] font-semibold md:min-h-[38px] ${
                   isDark ? 'bg-cyan-500/25 text-white' : 'bg-violet-100 text-violet-700'
                 }`}
               >
@@ -376,7 +490,7 @@ export default function ImageUploader({
                 type="button"
                 onClick={() => inputRef.current?.click()}
                 disabled={uploading}
-                className={`rounded-xl px-3.5 py-2 text-[11px] font-semibold ${
+                className={`min-h-[44px] rounded-xl px-3.5 py-2 text-[11px] font-semibold md:min-h-[38px] ${
                   isDark ? 'bg-purple-500/40 text-white' : 'bg-violet-100 text-violet-700'
                 }`}
               >
@@ -386,7 +500,7 @@ export default function ImageUploader({
                 <button
                   type="button"
                   onClick={onRemove}
-                  className="rounded-xl bg-red-500/40 px-3.5 py-2 text-[11px] font-semibold text-white"
+                  className="min-h-[44px] rounded-xl bg-red-500/40 px-3.5 py-2 text-[11px] font-semibold text-white md:min-h-[38px]"
                 >
                   Remove
                 </button>

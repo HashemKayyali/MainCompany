@@ -23,6 +23,7 @@ import SectionHeading from '../components/home/SectionHeading'
 import Reveal from '../components/home/Reveal'
 import EventiesHero from '../components/layout/EventiesHero'
 import FaqFlipGrid from '../components/ui/FaqFlipGrid'
+import { useI18n } from '../contexts/LanguageContext'
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
@@ -235,6 +236,8 @@ function ContactHeroShowcase() {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ContactPage() {
+  const { translateText } = useI18n()
+
   usePageMeta({
     title: 'Contact Eventies | Event Requests in Jordan',
     description:
@@ -247,11 +250,7 @@ export default function ContactPage() {
       {/* ── 1. Hero ─────────────────────────────────────────────── */}
       <EventiesHero
         eyebrow="Get in touch - Eventies"
-        title={
-          <>
-            Plan your event with the right <span>Eventies team</span>.
-          </>
-        }
+        title="Plan your event with the right Eventies team"
         description="Have a question about rental requests, purchase quote requests, custom builds, availability, or provider partnerships? Send the right inquiry and the Eventies team will review the details and follow up with you."
         primaryAction={{ label: 'Submit Request', href: '#contact-form' }}
         secondaryAction={{ label: 'Email Main Team', href: `mailto:${social.email}` }}
@@ -473,10 +472,10 @@ export default function ContactPage() {
             <Reveal y={22}>
               <div>
                 <h2 className="font-display text-[clamp(1.6rem,3vw,2.1rem)] font-extrabold tracking-[-0.03em] text-ink-900">
-                  Send a detailed inquiry
+                  {translateText('Send a detailed inquiry')}
                 </h2>
                 <p className="mt-2 max-w-xl text-[14px] leading-[1.7] text-ink-600">
-                  Tell us what you are planning so we can route your message to the right team.
+                  {translateText('Tell us what you are planning so we can route your message to the right team.')}
                 </p>
                 <div className="mt-6">
                   <ContactForm />
@@ -586,31 +585,30 @@ export default function ContactPage() {
               <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-violet-400/30 blur-3xl" aria-hidden="true" />
               <div className="relative mx-auto max-w-2xl">
                 <h2 className="font-display text-[clamp(1.8rem,4.4vw,2.8rem)] font-extrabold leading-[1.05] tracking-[-0.03em] text-white">
-                  Ready to send your event details?
+                  {translateText('Ready to send your event details?')}
                 </h2>
                 <p className="mx-auto mt-4 max-w-xl text-[14.5px] leading-[1.7] text-white/80">
-                  Choose the right contact path or send one clear inquiry with your event date,
-                  location, and setup needs.
+                  {translateText('Choose the right contact path or send one clear inquiry with your event date, location, and setup needs.')}
                 </p>
                 <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
                   <a
                     href="#contact-form"
                     className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-[13px] font-bold text-violet-800 transition-all hover:-translate-y-0.5 sm:w-auto"
                   >
-                    Submit Request
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={2.4} />
+                    {translateText('Submit Request')}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" strokeWidth={2.4} />
                   </a>
                   <a
                     href={`mailto:${social.email}`}
                     className="inline-flex w-full items-center justify-center rounded-full border border-white/30 bg-white/10 px-7 py-3.5 text-[13px] font-bold text-white backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/20 sm:w-auto"
                   >
-                    Email Main Team
+                    {translateText('Email Main Team')}
                   </a>
                   <a
                     href="mailto:vendors@eventiesjo.com"
                     className="inline-flex w-full items-center justify-center rounded-full border border-white/30 bg-white/10 px-7 py-3.5 text-[13px] font-bold text-white backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/20 sm:w-auto"
                   >
-                    Provider Inquiry
+                    {translateText('Provider Inquiry')}
                   </a>
                 </div>
               </div>

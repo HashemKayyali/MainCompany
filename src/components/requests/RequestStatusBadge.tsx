@@ -1,9 +1,11 @@
 import { useTheme } from '../../contexts/ThemeContext'
+import { useI18n } from '../../contexts/LanguageContext'
 import { formatRequestStatusLabel } from '../../utils/commerce'
 import { cn } from '../../utils/cn'
 
 export default function RequestStatusBadge({ status }: { status: string }) {
   const { isDark } = useTheme()
+  const { translateText } = useI18n()
 
   const tone = (() => {
     if (status === 'pending_review') return isDark ? 'bg-amber-500/12 text-amber-200 ring-amber-400/18' : 'bg-amber-50 text-amber-700 ring-amber-200'
@@ -14,7 +16,7 @@ export default function RequestStatusBadge({ status }: { status: string }) {
 
   return (
     <span className={cn('inline-flex rounded-full px-3 py-1 text-[11px] font-semibold ring-1 ring-inset', tone)}>
-      {formatRequestStatusLabel(status)}
+      {translateText(formatRequestStatusLabel(status))}
     </span>
   )
 }

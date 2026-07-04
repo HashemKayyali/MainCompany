@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useDialog } from '../../contexts/DialogContext'
 import { deleteVideo, uploadVideo } from '../../services/storage.service'
@@ -20,6 +20,7 @@ interface Props {
   renderFrameContextPreview?: (media: string) => ReactNode
   frameContextTitle?: string
   frameContextHint?: string
+  compactPreview?: boolean
 }
 
 const ACCEPTED_TYPES = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v']
@@ -39,6 +40,7 @@ export default function VideoUploader({
   renderFrameContextPreview,
   frameContextTitle,
   frameContextHint,
+  compactPreview = false,
 }: Props) {
   const { isDark } = useTheme()
   const dialog = useDialog()
@@ -50,9 +52,14 @@ export default function VideoUploader({
   const [editorOpen, setEditorOpen] = useState(false)
   const [editorMedia, setEditorMedia] = useState('')
   const [pendingNewMedia, setPendingNewMedia] = useState<string | null>(null)
+  const [previewExpanded, setPreviewExpanded] = useState(false)
 
   const sub = isDark ? 'text-purple-300/80' : 'text-gray-500'
   const isCollectionUploader = typeof value === 'undefined'
+
+  useEffect(() => {
+    setPreviewExpanded(false)
+  }, [value])
 
   const openFrameEditor = (media: string, pending = false) => {
     if (!media) return
@@ -146,6 +153,87 @@ export default function VideoUploader({
     onChange('')
   }
 
+  const compactVideoCard = value ? (
+    <div className="rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface)] p-2.5 shadow-[0_1px_2px_rgba(20,8,50,0.04)]">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] sm:w-36">
+          <FramedVideo
+            media={value}
+            className="h-full w-full"
+            muted
+            playsInline
+            preload="metadata"
+            fallbackTransform={{ fit: defaultFit }}
+          />
+          <span className="absolute start-2 top-2 rounded-full bg-[var(--admin-surface)]/90 px-2 py-1 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[var(--admin-success)] ring-1 ring-[var(--admin-border)]">
+            Uploaded
+          </span>
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-[color-mix(in_srgb,var(--admin-success)_10%,transparent)] px-2 py-1 text-[10px] font-bold text-[var(--admin-success)]">
+              Video ready
+            </span>
+            <span className="text-[11px] font-medium text-[var(--admin-text-muted)]">
+              Storefront hover preview
+            </span>
+          </div>
+          <div className="mt-1.5 truncate font-mono text-[11px] text-[var(--admin-text-muted)]">
+            {value.split('/').pop()?.split('#')[0] || 'Product video'}
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+            <button
+              type="button"
+              onClick={() => openFrameEditor(value)}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 text-[12px] font-bold text-[var(--admin-accent)] transition hover:border-[var(--admin-accent)] hover:bg-[var(--admin-surface-2)]"
+            >
+              Adjust frame
+            </button>
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              disabled={uploading}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 text-[12px] font-bold text-[var(--admin-accent)] transition hover:border-[var(--admin-accent)] hover:bg-[var(--admin-surface-2)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {uploading ? 'Uploading...' : 'Replace'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setPreviewExpanded(value => !value)}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 text-[12px] font-bold text-[var(--admin-text-muted)] transition hover:border-[var(--admin-accent)] hover:bg-[var(--admin-surface-2)] hover:text-[var(--admin-accent)]"
+            >
+              {previewExpanded ? 'Hide preview' : 'Preview'}
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleRemove()}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[color-mix(in_srgb,var(--admin-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--admin-danger)_8%,transparent)] px-3 text-[12px] font-bold text-[var(--admin-danger)] transition hover:bg-[color-mix(in_srgb,var(--admin-danger)_12%,transparent)]"
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {previewExpanded && (
+        <div className="mt-3 overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)]">
+          <div className="aspect-video max-h-[240px]">
+            <FramedVideo
+              media={value}
+              className="h-full w-full"
+              controls
+              playsInline
+              preload="metadata"
+              fallbackTransform={{ fit: defaultFit }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  ) : null
+
   return (
     <>
       <div>
@@ -159,7 +247,7 @@ export default function VideoUploader({
           className="hidden"
         />
 
-        {value ? (
+        {value && compactPreview ? compactVideoCard : value ? (
           <div className="group relative overflow-hidden rounded-xl">
             <div className="aspect-video overflow-hidden rounded-xl">
               <FramedVideo

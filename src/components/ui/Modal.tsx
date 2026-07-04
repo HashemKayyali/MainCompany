@@ -1,30 +1,37 @@
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
-import { useTheme } from '../../contexts/ThemeContext'
 import { useI18n } from '../../contexts/LanguageContext'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { cn } from '../../utils/cn'
 
 interface ModalProps {
   open: boolean
   onClose: () => void
   title: string
-  children: React.ReactNode
+  children: ReactNode
+  /** Blocks backdrop-click and Escape from closing (e.g. unsaved forms). */
   persistent?: boolean
-  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'
+  /** Alias-style opt-out of dismiss affordances; defaults to dismissable. */
+  dismissable?: boolean
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full'
+  overlayClassName?: string
   contentClassName?: string
   bodyClassName?: string
+  /** Optional sticky footer region (actions). Stays visible while the body scrolls. */
+  footer?: ReactNode
 }
 
 const SIZE_CLASSES: Record<NonNullable<ModalProps['size']>, string> = {
-  sm: 'max-w-md',
-  md: 'max-w-[37rem]',
-  lg: 'max-w-[48rem]',
-  xl: 'max-w-[58rem]',
-  '2xl': 'max-w-[66rem]',
-  full: 'max-w-[min(78rem,calc(100vw-1rem))]',
+  sm: 'sm:max-w-md',
+  md: 'sm:max-w-[37rem]',
+  lg: 'sm:max-w-[48rem]',
+  xl: 'sm:max-w-[58rem]',
+  '2xl': 'sm:max-w-[66rem]',
+  '3xl': 'sm:max-w-[min(90rem,calc(100vw-2rem))]',
+  full: 'sm:max-w-[min(78rem,calc(100vw-1rem))]',
 }
 
 const FOCUSABLE_SELECTOR = [
@@ -50,20 +57,22 @@ export default function Modal({
   title,
   children,
   persistent = false,
+  dismissable = true,
   size = 'md',
+  overlayClassName = '',
   contentClassName = '',
   bodyClassName = '',
+  footer,
 }: ModalProps) {
-  const { isDark } = useTheme()
-  const { t, translateText, dir } = useI18n()
+  const { translateText, dir } = useI18n()
+  const isDesktop = useMediaQuery('(min-width: 640px)', true)
   const titleId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
-  const topOffsetClass = 'pt-3 sm:pt-5 lg:pt-6'
-  const bottomOffsetClass =
-    'pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-[max(0.875rem,env(safe-area-inset-bottom))]'
-  const panelClass = 'bg-white border border-violet-200/65 shadow-[0_32px_96px_-22px_rgba(124,58,237,0.32),0_8px_28px_-8px_rgba(124,58,237,0.18)]'
+
+  // Backdrop / Escape only dismiss when both flags allow it.
+  const canDismiss = dismissable && !persistent
 
   useBodyScrollLock(open)
 
@@ -102,7 +111,7 @@ export default function Modal({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        if (persistent) return
+        if (!canDismiss) return
 
         event.preventDefault()
         onClose()
@@ -141,10 +150,10 @@ export default function Modal({
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose, open, persistent])
+  }, [canDismiss, onClose, open])
 
   const handleBackdropClick = () => {
-    if (!persistent) onClose()
+    if (canDismiss) onClose()
   }
 
   // Portal to <body> so the overlay escapes any ancestor that establishes
@@ -153,11 +162,26 @@ export default function Modal({
   // trapped inside the card instead of covering the viewport).
   if (typeof document === 'undefined') return null
 
+  // Mobile: bottom sheet. Desktop: centered panel.
+  const panelMotion = isDesktop
+    ? {
+        initial: { opacity: 0, scale: 0.96, y: 10 },
+        animate: { opacity: 1, scale: 1, y: 0 },
+        exit: { opacity: 0, scale: 0.96 },
+        transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] as const },
+      }
+    : {
+        initial: { y: '100%' },
+        animate: { y: 0 },
+        exit: { y: '100%' },
+        transition: { type: 'spring' as const, stiffness: 360, damping: 34 },
+      }
+
   return createPortal(
     <AnimatePresence>
       {open && (
         <div
-          className="fixed inset-0 z-[100] overflow-y-auto"
+          className={cn('fixed inset-0 z-[100] overflow-y-auto', overlayClassName)}
           onClick={handleBackdropClick}
           role="dialog"
           aria-modal="true"
@@ -169,33 +193,39 @@ export default function Modal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-[rgba(45,18,108,0.42)] backdrop-blur-[4px]"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
           />
 
           <div
             className={cn(
-              'relative flex min-h-full items-start justify-center px-2.5 sm:px-3.5',
-              topOffsetClass,
-              bottomOffsetClass
+              'relative flex min-h-full',
+              // Bottom sheet on mobile, centered dialog on sm+.
+              'items-end justify-center',
+              'sm:items-start sm:px-3.5 sm:pt-5 sm:pb-[max(0.875rem,env(safe-area-inset-bottom))] lg:pt-6'
             )}
           >
             <motion.div
               ref={panelRef}
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-              className={`relative flex w-full ${SIZE_CLASSES[size]} max-h-[calc(100dvh-24px)] flex-col overflow-hidden rounded-[22px] sm:max-h-[calc(100dvh-40px)] lg:max-h-[calc(100dvh-52px)] ${panelClass} ${contentClassName}`}
+              {...panelMotion}
+              className={cn(
+                'relative flex w-full flex-col overflow-hidden border border-violet-200/65 bg-white',
+                'shadow-[0_32px_96px_-22px_rgba(124,58,237,0.32),0_8px_28px_-8px_rgba(124,58,237,0.18)]',
+                // Mobile bottom sheet
+                'max-h-[92dvh] rounded-t-[24px]',
+                // Desktop centered
+                'sm:max-h-[calc(100dvh-40px)] sm:rounded-[22px] lg:max-h-[calc(100dvh-52px)]',
+                SIZE_CLASSES[size],
+                contentClassName
+              )}
               onClick={event => event.stopPropagation()}
             >
-              <div
-                className="sticky top-0 z-20 flex items-start justify-between gap-3 border-b border-violet-100 bg-white/95 px-3 pb-3 pt-3 backdrop-blur-xl sm:px-4 sm:pb-3.5 sm:pt-3.5"
-              >
-                <h2
-                  id={titleId}
-                  className="font-sans text-[0.98rem] font-bold sm:text-[1.04rem]"
-                  style={{ color: '#1a0b3d' }}
-                >
+              {/* Mobile drag handle */}
+              <div className="flex justify-center pt-2.5 sm:hidden" aria-hidden="true">
+                <span className="h-1.5 w-11 rounded-full bg-violet-200" />
+              </div>
+
+              <div className="sticky top-0 z-20 flex items-start justify-between gap-3 border-b border-violet-100 bg-white/95 px-3 pb-3 pt-2.5 backdrop-blur-xl sm:px-4 sm:pb-3.5 sm:pt-3.5">
+                <h2 id={titleId} className="font-sans text-[0.98rem] font-bold text-[#1a0b3d] sm:text-[1.04rem]">
                   {translateText(title)}
                 </h2>
 
@@ -204,7 +234,7 @@ export default function Modal({
                   type="button"
                   onClick={onClose}
                   className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200 transition hover:bg-violet-100 hover:text-violet-900"
-                  aria-label={t('admin.dialog.closeModal')}
+                  aria-label={translateText('Close')}
                 >
                   <X size={18} strokeWidth={2.2} />
                 </button>
@@ -219,6 +249,12 @@ export default function Modal({
               >
                 {children}
               </div>
+
+              {footer && (
+                <div className="sticky bottom-0 z-20 border-t border-violet-100 bg-white/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl sm:px-4 sm:pb-3.5 sm:pt-3.5">
+                  {footer}
+                </div>
+              )}
             </motion.div>
           </div>
         </div>

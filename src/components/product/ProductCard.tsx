@@ -209,7 +209,7 @@ const ProductCard = memo(function ProductCard({
 
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[30%] bg-gradient-to-b from-black/28 to-transparent" />
 
-        <div className="absolute left-2 top-2 z-20 flex flex-wrap gap-1 sm:left-3 sm:top-3 sm:gap-1.5">
+        <div className="absolute start-2 top-2 z-20 flex flex-wrap gap-1 sm:start-3 sm:top-3 sm:gap-1.5">
           {product.featured && (
             <span className={cn(
               'inline-flex items-center rounded-[8px] border border-cyan-400/40 bg-cyan-500/90 px-2.5 py-1 text-[9.5px] font-bold tracking-wide text-white shadow-[0_4px_12px_rgba(34,211,238,0.3)]',
@@ -261,6 +261,7 @@ const ProductCard = memo(function ProductCard({
       >
         <div className={compact ? 'mb-1.5' : 'mb-1.5 sm:mb-2.5'}>
           <span
+            data-i18n-skip
             className={cn(
               'inline-flex items-center rounded-full font-bold uppercase',
               compact
@@ -271,7 +272,7 @@ const ProductCard = memo(function ProductCard({
                 : 'bg-violet-50 text-violet-700 ring-1 ring-violet-200/80'
             )}
           >
-            {categoryLabel}
+            <bdi dir="auto">{categoryLabel}</bdi>
           </span>
         </div>
 
@@ -282,6 +283,8 @@ const ProductCard = memo(function ProductCard({
             className="outline-none focus-visible:underline"
           >
             <h3
+              dir="auto"
+              data-i18n-skip
               className={cn(
                 'font-sans font-bold leading-tight tracking-[-0.028em] line-clamp-1 transition-colors duration-300',
                 compact ? 'text-[1rem]' : 'text-[0.98rem] sm:text-[1.16rem]',
@@ -292,6 +295,8 @@ const ProductCard = memo(function ProductCard({
             </h3>
           </Link>
           <p
+            dir="auto"
+            data-i18n-skip
             className={cn(
               compact
                 ? 'mt-1 text-[10.5px] leading-[1.45] line-clamp-1'

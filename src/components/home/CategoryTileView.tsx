@@ -147,10 +147,12 @@ const CategoryTileView = memo(function CategoryTileView({
                 : 'text-violet-500/60 group-hover:text-violet-500/85'
           )}
         >
-          {count} Service{count !== 1 ? 's' : ''}
+          {count === 1 ? '1 Service' : `${count} Services`}
         </div>
 
         <h3
+          dir="auto"
+          data-i18n-skip
           className={cn(
             'font-sans text-[0.92rem] font-bold leading-snug tracking-[-0.02em] line-clamp-2 min-h-[2.53rem] sm:text-[1.13rem] sm:leading-tight sm:line-clamp-1 sm:min-h-0',
             isDark ? 'text-white/92' : 'text-slate-900'
@@ -161,6 +163,8 @@ const CategoryTileView = memo(function CategoryTileView({
 
         {description && (
           <p
+            dir="auto"
+            data-i18n-skip
             className={cn(
               'mt-1.5 line-clamp-2 text-[11.5px] font-medium leading-snug',
               isDark ? 'text-slate-300/66' : 'text-slate-500'

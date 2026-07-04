@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { useData } from '../../contexts/DataContext'
-import { useTheme } from '../../contexts/ThemeContext'
 import { useUser } from '../../contexts/UserContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase, isSupabaseConfigured } from '../../lib/supabase'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminStatCard from '../../components/admin/AdminStatCard'
+import AdminBadge from '../../components/admin/primitives/AdminBadge'
+import AdminButton from '../../components/admin/primitives/AdminButton'
+import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
+import AdminSkeleton from '../../components/admin/primitives/AdminSkeleton'
 import { cn } from '../../utils/cn'
 
 type IconName =
@@ -22,6 +25,7 @@ type IconName =
   | 'warning'
   | 'shield'
   | 'arrow'
+  | 'check'
 
 function Icon({ name, className }: { name: IconName; className?: string }) {
   const cls = `h-5 w-5 ${className || ''}`
@@ -111,9 +115,28 @@ function Icon({ name, className }: { name: IconName; className?: string }) {
           <path d="M6 12h12M13 7l5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )
+    case 'check':
+      return (
+        <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 12.5 10 17.5 19 7" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
     default:
       return null
   }
+}
+
+function IconChip({ name, className }: { name: IconName; className?: string }) {
+  return (
+    <div
+      className={cn(
+        'flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--admin-radius-sm)] bg-[var(--admin-accent-soft)] text-[var(--admin-accent)]',
+        className
+      )}
+    >
+      <Icon name={name} className="h-6 w-6" />
+    </div>
+  )
 }
 
 function SectionCard({
@@ -127,21 +150,11 @@ function SectionCard({
   children: React.ReactNode
   className?: string
 }) {
-  const { isDark } = useTheme()
-
   return (
-    <section
-      className={cn(
-        'rounded-[20px] p-3.5 md:p-4',
-        isDark
-          ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(8,11,27,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_28px_90px_-58px_rgba(7,15,36,0.96)]'
-          : 'bg-white ring-1 ring-inset ring-gray-200',
-        className
-      )}
-    >
+    <section className={cn('admin-card p-3.5 md:p-4', className)}>
       <div className="mb-3">
-        <h2 className={cn('font-sans text-base font-bold', isDark ? 'text-white' : 'text-gray-900')}>{title}</h2>
-        {subtitle && <p className={cn('mt-1 text-[13px] leading-5', isDark ? 'text-purple-100/64' : 'text-gray-500')}>{subtitle}</p>}
+        <h2 className="admin-section-title">{title}</h2>
+        {subtitle && <p className="mt-1 text-[13px] leading-5 text-[var(--admin-text-muted)]">{subtitle}</p>}
       </div>
       {children}
     </section>
@@ -159,36 +172,20 @@ function QuickActionCard({
   hint: string
   icon: IconName
 }) {
-  const { isDark } = useTheme()
-
   return (
     <Link
       to={to}
-      className={cn(
-        'group flex items-center gap-3 rounded-[18px] px-3.5 py-3.5 transition duration-200',
-        isDark
-          ? 'bg-[#0d1430]/88 ring-1 ring-inset ring-cyan-400/10 hover:bg-[#111a39] hover:ring-cyan-300/16'
-          : 'bg-gray-50/80 ring-1 ring-inset ring-gray-200 hover:bg-white'
-      )}
+      className="group flex min-h-[112px] flex-col gap-2.5 rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] p-3.5 transition duration-200 hover:border-[var(--admin-accent)] hover:bg-[var(--admin-surface)]"
     >
-      <div
-        className={cn(
-          'flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px]',
-          isDark
-            ? 'bg-[linear-gradient(135deg,rgba(34,211,238,0.18),rgba(168,85,247,0.18))] text-cyan-200 shadow-[0_0_24px_rgba(34,211,238,0.12)]'
-            : 'bg-violet-50 text-violet-700'
-        )}
-      >
-        <Icon name={icon} className="h-6 w-6" />
+      <div className="flex items-center justify-between">
+        <IconChip name={icon} />
+        <span className="text-[var(--admin-accent)] transition group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5">
+          <Icon name="arrow" className="h-4 w-4 rtl:rotate-180" />
+        </span>
       </div>
-
-      <div className="min-w-0 flex-1">
-        <div className={cn('text-[13px] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>{title}</div>
-        <div className={cn('mt-0.5 text-[11px] leading-5', isDark ? 'text-purple-100/60' : 'text-gray-500')}>{hint}</div>
-      </div>
-
-      <div className={cn('shrink-0 transition group-hover:translate-x-0.5', isDark ? 'text-cyan-200/80' : 'text-violet-600')}>
-        <Icon name="arrow" className="h-4 w-4" />
+      <div className="min-w-0">
+        <div className="text-[13px] font-bold text-[var(--admin-text)]">{title}</div>
+        <div className="mt-0.5 text-[11px] leading-4 text-[var(--admin-text-muted)]">{hint}</div>
       </div>
     </Link>
   )
@@ -205,117 +202,115 @@ function ReportCard({
   metrics: Array<{ label: string; value: React.ReactNode }>
   footer: string
 }) {
-  const { isDark } = useTheme()
-
-  const toneClass =
-    tone === 'good'
-      ? isDark
-        ? 'bg-cyan-400/10 text-cyan-200 ring-cyan-400/18'
-        : 'bg-cyan-50 text-cyan-700 ring-cyan-200'
-      : tone === 'watch'
-        ? isDark
-          ? 'bg-amber-400/10 text-amber-200 ring-amber-400/18'
-          : 'bg-amber-50 text-amber-700 ring-amber-200'
-        : isDark
-          ? 'bg-red-400/10 text-red-200 ring-red-400/18'
-          : 'bg-red-50 text-red-700 ring-red-200'
-
+  const badgeTone = tone === 'good' ? 'success' : tone === 'watch' ? 'warning' : 'danger'
   const toneLabel = tone === 'good' ? 'Healthy' : tone === 'watch' ? 'Watch' : 'Needs action'
 
   return (
-    <div
-      className={cn(
-        'rounded-[18px] p-3.5',
-        isDark
-          ? 'bg-[#0d1430]/88 ring-1 ring-inset ring-cyan-400/10'
-          : 'bg-gray-50/80 ring-1 ring-inset ring-gray-200'
-      )}
-    >
+    <div className="rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] p-3.5">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <div className={cn('text-[13px] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>{title}</div>
-        <span className={cn('rounded-full px-3 py-1 text-[10px] font-mono uppercase tracking-[0.22em] ring-1 ring-inset', toneClass)}>
-          {toneLabel}
-        </span>
+        <div className="text-[13px] font-bold text-[var(--admin-text)]">{title}</div>
+        <AdminBadge tone={badgeTone}>{toneLabel}</AdminBadge>
       </div>
 
       <div className="space-y-2">
         {metrics.map(metric => (
           <div
             key={metric.label}
-            className={cn(
-              'flex items-center justify-between gap-4 rounded-[16px] px-3 py-2.5',
-              isDark ? 'bg-black/15 ring-1 ring-inset ring-white/5' : 'bg-white ring-1 ring-inset ring-gray-200'
-            )}
+            className="flex items-center justify-between gap-4 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2.5"
           >
-            <span className={cn('text-[11px]', isDark ? 'text-purple-100/70' : 'text-gray-500')}>{metric.label}</span>
-            <span className={cn('text-[13px] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>{metric.value}</span>
+            <span className="text-[11px] text-[var(--admin-text-muted)]">{metric.label}</span>
+            <span className="text-[13px] font-semibold tabular-nums text-[var(--admin-text)]">{metric.value}</span>
           </div>
         ))}
       </div>
 
-      <div className={cn('mt-3 text-[11px]', isDark ? 'text-cyan-100/58' : 'text-violet-700')}>{footer}</div>
+      <div className="mt-3 text-[11px] text-[var(--admin-accent)]">{footer}</div>
     </div>
   )
 }
 
-function AttentionRow({
-  title,
-  count,
-  to,
-}: {
-  title: string
-  count: number
-  to: string
-}) {
-  const { isDark } = useTheme()
+function AttentionRow({ title, count, to }: { title: string; count: number; to: string }) {
+  const alert = count > 0
 
   return (
     <Link
       to={to}
-      className={cn(
-        'flex items-center gap-3 rounded-[16px] px-3 py-2.5 transition',
-        isDark
-          ? 'bg-[#0d1430]/88 ring-1 ring-inset ring-cyan-400/10 hover:bg-[#111a39]'
-          : 'bg-gray-50/80 ring-1 ring-inset ring-gray-200 hover:bg-white'
-      )}
+      className="group flex items-center gap-3 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3 py-2.5 transition hover:border-[var(--admin-accent)] hover:bg-[var(--admin-surface)]"
     >
       <div
         className={cn(
-          'flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px]',
-          count > 0
-            ? isDark
-              ? 'bg-red-400/10 text-red-200'
-              : 'bg-red-50 text-red-700'
-            : isDark
-              ? 'bg-cyan-400/10 text-cyan-200'
-              : 'bg-cyan-50 text-cyan-700'
+          'flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]',
+          alert
+            ? 'bg-[color-mix(in_srgb,var(--admin-danger)_10%,transparent)] text-[var(--admin-danger)]'
+            : 'bg-[var(--admin-accent-soft)] text-[var(--admin-accent)]'
         )}
       >
-        {count > 0 ? <Icon name="warning" /> : <Icon name="spark" />}
+        <Icon name={alert ? 'warning' : 'spark'} />
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className={cn('text-[13px] font-medium', isDark ? 'text-white' : 'text-gray-900')}>{title}</div>
-        <div className={cn('mt-0.5 text-[11px]', isDark ? 'text-purple-100/58' : 'text-gray-500')}>
-          {count > 0 ? `${count} item${count !== 1 ? 's' : ''} need review` : 'Looks good'}
+        <div className="text-[13px] font-medium text-[var(--admin-text)]">{title}</div>
+        <div className="mt-0.5 text-[11px] text-[var(--admin-text-muted)]">
+          {alert ? `${count} item${count !== 1 ? 's' : ''} need review` : 'Looks good'}
         </div>
       </div>
 
-      <div
-        className={cn(
-          'rounded-full px-2.5 py-1 text-[11px] font-semibold',
-          count > 0
-            ? isDark
-              ? 'bg-red-400/10 text-red-200'
-              : 'bg-red-50 text-red-700'
-            : isDark
-              ? 'bg-cyan-400/10 text-cyan-200'
-              : 'bg-cyan-50 text-cyan-700'
-        )}
-      >
+      <AdminBadge tone={alert ? 'danger' : 'success'} className="tabular-nums">
         {count}
-      </div>
+      </AdminBadge>
+      <Icon name="arrow" className="h-4 w-4 shrink-0 text-[var(--admin-text-muted)] rtl:rotate-180" />
     </Link>
+  )
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <div className="flex items-center justify-between gap-4">
+        <AdminSkeleton className="h-7 w-48" />
+        <AdminSkeleton className="h-10 w-32 rounded-[var(--admin-radius-sm)]" />
+      </div>
+
+      <div className="flex gap-3 overflow-hidden md:grid md:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="admin-card min-w-[240px] shrink-0 p-4 md:min-w-0">
+            <AdminSkeleton className="h-3.5 w-20" />
+            <AdminSkeleton className="mt-3 h-8 w-16" />
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-3.5 2xl:grid-cols-[minmax(0,1.2fr)_340px]">
+        <div className="space-y-3.5">
+          <div className="admin-card p-4">
+            <AdminSkeleton className="h-5 w-32" />
+            <div className="mt-4 grid grid-cols-2 gap-2.5">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <AdminSkeleton key={index} className="h-28" />
+              ))}
+            </div>
+          </div>
+          <div className="admin-card p-4">
+            <AdminSkeleton className="h-5 w-24" />
+            <div className="mt-4 grid gap-2.5 xl:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <AdminSkeleton key={index} className="h-40" />
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="space-y-3.5">
+          <div className="admin-card p-4">
+            <AdminSkeleton className="h-5 w-32" />
+            <div className="mt-4 space-y-2.5">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <AdminSkeleton key={index} className="h-14" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -323,7 +318,6 @@ export default function DashboardPage() {
   const { products, customers, galleryAlbums, parts, categories, loading, refreshAll } = useData()
   const { currentUser } = useUser()
   const { admins } = useAuth()
-  const { isDark } = useTheme()
   const [registeredUsersCount, setRegisteredUsersCount] = useState(0)
 
   useEffect(() => {
@@ -363,10 +357,10 @@ export default function DashboardPage() {
   ]
 
   const quickActions = [
-    { title: 'Manage Products', hint: 'Edit catalog, prices, media, and homepage order.', to: '/admin/products', icon: 'catalog' as const },
-    { title: 'Review Gallery', hint: 'Check albums, covers, and image framing quickly.', to: '/admin/gallery', icon: 'gallery' as const },
-    { title: 'Check Users', hint: 'Inspect accounts, roles, and contact details.', to: '/admin/users', icon: 'users' as const },
-    { title: 'Open Logs', hint: 'Follow updates, deletes, and admin activity.', to: '/admin/logs', icon: 'logs' as const },
+    { title: 'New Product', hint: 'Add a service to the catalog with media and pricing.', to: '/admin/products', icon: 'plus' as const },
+    { title: 'View Requests', hint: 'Review rental and purchase quote activity.', to: '/admin/requests', icon: 'catalog' as const },
+    { title: 'Categories', hint: 'Organise brands and category structure.', to: '/admin/categories', icon: 'gallery' as const },
+    { title: 'Gallery', hint: 'Check albums, covers, and image framing.', to: '/admin/gallery', icon: 'media' as const },
   ]
 
   const catalogTone: 'good' | 'watch' | 'alert' =
@@ -376,60 +370,65 @@ export default function DashboardPage() {
   const accessTone: 'good' | 'watch' | 'alert' =
     admins.length === 0 || registeredUsersCount === 0 ? 'alert' : superAdmins === 1 ? 'watch' : 'good'
 
+  const attentionItems = [
+    { title: 'Products missing public price', count: hiddenPriceProducts, to: '/admin/products' },
+    { title: 'Parts out of stock', count: outOfStockParts, to: '/admin/parts' },
+    { title: 'Customers without category', count: uncategorizedCustomers, to: '/admin/customers' },
+    { title: 'Gallery albums without photos', count: emptyAlbums, to: '/admin/gallery' },
+  ]
+  const totalAttention = attentionItems.reduce((sum, item) => sum + item.count, 0)
+
+  const summaryItems = [
+    { icon: 'catalog' as const, label: 'Catalog items', value: products.length + parts.length },
+    { icon: 'media' as const, label: 'Media assets', value: totalPhotos + productsWithVideo },
+    { icon: 'partners' as const, label: 'Customer records', value: customers.length },
+    { icon: 'shield' as const, label: 'Access accounts', value: admins.length + registeredUsersCount },
+  ]
+
+  const initialLoading =
+    loading && products.length === 0 && customers.length === 0 && categories.length === 0
+
+  if (initialLoading) return <DashboardSkeleton />
+
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
       <AdminPageHeader
         title={`Dashboard, ${firstName}`}
         actions={
-          <button
+          <AdminButton
+            variant="outline"
+            size="sm"
+            loading={loading}
             onClick={() => refreshAll()}
-            disabled={loading}
-            className={cn(
-              'inline-flex min-h-[42px] items-center gap-2 rounded-xl px-4 py-2.5 text-[12px] font-semibold transition active:translate-y-[1px]',
-              loading ? 'cursor-not-allowed opacity-60' : 'hover:-translate-y-[1px]',
-              isDark
-                ? 'bg-[linear-gradient(180deg,rgba(24,56,78,0.96),rgba(14,36,54,0.98))] text-cyan-100 ring-1 ring-inset ring-cyan-300/24 shadow-[0_12px_28px_-18px_rgba(34,211,238,0.3)] hover:brightness-110'
-                : 'bg-cyan-50 text-cyan-700 ring-1 ring-inset ring-cyan-200 shadow-[0_10px_24px_-18px_rgba(34,211,238,0.2)] hover:bg-cyan-100'
-            )}
           >
-            <Icon name="spark" className="h-4 w-4" />
+            {!loading && <Icon name="spark" className="h-4 w-4" />}
             {loading ? 'Refreshing...' : 'Refresh Data'}
-          </button>
+          </AdminButton>
         }
       />
 
-      <div className="grid shrink-0 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      {/* Stat cards: horizontal snap strip on mobile, grid on md+ */}
+      <div className="flex shrink-0 snap-x snap-mandatory gap-3 overflow-x-auto pb-1 md:grid md:grid-cols-2 md:overflow-visible md:pb-0 xl:grid-cols-4">
         {statCards.map(card => (
-          <Link key={card.label} to={card.to} className="block">
+          <Link key={card.label} to={card.to} className="block min-w-[240px] shrink-0 snap-start md:min-w-0">
             <AdminStatCard
               label={card.label}
-              value={card.value}
-              accent={
-                <div
-                  className={cn(
-                    'flex h-10 w-10 items-center justify-center rounded-2xl',
-                    isDark
-                      ? 'bg-[linear-gradient(135deg,rgba(34,211,238,0.16),rgba(168,85,247,0.18))] text-cyan-200'
-                      : 'bg-violet-50 text-violet-700'
-                  )}
-                >
-                  <Icon name={card.icon} />
-                </div>
-              }
-              className="transition hover:-translate-y-[1px]"
+              value={<span className="tabular-nums">{card.value}</span>}
+              accent={<IconChip name={card.icon} />}
+              className="h-full transition hover:-translate-y-[1px] hover:border-[var(--admin-accent)]"
             />
           </Link>
         ))}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
+      <div className="min-h-0 flex-1 overflow-y-auto pe-0.5">
         <div className="grid gap-3.5 2xl:grid-cols-[minmax(0,1.2fr)_340px]">
           <div className="space-y-3.5">
             <SectionCard
               title="Quick Actions"
               subtitle="Start from the most common admin tasks without hunting through the navigation."
             >
-              <div className="grid gap-2.5 md:grid-cols-2">
+              <div className="grid grid-cols-2 gap-2.5">
                 {quickActions.map(action => (
                   <QuickActionCard key={action.title} {...action} />
                 ))}
@@ -485,12 +484,19 @@ export default function DashboardPage() {
               title="Needs Attention"
               subtitle="These are the items most likely to require a manual pass next."
             >
-              <div className="space-y-2.5">
-                <AttentionRow title="Products missing public price" count={hiddenPriceProducts} to="/admin/products" />
-                <AttentionRow title="Parts out of stock" count={outOfStockParts} to="/admin/parts" />
-                <AttentionRow title="Customers without category" count={uncategorizedCustomers} to="/admin/customers" />
-                <AttentionRow title="Gallery albums without photos" count={emptyAlbums} to="/admin/gallery" />
-              </div>
+              {totalAttention === 0 ? (
+                <AdminEmptyState
+                  icon={<Icon name="check" className="h-6 w-6" />}
+                  title="All clear"
+                  description="Nothing needs a manual pass right now."
+                />
+              ) : (
+                <div className="space-y-2.5">
+                  {attentionItems.map(item => (
+                    <AttentionRow key={item.title} title={item.title} count={item.count} to={item.to} />
+                  ))}
+                </div>
+              )}
             </SectionCard>
 
             <SectionCard
@@ -498,30 +504,17 @@ export default function DashboardPage() {
               subtitle="A simple readout of what the admin workspace currently manages."
             >
               <div className="space-y-2.5">
-                {[
-                  { icon: 'catalog' as const, label: 'Catalog items', value: products.length + parts.length },
-                  { icon: 'media' as const, label: 'Media assets', value: totalPhotos + productsWithVideo },
-                  { icon: 'partners' as const, label: 'Customer records', value: customers.length },
-                  { icon: 'shield' as const, label: 'Access accounts', value: admins.length + registeredUsersCount },
-                ].map(item => (
+                {summaryItems.map(item => (
                   <div
                     key={item.label}
-                    className={cn(
-                      'flex items-center gap-3 rounded-[18px] px-3.5 py-3',
-                      isDark ? 'bg-[#0d1430]/88 ring-1 ring-inset ring-cyan-400/10' : 'bg-gray-50/80 ring-1 ring-inset ring-gray-200'
-                    )}
+                    className="flex items-center gap-3 rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3.5 py-3"
                   >
-                    <div
-                      className={cn(
-                        'flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl',
-                        isDark ? 'bg-cyan-400/10 text-cyan-200' : 'bg-violet-50 text-violet-700'
-                      )}
-                    >
-                      <Icon name={item.icon} />
-                    </div>
+                    <IconChip name={item.icon} />
                     <div className="min-w-0 flex-1">
-                    <div className={cn('text-[11px]', isDark ? 'text-purple-100/64' : 'text-gray-500')}>{item.label}</div>
-                    <div className={cn('mt-0.5 text-[13px] font-semibold', isDark ? 'text-white' : 'text-gray-900')}>{item.value}</div>
+                      <div className="text-[11px] text-[var(--admin-text-muted)]">{item.label}</div>
+                      <div className="mt-0.5 text-[13px] font-semibold tabular-nums text-[var(--admin-text)]">
+                        {item.value}
+                      </div>
                     </div>
                   </div>
                 ))}

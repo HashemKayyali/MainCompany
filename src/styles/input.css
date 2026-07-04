@@ -700,28 +700,36 @@
   }
 
   /* ─── Premium range slider (frame editor, etc.) ─── */
+  .frame-slider-hit {
+    display: flex;
+    min-height: 34px;
+    align-items: center;
+  }
+
   .frame-slider {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
-    height: 6px;
+    height: 34px;
     border-radius: 999px;
-    background: linear-gradient(90deg, rgba(113, 38, 227, 0.85), rgba(168, 85, 247, 0.7));
-    background-clip: padding-box;
+    background: transparent;
     outline: none;
     cursor: pointer;
+    accent-color: #7126e3;
   }
 
   .frame-slider::-webkit-slider-runnable-track {
-    height: 6px;
+    height: 7px;
     border-radius: 999px;
-    background: linear-gradient(90deg, rgba(113, 38, 227, 0.18), rgba(168, 85, 247, 0.12));
+    background: linear-gradient(90deg, rgba(113, 38, 227, 0.28), rgba(168, 85, 247, 0.2));
+    box-shadow: inset 0 0 0 1px rgba(113, 38, 227, 0.06);
   }
 
   .frame-slider::-moz-range-track {
-    height: 6px;
+    height: 7px;
     border-radius: 999px;
-    background: linear-gradient(90deg, rgba(113, 38, 227, 0.18), rgba(168, 85, 247, 0.12));
+    background: linear-gradient(90deg, rgba(113, 38, 227, 0.28), rgba(168, 85, 247, 0.2));
+    box-shadow: inset 0 0 0 1px rgba(113, 38, 227, 0.06);
   }
 
   .frame-slider::-webkit-slider-thumb {
@@ -729,7 +737,7 @@
     appearance: none;
     width: 18px;
     height: 18px;
-    margin-top: -6px;
+    margin-top: -5.5px;
     border-radius: 999px;
     background: linear-gradient(135deg, #7126e3 0%, #a855f7 100%);
     border: 2px solid #ffffff;
@@ -762,6 +770,94 @@
 
   .frame-slider:active::-webkit-slider-thumb {
     cursor: grabbing;
+  }
+
+  .media-placement-body {
+    overscroll-behavior: contain;
+    scrollbar-color: rgba(113, 38, 227, 0.24) transparent;
+  }
+
+  .media-placement-body::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .media-placement-body::-webkit-scrollbar-thumb {
+    background: rgba(113, 38, 227, 0.22);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+  }
+
+  @media (max-width: 767px) {
+    .media-placement-overlay {
+      overflow-y: hidden;
+      scrollbar-width: none;
+    }
+
+    .media-placement-overlay::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    .media-placement-modal .media-placement-body {
+      padding: 0 0 max(0.75rem, env(safe-area-inset-bottom)) !important;
+      background: #ffffff;
+    }
+
+    .media-placement-mobile-sticky {
+      box-shadow: 0 1px 0 rgba(113, 38, 227, 0.08), 0 12px 24px -22px rgba(89, 23, 196, 0.35);
+      transform: translateZ(0);
+    }
+
+    .frame-context-preview {
+      isolation: isolate;
+    }
+
+    .frame-slider-hit {
+      min-height: 40px;
+    }
+
+    .frame-slider {
+      height: 40px;
+    }
+
+    .frame-slider::-webkit-slider-runnable-track {
+      height: 8px;
+      background: rgba(113, 38, 227, 0.22);
+    }
+
+    .frame-slider::-moz-range-track {
+      height: 8px;
+      background: rgba(113, 38, 227, 0.22);
+    }
+
+    .frame-slider::-webkit-slider-thumb {
+      width: 22px;
+      height: 22px;
+      margin-top: -7px;
+      background: #7c3aed;
+      box-shadow: 0 5px 14px -4px rgba(89, 23, 196, 0.42), 0 0 0 2px #ffffff;
+    }
+
+    .frame-slider::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      background: #7c3aed;
+      box-shadow: 0 5px 14px -4px rgba(89, 23, 196, 0.42), 0 0 0 2px #ffffff;
+    }
+
+    .media-placement-body {
+      scrollbar-color: rgba(113, 38, 227, 0.16) transparent;
+    }
+
+    .media-placement-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .media-placement-body::-webkit-scrollbar-thumb {
+      background: rgba(113, 38, 227, 0.16);
+    }
   }
 
   /* ─── Premium floating panel (dropdowns, popovers) ─── */

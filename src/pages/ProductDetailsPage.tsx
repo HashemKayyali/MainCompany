@@ -270,7 +270,7 @@ export default function ProductDetailsPage() {
           <ChevronRight size={11} className={isDark ? 'text-white/18' : 'text-slate-300'} />
           <span className={cn('text-[11px] font-medium', mutedText)}>{categoryName}</span>
           <ChevronRight size={11} className={isDark ? 'text-white/18' : 'text-slate-300'} />
-          <span className={cn('max-w-[220px] truncate text-[11px] font-semibold sm:max-w-sm', isDark ? 'text-slate-300' : 'text-slate-700')}>
+          <span dir="auto" data-i18n-skip className={cn('max-w-[220px] truncate text-[11px] font-semibold sm:max-w-sm', isDark ? 'text-slate-300' : 'text-slate-700')}>
             {product.name}
           </span>
         </motion.nav>
@@ -328,6 +328,8 @@ export default function ProductDetailsPage() {
                 </div>
 
                 <h1
+                  dir="auto"
+                  data-i18n-skip
                   className={cn(
                     'font-display text-[2rem] font-black leading-[1.02] tracking-[-0.05em] sm:text-[2.45rem] lg:text-[2.2rem] xl:text-[2.55rem]',
                     headingText
@@ -338,6 +340,8 @@ export default function ProductDetailsPage() {
 
                 {!!leadDescription && (
                   <p
+                    dir="auto"
+                    data-i18n-skip
                     className={cn(
                       'mt-3.5 max-w-[68ch] text-[15px] font-medium leading-[1.7] sm:text-[16px]',
                       isDark ? 'text-slate-200/88' : 'text-slate-700'

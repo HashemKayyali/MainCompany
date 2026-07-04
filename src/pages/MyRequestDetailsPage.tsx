@@ -17,6 +17,7 @@ import {
   RequestJourneyTracker,
   isTerminalStatus,
 } from '../components/requests/RequestJourney'
+import { useI18n } from '../contexts/LanguageContext'
 import { useUser } from '../contexts/UserContext'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { getPurchaseQuoteByNumber } from '../services/purchase-quotes.service'
@@ -41,6 +42,8 @@ function statusDotTone(status: string) {
 }
 
 export default function MyRequestDetailsPage() {
+  const { locale, translateText } = useI18n()
+  const dateLocale = locale === 'ar' ? 'ar-JO' : undefined
   const { requestNumber = '' } = useParams<{ requestNumber: string }>()
   const { currentUser, isLoggedIn } = useUser()
   const [loading, setLoading] = useState(true)
@@ -116,17 +119,17 @@ export default function MyRequestDetailsPage() {
               <LockKeyhole size={20} strokeWidth={2.2} />
             </span>
             <h1 className="mt-4 font-display text-[1.7rem] font-black tracking-[-0.03em] text-ink-900">
-              Sign in to view this request
+              {translateText('Sign in to view this request')}
             </h1>
             <p className="mx-auto mt-3 max-w-md text-[13.5px] leading-[1.7] text-ink-600">
-              Request details are only visible to the owner account.
+              {translateText('Request details are only visible to the owner account.')}
             </p>
             <div className="mt-6">
               <Link
                 to={`/login?redirect=${encodeURIComponent(`/my-requests/${requestNumber}`)}`}
                 className="btn-primary !rounded-[14px] !px-6 !py-3 !text-[13px]"
               >
-                Sign In
+                {translateText('Sign In')}
               </Link>
             </div>
           </div>
@@ -142,8 +145,8 @@ export default function MyRequestDetailsPage() {
           to="/my-requests"
           className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-violet-200/70 bg-white px-3.5 py-1.5 text-[10.5px] font-bold uppercase tracking-[0.14em] text-ink-500 shadow-sm transition-all duration-300 hover:border-violet-300/70 hover:text-violet-700"
         >
-          <ArrowLeft size={11} strokeWidth={2.5} />
-          My Requests
+          <ArrowLeft size={11} className="rtl:rotate-180" strokeWidth={2.5} />
+          {translateText('My Requests')}
         </Link>
 
         {loading ? (
@@ -161,29 +164,29 @@ export default function MyRequestDetailsPage() {
           </div>
         ) : loadError ? (
           <div className={cn(cardShell, '!border-rose-200 p-6 sm:p-7')}>
-            <h2 className="font-display text-[1.35rem] font-black text-ink-900">We couldn&apos;t load this request</h2>
-            <p className="mt-2.5 text-[13px] leading-[1.7] text-ink-600">{loadError}</p>
+            <h2 className="font-display text-[1.35rem] font-black text-ink-900">{translateText("We couldn't load this request")}</h2>
+            <p className="mt-2.5 text-[13px] leading-[1.7] text-ink-600">{translateText(loadError)}</p>
             <div className="mt-5 flex flex-wrap gap-2.5">
               <Link to="/my-requests" className="btn-primary !rounded-[13px] !px-4 !py-2 !text-[12.5px]">
-                Back to My Requests
+                {translateText('Back to My Requests')}
               </Link>
               <Link to="/products" className="btn-outline !rounded-[13px] !px-4 !py-2 !text-[12.5px]">
-                Browse Services
+                {translateText('Browse Services')}
               </Link>
             </div>
           </div>
         ) : !request ? (
           <div className={cn(cardShell, 'p-6 sm:p-7')}>
-            <h2 className="font-display text-[1.35rem] font-black text-ink-900">We could not find this request</h2>
+            <h2 className="font-display text-[1.35rem] font-black text-ink-900">{translateText('We could not find this request')}</h2>
             <p className="mt-2.5 text-[13px] leading-[1.7] text-ink-600">
-              It may not belong to this account, or the request number may no longer be available.
+              {translateText('It may not belong to this account, or the request number may no longer be available.')}
             </p>
             <div className="mt-5 flex flex-wrap gap-2.5">
               <Link to="/my-requests" className="btn-primary !rounded-[13px] !px-4 !py-2 !text-[12.5px]">
-                Back to My Requests
+                {translateText('Back to My Requests')}
               </Link>
               <Link to="/products" className="btn-outline !rounded-[13px] !px-4 !py-2 !text-[12.5px]">
-                Browse Services
+                {translateText('Browse Services')}
               </Link>
             </div>
           </div>
@@ -197,7 +200,7 @@ export default function MyRequestDetailsPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-100/80 px-3 py-1 text-[9.5px] font-bold uppercase tracking-[0.16em] text-violet-700 ring-1 ring-violet-200/70">
                         {isRental ? <ClipboardList size={10} /> : <FileText size={10} />}
-                        {formatRequestTypeLabel(requestType)}
+                        {translateText(formatRequestTypeLabel(requestType))}
                       </span>
                       <RequestStatusBadge status={request.status} />
                     </div>
@@ -208,8 +211,8 @@ export default function MyRequestDetailsPage() {
                   </div>
 
                   {'grandTotal' in request && (
-                    <div className="rounded-[16px] bg-[linear-gradient(135deg,#7c3aed,#a855f7,#d946ef)] px-5 py-3.5 text-right shadow-[0_16px_36px_-18px_rgba(124,58,237,0.6)]">
-                      <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/70">Estimated Total</div>
+                    <div className="rounded-[16px] bg-[linear-gradient(135deg,#7c3aed,#a855f7,#d946ef)] px-5 py-3.5 text-end shadow-[0_16px_36px_-18px_rgba(124,58,237,0.6)]">
+                      <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/70">{translateText('Estimated Total')}</div>
                       <div className="mt-0.5 font-display text-[1.5rem] font-black leading-none text-white">
                         {request.grandTotal.toFixed(2)} <span className="text-[0.9rem] font-bold text-white/80">JOD</span>
                       </div>
@@ -220,7 +223,7 @@ export default function MyRequestDetailsPage() {
 
               <div className="grid grid-cols-1 gap-2.5 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4">
                 {[
-                  { icon: CalendarDays, label: 'Created', value: new Date(request.createdAt).toLocaleString() },
+                  { icon: CalendarDays, label: 'Created', value: new Date(request.createdAt).toLocaleString(dateLocale) },
                   { icon: Mail, label: 'Email', value: request.email },
                   { icon: Phone, label: 'Phone', value: request.phone },
                   { icon: MapPin, label: 'City', value: request.city || '—' },
@@ -230,7 +233,7 @@ export default function MyRequestDetailsPage() {
                       <Icon size={14} strokeWidth={2.2} />
                     </span>
                     <div className="min-w-0">
-                      <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-violet-600/80">{label}</div>
+                      <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-violet-600/80">{translateText(label)}</div>
                       <div className="truncate text-[12.5px] font-bold text-ink-800">{value}</div>
                     </div>
                   </div>
@@ -241,10 +244,10 @@ export default function MyRequestDetailsPage() {
             {/* ── Journey tracker: where the order is right now ── */}
             <div className={cn(cardShell, 'p-5 sm:p-6')}>
               <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="font-display text-[1.1rem] font-black tracking-[-0.02em] text-ink-900">Order Journey</h2>
+                <h2 className="font-display text-[1.1rem] font-black tracking-[-0.02em] text-ink-900">{translateText('Order Journey')}</h2>
                 <span className="text-[11px] font-semibold text-ink-400">
-                  Last update{' '}
-                  {new Date(sortedHistory[sortedHistory.length - 1]?.createdAt || request.createdAt).toLocaleString()}
+                  {translateText('Last update')}{' '}
+                  {new Date(sortedHistory[sortedHistory.length - 1]?.createdAt || request.createdAt).toLocaleString(dateLocale)}
                 </span>
               </div>
 
@@ -257,16 +260,16 @@ export default function MyRequestDetailsPage() {
                   </span>
                   <div className="min-w-0">
                     <div className="text-[13px] font-black text-rose-700">
-                      This request was {formatRequestStatusLabel(request.status).toLowerCase()}
+                      {translateText('Request status')}: {translateText(formatRequestStatusLabel(request.status))}
                       {terminalEntry && (
                         <span className="font-semibold text-rose-500">
-                          {' · '}
-                          {new Date(terminalEntry.createdAt).toLocaleString()}
+                          {' / '}
+                          {new Date(terminalEntry.createdAt).toLocaleString(dateLocale)}
                         </span>
                       )}
                     </div>
                     <p className="mt-1 text-[12px] leading-[1.6] text-rose-600/90">
-                      {terminalEntry?.note || 'You can contact the Eventies team for more details, or start a new request any time.'}
+                      {translateText(terminalEntry?.note || 'You can contact the Eventies team for more details, or start a new request any time.')}
                     </p>
                   </div>
                 </div>
@@ -277,9 +280,9 @@ export default function MyRequestDetailsPage() {
               {/* ── Services ── */}
               <div className={cn(cardShell, 'p-5 sm:p-6')}>
                 <div className="mb-4 flex items-center justify-between">
-                  <h2 className="font-display text-[1.1rem] font-black tracking-[-0.02em] text-ink-900">Services</h2>
+                  <h2 className="font-display text-[1.1rem] font-black tracking-[-0.02em] text-ink-900">{translateText('Services')}</h2>
                   <span className="rounded-full bg-violet-100 px-2.5 py-1 text-[10.5px] font-black text-violet-700">
-                    {request.items.length} item{request.items.length === 1 ? '' : 's'}
+                    {translateText(`${request.items.length} item${request.items.length === 1 ? '' : 's'}`)}
                   </span>
                 </div>
 
@@ -297,9 +300,9 @@ export default function MyRequestDetailsPage() {
                         {'rentalStartDate' in item && (
                           <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11.5px] font-semibold text-ink-500">
                             <CalendarDays size={11} className="text-violet-400" />
-                            {item.rentalStartDate} → {item.rentalEndDate}
-                            <span className="text-ink-300">·</span>
-                            {item.rentalDays} day{item.rentalDays === 1 ? '' : 's'}
+                            {item.rentalStartDate} - {item.rentalEndDate}
+                            <span className="text-ink-300">/</span>
+                            {translateText(`${item.rentalDays} day${item.rentalDays === 1 ? '' : 's'}`)}
                           </div>
                         )}
                         {'lineTotal' in item && (
@@ -307,7 +310,7 @@ export default function MyRequestDetailsPage() {
                         )}
                       </div>
                       <span className="shrink-0 self-center rounded-full bg-white px-2.5 py-1 text-[11.5px] font-black text-ink-800 ring-1 ring-inset ring-violet-200">
-                        ×{item.quantity}
+                        x{item.quantity}
                       </span>
                     </div>
                   ))}
@@ -320,21 +323,21 @@ export default function MyRequestDetailsPage() {
                   <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-violet-50 text-violet-600 ring-1 ring-violet-200/70">
                     <History size={14} strokeWidth={2.2} />
                   </span>
-                  <h2 className="font-display text-[1.1rem] font-black tracking-[-0.02em] text-ink-900">Activity</h2>
+                  <h2 className="font-display text-[1.1rem] font-black tracking-[-0.02em] text-ink-900">{translateText('Activity')}</h2>
                 </div>
 
                 {sortedHistory.length === 0 ? (
                   <p className="text-[12.5px] leading-[1.7] text-ink-500">
-                    No status changes yet — your request is waiting for team review.
+                    {translateText('No status changes yet — your request is waiting for team review.')}
                   </p>
                 ) : (
-                  <ol className="relative space-y-5 before:absolute before:bottom-2 before:left-[7px] before:top-2 before:w-[2px] before:rounded-full before:bg-gradient-to-b before:from-violet-200 before:via-violet-100 before:to-transparent">
+                  <ol className="relative space-y-5 before:absolute before:bottom-2 before:start-[7px] before:top-2 before:w-[2px] before:rounded-full before:bg-gradient-to-b before:from-violet-200 before:via-violet-100 before:to-transparent">
                     {[...sortedHistory].reverse().map((entry, index) => (
-                      <li key={entry.id} className="relative pl-7">
+                      <li key={entry.id} className="relative ps-7">
                         <span
                           aria-hidden="true"
                           className={cn(
-                            'absolute left-0 top-1 h-4 w-4 rounded-full ring-4 ring-white',
+                            'absolute start-0 top-1 h-4 w-4 rounded-full ring-4 ring-white',
                             statusDotTone(entry.newStatus),
                             index === 0 && 'shadow-[0_0_0_4px_rgba(124,58,237,0.12)]'
                           )}
@@ -343,16 +346,16 @@ export default function MyRequestDetailsPage() {
                           <RequestStatusBadge status={entry.newStatus} />
                           {index === 0 && (
                             <span className="rounded-full bg-violet-100 px-2 py-[2px] text-[9px] font-bold uppercase tracking-[0.12em] text-violet-700">
-                              Latest
+                              {translateText('Latest')}
                             </span>
                           )}
                         </div>
                         <time className="mt-1.5 block text-[11px] font-semibold text-ink-400">
-                          {new Date(entry.createdAt).toLocaleString()}
+                          {new Date(entry.createdAt).toLocaleString(dateLocale)}
                         </time>
                         {entry.note && (
                           <p className="mt-2 rounded-[12px] border border-violet-100 bg-violet-50/50 px-3 py-2 text-[12px] leading-[1.6] text-ink-600">
-                            {entry.note}
+                            {translateText(entry.note)}
                           </p>
                         )}
                       </li>

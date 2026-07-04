@@ -1,4 +1,5 @@
 import { useTheme } from '../../contexts/ThemeContext'
+import BidiText from './BidiText'
 import { cn } from '../../utils/cn'
 
 export type AdminFact = {
@@ -166,12 +167,12 @@ export default function AdminEntityCard({
             <div className="min-w-0 space-y-1.25">
               <div className={cn('min-w-0 space-y-0.5', titleBlockClassName)}>
                 <div className={cn(titleClampClass, 'font-sans text-[1rem] font-bold leading-tight', isDark ? 'text-white' : 'text-gray-900')}>
-                  {title}
+                  <BidiText>{title}</BidiText>
                 </div>
 
                 {subtitle && (
                   <p className={cn(subtitleClampClass, 'max-w-[54ch] text-[10.5px] leading-[1.45]', isDark ? 'text-purple-100/62' : 'text-gray-500')}>
-                    {subtitle}
+                    <BidiText>{subtitle}</BidiText>
                   </p>
                 )}
               </div>
@@ -263,12 +264,12 @@ export default function AdminEntityCard({
         <div className={cn('relative flex min-w-0 flex-1 flex-col gap-3 p-3.5', bodyClassName)}>
           <div className={cn('space-y-1', titleBlockClassName)}>
           <div className={cn(gridTitleClampClass, 'font-sans text-[1.02rem] font-extrabold leading-tight tracking-[-0.01em]', isDark ? 'text-white' : 'text-[#07041a]')}>
-            {title}
+            <BidiText>{title}</BidiText>
           </div>
 
           {subtitle && (
             <p className={cn(gridSubtitleClampClass, 'max-w-3xl text-[11.5px] font-medium leading-[1.5]', isDark ? 'text-purple-100/64' : 'text-[#31195f]')}>
-              {subtitle}
+              <BidiText>{subtitle}</BidiText>
             </p>
           )}
         </div>

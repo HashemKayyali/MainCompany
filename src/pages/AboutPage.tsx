@@ -694,14 +694,14 @@ export default function AboutPage() {
 
                 <div className="grid gap-3">
                   {differentiators.map((card, index) => (
-                    <div key={card.title} className="group grid gap-3 rounded-[18px] border border-violet-200/70 bg-white/82 p-4 shadow-[0_16px_34px_-30px_rgba(89,23,196,0.45)] sm:grid-cols-[auto_1fr] sm:items-start">
+                    <div key={card.title} className="group grid gap-3 rounded-[18px] border border-violet-200/70 bg-white/82 p-4 shadow-[0_16px_34px_-30px_rgba(89,23,196,0.45)] sm:grid-cols-[auto_minmax(0,1fr)] sm:items-start">
                       <span className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-violet-50 text-violet-700 transition-colors group-hover:bg-gradient-to-br group-hover:from-violet-600 group-hover:to-fuchsia-500 group-hover:text-white">
                         <card.icon className="h-5 w-5" strokeWidth={2} />
                       </span>
-                      <span>
-                        <span className="text-[10px] font-black uppercase tracking-[0.18em] text-violet-400">Difference {String(index + 1).padStart(2, '0')}</span>
-                        <span className="mt-0.5 block font-display text-[1.02rem] font-bold tracking-[-0.02em] text-ink-900">{card.title}</span>
-                        <span className="mt-1 block text-[12.5px] leading-[1.55] text-ink-600">{card.desc}</span>
+                      <span className="min-w-0 text-start">
+                        <span className="text-[10px] font-black uppercase tracking-[0.18em] text-violet-400">{translateText('Difference')} {String(index + 1).padStart(2, '0')}</span>
+                        <span className="mt-0.5 block break-words font-display text-[1.02rem] font-bold tracking-[-0.02em] text-ink-900">{translateText(card.title)}</span>
+                        <span className="mt-1 block break-words text-[12.5px] leading-[1.55] text-ink-600">{translateText(card.desc)}</span>
                       </span>
                     </div>
                   ))}
@@ -822,11 +822,10 @@ export default function AboutPage() {
               <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-violet-400/30 blur-3xl" aria-hidden="true" />
               <div className="relative mx-auto max-w-2xl">
                 <h2 className="font-display text-[clamp(1.8rem,4.4vw,2.8rem)] font-extrabold leading-[1.05] tracking-[-0.03em] text-white">
-                  Ready to explore your next event setup?
+                  {translateText('Ready to explore your next event setup?')}
                 </h2>
                 <p className="mx-auto mt-4 max-w-xl text-[14.5px] leading-[1.7] text-white/80">
-                  Browse event rentals and services, or submit a request so the Eventies team
-                  can review your event needs.
+                  {translateText('Browse event rentals and services, or submit a request so the Eventies team can review your event needs.')}
                 </p>
                 <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                   <Link
@@ -834,15 +833,15 @@ export default function AboutPage() {
                     onMouseEnter={() => preloadRoute('/products')}
                     className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-[13px] font-bold text-violet-800 transition-all hover:-translate-y-0.5 sm:w-auto"
                   >
-                    Explore Services
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={2.4} />
+                    {translateText('Explore Services')}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" strokeWidth={2.4} />
                   </Link>
                   <Link
                     to="/contact"
                     onMouseEnter={() => preloadRoute('/contact')}
                     className="inline-flex w-full items-center justify-center rounded-full border border-white/30 bg-white/10 px-7 py-3.5 text-[13px] font-bold text-white backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/20 sm:w-auto"
                   >
-                    Contact Eventies
+                    {translateText('Contact Eventies')}
                   </Link>
                 </div>
               </div>

@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { useTheme } from '../../contexts/ThemeContext'
+import { useEffect, useMemo, useState, type InputHTMLAttributes, type ReactNode } from 'react'
 import {
   encodeMediaValue,
   inferMediaKind,
@@ -11,7 +10,7 @@ import {
 import Modal from './Modal'
 import FramedImage from './FramedImage'
 import FramedVideo from './FramedVideo'
-import AdminEditorWorkspace, { AdminEditorSection } from '../admin/AdminEditorWorkspace'
+import AdminButton from '../admin/primitives/AdminButton'
 import { cn } from '../../utils/cn'
 
 interface Props {
@@ -29,8 +28,63 @@ interface Props {
   onClose: () => void
 }
 
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value))
+function GroupLabel({ children }: { children: ReactNode }) {
+  return (
+    <div className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[var(--admin-accent)]">
+      {children}
+    </div>
+  )
+}
+
+function ValuePill({ children, uppercase = false }: { children: ReactNode; uppercase?: boolean }) {
+  return (
+    <span
+      className={cn(
+        'rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-1.5 py-0.5 font-mono text-[10.5px] font-bold text-[var(--admin-accent)]',
+        uppercase && 'uppercase'
+      )}
+    >
+      {children}
+    </span>
+  )
+}
+
+function FrameSlider({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <div className="frame-slider-hit">
+      <input {...props} type="range" className={cn('frame-slider', className)} />
+    </div>
+  )
+}
+
+function SnapRow({
+  options,
+  isActive,
+  onSelect,
+}: {
+  options: Array<[string, number]>
+  isActive: (value: number) => boolean
+  onSelect: (value: number) => void
+}) {
+  return (
+    <div className="mt-2 flex gap-1.5">
+      {options.map(([label, value]) => (
+        <button
+          key={label}
+          type="button"
+          onClick={() => onSelect(value)}
+          className={cn(
+            'inline-flex min-h-[40px] flex-1 items-center justify-center rounded-[8px] border px-2 text-[10.5px] font-bold transition md:min-h-[32px]',
+            isActive(value)
+              ? 'border-[var(--admin-accent)] bg-[var(--admin-accent-soft)] text-[var(--admin-accent)]'
+              : 'border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-text-muted)] hover:border-[var(--admin-accent)]'
+          )}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  )
 }
 
 export default function MediaPlacementModal({
@@ -38,175 +92,239 @@ export default function MediaPlacementModal({
   media = '',
   title,
   type = 'auto',
-  aspectRatio = 16 / 9,
+  aspectRatio = 4 / 3,
   defaultFit = 'cover',
   hint,
   contextPreview,
-  contextPreviewTitle = 'Live Card Preview',
+  contextPreviewTitle = 'Card result',
   contextPreviewHint,
   onApply,
   onClose,
 }: Props) {
-  const { isDark } = useTheme()
   const [draft, setDraft] = useState<MediaFrameTransform>(() =>
     normalizeMediaTransform(undefined, { fit: defaultFit })
   )
-  const [dragging, setDragging] = useState(false)
-  const dragStateRef = useRef<{
-    pointerId: number
-    startClientX: number
-    startClientY: number
-    startX: number
-    startY: number
-  } | null>(null)
 
   useEffect(() => {
     if (!open) return
     const parsed = parseMediaValue(media, { fit: defaultFit })
     setDraft(parsed.transform)
-    setDragging(false)
-    dragStateRef.current = null
   }, [defaultFit, media, open])
 
   const kind = type === 'auto' ? inferMediaKind(media) : type
   const parsedMedia = useMemo(() => parseMediaValue(media, { fit: defaultFit }), [defaultFit, media])
-  const previewMedia = useMemo(
-    () => encodeMediaValue(parsedMedia.src, draft),
-    [draft, parsedMedia.src]
-  )
+  const previewMedia = useMemo(() => encodeMediaValue(parsedMedia.src, draft), [draft, parsedMedia.src])
   const minScale = draft.fit === 'cover' ? 1 : 0.25
-  const sub = isDark ? 'text-purple-200/70' : 'text-[#211049]'
-  const panel = isDark
-    ? 'border border-purple-500/20 bg-purple-500/[0.05]'
-    : 'border border-violet-200/80 bg-white shadow-[0_1px_2px_rgba(20,8,50,0.04),0_8px_18px_-12px_rgba(89,23,196,0.18)]'
-
-  // Premium fit-mode button styling — clear active state with strong purple.
-  const fitBtnBase =
-    'inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-[12px] border px-3.5 text-[11.5px] font-bold transition'
-  const fitBtnActive = isDark
-    ? 'border-prism-violet/45 bg-prism-violet/22 text-prism-violet shadow-[0_8px_18px_-8px_rgba(124,58,237,0.45)]'
-    : 'border-violet-500 bg-[linear-gradient(135deg,rgba(113,38,227,0.16),rgba(168,85,247,0.10))] text-[#2e0a72] shadow-[0_8px_22px_-8px_rgba(89,23,196,0.32)]'
-  const fitBtnInactive = isDark
-    ? 'border-white/10 bg-white/[0.04] text-purple-200/80 hover:bg-white/[0.06]'
-    : 'border-violet-200/80 bg-white text-[#211049] hover:border-violet-400 hover:text-[#07041a]'
-
-  // Position-snap pill buttons (Left / Center / Right etc.)
-  const snapBtnClass = (active: boolean) =>
-    cn(
-      'inline-flex min-h-[30px] flex-1 items-center justify-center rounded-[10px] border px-2.5 text-[10.5px] font-bold transition',
-      active
-        ? isDark
-          ? 'border-prism-violet/45 bg-prism-violet/22 text-prism-violet'
-          : 'border-violet-400 bg-violet-100 text-[#2e0a72]'
-        : isDark
-          ? 'border-white/10 bg-white/[0.04] text-purple-200/80'
-          : 'border-violet-200/70 bg-white text-[#211049] hover:border-violet-300 hover:bg-violet-50'
-    )
 
   const apply = () => {
     onApply(encodeMediaValue(parsedMedia.src, draft))
     onClose()
   }
 
+  const reset = () => setDraft(normalizeMediaTransform(undefined, { fit: defaultFit }))
+
   const updateDraft = (patch: Partial<MediaFrameTransform>) => {
     setDraft(prev => normalizeMediaTransform({ ...prev, ...patch }, { fit: defaultFit }))
   }
 
-  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0) return
-    event.currentTarget.setPointerCapture(event.pointerId)
-    dragStateRef.current = {
-      pointerId: event.pointerId,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      startX: draft.x,
-      startY: draft.y,
-    }
-    setDragging(true)
-  }
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const dragState = dragStateRef.current
-    if (!dragState || dragState.pointerId !== event.pointerId) return
-
-    const rect = event.currentTarget.getBoundingClientRect()
-    const deltaX = ((event.clientX - dragState.startClientX) / Math.max(rect.width, 1)) * 100
-    const deltaY = ((event.clientY - dragState.startClientY) / Math.max(rect.height, 1)) * 100
-
-    setDraft(prev =>
-      normalizeMediaTransform(
-        {
-          ...prev,
-          x: clamp(dragState.startX + deltaX, 0, 100),
-          y: clamp(dragState.startY + deltaY, 0, 100),
-        },
-        { fit: defaultFit }
-      )
-    )
-  }
-
-  const endDrag = (event?: React.PointerEvent<HTMLDivElement>) => {
-    if (event && dragStateRef.current?.pointerId === event.pointerId) {
-      try {
-        event.currentTarget.releasePointerCapture(event.pointerId)
-      } catch {
-        // no-op
-      }
-    }
-    dragStateRef.current = null
-    setDragging(false)
-  }
-
-  const renderMediaFrame = (interactive = false) => (
+  const renderCanvas = (compact = false) => (
     <div
       className={cn(
-        'relative mx-auto w-full overflow-hidden rounded-[18px] border',
-        interactive ? 'max-w-[22rem] sm:max-w-[25rem]' : 'max-w-[15rem] sm:max-w-[16rem]',
-        isDark
-          ? 'border-white/10 bg-black/30'
-          : 'border-violet-200/80 bg-[linear-gradient(135deg,rgba(250,247,255,1),rgba(244,236,255,0.92))] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.6),0_10px_28px_-14px_rgba(89,23,196,0.18)]',
-        interactive && (dragging ? 'cursor-grabbing' : 'cursor-grab')
+        'relative mx-auto w-full overflow-hidden rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)]',
+        compact ? 'max-w-[18rem]' : 'max-w-[31rem]'
       )}
       style={{ aspectRatio: `${aspectRatio}` }}
-      onPointerDown={interactive ? handlePointerDown : undefined}
-      onPointerMove={interactive ? handlePointerMove : undefined}
-      onPointerUp={interactive ? endDrag : undefined}
-      onPointerCancel={interactive ? endDrag : undefined}
     >
       {kind === 'video' ? (
-        <FramedVideo
-          media={previewMedia}
-          className="h-full w-full"
-          muted
-          loop
-          autoPlay
-          playsInline
-          controls={false}
-        />
+        <FramedVideo media={previewMedia} className="h-full w-full" muted loop autoPlay playsInline controls={false} />
       ) : (
         <FramedImage media={previewMedia} alt="" className="h-full w-full" />
       )}
 
-      {interactive && (
-        <>
-          {/* Crosshair guides */}
-          <div className="pointer-events-none absolute inset-x-[14%] top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-violet-400/50 to-transparent" />
-          <div className="pointer-events-none absolute inset-y-[14%] left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-violet-400/50 to-transparent" />
-          {/* Frame boundary highlight */}
-          <div className="pointer-events-none absolute inset-1 rounded-[14px] ring-1 ring-inset ring-violet-300/40" />
-          {/* Drag hint */}
-          <div
-            className={cn(
-              'pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full border px-2.5 py-1 text-[9.5px] font-bold uppercase tracking-[0.16em] backdrop-blur-sm',
-              isDark
-                ? 'border-white/10 bg-black/45 text-white/80'
-                : 'border-violet-300/60 bg-white/90 text-[#2e0a72]'
-            )}
-          >
-            Drag to position
-          </div>
-        </>
+      <div className="pointer-events-none absolute inset-x-[14%] top-1/2 h-px -translate-y-1/2 bg-[var(--admin-accent)]/40" />
+      <div className="pointer-events-none absolute inset-y-[14%] left-1/2 w-px -translate-x-1/2 bg-[var(--admin-accent)]/40" />
+      <div className="pointer-events-none absolute inset-1 rounded-[var(--admin-radius-sm)] ring-1 ring-inset ring-[var(--admin-accent)]/25" />
+    </div>
+  )
+
+  const fitButtons: Array<{ label: string; hint: string; active: boolean; onClick: () => void }> = [
+    { label: 'Fill card', hint: 'Edge to edge', active: draft.fit === 'cover', onClick: () => updateDraft({ fit: 'cover', scale: Math.max(draft.scale, 1) }) },
+    { label: 'Fit inside', hint: 'Show all', active: draft.fit === 'contain', onClick: () => updateDraft({ fit: 'contain' }) },
+    { label: 'Center', hint: 'Reset position', active: false, onClick: () => updateDraft({ x: 50, y: 50 }) },
+    { label: 'Reset', hint: 'Start over', active: false, onClick: reset },
+  ]
+
+  const renderFitButtons = (compact = false) => (
+    <div className={cn('grid gap-1.5', compact ? 'grid-cols-4' : 'grid-cols-2 sm:grid-cols-4')}>
+      {fitButtons.map(button => (
+        <button
+          key={button.label}
+          type="button"
+          onClick={button.onClick}
+          className={cn(
+            'flex flex-col items-center justify-center rounded-[var(--admin-radius-sm)] border text-center transition',
+            compact ? 'min-h-[38px] px-1 py-1' : 'min-h-[40px] px-2 py-1',
+            button.active
+              ? 'border-[var(--admin-accent)] bg-[var(--admin-accent-soft)] text-[var(--admin-accent)]'
+              : 'border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-text-muted)] hover:border-[var(--admin-accent)]'
+          )}
+        >
+          <span className={cn('font-bold', compact ? 'text-[10px]' : 'text-[11.5px]')}>{button.label}</span>
+          {!compact && <span className="text-[9px] font-semibold uppercase tracking-[0.08em] opacity-70">{button.hint}</span>}
+        </button>
+      ))}
+    </div>
+  )
+
+  const renderCanvasCard = () => (
+    <div className="admin-card space-y-2.5 p-2.5 xl:p-3">
+      <div>
+        <GroupLabel>Framing canvas</GroupLabel>
+        <p className="mt-1 text-[11.5px] leading-[1.5] text-[var(--admin-text-muted)]">
+          {hint || 'Use the controls to choose what stays visible in the final card.'}
+        </p>
+      </div>
+      {renderCanvas()}
+      {renderFitButtons()}
+    </div>
+  )
+
+  const renderContextCard = () => (
+    <div className="admin-card relative z-0 isolate space-y-2 p-2.5 xl:p-3">
+      <div>
+        <GroupLabel>{contextPreview ? contextPreviewTitle : 'Card result'}</GroupLabel>
+        {contextPreviewHint && (
+          <p className="mt-1 text-[11px] leading-[1.5] text-[var(--admin-text-muted)]">{contextPreviewHint}</p>
+        )}
+      </div>
+      {contextPreview ? (
+        <div
+          aria-hidden="true"
+          className="frame-context-preview mx-auto w-full max-w-[300px] [&_a]:pointer-events-none [&_button]:pointer-events-none [&_input]:pointer-events-none [&_select]:pointer-events-none [&_textarea]:pointer-events-none"
+        >
+          {contextPreview(previewMedia)}
+        </div>
+      ) : (
+        <div className="mx-auto w-full max-w-[15rem] overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)]" style={{ aspectRatio: `${aspectRatio}` }}>
+          {kind === 'video' ? (
+            <FramedVideo media={previewMedia} className="h-full w-full" muted loop autoPlay playsInline controls={false} />
+          ) : (
+            <FramedImage media={previewMedia} alt="" className="h-full w-full" />
+          )}
+        </div>
       )}
+    </div>
+  )
+
+  const renderControlsPanel = () => (
+    <div className="admin-card relative z-0 isolate p-2.5 xl:p-3">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1">
+        <div className="min-w-0">
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className="text-[11.5px] font-bold text-[var(--admin-text)]">Zoom</label>
+            <ValuePill>{draft.scale.toFixed(2)}x</ValuePill>
+          </div>
+          <FrameSlider
+            min={minScale}
+            max={4}
+            step={0.01}
+            value={draft.scale}
+            onChange={e => updateDraft({ scale: Number(e.currentTarget.value) })}
+            aria-label="Zoom"
+          />
+        </div>
+
+        <div className="min-w-0">
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className="text-[11.5px] font-bold text-[var(--admin-text)]">Horizontal (X)</label>
+            <ValuePill>{draft.x.toFixed(0)}%</ValuePill>
+          </div>
+          <FrameSlider
+            min={0}
+            max={100}
+            step={1}
+            value={draft.x}
+            onChange={e => updateDraft({ x: Number(e.currentTarget.value) })}
+            aria-label="Horizontal position"
+          />
+          <SnapRow options={[['Left', 0], ['Center', 50], ['Right', 100]]} isActive={value => Math.round(draft.x) === value} onSelect={value => updateDraft({ x: value })} />
+        </div>
+
+        <div className="min-w-0">
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className="text-[11.5px] font-bold text-[var(--admin-text)]">Vertical (Y)</label>
+            <ValuePill>{draft.y.toFixed(0)}%</ValuePill>
+          </div>
+          <FrameSlider
+            min={0}
+            max={100}
+            step={1}
+            value={draft.y}
+            onChange={e => updateDraft({ y: Number(e.currentTarget.value) })}
+            aria-label="Vertical position"
+          />
+          <SnapRow options={[['Top', 0], ['Middle', 50], ['Bottom', 100]]} isActive={value => Math.round(draft.y) === value} onSelect={value => updateDraft({ y: value })} />
+        </div>
+
+        {kind === 'image' && (
+          <>
+            <div className="min-w-0">
+              <div className="mb-2 flex items-center justify-between">
+                <label className="text-[11.5px] font-bold text-[var(--admin-text)]">Background color</label>
+                <ValuePill uppercase>{draft.bgOpacity > 0 ? 'On' : 'Off'}</ValuePill>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <label className="relative inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[10px] border border-[var(--admin-border)] md:h-9 md:w-9" style={{ backgroundColor: draft.bgColor }}>
+                  <input
+                    type="color"
+                    value={draft.bgColor}
+                    onChange={e => updateDraft({ bgColor: e.target.value, bgOpacity: draft.bgOpacity > 0 ? draft.bgOpacity : 0.85 })}
+                    className="absolute inset-0 cursor-pointer opacity-0"
+                    aria-label="Pick custom background color"
+                  />
+                </label>
+                <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
+                  {['#ffffff', '#f7f1ff', '#0b1020', '#7c3aed', '#22d3ee'].map(color => {
+                    const active = draft.bgColor.toLowerCase() === color.toLowerCase()
+                    return (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => updateDraft({ bgColor: color, bgOpacity: draft.bgOpacity > 0 ? draft.bgOpacity : 0.85 })}
+                        className={cn(
+                          'h-10 w-10 rounded-full transition-transform md:h-8 md:w-8 xl:h-7 xl:w-7',
+                          active
+                            ? 'ring-2 ring-[var(--admin-accent)] ring-offset-2 ring-offset-[var(--admin-surface)]'
+                            : 'ring-1 ring-[var(--admin-border)] hover:scale-105'
+                        )}
+                        style={{ backgroundColor: color }}
+                        aria-label={`Set background ${color}`}
+                        aria-pressed={active}
+                      />
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="min-w-0">
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="text-[11.5px] font-bold text-[var(--admin-text)]">Background opacity</label>
+                <ValuePill>{Math.round(draft.bgOpacity * 100)}%</ValuePill>
+              </div>
+              <FrameSlider
+                min={0}
+                max={100}
+                step={1}
+                value={Math.round(draft.bgOpacity * 100)}
+                onChange={e => updateDraft({ bgOpacity: Number(e.currentTarget.value) / 100 })}
+                aria-label="Background opacity"
+              />
+              <SnapRow options={[['Off', 0], ['Soft', 35], ['Strong', 85]]} isActive={value => Math.round(draft.bgOpacity * 100) === value} onSelect={value => updateDraft({ bgOpacity: value / 100 })} />
+            </div>
+          </>
+        )}
+      </div>
     </div>
   )
 
@@ -216,260 +334,42 @@ export default function MediaPlacementModal({
       onClose={onClose}
       title={title}
       persistent
-      size="xl"
-      bodyClassName="px-3.5 pb-3.5 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
+      size="3xl"
+      overlayClassName="media-placement-overlay"
+      contentClassName="media-placement-modal sm:!max-w-[calc(100vw-1rem)] 2xl:!max-w-[90rem]"
+      bodyClassName="media-placement-body px-0 pb-3 pt-0 md:px-4 md:pb-4 md:pt-3"
+      footer={
+        <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
+          <AdminButton variant="ghost" onClick={reset} className="sm:min-w-[96px]">
+            Reset
+          </AdminButton>
+          <AdminButton variant="outline" onClick={onClose} className="sm:min-w-[120px]">
+            Keep Current
+          </AdminButton>
+          <AdminButton onClick={apply} className="sm:min-w-[130px]">
+            Apply Frame
+          </AdminButton>
+        </div>
+      }
     >
-      <AdminEditorWorkspace
-        preview={
-          contextPreview ? (
-            <div
-              aria-hidden="true"
-              className="[&_a]:pointer-events-none [&_button]:pointer-events-none [&_input]:pointer-events-none [&_textarea]:pointer-events-none [&_select]:pointer-events-none"
-            >
-              {contextPreview(previewMedia)}
-            </div>
-          ) : (
-            renderMediaFrame(false)
-          )
-        }
-        previewTitle={contextPreview ? contextPreviewTitle : 'Frame Result'}
-        previewHint={
-          contextPreview
-            ? contextPreviewHint || 'Judge zoom, background, and placement inside the real final card context.'
-            : hint || 'Adjust placement inside the frame, then apply the final result.'
-        }
-        previewPaneClassName="xl:max-w-[19rem] xl:justify-self-end"
-        previewContentClassName="!p-3.5"
-        footer={
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => setDraft(normalizeMediaTransform(undefined, { fit: defaultFit }))}
-              className="inline-flex min-h-[38px] items-center justify-center rounded-[12px] border border-violet-200 bg-white px-3.5 text-[11.5px] font-bold text-[#211049] transition hover:border-violet-400 hover:bg-violet-50"
-            >
-              Reset
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex min-h-[38px] items-center justify-center rounded-[12px] border border-violet-200 bg-white px-3.5 text-[11.5px] font-bold text-[#211049] transition hover:border-violet-400 hover:bg-violet-50"
-            >
-              Keep Current
-            </button>
-            <button
-              type="button"
-              onClick={apply}
-              className="btn-primary !min-h-[38px] !rounded-[12px] !px-5 !text-[11.5px]"
-            >
-              Apply Frame
-            </button>
+      <div className="admin-scope md:hidden">
+        <div className="media-placement-mobile-sticky sticky top-0 z-40 isolate border-b border-[var(--admin-border)] bg-white px-3 pb-2.5 pt-3">
+          <div className="space-y-2">
+            {renderCanvas(true)}
+            {renderFitButtons(true)}
           </div>
-        }
-      >
-        <AdminEditorSection
-          title="Frame Editor"
-          hint={hint || 'Adjust fit, zoom, drag position, and verify the real final output on the right.'}
-        >
-          {renderMediaFrame(true)}
+        </div>
+        <div className="relative z-0 space-y-3 px-3 pt-3">
+          {renderControlsPanel()}
+          {renderContextCard()}
+        </div>
+      </div>
 
-          <div>
-            <div className={cn('mb-2 text-[10px] font-extrabold uppercase tracking-[0.16em]', isDark ? sub : 'text-[#7126e3]')}>
-              Fit Mode
-            </div>
-            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-              <button
-                type="button"
-                onClick={() => updateDraft({ fit: 'cover', scale: Math.max(draft.scale, 1) })}
-                className={cn(fitBtnBase, '!min-h-[42px] flex-col !gap-0', draft.fit === 'cover' ? fitBtnActive : fitBtnInactive)}
-              >
-                <span>Fill Frame</span>
-                <span className="text-[9px] font-semibold uppercase tracking-[0.1em] opacity-70">Edge to edge</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => updateDraft({ fit: 'contain' })}
-                className={cn(fitBtnBase, '!min-h-[42px] flex-col !gap-0', draft.fit === 'contain' ? fitBtnActive : fitBtnInactive)}
-              >
-                <span>Fit Inside</span>
-                <span className="text-[9px] font-semibold uppercase tracking-[0.1em] opacity-70">Show all</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => updateDraft({ x: 50, y: 50 })}
-                className={cn(fitBtnBase, '!min-h-[42px] flex-col !gap-0', fitBtnInactive)}
-              >
-                <span>Recenter</span>
-                <span className="text-[9px] font-semibold uppercase tracking-[0.1em] opacity-70">Reset position</span>
-              </button>
-            </div>
-          </div>
-        </AdminEditorSection>
-
-        <AdminEditorSection title="Position Controls" contentClassName="grid gap-3 xl:grid-cols-2">
-          <div className="space-y-3">
-            <div className={cn('rounded-[14px] p-3', panel)}>
-              <div className="mb-2.5 flex items-center justify-between">
-                <label className={cn('text-[11.5px] font-bold', isDark ? sub : 'text-[#07041a]')}>Zoom</label>
-                <span className={cn('rounded-md border px-1.5 py-0.5 font-mono text-[10.5px] font-bold', isDark ? 'border-white/10 bg-white/[0.04] text-purple-200/85' : 'border-violet-200 bg-violet-50 text-[#2e0a72]')}>
-                  {draft.scale.toFixed(2)}×
-                </span>
-              </div>
-              <input
-                type="range"
-                min={minScale}
-                max={4}
-                step={0.01}
-                value={draft.scale}
-                onChange={e => updateDraft({ scale: Number(e.target.value) })}
-                className="frame-slider"
-              />
-            </div>
-
-            <div className={cn('rounded-[14px] p-3', panel)}>
-              <div className="mb-2.5 flex items-center justify-between">
-                <label className={cn('text-[11.5px] font-bold', isDark ? sub : 'text-[#07041a]')}>Horizontal</label>
-                <span className={cn('rounded-md border px-1.5 py-0.5 font-mono text-[10.5px] font-bold', isDark ? 'border-white/10 bg-white/[0.04] text-purple-200/85' : 'border-violet-200 bg-violet-50 text-[#2e0a72]')}>
-                  {draft.x.toFixed(0)}%
-                </span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                step={1}
-                value={draft.x}
-                onChange={e => updateDraft({ x: Number(e.target.value) })}
-                className="frame-slider"
-              />
-              <div className="mt-2.5 flex gap-1.5">
-                {[['Left', 0], ['Center', 50], ['Right', 100]].map(([label, value]) => (
-                  <button
-                    key={label}
-                    type="button"
-                    onClick={() => updateDraft({ x: Number(value) })}
-                    className={snapBtnClass(Math.round(draft.x) === Number(value))}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className={cn('rounded-[14px] p-3', panel)}>
-              <div className="mb-2.5 flex items-center justify-between">
-                <label className={cn('text-[11.5px] font-bold', isDark ? sub : 'text-[#07041a]')}>Vertical</label>
-                <span className={cn('rounded-md border px-1.5 py-0.5 font-mono text-[10.5px] font-bold', isDark ? 'border-white/10 bg-white/[0.04] text-purple-200/85' : 'border-violet-200 bg-violet-50 text-[#2e0a72]')}>
-                  {draft.y.toFixed(0)}%
-                </span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                step={1}
-                value={draft.y}
-                onChange={e => updateDraft({ y: Number(e.target.value) })}
-                className="frame-slider"
-              />
-              <div className="mt-2.5 flex gap-1.5">
-                {[['Top', 0], ['Middle', 50], ['Bottom', 100]].map(([label, value]) => (
-                  <button
-                    key={label}
-                    type="button"
-                    onClick={() => updateDraft({ y: Number(value) })}
-                    className={snapBtnClass(Math.round(draft.y) === Number(value))}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {kind === 'image' ? (
-            <div className="space-y-3">
-              <div className={cn('rounded-[14px] p-3', panel)}>
-                <div className="mb-2.5 flex items-center justify-between">
-                  <label className={cn('text-[11.5px] font-bold', isDark ? sub : 'text-[#07041a]')}>Background</label>
-                  <span className={cn('rounded-md border px-1.5 py-0.5 font-mono text-[10.5px] font-bold uppercase tracking-[0.06em]', isDark ? 'border-white/10 bg-white/[0.04] text-purple-200/85' : 'border-violet-200 bg-violet-50 text-[#2e0a72]')}>
-                    {draft.bgOpacity > 0 ? 'On' : 'Off'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <label className="relative inline-flex h-9 w-9 cursor-pointer items-center justify-center overflow-hidden rounded-[10px] border border-violet-200 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.6)]" style={{ backgroundColor: draft.bgColor }}>
-                    <input
-                      type="color"
-                      value={draft.bgColor}
-                      onChange={e => updateDraft({ bgColor: e.target.value, bgOpacity: draft.bgOpacity > 0 ? draft.bgOpacity : 0.85 })}
-                      className="absolute inset-0 cursor-pointer opacity-0"
-                      aria-label="Pick custom background color"
-                    />
-                  </label>
-                  <div className="flex flex-1 flex-wrap gap-1.5">
-                    {['#ffffff', '#f7f1ff', '#0b1020', '#7c3aed', '#22d3ee'].map(color => {
-                      const active = draft.bgColor.toLowerCase() === color.toLowerCase()
-                      return (
-                        <button
-                          key={color}
-                          type="button"
-                          onClick={() => updateDraft({ bgColor: color, bgOpacity: draft.bgOpacity > 0 ? draft.bgOpacity : 0.85 })}
-                          className={cn(
-                            'h-8 w-8 rounded-full transition-transform',
-                            active
-                              ? 'ring-2 ring-offset-2 ring-violet-600 ring-offset-white scale-[1.06]'
-                              : 'ring-1 ring-violet-200 hover:scale-[1.04]'
-                          )}
-                          style={{ backgroundColor: color }}
-                          aria-label={`Set background ${color}`}
-                          aria-pressed={active}
-                        />
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              <div className={cn('rounded-[14px] p-3', panel)}>
-                <div className="mb-2.5 flex items-center justify-between">
-                  <label className={cn('text-[11.5px] font-bold', isDark ? sub : 'text-[#07041a]')}>Bg Opacity</label>
-                  <span className={cn('rounded-md border px-1.5 py-0.5 font-mono text-[10.5px] font-bold', isDark ? 'border-white/10 bg-white/[0.04] text-purple-200/85' : 'border-violet-200 bg-violet-50 text-[#2e0a72]')}>
-                    {Math.round(draft.bgOpacity * 100)}%
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  step={1}
-                  value={Math.round(draft.bgOpacity * 100)}
-                  onChange={e => updateDraft({ bgOpacity: Number(e.target.value) / 100 })}
-                  className="frame-slider"
-                />
-                <div className="mt-2.5 flex gap-1.5">
-                  {[['Off', 0], ['Soft', 35], ['Strong', 85]].map(([label, value]) => (
-                    <button
-                      key={label}
-                      type="button"
-                      onClick={() => updateDraft({ bgOpacity: Number(value) / 100 })}
-                      className={snapBtnClass(Math.round(draft.bgOpacity * 100) === Number(value))}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className={cn('rounded-[14px] p-3', panel)}>
-              <div className={cn('text-[11.5px] font-bold', isDark ? sub : 'text-[#07041a]')}>Frame Tips</div>
-              <p className={cn('mt-2 text-[11px] leading-[1.55]', sub)}>
-                Drag the canvas to position, then fine-tune with the sliders. <span className="font-semibold">Fit Inside</span> keeps the full asset visible; <span className="font-semibold">Fill Frame</span> goes edge-to-edge.
-              </p>
-            </div>
-          )}
-        </AdminEditorSection>
-      </AdminEditorWorkspace>
+      <div className="admin-scope hidden items-start gap-3 md:grid md:grid-cols-[minmax(360px,1fr)_minmax(280px,320px)] xl:justify-center xl:grid-cols-[minmax(400px,520px)_minmax(280px,320px)_minmax(300px,320px)]">
+        <div className="min-w-0 md:sticky md:top-0">{renderCanvasCard()}</div>
+        <div className="min-w-0 md:sticky md:top-0">{renderControlsPanel()}</div>
+        <div className="min-w-0 md:col-span-2 xl:sticky xl:top-0 xl:col-span-1">{renderContextCard()}</div>
+      </div>
     </Modal>
   )
 }
-
