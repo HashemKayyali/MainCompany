@@ -399,7 +399,7 @@ export default function AdminCategoriesPage() {
     : empty
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="flex min-h-0 flex-col gap-4 md:h-full">
       <AdminPageHeader
         title="Categories / Brands"
         actions={
@@ -410,12 +410,13 @@ export default function AdminCategoriesPage() {
         }
       />
 
-      <div className="admin-card flex min-h-0 flex-1 flex-col p-3 sm:p-4">
+      <div className="admin-card flex min-h-0 flex-col p-3 sm:p-4 md:flex-1">
         <div className="grid gap-2.5 xl:grid-cols-[minmax(0,1fr)_170px_160px]">
           <div className="relative min-w-0">
             <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-text-muted)]" strokeWidth={2} aria-hidden="true" />
             <input
-              className="admin-input ps-9 pe-16"
+              className="admin-input"
+              style={{ paddingInlineStart: '2.75rem', paddingInlineEnd: '4.75rem' }}
               value={search}
               onChange={event => setSearch(event.target.value)}
               placeholder="Search name, slug, description..."
@@ -532,7 +533,7 @@ export default function AdminCategoriesPage() {
               </div>
             </div>
 
-            <div className="mt-3 min-h-0 flex-1 overflow-y-auto pe-0.5 md:hidden">
+            <div className="mt-3 pe-0.5 md:hidden">
               <div className="grid grid-cols-1 gap-2.5">
                 {pageItems.map(({ category, productCount }) => (
                   <article key={category.id} className="admin-card p-3">
