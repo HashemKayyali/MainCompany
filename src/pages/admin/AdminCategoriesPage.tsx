@@ -15,6 +15,7 @@ import AdminViewToggle from '../../components/admin/AdminViewToggle'
 import useAdminCardView from '../../components/admin/useAdminCardView'
 import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
 import CategoryTileView from '../../components/home/CategoryTileView'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { cn } from '../../utils/cn'
 import { getErrorMessage } from '../../lib/errors'
 
@@ -71,6 +72,7 @@ export default function AdminCategoriesPage() {
 
   const iconWrapRef = useRef<HTMLDivElement | null>(null)
   const popoverRef = useRef<HTMLDivElement | null>(null)
+  const isDesktop = useMediaQuery('(min-width: 768px)', true)
 
   const sub = isDark ? 'text-purple-200/80' : 'text-gray-500'
   const cardsLayoutClass = getAdminCardsLayoutClass(displayCardView)
@@ -159,7 +161,9 @@ export default function AdminCategoriesPage() {
   }, [emojiQuery])
 
   useEffect(() => {
-    if (!showEmoji) return
+    // Desktop uses an absolute popover with outside-click dismissal; on mobile
+    // the picker renders inside a Modal that manages its own dismissal.
+    if (!showEmoji || !isDesktop) return
 
     const onPointerDown = (ev: PointerEvent) => {
       const t = ev.target as Node
@@ -171,7 +175,7 @@ export default function AdminCategoriesPage() {
 
     document.addEventListener('pointerdown', onPointerDown, true)
     return () => document.removeEventListener('pointerdown', onPointerDown, true)
-  }, [showEmoji])
+  }, [showEmoji, isDesktop])
 
   const previewCategory: Category = editing
     ? {
@@ -206,6 +210,68 @@ export default function AdminCategoriesPage() {
       </div>
     )
   }
+
+  // Shared icon-picker content — rendered inside an absolute popover on
+  // desktop and a bottom-sheet Modal on mobile (so it never overflows a
+  // narrow viewport). Logic/state is identical in both surfaces.
+  const emojiPickerBody = (
+    <>
+      <div className="mb-3 flex items-center gap-2">
+        <span className={cn('text-[11px] font-mono', sub)}>Filter</span>
+        <input
+          className={cn(
+            'flex-1 rounded-xl border px-3 py-2 text-sm outline-none',
+            isDark
+              ? 'border-purple-500/25 bg-transparent text-purple-50 placeholder:text-purple-200/60'
+              : 'border-gray-200 bg-transparent text-gray-800 placeholder:text-gray-500'
+          )}
+          placeholder="Type or paste emoji to filter..."
+          value={emojiQuery}
+          onChange={e => setEmojiQuery(e.target.value)}
+        />
+        <button
+          type="button"
+          onClick={() => setEmojiQuery('')}
+          className={cn(
+            'rounded-xl px-3 py-2 text-[11px] font-semibold active:translate-y-[1px]',
+            isDark
+              ? 'bg-[linear-gradient(180deg,rgba(20,29,56,0.98),rgba(13,20,42,0.98))] text-purple-100 ring-1 ring-inset ring-cyan-400/14 shadow-[0_10px_24px_-18px_rgba(4,8,20,0.8)]'
+              : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.14)]'
+          )}
+        >
+          Clear
+        </button>
+      </div>
+
+      <div className="grid max-h-56 grid-cols-6 gap-2 overflow-y-auto overscroll-contain pe-1 sm:max-h-72">
+        {filteredEmojis.map(icon => {
+          const active = editing?.icon === icon
+          return (
+            <button
+              key={icon}
+              type="button"
+              onClick={() => {
+                setEditing(x => (x ? { ...x, icon } : x))
+                setShowEmoji(false)
+              }}
+              className={cn(
+                'flex h-11 items-center justify-center rounded-xl border text-xl transition',
+                active
+                  ? isDark
+                    ? 'border-cyan-400/40 bg-cyan-400/15'
+                    : 'border-violet-300 bg-violet-50'
+                  : isDark
+                    ? 'border-purple-500/20 bg-purple-500/10 hover:bg-purple-500/15'
+                    : 'border-gray-200 bg-white hover:bg-gray-50'
+              )}
+            >
+              {icon}
+            </button>
+          )
+        })}
+      </div>
+    </>
+  )
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
@@ -473,70 +539,17 @@ export default function AdminCategoriesPage() {
                     <span className={cn('text-xs font-mono', sub)}>{showEmoji ? 'Close' : 'Pick'}</span>
                   </button>
 
-                  {showEmoji && (
+                  {showEmoji && isDesktop && (
                     <div
                       ref={popoverRef}
                       className={cn(
-                        'absolute right-0 z-[1000] mt-2 w-[340px] rounded-2xl border p-3 shadow-2xl',
+                        'absolute end-0 z-[1000] mt-2 w-[340px] max-w-[calc(100vw-2rem)] rounded-2xl border p-3 shadow-2xl',
                         isDark ? 'border-purple-500/20 bg-[#0b0b1a]' : 'border-gray-200 bg-white'
                       )}
                       onWheelCapture={event => event.stopPropagation()}
                       onTouchMove={event => event.stopPropagation()}
                     >
-                      <div className="mb-3 flex items-center gap-2">
-                        <span className={cn('text-[11px] font-mono', sub)}>Filter</span>
-                        <input
-                          className={cn(
-                            'flex-1 rounded-xl border px-3 py-2 text-sm outline-none',
-                            isDark
-                              ? 'border-purple-500/25 bg-transparent text-purple-50 placeholder:text-purple-200/60'
-                              : 'border-gray-200 bg-transparent text-gray-800 placeholder:text-gray-500'
-                          )}
-                          placeholder="Type or paste emoji to filter..."
-                          value={emojiQuery}
-                          onChange={e => setEmojiQuery(e.target.value)}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setEmojiQuery('')}
-                          className={cn(
-                            'rounded-xl px-3 py-2 text-[11px] font-semibold active:translate-y-[1px]',
-                            isDark
-                              ? 'bg-[linear-gradient(180deg,rgba(20,29,56,0.98),rgba(13,20,42,0.98))] text-purple-100 ring-1 ring-inset ring-cyan-400/14 shadow-[0_10px_24px_-18px_rgba(4,8,20,0.8)]'
-                              : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.14)]'
-                          )}
-                        >
-                          Clear
-                        </button>
-                      </div>
-
-                      <div className="grid max-h-56 grid-cols-6 gap-2 overflow-y-auto overscroll-contain pr-1">
-                        {filteredEmojis.map(icon => {
-                          const active = editing.icon === icon
-                          return (
-                            <button
-                              key={icon}
-                              type="button"
-                              onClick={() => {
-                                setEditing(x => (x ? { ...x, icon } : x))
-                                setShowEmoji(false)
-                              }}
-                              className={cn(
-                                'flex h-11 items-center justify-center rounded-xl border text-xl transition',
-                                active
-                                  ? isDark
-                                    ? 'border-cyan-400/40 bg-cyan-400/15'
-                                    : 'border-violet-300 bg-violet-50'
-                                  : isDark
-                                    ? 'border-purple-500/20 bg-purple-500/10 hover:bg-purple-500/15'
-                                    : 'border-gray-200 bg-white hover:bg-gray-50'
-                              )}
-                            >
-                              {icon}
-                            </button>
-                          )
-                        })}
-                      </div>
+                      {emojiPickerBody}
                     </div>
                   )}
                 </div>
@@ -580,6 +593,14 @@ export default function AdminCategoriesPage() {
           </AdminEditorWorkspace>
         )}
       </Modal>
+
+      {/* Mobile icon picker: bottom sheet instead of an overflowing popover.
+          Rendered last so it stacks above the category edit modal. */}
+      {!isDesktop && (
+        <Modal open={showEmoji} onClose={() => setShowEmoji(false)} title="Choose an icon" size="sm">
+          {emojiPickerBody}
+        </Modal>
+      )}
     </div>
   )
 }
