@@ -22,6 +22,8 @@ interface ModalProps {
   bodyClassName?: string
   /** Optional sticky footer region (actions). Stays visible while the body scrolls. */
   footer?: ReactNode
+  /** Mobile presentation. Fullscreen is intended for dense editor flows. */
+  mobilePresentation?: 'sheet' | 'fullscreen'
 }
 
 const SIZE_CLASSES: Record<NonNullable<ModalProps['size']>, string> = {
@@ -63,6 +65,7 @@ export default function Modal({
   contentClassName = '',
   bodyClassName = '',
   footer,
+  mobilePresentation = 'sheet',
 }: ModalProps) {
   const { translateText, dir } = useI18n()
   const isDesktop = useMediaQuery('(min-width: 640px)', true)
@@ -162,7 +165,8 @@ export default function Modal({
   // trapped inside the card instead of covering the viewport).
   if (typeof document === 'undefined') return null
 
-  // Mobile: bottom sheet. Desktop: centered panel.
+  // Mobile editors can opt into a true viewport-sized workspace. Compact
+  // dialogs keep the bottom-sheet treatment; desktop stays centered.
   const panelMotion = isDesktop
     ? {
         initial: { opacity: 0, scale: 0.96, y: 10 },
@@ -170,12 +174,19 @@ export default function Modal({
         exit: { opacity: 0, scale: 0.96 },
         transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] as const },
       }
-    : {
-        initial: { y: '100%' },
-        animate: { y: 0 },
-        exit: { y: '100%' },
-        transition: { type: 'spring' as const, stiffness: 360, damping: 34 },
-      }
+    : mobilePresentation === 'fullscreen'
+      ? {
+          initial: { opacity: 0, y: 16 },
+          animate: { opacity: 1, y: 0 },
+          exit: { opacity: 0, y: 12 },
+          transition: { duration: 0.18, ease: [0.16, 1, 0.3, 1] as const },
+        }
+      : {
+          initial: { y: '100%' },
+          animate: { y: 0 },
+          exit: { y: '100%' },
+          transition: { type: 'spring' as const, stiffness: 360, damping: 34 },
+        }
 
   return createPortal(
     <AnimatePresence>
@@ -198,9 +209,8 @@ export default function Modal({
 
           <div
             className={cn(
-              'relative flex min-h-full',
-              // Bottom sheet on mobile, centered dialog on sm+.
-              'items-end justify-center',
+              'relative flex min-h-full justify-center',
+              mobilePresentation === 'fullscreen' ? 'items-stretch' : 'items-end',
               'sm:items-start sm:px-3.5 sm:pt-5 sm:pb-[max(0.875rem,env(safe-area-inset-bottom))] lg:pt-6'
             )}
           >
@@ -210,19 +220,22 @@ export default function Modal({
               className={cn(
                 'relative flex w-full flex-col overflow-hidden border border-violet-200/65 bg-white',
                 'shadow-[0_32px_96px_-22px_rgba(124,58,237,0.32),0_8px_28px_-8px_rgba(124,58,237,0.18)]',
-                // Mobile bottom sheet
-                'max-h-[92dvh] rounded-t-[24px]',
+                mobilePresentation === 'fullscreen'
+                  ? 'h-[100dvh] max-h-[100dvh] rounded-none border-x-0 border-y-0'
+                  : 'max-h-[92dvh] rounded-t-[24px]',
                 // Desktop centered
-                'sm:max-h-[calc(100dvh-40px)] sm:rounded-[22px] lg:max-h-[calc(100dvh-52px)]',
+                'sm:h-auto sm:max-h-[calc(100dvh-40px)] sm:rounded-[22px] sm:border lg:max-h-[calc(100dvh-52px)]',
                 SIZE_CLASSES[size],
                 contentClassName
               )}
               onClick={event => event.stopPropagation()}
             >
-              {/* Mobile drag handle */}
-              <div className="flex justify-center pt-2.5 sm:hidden" aria-hidden="true">
-                <span className="h-1.5 w-11 rounded-full bg-violet-200" />
-              </div>
+              {/* Mobile drag handle is only shown for bottom sheets. */}
+              {mobilePresentation === 'sheet' && (
+                <div className="flex justify-center pt-2.5 sm:hidden" aria-hidden="true">
+                  <span className="h-1.5 w-11 rounded-full bg-violet-200" />
+                </div>
+              )}
 
               <div className="sticky top-0 z-20 flex items-start justify-between gap-3 border-b border-violet-100 bg-white/95 px-3 pb-3 pt-2.5 backdrop-blur-xl sm:px-4 sm:pb-3.5 sm:pt-3.5">
                 <h2 id={titleId} className="font-sans text-[0.98rem] font-bold text-[#1a0b3d] sm:text-[1.04rem]">

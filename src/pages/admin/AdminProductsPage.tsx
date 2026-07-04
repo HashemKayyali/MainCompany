@@ -446,12 +446,14 @@ export default function AdminProductsPage() {
   const useTableView = cardView === 'list' && isMdUp
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="flex min-h-full flex-col gap-4 md:h-full md:min-h-0">
       <AdminPageHeader
         title="Products"
         actions={
           <>
-            <AdminViewToggle value={cardView} onChange={setCardView} />
+            <div className="hidden md:block">
+              <AdminViewToggle value={cardView} onChange={setCardView} />
+            </div>
             <AdminButton size="sm" onClick={openNew}>
               <Plus className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
               Add Product
@@ -460,7 +462,7 @@ export default function AdminProductsPage() {
         }
       />
 
-      <div className="admin-card flex min-h-0 flex-1 flex-col p-3 sm:p-4">
+      <div className="admin-card flex flex-col p-3 sm:p-4 md:min-h-0 md:flex-1">
         {/* Toolbar */}
         <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center">
           <div className="relative flex-1">
@@ -496,7 +498,7 @@ export default function AdminProductsPage() {
 
         {/* Results */}
         {filtered.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center py-8">
+          <div className="flex items-center justify-center py-8 md:flex-1">
             <AdminEmptyState
               title="No products match this filter"
               description="Try a different search or category, or add a new product."
@@ -570,7 +572,7 @@ export default function AdminProductsPage() {
             </div>
           </div>
         ) : (
-          <div className="mt-3 min-h-0 flex-1 overflow-y-auto pe-0.5">
+          <div className="mt-3 pe-0.5 md:min-h-0 md:flex-1 md:overflow-y-auto">
             <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
               {filtered.map(product => (
                 <ProductAdminCard
@@ -703,6 +705,7 @@ export default function AdminProductsPage() {
         title={edit ? 'Edit Product' : 'Add Product'}
         persistent
         size="3xl"
+        mobilePresentation="fullscreen"
         bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
         footer={
           <div className="admin-scope flex flex-col items-stretch gap-2.5 sm:flex-row sm:items-center sm:justify-between">

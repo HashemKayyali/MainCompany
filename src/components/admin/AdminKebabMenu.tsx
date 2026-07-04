@@ -1,8 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { MoreVertical } from 'lucide-react'
-import Modal from '../ui/Modal'
-import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useI18n } from '../../contexts/LanguageContext'
 import { cn } from '../../utils/cn'
 
@@ -16,10 +14,10 @@ export type AdminKebabItem = {
 
 type AdminKebabMenuProps = {
   items: AdminKebabItem[]
-  /** Accessible label for the trigger + title for the mobile sheet. */
+  /** Accessible label for the trigger. */
   label?: string
   className?: string
-  /** Alignment of the desktop popover relative to the trigger. */
+  /** Alignment of the popover relative to the trigger. */
   align?: 'start' | 'end'
 }
 
@@ -43,11 +41,13 @@ const itemClass = (tone: 'default' | 'danger' | undefined) =>
       : 'text-[var(--admin-text)] hover:bg-[var(--admin-accent-soft)] hover:text-[var(--admin-accent)]'
   )
 
-// Overflow action menu. Desktop uses a fixed portal so cards, tables, and
-// modal scroll panes cannot clip it; mobile uses the shared bottom sheet.
+/**
+ * Viewport-positioned overflow menu. The same anchored popover is used on
+ * desktop and mobile so action menus stay attached to their trigger instead
+ * of opening as a half-screen bottom sheet.
+ */
 export default function AdminKebabMenu({ items, label, className, align = 'end' }: AdminKebabMenuProps) {
   const { translateText, dir } = useI18n()
-  const isDesktop = useMediaQuery('(min-width: 768px)', true)
   const [open, setOpen] = useState(false)
   const [position, setPosition] = useState<MenuPosition | null>(null)
   const wrapRef = useRef<HTMLDivElement | null>(null)
@@ -60,7 +60,7 @@ export default function AdminKebabMenu({ items, label, className, align = 'end' 
   }, [open])
 
   useLayoutEffect(() => {
-    if (!open || !isDesktop) return
+    if (!open) return
 
     const updatePosition = () => {
       const trigger = triggerRef.current
@@ -68,21 +68,23 @@ export default function AdminKebabMenu({ items, label, className, align = 'end' 
 
       const triggerRect = trigger.getBoundingClientRect()
       const measuredMenu = menuRef.current?.getBoundingClientRect()
+      const viewportWidth = window.innerWidth
+      const viewportHeight = window.innerHeight
       const menuWidth = Math.min(
         Math.max(measuredMenu?.width || MENU_WIDTH, MENU_WIDTH),
-        window.innerWidth - VIEWPORT_MARGIN * 2
+        viewportWidth - VIEWPORT_MARGIN * 2
       )
       const menuHeight = measuredMenu?.height || Math.min(items.length * 46 + 12, 320)
-      const spaceBelow = window.innerHeight - triggerRect.bottom - MENU_GAP - VIEWPORT_MARGIN
-      const spaceAbove = triggerRect.top - MENU_GAP - VIEWPORT_MARGIN
+      const spaceBelow = Math.max(0, viewportHeight - triggerRect.bottom - MENU_GAP - VIEWPORT_MARGIN)
+      const spaceAbove = Math.max(0, triggerRect.top - MENU_GAP - VIEWPORT_MARGIN)
       const placement: MenuPosition['placement'] =
         spaceBelow < menuHeight && spaceAbove > spaceBelow ? 'top' : 'bottom'
       const availableHeight = placement === 'top' ? spaceAbove : spaceBelow
-      const maxHeight = Math.max(132, Math.min(menuHeight, availableHeight))
+      const maxHeight = Math.max(88, Math.min(menuHeight, availableHeight || menuHeight))
       const top =
         placement === 'top'
           ? Math.max(VIEWPORT_MARGIN, triggerRect.top - MENU_GAP - maxHeight)
-          : Math.min(triggerRect.bottom + MENU_GAP, window.innerHeight - VIEWPORT_MARGIN - maxHeight)
+          : Math.min(triggerRect.bottom + MENU_GAP, viewportHeight - VIEWPORT_MARGIN - maxHeight)
       const rawLeft =
         dir === 'rtl'
           ? align === 'end'
@@ -93,42 +95,47 @@ export default function AdminKebabMenu({ items, label, className, align = 'end' 
             : triggerRect.left
       const left = Math.min(
         Math.max(VIEWPORT_MARGIN, rawLeft),
-        window.innerWidth - VIEWPORT_MARGIN - menuWidth
+        viewportWidth - VIEWPORT_MARGIN - menuWidth
       )
 
       setPosition({ top, left, width: menuWidth, maxHeight, placement })
     }
 
     updatePosition()
+    const frame = window.requestAnimationFrame(updatePosition)
     window.addEventListener('resize', updatePosition)
     window.addEventListener('scroll', updatePosition, true)
+
     return () => {
+      window.cancelAnimationFrame(frame)
       window.removeEventListener('resize', updatePosition)
       window.removeEventListener('scroll', updatePosition, true)
     }
-  }, [align, dir, isDesktop, items.length, open])
+  }, [align, dir, items.length, open])
 
   useEffect(() => {
-    if (!open || !isDesktop) return
+    if (!open) return
 
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node
       if (wrapRef.current?.contains(target) || menuRef.current?.contains(target)) return
       setOpen(false)
     }
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setOpen(false)
         triggerRef.current?.focus()
       }
     }
+
     document.addEventListener('pointerdown', onPointerDown, true)
     document.addEventListener('keydown', onKeyDown)
     return () => {
       document.removeEventListener('pointerdown', onPointerDown, true)
       document.removeEventListener('keydown', onKeyDown)
     }
-  }, [open, isDesktop])
+  }, [open])
 
   const handleSelect = (item: AdminKebabItem) => {
     if (item.disabled) return
@@ -136,12 +143,12 @@ export default function AdminKebabMenu({ items, label, className, align = 'end' 
     item.onSelect()
   }
 
-  const renderItems = () => {
-    const firstDangerIndex = items.findIndex(item => item.tone === 'danger')
+  const firstDangerIndex = items.findIndex(item => item.tone === 'danger')
 
-    return items.map((item, index) => (
+  const renderItems = () =>
+    items.map((item, index) => (
       <button
-        key={index}
+        key={`${item.label}-${index}`}
         type="button"
         role="menuitem"
         disabled={item.disabled}
@@ -158,15 +165,15 @@ export default function AdminKebabMenu({ items, label, className, align = 'end' 
         {item.label}
       </button>
     ))
-  }
 
-  const desktopMenu =
-    open && isDesktop && typeof document !== 'undefined'
+  const menuPortal =
+    open && typeof document !== 'undefined'
       ? createPortal(
           <div className="admin-scope pointer-events-none fixed inset-0 z-[160]" dir={dir}>
             <div
               ref={menuRef}
               role="menu"
+              aria-label={menuLabel}
               data-placement={position?.placement}
               className="surface-floating pointer-events-auto fixed rounded-[var(--admin-radius)] p-1.5"
               style={{
@@ -203,15 +210,7 @@ export default function AdminKebabMenu({ items, label, className, align = 'end' 
         <MoreVertical className="h-[18px] w-[18px]" strokeWidth={2.1} aria-hidden="true" />
       </button>
 
-      {desktopMenu}
-
-      {open && !isDesktop && (
-        <Modal open={open} onClose={() => setOpen(false)} title={menuLabel} size="sm">
-          <div className="admin-scope space-y-0.5" role="menu">
-            {renderItems()}
-          </div>
-        </Modal>
-      )}
+      {menuPortal}
     </div>
   )
 }

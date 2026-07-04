@@ -5,7 +5,6 @@ import AdminBadge from '../../../components/admin/primitives/AdminBadge'
 import AdminButton from '../../../components/admin/primitives/AdminButton'
 import AdminKebabMenu, { type AdminKebabItem } from '../../../components/admin/AdminKebabMenu'
 import BidiText from '../../../components/admin/BidiText'
-import { useMediaQuery } from '../../../hooks/useMediaQuery'
 import { cn } from '../../../utils/cn'
 
 type ProductAdminCardProps = {
@@ -39,14 +38,12 @@ export default function ProductAdminCard({
   onEdit,
   onDelete,
 }: ProductAdminCardProps) {
-  const isSm = useMediaQuery('(min-width: 640px)', true)
-
   const showRentalPrice = product.rentalEnabled !== false && product.showPrice !== false
   const priceLabel = showRentalPrice ? 'Per Day' : 'Reviewed'
   const priceValue = showRentalPrice ? `${product.rentalPricePerDay} ${product.currency}` : 'On request'
 
   const kebabItems: AdminKebabItem[] = [
-    ...(!isSm ? [{ label: 'Edit', onSelect: onEdit }] : []),
+    { label: 'Edit', onSelect: onEdit },
     { label: 'Delete', onSelect: onDelete, tone: 'danger' as const },
   ]
 
