@@ -1,20 +1,27 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Eye, KeyRound, Mail, Pencil, RefreshCw, Search, Shield, Users } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth, type AdminRole } from '../../contexts/AuthContext'
-import { useTheme } from '../../contexts/ThemeContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useDialog } from '../../contexts/DialogContext'
 import Modal from '../../components/ui/Modal'
+import UserAvatar from '../../components/ui/UserAvatar'
 import AdminActionButton from '../../components/admin/AdminActionButton'
 import AdminDetailModal from '../../components/admin/AdminDetailModal'
-import AdminEntityCard from '../../components/admin/AdminEntityCard'
+import AdminKebabMenu from '../../components/admin/AdminKebabMenu'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminStatCard from '../../components/admin/AdminStatCard'
-import AdminViewToggle from '../../components/admin/AdminViewToggle'
-import useAdminCardView from '../../components/admin/useAdminCardView'
-import { getAdminCardsLayoutClass, getAdminEntityVariant } from '../../components/admin/useAdminCardView'
-import UserAvatar from '../../components/ui/UserAvatar'
+import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
+import AdminField from '../../components/admin/primitives/AdminField'
+import AdminPagination from '../../components/admin/primitives/AdminPagination'
+import AdminSkeleton from '../../components/admin/primitives/AdminSkeleton'
+import AdminBadge, { type AdminBadgeTone } from '../../components/admin/primitives/AdminBadge'
+import AdminButton from '../../components/admin/primitives/AdminButton'
 import { emitProfileUpdated } from '../../lib/profile-sync'
+import { listAdminRequests } from '../../services/admin-requests.service'
+import type { AdminRequestListItem, RequestType } from '../../types/commerce'
+import { formatRequestStatusLabel, formatRequestTypeLabel, getCommerceErrorMessage } from '../../utils/commerce'
 import { cn } from '../../utils/cn'
 import { getErrorMessage } from '../../lib/errors'
 
@@ -28,8 +35,35 @@ interface UserProfile {
 }
 
 type SortKey = 'role' | 'name' | 'email' | 'newest' | 'oldest'
+type RoleFilter = 'all' | 'superadmin' | 'admin' | 'user'
+type RequestSortKey = 'newest' | 'oldest' | 'status' | 'type' | 'total_desc' | 'total_asc'
 
 const ROLE_ORDER: Record<string, number> = { superadmin: 0, admin: 1, user: 2 }
+const PAGE_SIZE_OPTIONS = [10, 20, 40]
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: 'role', label: 'Role' },
+  { value: 'name', label: 'Name A-Z' },
+  { value: 'email', label: 'Email A-Z' },
+  { value: 'newest', label: 'Newest' },
+  { value: 'oldest', label: 'Oldest' },
+]
+
+const ROLE_FILTERS: { value: RoleFilter; label: string }[] = [
+  { value: 'all', label: 'All roles' },
+  { value: 'superadmin', label: 'Super admins' },
+  { value: 'admin', label: 'Admins' },
+  { value: 'user', label: 'Users' },
+]
+
+const REQUEST_SORT_OPTIONS: { value: RequestSortKey; label: string }[] = [
+  { value: 'newest', label: 'Newest first' },
+  { value: 'oldest', label: 'Oldest first' },
+  { value: 'status', label: 'Status' },
+  { value: 'type', label: 'Type' },
+  { value: 'total_desc', label: 'Total high to low' },
+  { value: 'total_asc', label: 'Total low to high' },
+]
 
 function sortUsers(users: UserProfile[], key: SortKey): UserProfile[] {
   const arr = [...users]
@@ -49,24 +83,259 @@ function sortUsers(users: UserProfile[], key: SortKey): UserProfile[] {
   }
 }
 
-const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: 'role', label: 'Role (default)' },
-  { value: 'name', label: 'Name A-Z' },
-  { value: 'email', label: 'Email A-Z' },
-  { value: 'newest', label: 'Newest first' },
-  { value: 'oldest', label: 'Oldest first' },
-]
+function formatDate(value: string) {
+  if (!value) return '-'
+  return new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function formatDateTime(value: string) {
+  if (!value) return '-'
+  return new Date(value).toLocaleString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function roleLabel(role: string) {
+  if (role === 'superadmin') return 'Super Admin'
+  if (role === 'admin') return 'Admin'
+  return 'User'
+}
+
+function roleChipClass(role: string) {
+  if (role === 'superadmin') return 'admin-chip admin-chip--warning'
+  if (role === 'admin') return 'admin-chip admin-chip--accent'
+  return 'admin-chip'
+}
+
+function statusTone(status: string): AdminBadgeTone {
+  if (status === 'pending_review') return 'warning'
+  if (status === 'confirmed' || status === 'completed' || status === 'won') return 'success'
+  if (status === 'contacted' || status === 'quoted' || status === 'in_preparation') return 'accent'
+  if (status === 'rejected' || status === 'cancelled' || status === 'lost') return 'danger'
+  return 'neutral'
+}
+
+function typeTone(type: RequestType): AdminBadgeTone {
+  return type === 'rental' ? 'accent' : 'neutral'
+}
+
+function formatTotal(value: number | null) {
+  return value == null ? 'Review pending' : `${value.toFixed(2)} JOD`
+}
+
+function requestPath(request: AdminRequestListItem) {
+  return `/admin/requests/${request.type}/${request.id}`
+}
+
+function avatarClass(role: string) {
+  if (role === 'superadmin') return 'bg-[var(--admin-warning)] text-white'
+  if (role === 'admin') return 'bg-[var(--admin-accent)] text-white'
+  return 'bg-[var(--admin-surface-2)] text-[var(--admin-text-muted)]'
+}
+
+const controlButtonClass =
+  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3.5 text-[13px] font-bold text-[var(--admin-text)] transition hover:border-[var(--admin-accent)] hover:bg-[var(--admin-accent-soft)] hover:text-[var(--admin-accent)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--admin-accent-soft)] disabled:cursor-not-allowed disabled:opacity-50'
+
+const primaryButtonClass =
+  'inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] bg-[var(--admin-accent)] px-4 text-[13px] font-bold text-white transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--admin-accent-soft)] disabled:cursor-not-allowed disabled:opacity-50'
+
+type UserRequestsSectionProps = {
+  requests: AdminRequestListItem[]
+  loading: boolean
+  error: string
+  onRetry: () => void
+  onOpen: (request: AdminRequestListItem) => void
+}
+
+function UserRequestsSection({ requests, loading, error, onRetry, onOpen }: UserRequestsSectionProps) {
+  const [requestSearch, setRequestSearch] = useState('')
+  const [requestSort, setRequestSort] = useState<RequestSortKey>('newest')
+
+  const filteredRequests = useMemo(() => {
+    const query = requestSearch.trim().toLowerCase()
+    const next = requests.filter(request => {
+      if (!query) return true
+      return (
+        request.requestNumber.toLowerCase().includes(query) ||
+        request.customerName.toLowerCase().includes(query) ||
+        request.email.toLowerCase().includes(query) ||
+        formatRequestStatusLabel(request.status).toLowerCase().includes(query) ||
+        formatRequestTypeLabel(request.type).toLowerCase().includes(query)
+      )
+    })
+
+    return [...next].sort((a, b) => {
+      if (requestSort === 'oldest') return a.createdAt.localeCompare(b.createdAt)
+      if (requestSort === 'status') return formatRequestStatusLabel(a.status).localeCompare(formatRequestStatusLabel(b.status))
+      if (requestSort === 'type') return formatRequestTypeLabel(a.type).localeCompare(formatRequestTypeLabel(b.type))
+      if (requestSort === 'total_desc') return (b.total ?? -1) - (a.total ?? -1)
+      if (requestSort === 'total_asc') return (a.total ?? Number.MAX_SAFE_INTEGER) - (b.total ?? Number.MAX_SAFE_INTEGER)
+      return b.createdAt.localeCompare(a.createdAt)
+    })
+  }, [requestSearch, requestSort, requests])
+
+  const controls = (
+    <div className="grid gap-2.5 md:grid-cols-[minmax(0,1fr)_210px]">
+      <label className="relative block min-w-0">
+        <span className="sr-only">Search user requests</span>
+        <Search
+          className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-text-muted)]"
+          strokeWidth={2}
+          aria-hidden="true"
+        />
+        <input
+          className="admin-input ps-10"
+          placeholder="Search request number, status, or type"
+          value={requestSearch}
+          onChange={event => setRequestSearch(event.target.value)}
+          disabled={loading}
+        />
+      </label>
+
+      <label className="sr-only" htmlFor="user-request-sort">
+        Sort user requests
+      </label>
+      <select
+        id="user-request-sort"
+        className="admin-input"
+        value={requestSort}
+        onChange={event => setRequestSort(event.target.value as RequestSortKey)}
+        disabled={loading}
+      >
+        {REQUEST_SORT_OPTIONS.map(option => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+
+  if (loading) {
+    return (
+      <div className="space-y-3">
+        {controls}
+        <div className="admin-table-wrap">
+          <div className="grid min-w-[780px] grid-cols-[1.1fr_1fr_0.9fr_0.7fr_0.9fr_150px] gap-3 border-b border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3 py-3">
+            {Array.from({ length: 6 }, (_, index) => (
+              <AdminSkeleton key={index} className="h-4" />
+            ))}
+          </div>
+          {Array.from({ length: 3 }, (_, rowIndex) => (
+            <div key={rowIndex} className="grid min-w-[780px] grid-cols-[1.1fr_1fr_0.9fr_0.7fr_0.9fr_150px] gap-3 border-b border-[var(--admin-border)] px-3 py-3 last:border-b-0">
+              {Array.from({ length: 6 }, (_, cellIndex) => (
+                <AdminSkeleton key={cellIndex} className="h-4" />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-[var(--admin-radius-sm)] border border-[color-mix(in_srgb,var(--admin-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--admin-danger)_8%,transparent)] p-3">
+        <p className="text-[12px] font-semibold leading-5 text-[var(--admin-danger)]">{error}</p>
+        <AdminButton size="sm" variant="outline" onClick={onRetry} className="mt-3">
+          Try again
+        </AdminButton>
+      </div>
+    )
+  }
+
+  if (requests.length === 0) {
+    return (
+      <div className="space-y-3">
+        {controls}
+        <div className="rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] p-3 text-[12px] font-semibold leading-5 text-[var(--admin-text-muted)]">
+          No requests are linked to this user email yet.
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      {controls}
+
+      {filteredRequests.length === 0 ? (
+        <div className="rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] p-3 text-[12px] font-semibold leading-5 text-[var(--admin-text-muted)]">
+          No requests match the current search.
+        </div>
+      ) : (
+        <div className="admin-table-wrap">
+          <table className="w-full min-w-[780px] text-start">
+            <thead className="sticky top-0 z-10 bg-[var(--admin-surface-2)]">
+              <tr className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">
+                <th className="px-3 py-3 text-start">Request</th>
+                <th className="px-3 py-3 text-start">Type</th>
+                <th className="px-3 py-3 text-start">Status</th>
+                <th className="px-3 py-3 text-start">Items</th>
+                <th className="px-3 py-3 text-start">Total</th>
+                <th className="px-3 py-3 text-start">Created</th>
+                <th className="px-3 py-3 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRequests.map(request => (
+                <tr key={`${request.type}-${request.id}`} className="border-t border-[var(--admin-border)] align-middle hover:bg-[var(--admin-surface-2)]">
+                  <td className="px-3 py-2.5">
+                    <div className="max-w-[220px] truncate text-[13px] font-black text-[var(--admin-text)]">{request.requestNumber}</div>
+                    <div className="mt-0.5 truncate text-[11px] font-semibold text-[var(--admin-text-muted)]">{request.customerName || 'No customer name'}</div>
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <AdminBadge tone={typeTone(request.type)}>{formatRequestTypeLabel(request.type)}</AdminBadge>
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <AdminBadge tone={statusTone(request.status)}>{formatRequestStatusLabel(request.status)}</AdminBadge>
+                  </td>
+                  <td className="px-3 py-2.5 text-[12px] font-bold text-[var(--admin-text)]">{request.itemCount}</td>
+                  <td className="px-3 py-2.5 text-[12px] font-bold text-[var(--admin-text)]">{formatTotal(request.total)}</td>
+                  <td className="px-3 py-2.5 text-[12px] font-semibold text-[var(--admin-text-muted)]">{formatDate(request.createdAt)}</td>
+                  <td className="px-3 py-2.5">
+                    <div className="flex justify-end">
+                      <AdminButton size="sm" variant="outline" onClick={() => onOpen(request)}>
+                        <Eye className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                        Request details
+                      </AdminButton>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <div className="text-[11px] font-bold text-[var(--admin-text-muted)]">
+        Showing {filteredRequests.length} of {requests.length} requests
+      </div>
+    </div>
+  )
+}
 
 export default function AdminUsersPage() {
   const { user: currentUser, isSuperAdmin, changeAdminRole } = useAuth()
-  const { isDark } = useTheme()
   const { toast } = useToast()
   const dialog = useDialog()
+  const navigate = useNavigate()
 
   const [users, setUsers] = useState<UserProfile[]>([])
   const [loading, setLoading] = useState(true)
+  const [requests, setRequests] = useState<AdminRequestListItem[]>([])
+  const [requestsLoading, setRequestsLoading] = useState(false)
+  const [requestsLoaded, setRequestsLoaded] = useState(false)
+  const [requestsError, setRequestsError] = useState('')
   const [search, setSearch] = useState('')
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
   const [sortBy, setSortBy] = useState<SortKey>('role')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
   const [details, setDetails] = useState<UserProfile | null>(null)
 
   const [editUser, setEditUser] = useState<UserProfile | null>(null)
@@ -74,12 +343,6 @@ export default function AdminUsersPage() {
   const [editPhone, setEditPhone] = useState('')
   const [editRole, setEditRole] = useState('')
   const [editSaving, setEditSaving] = useState(false)
-  const { cardView, displayCardView, viewTransitionClassName, setCardView } = useAdminCardView('users')
-
-  const txt = isDark ? 'text-white' : 'text-gray-900'
-  const sub = isDark ? 'text-purple-200/70' : 'text-gray-500'
-  const muted = isDark ? 'text-purple-300/40' : 'text-gray-400'
-  const cardsLayoutClass = getAdminCardsLayoutClass(displayCardView)
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -106,8 +369,34 @@ export default function AdminUsersPage() {
     fetchUsers()
   }, [fetchUsers])
 
+  const loadRequests = useCallback(async () => {
+    setRequestsLoading(true)
+    try {
+      setRequestsError('')
+      setRequests(await listAdminRequests())
+      setRequestsLoaded(true)
+    } catch (error) {
+      const message = getCommerceErrorMessage(error, 'Could not load request activity.')
+      setRequestsError(message)
+      setRequests([])
+      setRequestsLoaded(true)
+    } finally {
+      setRequestsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void loadRequests()
+  }, [loadRequests])
+
+  useEffect(() => {
+    if (!details || requestsLoaded || requestsLoading) return
+    void loadRequests()
+  }, [details, loadRequests, requestsLoaded, requestsLoading])
+
   const displayed = useMemo(() => {
     let list = users
+    if (roleFilter !== 'all') list = list.filter(user => user.role === roleFilter)
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(
@@ -118,7 +407,22 @@ export default function AdminUsersPage() {
       )
     }
     return sortUsers(list, sortBy)
-  }, [users, search, sortBy])
+  }, [users, search, roleFilter, sortBy])
+
+  const totalPages = Math.max(1, Math.ceil(displayed.length / pageSize))
+  const pagedUsers = useMemo(() => {
+    const safePage = Math.min(Math.max(page, 1), totalPages)
+    const start = (safePage - 1) * pageSize
+    return displayed.slice(start, start + pageSize)
+  }, [displayed, page, pageSize, totalPages])
+
+  useEffect(() => {
+    setPage(1)
+  }, [search, roleFilter, sortBy, pageSize])
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages)
+  }, [page, totalPages])
 
   const stats = useMemo(
     () => ({
@@ -130,11 +434,38 @@ export default function AdminUsersPage() {
     [users]
   )
 
-  const openEdit = (user: UserProfile) => {
-    setEditUser(user)
-    setEditName(user.name)
-    setEditPhone(user.phone)
-    setEditRole(user.role)
+  const detailRequests = useMemo(() => {
+    if (!details?.email) return []
+    const email = details.email.trim().toLowerCase()
+    return requests.filter(request => request.email.trim().toLowerCase() === email)
+  }, [details, requests])
+
+  const requestCountByEmail = useMemo(() => {
+    const counts = new Map<string, number>()
+    requests.forEach(request => {
+      const email = request.email.trim().toLowerCase()
+      if (!email) return
+      counts.set(email, (counts.get(email) || 0) + 1)
+    })
+    return counts
+  }, [requests])
+
+  const requestCountFor = (target: UserProfile) => {
+    if (requestsLoading && !requestsLoaded) return '...'
+    if (requestsError) return '-'
+    return requestCountByEmail.get(target.email.trim().toLowerCase()) || 0
+  }
+
+  const openEdit = (target: UserProfile) => {
+    setEditUser(target)
+    setEditName(target.name)
+    setEditPhone(target.phone)
+    setEditRole(target.role)
+  }
+
+  const closeEdit = () => {
+    if (editSaving) return
+    setEditUser(null)
   }
 
   const handleSave = async () => {
@@ -220,215 +551,279 @@ export default function AdminUsersPage() {
     }
   }
 
-  const roleBadge = (role: string) => {
-    if (role === 'superadmin')
-      return isDark
-        ? 'bg-amber-400/10 text-amber-200 ring-1 ring-inset ring-amber-400/18'
-        : 'border-amber-200 bg-amber-50 text-amber-700'
-    if (role === 'admin')
-      return isDark
-        ? 'bg-cyan-400/10 text-cyan-200 ring-1 ring-inset ring-cyan-400/18'
-        : 'border-violet-200 bg-violet-50 text-violet-700'
-    return isDark
-      ? 'bg-[#0f1630]/92 text-purple-100/76 ring-1 ring-inset ring-cyan-400/10'
-      : 'border-gray-200 bg-gray-50 text-gray-600'
-  }
-
-  const avatarBg = (role: string) => {
-    if (role === 'superadmin') return 'bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg shadow-amber-500/20'
-    if (role === 'admin') return 'bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-purple-500/20'
-    return isDark ? 'bg-white/[0.08] text-white/60' : 'bg-gray-100 text-gray-500'
-  }
-
-  const formatDate = (value: string) => {
-    if (!value) return '-'
-    return new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-  }
-
   const hasChanges = useMemo(() => {
     if (!editUser) return false
     return editName !== editUser.name || editPhone !== editUser.phone
   }, [editName, editPhone, editUser])
 
+  const renderActions = (target: UserProfile) => (
+    <AdminKebabMenu
+      label={`Actions for ${target.name || target.email}`}
+      items={[
+        {
+          label: 'Details',
+          icon: <Eye className="h-4 w-4" strokeWidth={2} aria-hidden="true" />,
+          onSelect: () => setDetails(target),
+        },
+        {
+          label: 'Edit',
+          icon: <Pencil className="h-4 w-4" strokeWidth={2} aria-hidden="true" />,
+          onSelect: () => openEdit(target),
+        },
+        {
+          label: 'Send reset email',
+          icon: <Mail className="h-4 w-4" strokeWidth={2} aria-hidden="true" />,
+          onSelect: () => void handleResetPassword(target),
+        },
+      ]}
+    />
+  )
+
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3.5">
+    <div className="admin-scope flex h-full min-h-0 flex-col gap-3 pt-1 pb-[calc(var(--admin-bottombar-h)+0.75rem)] md:gap-4 md:pt-0 md:pb-0">
       <AdminPageHeader
         title="Users"
-        actions={<AdminViewToggle value={cardView} onChange={setCardView} />}
+        actions={
+          <button
+            type="button"
+            className={controlButtonClass}
+            onClick={async () => {
+              setLoading(true)
+              await Promise.all([fetchUsers(), loadRequests()])
+            }}
+          >
+            <RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} strokeWidth={2.1} aria-hidden="true" />
+            Refresh
+          </button>
+        }
       />
 
-      <div className="grid shrink-0 gap-1.5 sm:grid-cols-2 xl:grid-cols-4">
-        <AdminStatCard label="Total" value={stats.total} />
-        <AdminStatCard label="Superadmins" value={stats.superadmins} />
-        <AdminStatCard label="Admins" value={stats.admins} />
-        <AdminStatCard label="Users" value={stats.regular} />
+      <div className="grid shrink-0 grid-cols-2 gap-2 xl:grid-cols-4">
+        <AdminStatCard label="Total" value={stats.total} className="min-h-[74px] rounded-[14px] px-3 py-3 sm:min-h-[92px] sm:rounded-[18px] sm:px-4 sm:py-3.5" />
+        <AdminStatCard label="Super Admins" value={stats.superadmins} className="min-h-[74px] rounded-[14px] px-3 py-3 sm:min-h-[92px] sm:rounded-[18px] sm:px-4 sm:py-3.5" />
+        <AdminStatCard label="Admins" value={stats.admins} className="min-h-[74px] rounded-[14px] px-3 py-3 sm:min-h-[92px] sm:rounded-[18px] sm:px-4 sm:py-3.5" />
+        <AdminStatCard label="Users" value={stats.regular} className="min-h-[74px] rounded-[14px] px-3 py-3 sm:min-h-[92px] sm:rounded-[18px] sm:px-4 sm:py-3.5" />
       </div>
 
-      <div
-        className={cn(
-          'min-h-0 flex flex-1 flex-col rounded-[18px] p-2.5',
-          isDark
-            ? 'bg-[linear-gradient(145deg,rgba(11,15,34,0.96),rgba(8,11,27,0.98))] ring-1 ring-inset ring-cyan-400/12 shadow-[0_28px_90px_-58px_rgba(7,15,36,0.96)]'
-            : 'bg-white ring-1 ring-inset ring-gray-200'
-        )}
-      >
-        <div className="mb-2.5 flex flex-col gap-2.5 lg:flex-row lg:items-center">
-          <div className="relative flex-1">
-            <svg className={`absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 ${muted}`} fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="7" cy="7" r="5" />
-              <path d="M11 11l3 3" strokeLinecap="round" />
-            </svg>
-            <input
-              className="form-field !mb-0 !pl-10"
-              placeholder="Search by name, email, or phone..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
+      <section className="admin-card flex min-h-0 flex-1 flex-col gap-3 p-3">
+        <div className="grid gap-2.5 lg:grid-cols-[minmax(0,1fr)_180px_180px]">
+          <label className="relative block min-w-0">
+            <span className="sr-only">Search users</span>
+            <Search
+              className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-text-muted)]"
+              strokeWidth={2}
+              aria-hidden="true"
             />
-          </div>
+            <input
+              className="admin-input ps-10"
+              placeholder="Search by name, email, or phone"
+              value={search}
+              onChange={event => setSearch(event.target.value)}
+            />
+          </label>
 
-          <div className="flex items-center gap-1.5">
-            <span className={`text-[11px] font-mono uppercase tracking-[0.22em] ${muted}`}>Sort</span>
-            <select className="form-field !mb-0 !w-auto !min-w-[170px]" value={sortBy} onChange={e => setSortBy(e.target.value as SortKey)}>
-              {SORT_OPTIONS.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <label className="sr-only" htmlFor="users-role-filter">
+            Filter users by role
+          </label>
+          <select
+            id="users-role-filter"
+            className="admin-input"
+            value={roleFilter}
+            onChange={event => setRoleFilter(event.target.value as RoleFilter)}
+          >
+            {ROLE_FILTERS.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+
+          <label className="sr-only" htmlFor="users-sort">
+            Sort users
+          </label>
+          <select
+            id="users-sort"
+            className="admin-input"
+            value={sortBy}
+            onChange={event => setSortBy(event.target.value as SortKey)}
+          >
+            {SORT_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {loading ? (
-          <div className="flex flex-1 flex-col items-center justify-center py-16 text-center">
-            <div className={`mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-2 border-t-transparent ${isDark ? 'border-purple-400' : 'border-violet-500'}`} />
-            <p className={`text-sm ${sub}`}>Loading users...</p>
+          <div className="space-y-3">
+            <div className="hidden md:block">
+              <div className="admin-table-wrap">
+                <div className="grid min-w-[920px] grid-cols-[1.3fr_1.35fr_0.8fr_0.85fr_0.65fr_0.9fr_64px] gap-3 border-b border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3 py-3">
+                  {Array.from({ length: 7 }, (_, index) => (
+                    <AdminSkeleton key={index} className="h-4" />
+                  ))}
+                </div>
+                {Array.from({ length: 6 }, (_, rowIndex) => (
+                  <div key={rowIndex} className="grid min-w-[920px] grid-cols-[1.3fr_1.35fr_0.8fr_0.85fr_0.65fr_0.9fr_64px] gap-3 border-b border-[var(--admin-border)] px-3 py-3 last:border-b-0">
+                    {Array.from({ length: 7 }, (_, cellIndex) => (
+                      <AdminSkeleton key={cellIndex} className="h-4" />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="grid gap-3 md:hidden">
+              {Array.from({ length: 4 }, (_, index) => (
+                <div key={index} className="admin-card p-3">
+                  <AdminSkeleton lines={4} />
+                </div>
+              ))}
+            </div>
           </div>
         ) : displayed.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center py-12 text-center">
-            <div className={cn('mb-3 flex h-12 w-12 items-center justify-center rounded-[18px] border', isDark ? 'border-cyan-400/16 bg-cyan-400/8 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700')}>
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 12a4 4 0 100-8 4 4 0 000 8z" />
-                <path d="M5 20a7 7 0 0114 0" strokeLinecap="round" />
-              </svg>
-            </div>
-            <p className={`text-sm ${sub}`}>{search ? `No users match "${search}"` : 'No users found.'}</p>
-          </div>
+          <AdminEmptyState
+            icon={<Users className="h-5 w-5" strokeWidth={2} aria-hidden="true" />}
+            title={search || roleFilter !== 'all' ? 'No users match the current filters' : 'No users found'}
+            description="User accounts will appear here after they are available from Supabase."
+          />
         ) : (
-          <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
-            <div className={cn('origin-top transition-[opacity,transform,filter] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[opacity,transform,filter]', viewTransitionClassName)}>
-            <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(250px,1fr))]">
-              {displayed.map(user => {
-                const isYou = user.id === currentUser?.id
+          <>
+            <div className="hidden min-h-0 flex-1 md:block">
+              <div className="admin-table-wrap h-full">
+                <table className="w-full min-w-[920px] text-start">
+                  <thead className="sticky top-0 z-10 bg-[var(--admin-surface-2)]">
+                    <tr className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">
+                      <th className="px-3 py-3 text-start">User</th>
+                      <th className="px-3 py-3 text-start">Email</th>
+                      <th className="px-3 py-3 text-start">Phone</th>
+                      <th className="px-3 py-3 text-start">Role</th>
+                      <th className="px-3 py-3 text-start">Requests</th>
+                      <th className="px-3 py-3 text-start">Joined</th>
+                      <th className="px-3 py-3 text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pagedUsers.map(target => {
+                      const isYou = target.id === currentUser?.id
+                      return (
+                        <tr key={target.id} className="border-t border-[var(--admin-border)] align-middle hover:bg-[var(--admin-surface-2)]">
+                          <td className="px-3 py-2.5">
+                            <div className="flex min-w-0 items-center gap-2.5">
+                              <UserAvatar
+                                name={target.name}
+                                email={target.email}
+                                className={cn('h-10 w-10 rounded-[var(--admin-radius-sm)] text-[13px] font-bold', avatarClass(target.role))}
+                              />
+                              <div className="min-w-0">
+                                <div className="flex min-w-0 items-center gap-2">
+                                  <span className="truncate text-[13px] font-bold text-[var(--admin-text)]">
+                                    {target.name || 'No name'}
+                                  </span>
+                                  {isYou && <span className="admin-chip admin-chip--accent !py-0.5 !text-[10px]">You</span>}
+                                </div>
+                                <div className="mt-0.5 truncate text-[11px] font-semibold text-[var(--admin-text-muted)]">
+                                  {roleLabel(target.role)}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <a className="block max-w-[240px] truncate text-[12px] font-semibold text-[var(--admin-accent)] hover:underline" href={`mailto:${target.email}`}>
+                              {target.email}
+                            </a>
+                          </td>
+                          <td className="px-3 py-2.5 text-[12px] font-semibold text-[var(--admin-text-muted)]">
+                            {target.phone || 'Not set'}
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <span className={roleChipClass(target.role)}>{roleLabel(target.role)}</span>
+                          </td>
+                          <td className="px-3 py-2.5 text-[12px] font-bold text-[var(--admin-text)]">
+                            {requestCountFor(target)}
+                          </td>
+                          <td className="px-3 py-2.5 text-[12px] font-semibold text-[var(--admin-text-muted)]">
+                            {formatDate(target.created_at)}
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="flex justify-end">{renderActions(target)}</div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="grid gap-2.5 md:hidden">
+              {pagedUsers.map(target => {
+                const isYou = target.id === currentUser?.id
                 return (
-                  <div
-                    key={user.id}
-                    className="flex flex-col rounded-[16px] border border-violet-200/70 bg-white p-3.5 shadow-[0_8px_24px_-18px_rgba(89,23,196,0.20)] transition-shadow duration-200 hover:shadow-[0_14px_32px_-16px_rgba(89,23,196,0.30)]"
-                  >
+                  <article key={target.id} className="admin-card p-3">
                     <div className="flex items-start gap-3">
                       <UserAvatar
-                        name={user.name}
-                        email={user.email}
-                        className={cn(
-                          'h-11 w-11 shrink-0 rounded-[12px] text-[0.95rem] font-sans font-bold',
-                          avatarBg(user.role)
-                        )}
+                        name={target.name}
+                        email={target.email}
+                        className={cn('h-11 w-11 rounded-[var(--admin-radius-sm)] text-[14px] font-bold', avatarClass(target.role))}
                       />
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="truncate font-sans text-[14px] font-extrabold text-[#1a0b3d]">
-                            {user.name || 'No name'}
-                          </span>
-                          {isYou && (
-                            <span className="shrink-0 rounded-full border border-violet-300 bg-violet-100/80 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#2e0a72]">
-                              You
-                            </span>
-                          )}
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
+                          <h2 className="truncate text-[14px] font-black text-[var(--admin-text)]">
+                            {target.name || 'No name'}
+                          </h2>
+                          {isYou && <span className="admin-chip admin-chip--accent !py-0.5 !text-[10px]">You</span>}
                         </div>
-                        <div className="mt-0.5 truncate text-[12px] font-medium text-[#6b5a82]">
-                          {user.email}
-                        </div>
+                        <p className="mt-0.5 truncate text-[12px] font-semibold text-[var(--admin-text-muted)]">
+                          {target.email}
+                        </p>
                       </div>
-                      <span
-                        className={cn(
-                          'shrink-0 rounded-full border px-2.5 py-1 text-[9.5px] font-extrabold uppercase tracking-[0.14em]',
-                          roleBadge(user.role)
-                        )}
-                      >
-                        {user.role}
-                      </span>
+                      {renderActions(target)}
                     </div>
-
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      <div className="min-w-0 rounded-[10px] border border-violet-100 bg-violet-50/50 px-2.5 py-1.5">
-                        <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#7126e3]">
-                          Phone
-                        </div>
-                        <div className="mt-0.5 truncate text-[12px] font-bold text-[#1a0b3d]">
-                          {user.phone || 'Not set'}
-                        </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <span className={roleChipClass(target.role)}>{roleLabel(target.role)}</span>
+                      <span className="admin-chip">{formatDate(target.created_at)}</span>
+                      <span className="admin-chip">{requestCountFor(target)} requests</span>
+                    </div>
+                    <div className="mt-2.5 grid grid-cols-2 gap-2">
+                      <div className="rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3 py-2">
+                        <div className="text-[9px] font-extrabold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">Phone</div>
+                        <div className="mt-1 truncate text-[12px] font-bold text-[var(--admin-text)]">{target.phone || 'Not set'}</div>
                       </div>
-                      <div className="min-w-0 rounded-[10px] border border-violet-100 bg-violet-50/50 px-2.5 py-1.5">
-                        <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#7126e3]">
-                          Joined
-                        </div>
-                        <div className="mt-0.5 truncate text-[12px] font-bold text-[#1a0b3d]">
-                          {formatDate(user.created_at)}
-                        </div>
+                      <div className="rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3 py-2">
+                        <div className="text-[9px] font-extrabold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">Role</div>
+                        <div className="mt-1 truncate text-[12px] font-bold text-[var(--admin-text)]">{roleLabel(target.role)}</div>
                       </div>
                     </div>
-
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      <AdminActionButton tone="primary" onClick={() => setDetails(user)}>
-                        Details
-                      </AdminActionButton>
-                      <AdminActionButton onClick={() => openEdit(user)}>Edit</AdminActionButton>
-                    </div>
-                  </div>
+                  </article>
                 )
               })}
             </div>
-            </div>
-          </div>
+
+            <AdminPagination
+              page={page}
+              pageSize={pageSize}
+              totalItems={displayed.length}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+            />
+          </>
         )}
-      </div>
+      </section>
 
       <AdminDetailModal
         open={!!details}
         onClose={() => setDetails(null)}
         title={details?.name || details?.email || 'User Details'}
-        subtitle={details ? 'The details panel carries the full account context so the main list can stay compact and easier to scan.' : undefined}
-        media={
-          details ? (
-            <div className={cn('flex aspect-[16/9] items-center justify-center', isDark ? 'bg-[radial-gradient(circle,rgba(34,211,238,0.15),transparent_58%)]' : 'bg-[radial-gradient(circle,rgba(139,92,246,0.10),transparent_55%)]')}>
-              <UserAvatar
-                name={details.name}
-                email={details.email}
-                className="h-24 w-24 rounded-[26px]"
-                fallbackClassName={cn('text-5xl font-sans font-bold', avatarBg(details.role))}
-              />
-            </div>
-          ) : null
-        }
-        badges={
-          details ? (
-            <>
-              <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold', roleBadge(details.role))}>
-                {details.role}
-              </span>
-              {details.id === currentUser?.id && (
-                <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold', isDark ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200' : 'border-violet-200 bg-violet-50 text-violet-700')}>
-                  Current session
-                </span>
-              )}
-            </>
-          ) : null
-        }
+        size="3xl"
         summaryFacts={
           details
             ? [
                 { label: 'Email', value: details.email },
-                { label: 'Role', value: details.role },
+                { label: 'Role', value: roleLabel(details.role) },
                 { label: 'Phone', value: details.phone || 'Not set' },
+                { label: 'Requests', value: requestCountFor(details) },
                 { label: 'Joined', value: formatDate(details.created_at) },
               ]
             : []
@@ -447,10 +842,30 @@ export default function AdminUsersPage() {
                 {
                   title: 'Access',
                   facts: [
-                    { label: 'Role', value: details.role },
-                    { label: 'Joined', value: formatDate(details.created_at) },
+                    { label: 'Role', value: roleLabel(details.role) },
+                    { label: 'Joined', value: formatDateTime(details.created_at) },
                     { label: 'Editable here', value: details.role === 'superadmin' ? 'No' : 'Yes' },
                   ],
+                },
+                {
+                  title: 'Requests',
+                  description: 'Requests linked by this user email.',
+                  wide: true,
+                  content: (
+                    <UserRequestsSection
+                      requests={detailRequests}
+                      loading={requestsLoading}
+                      error={requestsError}
+                      onRetry={() => {
+                        setRequestsLoaded(false)
+                        void loadRequests()
+                      }}
+                      onOpen={request => {
+                        setDetails(null)
+                        navigate(requestPath(request))
+                      }}
+                    />
+                  ),
                 },
               ]
             : []
@@ -474,97 +889,105 @@ export default function AdminUsersPage() {
         }
       />
 
-      <Modal open={!!editUser} onClose={() => setEditUser(null)} title="Edit User" persistent size="lg">
+      <Modal
+        open={!!editUser}
+        onClose={closeEdit}
+        title="Edit User"
+        size="lg"
+        dismissable={!editSaving}
+        footer={
+          <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
+            <button type="button" onClick={closeEdit} className={controlButtonClass} disabled={editSaving}>
+              Cancel
+            </button>
+            <button type="button" onClick={handleSave} disabled={editSaving || !hasChanges} className={primaryButtonClass}>
+              {editSaving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        }
+      >
         {editUser && (
-          <div className="space-y-4">
-            <div className={`flex items-center gap-3 rounded-[16px] p-3.5 ${isDark ? 'border border-white/[0.08] bg-white/[0.03]' : 'border border-gray-100 bg-gray-50'}`}>
+          <div className="admin-scope space-y-4">
+            <div className="flex items-center gap-3 rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] p-3">
               <UserAvatar
                 name={editName || editUser.name}
                 email={editUser.email}
-                className="h-10 w-10 rounded-[14px]"
-                fallbackClassName={cn('text-sm font-bold font-sans', avatarBg(editUser.role))}
+                className="h-11 w-11 rounded-[var(--admin-radius-sm)]"
+                fallbackClassName={cn('text-sm font-bold', avatarClass(editUser.role))}
               />
               <div className="min-w-0 flex-1">
-                <div className={`truncate text-sm font-medium ${txt}`}>{editUser.email}</div>
-                <div className={`mt-0.5 text-[11px] font-mono ${muted}`}>Joined {formatDate(editUser.created_at)}</div>
+                <div className="truncate text-[13px] font-bold text-[var(--admin-text)]">{editUser.email}</div>
+                <div className="mt-0.5 text-[11px] font-semibold text-[var(--admin-text-muted)]">
+                  Joined {formatDate(editUser.created_at)}
+                </div>
               </div>
-              <span className={`rounded-lg border px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider ${roleBadge(editUser.role)}`}>
-                {editUser.role}
-              </span>
+              <span className={roleChipClass(editUser.role)}>{roleLabel(editUser.role)}</span>
             </div>
 
-            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-              <div>
-                <label className={`mb-1.5 block text-[11px] font-mono uppercase tracking-wider ${muted}`}>Name</label>
-                <input className="form-field !mb-0" value={editName} onChange={e => setEditName(e.target.value)} placeholder="Full name" />
-              </div>
-              <div>
-                <label className={`mb-1.5 block text-[11px] font-mono uppercase tracking-wider ${muted}`}>Phone</label>
-                <input className="form-field !mb-0" type="tel" value={editPhone} onChange={e => setEditPhone(e.target.value)} placeholder="+962..." />
-              </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <AdminField label="Name" htmlFor="edit-user-name">
+                <input
+                  id="edit-user-name"
+                  className="admin-input"
+                  value={editName}
+                  onChange={event => setEditName(event.target.value)}
+                  placeholder="Full name"
+                />
+              </AdminField>
+              <AdminField label="Phone" htmlFor="edit-user-phone">
+                <input
+                  id="edit-user-phone"
+                  className="admin-input"
+                  type="tel"
+                  value={editPhone}
+                  onChange={event => setEditPhone(event.target.value)}
+                  placeholder="+962..."
+                />
+              </AdminField>
             </div>
 
-            <button
-              onClick={() => void handleResetPassword()}
-              className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm font-medium transition ${isDark ? 'border-cyan-500/15 text-cyan-300/80 hover:bg-cyan-500/10 hover:text-cyan-200' : 'border-blue-200 text-blue-600 hover:bg-blue-50'}`}
-            >
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" className="shrink-0">
-                <rect x="2" y="5" width="12" height="9" rx="1.5" />
-                <path d="M2 5l6 4.5L14 5" />
-              </svg>
-              <span>Send Password Reset Email</span>
-              <span className={`ml-auto text-[10px] font-mono ${muted}`}>via Supabase</span>
+            <button type="button" onClick={() => void handleResetPassword()} className={controlButtonClass + ' w-full justify-start'}>
+              <KeyRound className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+              Send Password Reset Email
+              <span className="ms-auto text-[11px] text-[var(--admin-text-muted)]">Supabase</span>
             </button>
 
             {isSuperAdmin && editUser.role !== 'superadmin' && (
-              <div className={`rounded-xl border p-4 ${isDark ? 'border-amber-500/15 bg-amber-500/[0.04]' : 'border-amber-200 bg-amber-50/50'}`}>
-                <label className={`mb-2 block text-[11px] font-mono uppercase tracking-wider ${isDark ? 'text-amber-400/70' : 'text-amber-700'}`}>
-                  Change Role
-                </label>
-                <div className="flex items-center gap-2">
-                  <select className="form-field !mb-0 flex-1" value={editRole} onChange={e => setEditRole(e.target.value)}>
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                    <option value="superadmin">Super Admin</option>
-                  </select>
-                  <button
-                    onClick={handleRoleChange}
-                    disabled={editSaving || editRole === editUser.role}
-                    className="btn-primary !rounded-xl !px-5 !py-2.5 !text-xs disabled:opacity-40"
-                  >
-                    Apply
-                  </button>
-                </div>
+              <div className="rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] p-3">
+                <AdminField label="Change role" htmlFor="edit-user-role" hint="Role changes use the existing admin RPC flow.">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <select
+                      id="edit-user-role"
+                      className="admin-input"
+                      value={editRole}
+                      onChange={event => setEditRole(event.target.value)}
+                    >
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                      <option value="superadmin">Super Admin</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={handleRoleChange}
+                      disabled={editSaving || editRole === editUser.role}
+                      className={primaryButtonClass + ' shrink-0'}
+                    >
+                      Apply Role
+                    </button>
+                  </div>
+                </AdminField>
               </div>
             )}
 
             {editUser.role === 'superadmin' && (
-              <div className={`flex items-center gap-2 rounded-xl px-4 py-3 text-xs ${isDark ? 'border border-amber-500/15 bg-amber-500/[0.06] text-amber-300/70' : 'border border-amber-200 bg-amber-50 text-amber-700'}`}>
-                <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 3l7 4v5c0 4.1-2.3 7.2-7 9-4.7-1.8-7-4.9-7-9V7l7-4z" />
-                  <path d="M9.5 12.5l1.6 1.6 3.4-3.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span>Superadmin role can only be changed from Supabase dashboard</span>
+              <div className="flex gap-2 rounded-[var(--admin-radius-sm)] border border-[color-mix(in_srgb,var(--admin-warning)_28%,transparent)] bg-[color-mix(in_srgb,var(--admin-warning)_10%,transparent)] px-3 py-2.5 text-[12px] font-semibold text-[var(--admin-warning)]">
+                <Shield className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+                <span>Super admin role can only be changed from Supabase dashboard.</span>
               </div>
             )}
-
-            <div className={`flex justify-end gap-3 border-t pt-2 ${isDark ? 'border-white/[0.06]' : 'border-gray-100'}`}>
-              <button onClick={() => setEditUser(null)} className="btn-outline !rounded-xl !px-5 !py-2.5 !text-sm">
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={editSaving || !hasChanges}
-                className="btn-primary !rounded-xl !px-6 !py-2.5 !text-xs disabled:opacity-40"
-              >
-                {editSaving ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
           </div>
         )}
       </Modal>
     </div>
   )
 }
-
-

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
 import { RequestProgressStrip, isTerminalStatus } from '../components/requests/RequestJourney'
+import { useI18n } from '../contexts/LanguageContext'
 import { usePurchaseQuote } from '../contexts/PurchaseQuoteContext'
 import { useUser } from '../contexts/UserContext'
 import { usePageMeta } from '../hooks/usePageMeta'
@@ -27,19 +28,27 @@ const cardShell =
   'rounded-[22px] border border-violet-200/70 bg-white shadow-[0_18px_44px_-34px_rgba(89,23,196,0.30)]'
 
 function PageHeading() {
+  const { dir, translateText } = useI18n()
+  const title = translateText('Track every request')
+
   return (
     <div className="mb-7">
       <div className="mb-3 inline-flex items-center gap-2.5">
         <span className="h-px w-7 bg-gradient-to-r from-transparent to-violet-400" aria-hidden="true" />
-        <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-violet-600">My Requests</span>
+        <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-violet-600">{translateText('My Requests')}</span>
       </div>
       <h1 className="font-display text-[clamp(1.9rem,4vw,2.7rem)] font-extrabold leading-[1.05] tracking-[-0.04em] text-ink-900">
-        Track every{' '}
-        <span className="bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">request</span>
+        {dir === 'rtl' ? (
+          title
+        ) : (
+          <>
+            Track every{' '}
+            <span className="bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">request</span>
+          </>
+        )}
       </h1>
       <p className="mt-3 max-w-2xl text-[14px] leading-[1.7] text-ink-600">
-        Follow your rental requests and purchase quote requests, see exactly where each one is, and what happened at
-        every step.
+        {translateText('Follow your rental requests and purchase quote requests, see exactly where each one is, and what happened at every step.')}
       </p>
     </div>
   )
@@ -56,6 +65,8 @@ function CenteredCard({ children }: { children: React.ReactNode }) {
 }
 
 function RequestCard({ request }: { request: CustomerRequestListItem }) {
+  const { locale, translateText } = useI18n()
+  const dateLocale = locale === 'ar' ? 'ar-JO' : undefined
   const terminal = isTerminalStatus(request.status)
 
   return (
@@ -89,13 +100,13 @@ function RequestCard({ request }: { request: CustomerRequestListItem }) {
                   request.type === 'rental' ? 'bg-violet-50 text-violet-700' : 'bg-fuchsia-50 text-fuchsia-700'
                 )}
               >
-                {formatRequestTypeLabel(request.type)}
+                {translateText(formatRequestTypeLabel(request.type))}
               </span>
             </div>
             <div className="mt-0.5 text-[11.5px] font-semibold text-ink-400">
-              {new Date(request.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-              {' · '}
-              {request.itemCount} service{request.itemCount === 1 ? '' : 's'}
+              {new Date(request.createdAt).toLocaleDateString(dateLocale, { year: 'numeric', month: 'short', day: 'numeric' })}
+              {' / '}
+              {translateText(`${request.itemCount} service${request.itemCount === 1 ? '' : 's'}`)}
             </div>
           </div>
         </div>
@@ -106,14 +117,14 @@ function RequestCard({ request }: { request: CustomerRequestListItem }) {
         <RequestProgressStrip type={request.type} status={request.status} />
 
         <div className="flex items-center justify-between gap-4 sm:justify-end">
-          <div className="text-right">
-            <div className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-ink-400">Total</div>
+          <div className="text-end">
+            <div className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-ink-400">{translateText('Total')}</div>
             <div className={cn('text-[14px] font-black', terminal ? 'text-ink-400' : 'text-ink-900')}>
-              {request.total == null ? 'After review' : `${request.total.toFixed(2)} JOD`}
+              {request.total == null ? translateText('After review') : `${request.total.toFixed(2)} JOD`}
             </div>
           </div>
-          <span className="flex h-8 w-8 items-center justify-center rounded-full border border-violet-200 bg-violet-50 text-violet-600 transition-transform duration-300 group-hover:translate-x-0.5">
-            <ChevronRight size={15} strokeWidth={2.4} />
+          <span className="flex h-8 w-8 items-center justify-center rounded-full border border-violet-200 bg-violet-50 text-violet-600 transition-transform duration-300 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5">
+            <ChevronRight size={15} className="rtl:rotate-180" strokeWidth={2.4} />
           </span>
         </div>
       </div>
@@ -128,6 +139,7 @@ export default function MyRequestsPage() {
     noIndex: true,
   })
 
+  const { translateText } = useI18n()
   const { currentUser, isLoggedIn } = useUser()
   const purchaseQuote = usePurchaseQuote()
   const [tab, setTab] = useState<RequestTab>('all')
@@ -193,18 +205,17 @@ export default function MyRequestsPage() {
           <LockKeyhole size={20} strokeWidth={2.2} />
         </span>
         <h1 className="mt-4 font-display text-[1.7rem] font-black tracking-[-0.03em] text-ink-900">
-          Sign in to view your requests
+          {translateText('Sign in to view your requests')}
         </h1>
         <p className="mx-auto mt-3 max-w-md text-[13.5px] leading-[1.7] text-ink-600">
-          Rental requests and purchase quote requests are tied to your account, so you can track their progress any
-          time.
+          {translateText('Rental requests and purchase quote requests are tied to your account, so you can track their progress any time.')}
         </p>
         <div className="mt-6">
           <Link
             to={`/login?redirect=${encodeURIComponent('/my-requests')}`}
             className="btn-primary !rounded-[14px] !px-6 !py-3 !text-[13px]"
           >
-            Sign In
+            {translateText('Sign In')}
           </Link>
         </div>
       </CenteredCard>
@@ -231,7 +242,7 @@ export default function MyRequestsPage() {
                     : 'border border-violet-200/70 bg-white text-ink-600 hover:border-violet-300 hover:text-violet-700'
                 )}
               >
-                {value === 'all' ? 'All' : value === 'rental' ? 'Rentals' : 'Purchase Quotes'}
+                {translateText(value === 'all' ? 'All' : value === 'rental' ? 'Rentals' : 'Purchase Quotes')}
                 <span
                   className={cn(
                     'rounded-full px-1.5 py-[1px] text-[10px] font-black',
@@ -250,9 +261,9 @@ export default function MyRequestsPage() {
                 { label: 'Active', value: stats.active, tone: 'text-violet-700' },
                 { label: 'Completed', value: stats.done, tone: 'text-emerald-600' },
               ].map(stat => (
-                <div key={stat.label} className="text-right">
+                <div key={stat.label} className="text-end">
                   <div className={cn('font-display text-[1.35rem] font-black leading-none', stat.tone)}>{stat.value}</div>
-                  <div className="mt-1 text-[9.5px] font-bold uppercase tracking-[0.16em] text-ink-400">{stat.label}</div>
+                  <div className="mt-1 text-[9.5px] font-bold uppercase tracking-[0.16em] text-ink-400">{translateText(stat.label)}</div>
                 </div>
               ))}
             </div>
@@ -267,22 +278,21 @@ export default function MyRequestsPage() {
                 <ShoppingCart size={17} strokeWidth={2.2} />
               </span>
               <div className="min-w-0">
-                <div className="text-[13.5px] font-black text-ink-900">You have an unsubmitted purchase quote draft</div>
+                <div className="text-[13.5px] font-black text-ink-900">{translateText('You have an unsubmitted purchase quote draft')}</div>
                 <p className="mt-0.5 text-[12px] leading-[1.6] text-ink-500">
-                  {purchaseQuote.itemCount} unit(s) across {purchaseQuote.items.length} service(s), saved on this device.
-                  Drafts appear here after you submit them.
+                  {translateText(`${purchaseQuote.itemCount} unit(s) across ${purchaseQuote.items.length} service(s), saved on this device. Drafts appear here after you submit them.`)}
                 </p>
               </div>
             </div>
             <Link to="/purchase-quote" className="btn-outline !rounded-[13px] !px-4 !py-2 !text-[12px]">
-              Open Draft
-              <ArrowRight size={13} className="ml-1.5 inline" />
+              {translateText('Open Draft')}
+              <ArrowRight size={13} className="ms-1.5 inline rtl:rotate-180" />
             </Link>
           </div>
         )}
 
         {loading ? (
-          <div className="space-y-4" aria-busy="true" aria-label="Loading requests">
+          <div className="space-y-4" aria-busy="true" aria-label={translateText('Loading requests')}>
             {[0, 1, 2].map(index => (
               <div key={index} className={cn(cardShell, 'animate-pulse p-5')}>
                 <div className="flex items-center gap-3">
@@ -298,19 +308,19 @@ export default function MyRequestsPage() {
           </div>
         ) : loadError ? (
           <div className={cn(cardShell, '!border-rose-200 p-6 sm:p-7')}>
-            <h2 className="font-display text-[1.35rem] font-black text-ink-900">We couldn&apos;t load your requests</h2>
-            <p className="mt-2.5 max-w-2xl text-[13px] leading-[1.7] text-ink-600">{loadError}</p>
+            <h2 className="font-display text-[1.35rem] font-black text-ink-900">{translateText("We couldn't load your requests")}</h2>
+            <p className="mt-2.5 max-w-2xl text-[13px] leading-[1.7] text-ink-600">{translateText(loadError)}</p>
             <div className="mt-5 flex flex-wrap gap-2.5">
               <button
                 type="button"
                 onClick={() => window.location.reload()}
                 className="btn-primary !rounded-[13px] !px-4 !py-2 !text-[12.5px]"
               >
-                <RefreshCw size={13} className="mr-1.5 inline" />
-                Refresh
+                <RefreshCw size={13} className="me-1.5 inline" />
+                {translateText('Refresh')}
               </button>
               <Link to="/products" className="btn-outline !rounded-[13px] !px-4 !py-2 !text-[12.5px]">
-                Browse Services
+                {translateText('Browse Services')}
               </Link>
             </div>
           </div>
@@ -320,17 +330,17 @@ export default function MyRequestsPage() {
               <Inbox size={20} strokeWidth={2} />
             </span>
             <h2 className="mt-4 font-display text-[1.45rem] font-black tracking-[-0.02em] text-ink-900">
-              {requests.length ? 'No requests match this filter' : 'You have no requests yet'}
+              {translateText(requests.length ? 'No requests match this filter' : 'You have no requests yet')}
             </h2>
             <p className="mx-auto mt-2.5 max-w-md text-[13px] leading-[1.7] text-ink-600">
-              {requests.length
+              {translateText(requests.length
                 ? 'Try another tab to see the rest of your requests.'
-                : 'Browse services, add what your event needs to a draft, and track every update from here.'}
+                : 'Browse services, add what your event needs to a draft, and track every update from here.')}
             </p>
             {!requests.length && (
               <div className="mt-6">
                 <Link to="/products" className="btn-primary !rounded-[14px] !px-6 !py-3 !text-[13px]">
-                  Browse Services
+                  {translateText('Browse Services')}
                 </Link>
               </div>
             )}

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import FramedImage from '../components/ui/FramedImage'
 import { useDialog } from '../contexts/DialogContext'
+import { useI18n } from '../contexts/LanguageContext'
 import { useRentalCart } from '../contexts/RentalCartContext'
 import { useUser } from '../contexts/UserContext'
 import { useRequireAuthAction } from '../hooks/useRequireAuthAction'
@@ -44,6 +45,10 @@ function CartSection({
   delay?: number
   children: ReactNode
 }) {
+  const { dir, translateText } = useI18n()
+  const sectionLabel =
+    dir === 'rtl' ? `${translateText(eyebrow)} - ${index}` : `${index} - ${translateText(eyebrow)}`
+
   return (
     <motion.section
       initial={motionEnabled ? { opacity: 0, y: 20 } : false}
@@ -54,12 +59,12 @@ function CartSection({
     >
       <div className="mb-5">
         <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#7126e3]">
-          {index} — {eyebrow}
+          {sectionLabel}
         </div>
         <h2 className="mt-2 font-display text-[1.35rem] font-black tracking-[-0.02em] text-[#1a0b3d] sm:text-[1.5rem]">
-          {title}
+          {translateText(title)}
         </h2>
-        <p className="mt-1.5 text-[0.9rem] leading-6 text-[#4b3a63]">{description}</p>
+        <p className="mt-1.5 text-[0.9rem] leading-6 text-[#4b3a63]">{translateText(description)}</p>
       </div>
       {children}
     </motion.section>
@@ -93,24 +98,27 @@ function DateField({
   disabled?: boolean
   onChange: (value: string) => void
 }) {
+  const { dir, translateText } = useI18n()
+
   return (
     <div>
       <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#4b3a63]">
-        {label}
+        {translateText(label)}
       </label>
       <div className="relative">
         <CalendarDays
           size={15}
           strokeWidth={2}
-          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7126e3]"
+          className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-[#7126e3]"
         />
         <input
           type="date"
+          lang={dir === 'rtl' ? 'ar-JO' : 'en-US'}
           value={value}
           min={min}
           disabled={disabled}
           onChange={event => onChange(event.target.value)}
-          className="form-field !pl-10 disabled:cursor-not-allowed disabled:opacity-55"
+          className="form-field !ps-10 disabled:cursor-not-allowed disabled:opacity-55"
         />
       </div>
     </div>
@@ -125,18 +133,20 @@ function QtyStepper({
   quantity: number
   onChange: (next: number) => void
 }) {
+  const { translateText } = useI18n()
+
   return (
     <div>
       <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#4b3a63]">
-        Quantity
+        {translateText('Quantity')}
       </label>
       <div className="inline-flex items-center rounded-[12px] border border-violet-200 bg-white">
         <button
           type="button"
-          aria-label="Decrease quantity"
+          aria-label={translateText('Decrease quantity')}
           disabled={quantity <= 1}
           onClick={() => onChange(quantity - 1)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-l-[12px] text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-s-[12px] text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
         >
           <Minus size={15} strokeWidth={2.4} />
         </button>
@@ -152,10 +162,10 @@ function QtyStepper({
         />
         <button
           type="button"
-          aria-label="Increase quantity"
+          aria-label={translateText('Increase quantity')}
           disabled={quantity >= 999}
           onClick={() => onChange(quantity + 1)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-r-[12px] text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-e-[12px] text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
         >
           <Plus size={15} strokeWidth={2.4} />
         </button>
@@ -174,11 +184,13 @@ function AvailabilitySticker({
   availability: RentalAvailability | null | undefined
   availOk: boolean | null
 }) {
+  const { translateText } = useI18n()
+
   if (!dateRangeValid) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[11.5px] font-bold text-[#4b3a63]">
         <CalendarDays size={11} strokeWidth={2.4} />
-        Pick dates
+        {translateText('Pick dates')}
       </span>
     )
   }
@@ -186,7 +198,7 @@ function AvailabilitySticker({
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[11.5px] font-semibold text-[#4b3a63]">
         <span className="h-3 w-3 animate-spin rounded-full border-2 border-violet-300 border-t-[#7126e3]" />
-        Checking…
+        {translateText('Checking...')}
       </span>
     )
   }
@@ -194,14 +206,14 @@ function AvailabilitySticker({
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-[11.5px] font-bold text-emerald-800">
         <CheckCircle2 size={11} strokeWidth={2.4} />
-        {availability.availableQuantity} available
+        {translateText(`${availability.availableQuantity} available`)}
       </span>
     )
   }
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-red-300 bg-red-50 px-3 py-1 text-[11.5px] font-bold text-red-800">
       <AlertTriangle size={11} strokeWidth={2.4} />
-      Only {availability.availableQuantity} available for these dates
+      {translateText(`Only ${availability.availableQuantity} available for these dates`)}
     </span>
   )
 }
@@ -242,6 +254,21 @@ function RentalItemCard({
   onDates: (start: string, end: string) => void
   onRemove: () => void
 }) {
+  const { dir, translateText } = useI18n()
+  const dayUnit = translateText('day')
+  const currencyLabel = dir === 'rtl' && item.currency === 'JOD' ? 'د.أ' : item.currency
+  const unitPriceLabel =
+    dir === 'rtl'
+      ? `${item.unitPrice} ${currencyLabel} / ${dayUnit}`
+      : `${item.unitPrice} ${currencyLabel}/${dayUnit}`
+  const minimumDaysLabel = translateText(
+    `min ${item.minimumRentalDays} day${item.minimumRentalDays === 1 ? '' : 's'}`
+  )
+  const lineFormula =
+    dir === 'rtl'
+      ? `${lineTotal.toFixed(2)} ${currencyLabel} = ${item.unitPrice} x ${item.quantity} x ${days}`
+      : `${days} x ${item.quantity} x ${item.unitPrice} = ${lineTotal.toFixed(2)} ${currencyLabel}`
+
   return (
     <motion.div
       initial={motionEnabled ? { opacity: 0, y: 14 } : false}
@@ -252,12 +279,12 @@ function RentalItemCard({
     >
       <div className="flex items-start justify-between gap-3">
         <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#6b5a82]">
-          Item {index + 1} of {total}
+          {translateText(`Item ${index + 1} of ${total}`)}
         </span>
         <button
           type="button"
           onClick={onRemove}
-          aria-label={`Remove ${item.productTitle}`}
+          aria-label={`${translateText('Remove')} ${item.productTitle}`}
           className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100 hover:text-red-700"
         >
           <Trash2 size={15} strokeWidth={2} />
@@ -289,11 +316,9 @@ function RentalItemCard({
             {item.productTitle}
           </h3>
           <p className="mt-1 text-[12.5px] font-semibold text-[#4b3a63]">
-            <span className="font-bold text-[#1a0b3d]">
-              {item.unitPrice} {item.currency}/day
-            </span>
-            <span className="mx-1.5 text-violet-400">·</span>
-            min {item.minimumRentalDays} day{item.minimumRentalDays === 1 ? '' : 's'}
+            <span className="font-bold text-[#1a0b3d]">{unitPriceLabel}</span>
+            <span className="mx-1.5 text-violet-400">/</span>
+            {minimumDaysLabel}
           </p>
         </div>
       </div>
@@ -322,12 +347,12 @@ function RentalItemCard({
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[11.5px] font-bold text-[#140832]">
           <Clock size={11} strokeWidth={2.4} />
-          {days ? `${days} day${days === 1 ? '' : 's'}` : 'No dates'}
+          {translateText(days ? `${days} day${days === 1 ? '' : 's'}` : 'No dates')}
         </span>
 
         {days > 0 && (
           <span className="inline-flex items-center gap-1 rounded-full border border-violet-300 bg-violet-100/90 px-3 py-1 text-[11.5px] font-extrabold tabular-nums text-[#2e0a72]">
-            {days} × {item.quantity} × {item.unitPrice} = {lineTotal.toFixed(2)} {item.currency}
+            {lineFormula}
           </span>
         )}
 
@@ -341,7 +366,7 @@ function RentalItemCard({
       {minDaysMissed && (
         <div className="mt-3 flex items-center gap-2 rounded-[12px] border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[12px] font-semibold text-amber-800">
           <AlertTriangle size={13} strokeWidth={2} className="shrink-0" />
-          Minimum {item.minimumRentalDays} day{item.minimumRentalDays === 1 ? '' : 's'} required for this service.
+          {translateText(`Minimum ${item.minimumRentalDays} day${item.minimumRentalDays === 1 ? '' : 's'} required for this service.`)}
         </div>
       )}
     </motion.div>
@@ -355,6 +380,7 @@ export default function RentalCartPage() {
     noIndex: true,
   })
 
+  const { translateText } = useI18n()
   const reducedMotion = useReducedMotion()
   const motionEnabled = !reducedMotion
   const navigate = useNavigate()
@@ -408,9 +434,9 @@ export default function RentalCartPage() {
   const handleCheckout = async () => {
     if (!allItemsReady) {
       await dialog.alert({
-        title: 'Complete your request first',
-        message: 'Choose valid rental dates for every service before submitting your request.',
-        confirmLabel: 'Review Request',
+        title: translateText('Complete your request first'),
+        message: translateText('Choose valid rental dates for every service before submitting your request.'),
+        confirmLabel: translateText('Review Request'),
         variant: 'warning',
       })
       return
@@ -418,8 +444,8 @@ export default function RentalCartPage() {
     if (!isLoggedIn) {
       const canContinue = await requireAuthAction({
         redirectTo: '/checkout',
-        title: 'Sign in to submit your request',
-        message: 'You can keep building your request draft as a guest, but you need to sign in before submitting it. Your draft will stay saved.',
+        title: translateText('Sign in to submit your request'),
+        message: translateText('You can keep building your request draft as a guest, but you need to sign in before submitting it. Your draft will stay saved.'),
       })
       if (!canContinue) return
     }
@@ -428,6 +454,16 @@ export default function RentalCartPage() {
 
   const currency = rentalCart.items[0]?.currency || 'JOD'
   const sharedDatesValid = hasValidDateRange(rentalCart.sharedStartDate, rentalCart.sharedEndDate)
+  const sharedDayCount = sharedDatesValid
+    ? Math.max(
+        1,
+        Math.round(
+          (new Date(rentalCart.sharedEndDate).getTime() -
+            new Date(rentalCart.sharedStartDate).getTime()) /
+            86400000
+        ) + 1
+      )
+    : 0
   const readinessMessage = allItemsReady
     ? isLoggedIn
       ? 'All services are ready to submit for review.'
@@ -441,18 +477,17 @@ export default function RentalCartPage() {
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-[20px] border border-violet-200 bg-violet-50">
           <ShoppingBag className="h-7 w-7 text-[#7126e3]" strokeWidth={2} />
         </div>
-        <span className="section-label justify-center">// Rental Request Draft</span>
+        <span className="section-label justify-center">// {translateText('Rental Request Draft')}</span>
         <h1 className="mt-3 font-display text-3xl font-black tracking-[-0.03em] text-[#1a0b3d] sm:text-4xl">
-          Your rental request draft is empty
+          {translateText('Your rental request draft is empty')}
         </h1>
         <p className="mx-auto mt-3 max-w-md text-[0.95rem] leading-7 text-[#4b3a63]">
-          Browse our event services and start building your request. Pick your dates and we'll
-          check availability for you.
+          {translateText("Browse our event services and start building your request. Pick your dates and we'll check availability for you.")}
         </p>
         <div className="mt-7">
           <Link to="/products" className="btn-primary !rounded-[14px] !px-6 !py-3 !text-sm">
-            Browse Services
-            <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
+            {translateText('Browse Services')}
+            <ArrowRight className="h-4 w-4 rtl:rotate-180" strokeWidth={2.2} />
           </Link>
         </div>
       </StatusShell>
@@ -471,13 +506,12 @@ export default function RentalCartPage() {
             transition={motionEnabled ? { duration: 0.6, ease } : undefined}
             className="mx-auto mb-10 max-w-3xl text-center"
           >
-            <span className="section-label justify-center">// Rental Request Draft</span>
+            <span className="section-label justify-center">// {translateText('Rental Request Draft')}</span>
             <h1 className="mt-3 font-display text-3xl font-black leading-[1.05] tracking-[-0.035em] sm:text-5xl">
-              <span className="text-glow">Prepare Your Request</span>
+              <span className="text-glow">{translateText('Prepare Your Request')}</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-[0.98rem] leading-7 text-[#4b3a63]">
-              Set shared event dates for the whole request, or switch to per-item mode. We review
-              availability against your selected rental range.
+              {translateText('Set shared event dates for the whole request, or switch to per-item mode. We review availability against your selected rental range.')}
             </p>
             <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-violet-300 to-transparent" />
           </motion.div>
@@ -514,7 +548,7 @@ export default function RentalCartPage() {
                         }
                         aria-pressed={active}
                       >
-                        {label}
+                        {translateText(label)}
                       </button>
                     )
                   })}
@@ -548,20 +582,12 @@ export default function RentalCartPage() {
                         {sharedDatesValid ? (
                           <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-300 bg-violet-100/90 px-3 py-1 text-[11.5px] font-bold text-[#2e0a72]">
                             <Clock size={11} strokeWidth={2.4} />
-                            {Math.max(
-                              1,
-                              Math.round(
-                                (new Date(rentalCart.sharedEndDate).getTime() -
-                                  new Date(rentalCart.sharedStartDate).getTime()) /
-                                  86400000
-                              ) + 1
-                            )}{' '}
-                            day range applied to all items
+                            {translateText(`${sharedDayCount} day range applied to all items`)}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[11.5px] font-semibold text-[#4b3a63]">
                             <CalendarDays size={11} strokeWidth={2.4} />
-                            Pick a start and end date
+                            {translateText('Pick a start and end date')}
                           </span>
                         )}
                       </div>
@@ -629,7 +655,7 @@ export default function RentalCartPage() {
             >
               <div className="glass !rounded-[22px] p-5 xl:sticky xl:top-24">
                 <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#7126e3]">
-                  Rental Request Draft Summary
+                  {translateText('Rental Request Draft Summary')}
                 </div>
 
                 <div className="mt-3 flex items-end gap-2">
@@ -637,15 +663,15 @@ export default function RentalCartPage() {
                     <span className="text-glow">{rentalCart.itemCount}</span>
                   </span>
                   <span className="pb-1 text-[0.85rem] font-medium text-[#4b3a63]">
-                    item{rentalCart.itemCount === 1 ? '' : 's'}
+                    {translateText(rentalCart.itemCount === 1 ? 'item' : 'items')}
                   </span>
                 </div>
                 <div className="mt-1 text-[0.85rem] text-[#6b5a82]">
-                  across {rentalCart.items.length} service{rentalCart.items.length === 1 ? '' : 's'}
+                  {translateText(`${rentalCart.items.length} service${rentalCart.items.length === 1 ? '' : 's'}`)}
                 </div>
 
                 {/* Breakdown */}
-                <div className="mt-5 max-h-[15rem] divide-y divide-violet-100 overflow-y-auto pr-1 [scrollbar-width:thin]">
+                <div className="mt-5 max-h-[15rem] divide-y divide-violet-100 overflow-y-auto pe-1 [scrollbar-width:thin]">
                   {rentalCart.items.map(item => (
                     <div key={item.productSlug} className="flex items-center justify-between gap-3 py-2.5">
                       <span className="min-w-0 truncate text-[0.88rem] font-semibold text-[#1a0b3d]">
@@ -661,14 +687,14 @@ export default function RentalCartPage() {
                 {/* Subtotal */}
                 <div className="mt-4 rounded-[16px] border border-violet-200 bg-violet-50/70 p-4">
                   <div className="text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-[#2e0a72]">
-                    Estimated total
+                    {translateText('Estimated total')}
                   </div>
                   <div className="mt-1.5 font-display text-[2.1rem] font-black leading-none tabular-nums tracking-[-0.04em] text-[#07041a]">
                     {rentalCart.grandTotal.toFixed(2)}{' '}
                     <span className="text-[1.1rem] font-bold text-[#4b3a63]">{currency}</span>
                   </div>
                   <div className="mt-1 text-[11.5px] font-semibold text-[#4b3a63]">
-                    {allItemsReady ? 'Based on current day rates; final pricing is reviewed before confirmation' : 'Set dates to see the full estimate'}
+                    {translateText(allItemsReady ? 'Based on current day rates; final pricing is reviewed before confirmation' : 'Set dates to see the full estimate')}
                   </div>
                 </div>
 
@@ -686,7 +712,7 @@ export default function RentalCartPage() {
                   ) : (
                     <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                   )}
-                  <span>{readinessMessage}</span>
+                  <span>{translateText(readinessMessage)}</span>
                 </div>
 
                 {/* CTAs */}
@@ -695,17 +721,17 @@ export default function RentalCartPage() {
                     type="button"
                     onClick={() => void handleCheckout()}
                     disabled={!allItemsReady}
-                    title={!allItemsReady ? readinessMessage : undefined}
+                    title={!allItemsReady ? translateText(readinessMessage) : undefined}
                     className="btn-primary !w-full !rounded-[14px] !py-3 !text-[13px] disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {isLoggedIn ? 'Submit Rental Request' : 'Sign In to Submit'}
-                    <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
+                    {translateText(isLoggedIn ? 'Submit Rental Request' : 'Sign In to Submit')}
+                    <ArrowRight className="h-4 w-4 rtl:rotate-180" strokeWidth={2.2} />
                   </button>
                   <Link
                     to="/products"
                     className="btn-outline !w-full !rounded-[14px] !py-2.5 !text-[12px]"
                   >
-                    Keep Browsing
+                    {translateText('Keep Browsing')}
                   </Link>
                 </div>
               </div>
@@ -724,7 +750,7 @@ export default function RentalCartPage() {
             {allItemsReady ? (
               <>
                 <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#6b5a82]">
-                  Total
+                  {translateText('Total')}
                 </div>
                 <div className="font-display text-[1.15rem] font-black tabular-nums leading-tight text-[#07041a]">
                   {rentalCart.grandTotal.toFixed(2)}{' '}
@@ -734,7 +760,7 @@ export default function RentalCartPage() {
             ) : (
               <div className="flex items-center gap-1.5 text-[12px] font-semibold text-amber-700">
                 <AlertTriangle size={13} strokeWidth={2.2} className="shrink-0" />
-                Set dates to see total
+                {translateText('Set dates to see total')}
               </div>
             )}
           </div>
@@ -742,11 +768,11 @@ export default function RentalCartPage() {
             type="button"
             onClick={() => void handleCheckout()}
             disabled={!allItemsReady}
-            title={!allItemsReady ? readinessMessage : undefined}
+            title={!allItemsReady ? translateText(readinessMessage) : undefined}
             className="btn-primary !shrink-0 !whitespace-nowrap !rounded-[14px] !px-5 !py-2.5 !text-[12.5px] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isLoggedIn ? 'Continue' : 'Sign In'}
-            <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
+            {translateText(isLoggedIn ? 'Continue' : 'Sign In')}
+            <ArrowRight className="h-4 w-4 rtl:rotate-180" strokeWidth={2.2} />
           </button>
         </div>
       </div>

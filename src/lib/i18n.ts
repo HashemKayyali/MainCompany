@@ -108,6 +108,181 @@ export function t(key: string, vars?: Record<string, string | number>): string {
 }
 
 const arPhraseMap: Record<string, string> = {
+  // ── Public site UI (Phase 7.6 localization audit) ──
+  'About Eventies': 'عن Eventies',
+  'About this service': 'عن هذه الخدمة',
+  'About Us': 'من نحن',
+  'Account created successfully.': 'تم إنشاء الحساب بنجاح.',
+  'Account created. Check your email to confirm your address before signing in.': 'تم إنشاء الحساب. تحقق من بريدك الإلكتروني لتأكيد عنوانك قبل تسجيل الدخول.',
+  Active: 'نشط',
+  Activity: 'النشاط',
+  'After Eventies': 'بعد Eventies',
+  'All Categories': 'كل الفئات',
+  "An unexpected error occurred. Don't worry — your data is safe.": 'حدث خطأ غير متوقع. لا تقلق — بياناتك في أمان.',
+  Analytics: 'التحليلات',
+  'Apply one date range to every item, or set dates per item.': 'طبق نطاق تواريخ واحدا على كل العناصر، أو حدد تواريخ لكل عنصر.',
+  Ask: 'اسأل',
+  'Availability and details approved': 'تمت الموافقة على التوفر والتفاصيل',
+  'Back to My Requests': 'العودة إلى طلباتي',
+  'Back to Request Draft': 'العودة إلى مسودة الطلب',
+  'Become a Provider': 'انضم كمزود خدمة',
+  'Before requesting': 'قبل الطلب',
+  'Browse now': 'تصفح الآن',
+  'Browse our hand-picked service categories. Open any category below to explore tailored services, packages, and event-ready solutions.': 'تصفح فئات الخدمات المختارة بعناية. افتح أي فئة أدناه لاستكشاف خدمات وباقات وحلول جاهزة للفعاليات.',
+  'Browse rental-ready event services': 'تصفح خدمات فعاليات جاهزة للتأجير',
+  'Category, service, and preferred timing.': 'الفئة والخدمة والتوقيت المفضل.',
+  'Choose valid rental dates for every service before submitting your request.': 'اختر تواريخ تأجير صحيحة لكل خدمة قبل إرسال طلبك.',
+  'Choose your setup': 'اختر تجهيزتك',
+  'City / Governorate / State': 'المدينة / المحافظة / المنطقة',
+  'Close answer': 'إغلاق الإجابة',
+  'Complete your request first': 'أكمل طلبك أولا',
+  Completed: 'مكتمل',
+  Confirmed: 'مؤكد',
+  'Contact channels visual': 'رسم قنوات التواصل',
+  'Contact Eventies': 'تواصل مع Eventies',
+  'Contact Us': 'تواصل معنا',
+  Contacted: 'تم التواصل',
+  'Continue Browsing': 'متابعة التصفح',
+  'Continue with Google': 'المتابعة عبر Google',
+  Country: 'الدولة',
+  Custom: 'مخصص',
+  'Customer logo shuffle grid': 'شبكة شعارات العملاء',
+  'Customer Stories': 'قصص العملاء',
+  'Deal Closed': 'تم إغلاق الصفقة',
+  'Delivery & setup': 'التوصيل والتجهيز',
+  'Drafts stay local until you submit. Requests do not reserve inventory or confirm pricing.': 'تبقى المسودات محلية حتى الإرسال. الطلبات لا تحجز المخزون ولا تؤكد الأسعار.',
+  'Drag or swipe to browse': 'اسحب أو مرر للتصفح',
+  'e.g. Company family day, brand activation...': 'مثال: يوم عائلي للشركة، تفعيل علامة...',
+  'Enter your email': 'أدخل بريدك الإلكتروني',
+  'Equipment being prepared for your event': 'يجري تجهيز المعدات لفعاليتك',
+  'Estimated Total': 'الإجمالي التقديري',
+  'Event Date': 'تاريخ الفعالية',
+  'Event details': 'تفاصيل الفعالية',
+  'Event request': 'طلب فعالية',
+  'Event Services Marketplace': 'سوق خدمات الفعاليات',
+  'Event Type': 'نوع الفعالية',
+  'Eventies marketplace map visual': 'رسم خريطة سوق Eventies',
+  'Every request is reviewed first — we confirm availability, pricing, and delivery before anything is final.': 'كل طلب تتم مراجعته أولا — نؤكد التوفر والأسعار والتوصيل قبل أي شيء نهائي.',
+  'Explore All': 'استكشف الكل',
+  'Explore categories and service depth': 'استكشف الفئات وعمق الخدمات',
+  'Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then submit a rental or purchase quote request for review.': 'استكشف تأجيرات الفعاليات والتفعيلات التفاعلية والشاشات والبوثات ودعم الإنتاج والتجهيزات المخصصة في الأردن، ثم أرسل طلب تأجير أو طلب عرض سعر للشراء للمراجعة.',
+  'Featured Event': 'فعالية مميزة',
+  'Full marketplace catalog': 'كتالوج السوق الكامل',
+  'Get Options': 'احصل على الخيارات',
+  'Go home': 'العودة للرئيسية',
+  'Go Home': 'العودة للرئيسية',
+  'Go to Request Draft': 'الانتقال إلى مسودة الطلب',
+  'Go to Sign In': 'الانتقال إلى تسجيل الدخول',
+  'Help Center': 'مركز المساعدة',
+  'If this account exists, you will receive a reset link shortly.': 'إذا كان هذا الحساب موجودا، فستتلقى رابط إعادة التعيين قريبا.',
+  'In Preparation': 'قيد التجهيز',
+  'Inquiry Type': 'نوع الاستفسار',
+  'Insured equipment': 'معدات مؤمنة',
+  Integrations: 'التكاملات',
+  'It may not belong to this account, or the request number may no longer be available.': 'قد لا يخص هذا الحساب، أو قد يكون رقم الطلب لم يعد متاحا.',
+  Latest: 'الأحدث',
+  'Learn how Eventies works': 'تعرف على كيفية عمل Eventies',
+  'Live Preview': 'معاينة حية',
+  'Loading Google sign-in': 'جار تحميل تسجيل الدخول عبر Google',
+  'Loading Google...': 'جار تحميل Google...',
+  'Loading requests': 'جار تحميل الطلبات',
+  'Location and notes': 'الموقع والملاحظات',
+  'Make an entrance with high-impact activations.': 'اترك انطباعا قويا بتفعيلات عالية التأثير.',
+  'Maybe you were looking for': 'ربما كنت تبحث عن',
+  'Name and reachable contact information.': 'الاسم ومعلومات تواصل يمكن الوصول إليها.',
+  'No status changes yet — your request is waiting for team review.': 'لا توجد تغييرات على الحالة بعد — طلبك بانتظار مراجعة الفريق.',
+  'Nothing to submit yet': 'لا يوجد ما يمكن إرساله بعد',
+  'One clear request journey': 'رحلة طلب واحدة واضحة',
+  'Open Draft': 'فتح المسودة',
+  'Order Journey': 'رحلة الطلب',
+  'Our team reached out to you': 'تواصل فريقنا معك',
+  'Page not': 'الصفحة غير',
+  'Parts and accessories': 'القطع والإكسسوارات',
+  'Pending Review': 'بانتظار المراجعة',
+  'Per-item dates': 'تواريخ لكل عنصر',
+  'Pick a start and end date': 'اختر تاريخ البداية والنهاية',
+  'Plan multi-service event workflows': 'خطط مسارات فعاليات متعددة الخدمات',
+  'Plan. Compare. Request.': 'خطط. قارن. اطلب.',
+  'Please sign in first. Your rental request draft will stay saved and you will return here right after login.': 'يرجى تسجيل الدخول أولا. ستبقى مسودة طلب التأجير محفوظة وستعود إلى هنا بعد تسجيل الدخول مباشرة.',
+  'Purchase quote': 'عرض سعر شراء',
+  'Quote accepted — request complete': 'تم قبول العرض — اكتمل الطلب',
+  Quoted: 'تم التسعير',
+  'Ready to explore your next event setup?': 'جاهز لاستكشاف تجهيزة فعاليتك القادمة؟',
+  'Browse event rentals and services, or submit a request so the Eventies team can review your event needs.':
+    'تصفح خدمات وتأجيرات الفعاليات، أو أرسل طلبا ليتمكن فريق Eventies من مراجعة احتياجات فعاليتك.',
+  'Redirecting you to sign in...': 'جار تحويلك إلى تسجيل الدخول...',
+  'Refresh page': 'تحديث الصفحة',
+  'Registration failed': 'فشل إنشاء الحساب',
+  'Remove from Rental Request': 'إزالة من طلب التأجير',
+  'Rental Request Pricing': 'تسعير طلب التأجير',
+  'Request details are only visible to the owner account.': 'تفاصيل الطلب مرئية فقط لحساب صاحب الطلب.',
+  'Request fulfilled successfully': 'تم تنفيذ الطلب بنجاح',
+  'Request new link': 'طلب رابط جديد',
+  'Request received — the team is reviewing it': 'تم استلام الطلب — الفريق يراجعه الآن',
+  'Request reviewed by Eventies team': 'يراجع فريق Eventies الطلب',
+  'Review the rental request you just submitted.': 'راجع طلب التأجير الذي أرسلته للتو.',
+  'Review your rental request draft, set event dates, and submit it for review.': 'راجع مسودة طلب التأجير، وحدد تواريخ الفعالية، ثم أرسلها للمراجعة.',
+  'Scattered planning signals': 'إشارات تخطيط مبعثرة',
+  'See visual highlights and setups': 'شاهد أبرز اللقطات والتجهيزات',
+  'See who already trusts the platform': 'اطلع على من يثق بالمنصة بالفعل',
+  'Send a password reset link to': 'إرسال رابط إعادة تعيين كلمة المرور إلى',
+  'Send another link': 'إرسال رابط آخر',
+  'Sending…': 'جار الإرسال…',
+  'Service / Request': 'الخدمة / الطلب',
+  'Service Note': 'ملاحظة الخدمة',
+  'Setup notes, timing, access details, or anything else the team should know.': 'ملاحظات التجهيز أو التوقيت أو تفاصيل الوصول أو أي شيء آخر يجب أن يعرفه الفريق.',
+  'Shared dates for all': 'تواريخ موحدة للجميع',
+  'Sign in': 'تسجيل الدخول',
+  'Sign in to submit your request': 'سجل الدخول لإرسال طلبك',
+  'Sign in to view this request': 'سجل الدخول لعرض هذا الطلب',
+  'Sign in to view your requests': 'سجل الدخول لعرض طلباتك',
+  'Signed in successfully.': 'تم تسجيل الدخول بنجاح.',
+  'Signing in...': 'جار تسجيل الدخول...',
+  'Similar services': 'خدمات مشابهة',
+  'Site footer': 'تذييل الموقع',
+  'Skip to content': 'تخط إلى المحتوى',
+  'Something went': 'حدث خطأ',
+  'Starting from': 'يبدأ من',
+  'Starting per day': 'يبدأ لليوم من',
+  'Still loading your admin session…': 'لا تزال جلسة الإدارة قيد التحميل…',
+  'Tailored quote for your event': 'عرض سعر مخصص لفعاليتك',
+  'Talk to us about collaboration': 'حدثنا عن التعاون',
+  'The Eventies team uses these details to review and follow up on your request.': 'يستخدم فريق Eventies هذه التفاصيل لمراجعة طلبك ومتابعته.',
+  'This page doesn’t exist or has been moved. Let’s get you back on track.': 'هذه الصفحة غير موجودة أو تم نقلها. لنعدك إلى المسار الصحيح.',
+  'This request summary belongs to your account.': 'ملخص هذا الطلب يخص حسابك.',
+  'Toggle menu': 'تبديل القائمة',
+  'Top brands & teams': 'أبرز العلامات والفرق',
+  'Track This Request': 'تتبع هذا الطلب',
+  'Trusted brands and partner stories': 'علامات موثوقة وقصص شركاء',
+  'Trusted by': 'موثوق من',
+  'Try Again': 'حاول مرة أخرى',
+  'Type your city': 'اكتب مدينتك',
+  'Understand the marketplace structure': 'افهم بنية السوق',
+  'Use the actions below to start a rental request or purchase quote request without leaving this page. Final availability, pricing, setup, delivery, shipping, and scope are confirmed after review.': 'استخدم الإجراءات أدناه لبدء طلب تأجير أو طلب عرض سعر شراء دون مغادرة هذه الصفحة. يتم تأكيد التوفر والأسعار والتجهيز والتوصيل والشحن والنطاق النهائي بعد المراجعة.',
+  'View answer': 'عرض الإجابة',
+  'View Details': 'عرض التفاصيل',
+  'View request details and status history.': 'اعرض تفاصيل الطلب وسجل الحالة.',
+  'We could not find this rental request': 'تعذر العثور على طلب التأجير هذا',
+  'We could not find this request': 'تعذر العثور على هذا الطلب',
+  'We couldn’t load this request': 'تعذر تحميل هذا الطلب',
+  'We couldn’t load your requests': 'تعذر تحميل طلباتك',
+  // Straight-apostrophe variants (JSX &apos; renders U+0027, not U+2019)
+  "This page doesn't exist or has been moved. Let's get you back on track.": 'هذه الصفحة غير موجودة أو تم نقلها. لنعدك إلى المسار الصحيح.',
+  "We couldn't load this request": 'تعذر تحميل هذا الطلب',
+  "We couldn't load your requests": 'تعذر تحميل طلباتك',
+  'What happens next': 'ماذا يحدث بعد ذلك',
+  'What this request is for.': 'الغرض من هذا الطلب.',
+  'What We Offer': 'ماذا نقدم',
+  "What's included": 'ماذا يشمل',
+  'When is your event?': 'متى فعاليتك؟',
+  'Where it happens and what the team should know.': 'مكان الفعالية وما يجب أن يعرفه الفريق.',
+  'Where should the Eventies team reach you?': 'أين يمكن لفريق Eventies التواصل معك؟',
+  'Where the services are needed and anything the team should know.': 'مكان الحاجة إلى الخدمات وأي شيء يجب أن يعرفه الفريق.',
+  'You can keep building your request draft as a guest, but you need to sign in before submitting it. Your draft will stay saved.': 'يمكنك متابعة بناء مسودة طلبك كزائر، لكن عليك تسجيل الدخول قبل إرسالها. ستبقى مسودتك محفوظة.',
+  'You have an unsubmitted purchase quote draft': 'لديك مسودة عرض سعر شراء لم ترسل بعد',
+  'Your quote was prepared and shared': 'تم إعداد عرض السعر ومشاركته',
+  'Your rental request draft is empty. Add services first, then come back to submit them for review.': 'مسودة طلب التأجير فارغة. أضف خدمات أولا، ثم عد لإرسالها للمراجعة.',
+  'Your session could not be established. Please try again.': 'تعذر إنشاء جلستك. يرجى المحاولة مرة أخرى.',
   // ── Admin panel UI (Phase 7.5 localization audit) ──
   'A short visual description. Keep it tight.': 'وصف مرئي قصير. اجعله مختصرا.',
   'A simple readout of what the admin workspace currently manages.': 'ملخص بسيط لما تديره مساحة العمل الإدارية حاليا.',
@@ -676,7 +851,9 @@ const arPhraseMap: Record<string, string> = {
   'Add to Rental Request': 'أضف إلى طلب التأجير',
   Added: 'تمت الإضافة',
   Remove: 'إزالة',
+  'Rental Request': 'طلب تأجير',
   'Purchase Quote Request': 'طلب عرض سعر للشراء',
+  'Purchase Quotes': 'عروض أسعار الشراء',
   'Purchase Quote Requests': 'طلبات عرض سعر الشراء',
   'Ask About This Service': 'اسأل عن هذه الخدمة',
   Inquiry: 'استفسار',
@@ -725,8 +902,26 @@ const arPhraseMap: Record<string, string> = {
   'Submit Request': 'إرسال الطلب',
   'Continue to Submit Request': 'المتابعة لإرسال الطلب',
   'Sign In to Submit Request': 'سجل الدخول لإرسال الطلب',
+  'Sign In to Submit': 'سجل الدخول للإرسال',
   'Keep Browsing': 'متابعة التصفح',
   'Set dates to see total': 'حدد التواريخ لعرض المجموع',
+  'Set dates to see the full estimate': 'حدد التواريخ لعرض التقدير الكامل',
+  'Set shared event dates for the whole request, or switch to per-item mode. We review availability against your selected rental range.':
+    'حدد تواريخ الفعالية لكامل الطلب، أو بدّل إلى تواريخ لكل خدمة. نراجع التوفر حسب نطاق التأجير الذي اخترته.',
+  "Browse our event services and start building your request. Pick your dates and we'll check availability for you.":
+    'تصفح خدمات الفعاليات وابدأ بناء طلبك. اختر التواريخ وسنتحقق من التوفر لك.',
+  'EVENT DATES': 'تواريخ الفعالية',
+  'Set dates per item and adjust quantities.': 'حدد التواريخ لكل خدمة وعدّل الكميات.',
+  'Adjust quantities. Dates come from the shared range above.': 'عدّل الكميات. التواريخ مأخوذة من النطاق الموحد أعلاه.',
+  'All services are ready to submit for review.': 'كل الخدمات جاهزة للإرسال للمراجعة.',
+  'All services are ready. Sign in to submit the request.': 'كل الخدمات جاهزة. سجل الدخول لإرسال الطلب.',
+  'Set valid dates for every service before submitting.': 'حدد تواريخ صالحة لكل خدمة قبل الإرسال.',
+  'Based on current day rates; final pricing is reviewed before confirmation': 'حسب أسعار اليوم الحالية؛ تتم مراجعة السعر النهائي قبل التأكيد.',
+  'No dates': 'بدون تواريخ',
+  day: 'يوم',
+  days: 'أيام',
+  item: 'عنصر',
+  Continue: 'متابعة',
 
   'Your request draft is empty': 'مسودة الطلب فارغة',
   'Your purchase quote request draft is empty.': 'مسودة طلب عرض سعر الشراء فارغة.',
@@ -739,10 +934,23 @@ const arPhraseMap: Record<string, string> = {
   'Open Request Draft': 'فتح مسودة الطلب',
   'Open Rental Request Draft': 'فتح مسودة طلب التأجير',
   'Go to My Requests': 'الذهاب إلى طلباتي',
+  'Track every request': 'تابع كل طلب',
   'Track Every Request': 'تابع كل طلب',
+  'Follow your rental requests and purchase quote requests, see exactly where each one is, and what happened at every step.':
+    'تابع طلبات التأجير وطلبات عروض أسعار الشراء، واعرف مكان كل طلب وما حدث في كل خطوة.',
+  'Rental requests and purchase quote requests are tied to your account, so you can track their progress any time.':
+    'طلبات التأجير وطلبات عروض أسعار الشراء مرتبطة بحسابك حتى تتمكن من متابعة تقدمها في أي وقت.',
+  'Try another tab to see the rest of your requests.': 'جرّب تبويبا آخر لعرض بقية طلباتك.',
+  'Browse services, add what your event needs to a draft, and track every update from here.':
+    'تصفح الخدمات، أضف ما تحتاجه فعاليتك إلى المسودة، وتابع كل تحديث من هنا.',
   'All Requests': 'كل الطلبات',
   'Rental Requests': 'طلبات التأجير',
   'Track Requests': 'متابعة الطلبات',
+  'Request status': 'حالة الطلب',
+  'Last update': 'آخر تحديث',
+  'You can contact the Eventies team for more details, or start a new request any time.':
+    'يمكنك التواصل مع فريق Eventies لمزيد من التفاصيل، أو بدء طلب جديد في أي وقت.',
+  'Rejected from requests list': 'تم الرفض من قائمة الطلبات',
   'No requests match this filter': 'لا توجد طلبات تطابق هذا الفلتر',
   'Add services to your request draft, submit your request, and track every update from here.':
     'أضف الخدمات إلى مسودة الطلب، وأرسل طلبك، وتابع كل تحديث من هنا.',
@@ -1018,6 +1226,8 @@ const arPhraseMap: Record<string, string> = {
     'أي قناة تستخدم، وما المعلومات المطلوبة، وما المتوقع بعد إرسال الرسالة.',
   'Ready to send your event details?': 'جاهز لإرسال تفاصيل فعاليتك؟',
   'Choose the right contact path or send one clear inquiry with your event date,': 'اختر مسار التواصل المناسب أو أرسل استفسارا واضحا يتضمن تاريخ الفعالية،',
+  'Choose the right contact path or send one clear inquiry with your event date, location, and setup needs.':
+    'اختر مسار التواصل المناسب أو أرسل استفسارا واضحا يتضمن تاريخ الفعالية والموقع واحتياجات التجهيز.',
   'location, and setup needs.': 'الموقع، واحتياجات التجهيز.',
   'Provider Inquiry': 'استفسار مزود خدمة',
   'Which email should I use?': 'أي بريد إلكتروني أستخدم؟',
@@ -1057,6 +1267,7 @@ const arPhraseMap: Record<string, string> = {
   'Gallery highlight': 'لقطة من المعرض',
   'Submit Your Rental Request': 'إرسال طلب التأجير',
   'Pick dates': 'اختر التواريخ',
+  'Checking...': 'جار التحقق...',
   'Checking…': 'جار التحقق…',
   'Decrease quantity': 'تقليل الكمية',
   'Increase quantity': 'زيادة الكمية',
@@ -1442,6 +1653,9 @@ const arPhraseMap: Record<string, string> = {
   'Provider inquiry': 'استفسار مزود',
   'Support / request follow-up': 'دعم / متابعة طلب',
   'General question': 'سؤال عام',
+  Jordan: 'الأردن',
+  'Showing regions for': 'المناطق المتاحة لـ',
+  'Saving...': 'جار الحفظ...',
   'Corporate activation': 'تفعيل شركة',
   'Exhibition / booth': 'معرض / جناح',
   'University event': 'فعالية جامعية',
@@ -1511,7 +1725,10 @@ const arPhraseMap: Record<string, string> = {
   'Use your account to follow rental and purchase quote requests as they move through the review process.': 'استخدم حسابك لمتابعة طلبات التأجير وطلبات عرض سعر الشراء أثناء انتقالها عبر مسار المراجعة.',
   "Connect with the Team": "تواصل مع الفريق",
   "Use the right contact channel for support, event requests, or provider partnerships.": "استخدم قناة التواصل المناسبة للدعم أو طلبات الفعاليات أو شراكات المزودين.",
+  Audience: 'الجمهور',
   "Audiences": "الفئات المستهدفة",
+  Delivery: 'التسليم',
+  Difference: 'الفرق',
   "Built for different event needs": "مصمم لاحتياجات فعاليات مختلفة",
   "Whether you're planning one event or offering services, Eventies is designed around your role.": "سواء كنت تخطط لفعالية أو تقدم خدمات، تم تصميم Eventies حول دورك.",
   "Individuals": "الأفراد",
@@ -1693,8 +1910,20 @@ function translateDynamicPhrase(core: string, locale: Locale): string {
   match = core.match(/^(\d+) items?$/i)
   if (match) return `${match[1]} عنصر`
 
+  match = core.match(/^(\d+) days?$/i)
+  if (match) return `${match[1]} يوم`
+
   match = core.match(/^Item (\d+) of (\d+)$/)
   if (match) return `الخدمة ${match[1]} من ${match[2]}`
+
+  match = core.match(/^min (\d+) days?$/i)
+  if (match) return `الحد الأدنى ${match[1]} يوم`
+
+  match = core.match(/^Minimum (\d+) days? required for this service\.$/i)
+  if (match) return `الحد الأدنى لهذه الخدمة ${match[1]} يوم`
+
+  match = core.match(/^(\d+) day range applied to all items$/i)
+  if (match) return `تم تطبيق نطاق ${match[1]} يوم على كل الخدمات`
 
   match = core.match(/^(\d+) available$/i)
   if (match) return `${match[1]} متاحة`
@@ -1704,6 +1933,9 @@ function translateDynamicPhrase(core: string, locale: Locale): string {
 
   match = core.match(/^You have (\d+) items? in your rental request draft$/i)
   if (match) return `لديك ${match[1]} عنصر في مسودة طلب التأجير`
+
+  match = core.match(/^(\d+) unit\(s\) across (\d+) service\(s\), saved on this device\. Drafts appear here after you submit them\.$/i)
+  if (match) return `${match[1]} وحدة عبر ${match[2]} خدمة، محفوظة على هذا الجهاز. تظهر المسودات هنا بعد إرسالها.`
 
   match = core.match(/^No matches for [“"](.+)[”"]. Press Enter to browse all services\.?$/i)
   if (match) return `لا توجد نتائج لـ ”${match[1]}“. اضغط Enter لتصفح جميع الخدمات.`
@@ -1716,6 +1948,9 @@ function translateDynamicPhrase(core: string, locale: Locale): string {
 
   match = core.match(/^Step (\d+)$/i)
   if (match) return ''
+
+  match = core.match(/^Step (\d+) of (\d+)$/i)
+  if (match) return `الخطوة ${match[1]} من ${match[2]}`
 
   match = core.match(/^STEP 0?(\d+)$/i)
   if (match) return ''

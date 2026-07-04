@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { allCountries } from 'country-region-data'
 import { AlertCircle, CalendarDays, CheckCircle2, Mail, MapPin, MessageCircle, UserRound } from 'lucide-react'
 import { useProductsData } from '../../contexts/DataContext'
+import { useI18n } from '../../contexts/LanguageContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useRateLimit } from '../../hooks/useRateLimit'
@@ -109,6 +110,7 @@ const getRegionOptions = (countryCode: string): LocationOption[] => {
 }
 
 export default function ContactForm() {
+  const { dir, translateText } = useI18n()
   const [searchParams] = useSearchParams()
   const preselectedProduct = searchParams.get('product') || ''
   // Split hook (batch 4): the contact form only ensures products.
@@ -149,6 +151,7 @@ export default function ContactForm() {
   const countryOptions = useMemo(() => getCountryOptions(), [])
   const regionOptions = useMemo(() => getRegionOptions(form.country), [form.country])
   const selectedCountryName = countryOptions.find(country => country.value === form.country)?.label || form.country
+  const selectedCountryDisplayName = translateText(selectedCountryName)
   const cityForSubmission = [form.city, selectedCountryName].filter(Boolean).join(', ')
 
   const updateCountry = (countryCode: string) => {
@@ -339,15 +342,15 @@ export default function ContactForm() {
               <UserRound className="h-5 w-5" strokeWidth={2.2} />
             </span>
             <div>
-              <h3 className={sectionTitleClass}>Contact details</h3>
-              <p className={sectionCaptionClass}>Name and reachable contact information.</p>
+              <h3 className={sectionTitleClass}>{translateText('Contact details')}</h3>
+              <p className={sectionCaptionClass}>{translateText('Name and reachable contact information.')}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div>
               <label htmlFor="cf-name" className={labelClass}>
-                Full Name *
+                {translateText('Full Name')} *
               </label>
               <input
                 id="cf-name"
@@ -368,7 +371,7 @@ export default function ContactForm() {
 
             <div>
               <label htmlFor="cf-email" className={labelClass}>
-                Email *
+                {translateText('Email')} *
               </label>
               <input
                 id="cf-email"
@@ -389,7 +392,7 @@ export default function ContactForm() {
 
             <div className="md:col-span-2 xl:col-span-1">
               <label htmlFor="cf-phone" className={labelClass}>
-                Phone
+                {translateText('Phone')}
               </label>
               <input
                 id="cf-phone"
@@ -418,15 +421,15 @@ export default function ContactForm() {
               <CalendarDays className="h-5 w-5" strokeWidth={2.2} />
             </span>
             <div>
-              <h3 className={sectionTitleClass}>Event request</h3>
-              <p className={sectionCaptionClass}>Category, service, and preferred timing.</p>
+              <h3 className={sectionTitleClass}>{translateText('Event request')}</h3>
+              <p className={sectionCaptionClass}>{translateText('Category, service, and preferred timing.')}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div>
               <label htmlFor="cf-inquiry" className={labelClass}>
-                Inquiry Type
+                {translateText('Inquiry Type')}
               </label>
               <select
                 id="cf-inquiry"
@@ -434,10 +437,10 @@ export default function ContactForm() {
                 value={form.inquiryType}
                 onChange={event => update('inquiryType', event.target.value)}
               >
-                <option value="">Select an inquiry type</option>
+                <option value="">{translateText('Select an inquiry type')}</option>
                 {INQUIRY_TYPES.map(type => (
                   <option key={type} value={type}>
-                    {type}
+                    {translateText(type)}
                   </option>
                 ))}
               </select>
@@ -445,7 +448,7 @@ export default function ContactForm() {
 
             <div>
               <label htmlFor="cf-eventtype" className={labelClass}>
-                Event Type
+                {translateText('Event Type')}
               </label>
               <select
                 id="cf-eventtype"
@@ -453,10 +456,10 @@ export default function ContactForm() {
                 value={form.eventType}
                 onChange={event => update('eventType', event.target.value)}
               >
-                <option value="">Select an event type</option>
+                <option value="">{translateText('Select an event type')}</option>
                 {EVENT_TYPES.map(type => (
                   <option key={type} value={type}>
-                    {type}
+                    {translateText(type)}
                   </option>
                 ))}
               </select>
@@ -464,11 +467,12 @@ export default function ContactForm() {
 
             <div>
               <label htmlFor="cf-eventdate" className={labelClass}>
-                Event Date
+                {translateText('Event Date')}
               </label>
               <input
                 id="cf-eventdate"
                 type="date"
+                lang={dir === 'rtl' ? 'ar-JO' : 'en-US'}
                 className={fieldClass()}
                 value={form.eventDate}
                 onChange={event => update('eventDate', event.target.value)}
@@ -478,7 +482,7 @@ export default function ContactForm() {
 
           <div className="mt-4">
             <label htmlFor="cf-product" className={labelClass}>
-              Service / Request
+              {translateText('Service / Request')}
             </label>
             <select
               id="cf-product"
@@ -486,7 +490,7 @@ export default function ContactForm() {
               value={form.product}
               onChange={event => update('product', event.target.value)}
             >
-              <option value="">General inquiry / no specific service</option>
+              <option value="">{translateText('General inquiry / no specific service')}</option>
               {products.map(product => (
                 <option key={product.slug} value={product.slug}>
                   {product.name}
@@ -503,15 +507,15 @@ export default function ContactForm() {
               <MapPin className="h-5 w-5" strokeWidth={2.2} />
             </span>
             <div>
-              <h3 className={sectionTitleClass}>Location and notes</h3>
-              <p className={sectionCaptionClass}>Where it happens and what the team should know.</p>
+              <h3 className={sectionTitleClass}>{translateText('Location and notes')}</h3>
+              <p className={sectionCaptionClass}>{translateText('Where it happens and what the team should know.')}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div>
               <label htmlFor="cf-country" className={labelClass}>
-                Country
+                {translateText('Country')}
               </label>
               <select
                 id="cf-country"
@@ -522,7 +526,7 @@ export default function ContactForm() {
               >
                 {countryOptions.map(country => (
                   <option key={country.value} value={country.value}>
-                    {country.label}
+                    {translateText(country.label)}
                   </option>
                 ))}
               </select>
@@ -530,7 +534,7 @@ export default function ContactForm() {
 
             <div>
               <label htmlFor="cf-city" className={labelClass}>
-                City / Governorate / State
+                {translateText('City / Governorate / State')}
               </label>
               <select
                 id="cf-city"
@@ -541,21 +545,21 @@ export default function ContactForm() {
                 disabled={regionOptions.length === 0}
               >
                 {regionOptions.length === 0 ? (
-                  <option value="">No regions listed for this country</option>
+                  <option value="">{translateText('No regions listed for this country')}</option>
                 ) : (
                   regionOptions.map(region => (
                     <option key={region.value} value={region.value}>
-                      {region.label}
+                      {translateText(region.label)}
                     </option>
                   ))
                 )}
               </select>
-              {regionOptions.length > 0 && <p className={hintClass}>Showing regions for {selectedCountryName}</p>}
+              {regionOptions.length > 0 && <p className={hintClass}>{translateText('Showing regions for')} {selectedCountryDisplayName}</p>}
             </div>
 
             <div>
               <label htmlFor="cf-venue" className={labelClass}>
-                Venue
+                {translateText('Venue')}
               </label>
               <input
                 id="cf-venue"
@@ -568,7 +572,7 @@ export default function ContactForm() {
 
             <div className="md:col-span-2 xl:col-span-3">
               <label htmlFor="cf-notes" className={labelClass}>
-                Message / Notes *
+                {translateText('Message / Notes')} *
               </label>
               <textarea
                 id="cf-notes"
@@ -577,7 +581,7 @@ export default function ContactForm() {
                 value={form.message}
                 onChange={event => update('message', event.target.value)}
                 maxLength={2000}
-                placeholder="Tell us what you need, preferred date, location, expected number of guests, services, rentals, or custom builds you are interested in, and any setup notes."
+                placeholder={translateText('Tell us what you need, preferred date, location, expected number of guests, services, rentals, or custom builds you are interested in, and any setup notes.')}
                 aria-invalid={errors.message ? true : undefined}
                 aria-describedby={errors.message ? 'cf-notes-error' : undefined}
               />
@@ -614,8 +618,7 @@ export default function ContactForm() {
         )}
 
         <p className={reviewNoteClass}>
-          Submitting this form starts a request review. The Eventies team reviews availability, pricing, scope, delivery
-          or shipping, and next steps before confirmation.
+          {translateText('Submitting this form starts a request review. The Eventies team reviews availability, pricing, scope, delivery or shipping, and next steps before confirmation.')}
         </p>
 
         <div className="mt-5 flex flex-col gap-3 sm:flex-row">
@@ -626,11 +629,11 @@ export default function ContactForm() {
             className="inline-flex min-h-[50px] flex-1 items-center justify-center gap-2.5 rounded-[16px] bg-[#25D366] px-5 py-3 text-[13px] font-black text-white shadow-[0_14px_30px_-18px_rgba(22,163,74,0.9)] transition-all hover:-translate-y-0.5 hover:bg-[#20BD5A] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <MessageCircle className="h-4 w-4" strokeWidth={2.4} />
-            {saving ? 'Saving...' : 'Send via WhatsApp'}
+            {translateText(saving ? 'Saving...' : 'Send via WhatsApp')}
           </button>
           <button type="button" disabled={saving} onClick={() => submit('email')} className={emailButtonClass}>
             <Mail className="h-4 w-4" strokeWidth={2.4} />
-            {saving ? 'Saving...' : 'Send via Email'}
+            {translateText(saving ? 'Saving...' : 'Send via Email')}
           </button>
         </div>
       </div>

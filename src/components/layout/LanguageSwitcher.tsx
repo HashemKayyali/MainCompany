@@ -30,7 +30,7 @@ export default function LanguageSwitcher({
     >
       <Languages className={compact ? 'h-3.5 w-3.5' : 'h-4 w-4'} strokeWidth={2.2} />
       <span>{locale === 'en' ? 'AR' : 'EN'}</span>
-      {!compact && <span className="hidden text-[11px] opacity-70 sm:inline">{nextLabel}</span>}
+      {!compact && <span className="hidden whitespace-nowrap text-[11px] opacity-70 2xl:inline">{nextLabel}</span>}
     </button>
   )
 }

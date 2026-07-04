@@ -8,6 +8,7 @@ import type { Category } from '../../data/products/types'
 import Modal from '../../components/ui/Modal'
 import ImageUploader from '../../components/ui/ImageUploader'
 import FramedImage from '../../components/ui/FramedImage'
+import CategoryTileView from '../../components/home/CategoryTileView'
 import AdminConfirmDialog from '../../components/admin/AdminConfirmDialog'
 import AdminKebabMenu, { type AdminKebabItem } from '../../components/admin/AdminKebabMenu'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
@@ -20,7 +21,30 @@ import { getErrorMessage } from '../../lib/errors'
 
 const empty: Category = { id: '', name: '', slug: '', icon: '', description: '', image: '' }
 const PAGE_SIZE_OPTIONS = [12, 24, 48]
-const ICON_OPTIONS = ['🎪', '🎮', '🕶️', '🛠️', '🧠', '🎯', '⚡', '🏁', '🔍', '🎥', '🖥️', '🎉', '💡', '🚀', '🎨', '🧩', '🛡️', '🌊', '🏆', '📸', '🤖', '🔧', '🎭', '🧃']
+const ICON_OPTIONS = Array.from(new Set([
+  '🎪', '🎡', '🎢', '🎠', '🎟️', '🎫', '🎭', '🎤', '🎧', '🎼', '🎹', '🥁',
+  '🎷', '🎺', '🎸', '🪩', '🎬', '🎥', '📽️', '📸', '📷', '🎞️', '🎨', '🖌️',
+  '🖍️', '🖼️', '🧵', '🪡', '🧶', '✂️', '📐', '📏', '🖊️', '🖋️', '📝',
+  '🎮', '🕹️', '👾', '🤖', '🧩', '🎲', '♟️', '🧠', '🎯', '🏆', '🥇', '🥈',
+  '🥉', '🏅', '🎳', '🏓', '🏸', '🥅', '⚽', '🏀', '🏈', '⚾', '🎾', '🏐',
+  '🏉', '🎱', '🥏', '🥊', '🥋', '🏁', '🏎️', '🚲', '🛴', '🛵', '🚗', '🚕',
+  '🚙', '🚌', '🚐', '🚚', '🚓', '🚑', '🚒', '🚜', '✈️', '🚁', '🚤', '⛵',
+  '💡', '🔦', '⚡', '🔌', '🔋', '🖥️', '💻', '⌨️', '🖱️', '🖨️', '📱', '📲',
+  '📟', '📡', '📺', '📻', '🎙️', '🎚️', '🎛️', '📹', '📼', '💾', '💿', '📀',
+  '🕶️', '🥽', '🛸', '🚀', '🛰️', '🌌', '🌠', '✨', '💫', '🌟', '⭐', '🔮',
+  '🪄', '🎆', '🎇', '🕯️', '🪔', '💎', '🧿', '🎉', '🎊', '🎈', '🎂', '🧁',
+  '🍰', '🍭', '🍬', '🍿', '🥤', '🧃', '🍩', '🍪', '🍫', '🍕', '🍔', '🌭',
+  '🍟', '🍗', '🌮', '🌯', '🥙', '🥗', '🍝', '🍣', '🍱', '🍦', '🍧', '🍨',
+  '☕', '🍵', '🧋', '🎁', '🧸', '🪁', '🪀', '🛝', '🎀', '🛍️', '🛒', '🏷️',
+  '💄', '💅', '💇‍♀️', '💇‍♂️', '🧴', '🪞', '👑', '🎩', '🧢', '👗', '👕',
+  '👟', '🕺', '💃', '🧘', '🏋️', '🤹', '🎯', '🎪', '🎭', '🏟️', '🏢', '🏛️',
+  '🏪', '🏬', '🏫', '🏗️', '🗓️', '📅', '📋', '📌', '📍', '🧾', '💳', '💰',
+  '🧮', '📦', '📫', '📞', '📣', '📢', '🔔', '🔍', '🔎', '🔖', '🗂️', '📁',
+  '🛠️', '🔧', '🔨', '🪛', '🧰', '⚙️', '🪜', '🧲', '🔩', '🛡️', '🚨', '🧯',
+  '⛑️', '🔒', '🔐', '🩺', '🌊', '🏖️', '🏝️', '🌴', '🌵', '🌲', '🌳', '🌺',
+  '🌸', '🌼', '🌻', '🌹', '🍀', '🍁', '❄️', '☃️', '🔥', '💧', '☀️', '🌙',
+  '☁️', '🌈', '📣', '🎇', '🎵', '🎶', '✅', '☑️', '➕', '💜', '🟣', '🟢',
+]))
 
 type CategoryFilter = 'all' | 'in_use' | 'unused'
 type CategorySort = 'name' | 'slug' | 'products_desc' | 'products_asc'
@@ -63,18 +87,24 @@ function CategoryThumb({ category, compact = false }: { category: Category; comp
     <div
       className={cn(
         'overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)]',
-        compact ? 'h-12 w-16' : 'aspect-[16/10] w-full'
+        compact ? 'flex h-14 w-20 shrink-0 items-center justify-center p-1.5' : 'aspect-[16/10] w-full'
       )}
     >
       {category.image ? (
         <FramedImage
           media={category.image}
           alt={category.name}
-          className="h-full w-full"
-          fallbackTransform={{ fit: 'cover' }}
-          onError={event => {
-            ;(event.target as HTMLImageElement).style.display = 'none'
-          }}
+          className={cn('h-full w-full', compact && 'rounded-[8px]')}
+          fallbackTransform={{ fit: compact ? 'contain' : 'cover' }}
+          style={
+            compact
+              ? {
+                  objectFit: 'contain',
+                  objectPosition: 'center',
+                  transform: 'none',
+                }
+              : undefined
+          }
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--admin-text-muted)]">
@@ -87,23 +117,15 @@ function CategoryThumb({ category, compact = false }: { category: Category; comp
 
 function CompactCategoryPreview({ category, productCount }: { category: Category; productCount: number }) {
   return (
-    <div className="mx-auto w-full max-w-[18rem] overflow-hidden rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface)]">
-      <CategoryThumb category={category} />
-      <div className="space-y-2 p-3">
-        <div className="flex items-center gap-2">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--admin-radius-sm)] bg-[var(--admin-accent-soft)] text-[18px]">
-            {category.icon || '•'}
-          </span>
-          <div className="min-w-0">
-            <div className="truncate text-[14px] font-black text-[var(--admin-text)]">{category.name || 'Category name'}</div>
-            <div className="truncate font-mono text-[10.5px] font-semibold text-[var(--admin-text-muted)]">{category.slug || 'auto-slug'}</div>
-          </div>
-        </div>
-        <p className="line-clamp-2 text-[12px] font-semibold leading-5 text-[var(--admin-text-muted)]">
-          {category.description || 'Short category description appears here.'}
-        </p>
-        <AdminBadge tone={productCount > 0 ? 'accent' : 'warning'}>{productCount > 0 ? `${productCount} products` : 'Unused'}</AdminBadge>
-      </div>
+    <div className="mx-auto w-full max-w-[18rem]">
+      <CategoryTileView
+        name={category.name || 'Category name'}
+        description={category.description || 'Short category description appears here.'}
+        image={category.image}
+        count={productCount}
+        reducedVisualEffects
+        imageLoading="eager"
+      />
     </div>
   )
 }
@@ -474,7 +496,7 @@ export default function AdminCategoriesPage() {
                     {pageItems.map(({ category, productCount }) => (
                       <tr key={category.id} className="border-t border-[var(--admin-border)] align-middle">
                         <td className="px-3 py-2.5">
-                          <div className="flex max-w-[300px] items-center gap-2.5">
+                          <div className="flex max-w-[360px] items-center gap-3">
                             <CategoryThumb category={category} compact />
                             <div className="min-w-0">
                               <div className="truncate text-[13px] font-bold text-[var(--admin-text)]">{category.name}</div>
@@ -720,7 +742,9 @@ export default function AdminCategoriesPage() {
                   defaultFit="cover"
                   frameTitle="Adjust Category Image"
                   frameHint="Position the image inside the category card frame."
-                  previewAspectClass="aspect-[4/3]"
+                  previewAspectClass="aspect-[16/9]"
+                  maxWidthClassName="w-full max-w-[46rem]"
+                  compactPreview
                   renderFrameContextPreview={media => (
                     <CompactCategoryPreview category={{ ...previewCategory, image: media }} productCount={editing.id ? countForCategory(editing.id) : 0} />
                   )}

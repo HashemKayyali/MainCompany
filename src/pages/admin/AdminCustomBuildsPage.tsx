@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { ArrowDown, ArrowUp, Eye, Pencil, Plus, Search } from 'lucide-react'
 import { useData } from '../../contexts/DataContext'
 import { useDialog } from '../../contexts/DialogContext'
 import type { CustomBuild } from '../../data/custom-builds'
@@ -32,9 +32,24 @@ const PAGE_SIZE_OPTIONS = [12, 24, 48]
 type BuildFilter = 'all' | 'active' | 'hidden' | 'featured'
 type BuildSort = 'order' | 'title' | 'category' | 'photos_desc' | 'photos_asc'
 
-function normaliseOrder(value: string) {
-  const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : 0
+function orderValueForPosition(orderedWithoutCurrent: CustomBuild[], targetIndex: number) {
+  const previous = orderedWithoutCurrent[targetIndex - 1]?.sortOrder
+  const next = orderedWithoutCurrent[targetIndex]?.sortOrder
+
+  if (previous === undefined && next === undefined) return 10
+  if (previous === undefined) return next - 10
+  if (next === undefined) return previous + 10
+  if (previous === next) return previous + 0.01
+  return previous + (next - previous) / 2
+}
+
+function buildOrderIndex(build: CustomBuild, orderedBuilds: CustomBuild[]) {
+  return orderedBuilds.findIndex(item => (build.id ? item.id === build.id : item.title === build.title))
+}
+
+function buildPositionLabel(build: CustomBuild, orderedBuilds: CustomBuild[]) {
+  const index = buildOrderIndex(build, orderedBuilds)
+  return index >= 0 ? `#${index + 1}` : '-'
 }
 
 function buildImages(build: CustomBuild) {
@@ -70,7 +85,7 @@ function Fact({ label, value }: { label: string; value: ReactNode }) {
 function BuildThumb({ build, compact = false }: { build: CustomBuild; compact?: boolean }) {
   const cover = buildImages(build)[0]
   return (
-    <div className={cn('overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)]', compact ? 'aspect-[16/10]' : 'aspect-[16/10] w-full')}>
+    <div className={cn('overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)]', compact ? 'h-14 w-24 shrink-0' : 'aspect-video w-full')}>
       {cover ? (
         <FramedImage
           media={cover}
@@ -90,23 +105,62 @@ function BuildThumb({ build, compact = false }: { build: CustomBuild; compact?: 
   )
 }
 
-function CompactBuildPreview({ build }: { build: CustomBuild }) {
-  const images = buildImages(build)
+function CustomBuildViewerPreview({ build, images: imageOverride }: { build: CustomBuild; images?: string[] }) {
+  const images = imageOverride?.filter(Boolean) ?? buildImages(build)
+  const cover = images[0] || ''
+  const title = build.title.trim() || 'Build title'
+  const category = (build.category.trim() || 'Custom').toUpperCase()
+  const description = build.description.trim() || 'Preview how this photo sits in the public build viewer.'
+  const previewThumbs = images.length ? images.slice(0, 3) : ['']
+
   return (
-    <div className="mx-auto w-full max-w-[18rem] overflow-hidden rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface)]">
-      <BuildThumb build={build} />
-      <div className="space-y-2 p-3">
-        <div className="min-w-0">
-          <div className="truncate text-[14px] font-black text-[var(--admin-text)]">{build.title || 'Build title'}</div>
-          <div className="truncate text-[11px] font-semibold text-[var(--admin-text-muted)]">{build.category || 'Uncategorized'}</div>
+    <div className="relative mx-auto w-full max-w-[20rem] overflow-hidden rounded-[var(--admin-radius)] border border-[color-mix(in_srgb,var(--admin-accent)_32%,transparent)] bg-[color-mix(in_srgb,var(--admin-accent)_30%,var(--admin-text))] p-2.5 text-white shadow-[0_18px_46px_-30px_rgba(20,8,50,0.65)]">
+      <div className="relative grid grid-cols-[44px_minmax(0,1fr)] gap-2" dir="ltr">
+        <div className="flex flex-col gap-1.5 pt-8">
+          {previewThumbs.map((image, index) => (
+            <div
+              key={`${image}-${index}`}
+              className={cn(
+                'aspect-video overflow-hidden rounded-[8px] border bg-white/10',
+                index === 0 ? 'border-fuchsia-200 ring-1 ring-fuchsia-200/45' : 'border-white/15 opacity-75'
+              )}
+            >
+              {image ? (
+                <FramedImage media={image} alt="" className="h-full w-full" fallbackTransform={{ fit: 'contain' }} />
+              ) : (
+                <div className="h-full w-full bg-white/10" />
+              )}
+            </div>
+          ))}
         </div>
-        <p className="line-clamp-2 text-[12px] font-semibold leading-5 text-[var(--admin-text-muted)]">
-          {build.description || 'Short build description appears here.'}
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          <AdminBadge tone={build.active !== false ? 'success' : 'warning'}>{build.active !== false ? 'Active' : 'Hidden'}</AdminBadge>
-          {build.featured && <AdminBadge tone="accent">Featured</AdminBadge>}
-          <AdminBadge tone={images.length > 0 ? 'success' : 'warning'}>{images.length} photos</AdminBadge>
+
+        <div className="relative overflow-hidden rounded-[14px] border border-white/15 bg-black/25 p-1.5">
+          <div className="mb-1.5 flex items-center justify-between gap-2 px-1">
+            <span className="flex min-w-0 items-center gap-1.5 truncate text-[8px] font-black uppercase tracking-[0.12em] text-white/58">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-fuchsia-300" />
+              Live Build Viewer
+            </span>
+            <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-1.5 py-0.5 text-[8px] font-bold text-white/70">
+              01/{String(Math.max(images.length, 1)).padStart(2, '0')}
+            </span>
+          </div>
+
+          <div className="relative aspect-video overflow-hidden rounded-[10px] bg-black/35">
+            {cover ? (
+              <FramedImage media={cover} alt={title} className="h-full w-full" fallbackTransform={{ fit: 'contain' }} />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-[10px] font-bold uppercase tracking-[0.14em] text-white/50">
+                No photo
+              </div>
+            )}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/18 to-transparent p-2.5">
+              <div className="inline-flex max-w-full rounded-[6px] border border-white/20 bg-black/35 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-[0.14em] text-violet-100">
+                <span className="truncate">{category}</span>
+              </div>
+              <div className="mt-1 truncate text-[14px] font-black leading-none">{title}</div>
+              <div className="mt-1 line-clamp-1 text-[9.5px] font-semibold leading-4 text-white/72">{description}</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -137,7 +191,7 @@ function PhotoTile({
   return (
     <div className="rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] p-2">
       <div className="relative overflow-hidden rounded-[var(--admin-radius-sm)] bg-[var(--admin-surface-2)]">
-        <div className="aspect-[16/10] overflow-hidden">
+        <div className="aspect-video overflow-hidden">
           <FramedImage
             media={url}
             alt=""
@@ -197,6 +251,7 @@ export default function AdminCustomBuildsPage() {
   const [isNew, setIsNew] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [reorderingId, setReorderingId] = useState<string | null>(null)
   const [creatingCategory, setCreatingCategory] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState('')
   const [search, setSearch] = useState('')
@@ -208,8 +263,25 @@ export default function AdminCustomBuildsPage() {
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
 
   const sortedBuilds = useMemo(
-    () => [...customBuilds].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)),
+    () => [...customBuilds].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.title.localeCompare(b.title)),
     [customBuilds]
+  )
+
+  const buildsWithoutEditing = useMemo(
+    () => (editing?.id ? sortedBuilds.filter(build => build.id !== editing.id) : sortedBuilds),
+    [editing?.id, sortedBuilds]
+  )
+
+  const editingPosition = useMemo(() => {
+    if (!editing) return 1
+    const orderedWithEditing = [...buildsWithoutEditing, editing].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.title.localeCompare(b.title))
+    const index = orderedWithEditing.indexOf(editing)
+    return index >= 0 ? index + 1 : orderedWithEditing.length
+  }, [buildsWithoutEditing, editing])
+
+  const orderOptions = useMemo(
+    () => Array.from({ length: buildsWithoutEditing.length + 1 }, (_, index) => index + 1),
+    [buildsWithoutEditing.length]
   )
 
   const categoryNames = useMemo(
@@ -262,6 +334,15 @@ export default function AdminCustomBuildsPage() {
 
   const patchEditing = <K extends keyof CustomBuild>(key: K, value: CustomBuild[K]) => {
     setEditing(current => (current ? { ...current, [key]: value } : null))
+  }
+
+  const setEditingPosition = (position: number) => {
+    const targetIndex = Math.min(Math.max(position - 1, 0), buildsWithoutEditing.length)
+    patchEditing('sortOrder', orderValueForPosition(buildsWithoutEditing, targetIndex))
+  }
+
+  const moveEditingPosition = (direction: -1 | 1) => {
+    setEditingPosition(editingPosition + direction)
   }
 
   const createCategory = async () => {
@@ -396,7 +477,38 @@ export default function AdminCustomBuildsPage() {
     })
   }
 
+  const moveBuildInOrder = async (build: CustomBuild, direction: -1 | 1) => {
+    if (!build.id) return
+    const currentIndex = buildOrderIndex(build, sortedBuilds)
+    const targetIndex = currentIndex + direction
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= sortedBuilds.length) return
+
+    const withoutCurrent = sortedBuilds.filter(item => item.id !== build.id)
+    const nextSortOrder = orderValueForPosition(withoutCurrent, targetIndex)
+
+    setReorderingId(build.id)
+    try {
+      await updateCustomBuild(build.id, { sortOrder: nextSortOrder })
+    } catch (error: unknown) {
+      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to reorder custom build'), variant: 'danger' })
+    } finally {
+      setReorderingId(null)
+    }
+  }
+
   const actionItems = (build: CustomBuild): AdminKebabItem[] => [
+    {
+      label: 'Move up',
+      icon: <ArrowUp className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />,
+      disabled: !build.id || buildOrderIndex(build, sortedBuilds) <= 0 || reorderingId === build.id,
+      onSelect: () => void moveBuildInOrder(build, -1),
+    },
+    {
+      label: 'Move down',
+      icon: <ArrowDown className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />,
+      disabled: !build.id || buildOrderIndex(build, sortedBuilds) < 0 || buildOrderIndex(build, sortedBuilds) >= sortedBuilds.length - 1 || reorderingId === build.id,
+      onSelect: () => void moveBuildInOrder(build, 1),
+    },
     {
       label: build.id ? 'Delete build' : 'Delete unavailable',
       tone: 'danger',
@@ -491,7 +603,7 @@ export default function AdminCustomBuildsPage() {
           <div className="flex flex-1 items-center justify-center py-8">
             <AdminEmptyState
               title={customBuilds.length ? 'No custom builds match this view' : 'No custom builds yet'}
-              description={customBuilds.length ? 'Try another status, category, sort, or search.' : 'Create the first compact custom build card.'}
+              description={customBuilds.length ? 'Try another status, category, sort, or search.' : 'Create the first custom build entry.'}
               action={
                 <AdminButton size="sm" onClick={openNew}>
                   <Plus className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
@@ -502,15 +614,101 @@ export default function AdminCustomBuildsPage() {
           </div>
         ) : (
           <>
-            <div className="mt-3 min-h-0 flex-1 overflow-y-auto pe-0.5">
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="mt-3 hidden min-h-0 flex-1 overflow-y-auto md:block">
+              <div className="admin-table-wrap">
+                <table className="min-w-[900px] w-full border-collapse text-start">
+                  <thead className="sticky top-0 z-10 bg-[var(--admin-surface-2)]">
+                    <tr className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">
+                      <th className="px-3 py-2.5 text-start">Build</th>
+                      <th className="px-3 py-2.5 text-start">Position</th>
+                      <th className="px-3 py-2.5 text-start">Photos</th>
+                      <th className="px-3 py-2.5 text-start">Category</th>
+                      <th className="px-3 py-2.5 text-start">Status</th>
+                      <th className="px-3 py-2.5 text-start">Featured</th>
+                      <th className="px-3 py-2.5 text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pageItems.map(build => {
+                      const images = buildImages(build)
+                      const orderIndex = buildOrderIndex(build, sortedBuilds)
+                      const isReordering = reorderingId === build.id
+                      return (
+                        <tr key={build.id || build.title} className="border-t border-[var(--admin-border)] align-middle hover:bg-[var(--admin-surface-2)]">
+                          <td className="px-3 py-2.5">
+                            <div className="flex max-w-[420px] items-center gap-3">
+                              <BuildThumb build={build} compact />
+                              <div className="min-w-0">
+                                <div className="truncate text-[13px] font-bold text-[var(--admin-text)]">{build.title}</div>
+                                <div className="line-clamp-1 text-[11px] text-[var(--admin-text-muted)]">{build.description || 'No description'}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="inline-flex min-h-[32px] min-w-[3rem] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-2 text-[12px] font-black tabular-nums text-[var(--admin-text)]">
+                                {buildPositionLabel(build, sortedBuilds)}
+                              </span>
+                              <button
+                                type="button"
+                                className="admin-icon-btn"
+                                aria-label={`Move ${build.title} up`}
+                                disabled={!build.id || orderIndex <= 0 || isReordering}
+                                onClick={() => void moveBuildInOrder(build, -1)}
+                              >
+                                <ArrowUp className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                              </button>
+                              <button
+                                type="button"
+                                className="admin-icon-btn"
+                                aria-label={`Move ${build.title} down`}
+                                disabled={!build.id || orderIndex < 0 || orderIndex >= sortedBuilds.length - 1 || isReordering}
+                                onClick={() => void moveBuildInOrder(build, 1)}
+                              >
+                                <ArrowDown className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                              </button>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5 text-[13px] font-bold tabular-nums text-[var(--admin-text)]">{images.length}</td>
+                          <td className="px-3 py-2.5">
+                            <span className="block max-w-[150px] truncate text-[12px] font-semibold text-[var(--admin-text-muted)]">{build.category || 'Uncategorized'}</span>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <AdminBadge tone={build.active !== false ? 'success' : 'warning'}>{build.active !== false ? 'Active' : 'Hidden'}</AdminBadge>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <AdminBadge tone={build.featured ? 'accent' : 'warning'}>{build.featured ? 'Featured' : 'No'}</AdminBadge>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <AdminButton size="sm" variant="outline" onClick={() => setDetails(build)}>
+                                <Eye className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                                Details
+                              </AdminButton>
+                              <AdminButton size="sm" onClick={() => openEdit(build)}>
+                                <Pencil className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                                Edit
+                              </AdminButton>
+                              <AdminKebabMenu label={`More actions for ${build.title}`} items={actionItems(build)} />
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="mt-3 min-h-0 flex-1 overflow-y-auto pe-0.5 md:hidden">
+              <div className="grid grid-cols-1 gap-2.5">
                 {pageItems.map(build => {
                   const images = buildImages(build)
                   return (
-                    <article key={build.id || build.title} className="admin-card min-w-0 p-2.5">
-                      <div className="grid grid-cols-[96px_minmax(0,1fr)] gap-3">
+                    <article key={build.id || build.title} className="admin-card min-w-0 p-3">
+                      <div className="flex items-start gap-3">
                         <BuildThumb build={build} compact />
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
                               <h2 className="truncate text-[14px] font-black text-[var(--admin-text)]">{build.title}</h2>
@@ -523,7 +721,7 @@ export default function AdminCustomBuildsPage() {
                       </div>
 
                       <div className="mt-3 grid grid-cols-3 gap-2">
-                        <Fact label="Order" value={build.sortOrder || 0} />
+                        <Fact label="Position" value={buildPositionLabel(build, sortedBuilds)} />
                         <Fact label="Photos" value={images.length} />
                         <Fact label="Featured" value={build.featured ? 'Yes' : 'No'} />
                       </div>
@@ -535,9 +733,11 @@ export default function AdminCustomBuildsPage() {
 
                       <div className="mt-3 grid grid-cols-[1fr_1fr_auto] gap-2">
                         <AdminButton size="sm" variant="outline" onClick={() => setDetails(build)}>
+                          <Eye className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
                           Details
                         </AdminButton>
                         <AdminButton size="sm" onClick={() => openEdit(build)}>
+                          <Pencil className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
                           Edit
                         </AdminButton>
                         <AdminKebabMenu label={`More actions for ${build.title}`} items={actionItems(build)} />
@@ -612,7 +812,7 @@ export default function AdminCustomBuildsPage() {
                     <p className="mt-2 text-[13px] leading-6 text-[var(--admin-text-muted)]">{details.description || 'No description has been added.'}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <Fact label="Order" value={details.sortOrder || 0} />
+                    <Fact label="Position" value={buildPositionLabel(details, sortedBuilds)} />
                     <Fact label="Photos" value={buildImages(details).length} />
                   </div>
                 </div>
@@ -623,7 +823,7 @@ export default function AdminCustomBuildsPage() {
               {buildImages(details).length > 0 ? (
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                   {buildImages(details).slice(0, 8).map((image, index) => (
-                    <div key={`${image}-${index}`} className="aspect-[16/10] overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)]">
+                    <div key={`${image}-${index}`} className="aspect-video overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)]">
                       <FramedImage media={image} alt="" className="h-full w-full" fallbackTransform={{ fit: 'cover' }} />
                     </div>
                   ))}
@@ -659,9 +859,9 @@ export default function AdminCustomBuildsPage() {
         }
       >
         {editing && (
-          <div className="admin-scope grid min-h-0 gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+          <div className="admin-scope min-h-0">
             <div className="min-w-0 space-y-4">
-              <FieldSection title="Content / Category" description="Title, category, order, and category creation stay in one compact editing group.">
+              <FieldSection title="Content / Category" description="Title, category, and public position stay in one compact editing group.">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <label className="admin-label mb-1.5" htmlFor="build-title">Title *</label>
@@ -713,15 +913,40 @@ export default function AdminCustomBuildsPage() {
                       </AdminButton>
                     </div>
                   </div>
-                  <div>
-                    <label className="admin-label mb-1.5" htmlFor="build-order">Order</label>
-                    <input
-                      id="build-order"
-                      className="admin-input"
-                      type="number"
-                      value={editing.sortOrder}
-                      onChange={event => patchEditing('sortOrder', normaliseOrder(event.target.value))}
-                    />
+                  <div className="rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] p-3">
+                    <label className="admin-label mb-1.5" htmlFor="build-position">Public position</label>
+                    <select
+                      id="build-position"
+                      className="admin-input bg-[var(--admin-surface)]"
+                      value={editingPosition}
+                      onChange={event => setEditingPosition(Number(event.target.value))}
+                    >
+                      {orderOptions.map(position => (
+                        <option key={position} value={position}>
+                          Position {position} of {orderOptions.length}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <AdminButton
+                        size="sm"
+                        variant="outline"
+                        onClick={() => moveEditingPosition(-1)}
+                        disabled={editingPosition <= 1}
+                      >
+                        <ArrowUp className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                        Move up
+                      </AdminButton>
+                      <AdminButton
+                        size="sm"
+                        variant="outline"
+                        onClick={() => moveEditingPosition(1)}
+                        disabled={editingPosition >= orderOptions.length}
+                      >
+                        <ArrowDown className="h-4 w-4" strokeWidth={2.1} aria-hidden="true" />
+                        Move down
+                      </AdminButton>
+                    </div>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="admin-label mb-1.5" htmlFor="build-description">Description</label>
@@ -758,16 +983,16 @@ export default function AdminCustomBuildsPage() {
                     compact
                     onChange={addImage}
                     folder="custom-builds"
-                    frameAspect={16 / 10}
-                    defaultFit="cover"
+                    frameAspect={16 / 9}
+                    defaultFit="contain"
                     frameTitle="Adjust Custom Build Photo"
-                    frameHint="Choose the crop used inside this custom build card."
-                    previewAspectClass="aspect-[16/10]"
+                    frameHint="Position the photo inside the public custom build viewer."
+                    previewAspectClass="aspect-video"
                     renderFrameContextPreview={media =>
-                      <CompactBuildPreview build={{ ...previewBuild, image: previewImages[0] || media, images: media ? [...previewImages, media] : previewImages }} />
+                      <CustomBuildViewerPreview build={previewBuild} images={media ? [media, ...previewImages.filter(image => image !== media)] : previewImages} />
                     }
-                    frameContextTitle="Custom Build Card"
-                    frameContextHint="Check the compact build card while framing."
+                    frameContextTitle="Public Build Viewer"
+                    frameContextHint="Matches the large image container on the custom builds page."
                   />
                 </div>
               </FieldSection>
@@ -795,12 +1020,6 @@ export default function AdminCustomBuildsPage() {
                 </div>
               </FieldSection>
             </div>
-
-            <aside className="min-w-0 xl:sticky xl:top-0 xl:self-start">
-              <FieldSection title="Compact Preview" description="A small admin preview of the public build card.">
-                <CompactBuildPreview build={previewBuild} />
-              </FieldSection>
-            </aside>
           </div>
         )}
       </Modal>
@@ -810,19 +1029,19 @@ export default function AdminCustomBuildsPage() {
         media={activeImageIndex !== null ? previewImages[activeImageIndex] : ''}
         title="Adjust Custom Build Photo"
         type="image"
-        aspectRatio={16 / 10}
-        defaultFit="cover"
-        hint="Choose what should stay visible inside this custom build card frame."
+        aspectRatio={16 / 9}
+        defaultFit="contain"
+        hint="Position the photo inside the public custom build viewer frame."
         contextPreview={media => {
           const nextImages =
             activeImageIndex === null
               ? previewImages
               : previewImages.map((image, index) => (index === activeImageIndex ? media : image))
 
-          return <CompactBuildPreview build={{ ...previewBuild, image: nextImages[0] || '', images: nextImages }} />
+          return <CustomBuildViewerPreview build={previewBuild} images={nextImages} />
         }}
-        contextPreviewTitle="Custom Build Card"
-        contextPreviewHint="Refine this photo while checking the compact card."
+        contextPreviewTitle="Public Build Viewer"
+        contextPreviewHint="Matches the large image container on the custom builds page."
         onApply={media => {
           if (activeImageIndex === null) return
           updateImageFrame(activeImageIndex, media)

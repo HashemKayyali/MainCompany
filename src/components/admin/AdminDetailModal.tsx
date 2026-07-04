@@ -11,6 +11,7 @@ export type AdminDetailSection = {
   description?: string
   facts?: AdminFact[]
   content?: React.ReactNode
+  wide?: boolean
 }
 
 interface AdminDetailModalProps {
@@ -23,7 +24,7 @@ interface AdminDetailModalProps {
   summaryFacts?: AdminFact[]
   sections?: AdminDetailSection[]
   actions?: React.ReactNode
-  size?: 'lg' | 'xl' | '2xl'
+  size?: 'lg' | 'xl' | '2xl' | '3xl'
 }
 
 // Collapsible on mobile (native <details>), always-open card on desktop.
@@ -55,7 +56,12 @@ function DetailSection({ section, isDesktop }: { section: AdminDetailSection; is
 
   if (isDesktop) {
     return (
-      <section className="rounded-[18px] border border-violet-200/70 bg-white p-4 shadow-[0_8px_24px_-18px_rgba(89,23,196,0.16)] sm:p-5">
+      <section
+        className={cn(
+          'rounded-[18px] border border-violet-200/70 bg-white p-4 shadow-[0_8px_24px_-18px_rgba(89,23,196,0.16)] sm:p-5',
+          section.wide && 'lg:col-span-2'
+        )}
+      >
         <h3 className="font-sans text-[1.05rem] font-extrabold text-[#1a0b3d]">{section.title}</h3>
         {body}
       </section>

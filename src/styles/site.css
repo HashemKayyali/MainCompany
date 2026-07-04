@@ -38,6 +38,17 @@ html.lenis-root body {
   outline: none !important;
 }
 
+/* The search field is allowed to shrink on constrained desktops; long
+   placeholders (especially Arabic) must truncate instead of forcing width. */
+.nav-search-input {
+  text-overflow: ellipsis;
+}
+.nav-search-input::placeholder {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ── Performance / Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
   .animate-aurora,
@@ -883,40 +894,40 @@ html[dir="rtl"] .font-sans {
   font-family: var(--eventies-arabic-font) !important;
 }
 
-html[dir="rtl"] .font-display {
+html[dir="rtl"] .font-display:not([data-i18n-skip]):not([data-i18n-skip] *) {
   font-family: var(--eventies-arabic-font) !important;
   line-height: 1.18 !important;
   letter-spacing: 0 !important;
 }
 
-html[dir="rtl"] h1.font-display,
+html[dir="rtl"] h1.font-display:not([data-i18n-skip]):not([data-i18n-skip] *),
 html[dir="rtl"] .hero-title-silver {
   font-size: clamp(2.05rem, 4vw, 3.8rem) !important;
   line-height: 1.2 !important;
   letter-spacing: 0 !important;
 }
 
-html[dir="rtl"] h2.font-display {
+html[dir="rtl"] h2.font-display:not([data-i18n-skip]):not([data-i18n-skip] *) {
   line-height: 1.18 !important;
   letter-spacing: 0 !important;
 }
 
-html[dir="rtl"] .uppercase,
-html[dir="rtl"] [class*="tracking-"] {
+html[dir="rtl"] .uppercase:not([data-i18n-skip]):not([data-i18n-skip] *),
+html[dir="rtl"] [class*="tracking-"]:not([data-i18n-skip]):not([data-i18n-skip] *) {
   letter-spacing: 0 !important;
 }
 
-html[dir="rtl"] .font-display.leading-none,
-html[dir="rtl"] .font-display[class*="leading-"] {
+html[dir="rtl"] .font-display.leading-none:not([data-i18n-skip]):not([data-i18n-skip] *),
+html[dir="rtl"] .font-display[class*="leading-"]:not([data-i18n-skip]):not([data-i18n-skip] *) {
   line-height: 1.2 !important;
 }
 
-html[dir="rtl"] p,
-html[dir="rtl"] li,
-html[dir="rtl"] .text-sm,
-html[dir="rtl"] .text-base,
-html[dir="rtl"] .text-lg,
-html[dir="rtl"] .text-xl {
+html[dir="rtl"] p:not([data-i18n-skip]):not([data-i18n-skip] *),
+html[dir="rtl"] li:not([data-i18n-skip]):not([data-i18n-skip] *),
+html[dir="rtl"] .text-sm:not([data-i18n-skip]):not([data-i18n-skip] *),
+html[dir="rtl"] .text-base:not([data-i18n-skip]):not([data-i18n-skip] *),
+html[dir="rtl"] .text-lg:not([data-i18n-skip]):not([data-i18n-skip] *),
+html[dir="rtl"] .text-xl:not([data-i18n-skip]):not([data-i18n-skip] *) {
   line-height: 1.95;
 }
 
@@ -1019,4 +1030,22 @@ html[dir="rtl"] .eventies-logo-full--hero,
 html[dir="rtl"] .eventies-logo-full--original,
 .nav-shell-ar .eventies-logo-full--original {
   filter: none !important;
+}
+
+/* ── Dynamic (database/user) content: identical typography to English mode ──
+   Elements marked data-i18n-skip carry original (often English) database
+   content. They must not inherit the Arabic font swap above — English
+   product names/descriptions keep the exact same font, weight rendering,
+   and tracking as in English mode. Placed last so it wins the ties against
+   the html[dir="rtl"] font overrides above. */
+html[dir='rtl'] [data-i18n-skip],
+html[dir='rtl'] [data-i18n-skip] * {
+  font-family: 'Alexandria', 'IBM Plex Sans Arabic', system-ui, sans-serif !important;
+}
+
+/* Content-direction elements also align by their own content direction,
+   overriding any inherited RTL alignment (English -> left, Arabic -> right). */
+html[dir='rtl'] [data-i18n-skip][dir='auto'],
+html[dir='rtl'] [data-i18n-skip][dir='ltr'] {
+  text-align: start;
 }

@@ -36,6 +36,23 @@ const NAV_LINKS = [
   { to: '/contact', label: 'Contact' },
 ]
 
+/* Priority navigation: only the primary links are always visible in the
+   desktop bar. Secondary links live in the "More" menu until the viewport is
+   wide enough (≥1720px) to fit every link inline — the full set of eight
+   links plus search and actions needs ~1650px even in English. */
+const PRIMARY_NAV_LINKS = [
+  { to: '/', label: 'Home' },
+  { to: '/products', label: 'Services' },
+  { to: '/gallery', label: 'Gallery' },
+]
+
+const SECONDARY_NAV_LINKS = [
+  { to: '/custom-builds', label: 'Custom Builds' },
+  { to: '/customers', label: 'Customers' },
+  { to: '/about', label: 'About' },
+  { to: '/contact', label: 'Contact' },
+]
+
 type SearchResult = {
   type: 'category' | 'product'
   label: string
@@ -81,9 +98,12 @@ function BrandLogo({ overHero, compact = false }: { overHero: boolean; compact?:
   // Use the approved full logo asset as one image so the wordmark never changes
   // between English and Arabic modes. The only allowed change is color treatment:
   // white over dark hero sections, original colored/black logo after scrolling.
+  // Fluid by mode: never a fixed width that can push the bar past the
+  // viewport. The floor (104px) keeps the wordmark readable on 280px screens;
+  // desktop modes trade a little logo width for nav/search room.
   const logoSize = compact
-    ? 'h-[38px] w-[176px]'
-    : 'h-[36px] w-[165px] min-[420px]:h-[42px] min-[420px]:w-[192px] sm:h-[52px] sm:w-[238px]'
+    ? 'h-[38px] w-[clamp(120px,40vw,176px)]'
+    : 'h-9 w-[clamp(104px,34vw,165px)] md:h-11 md:w-[201px] lg:h-10 lg:w-[183px] 2xl:h-11 2xl:w-[201px] min-[1720px]:h-12 min-[1720px]:w-[220px]'
   const logoTone = overHero ? 'eventies-logo-full--hero' : 'eventies-logo-full--original'
 
   return (
@@ -122,6 +142,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [catsOpen, setCatsOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
   const [userOpen, setUserOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
@@ -130,6 +151,7 @@ export default function Navbar() {
   const searchRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const catsRef = useRef<HTMLDivElement>(null)
+  const moreRef = useRef<HTMLDivElement>(null)
   const userRef = useRef<HTMLDivElement>(null)
   const fastNavIntentRef = useRef<{ to: string; at: number } | null>(null)
 
@@ -166,6 +188,7 @@ export default function Navbar() {
   useEffect(() => {
     setMobileOpen(false)
     setCatsOpen(false)
+    setMoreOpen(false)
     setUserOpen(false)
     setSearchFocused(false)
     setQuery('')
@@ -175,11 +198,24 @@ export default function Navbar() {
     const onDown = (event: MouseEvent) => {
       const target = event.target as Node
       if (catsRef.current && !catsRef.current.contains(target)) setCatsOpen(false)
+      if (moreRef.current && !moreRef.current.contains(target)) setMoreOpen(false)
       if (userRef.current && !userRef.current.contains(target)) setUserOpen(false)
       if (searchRef.current && !searchRef.current.contains(target)) setSearchFocused(false)
     }
     document.addEventListener('mousedown', onDown)
     return () => document.removeEventListener('mousedown', onDown)
+  }, [])
+
+  useEffect(() => {
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setCatsOpen(false)
+      setMoreOpen(false)
+      setUserOpen(false)
+      setMobileOpen(false)
+    }
+    document.addEventListener('keydown', onEscape)
+    return () => document.removeEventListener('keydown', onEscape)
   }, [])
 
   useEffect(() => {
@@ -353,10 +389,31 @@ export default function Navbar() {
     ? 'border-white/50 bg-white/95 shadow-[0_8px_24px_-12px_rgba(8,3,26,0.6)] focus-within:border-violet-300 focus-within:bg-white'
     : 'border-violet-200 bg-white focus-within:border-violet-300'
 
+  const menuSurface =
+    'overflow-hidden rounded-[20px] border border-violet-200/80 bg-white shadow-[0_36px_80px_-26px_rgba(46,10,114,0.45)]'
+
+  const desktopNavLink = (item: { to: string; label: string }, extraClass = '') => {
+    const isCurrent = active(item.to)
+    return (
+      <Link
+        key={item.to}
+        to={item.to}
+        onMouseEnter={() => preloadRoute(item.to)}
+        onFocus={() => preloadRoute(item.to)}
+        {...fastNavProps(item.to)}
+        aria-current={isCurrent ? 'page' : undefined}
+        className={`relative inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-full px-3.5 font-display text-[13px] font-semibold transition-colors ${linkColor(isCurrent)} ${extraClass}`}
+      >
+        {isCurrent && <span className={`absolute inset-0 rounded-full ${activePill}`} />}
+        <span className="relative z-10">{tr(item.label)}</span>
+      </Link>
+    )
+  }
+
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <div className={`border-b transition-colors duration-300 ${barSurface}`} dir="ltr">
-        <div className={`site-container flex h-[74px] items-center gap-2.5 sm:gap-4 ${isArabic ? 'nav-shell-ar' : ''}`}>
+        <div className={`site-container flex h-[74px] min-w-0 items-center gap-[clamp(8px,1.2vw,18px)] ${isArabic ? 'nav-shell-ar' : ''}`}>
           {/* Logo — larger */}
           <Link
             to="/"
@@ -369,25 +426,10 @@ export default function Navbar() {
             <BrandLogo overHero={overHero} />
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Main navigation">
-            {NAV_LINKS.slice(0, 1).map(item => {
-              const isCurrent = active(item.to)
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  onMouseEnter={() => preloadRoute(item.to)}
-                  onFocus={() => preloadRoute(item.to)}
-                  {...fastNavProps(item.to)}
-                  aria-current={isCurrent ? 'page' : undefined}
-                  className={`relative inline-flex h-9 items-center rounded-full px-3.5 font-display text-[13px] font-semibold transition-colors ${linkColor(isCurrent)}`}
-                >
-                  {isCurrent && <span className={`absolute inset-0 rounded-full ${activePill}`} />}
-                  <span className="relative z-10">{tr(item.label)}</span>
-                </Link>
-              )
-            })}
+          {/* Desktop nav — priority links always visible, secondary links
+              collapse into the More menu until ~1720px. */}
+          <nav className="hidden shrink-0 items-center gap-0.5 lg:flex" aria-label="Main navigation">
+            {desktopNavLink(PRIMARY_NAV_LINKS[0])}
 
             <div ref={catsRef} className="relative">
               <button
@@ -464,30 +506,69 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
-            {NAV_LINKS.slice(1).map(item => {
-              const isCurrent = active(item.to)
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  onMouseEnter={() => preloadRoute(item.to)}
-                  onFocus={() => preloadRoute(item.to)}
-                  {...fastNavProps(item.to)}
-                  aria-current={isCurrent ? 'page' : undefined}
-                  className={`relative inline-flex h-9 items-center rounded-full px-3.5 font-display text-[13px] font-semibold transition-colors ${linkColor(isCurrent)}`}
-                >
-                  {isCurrent && <span className={`absolute inset-0 rounded-full ${activePill}`} />}
-                  <span className="relative z-10">{tr(item.label)}</span>
-                </Link>
-              )
-            })}
+            {PRIMARY_NAV_LINKS.slice(1).map(item => desktopNavLink(item))}
+
+            {/* Secondary links inline only when the full set genuinely fits. */}
+            {SECONDARY_NAV_LINKS.map(item => desktopNavLink(item, 'hidden min-[1720px]:inline-flex'))}
+
+            {/* More menu — holds secondary links on constrained desktops. */}
+            <div ref={moreRef} className="relative min-[1720px]:hidden">
+              <button
+                type="button"
+                onClick={() => setMoreOpen(open => !open)}
+                aria-expanded={moreOpen}
+                aria-haspopup="menu"
+                className={`relative inline-flex h-9 items-center gap-1 whitespace-nowrap rounded-full px-3.5 font-display text-[13px] font-semibold transition-colors ${linkColor(
+                  SECONDARY_NAV_LINKS.some(item => active(item.to))
+                )}`}
+              >
+                {(SECONDARY_NAV_LINKS.some(item => active(item.to)) || moreOpen) && (
+                  <span className={`absolute inset-0 rounded-full ${activePill}`} />
+                )}
+                <span className="relative z-10">{tr('More')}</span>
+                <ChevronDown className={`relative z-10 h-3.5 w-3.5 transition-transform ${moreOpen ? 'rotate-180' : ''}`} strokeWidth={2.4} />
+              </button>
+
+              <AnimatePresence>
+                {moreOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.97 }}
+                    transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                    dir={dir}
+                    className={`absolute left-0 top-[calc(100%+12px)] z-50 w-[224px] p-2 ${menuSurface}`}
+                    role="menu"
+                  >
+                    {SECONDARY_NAV_LINKS.map(item => (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        onMouseEnter={() => preloadRoute(item.to)}
+                        onFocus={() => preloadRoute(item.to)}
+                        {...fastNavProps(item.to, () => setMoreOpen(false))}
+                        role="menuitem"
+                        aria-current={active(item.to) ? 'page' : undefined}
+                        className={`flex items-center rounded-[13px] px-3 py-2.5 font-display text-[13px] font-semibold transition-colors ${
+                          active(item.to) ? 'bg-violet-50 text-violet-900' : 'text-ink-800 hover:bg-violet-50 hover:text-violet-900'
+                        }`}
+                      >
+                        {tr(item.label)}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </nav>
 
-          {/* Right cluster: search + utilities */}
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-2.5">
-            {/* Inline search — wider */}
-            <div ref={searchRef} className="relative hidden lg:block">
-              <div className={`flex h-11 w-[clamp(260px,28vw,430px)] items-center gap-2.5 rounded-full border px-4 transition-all duration-200 ${searchSurface}`}>
+          {/* Right cluster: search + utilities. flex-1 + min-w-0 lets the
+              search absorb or release width instead of overflowing the bar. */}
+          <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-1.5 sm:gap-2.5">
+            {/* Inline search — flexible between a usable minimum and a
+                comfortable maximum; shrinks before anything overflows. */}
+            <div ref={searchRef} className="relative hidden w-full min-w-[150px] max-w-[430px] lg:block">
+              <div className={`flex h-11 w-full min-w-0 items-center gap-2.5 rounded-full border px-4 transition-all duration-200 ${searchSurface}`}>
                 <Search className="h-[18px] w-[18px] shrink-0 text-violet-500" strokeWidth={2.2} />
                 <input
                   ref={searchInputRef}
@@ -563,7 +644,7 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
-            <LanguageSwitcher className={`hidden sm:inline-flex ${utilityBtn}`} />
+            <LanguageSwitcher className={`hidden shrink-0 md:inline-flex ${utilityBtn}`} />
 
             {/* Request draft */}
             <Link
@@ -572,7 +653,7 @@ export default function Navbar() {
               onFocus={() => preloadRoute('/rental-cart')}
               {...fastNavProps('/rental-cart')}
               aria-label={itemCount > 0 ? `${tr('Request draft')}, ${itemCount} ${tr('items')}` : tr('Request draft')}
-              className={`relative inline-flex h-11 w-11 items-center justify-center gap-2 rounded-full border px-0 transition-all sm:w-auto sm:justify-start sm:px-3.5 ${utilityBtn}`}
+              className={`relative inline-flex h-11 w-11 shrink-0 items-center justify-center gap-2 rounded-full border px-0 transition-all 2xl:w-auto 2xl:justify-start 2xl:px-3.5 ${utilityBtn}`}
             >
               <span className="relative inline-flex">
                 <ShoppingCart className="h-[18px] w-[18px]" strokeWidth={2.2} />
@@ -582,7 +663,7 @@ export default function Navbar() {
                   </span>
                 )}
               </span>
-              <span className="hidden font-display text-[13px] font-semibold sm:inline">{tr('Request Draft')}</span>
+              <span className="hidden whitespace-nowrap font-display text-[13px] font-semibold 2xl:inline">{tr('Request Draft')}</span>
             </Link>
 
             {/* User / Login */}
@@ -593,13 +674,13 @@ export default function Navbar() {
                   onClick={() => setUserOpen(open => !open)}
                   aria-expanded={userOpen}
                   aria-label={tr('Account menu')}
-                  className={`inline-flex h-11 w-11 items-center justify-center rounded-full border p-0 transition-all sm:w-auto sm:justify-start sm:gap-2 sm:pl-1.5 sm:pr-3 ${utilityBtn}`}
+                  className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border p-0 transition-all 2xl:w-auto 2xl:justify-start 2xl:gap-2 2xl:pl-1.5 2xl:pr-3 ${utilityBtn}`}
                 >
                   <Avatar name={currentUser?.name} email={currentUser?.email} className="h-8 w-8 text-[12px]" ring={overHero ? 'ring-2 ring-white/50' : 'ring-2 ring-white'} />
-                  <span className="hidden max-w-[96px] truncate font-display text-[13px] font-bold md:inline">
+                  <span className="hidden max-w-[96px] truncate font-display text-[13px] font-bold 2xl:inline">
                     {accountButtonLabel}
                   </span>
-                  <ChevronDown className={`hidden h-3.5 w-3.5 transition-transform sm:block ${userOpen ? 'rotate-180' : ''}`} strokeWidth={2.2} />
+                  <ChevronDown className={`hidden h-3.5 w-3.5 transition-transform 2xl:block ${userOpen ? 'rotate-180' : ''}`} strokeWidth={2.2} />
                 </button>
 
                 <AnimatePresence>
@@ -660,7 +741,7 @@ export default function Navbar() {
                 onMouseEnter={() => preloadRoute('/login')}
                 onFocus={() => preloadRoute('/login')}
                 {...fastNavProps('/login')}
-                className={`group inline-flex h-11 w-11 items-center justify-center rounded-full border p-0 font-bold transition-all hover:-translate-y-0.5 sm:w-auto sm:justify-start sm:gap-2 sm:pl-1.5 sm:pr-4 ${
+                className={`group inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border p-0 font-bold transition-all hover:-translate-y-0.5 2xl:w-auto 2xl:justify-start 2xl:gap-2 2xl:pl-1.5 2xl:pr-4 ${
                   overHero
                     ? 'border-white/45 bg-white text-ink-900'
                     : 'border-violet-200 bg-white text-ink-900 hover:border-violet-300 hover:shadow-[0_12px_26px_-12px_rgba(124,58,237,0.45)]'
@@ -669,7 +750,7 @@ export default function Navbar() {
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white shadow-[0_6px_14px_-6px_rgba(192,38,211,0.7)] transition-transform group-hover:scale-105">
                   <User2 className="h-4 w-4" strokeWidth={2.4} />
                 </span>
-                <span className="hidden font-display text-[13px] sm:inline">{tr('Login')}</span>
+                <span className="hidden whitespace-nowrap font-display text-[13px] 2xl:inline">{tr('Login')}</span>
               </Link>
             )}
 
@@ -679,7 +760,7 @@ export default function Navbar() {
               onClick={() => setMobileOpen(open => !open)}
               aria-label={tr('Menu')}
               aria-expanded={mobileOpen}
-              className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition-all lg:hidden ${utilityBtn}`}
+              className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all lg:hidden ${utilityBtn}`}
             >
               {mobileOpen ? <X className="h-5 w-5" strokeWidth={2.2} /> : <Menu className="h-5 w-5" strokeWidth={2.2} />}
             </button>
@@ -701,7 +782,7 @@ export default function Navbar() {
             />
             <motion.div
               dir={dir}
-              className="fixed inset-x-0 top-0 z-50 max-h-[92vh] overflow-y-auto rounded-b-[24px] border-b border-violet-100 bg-white p-4 shadow-2xl lg:hidden"
+              className="fixed inset-x-0 top-0 z-50 max-h-[92vh] overflow-y-auto rounded-b-[24px] border-b border-violet-100 bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl lg:hidden"
               initial={{ y: '-100%' }}
               animate={{ y: 0 }}
               exit={{ y: '-100%' }}

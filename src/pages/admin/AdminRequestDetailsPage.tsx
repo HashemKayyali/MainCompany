@@ -7,6 +7,8 @@ import AdminBadge, { type AdminBadgeTone } from '../../components/admin/primitiv
 import AdminButton from '../../components/admin/primitives/AdminButton'
 import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
 import AdminSkeleton from '../../components/admin/primitives/AdminSkeleton'
+import FramedImage from '../../components/ui/FramedImage'
+import { useProductsData } from '../../contexts/DataContext'
 import { useToast } from '../../contexts/ToastContext'
 import { getRentalAvailability } from '../../services/availability.service'
 import {
@@ -125,10 +127,26 @@ function Fact({ label, value, valueClassName = '' }: { label: string; value: Rea
   )
 }
 
-function ItemMark({ title }: { title: string }) {
+function ItemMark({ title, image }: { title: string; image?: string }) {
+  const [broken, setBroken] = useState(false)
+
+  useEffect(() => {
+    setBroken(false)
+  }, [image])
+
   return (
-    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-accent-soft)] text-[13px] font-black text-[var(--admin-accent)]">
-      {title.trim().charAt(0).toUpperCase() || 'I'}
+    <div className="flex h-11 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-accent-soft)] text-[13px] font-black text-[var(--admin-accent)]">
+      {image && !broken ? (
+        <FramedImage
+          media={image}
+          alt={title}
+          className="h-full w-full"
+          fallbackTransform={{ fit: 'cover' }}
+          onError={() => setBroken(true)}
+        />
+      ) : (
+        title.trim().charAt(0).toUpperCase() || 'I'
+      )}
     </div>
   )
 }
@@ -137,6 +155,7 @@ export default function AdminRequestDetailsPage() {
   const { type, id } = useParams<{ type: RequestType; id: string }>()
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { products } = useProductsData()
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [request, setRequest] = useState<RentalRequestDetails | PurchaseQuoteRequestDetails | null>(null)
@@ -149,6 +168,15 @@ export default function AdminRequestDetailsPage() {
 
   const isRental = type === 'rental'
   const isPurchaseQuote = type === 'purchase_quote'
+
+  const productLookup = useMemo(() => {
+    const map = new Map<string, string>()
+    products.forEach(product => {
+      if (product.id) map.set(product.id, product.heroImage)
+      map.set(product.slug, product.heroImage)
+    })
+    return map
+  }, [products])
 
   const load = async () => {
     if (!id || (!isRental && !isPurchaseQuote)) {
@@ -449,11 +477,12 @@ export default function AdminRequestDetailsPage() {
                       <tbody>
                         {request.items.map(item => {
                           const availability = isRentalItem(item) ? availabilityMap[item.id] : null
+                          const productImage = productLookup.get(item.productId) || productLookup.get(item.productSlug) || ''
                           return (
                             <tr key={item.id} className="border-t border-[var(--admin-border)] align-middle">
                               <td className="px-3 py-2.5">
                                 <div className="flex min-w-[220px] items-center gap-2.5">
-                                  <ItemMark title={item.productTitleSnapshot} />
+                                  <ItemMark title={item.productTitleSnapshot} image={productImage} />
                                   <div className="min-w-0">
                                     <div className="truncate text-[13px] font-bold text-[var(--admin-text)]">{item.productTitleSnapshot}</div>
                                     <div className="truncate text-[11px] text-[var(--admin-text-muted)]">{item.productSlug}</div>
@@ -494,10 +523,11 @@ export default function AdminRequestDetailsPage() {
                 <div className="space-y-2.5 md:hidden">
                   {request.items.map(item => {
                     const availability = isRentalItem(item) ? availabilityMap[item.id] : null
+                    const productImage = productLookup.get(item.productId) || productLookup.get(item.productSlug) || ''
                     return (
                       <article key={item.id} className="rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] p-3">
                         <div className="flex items-start gap-2.5">
-                          <ItemMark title={item.productTitleSnapshot} />
+                          <ItemMark title={item.productTitleSnapshot} image={productImage} />
                           <div className="min-w-0">
                             <div className="text-[13px] font-bold text-[var(--admin-text)]">{item.productTitleSnapshot}</div>
                             <div className="mt-0.5 text-[11px] text-[var(--admin-text-muted)]">Qty {item.quantity}</div>

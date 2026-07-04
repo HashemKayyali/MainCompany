@@ -11,6 +11,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import type { RequestType } from '../../types/commerce'
+import { useI18n } from '../../contexts/LanguageContext'
 import { formatRequestStatusLabel } from '../../utils/commerce'
 import { cn } from '../../utils/cn'
 
@@ -77,6 +78,7 @@ export function getJourneyPosition(
  * "Step 2 of 4 · Confirmed" caption, or a red stop label for terminal states.
  */
 export function RequestProgressStrip({ type, status }: { type: RequestType; status: string }) {
+  const { translateText } = useI18n()
   const journey = getJourney(type)
   const { index, terminal } = getJourneyPosition(type, status)
   const current = journey[index]
@@ -108,20 +110,20 @@ export function RequestProgressStrip({ type, status }: { type: RequestType; stat
         {terminal ? (
           <>
             <XCircle size={12} className="shrink-0 text-rose-500" strokeWidth={2.5} />
-            <span className="truncate text-rose-600">{formatRequestStatusLabel(status)}</span>
+            <span className="truncate text-rose-600">{translateText(formatRequestStatusLabel(status))}</span>
           </>
         ) : status === 'completed' || status === 'won' ? (
           <>
             <Check size={12} className="shrink-0 text-emerald-500" strokeWidth={3} />
-            <span className="truncate text-emerald-600">{current.label}</span>
+            <span className="truncate text-emerald-600">{translateText(current.label)}</span>
           </>
         ) : (
           <>
             <span className="text-ink-400">
-              Step {index + 1} of {journey.length}
+              {translateText(`Step ${index + 1} of ${journey.length}`)}
             </span>
-            <span className="text-ink-300">·</span>
-            <span className="truncate text-violet-700">{current.label}</span>
+            <span className="text-ink-300">/</span>
+            <span className="truncate text-violet-700">{translateText(current.label)}</span>
           </>
         )}
       </div>
@@ -142,6 +144,8 @@ export function RequestJourneyTracker({
   status: string
   stepDates: Record<string, string>
 }) {
+  const { locale, translateText } = useI18n()
+  const dateLocale = locale === 'ar' ? 'ar-JO' : undefined
   const journey = getJourney(type)
   const { index, terminal } = getJourneyPosition(
     type,
@@ -166,7 +170,7 @@ export function RequestJourneyTracker({
               <span
                 aria-hidden="true"
                 className={cn(
-                  'absolute right-1/2 top-[22px] -z-0 hidden h-[3px] w-full rounded-full sm:block',
+                  'absolute end-1/2 top-[22px] -z-0 hidden h-[3px] w-full rounded-full sm:block',
                   reached
                     ? terminal
                       ? 'bg-rose-200'
@@ -210,16 +214,16 @@ export function RequestJourneyTracker({
                 reached ? (terminal ? 'text-rose-600' : 'text-ink-900') : 'text-slate-400'
               )}
             >
-              {step.label}
+              {translateText(step.label)}
             </div>
             <div className={cn('mt-1 hidden max-w-[160px] text-[10.5px] font-medium leading-[1.5] sm:block', reached ? 'text-ink-500' : 'text-slate-300')}>
-              {step.caption}
+              {translateText(step.caption)}
             </div>
             {date && (
               <time className={cn('mt-1.5 text-[10px] font-bold', terminal ? 'text-rose-400' : 'text-violet-600')}>
-                {new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                {' · '}
-                {new Date(date).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                {new Date(date).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })}
+                {' / '}
+                {new Date(date).toLocaleTimeString(dateLocale, { hour: 'numeric', minute: '2-digit' })}
               </time>
             )}
           </li>
