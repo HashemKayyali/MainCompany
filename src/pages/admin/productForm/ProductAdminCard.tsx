@@ -4,6 +4,7 @@ import FramedImage from '../../../components/ui/FramedImage'
 import AdminBadge from '../../../components/admin/primitives/AdminBadge'
 import AdminButton from '../../../components/admin/primitives/AdminButton'
 import AdminKebabMenu, { type AdminKebabItem } from '../../../components/admin/AdminKebabMenu'
+import BidiText from '../../../components/admin/BidiText'
 import { useMediaQuery } from '../../../hooks/useMediaQuery'
 import { cn } from '../../../utils/cn'
 
@@ -85,11 +86,11 @@ export default function ProductAdminCard({
         </div>
 
         <div>
-          <h3 className="line-clamp-1 font-sans text-[0.98rem] font-bold leading-tight tracking-[-0.01em] text-[var(--admin-text)]">
-            {product.name}
+          <h3 className="line-clamp-1 text-start font-sans text-[0.98rem] font-bold leading-tight tracking-[-0.01em] text-[var(--admin-text)]">
+            <BidiText>{product.name}</BidiText>
           </h3>
-          <p className="mt-1 line-clamp-2 min-h-[2.4em] text-[11.5px] leading-[1.5] text-[var(--admin-text-muted)]">
-            {product.shortDescription || 'No short description yet.'}
+          <p className="mt-1 line-clamp-2 min-h-[2.4em] text-start text-[11.5px] leading-[1.5] text-[var(--admin-text-muted)]">
+            {product.shortDescription ? <BidiText>{product.shortDescription}</BidiText> : 'No short description yet.'}
           </p>
         </div>
 

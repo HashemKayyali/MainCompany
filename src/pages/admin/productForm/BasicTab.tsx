@@ -28,12 +28,16 @@ export default function BasicTab({ form, setForm, categories }: BasicTabProps) {
           <AdminInput
             label="Product name"
             required
+            dir="auto"
+            className="!text-start"
             value={form.name || ''}
             onChange={e => setForm({ ...form, name: e.target.value })}
             placeholder="e.g. Bike Blender"
           />
           <AdminInput
             label="Slug (URL)"
+            dir="ltr"
+            className="!text-start"
             value={form.slug || ''}
             onChange={e => setForm({ ...form, slug: e.target.value })}
             placeholder="auto-generated"

@@ -14,6 +14,7 @@ import AdminButton from '../../components/admin/primitives/AdminButton'
 import AdminBadge from '../../components/admin/primitives/AdminBadge'
 import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
 import AdminKebabMenu, { type AdminKebabItem } from '../../components/admin/AdminKebabMenu'
+import BidiText from '../../components/admin/BidiText'
 import useAdminCardView from '../../components/admin/useAdminCardView'
 import ProductCard from '../../components/product/ProductCard'
 import ProductAdminCard from './productForm/ProductAdminCard'
@@ -532,9 +533,9 @@ export default function AdminProductsPage() {
                                 <FramedImage media={product.heroImage} alt={product.name} className="h-full w-full" fallbackTransform={{ fit: 'cover' }} />
                               ) : null}
                             </div>
-                            <div className="min-w-0">
-                              <div className="truncate text-[13px] font-bold text-[var(--admin-text)]">{product.name}</div>
-                              <div className="truncate text-[11px] text-[var(--admin-text-muted)]">{product.shortDescription || '-'}</div>
+                            <div className="min-w-0 text-start">
+                              <div className="truncate text-[13px] font-bold text-[var(--admin-text)]"><BidiText>{product.name}</BidiText></div>
+                              <div className="truncate text-[11px] text-[var(--admin-text-muted)]">{product.shortDescription ? <BidiText>{product.shortDescription}</BidiText> : '-'}</div>
                             </div>
                           </div>
                         </td>
@@ -674,7 +675,7 @@ export default function AdminProductsPage() {
               <DetailFact label="Gallery" value={`${details.gallery.length} image${details.gallery.length === 1 ? '' : 's'}`} />
               <DetailFact label="Video" value={details.videoUrl ? 'Uploaded' : 'Not uploaded'} />
               <DetailFact label="Options" value={`${details.quickOptions.length} quick option${details.quickOptions.length === 1 ? '' : 's'}`} />
-              <DetailFact label="Slug" value={<span className="break-all font-mono text-[11px]">{details.slug}</span>} />
+              <DetailFact label="Slug" value={<span dir="ltr" data-i18n-skip className="break-all font-mono text-[11px]">{details.slug}</span>} />
             </div>
 
             <div className="grid gap-4 lg:grid-cols-2">

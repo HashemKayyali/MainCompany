@@ -19,6 +19,8 @@ export default function ContentTab({ form, setForm }: ContentTabProps) {
         </div>
         <AdminTextarea
           label="Short description"
+          dir="auto"
+          className="!text-start"
           value={form.shortDescription || ''}
           onChange={e => setForm({ ...form, shortDescription: e.target.value })}
           rows={3}
@@ -26,6 +28,8 @@ export default function ContentTab({ form, setForm }: ContentTabProps) {
         />
         <AdminTextarea
           label="Full description"
+          dir="auto"
+          className="!text-start"
           value={form.description || ''}
           onChange={e => setForm({ ...form, description: e.target.value })}
           rows={6}
@@ -42,6 +46,8 @@ export default function ContentTab({ form, setForm }: ContentTabProps) {
         </div>
         <AdminTextarea
           label="Internal notes (one per line)"
+          dir="auto"
+          className="!text-start"
           value={typeof form.notes === 'string' ? form.notes : (form.notes || []).join('\n')}
           onChange={e => setForm({ ...form, notes: e.target.value })}
           rows={5}

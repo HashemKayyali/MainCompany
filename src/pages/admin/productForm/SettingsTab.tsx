@@ -56,6 +56,8 @@ export default function SettingsTab({ form, setForm }: SettingsTabProps) {
           />
           <AdminInput
             label="Currency"
+            dir="ltr"
+            className="!text-start"
             value={form.currency || 'JOD'}
             onChange={e => setForm({ ...form, currency: e.target.value.toUpperCase() })}
             placeholder="JOD"
