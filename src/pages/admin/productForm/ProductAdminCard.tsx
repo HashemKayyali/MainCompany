@@ -78,7 +78,7 @@ export default function ProductAdminCard({
 
       <div className="flex flex-1 flex-col gap-2 p-3">
         <div className="flex flex-wrap items-center gap-1.5">
-          <AdminBadge tone="accent">{categoryName}</AdminBadge>
+          <AdminBadge tone="accent"><BidiText>{categoryName}</BidiText></AdminBadge>
           {product.showPrice === false && <AdminBadge tone="warning">Price hidden</AdminBadge>}
         </div>
 

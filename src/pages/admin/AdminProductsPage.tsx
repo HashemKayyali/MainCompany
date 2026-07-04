@@ -52,7 +52,7 @@ function DetailFact({ label, value }: { label: string; value: ReactNode }) {
       <div className="text-[9.5px] font-extrabold uppercase tracking-[0.14em] text-[var(--admin-accent)]">
         {label}
       </div>
-      <div className="mt-1 text-[13px] font-semibold leading-5 text-[var(--admin-text)]">
+      <div dir="auto" className="mt-1 text-[13px] font-semibold leading-5 text-[var(--admin-text)]">
         {value}
       </div>
     </div>
@@ -542,7 +542,7 @@ export default function AdminProductsPage() {
                           </div>
                         </td>
                         <td className="px-3 py-2.5">
-                          <AdminBadge tone="accent">{productCategoryName(product)}</AdminBadge>
+                          <AdminBadge tone="accent"><BidiText>{productCategoryName(product)}</BidiText></AdminBadge>
                         </td>
                         <td className="px-3 py-2.5 text-[13px] font-semibold tabular-nums text-[var(--admin-text)]">
                           {showRentalPrice ? `${product.rentalPricePerDay} ${product.currency}` : 'On request'}
@@ -597,8 +597,8 @@ export default function AdminProductsPage() {
         bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
         footer={
           details ? (
-            <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
-              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="sm:min-w-[96px]">
+            <div className="admin-scope grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:items-center sm:justify-end">
+              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="hidden sm:inline-flex sm:min-w-[96px]">
                 Close
               </AdminButton>
               <AdminButton
@@ -608,7 +608,7 @@ export default function AdminProductsPage() {
                   setDetails(null)
                   openEdit(product)
                 }}
-                className="sm:min-w-[124px]"
+                className="w-full sm:w-auto sm:min-w-[124px]"
               >
                 Edit Product
               </AdminButton>
@@ -620,7 +620,7 @@ export default function AdminProductsPage() {
                   setDetails(null)
                   void removeProduct(slug)
                 }}
-                className="sm:min-w-[124px]"
+                className="w-full sm:w-auto sm:min-w-[124px]"
               >
                 Delete Product
               </AdminButton>
@@ -647,17 +647,17 @@ export default function AdminProductsPage() {
                 <div className="flex min-w-0 flex-col justify-between gap-4 p-4">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <AdminBadge tone="accent">{catName(details.categoryId)}</AdminBadge>
+                      <AdminBadge tone="accent"><BidiText>{catName(details.categoryId)}</BidiText></AdminBadge>
                       <BadgePill p={details} />
                       {details.featured && <AdminBadge tone="accent">Featured</AdminBadge>}
                       {details.showPrice === false && <AdminBadge tone="warning">Price hidden</AdminBadge>}
                       {details.rentalEnabled === false && details.saleEnabled === false && <AdminBadge tone="danger">Off storefront</AdminBadge>}
                     </div>
-                    <h3 className="mt-3 font-sans text-[1.25rem] font-black leading-tight tracking-[-0.03em] text-[var(--admin-text)]">
-                      {details.name}
+                    <h3 className="mt-3 text-start font-sans text-[1.25rem] font-black leading-tight tracking-[-0.03em] text-[var(--admin-text)]">
+                      <BidiText>{details.name}</BidiText>
                     </h3>
-                    <p className="mt-2 text-[13px] leading-6 text-[var(--admin-text-muted)]">
-                      {details.shortDescription || 'No short description added.'}
+                    <p className="mt-2 text-start text-[13px] leading-6 text-[var(--admin-text-muted)]">
+                      {details.shortDescription ? <BidiText>{details.shortDescription}</BidiText> : 'No short description added.'}
                     </p>
                   </div>
 
@@ -670,7 +670,7 @@ export default function AdminProductsPage() {
             </section>
 
             <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-              <DetailFact label="Category" value={catName(details.categoryId)} />
+              <DetailFact label="Category" value={<BidiText>{catName(details.categoryId)}</BidiText>} />
               <DetailFact label="Badge" value={details.badge || 'None'} />
               <DetailFact label="Rental" value={details.rentalEnabled !== false ? 'Enabled' : 'Disabled'} />
               <DetailFact label="Sale" value={details.saleEnabled !== false ? 'Enabled' : 'Disabled'} />
@@ -682,15 +682,15 @@ export default function AdminProductsPage() {
 
             <div className="grid gap-4 lg:grid-cols-2">
               <DetailSection title="Short Description">
-                <p className="text-[13px] leading-6 text-[var(--admin-text-muted)]">
-                  {details.shortDescription || 'No short description added.'}
+                <p className="text-start text-[13px] leading-6 text-[var(--admin-text-muted)]">
+                  {details.shortDescription ? <BidiText>{details.shortDescription}</BidiText> : 'No short description added.'}
                 </p>
               </DetailSection>
 
               {details.description && (
                 <DetailSection title="Long Description">
-                  <p className="text-[13px] leading-6 text-[var(--admin-text-muted)]">
-                    {details.description}
+                  <p className="text-start text-[13px] leading-6 text-[var(--admin-text-muted)]">
+                    <BidiText>{details.description}</BidiText>
                   </p>
                 </DetailSection>
               )}

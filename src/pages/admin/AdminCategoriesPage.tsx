@@ -12,6 +12,7 @@ import CategoryTileView from '../../components/home/CategoryTileView'
 import AdminConfirmDialog from '../../components/admin/AdminConfirmDialog'
 import AdminKebabMenu, { type AdminKebabItem } from '../../components/admin/AdminKebabMenu'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
+import BidiText from '../../components/admin/BidiText'
 import AdminBadge from '../../components/admin/primitives/AdminBadge'
 import AdminButton from '../../components/admin/primitives/AdminButton'
 import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
@@ -77,7 +78,7 @@ function Fact({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="min-w-0 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3 py-2.5">
       <div className="text-[9.5px] font-extrabold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">{label}</div>
-      <div className="mt-1 truncate text-[13px] font-bold leading-5 text-[var(--admin-text)]">{value}</div>
+      <div dir="auto" className="mt-1 truncate text-[13px] font-bold leading-5 text-[var(--admin-text)]">{value}</div>
     </div>
   )
 }
@@ -500,12 +501,12 @@ export default function AdminCategoriesPage() {
                           <div className="flex max-w-[360px] items-center gap-3">
                             <CategoryThumb category={category} compact />
                             <div className="min-w-0">
-                              <div className="truncate text-[13px] font-bold text-[var(--admin-text)]">{category.name}</div>
-                              <div className="line-clamp-1 text-[11px] text-[var(--admin-text-muted)]">{category.description || 'No description'}</div>
+                              <div className="truncate text-start text-[13px] font-bold text-[var(--admin-text)]"><BidiText>{category.name}</BidiText></div>
+                              <div className="line-clamp-1 text-start text-[11px] text-[var(--admin-text-muted)]">{category.description ? <BidiText>{category.description}</BidiText> : 'No description'}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-3 py-2.5 font-mono text-[12px] font-semibold text-[var(--admin-text-muted)]">{category.slug || '-'}</td>
+                        <td className="px-3 py-2.5 font-mono text-[12px] font-semibold text-[var(--admin-text-muted)]"><BidiText dir="ltr">{category.slug || '-'}</BidiText></td>
                         <td className="px-3 py-2.5">
                           <AdminBadge tone={productCount > 0 ? 'success' : 'warning'}>{productCount > 0 ? 'In use' : 'Unused'}</AdminBadge>
                         </td>
@@ -542,12 +543,12 @@ export default function AdminCategoriesPage() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
-                            <h2 className="truncate text-[14px] font-black text-[var(--admin-text)]">{category.name}</h2>
-                            <p className="truncate font-mono text-[11px] font-semibold text-[var(--admin-text-muted)]">{category.slug || '-'}</p>
+                            <h2 className="truncate text-start text-[14px] font-black text-[var(--admin-text)]"><BidiText>{category.name}</BidiText></h2>
+                            <p className="truncate text-start font-mono text-[11px] font-semibold text-[var(--admin-text-muted)]"><BidiText dir="ltr">{category.slug || '-'}</BidiText></p>
                           </div>
                           <AdminBadge tone={productCount > 0 ? 'success' : 'warning'}>{productCount > 0 ? 'In use' : 'Unused'}</AdminBadge>
                         </div>
-                        <p className="mt-2 line-clamp-2 text-[12px] leading-5 text-[var(--admin-text-muted)]">{category.description || 'No description'}</p>
+                        <p className="mt-2 line-clamp-2 text-start text-[12px] leading-5 text-[var(--admin-text-muted)]">{category.description ? <BidiText>{category.description}</BidiText> : 'No description'}</p>
                       </div>
                     </div>
                     <div className="mt-3 grid grid-cols-3 gap-2">
@@ -593,8 +594,8 @@ export default function AdminCategoriesPage() {
         bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
         footer={
           details ? (
-            <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
-              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="sm:min-w-[96px]">Close</AdminButton>
+            <div className="admin-scope grid grid-cols-[minmax(0,1fr)_auto] gap-2.5 sm:flex sm:flex-row sm:items-center sm:justify-end">
+              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="hidden sm:inline-flex sm:min-w-[96px]">Close</AdminButton>
               <AdminButton
                 variant="outline"
                 onClick={() => {
@@ -602,7 +603,7 @@ export default function AdminCategoriesPage() {
                   setDetails(null)
                   openEdit(category)
                 }}
-                className="sm:min-w-[128px]"
+                className="w-full sm:w-auto sm:min-w-[128px]"
               >
                 Edit Category
               </AdminButton>
@@ -626,8 +627,8 @@ export default function AdminCategoriesPage() {
                       </AdminBadge>
                       <AdminBadge tone="accent">Visible</AdminBadge>
                     </div>
-                    <h3 className="mt-3 text-[1.2rem] font-black text-[var(--admin-text)]">{details.name}</h3>
-                    <p className="mt-2 text-[13px] leading-6 text-[var(--admin-text-muted)]">{details.description || 'No description has been added.'}</p>
+                    <h3 className="mt-3 text-start text-[1.2rem] font-black text-[var(--admin-text)]"><BidiText>{details.name}</BidiText></h3>
+                    <p className="mt-2 text-start text-[13px] leading-6 text-[var(--admin-text-muted)]">{details.description ? <BidiText>{details.description}</BidiText> : 'No description has been added.'}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Fact label="Products" value={countForCategory(details.id)} />
@@ -638,8 +639,8 @@ export default function AdminCategoriesPage() {
             </section>
 
             <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-              <Fact label="Name" value={details.name} />
-              <Fact label="Slug" value={<span className="font-mono text-[11px]">{details.slug || '-'}</span>} />
+              <Fact label="Name" value={<BidiText>{details.name}</BidiText>} />
+              <Fact label="Slug" value={<BidiText dir="ltr" className="font-mono text-[11px]">{details.slug || '-'}</BidiText>} />
               <Fact label="Icon" value={details.icon || '-'} />
               <Fact label="Visibility" value="Visible" />
             </div>

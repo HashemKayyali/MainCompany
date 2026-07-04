@@ -32,7 +32,7 @@ function DetailSection({ section, isDesktop }: { section: AdminDetailSection; is
   const body = (
     <>
       {section.description && (
-        <p className="mt-1 text-[12.5px] leading-5 text-[#4b3a63]">{section.description}</p>
+        <p dir="auto" className="mt-1 text-start text-[12.5px] leading-5 text-[#4b3a63]">{section.description}</p>
       )}
 
       {section.facts && section.facts.length > 0 && (
@@ -42,7 +42,7 @@ function DetailSection({ section, isDesktop }: { section: AdminDetailSection; is
               <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b5a82]">
                 {fact.label}
               </div>
-              <div className="max-w-[70%] text-end text-[13px] font-semibold leading-6 text-[#1a0b3d]">
+              <div dir="auto" className="max-w-[70%] text-start text-[13px] font-semibold leading-6 text-[#1a0b3d]">
                 {fact.value}
               </div>
             </div>
@@ -118,12 +118,15 @@ export default function AdminDetailModal({
       title={title}
       size={size}
       footer={
-        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
-          <AdminActionButton onClick={onClose} className="w-full !min-h-[44px] sm:w-auto sm:!min-h-[38px]">
+        <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:items-center sm:justify-end">
+          <AdminActionButton
+            onClick={onClose}
+            className={cn('w-full !min-h-[44px] sm:w-auto sm:!min-h-[38px]', actions && 'hidden sm:inline-flex')}
+          >
             {translateText('Cancel')}
           </AdminActionButton>
           {actions && (
-            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center [&>button]:w-full [&>button]:!min-h-[44px] sm:[&>button]:w-auto sm:[&>button]:!min-h-[38px]">
+            <div className="col-span-2 grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:items-center [&>button]:w-full [&>button]:!min-h-[44px] sm:[&>button]:w-auto sm:[&>button]:!min-h-[38px]">
               {actions}
             </div>
           )}
@@ -171,7 +174,7 @@ export default function AdminDetailModal({
                 <div className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#7126e3]">
                   {fact.label}
                 </div>
-                <div className="mt-1.5 text-[13px] font-medium leading-6 text-[#1a0b3d]">
+                <div dir="auto" className="mt-1.5 text-start text-[13px] font-medium leading-6 text-[#1a0b3d]">
                   {fact.value}
                 </div>
               </div>

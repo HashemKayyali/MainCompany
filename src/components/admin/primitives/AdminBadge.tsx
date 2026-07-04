@@ -18,7 +18,7 @@ const TONE_CLASSES: Record<AdminBadgeTone, string | null> = {
 
 export default function AdminBadge({ tone = 'neutral', className, children, ...props }: AdminBadgeProps) {
   return (
-    <span className={cn('admin-chip', TONE_CLASSES[tone], className)} {...props}>
+    <span dir="auto" className={cn('admin-chip', TONE_CLASSES[tone], className)} {...props}>
       {children}
     </span>
   )

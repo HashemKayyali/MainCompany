@@ -10,6 +10,7 @@ import MediaPlacementModal from '../../components/ui/MediaPlacementModal'
 import AdminConfirmDialog from '../../components/admin/AdminConfirmDialog'
 import AdminKebabMenu, { type AdminKebabItem } from '../../components/admin/AdminKebabMenu'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
+import BidiText from '../../components/admin/BidiText'
 import AdminBadge from '../../components/admin/primitives/AdminBadge'
 import AdminButton from '../../components/admin/primitives/AdminButton'
 import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
@@ -41,7 +42,7 @@ function Fact({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="min-w-0 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3 py-2.5">
       <div className="text-[9.5px] font-extrabold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">{label}</div>
-      <div className="mt-1 truncate text-[13px] font-bold leading-5 text-[var(--admin-text)]">{value}</div>
+      <div dir="auto" className="mt-1 truncate text-[13px] font-bold leading-5 text-[var(--admin-text)]">{value}</div>
     </div>
   )
 }
@@ -79,11 +80,11 @@ function CompactAlbumPreview({ album }: { album: GalleryAlbum }) {
       <AlbumThumb album={album} />
       <div className="space-y-2 p-3">
         <div className="min-w-0">
-          <div className="truncate text-[14px] font-black text-[var(--admin-text)]">{album.title || 'Album title'}</div>
-          <div className="truncate font-mono text-[10.5px] font-semibold text-[var(--admin-text-muted)]">{album.slug || 'auto-slug'}</div>
+          <div className="truncate text-start text-[14px] font-black text-[var(--admin-text)]"><BidiText>{album.title || 'Album title'}</BidiText></div>
+          <div className="truncate text-start font-mono text-[10.5px] font-semibold text-[var(--admin-text-muted)]"><BidiText dir="ltr">{album.slug || 'auto-slug'}</BidiText></div>
         </div>
         <div className="flex flex-wrap gap-1.5">
-          <AdminBadge tone="accent">{album.category || 'Uncategorized'}</AdminBadge>
+          <AdminBadge tone="accent"><BidiText>{album.category || 'Uncategorized'}</BidiText></AdminBadge>
           <AdminBadge tone={album.images.length > 0 ? 'success' : 'warning'}>{album.images.length} photos</AdminBadge>
         </div>
       </div>
@@ -401,11 +402,11 @@ export default function AdminGalleryPage() {
                     <AlbumThumb album={album} compact />
                     <div className="mt-2.5 min-w-0 space-y-2">
                       <div className="min-w-0">
-                        <h2 className="truncate text-[13px] font-black text-[var(--admin-text)]">{album.title}</h2>
-                        <p className="truncate font-mono text-[10.5px] font-semibold text-[var(--admin-text-muted)]">{album.slug || '-'}</p>
+                        <h2 className="truncate text-start text-[13px] font-black text-[var(--admin-text)]"><BidiText>{album.title}</BidiText></h2>
+                        <p className="truncate text-start font-mono text-[10.5px] font-semibold text-[var(--admin-text-muted)]"><BidiText dir="ltr">{album.slug || '-'}</BidiText></p>
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        <AdminBadge tone="accent" className="max-w-full truncate">{album.category || 'Uncategorized'}</AdminBadge>
+                        <AdminBadge tone="accent" className="max-w-full truncate"><BidiText>{album.category || 'Uncategorized'}</BidiText></AdminBadge>
                         <AdminBadge tone={album.images.length > 0 ? 'success' : 'warning'}>{album.images.length}</AdminBadge>
                       </div>
                       <div className="grid grid-cols-[1fr_1fr_auto] gap-1.5">
@@ -451,8 +452,8 @@ export default function AdminGalleryPage() {
         bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
         footer={
           details ? (
-            <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
-              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="sm:min-w-[96px]">Close</AdminButton>
+            <div className="admin-scope grid grid-cols-[minmax(0,1fr)_auto] gap-2.5 sm:flex sm:flex-row sm:items-center sm:justify-end">
+              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="hidden sm:inline-flex sm:min-w-[96px]">Close</AdminButton>
               <AdminButton
                 variant="outline"
                 onClick={() => {
@@ -460,7 +461,7 @@ export default function AdminGalleryPage() {
                   setDetails(null)
                   openEdit(album)
                 }}
-                className="sm:min-w-[120px]"
+                className="w-full sm:w-auto sm:min-w-[120px]"
               >
                 Edit Album
               </AdminButton>
@@ -479,15 +480,15 @@ export default function AdminGalleryPage() {
                 <div className="flex min-w-0 flex-col justify-between gap-4 p-4">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <AdminBadge tone="accent">{details.category || 'Uncategorized'}</AdminBadge>
+                      <AdminBadge tone="accent"><BidiText>{details.category || 'Uncategorized'}</BidiText></AdminBadge>
                       <AdminBadge tone={details.images.length > 0 ? 'success' : 'warning'}>{details.images.length} photos</AdminBadge>
                     </div>
-                    <h3 className="mt-3 text-[1.2rem] font-black text-[var(--admin-text)]">{details.title}</h3>
-                    <p className="mt-2 break-all font-mono text-[12px] font-semibold text-[var(--admin-text-muted)]">{details.slug || '-'}</p>
+                    <h3 className="mt-3 text-start text-[1.2rem] font-black text-[var(--admin-text)]"><BidiText>{details.title}</BidiText></h3>
+                    <p className="mt-2 break-all text-start font-mono text-[12px] font-semibold text-[var(--admin-text-muted)]"><BidiText dir="ltr">{details.slug || '-'}</BidiText></p>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Fact label="Cover" value={albumCover(details) ? 'Ready' : 'Missing'} />
-                    <Fact label="Category" value={details.category || 'Not set'} />
+                    <Fact label="Category" value={<BidiText>{details.category || 'Not set'}</BidiText>} />
                   </div>
                 </div>
               </div>

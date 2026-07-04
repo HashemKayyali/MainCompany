@@ -9,6 +9,7 @@ import FramedImage from '../../components/ui/FramedImage'
 import AdminConfirmDialog from '../../components/admin/AdminConfirmDialog'
 import AdminKebabMenu, { type AdminKebabItem } from '../../components/admin/AdminKebabMenu'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
+import BidiText from '../../components/admin/BidiText'
 import AdminBadge from '../../components/admin/primitives/AdminBadge'
 import AdminButton from '../../components/admin/primitives/AdminButton'
 import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
@@ -48,7 +49,7 @@ function Fact({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="min-w-0 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3 py-2.5">
       <div className="text-[9.5px] font-extrabold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">{label}</div>
-      <div className="mt-1 truncate text-[13px] font-bold leading-5 text-[var(--admin-text)]">{value}</div>
+      <div dir="auto" className="mt-1 truncate text-[13px] font-bold leading-5 text-[var(--admin-text)]">{value}</div>
     </div>
   )
 }
@@ -85,13 +86,13 @@ function CompactPartPreview({ part, productName }: { part: ProductPart; productN
       <div className="space-y-2 p-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <div className="truncate text-[14px] font-black text-[var(--admin-text)]">{part.name || 'Part name'}</div>
+            <div className="truncate text-start text-[14px] font-black text-[var(--admin-text)]"><BidiText>{part.name || 'Part name'}</BidiText></div>
             <div className="truncate text-[11px] font-semibold text-[var(--admin-text-muted)]">{productName || 'Linked product'}</div>
           </div>
           <AdminBadge tone={part.inStock ? 'success' : 'danger'}>{part.inStock ? 'In stock' : 'Out'}</AdminBadge>
         </div>
         <p className="line-clamp-2 text-[12px] font-semibold leading-5 text-[var(--admin-text-muted)]">
-          {part.description || 'Short part description appears here.'}
+          {part.description ? <BidiText>{part.description}</BidiText> : 'Short part description appears here.'}
         </p>
         <div className="flex flex-wrap gap-1.5">
           <AdminBadge tone={part.showPrice === false ? 'warning' : 'accent'}>
@@ -349,8 +350,8 @@ export default function AdminPartsPage() {
                           <div className="flex max-w-[320px] items-center gap-2.5">
                             <PartThumb part={part} compact />
                             <div className="min-w-0">
-                              <div className="truncate text-[13px] font-bold text-[var(--admin-text)]">{part.name}</div>
-                              <div className="line-clamp-1 text-[11px] text-[var(--admin-text-muted)]">{part.description || 'No description'}</div>
+                              <div className="truncate text-start text-[13px] font-bold text-[var(--admin-text)]"><BidiText>{part.name}</BidiText></div>
+                              <div className="line-clamp-1 text-start text-[11px] text-[var(--admin-text-muted)]">{part.description ? <BidiText>{part.description}</BidiText> : 'No description'}</div>
                             </div>
                           </div>
                         </td>
@@ -397,12 +398,12 @@ export default function AdminPartsPage() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
-                            <h2 className="truncate text-[14px] font-black text-[var(--admin-text)]">{part.name}</h2>
+                            <h2 className="truncate text-start text-[14px] font-black text-[var(--admin-text)]"><BidiText>{part.name}</BidiText></h2>
                             <p className="truncate text-[11px] font-semibold text-[var(--admin-text-muted)]">{productName}</p>
                           </div>
                           <AdminBadge tone={part.inStock ? 'success' : 'danger'}>{part.inStock ? 'In stock' : 'Out'}</AdminBadge>
                         </div>
-                        <p className="mt-2 line-clamp-2 text-[12px] leading-5 text-[var(--admin-text-muted)]">{part.description || 'No description'}</p>
+                        <p className="mt-2 line-clamp-2 text-start text-[12px] leading-5 text-[var(--admin-text-muted)]">{part.description ? <BidiText>{part.description}</BidiText> : 'No description'}</p>
                       </div>
                     </div>
                     <div className="mt-3 grid grid-cols-3 gap-2">
@@ -448,8 +449,8 @@ export default function AdminPartsPage() {
         bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
         footer={
           details ? (
-            <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
-              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="sm:min-w-[96px]">Close</AdminButton>
+            <div className="admin-scope grid grid-cols-[minmax(0,1fr)_auto] gap-2.5 sm:flex sm:flex-row sm:items-center sm:justify-end">
+              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="hidden sm:inline-flex sm:min-w-[96px]">Close</AdminButton>
               <AdminButton
                 variant="outline"
                 onClick={() => {
@@ -457,7 +458,7 @@ export default function AdminPartsPage() {
                   setDetails(null)
                   openEdit(part)
                 }}
-                className="sm:min-w-[120px]"
+                className="w-full sm:w-auto sm:min-w-[120px]"
               >
                 Edit Part
               </AdminButton>
@@ -476,12 +477,12 @@ export default function AdminPartsPage() {
                 <div className="flex min-w-0 flex-col justify-between gap-4 p-4">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <AdminBadge tone="accent">{getProductName(details.productSlug)}</AdminBadge>
+                      <AdminBadge tone="accent"><BidiText>{getProductName(details.productSlug)}</BidiText></AdminBadge>
                       <AdminBadge tone={details.inStock ? 'success' : 'danger'}>{details.inStock ? 'In stock' : 'Out of stock'}</AdminBadge>
                       {details.showPrice === false && <AdminBadge tone="warning">Price hidden</AdminBadge>}
                     </div>
-                    <h3 className="mt-3 text-[1.2rem] font-black text-[var(--admin-text)]">{details.name}</h3>
-                    <p className="mt-2 text-[13px] leading-6 text-[var(--admin-text-muted)]">{details.description || 'No description has been added.'}</p>
+                    <h3 className="mt-3 text-start text-[1.2rem] font-black text-[var(--admin-text)]"><BidiText>{details.name}</BidiText></h3>
+                    <p className="mt-2 text-start text-[13px] leading-6 text-[var(--admin-text-muted)]">{details.description ? <BidiText>{details.description}</BidiText> : 'No description has been added.'}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Fact label="Price" value={`${Number(details.price || 0).toFixed(2)} ${details.currency || 'JOD'}`} />
@@ -492,8 +493,8 @@ export default function AdminPartsPage() {
             </section>
 
             <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-              <Fact label="Name" value={details.name} />
-              <Fact label="Product" value={getProductName(details.productSlug)} />
+              <Fact label="Name" value={<BidiText>{details.name}</BidiText>} />
+              <Fact label="Product" value={<BidiText>{getProductName(details.productSlug)}</BidiText>} />
               <Fact label="Stock" value={details.inStock ? 'Available' : 'Out of stock'} />
               <Fact label="Price visible" value={details.showPrice === false ? 'No' : 'Yes'} />
             </div>

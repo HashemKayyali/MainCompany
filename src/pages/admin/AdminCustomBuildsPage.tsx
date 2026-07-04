@@ -10,6 +10,7 @@ import MediaPlacementModal from '../../components/ui/MediaPlacementModal'
 import AdminConfirmDialog from '../../components/admin/AdminConfirmDialog'
 import AdminKebabMenu, { type AdminKebabItem } from '../../components/admin/AdminKebabMenu'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
+import BidiText from '../../components/admin/BidiText'
 import AdminBadge from '../../components/admin/primitives/AdminBadge'
 import AdminButton from '../../components/admin/primitives/AdminButton'
 import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
@@ -77,7 +78,7 @@ function Fact({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="min-w-0 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface-2)] px-3 py-2.5">
       <div className="text-[9.5px] font-extrabold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">{label}</div>
-      <div className="mt-1 truncate text-[13px] font-bold leading-5 text-[var(--admin-text)]">{value}</div>
+      <div dir="auto" className="mt-1 truncate text-[13px] font-bold leading-5 text-[var(--admin-text)]">{value}</div>
     </div>
   )
 }
@@ -639,8 +640,8 @@ export default function AdminCustomBuildsPage() {
                             <div className="flex max-w-[420px] items-center gap-3">
                               <BuildThumb build={build} compact />
                               <div className="min-w-0">
-                                <div className="truncate text-[13px] font-bold text-[var(--admin-text)]">{build.title}</div>
-                                <div className="line-clamp-1 text-[11px] text-[var(--admin-text-muted)]">{build.description || 'No description'}</div>
+                                <div className="truncate text-start text-[13px] font-bold text-[var(--admin-text)]"><BidiText>{build.title}</BidiText></div>
+                                <div className="line-clamp-1 text-start text-[11px] text-[var(--admin-text-muted)]">{build.description ? <BidiText>{build.description}</BidiText> : 'No description'}</div>
                               </div>
                             </div>
                           </td>
@@ -671,7 +672,7 @@ export default function AdminCustomBuildsPage() {
                           </td>
                           <td className="px-3 py-2.5 text-[13px] font-bold tabular-nums text-[var(--admin-text)]">{images.length}</td>
                           <td className="px-3 py-2.5">
-                            <span className="block max-w-[150px] truncate text-[12px] font-semibold text-[var(--admin-text-muted)]">{build.category || 'Uncategorized'}</span>
+                            <span className="block max-w-[150px] truncate text-start text-[12px] font-semibold text-[var(--admin-text-muted)]"><BidiText>{build.category || 'Uncategorized'}</BidiText></span>
                           </td>
                           <td className="px-3 py-2.5">
                             <AdminBadge tone={build.active !== false ? 'success' : 'warning'}>{build.active !== false ? 'Active' : 'Hidden'}</AdminBadge>
@@ -711,12 +712,12 @@ export default function AdminCustomBuildsPage() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
-                              <h2 className="truncate text-[14px] font-black text-[var(--admin-text)]">{build.title}</h2>
-                              <p className="truncate text-[11px] font-semibold text-[var(--admin-text-muted)]">{build.category || 'Uncategorized'}</p>
+                              <h2 className="truncate text-start text-[14px] font-black text-[var(--admin-text)]"><BidiText>{build.title}</BidiText></h2>
+                              <p className="truncate text-start text-[11px] font-semibold text-[var(--admin-text-muted)]"><BidiText>{build.category || 'Uncategorized'}</BidiText></p>
                             </div>
                             <AdminBadge tone={build.active !== false ? 'success' : 'warning'}>{build.active !== false ? 'Active' : 'Hidden'}</AdminBadge>
                           </div>
-                          <p className="mt-2 line-clamp-2 text-[12px] leading-5 text-[var(--admin-text-muted)]">{build.description || 'No description'}</p>
+                          <p className="mt-2 line-clamp-2 text-start text-[12px] leading-5 text-[var(--admin-text-muted)]">{build.description ? <BidiText>{build.description}</BidiText> : 'No description'}</p>
                         </div>
                       </div>
 
@@ -776,8 +777,8 @@ export default function AdminCustomBuildsPage() {
         bodyClassName="px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3"
         footer={
           details ? (
-            <div className="admin-scope flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
-              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="sm:min-w-[96px]">Close</AdminButton>
+            <div className="admin-scope grid grid-cols-[minmax(0,1fr)_auto] gap-2.5 sm:flex sm:flex-row sm:items-center sm:justify-end">
+              <AdminButton variant="ghost" onClick={() => setDetails(null)} className="hidden sm:inline-flex sm:min-w-[96px]">Close</AdminButton>
               <AdminButton
                 variant="outline"
                 onClick={() => {
@@ -785,7 +786,7 @@ export default function AdminCustomBuildsPage() {
                   setDetails(null)
                   openEdit(build)
                 }}
-                className="sm:min-w-[120px]"
+                className="w-full sm:w-auto sm:min-w-[120px]"
               >
                 Edit Build
               </AdminButton>
@@ -806,10 +807,10 @@ export default function AdminCustomBuildsPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <AdminBadge tone={details.active !== false ? 'success' : 'warning'}>{details.active !== false ? 'Active' : 'Hidden'}</AdminBadge>
                       {details.featured && <AdminBadge tone="accent">Featured</AdminBadge>}
-                      <AdminBadge tone="accent">{details.category || 'Uncategorized'}</AdminBadge>
+                      <AdminBadge tone="accent"><BidiText>{details.category || 'Uncategorized'}</BidiText></AdminBadge>
                     </div>
-                    <h3 className="mt-3 text-[1.2rem] font-black text-[var(--admin-text)]">{details.title}</h3>
-                    <p className="mt-2 text-[13px] leading-6 text-[var(--admin-text-muted)]">{details.description || 'No description has been added.'}</p>
+                    <h3 className="mt-3 text-start text-[1.2rem] font-black text-[var(--admin-text)]"><BidiText>{details.title}</BidiText></h3>
+                    <p className="mt-2 text-start text-[13px] leading-6 text-[var(--admin-text-muted)]">{details.description ? <BidiText>{details.description}</BidiText> : 'No description has been added.'}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Fact label="Position" value={buildPositionLabel(details, sortedBuilds)} />
