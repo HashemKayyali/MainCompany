@@ -1,4 +1,4 @@
-import type { AssetDeletionResult, StorageIdentity } from '../storage.service'
+import type { AssetDeletionResult, StorageIdentity } from '../storage-identity'
 import type { AuditReport, CleanupResult, DbReferenceSource } from './types'
 import { computeIntegrityHash } from './audit-core'
 import { buildReferenceIndex, type ReferenceInputs } from './reference-index'

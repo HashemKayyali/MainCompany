@@ -3,7 +3,7 @@ import { CleanupRefusalError, runCleanup } from '../cleanup-core'
 import { buildAuditReport, computeIntegrityHash } from '../audit-core'
 import { buildReferenceIndex } from '../reference-index'
 import { classifyStorageObjects } from '../classifier'
-import { IMAGE_BUCKET } from '../../storage.service'
+import { IMAGE_BUCKET } from '../../storage-identity'
 import type { AuditReport, StorageObject } from '../types'
 
 const PROJECT = 'https://example.supabase.co'

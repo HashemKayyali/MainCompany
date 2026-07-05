@@ -1,0 +1,453 @@
+{
+  "post": {
+    "environment": "dqizzlcsioqykfeldtsj",
+    "timestamp": "2026-07-05T21:45:11.877Z",
+    "safetyWindowDays": 7,
+    "safetyWindowCutoffIso": "2026-06-28T21:45:11.877Z",
+    "buckets": [
+      "product-images",
+      "product-videos"
+    ],
+    "totals": {
+      "dbReferencesRaw": 176,
+      "dbReferencesUnique": 146,
+      "storageObjects": 215,
+      "referenced": 144,
+      "safeCandidates": 0,
+      "reviewRequired": 6,
+      "recentUnreferenced": 65,
+      "unknownOrUnparseable": 0,
+      "brokenReferences": 2,
+      "duplicateDbReferences": 30,
+      "estimatedReclaimableBytes": 0
+    },
+    "perFolder": {
+      "product-images/categories": {
+        "count": 13,
+        "bytes": 948980
+      },
+      "product-images/custom-builds": {
+        "count": 9,
+        "bytes": 922550
+      },
+      "product-images/customers": {
+        "count": 20,
+        "bytes": 2986254
+      },
+      "product-images/gallery": {
+        "count": 101,
+        "bytes": 328656320
+      },
+      "product-images/products": {
+        "count": 67,
+        "bytes": 3909278
+      },
+      "product-videos/products": {
+        "count": 5,
+        "bytes": 20604384
+      }
+    },
+    "safeCandidates": [],
+    "reviewRequired": [
+      {
+        "bucket": "product-images",
+        "path": "categories",
+        "canonical": "product-images/categories",
+        "reason": "directory placeholder",
+        "lastModifiedIso": "1970-01-01T00:00:00.000Z"
+      },
+      {
+        "bucket": "product-images",
+        "path": "custom-builds",
+        "canonical": "product-images/custom-builds",
+        "reason": "directory placeholder",
+        "lastModifiedIso": "1970-01-01T00:00:00.000Z"
+      },
+      {
+        "bucket": "product-images",
+        "path": "customers",
+        "canonical": "product-images/customers",
+        "reason": "directory placeholder",
+        "lastModifiedIso": "1970-01-01T00:00:00.000Z"
+      },
+      {
+        "bucket": "product-images",
+        "path": "gallery",
+        "canonical": "product-images/gallery",
+        "reason": "directory placeholder",
+        "lastModifiedIso": "1970-01-01T00:00:00.000Z"
+      },
+      {
+        "bucket": "product-images",
+        "path": "products",
+        "canonical": "product-images/products",
+        "reason": "directory placeholder",
+        "lastModifiedIso": "1970-01-01T00:00:00.000Z"
+      },
+      {
+        "bucket": "product-videos",
+        "path": "products",
+        "canonical": "product-videos/products",
+        "reason": "directory placeholder",
+        "lastModifiedIso": "1970-01-01T00:00:00.000Z"
+      }
+    ],
+    "recentUnreferenced": [
+      {
+        "canonical": "product-images/categories/1783027034449-b6emk2uz-thumb.webp",
+        "ageHours": 72.46563611111111,
+        "lastModifiedIso": "2026-07-02T21:17:15.587Z"
+      },
+      {
+        "canonical": "product-images/categories/1783043553194-ifnl9hpa-thumb.webp",
+        "ageHours": 67.87709333333333,
+        "lastModifiedIso": "2026-07-03T01:52:34.341Z"
+      },
+      {
+        "canonical": "product-images/categories/1783043600690-f2nszcq7-thumb.webp",
+        "ageHours": 67.86403083333333,
+        "lastModifiedIso": "2026-07-03T01:53:21.366Z"
+      },
+      {
+        "canonical": "product-images/categories/1783043641231-e7b219pe-thumb.webp",
+        "ageHours": 67.85275194444445,
+        "lastModifiedIso": "2026-07-03T01:54:01.970Z"
+      },
+      {
+        "canonical": "product-images/categories/1783043873252-077pkjyz-thumb.webp",
+        "ageHours": 67.78824527777778,
+        "lastModifiedIso": "2026-07-03T01:57:54.194Z"
+      },
+      {
+        "canonical": "product-images/categories/1783044661759-k6a86csm-thumb.webp",
+        "ageHours": 67.56921666666666,
+        "lastModifiedIso": "2026-07-03T02:11:02.697Z"
+      },
+      {
+        "canonical": "product-images/custom-builds/1782724793240-tjqu0z1v-thumb.webp",
+        "ageHours": 156.42155277777778,
+        "lastModifiedIso": "2026-06-29T09:19:54.287Z"
+      },
+      {
+        "canonical": "product-images/custom-builds/1782724820239-ij6rnuac-thumb.webp",
+        "ageHours": 156.41413166666666,
+        "lastModifiedIso": "2026-06-29T09:20:21.003Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783167788739-pblcu5ny-hero.webp",
+        "ageHours": 33.36727138888889,
+        "lastModifiedIso": "2026-07-04T12:23:09.700Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783167788739-pblcu5ny-thumb.webp",
+        "ageHours": 33.36725222222222,
+        "lastModifiedIso": "2026-07-04T12:23:09.769Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783187707824-xat7nr4w-hero.webp",
+        "ageHours": 27.83379111111111,
+        "lastModifiedIso": "2026-07-04T17:55:10.229Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783187707824-xat7nr4w-thumb.webp",
+        "ageHours": 27.834038055555556,
+        "lastModifiedIso": "2026-07-04T17:55:09.340Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783212527407-oabtagmy-thumb.webp",
+        "ageHours": 20.939949444444444,
+        "lastModifiedIso": "2026-07-05T00:48:48.059Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783218380629-bp4zh6b7-hero.webp",
+        "ageHours": 19.313968055555556,
+        "lastModifiedIso": "2026-07-05T02:26:21.592Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783218380629-rcrpi7yv-hero.webp",
+        "ageHours": 19.31396722222222,
+        "lastModifiedIso": "2026-07-05T02:26:21.595Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783218392493-1gwpv47d-hero.webp",
+        "ageHours": 19.310675555555555,
+        "lastModifiedIso": "2026-07-05T02:26:33.445Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783218392494-3rjc698v-hero.webp",
+        "ageHours": 19.310740555555554,
+        "lastModifiedIso": "2026-07-05T02:26:33.211Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783218392494-thh53nc0-hero.webp",
+        "ageHours": 19.3108225,
+        "lastModifiedIso": "2026-07-05T02:26:32.916Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783218392494-ux8ithkn-hero.webp",
+        "ageHours": 19.310769722222222,
+        "lastModifiedIso": "2026-07-05T02:26:33.106Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783218392913-g0utp36u-hero.webp",
+        "ageHours": 19.3106825,
+        "lastModifiedIso": "2026-07-05T02:26:33.420Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783218393088-i0pckoig-hero.webp",
+        "ageHours": 19.310648055555557,
+        "lastModifiedIso": "2026-07-05T02:26:33.544Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783218393198-giodplnl-hero.webp",
+        "ageHours": 19.310558611111112,
+        "lastModifiedIso": "2026-07-05T02:26:33.866Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783218393410-gj2jllk9-hero.webp",
+        "ageHours": 19.310596944444445,
+        "lastModifiedIso": "2026-07-05T02:26:33.728Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783218393442-48vs1q5v-hero.webp",
+        "ageHours": 19.310593611111113,
+        "lastModifiedIso": "2026-07-05T02:26:33.740Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783218393534-58w7mxt0-hero.webp",
+        "ageHours": 19.31056361111111,
+        "lastModifiedIso": "2026-07-05T02:26:33.848Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783219400506-9rrrtxj3-hero.webp",
+        "ageHours": 19.030655,
+        "lastModifiedIso": "2026-07-05T02:43:21.519Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783219400506-9rrrtxj3-thumb.webp",
+        "ageHours": 19.030709444444444,
+        "lastModifiedIso": "2026-07-05T02:43:21.323Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783219495969-cmesifi0-hero.webp",
+        "ageHours": 19.00415,
+        "lastModifiedIso": "2026-07-05T02:44:56.937Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783219495969-cmesifi0-thumb.webp",
+        "ageHours": 19.00415111111111,
+        "lastModifiedIso": "2026-07-05T02:44:56.933Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783219563563-vdleem7l-hero.webp",
+        "ageHours": 18.985341666666667,
+        "lastModifiedIso": "2026-07-05T02:46:04.647Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783219666634-gm9992fl-hero.webp",
+        "ageHours": 18.956574444444446,
+        "lastModifiedIso": "2026-07-05T02:47:48.209Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783219666634-gm9992fl-thumb.webp",
+        "ageHours": 18.956416944444445,
+        "lastModifiedIso": "2026-07-05T02:47:48.776Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783222382375-2gb17zzk-hero.webp",
+        "ageHours": 18.20243111111111,
+        "lastModifiedIso": "2026-07-05T03:33:03.125Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783222382376-6m34v3y4-hero.webp",
+        "ageHours": 18.20242777777778,
+        "lastModifiedIso": "2026-07-05T03:33:03.137Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783222382376-i9p47bjd-hero.webp",
+        "ageHours": 18.202466944444446,
+        "lastModifiedIso": "2026-07-05T03:33:02.996Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783222382376-uzyyqmdd-hero.webp",
+        "ageHours": 18.202444166666666,
+        "lastModifiedIso": "2026-07-05T03:33:03.078Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783222431994-hgvozn1z-hero.webp",
+        "ageHours": 18.1879375,
+        "lastModifiedIso": "2026-07-05T03:33:55.302Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783222431995-8p682npg-hero.webp",
+        "ageHours": 18.188049444444445,
+        "lastModifiedIso": "2026-07-05T03:33:54.899Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783222431995-nylvmhqq-hero.webp",
+        "ageHours": 18.18795638888889,
+        "lastModifiedIso": "2026-07-05T03:33:55.234Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783222625208-un7ga41o-hero.webp",
+        "ageHours": 18.134656666666668,
+        "lastModifiedIso": "2026-07-05T03:37:07.113Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783222625208-yblrrmna-hero.webp",
+        "ageHours": 18.134538055555556,
+        "lastModifiedIso": "2026-07-05T03:37:07.540Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783222908663-2awryd4c-hero.webp",
+        "ageHours": 18.0558175,
+        "lastModifiedIso": "2026-07-05T03:41:50.934Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783222908663-8ijvtji1-hero.webp",
+        "ageHours": 18.055843055555556,
+        "lastModifiedIso": "2026-07-05T03:41:50.842Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783222908663-d5zfta0x-hero.webp",
+        "ageHours": 18.05561611111111,
+        "lastModifiedIso": "2026-07-05T03:41:51.659Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783223014499-69gm7zga-hero.webp",
+        "ageHours": 18.026492222222224,
+        "lastModifiedIso": "2026-07-05T03:43:36.505Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783223014499-milvlav5-hero.webp",
+        "ageHours": 18.025928611111112,
+        "lastModifiedIso": "2026-07-05T03:43:38.534Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783223014499-nijssfcq-hero.webp",
+        "ageHours": 18.026349166666666,
+        "lastModifiedIso": "2026-07-05T03:43:37.020Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783223014500-y2dy96as-hero.webp",
+        "ageHours": 18.026184722222222,
+        "lastModifiedIso": "2026-07-05T03:43:37.612Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783223016325-lc9fihmm-hero.webp",
+        "ageHours": 18.02612388888889,
+        "lastModifiedIso": "2026-07-05T03:43:37.831Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783223016835-llcg6mkf-hero.webp",
+        "ageHours": 18.02602388888889,
+        "lastModifiedIso": "2026-07-05T03:43:38.191Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783223017426-mfb3ch23-hero.webp",
+        "ageHours": 18.025895277777778,
+        "lastModifiedIso": "2026-07-05T03:43:38.654Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783223017647-ongag8yx-hero.webp",
+        "ageHours": 18.025815555555557,
+        "lastModifiedIso": "2026-07-05T03:43:38.941Z"
+      },
+      {
+        "canonical": "product-images/gallery/1783245902550-p3idnucr-hero.webp",
+        "ageHours": 11.668794166666666,
+        "lastModifiedIso": "2026-07-05T10:05:04.218Z"
+      },
+      {
+        "canonical": "product-images/products/1782859689447-hk388jp1-hero.webp",
+        "ageHours": 118.9504525,
+        "lastModifiedIso": "2026-06-30T22:48:10.248Z"
+      },
+      {
+        "canonical": "product-images/products/1782859689447-hk388jp1-thumb.webp",
+        "ageHours": 118.95047638888889,
+        "lastModifiedIso": "2026-06-30T22:48:10.162Z"
+      },
+      {
+        "canonical": "product-images/products/1783028371826-rat5esev-hero.webp",
+        "ageHours": 72.09411583333333,
+        "lastModifiedIso": "2026-07-02T21:39:33.060Z"
+      },
+      {
+        "canonical": "product-images/products/1783028371826-rat5esev-thumb.webp",
+        "ageHours": 72.0941386111111,
+        "lastModifiedIso": "2026-07-02T21:39:32.978Z"
+      },
+      {
+        "canonical": "product-images/products/1783028589575-123hheh2-thumb.webp",
+        "ageHours": 72.03371527777777,
+        "lastModifiedIso": "2026-07-02T21:43:10.502Z"
+      },
+      {
+        "canonical": "product-images/products/1783030164006-vt8ogvk6-thumb.webp",
+        "ageHours": 71.59640916666666,
+        "lastModifiedIso": "2026-07-02T22:09:24.804Z"
+      },
+      {
+        "canonical": "product-images/products/1783045164883-0vie4mqo-thumb.webp",
+        "ageHours": 67.42939277777778,
+        "lastModifiedIso": "2026-07-03T02:19:26.063Z"
+      },
+      {
+        "canonical": "product-images/products/1783045305529-6ppv98sc-thumb.webp",
+        "ageHours": 67.39043833333334,
+        "lastModifiedIso": "2026-07-03T02:21:46.299Z"
+      },
+      {
+        "canonical": "product-images/products/1783134576186-u9i275aa-hero.webp",
+        "ageHours": 42.59285638888889,
+        "lastModifiedIso": "2026-07-04T03:09:37.594Z"
+      },
+      {
+        "canonical": "product-images/products/1783134576186-u9i275aa-thumb.webp",
+        "ageHours": 42.59301833333333,
+        "lastModifiedIso": "2026-07-04T03:09:37.011Z"
+      },
+      {
+        "canonical": "product-images/products/1783137402912-orrbrda7-thumb.webp",
+        "ageHours": 41.80779833333333,
+        "lastModifiedIso": "2026-07-04T03:56:43.803Z"
+      },
+      {
+        "canonical": "product-videos/products/1783134639286-njesrxpb.webm",
+        "ageHours": 42.481682222222226,
+        "lastModifiedIso": "2026-07-04T03:16:17.821Z"
+      }
+    ],
+    "brokenReferences": [
+      {
+        "canonical": "product-videos/products/1774890066821-qspdo201.webm",
+        "bucket": "product-videos",
+        "path": "products/1774890066821-qspdo201.webm",
+        "sources": [
+          {
+            "table": "products",
+            "field": "video_url",
+            "rowKey": "slider"
+          }
+        ]
+      },
+      {
+        "canonical": "product-videos/products/1774887802993-q5hm4l1m.webm",
+        "bucket": "product-videos",
+        "path": "products/1774887802993-q5hm4l1m.webm",
+        "sources": [
+          {
+            "table": "products",
+            "field": "video_url",
+            "rowKey": "360"
+          }
+        ]
+      }
+    ],
+    "unknownOrUnparseable": [],
+    "integrityHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "violations": [],
+  "newBroken": []
+}

@@ -5,7 +5,7 @@ import type {
 } from '../../src/services/storage-gc/reference-index'
 import { buildReferenceIndex } from '../../src/services/storage-gc/reference-index'
 import type { StorageListFetcher } from '../../src/services/storage-gc/storage-enumerator'
-import { getStorageIdentity } from '../../src/services/storage.service'
+import { getStorageIdentity } from '../../src/services/storage-identity'
 
 /**
  * Fetch every URL-bearing row from every media-managed table.

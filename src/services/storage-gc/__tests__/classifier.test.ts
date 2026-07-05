@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { classifyStorageObjects, MANAGED_FOLDERS } from '../classifier'
 import { buildReferenceIndex } from '../reference-index'
-import { IMAGE_BUCKET, VIDEO_BUCKET } from '../../storage.service'
+import { IMAGE_BUCKET, VIDEO_BUCKET } from '../../storage-identity'
 import type { StorageObject } from '../types'
 
 const PROJECT = 'https://example.supabase.co'

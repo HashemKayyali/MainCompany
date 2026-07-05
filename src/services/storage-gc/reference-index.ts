@@ -1,4 +1,4 @@
-import { getStorageIdentity } from '../storage.service'
+import { getStorageIdentity } from '../storage-identity'
 import type { DbReference, DbReferenceSource, ReferenceIndex } from './types'
 
 /* ------------------------------------------------------------------ *

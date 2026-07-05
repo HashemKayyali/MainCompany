@@ -1,4 +1,4 @@
-import type { StorageAssetKind } from '../storage.service'
+import type { StorageAssetKind } from '../storage-identity'
 
 /* ------------------------------------------------------------------ *
  *  Reference index                                                    *

@@ -1,0 +1,2155 @@
+{
+  "environment": "dqizzlcsioqykfeldtsj",
+  "timestamp": "2026-07-05T21:41:37.090Z",
+  "safetyWindowDays": 7,
+  "safetyWindowCutoffIso": "2026-06-28T21:41:37.090Z",
+  "buckets": [
+    "product-images",
+    "product-videos"
+  ],
+  "totals": {
+    "dbReferencesRaw": 176,
+    "dbReferencesUnique": 146,
+    "storageObjects": 456,
+    "referenced": 144,
+    "safeCandidates": 240,
+    "reviewRequired": 7,
+    "recentUnreferenced": 65,
+    "unknownOrUnparseable": 0,
+    "brokenReferences": 2,
+    "duplicateDbReferences": 30,
+    "estimatedReclaimableBytes": 21063530
+  },
+  "perFolder": {
+    "product-images/categories": {
+      "count": 29,
+      "bytes": 1388198
+    },
+    "product-images/custom-builds": {
+      "count": 19,
+      "bytes": 1326186
+    },
+    "product-images/customers": {
+      "count": 26,
+      "bytes": 3179116
+    },
+    "product-images/gallery": {
+      "count": 136,
+      "bytes": 334256226
+    },
+    "product-images/parts": {
+      "count": 2,
+      "bytes": 0
+    },
+    "product-images/products": {
+      "count": 238,
+      "bytes": 11367224
+    },
+    "product-videos/products": {
+      "count": 6,
+      "bytes": 27574346
+    }
+  },
+  "safeCandidates": [
+    {
+      "bucket": "product-images",
+      "path": "categories/1771524048073-84mc8ill.png",
+      "canonical": "product-images/categories/1771524048073-84mc8ill.png",
+      "size": 21727,
+      "lastModifiedIso": "2026-02-19T18:00:48.724Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1771559140518-b52rcj0i.png",
+      "canonical": "product-images/categories/1771559140518-b52rcj0i.png",
+      "size": 21727,
+      "lastModifiedIso": "2026-02-20T03:45:41.328Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1774965619571-tliq3nem-hero.webp",
+      "canonical": "product-images/categories/1774965619571-tliq3nem-hero.webp",
+      "size": 109770,
+      "lastModifiedIso": "2026-03-31T14:00:20.738Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1774965619571-tliq3nem-thumb.webp",
+      "canonical": "product-images/categories/1774965619571-tliq3nem-thumb.webp",
+      "size": 36924,
+      "lastModifiedIso": "2026-03-31T14:00:20.712Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1774965660294-pidg18n7-hero.webp",
+      "canonical": "product-images/categories/1774965660294-pidg18n7-hero.webp",
+      "size": 30174,
+      "lastModifiedIso": "2026-03-31T14:01:00.948Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1774965660294-pidg18n7-thumb.webp",
+      "canonical": "product-images/categories/1774965660294-pidg18n7-thumb.webp",
+      "size": 32304,
+      "lastModifiedIso": "2026-03-31T14:01:00.944Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1774965862635-6wbhwxx5-hero.webp",
+      "canonical": "product-images/categories/1774965862635-6wbhwxx5-hero.webp",
+      "size": 57060,
+      "lastModifiedIso": "2026-03-31T14:04:23.980Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1774965862635-6wbhwxx5-thumb.webp",
+      "canonical": "product-images/categories/1774965862635-6wbhwxx5-thumb.webp",
+      "size": 16928,
+      "lastModifiedIso": "2026-03-31T14:04:23.988Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1774974034917-0dirifhr-hero.webp",
+      "canonical": "product-images/categories/1774974034917-0dirifhr-hero.webp",
+      "size": 25346,
+      "lastModifiedIso": "2026-03-31T16:20:35.972Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1774974034917-0dirifhr-thumb.webp",
+      "canonical": "product-images/categories/1774974034917-0dirifhr-thumb.webp",
+      "size": 6144,
+      "lastModifiedIso": "2026-03-31T16:20:35.761Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1774974886736-3hvu33ln-hero.webp",
+      "canonical": "product-images/categories/1774974886736-3hvu33ln-hero.webp",
+      "size": 25346,
+      "lastModifiedIso": "2026-03-31T16:34:47.753Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1774974886736-3hvu33ln-thumb.webp",
+      "canonical": "product-images/categories/1774974886736-3hvu33ln-thumb.webp",
+      "size": 6144,
+      "lastModifiedIso": "2026-03-31T16:34:47.511Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1778769421185-iruxa3tf-hero.webp",
+      "canonical": "product-images/categories/1778769421185-iruxa3tf-hero.webp",
+      "size": 7644,
+      "lastModifiedIso": "2026-05-14T14:37:02.169Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1778769421185-iruxa3tf-thumb.webp",
+      "canonical": "product-images/categories/1778769421185-iruxa3tf-thumb.webp",
+      "size": 7644,
+      "lastModifiedIso": "2026-05-14T14:37:02.036Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1782541899264-v4lk5rds-hero.webp",
+      "canonical": "product-images/categories/1782541899264-v4lk5rds-hero.webp",
+      "size": 17168,
+      "lastModifiedIso": "2026-06-27T06:31:40.111Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "categories/1782541899264-v4lk5rds-thumb.webp",
+      "canonical": "product-images/categories/1782541899264-v4lk5rds-thumb.webp",
+      "size": 17168,
+      "lastModifiedIso": "2026-06-27T06:31:40.073Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "custom-builds/1782678289033-0pamewwa-hero.webp",
+      "canonical": "product-images/custom-builds/1782678289033-0pamewwa-hero.webp",
+      "size": 17168,
+      "lastModifiedIso": "2026-06-28T20:24:50.066Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "custom-builds/1782678289033-0pamewwa-thumb.webp",
+      "canonical": "product-images/custom-builds/1782678289033-0pamewwa-thumb.webp",
+      "size": 17168,
+      "lastModifiedIso": "2026-06-28T20:24:50.093Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "custom-builds/1782678394846-azze9rj8-hero.webp",
+      "canonical": "product-images/custom-builds/1782678394846-azze9rj8-hero.webp",
+      "size": 182986,
+      "lastModifiedIso": "2026-06-28T20:26:36.201Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "custom-builds/1782678394846-azze9rj8-thumb.webp",
+      "canonical": "product-images/custom-builds/1782678394846-azze9rj8-thumb.webp",
+      "size": 25578,
+      "lastModifiedIso": "2026-06-28T20:26:36.079Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "custom-builds/1782678764006-1gxjtxcl-thumb.webp",
+      "canonical": "product-images/custom-builds/1782678764006-1gxjtxcl-thumb.webp",
+      "size": 26162,
+      "lastModifiedIso": "2026-06-28T20:32:45.166Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "custom-builds/1782678802668-cs4yhuv4-hero.webp",
+      "canonical": "product-images/custom-builds/1782678802668-cs4yhuv4-hero.webp",
+      "size": 27922,
+      "lastModifiedIso": "2026-06-28T20:33:23.584Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "custom-builds/1782678802668-cs4yhuv4-thumb.webp",
+      "canonical": "product-images/custom-builds/1782678802668-cs4yhuv4-thumb.webp",
+      "size": 27922,
+      "lastModifiedIso": "2026-06-28T20:33:23.686Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "custom-builds/1782679064997-qqxwx8dd-thumb.webp",
+      "canonical": "product-images/custom-builds/1782679064997-qqxwx8dd-thumb.webp",
+      "size": 20208,
+      "lastModifiedIso": "2026-06-28T20:37:46.037Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "custom-builds/1782679501762-f47kkfxl-thumb.webp",
+      "canonical": "product-images/custom-builds/1782679501762-f47kkfxl-thumb.webp",
+      "size": 29564,
+      "lastModifiedIso": "2026-06-28T20:45:03.374Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "custom-builds/1782679507699-iptsdgd0-thumb.webp",
+      "canonical": "product-images/custom-builds/1782679507699-iptsdgd0-thumb.webp",
+      "size": 28958,
+      "lastModifiedIso": "2026-06-28T20:45:08.509Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "customers/1771523922374-s2m5anx5.jpg",
+      "canonical": "product-images/customers/1771523922374-s2m5anx5.jpg",
+      "size": 5165,
+      "lastModifiedIso": "2026-02-19T17:58:43.058Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "customers/1771527620632-0e13s11t.webp",
+      "canonical": "product-images/customers/1771527620632-0e13s11t.webp",
+      "size": 14686,
+      "lastModifiedIso": "2026-02-19T19:00:21.499Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "customers/1771527728765-kt4kfket.webp",
+      "canonical": "product-images/customers/1771527728765-kt4kfket.webp",
+      "size": 24624,
+      "lastModifiedIso": "2026-02-19T19:02:09.417Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "customers/1771528139435-f4q9oi2c.webp",
+      "canonical": "product-images/customers/1771528139435-f4q9oi2c.webp",
+      "size": 61814,
+      "lastModifiedIso": "2026-02-19T19:09:00.406Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "customers/1771557963866-ylrl7sez.png",
+      "canonical": "product-images/customers/1771557963866-ylrl7sez.png",
+      "size": 43849,
+      "lastModifiedIso": "2026-02-20T03:26:04.545Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "customers/1774968149403-dsmzey5r-thumb.webp",
+      "canonical": "product-images/customers/1774968149403-dsmzey5r-thumb.webp",
+      "size": 42724,
+      "lastModifiedIso": "2026-03-31T14:42:30.483Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/.emptyFolderPlaceholder",
+      "canonical": "product-images/gallery/.emptyFolderPlaceholder",
+      "size": 0,
+      "lastModifiedIso": "2026-02-20T23:11:29.474Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782528487995-vb11haps-hero.webp",
+      "canonical": "product-images/gallery/1782528487995-vb11haps-hero.webp",
+      "size": 462596,
+      "lastModifiedIso": "2026-06-27T02:48:09.439Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782528487995-vb11haps-thumb.webp",
+      "canonical": "product-images/gallery/1782528487995-vb11haps-thumb.webp",
+      "size": 70158,
+      "lastModifiedIso": "2026-06-27T02:48:09.373Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782528514768-49saif6q-hero.webp",
+      "canonical": "product-images/gallery/1782528514768-49saif6q-hero.webp",
+      "size": 169972,
+      "lastModifiedIso": "2026-06-27T02:48:35.601Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782528514768-49saif6q-thumb.webp",
+      "canonical": "product-images/gallery/1782528514768-49saif6q-thumb.webp",
+      "size": 29964,
+      "lastModifiedIso": "2026-06-27T02:48:35.483Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782528519083-w5ny8jtj-hero.webp",
+      "canonical": "product-images/gallery/1782528519083-w5ny8jtj-hero.webp",
+      "size": 174130,
+      "lastModifiedIso": "2026-06-27T02:48:39.803Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782528519083-w5ny8jtj-thumb.webp",
+      "canonical": "product-images/gallery/1782528519083-w5ny8jtj-thumb.webp",
+      "size": 25844,
+      "lastModifiedIso": "2026-06-27T02:48:39.684Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782528525812-wxojmiqs-hero.webp",
+      "canonical": "product-images/gallery/1782528525812-wxojmiqs-hero.webp",
+      "size": 817708,
+      "lastModifiedIso": "2026-06-27T02:48:47.818Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782528525812-wxojmiqs-thumb.webp",
+      "canonical": "product-images/gallery/1782528525812-wxojmiqs-thumb.webp",
+      "size": 90468,
+      "lastModifiedIso": "2026-06-27T02:48:47.541Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529203557-u0lszknx-hero.webp",
+      "canonical": "product-images/gallery/1782529203557-u0lszknx-hero.webp",
+      "size": 111594,
+      "lastModifiedIso": "2026-06-27T03:00:04.480Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529203557-u0lszknx-thumb.webp",
+      "canonical": "product-images/gallery/1782529203557-u0lszknx-thumb.webp",
+      "size": 19288,
+      "lastModifiedIso": "2026-06-27T03:00:04.440Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529210086-b8rsegq1-hero.webp",
+      "canonical": "product-images/gallery/1782529210086-b8rsegq1-hero.webp",
+      "size": 353364,
+      "lastModifiedIso": "2026-06-27T03:00:11.149Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529210086-b8rsegq1-thumb.webp",
+      "canonical": "product-images/gallery/1782529210086-b8rsegq1-thumb.webp",
+      "size": 46654,
+      "lastModifiedIso": "2026-06-27T03:00:10.896Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529235023-qkuwmgz9-hero.webp",
+      "canonical": "product-images/gallery/1782529235023-qkuwmgz9-hero.webp",
+      "size": 321204,
+      "lastModifiedIso": "2026-06-27T03:00:36.093Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529235023-qkuwmgz9-thumb.webp",
+      "canonical": "product-images/gallery/1782529235023-qkuwmgz9-thumb.webp",
+      "size": 59314,
+      "lastModifiedIso": "2026-06-27T03:00:35.973Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529244781-hvfy6q3q-hero.webp",
+      "canonical": "product-images/gallery/1782529244781-hvfy6q3q-hero.webp",
+      "size": 332582,
+      "lastModifiedIso": "2026-06-27T03:00:45.926Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529244781-hvfy6q3q-thumb.webp",
+      "canonical": "product-images/gallery/1782529244781-hvfy6q3q-thumb.webp",
+      "size": 59156,
+      "lastModifiedIso": "2026-06-27T03:00:45.755Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529250126-gmpp54et-hero.webp",
+      "canonical": "product-images/gallery/1782529250126-gmpp54et-hero.webp",
+      "size": 197504,
+      "lastModifiedIso": "2026-06-27T03:00:50.875Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529250126-gmpp54et-thumb.webp",
+      "canonical": "product-images/gallery/1782529250126-gmpp54et-thumb.webp",
+      "size": 27950,
+      "lastModifiedIso": "2026-06-27T03:00:50.805Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529255755-eby82oge-hero.webp",
+      "canonical": "product-images/gallery/1782529255755-eby82oge-hero.webp",
+      "size": 614662,
+      "lastModifiedIso": "2026-06-27T03:00:56.999Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529255755-eby82oge-thumb.webp",
+      "canonical": "product-images/gallery/1782529255755-eby82oge-thumb.webp",
+      "size": 75160,
+      "lastModifiedIso": "2026-06-27T03:00:56.757Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529260684-acx3c6ic-hero.webp",
+      "canonical": "product-images/gallery/1782529260684-acx3c6ic-hero.webp",
+      "size": 953260,
+      "lastModifiedIso": "2026-06-27T03:01:01.823Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529260684-acx3c6ic-thumb.webp",
+      "canonical": "product-images/gallery/1782529260684-acx3c6ic-thumb.webp",
+      "size": 105492,
+      "lastModifiedIso": "2026-06-27T03:01:01.749Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529266162-kyoc10k5-hero.webp",
+      "canonical": "product-images/gallery/1782529266162-kyoc10k5-hero.webp",
+      "size": 118876,
+      "lastModifiedIso": "2026-06-27T03:01:06.911Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782529266162-kyoc10k5-thumb.webp",
+      "canonical": "product-images/gallery/1782529266162-kyoc10k5-thumb.webp",
+      "size": 23602,
+      "lastModifiedIso": "2026-06-27T03:01:06.889Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782679144250-lchr1i3n-hero.webp",
+      "canonical": "product-images/gallery/1782679144250-lchr1i3n-hero.webp",
+      "size": 62846,
+      "lastModifiedIso": "2026-06-28T20:39:05.094Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782679144250-lchr1i3n-thumb.webp",
+      "canonical": "product-images/gallery/1782679144250-lchr1i3n-thumb.webp",
+      "size": 28528,
+      "lastModifiedIso": "2026-06-28T20:39:05.079Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782679160309-uiltaetw-hero.webp",
+      "canonical": "product-images/gallery/1782679160309-uiltaetw-hero.webp",
+      "size": 17168,
+      "lastModifiedIso": "2026-06-28T20:39:20.852Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782679160309-uiltaetw-thumb.webp",
+      "canonical": "product-images/gallery/1782679160309-uiltaetw-thumb.webp",
+      "size": 17168,
+      "lastModifiedIso": "2026-06-28T20:39:20.854Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782679165948-t0ksw735-hero.webp",
+      "canonical": "product-images/gallery/1782679165948-t0ksw735-hero.webp",
+      "size": 30080,
+      "lastModifiedIso": "2026-06-28T20:39:26.478Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782679165948-t0ksw735-thumb.webp",
+      "canonical": "product-images/gallery/1782679165948-t0ksw735-thumb.webp",
+      "size": 16032,
+      "lastModifiedIso": "2026-06-28T20:39:26.547Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782679175018-qu4lcby3-hero.webp",
+      "canonical": "product-images/gallery/1782679175018-qu4lcby3-hero.webp",
+      "size": 25450,
+      "lastModifiedIso": "2026-06-28T20:39:35.710Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782679175018-qu4lcby3-thumb.webp",
+      "canonical": "product-images/gallery/1782679175018-qu4lcby3-thumb.webp",
+      "size": 12490,
+      "lastModifiedIso": "2026-06-28T20:39:35.582Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782679184039-67q4bi59-hero.webp",
+      "canonical": "product-images/gallery/1782679184039-67q4bi59-hero.webp",
+      "size": 112340,
+      "lastModifiedIso": "2026-06-28T20:39:44.977Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery/1782679184039-67q4bi59-thumb.webp",
+      "canonical": "product-images/gallery/1782679184039-67q4bi59-thumb.webp",
+      "size": 17302,
+      "lastModifiedIso": "2026-06-28T20:39:44.856Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "parts/.emptyFolderPlaceholder",
+      "canonical": "product-images/parts/.emptyFolderPlaceholder",
+      "size": 0,
+      "lastModifiedIso": "2026-06-27T04:37:59.247Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/.emptyFolderPlaceholder",
+      "canonical": "product-images/products/.emptyFolderPlaceholder",
+      "size": 0,
+      "lastModifiedIso": "2026-02-20T23:11:11.215Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630433016-r5sf9tdg-hero.webp",
+      "canonical": "product-images/products/1771630433016-r5sf9tdg-hero.webp",
+      "size": 195836,
+      "lastModifiedIso": "2026-02-20T23:33:54.184Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630433016-r5sf9tdg-thumb.webp",
+      "canonical": "product-images/products/1771630433016-r5sf9tdg-thumb.webp",
+      "size": 28884,
+      "lastModifiedIso": "2026-02-20T23:33:54.034Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630437138-qx6y9it5-hero.webp",
+      "canonical": "product-images/products/1771630437138-qx6y9it5-hero.webp",
+      "size": 60026,
+      "lastModifiedIso": "2026-02-20T23:33:57.861Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630437138-qx6y9it5-thumb.webp",
+      "canonical": "product-images/products/1771630437138-qx6y9it5-thumb.webp",
+      "size": 12436,
+      "lastModifiedIso": "2026-02-20T23:33:57.859Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630440657-9vtywtun-thumb.webp",
+      "canonical": "product-images/products/1771630440657-9vtywtun-thumb.webp",
+      "size": 14308,
+      "lastModifiedIso": "2026-02-20T23:34:01.418Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630581725-hvt53xnq-thumb.webp",
+      "canonical": "product-images/products/1771630581725-hvt53xnq-thumb.webp",
+      "size": 26248,
+      "lastModifiedIso": "2026-02-20T23:36:22.797Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630586031-f8t5nroe-thumb.webp",
+      "canonical": "product-images/products/1771630586031-f8t5nroe-thumb.webp",
+      "size": 18220,
+      "lastModifiedIso": "2026-02-20T23:36:26.673Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630589055-111zdig4-thumb.webp",
+      "canonical": "product-images/products/1771630589055-111zdig4-thumb.webp",
+      "size": 22322,
+      "lastModifiedIso": "2026-02-20T23:36:29.612Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630602294-mk8ir9dv-hero.webp",
+      "canonical": "product-images/products/1771630602294-mk8ir9dv-hero.webp",
+      "size": 103028,
+      "lastModifiedIso": "2026-02-20T23:36:43.318Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630602294-mk8ir9dv-thumb.webp",
+      "canonical": "product-images/products/1771630602294-mk8ir9dv-thumb.webp",
+      "size": 16206,
+      "lastModifiedIso": "2026-02-20T23:36:43.226Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630605705-ows82434-hero.webp",
+      "canonical": "product-images/products/1771630605705-ows82434-hero.webp",
+      "size": 124570,
+      "lastModifiedIso": "2026-02-20T23:36:47.048Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630605705-ows82434-thumb.webp",
+      "canonical": "product-images/products/1771630605705-ows82434-thumb.webp",
+      "size": 22726,
+      "lastModifiedIso": "2026-02-20T23:36:46.955Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630609074-fkaggci7-hero.webp",
+      "canonical": "product-images/products/1771630609074-fkaggci7-hero.webp",
+      "size": 97104,
+      "lastModifiedIso": "2026-02-20T23:36:50.031Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630609074-fkaggci7-thumb.webp",
+      "canonical": "product-images/products/1771630609074-fkaggci7-thumb.webp",
+      "size": 23226,
+      "lastModifiedIso": "2026-02-20T23:36:49.962Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630647387-kt2x56uo-hero.webp",
+      "canonical": "product-images/products/1771630647387-kt2x56uo-hero.webp",
+      "size": 116664,
+      "lastModifiedIso": "2026-02-20T23:37:28.487Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630647387-kt2x56uo-thumb.webp",
+      "canonical": "product-images/products/1771630647387-kt2x56uo-thumb.webp",
+      "size": 33160,
+      "lastModifiedIso": "2026-02-20T23:37:28.087Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630650754-yohz8ug9-hero.webp",
+      "canonical": "product-images/products/1771630650754-yohz8ug9-hero.webp",
+      "size": 129886,
+      "lastModifiedIso": "2026-02-20T23:37:31.708Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630650754-yohz8ug9-thumb.webp",
+      "canonical": "product-images/products/1771630650754-yohz8ug9-thumb.webp",
+      "size": 28534,
+      "lastModifiedIso": "2026-02-20T23:37:31.638Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630654120-lilyo7pm-hero.webp",
+      "canonical": "product-images/products/1771630654120-lilyo7pm-hero.webp",
+      "size": 165576,
+      "lastModifiedIso": "2026-02-20T23:37:35.358Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630654120-lilyo7pm-thumb.webp",
+      "canonical": "product-images/products/1771630654120-lilyo7pm-thumb.webp",
+      "size": 29610,
+      "lastModifiedIso": "2026-02-20T23:37:35.258Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630682101-jrgw31nj-hero.webp",
+      "canonical": "product-images/products/1771630682101-jrgw31nj-hero.webp",
+      "size": 256800,
+      "lastModifiedIso": "2026-02-20T23:38:04.047Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630682101-jrgw31nj-thumb.webp",
+      "canonical": "product-images/products/1771630682101-jrgw31nj-thumb.webp",
+      "size": 37296,
+      "lastModifiedIso": "2026-02-20T23:38:03.598Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630686823-iiuzizim-hero.webp",
+      "canonical": "product-images/products/1771630686823-iiuzizim-hero.webp",
+      "size": 247596,
+      "lastModifiedIso": "2026-02-20T23:38:08.230Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771630686823-iiuzizim-thumb.webp",
+      "canonical": "product-images/products/1771630686823-iiuzizim-thumb.webp",
+      "size": 32304,
+      "lastModifiedIso": "2026-02-20T23:38:08.079Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771631973806-92e0f02n-hero.webp",
+      "canonical": "product-images/products/1771631973806-92e0f02n-hero.webp",
+      "size": 247596,
+      "lastModifiedIso": "2026-02-20T23:59:35.827Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1771631973806-92e0f02n-thumb.webp",
+      "canonical": "product-images/products/1771631973806-92e0f02n-thumb.webp",
+      "size": 32304,
+      "lastModifiedIso": "2026-02-20T23:59:35.659Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044694570-n6zfwt2s-hero.webp",
+      "canonical": "product-images/products/1772044694570-n6zfwt2s-hero.webp",
+      "size": 77674,
+      "lastModifiedIso": "2026-02-25T18:38:14.666Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044694570-n6zfwt2s-thumb.webp",
+      "canonical": "product-images/products/1772044694570-n6zfwt2s-thumb.webp",
+      "size": 23212,
+      "lastModifiedIso": "2026-02-25T18:38:14.616Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044707085-qac9utve-hero.webp",
+      "canonical": "product-images/products/1772044707085-qac9utve-hero.webp",
+      "size": 69126,
+      "lastModifiedIso": "2026-02-25T18:38:26.866Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044707085-qac9utve-thumb.webp",
+      "canonical": "product-images/products/1772044707085-qac9utve-thumb.webp",
+      "size": 21128,
+      "lastModifiedIso": "2026-02-25T18:38:26.855Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044717814-611s9x74-hero.webp",
+      "canonical": "product-images/products/1772044717814-611s9x74-hero.webp",
+      "size": 81098,
+      "lastModifiedIso": "2026-02-25T18:38:37.730Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044717814-611s9x74-thumb.webp",
+      "canonical": "product-images/products/1772044717814-611s9x74-thumb.webp",
+      "size": 24302,
+      "lastModifiedIso": "2026-02-25T18:38:37.657Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044726618-ee5ux8yp-hero.webp",
+      "canonical": "product-images/products/1772044726618-ee5ux8yp-hero.webp",
+      "size": 77674,
+      "lastModifiedIso": "2026-02-25T18:38:46.396Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044726618-ee5ux8yp-thumb.webp",
+      "canonical": "product-images/products/1772044726618-ee5ux8yp-thumb.webp",
+      "size": 23212,
+      "lastModifiedIso": "2026-02-25T18:38:46.383Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044735218-2di38gv9-hero.webp",
+      "canonical": "product-images/products/1772044735218-2di38gv9-hero.webp",
+      "size": 69758,
+      "lastModifiedIso": "2026-02-25T18:38:55.037Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044735218-2di38gv9-thumb.webp",
+      "canonical": "product-images/products/1772044735218-2di38gv9-thumb.webp",
+      "size": 20474,
+      "lastModifiedIso": "2026-02-25T18:38:54.989Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044837248-q3tzvrf7-hero.webp",
+      "canonical": "product-images/products/1772044837248-q3tzvrf7-hero.webp",
+      "size": 44968,
+      "lastModifiedIso": "2026-02-25T18:40:37.219Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044837248-q3tzvrf7-thumb.webp",
+      "canonical": "product-images/products/1772044837248-q3tzvrf7-thumb.webp",
+      "size": 14628,
+      "lastModifiedIso": "2026-02-25T18:40:37.203Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044842529-ihzxsywd-hero.webp",
+      "canonical": "product-images/products/1772044842529-ihzxsywd-hero.webp",
+      "size": 56312,
+      "lastModifiedIso": "2026-02-25T18:40:42.327Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044842529-ihzxsywd-thumb.webp",
+      "canonical": "product-images/products/1772044842529-ihzxsywd-thumb.webp",
+      "size": 18588,
+      "lastModifiedIso": "2026-02-25T18:40:42.326Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044996465-y895lmw9-hero.webp",
+      "canonical": "product-images/products/1772044996465-y895lmw9-hero.webp",
+      "size": 66924,
+      "lastModifiedIso": "2026-02-25T18:43:16.458Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772044996465-y895lmw9-thumb.webp",
+      "canonical": "product-images/products/1772044996465-y895lmw9-thumb.webp",
+      "size": 21604,
+      "lastModifiedIso": "2026-02-25T18:43:16.350Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772045003181-jras24mc-hero.webp",
+      "canonical": "product-images/products/1772045003181-jras24mc-hero.webp",
+      "size": 73092,
+      "lastModifiedIso": "2026-02-25T18:43:23.003Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772045003181-jras24mc-thumb.webp",
+      "canonical": "product-images/products/1772045003181-jras24mc-thumb.webp",
+      "size": 22172,
+      "lastModifiedIso": "2026-02-25T18:43:22.981Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772045008025-ni5zol0z-hero.webp",
+      "canonical": "product-images/products/1772045008025-ni5zol0z-hero.webp",
+      "size": 77876,
+      "lastModifiedIso": "2026-02-25T18:43:27.830Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772045008025-ni5zol0z-thumb.webp",
+      "canonical": "product-images/products/1772045008025-ni5zol0z-thumb.webp",
+      "size": 25286,
+      "lastModifiedIso": "2026-02-25T18:43:27.826Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772045046342-25b3a7yo-hero.webp",
+      "canonical": "product-images/products/1772045046342-25b3a7yo-hero.webp",
+      "size": 70262,
+      "lastModifiedIso": "2026-02-25T18:44:06.197Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772045046342-25b3a7yo-thumb.webp",
+      "canonical": "product-images/products/1772045046342-25b3a7yo-thumb.webp",
+      "size": 21830,
+      "lastModifiedIso": "2026-02-25T18:44:06.173Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772045051041-qd64lcet-hero.webp",
+      "canonical": "product-images/products/1772045051041-qd64lcet-hero.webp",
+      "size": 89742,
+      "lastModifiedIso": "2026-02-25T18:44:10.858Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1772045051041-qd64lcet-thumb.webp",
+      "canonical": "product-images/products/1772045051041-qd64lcet-thumb.webp",
+      "size": 26892,
+      "lastModifiedIso": "2026-02-25T18:44:10.835Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1773745369151-0mun8cwf-hero.webp",
+      "canonical": "product-images/products/1773745369151-0mun8cwf-hero.webp",
+      "size": 13772,
+      "lastModifiedIso": "2026-03-17T11:02:51.305Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1773745369151-0mun8cwf-thumb.webp",
+      "canonical": "product-images/products/1773745369151-0mun8cwf-thumb.webp",
+      "size": 9730,
+      "lastModifiedIso": "2026-03-17T11:02:51.360Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1773746006520-hkicch94-hero.webp",
+      "canonical": "product-images/products/1773746006520-hkicch94-hero.webp",
+      "size": 63756,
+      "lastModifiedIso": "2026-03-17T11:13:29.017Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1773746006520-hkicch94-thumb.webp",
+      "canonical": "product-images/products/1773746006520-hkicch94-thumb.webp",
+      "size": 15226,
+      "lastModifiedIso": "2026-03-17T11:13:28.814Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1773748415960-m9vmma5r-hero.webp",
+      "canonical": "product-images/products/1773748415960-m9vmma5r-hero.webp",
+      "size": 49252,
+      "lastModifiedIso": "2026-03-17T11:53:38.283Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1773748415960-m9vmma5r-thumb.webp",
+      "canonical": "product-images/products/1773748415960-m9vmma5r-thumb.webp",
+      "size": 11110,
+      "lastModifiedIso": "2026-03-17T11:53:38.266Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774395889040-q5q0sax8-thumb.webp",
+      "canonical": "product-images/products/1774395889040-q5q0sax8-thumb.webp",
+      "size": 14624,
+      "lastModifiedIso": "2026-03-24T23:44:50.149Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774395895213-j48x2z36-thumb.webp",
+      "canonical": "product-images/products/1774395895213-j48x2z36-thumb.webp",
+      "size": 23788,
+      "lastModifiedIso": "2026-03-24T23:44:55.679Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774395902114-f75rkc2r-thumb.webp",
+      "canonical": "product-images/products/1774395902114-f75rkc2r-thumb.webp",
+      "size": 14028,
+      "lastModifiedIso": "2026-03-24T23:45:02.550Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774395907099-c498ikx1-thumb.webp",
+      "canonical": "product-images/products/1774395907099-c498ikx1-thumb.webp",
+      "size": 14550,
+      "lastModifiedIso": "2026-03-24T23:45:07.603Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774395912697-ljbbb74t-thumb.webp",
+      "canonical": "product-images/products/1774395912697-ljbbb74t-thumb.webp",
+      "size": 16614,
+      "lastModifiedIso": "2026-03-24T23:45:13.158Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774887387900-e1fnekr1-thumb.webp",
+      "canonical": "product-images/products/1774887387900-e1fnekr1-thumb.webp",
+      "size": 12116,
+      "lastModifiedIso": "2026-03-30T16:16:29.139Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774887393479-c7df9hqx-thumb.webp",
+      "canonical": "product-images/products/1774887393479-c7df9hqx-thumb.webp",
+      "size": 17642,
+      "lastModifiedIso": "2026-03-30T16:16:33.911Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774887396436-eef00v9a-thumb.webp",
+      "canonical": "product-images/products/1774887396436-eef00v9a-thumb.webp",
+      "size": 15486,
+      "lastModifiedIso": "2026-03-30T16:16:36.853Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774887399501-nkij1731-thumb.webp",
+      "canonical": "product-images/products/1774887399501-nkij1731-thumb.webp",
+      "size": 30330,
+      "lastModifiedIso": "2026-03-30T16:16:39.945Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774888830474-0zngbs7k-thumb.webp",
+      "canonical": "product-images/products/1774888830474-0zngbs7k-thumb.webp",
+      "size": 8254,
+      "lastModifiedIso": "2026-03-30T16:40:31.477Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774890137854-um536awi-hero.webp",
+      "canonical": "product-images/products/1774890137854-um536awi-hero.webp",
+      "size": 176458,
+      "lastModifiedIso": "2026-03-30T17:02:20.126Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774890137854-um536awi-thumb.webp",
+      "canonical": "product-images/products/1774890137854-um536awi-thumb.webp",
+      "size": 14086,
+      "lastModifiedIso": "2026-03-30T17:02:19.230Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774890273556-r325cate-hero.webp",
+      "canonical": "product-images/products/1774890273556-r325cate-hero.webp",
+      "size": 176458,
+      "lastModifiedIso": "2026-03-30T17:04:35.740Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774890273556-r325cate-thumb.webp",
+      "canonical": "product-images/products/1774890273556-r325cate-thumb.webp",
+      "size": 14086,
+      "lastModifiedIso": "2026-03-30T17:04:34.789Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774951044134-a7inqa0b-hero.webp",
+      "canonical": "product-images/products/1774951044134-a7inqa0b-hero.webp",
+      "size": 217400,
+      "lastModifiedIso": "2026-03-31T09:57:26.031Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774951044134-a7inqa0b-thumb.webp",
+      "canonical": "product-images/products/1774951044134-a7inqa0b-thumb.webp",
+      "size": 20380,
+      "lastModifiedIso": "2026-03-31T09:57:25.772Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774951054383-c29cnf5b-hero.webp",
+      "canonical": "product-images/products/1774951054383-c29cnf5b-hero.webp",
+      "size": 38802,
+      "lastModifiedIso": "2026-03-31T09:57:35.101Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774951054383-c29cnf5b-thumb.webp",
+      "canonical": "product-images/products/1774951054383-c29cnf5b-thumb.webp",
+      "size": 20392,
+      "lastModifiedIso": "2026-03-31T09:57:35.056Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774951099569-jufixdsw-hero.webp",
+      "canonical": "product-images/products/1774951099569-jufixdsw-hero.webp",
+      "size": 217400,
+      "lastModifiedIso": "2026-03-31T09:58:21.221Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774951099569-jufixdsw-thumb.webp",
+      "canonical": "product-images/products/1774951099569-jufixdsw-thumb.webp",
+      "size": 20380,
+      "lastModifiedIso": "2026-03-31T09:58:21.020Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774951561075-u8ty5lbj-hero.webp",
+      "canonical": "product-images/products/1774951561075-u8ty5lbj-hero.webp",
+      "size": 217400,
+      "lastModifiedIso": "2026-03-31T10:06:03.527Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774951561075-u8ty5lbj-thumb.webp",
+      "canonical": "product-images/products/1774951561075-u8ty5lbj-thumb.webp",
+      "size": 20380,
+      "lastModifiedIso": "2026-03-31T10:06:02.783Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774951604180-7s0d4p11-hero.webp",
+      "canonical": "product-images/products/1774951604180-7s0d4p11-hero.webp",
+      "size": 176458,
+      "lastModifiedIso": "2026-03-31T10:06:45.790Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774951604180-7s0d4p11-thumb.webp",
+      "canonical": "product-images/products/1774951604180-7s0d4p11-thumb.webp",
+      "size": 14086,
+      "lastModifiedIso": "2026-03-31T10:06:45.631Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774951620125-ei0olcj4-hero.webp",
+      "canonical": "product-images/products/1774951620125-ei0olcj4-hero.webp",
+      "size": 217400,
+      "lastModifiedIso": "2026-03-31T10:07:02.382Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774951620125-ei0olcj4-thumb.webp",
+      "canonical": "product-images/products/1774951620125-ei0olcj4-thumb.webp",
+      "size": 20380,
+      "lastModifiedIso": "2026-03-31T10:07:01.208Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774971118256-73gct607-hero.webp",
+      "canonical": "product-images/products/1774971118256-73gct607-hero.webp",
+      "size": 18548,
+      "lastModifiedIso": "2026-03-31T15:31:59.014Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774971118256-73gct607-thumb.webp",
+      "canonical": "product-images/products/1774971118256-73gct607-thumb.webp",
+      "size": 11090,
+      "lastModifiedIso": "2026-03-31T15:31:59.053Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774971513700-yhu50hlb-hero.webp",
+      "canonical": "product-images/products/1774971513700-yhu50hlb-hero.webp",
+      "size": 27024,
+      "lastModifiedIso": "2026-03-31T15:38:34.551Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1774971513700-yhu50hlb-thumb.webp",
+      "canonical": "product-images/products/1774971513700-yhu50hlb-thumb.webp",
+      "size": 7632,
+      "lastModifiedIso": "2026-03-31T15:38:34.763Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1775004897732-6igfy1iv-thumb.webp",
+      "canonical": "product-images/products/1775004897732-6igfy1iv-thumb.webp",
+      "size": 27608,
+      "lastModifiedIso": "2026-04-01T00:54:58.606Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1775004938843-uua1ntax-thumb.webp",
+      "canonical": "product-images/products/1775004938843-uua1ntax-thumb.webp",
+      "size": 4974,
+      "lastModifiedIso": "2026-04-01T00:55:39.685Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1775081531657-68qafbmw-hero.webp",
+      "canonical": "product-images/products/1775081531657-68qafbmw-hero.webp",
+      "size": 20000,
+      "lastModifiedIso": "2026-04-01T22:12:12.355Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1775081531657-68qafbmw-thumb.webp",
+      "canonical": "product-images/products/1775081531657-68qafbmw-thumb.webp",
+      "size": 4974,
+      "lastModifiedIso": "2026-04-01T22:12:12.351Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1775081546469-v3jb7sk3-hero.webp",
+      "canonical": "product-images/products/1775081546469-v3jb7sk3-hero.webp",
+      "size": 38802,
+      "lastModifiedIso": "2026-04-01T22:12:27.226Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1775081546469-v3jb7sk3-thumb.webp",
+      "canonical": "product-images/products/1775081546469-v3jb7sk3-thumb.webp",
+      "size": 20392,
+      "lastModifiedIso": "2026-04-01T22:12:27.266Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1775734707308-2m17ylim-hero.webp",
+      "canonical": "product-images/products/1775734707308-2m17ylim-hero.webp",
+      "size": 109420,
+      "lastModifiedIso": "2026-04-09T11:38:29.232Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1775734707308-2m17ylim-thumb.webp",
+      "canonical": "product-images/products/1775734707308-2m17ylim-thumb.webp",
+      "size": 17746,
+      "lastModifiedIso": "2026-04-09T11:38:29.206Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769553121-ls1hilrq-thumb.webp",
+      "canonical": "product-images/products/1778769553121-ls1hilrq-thumb.webp",
+      "size": 12490,
+      "lastModifiedIso": "2026-05-14T14:39:13.805Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769570557-xbc1p4f7-thumb.webp",
+      "canonical": "product-images/products/1778769570557-xbc1p4f7-thumb.webp",
+      "size": 28528,
+      "lastModifiedIso": "2026-05-14T14:39:31.108Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769583706-31qd659b-thumb.webp",
+      "canonical": "product-images/products/1778769583706-31qd659b-thumb.webp",
+      "size": 10128,
+      "lastModifiedIso": "2026-05-14T14:39:44.296Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769630130-t8n5bdm1-hero.webp",
+      "canonical": "product-images/products/1778769630130-t8n5bdm1-hero.webp",
+      "size": 30766,
+      "lastModifiedIso": "2026-05-14T14:40:30.586Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769630130-t8n5bdm1-thumb.webp",
+      "canonical": "product-images/products/1778769630130-t8n5bdm1-thumb.webp",
+      "size": 14206,
+      "lastModifiedIso": "2026-05-14T14:40:30.572Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769637402-r5iu990c-hero.webp",
+      "canonical": "product-images/products/1778769637402-r5iu990c-hero.webp",
+      "size": 67934,
+      "lastModifiedIso": "2026-05-14T14:40:38.347Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769637402-r5iu990c-thumb.webp",
+      "canonical": "product-images/products/1778769637402-r5iu990c-thumb.webp",
+      "size": 17072,
+      "lastModifiedIso": "2026-05-14T14:40:38.101Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769650699-t3e8xf8y-hero.webp",
+      "canonical": "product-images/products/1778769650699-t3e8xf8y-hero.webp",
+      "size": 7644,
+      "lastModifiedIso": "2026-05-14T14:40:50.998Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769650699-t3e8xf8y-thumb.webp",
+      "canonical": "product-images/products/1778769650699-t3e8xf8y-thumb.webp",
+      "size": 7644,
+      "lastModifiedIso": "2026-05-14T14:40:50.915Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769684956-t3ex8h1n-thumb.webp",
+      "canonical": "product-images/products/1778769684956-t3ex8h1n-thumb.webp",
+      "size": 14206,
+      "lastModifiedIso": "2026-05-14T14:41:25.301Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769690895-le0cldp2-thumb.webp",
+      "canonical": "product-images/products/1778769690895-le0cldp2-thumb.webp",
+      "size": 7644,
+      "lastModifiedIso": "2026-05-14T14:41:31.344Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769698683-3v6l4kj9-thumb.webp",
+      "canonical": "product-images/products/1778769698683-3v6l4kj9-thumb.webp",
+      "size": 17072,
+      "lastModifiedIso": "2026-05-14T14:41:39.299Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769769581-yt9ztvll-thumb.webp",
+      "canonical": "product-images/products/1778769769581-yt9ztvll-thumb.webp",
+      "size": 16032,
+      "lastModifiedIso": "2026-05-14T14:42:50.189Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769777734-b0ppqwtp-thumb.webp",
+      "canonical": "product-images/products/1778769777734-b0ppqwtp-thumb.webp",
+      "size": 10132,
+      "lastModifiedIso": "2026-05-14T14:42:58.131Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769823235-90ab03ih-thumb.webp",
+      "canonical": "product-images/products/1778769823235-90ab03ih-thumb.webp",
+      "size": 18366,
+      "lastModifiedIso": "2026-05-14T14:43:43.875Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769829109-2lqru7fv-thumb.webp",
+      "canonical": "product-images/products/1778769829109-2lqru7fv-thumb.webp",
+      "size": 36732,
+      "lastModifiedIso": "2026-05-14T14:43:49.426Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769854135-wr5l1bru-hero.webp",
+      "canonical": "product-images/products/1778769854135-wr5l1bru-hero.webp",
+      "size": 14958,
+      "lastModifiedIso": "2026-05-14T14:44:14.614Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769854135-wr5l1bru-thumb.webp",
+      "canonical": "product-images/products/1778769854135-wr5l1bru-thumb.webp",
+      "size": 8734,
+      "lastModifiedIso": "2026-05-14T14:44:14.647Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769867334-bf76gstm-hero.webp",
+      "canonical": "product-images/products/1778769867334-bf76gstm-hero.webp",
+      "size": 14958,
+      "lastModifiedIso": "2026-05-14T14:44:27.619Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769867334-bf76gstm-thumb.webp",
+      "canonical": "product-images/products/1778769867334-bf76gstm-thumb.webp",
+      "size": 8734,
+      "lastModifiedIso": "2026-05-14T14:44:27.765Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769917276-ezj4vpru-thumb.webp",
+      "canonical": "product-images/products/1778769917276-ezj4vpru-thumb.webp",
+      "size": 8734,
+      "lastModifiedIso": "2026-05-14T14:45:17.755Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769922241-1ztj7nxx-thumb.webp",
+      "canonical": "product-images/products/1778769922241-1ztj7nxx-thumb.webp",
+      "size": 6188,
+      "lastModifiedIso": "2026-05-14T14:45:22.519Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769927145-bwofwk4n-thumb.webp",
+      "canonical": "product-images/products/1778769927145-bwofwk4n-thumb.webp",
+      "size": 10364,
+      "lastModifiedIso": "2026-05-14T14:45:27.588Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769976262-dij6l193-thumb.webp",
+      "canonical": "product-images/products/1778769976262-dij6l193-thumb.webp",
+      "size": 18368,
+      "lastModifiedIso": "2026-05-14T14:46:16.711Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778769993573-hnv7qdk7-thumb.webp",
+      "canonical": "product-images/products/1778769993573-hnv7qdk7-thumb.webp",
+      "size": 32158,
+      "lastModifiedIso": "2026-05-14T14:46:33.853Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778770001466-5nu1dnx3-thumb.webp",
+      "canonical": "product-images/products/1778770001466-5nu1dnx3-thumb.webp",
+      "size": 12400,
+      "lastModifiedIso": "2026-05-14T14:46:41.741Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778770031708-3k0ltme0-thumb.webp",
+      "canonical": "product-images/products/1778770031708-3k0ltme0-thumb.webp",
+      "size": 26898,
+      "lastModifiedIso": "2026-05-14T14:47:12.048Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778770097871-7grjn6dg-thumb.webp",
+      "canonical": "product-images/products/1778770097871-7grjn6dg-thumb.webp",
+      "size": 9520,
+      "lastModifiedIso": "2026-05-14T14:48:18.613Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778770143656-skm67gl1-thumb.webp",
+      "canonical": "product-images/products/1778770143656-skm67gl1-thumb.webp",
+      "size": 14396,
+      "lastModifiedIso": "2026-05-14T14:49:04.126Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778770152420-7o7ykq7o-thumb.webp",
+      "canonical": "product-images/products/1778770152420-7o7ykq7o-thumb.webp",
+      "size": 14074,
+      "lastModifiedIso": "2026-05-14T14:49:12.702Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778770189802-xf0q2n7h-thumb.webp",
+      "canonical": "product-images/products/1778770189802-xf0q2n7h-thumb.webp",
+      "size": 17994,
+      "lastModifiedIso": "2026-05-14T14:49:50.256Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778770965924-d55xhsqq-thumb.webp",
+      "canonical": "product-images/products/1778770965924-d55xhsqq-thumb.webp",
+      "size": 9926,
+      "lastModifiedIso": "2026-05-14T15:02:46.628Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778771052334-m7gaht01-hero.webp",
+      "canonical": "product-images/products/1778771052334-m7gaht01-hero.webp",
+      "size": 15846,
+      "lastModifiedIso": "2026-05-14T15:04:13.023Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778771052334-m7gaht01-thumb.webp",
+      "canonical": "product-images/products/1778771052334-m7gaht01-thumb.webp",
+      "size": 9454,
+      "lastModifiedIso": "2026-05-14T15:04:13.030Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778771099725-soer4674-thumb.webp",
+      "canonical": "product-images/products/1778771099725-soer4674-thumb.webp",
+      "size": 9454,
+      "lastModifiedIso": "2026-05-14T15:05:00.199Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778771146701-yz1d0kr7-hero.webp",
+      "canonical": "product-images/products/1778771146701-yz1d0kr7-hero.webp",
+      "size": 18126,
+      "lastModifiedIso": "2026-05-14T15:05:47.379Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778771146701-yz1d0kr7-thumb.webp",
+      "canonical": "product-images/products/1778771146701-yz1d0kr7-thumb.webp",
+      "size": 10378,
+      "lastModifiedIso": "2026-05-14T15:05:47.330Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778771214341-wt4odoze-hero.webp",
+      "canonical": "product-images/products/1778771214341-wt4odoze-hero.webp",
+      "size": 10594,
+      "lastModifiedIso": "2026-05-14T15:06:55.063Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778771214341-wt4odoze-thumb.webp",
+      "canonical": "product-images/products/1778771214341-wt4odoze-thumb.webp",
+      "size": 10594,
+      "lastModifiedIso": "2026-05-14T15:06:55.060Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778854618402-o23e45wo-hero.webp",
+      "canonical": "product-images/products/1778854618402-o23e45wo-hero.webp",
+      "size": 47272,
+      "lastModifiedIso": "2026-05-15T14:16:59.586Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778854618402-o23e45wo-thumb.webp",
+      "canonical": "product-images/products/1778854618402-o23e45wo-thumb.webp",
+      "size": 47272,
+      "lastModifiedIso": "2026-05-15T14:16:59.572Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778878543425-9cguf28p-hero.webp",
+      "canonical": "product-images/products/1778878543425-9cguf28p-hero.webp",
+      "size": 62628,
+      "lastModifiedIso": "2026-05-15T20:55:44.512Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1778878543425-9cguf28p-thumb.webp",
+      "canonical": "product-images/products/1778878543425-9cguf28p-thumb.webp",
+      "size": 11630,
+      "lastModifiedIso": "2026-05-15T20:55:44.451Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779013442602-w3u6wgqg-hero.webp",
+      "canonical": "product-images/products/1779013442602-w3u6wgqg-hero.webp",
+      "size": 70006,
+      "lastModifiedIso": "2026-05-17T10:24:03.881Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779013442602-w3u6wgqg-thumb.webp",
+      "canonical": "product-images/products/1779013442602-w3u6wgqg-thumb.webp",
+      "size": 21000,
+      "lastModifiedIso": "2026-05-17T10:24:03.843Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779013465308-1a382gzf-hero.webp",
+      "canonical": "product-images/products/1779013465308-1a382gzf-hero.webp",
+      "size": 8974,
+      "lastModifiedIso": "2026-05-17T10:24:26.004Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779013465308-1a382gzf-thumb.webp",
+      "canonical": "product-images/products/1779013465308-1a382gzf-thumb.webp",
+      "size": 8974,
+      "lastModifiedIso": "2026-05-17T10:24:25.770Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779014041200-ngmyomf3-hero.webp",
+      "canonical": "product-images/products/1779014041200-ngmyomf3-hero.webp",
+      "size": 62628,
+      "lastModifiedIso": "2026-05-17T10:34:02.205Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779014041200-ngmyomf3-thumb.webp",
+      "canonical": "product-images/products/1779014041200-ngmyomf3-thumb.webp",
+      "size": 11630,
+      "lastModifiedIso": "2026-05-17T10:34:02.200Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779882886126-6kz3bkm1-thumb.webp",
+      "canonical": "product-images/products/1779882886126-6kz3bkm1-thumb.webp",
+      "size": 10846,
+      "lastModifiedIso": "2026-05-27T11:54:47.178Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779882918950-sfdlrfij-hero.webp",
+      "canonical": "product-images/products/1779882918950-sfdlrfij-hero.webp",
+      "size": 31166,
+      "lastModifiedIso": "2026-05-27T11:55:19.753Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779882918950-sfdlrfij-thumb.webp",
+      "canonical": "product-images/products/1779882918950-sfdlrfij-thumb.webp",
+      "size": 11058,
+      "lastModifiedIso": "2026-05-27T11:55:19.526Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779883910985-ydwg63lg-thumb.webp",
+      "canonical": "product-images/products/1779883910985-ydwg63lg-thumb.webp",
+      "size": 18078,
+      "lastModifiedIso": "2026-05-27T12:11:51.981Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779885353224-uis8iibd-thumb.webp",
+      "canonical": "product-images/products/1779885353224-uis8iibd-thumb.webp",
+      "size": 26710,
+      "lastModifiedIso": "2026-05-27T12:35:54.495Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779885407020-nxs6v5f3-hero.webp",
+      "canonical": "product-images/products/1779885407020-nxs6v5f3-hero.webp",
+      "size": 51068,
+      "lastModifiedIso": "2026-05-27T12:36:47.670Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779885407020-nxs6v5f3-thumb.webp",
+      "canonical": "product-images/products/1779885407020-nxs6v5f3-thumb.webp",
+      "size": 19946,
+      "lastModifiedIso": "2026-05-27T12:36:47.722Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779885454861-7cv7141h-thumb.webp",
+      "canonical": "product-images/products/1779885454861-7cv7141h-thumb.webp",
+      "size": 24218,
+      "lastModifiedIso": "2026-05-27T12:37:35.469Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779886326673-5ns53cx9-thumb.webp",
+      "canonical": "product-images/products/1779886326673-5ns53cx9-thumb.webp",
+      "size": 20650,
+      "lastModifiedIso": "2026-05-27T12:52:08.128Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779886503588-7w1src2a-thumb.webp",
+      "canonical": "product-images/products/1779886503588-7w1src2a-thumb.webp",
+      "size": 31126,
+      "lastModifiedIso": "2026-05-27T12:55:04.885Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779886716338-nx2fluxr-hero.webp",
+      "canonical": "product-images/products/1779886716338-nx2fluxr-hero.webp",
+      "size": 165576,
+      "lastModifiedIso": "2026-05-27T12:58:37.994Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779886716338-nx2fluxr-thumb.webp",
+      "canonical": "product-images/products/1779886716338-nx2fluxr-thumb.webp",
+      "size": 29610,
+      "lastModifiedIso": "2026-05-27T12:58:37.890Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779886738714-qw52o77d-thumb.webp",
+      "canonical": "product-images/products/1779886738714-qw52o77d-thumb.webp",
+      "size": 28356,
+      "lastModifiedIso": "2026-05-27T12:58:59.321Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779895009836-6xvhsg9q-thumb.webp",
+      "canonical": "product-images/products/1779895009836-6xvhsg9q-thumb.webp",
+      "size": 17330,
+      "lastModifiedIso": "2026-05-27T15:16:50.788Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779895023384-ao3ricsf-hero.webp",
+      "canonical": "product-images/products/1779895023384-ao3ricsf-hero.webp",
+      "size": 37796,
+      "lastModifiedIso": "2026-05-27T15:17:04.073Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779895023384-ao3ricsf-thumb.webp",
+      "canonical": "product-images/products/1779895023384-ao3ricsf-thumb.webp",
+      "size": 16016,
+      "lastModifiedIso": "2026-05-27T15:17:04.030Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779895050688-t2gnrj22-hero.webp",
+      "canonical": "product-images/products/1779895050688-t2gnrj22-hero.webp",
+      "size": 76674,
+      "lastModifiedIso": "2026-05-27T15:17:31.397Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1779895050688-t2gnrj22-thumb.webp",
+      "canonical": "product-images/products/1779895050688-t2gnrj22-thumb.webp",
+      "size": 15434,
+      "lastModifiedIso": "2026-05-27T15:17:31.229Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1781012650462-y0j93kee-thumb.webp",
+      "canonical": "product-images/products/1781012650462-y0j93kee-thumb.webp",
+      "size": 28958,
+      "lastModifiedIso": "2026-06-09T13:44:10.754Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1781012788954-zrxj2djz-thumb.webp",
+      "canonical": "product-images/products/1781012788954-zrxj2djz-thumb.webp",
+      "size": 29474,
+      "lastModifiedIso": "2026-06-09T13:46:29.452Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1781012795463-7imhjbcq-thumb.webp",
+      "canonical": "product-images/products/1781012795463-7imhjbcq-thumb.webp",
+      "size": 25372,
+      "lastModifiedIso": "2026-06-09T13:46:35.576Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1781012911765-etsawear-hero.webp",
+      "canonical": "product-images/products/1781012911765-etsawear-hero.webp",
+      "size": 130818,
+      "lastModifiedIso": "2026-06-09T13:48:32.278Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1781012911765-etsawear-thumb.webp",
+      "canonical": "product-images/products/1781012911765-etsawear-thumb.webp",
+      "size": 25372,
+      "lastModifiedIso": "2026-06-09T13:48:32.584Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1781012919455-bfj05vys-thumb.webp",
+      "canonical": "product-images/products/1781012919455-bfj05vys-thumb.webp",
+      "size": 26078,
+      "lastModifiedIso": "2026-06-09T13:48:39.604Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1781013092827-7i2hi530-thumb.webp",
+      "canonical": "product-images/products/1781013092827-7i2hi530-thumb.webp",
+      "size": 9626,
+      "lastModifiedIso": "2026-06-09T13:51:33.089Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1782410725981-dfkl091a-hero.webp",
+      "canonical": "product-images/products/1782410725981-dfkl091a-hero.webp",
+      "size": 81086,
+      "lastModifiedIso": "2026-06-25T18:07:03.286Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products/1782410725981-dfkl091a-thumb.webp",
+      "canonical": "product-images/products/1782410725981-dfkl091a-thumb.webp",
+      "size": 27310,
+      "lastModifiedIso": "2026-06-25T18:07:03.181Z"
+    },
+    {
+      "bucket": "product-videos",
+      "path": "products/1774890329583-w1avxqin.webm",
+      "canonical": "product-videos/products/1774890329583-w1avxqin.webm",
+      "size": 6969962,
+      "lastModifiedIso": "2026-03-30T17:06:16.114Z"
+    }
+  ],
+  "reviewRequired": [
+    {
+      "bucket": "product-images",
+      "path": "categories",
+      "canonical": "product-images/categories",
+      "reason": "directory placeholder",
+      "lastModifiedIso": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "custom-builds",
+      "canonical": "product-images/custom-builds",
+      "reason": "directory placeholder",
+      "lastModifiedIso": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "customers",
+      "canonical": "product-images/customers",
+      "reason": "directory placeholder",
+      "lastModifiedIso": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "gallery",
+      "canonical": "product-images/gallery",
+      "reason": "directory placeholder",
+      "lastModifiedIso": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "parts",
+      "canonical": "product-images/parts",
+      "reason": "directory placeholder",
+      "lastModifiedIso": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "bucket": "product-images",
+      "path": "products",
+      "canonical": "product-images/products",
+      "reason": "directory placeholder",
+      "lastModifiedIso": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "bucket": "product-videos",
+      "path": "products",
+      "canonical": "product-videos/products",
+      "reason": "directory placeholder",
+      "lastModifiedIso": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "recentUnreferenced": [
+    {
+      "canonical": "product-images/categories/1783027034449-b6emk2uz-thumb.webp",
+      "ageHours": 72.40597305555555,
+      "lastModifiedIso": "2026-07-02T21:17:15.587Z"
+    },
+    {
+      "canonical": "product-images/categories/1783043553194-ifnl9hpa-thumb.webp",
+      "ageHours": 67.81743027777777,
+      "lastModifiedIso": "2026-07-03T01:52:34.341Z"
+    },
+    {
+      "canonical": "product-images/categories/1783043600690-f2nszcq7-thumb.webp",
+      "ageHours": 67.80436777777778,
+      "lastModifiedIso": "2026-07-03T01:53:21.366Z"
+    },
+    {
+      "canonical": "product-images/categories/1783043641231-e7b219pe-thumb.webp",
+      "ageHours": 67.79308888888889,
+      "lastModifiedIso": "2026-07-03T01:54:01.970Z"
+    },
+    {
+      "canonical": "product-images/categories/1783043873252-077pkjyz-thumb.webp",
+      "ageHours": 67.72858222222222,
+      "lastModifiedIso": "2026-07-03T01:57:54.194Z"
+    },
+    {
+      "canonical": "product-images/categories/1783044661759-k6a86csm-thumb.webp",
+      "ageHours": 67.50955361111112,
+      "lastModifiedIso": "2026-07-03T02:11:02.697Z"
+    },
+    {
+      "canonical": "product-images/custom-builds/1782724793240-tjqu0z1v-thumb.webp",
+      "ageHours": 156.36188972222223,
+      "lastModifiedIso": "2026-06-29T09:19:54.287Z"
+    },
+    {
+      "canonical": "product-images/custom-builds/1782724820239-ij6rnuac-thumb.webp",
+      "ageHours": 156.35446861111112,
+      "lastModifiedIso": "2026-06-29T09:20:21.003Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783167788739-pblcu5ny-hero.webp",
+      "ageHours": 33.307608333333334,
+      "lastModifiedIso": "2026-07-04T12:23:09.700Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783167788739-pblcu5ny-thumb.webp",
+      "ageHours": 33.307589166666666,
+      "lastModifiedIso": "2026-07-04T12:23:09.769Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783187707824-xat7nr4w-hero.webp",
+      "ageHours": 27.774128055555554,
+      "lastModifiedIso": "2026-07-04T17:55:10.229Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783187707824-xat7nr4w-thumb.webp",
+      "ageHours": 27.774375,
+      "lastModifiedIso": "2026-07-04T17:55:09.340Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783212527407-oabtagmy-thumb.webp",
+      "ageHours": 20.880286388888887,
+      "lastModifiedIso": "2026-07-05T00:48:48.059Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783218380629-bp4zh6b7-hero.webp",
+      "ageHours": 19.254305,
+      "lastModifiedIso": "2026-07-05T02:26:21.592Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783218380629-rcrpi7yv-hero.webp",
+      "ageHours": 19.254304166666667,
+      "lastModifiedIso": "2026-07-05T02:26:21.595Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783218392493-1gwpv47d-hero.webp",
+      "ageHours": 19.2510125,
+      "lastModifiedIso": "2026-07-05T02:26:33.445Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783218392494-3rjc698v-hero.webp",
+      "ageHours": 19.2510775,
+      "lastModifiedIso": "2026-07-05T02:26:33.211Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783218392494-thh53nc0-hero.webp",
+      "ageHours": 19.251159444444443,
+      "lastModifiedIso": "2026-07-05T02:26:32.916Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783218392494-ux8ithkn-hero.webp",
+      "ageHours": 19.251106666666665,
+      "lastModifiedIso": "2026-07-05T02:26:33.106Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783218392913-g0utp36u-hero.webp",
+      "ageHours": 19.251019444444445,
+      "lastModifiedIso": "2026-07-05T02:26:33.420Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783218393088-i0pckoig-hero.webp",
+      "ageHours": 19.250985,
+      "lastModifiedIso": "2026-07-05T02:26:33.544Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783218393198-giodplnl-hero.webp",
+      "ageHours": 19.250895555555555,
+      "lastModifiedIso": "2026-07-05T02:26:33.866Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783218393410-gj2jllk9-hero.webp",
+      "ageHours": 19.250933888888888,
+      "lastModifiedIso": "2026-07-05T02:26:33.728Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783218393442-48vs1q5v-hero.webp",
+      "ageHours": 19.250930555555556,
+      "lastModifiedIso": "2026-07-05T02:26:33.740Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783218393534-58w7mxt0-hero.webp",
+      "ageHours": 19.250900555555557,
+      "lastModifiedIso": "2026-07-05T02:26:33.848Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783219400506-9rrrtxj3-hero.webp",
+      "ageHours": 18.970991944444446,
+      "lastModifiedIso": "2026-07-05T02:43:21.519Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783219400506-9rrrtxj3-thumb.webp",
+      "ageHours": 18.97104638888889,
+      "lastModifiedIso": "2026-07-05T02:43:21.323Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783219495969-cmesifi0-hero.webp",
+      "ageHours": 18.944486944444446,
+      "lastModifiedIso": "2026-07-05T02:44:56.937Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783219495969-cmesifi0-thumb.webp",
+      "ageHours": 18.944488055555556,
+      "lastModifiedIso": "2026-07-05T02:44:56.933Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783219563563-vdleem7l-hero.webp",
+      "ageHours": 18.92567861111111,
+      "lastModifiedIso": "2026-07-05T02:46:04.647Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783219666634-gm9992fl-hero.webp",
+      "ageHours": 18.89691138888889,
+      "lastModifiedIso": "2026-07-05T02:47:48.209Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783219666634-gm9992fl-thumb.webp",
+      "ageHours": 18.896753888888888,
+      "lastModifiedIso": "2026-07-05T02:47:48.776Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783222382375-2gb17zzk-hero.webp",
+      "ageHours": 18.142768055555557,
+      "lastModifiedIso": "2026-07-05T03:33:03.125Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783222382376-6m34v3y4-hero.webp",
+      "ageHours": 18.14276472222222,
+      "lastModifiedIso": "2026-07-05T03:33:03.137Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783222382376-i9p47bjd-hero.webp",
+      "ageHours": 18.14280388888889,
+      "lastModifiedIso": "2026-07-05T03:33:02.996Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783222382376-uzyyqmdd-hero.webp",
+      "ageHours": 18.142781111111113,
+      "lastModifiedIso": "2026-07-05T03:33:03.078Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783222431994-hgvozn1z-hero.webp",
+      "ageHours": 18.128274444444443,
+      "lastModifiedIso": "2026-07-05T03:33:55.302Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783222431995-8p682npg-hero.webp",
+      "ageHours": 18.128386388888888,
+      "lastModifiedIso": "2026-07-05T03:33:54.899Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783222431995-nylvmhqq-hero.webp",
+      "ageHours": 18.128293333333332,
+      "lastModifiedIso": "2026-07-05T03:33:55.234Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783222625208-un7ga41o-hero.webp",
+      "ageHours": 18.07499361111111,
+      "lastModifiedIso": "2026-07-05T03:37:07.113Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783222625208-yblrrmna-hero.webp",
+      "ageHours": 18.074875,
+      "lastModifiedIso": "2026-07-05T03:37:07.540Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783222908663-2awryd4c-hero.webp",
+      "ageHours": 17.996154444444443,
+      "lastModifiedIso": "2026-07-05T03:41:50.934Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783222908663-8ijvtji1-hero.webp",
+      "ageHours": 17.99618,
+      "lastModifiedIso": "2026-07-05T03:41:50.842Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783222908663-d5zfta0x-hero.webp",
+      "ageHours": 17.995953055555557,
+      "lastModifiedIso": "2026-07-05T03:41:51.659Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783223014499-69gm7zga-hero.webp",
+      "ageHours": 17.966829166666667,
+      "lastModifiedIso": "2026-07-05T03:43:36.505Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783223014499-milvlav5-hero.webp",
+      "ageHours": 17.966265555555555,
+      "lastModifiedIso": "2026-07-05T03:43:38.534Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783223014499-nijssfcq-hero.webp",
+      "ageHours": 17.966686111111112,
+      "lastModifiedIso": "2026-07-05T03:43:37.020Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783223014500-y2dy96as-hero.webp",
+      "ageHours": 17.966521666666665,
+      "lastModifiedIso": "2026-07-05T03:43:37.612Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783223016325-lc9fihmm-hero.webp",
+      "ageHours": 17.966460833333333,
+      "lastModifiedIso": "2026-07-05T03:43:37.831Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783223016835-llcg6mkf-hero.webp",
+      "ageHours": 17.966360833333333,
+      "lastModifiedIso": "2026-07-05T03:43:38.191Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783223017426-mfb3ch23-hero.webp",
+      "ageHours": 17.96623222222222,
+      "lastModifiedIso": "2026-07-05T03:43:38.654Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783223017647-ongag8yx-hero.webp",
+      "ageHours": 17.9661525,
+      "lastModifiedIso": "2026-07-05T03:43:38.941Z"
+    },
+    {
+      "canonical": "product-images/gallery/1783245902550-p3idnucr-hero.webp",
+      "ageHours": 11.609131111111111,
+      "lastModifiedIso": "2026-07-05T10:05:04.218Z"
+    },
+    {
+      "canonical": "product-images/products/1782859689447-hk388jp1-hero.webp",
+      "ageHours": 118.89078944444445,
+      "lastModifiedIso": "2026-06-30T22:48:10.248Z"
+    },
+    {
+      "canonical": "product-images/products/1782859689447-hk388jp1-thumb.webp",
+      "ageHours": 118.89081333333333,
+      "lastModifiedIso": "2026-06-30T22:48:10.162Z"
+    },
+    {
+      "canonical": "product-images/products/1783028371826-rat5esev-hero.webp",
+      "ageHours": 72.03445277777777,
+      "lastModifiedIso": "2026-07-02T21:39:33.060Z"
+    },
+    {
+      "canonical": "product-images/products/1783028371826-rat5esev-thumb.webp",
+      "ageHours": 72.03447555555556,
+      "lastModifiedIso": "2026-07-02T21:39:32.978Z"
+    },
+    {
+      "canonical": "product-images/products/1783028589575-123hheh2-thumb.webp",
+      "ageHours": 71.97405222222223,
+      "lastModifiedIso": "2026-07-02T21:43:10.502Z"
+    },
+    {
+      "canonical": "product-images/products/1783030164006-vt8ogvk6-thumb.webp",
+      "ageHours": 71.53674611111111,
+      "lastModifiedIso": "2026-07-02T22:09:24.804Z"
+    },
+    {
+      "canonical": "product-images/products/1783045164883-0vie4mqo-thumb.webp",
+      "ageHours": 67.36972972222222,
+      "lastModifiedIso": "2026-07-03T02:19:26.063Z"
+    },
+    {
+      "canonical": "product-images/products/1783045305529-6ppv98sc-thumb.webp",
+      "ageHours": 67.33077527777778,
+      "lastModifiedIso": "2026-07-03T02:21:46.299Z"
+    },
+    {
+      "canonical": "product-images/products/1783134576186-u9i275aa-hero.webp",
+      "ageHours": 42.53319333333334,
+      "lastModifiedIso": "2026-07-04T03:09:37.594Z"
+    },
+    {
+      "canonical": "product-images/products/1783134576186-u9i275aa-thumb.webp",
+      "ageHours": 42.53335527777778,
+      "lastModifiedIso": "2026-07-04T03:09:37.011Z"
+    },
+    {
+      "canonical": "product-images/products/1783137402912-orrbrda7-thumb.webp",
+      "ageHours": 41.74813527777778,
+      "lastModifiedIso": "2026-07-04T03:56:43.803Z"
+    },
+    {
+      "canonical": "product-videos/products/1783134639286-njesrxpb.webm",
+      "ageHours": 42.422019166666665,
+      "lastModifiedIso": "2026-07-04T03:16:17.821Z"
+    }
+  ],
+  "brokenReferences": [
+    {
+      "canonical": "product-videos/products/1774890066821-qspdo201.webm",
+      "bucket": "product-videos",
+      "path": "products/1774890066821-qspdo201.webm",
+      "sources": [
+        {
+          "table": "products",
+          "field": "video_url",
+          "rowKey": "slider"
+        }
+      ]
+    },
+    {
+      "canonical": "product-videos/products/1774887802993-q5hm4l1m.webm",
+      "bucket": "product-videos",
+      "path": "products/1774887802993-q5hm4l1m.webm",
+      "sources": [
+        {
+          "table": "products",
+          "field": "video_url",
+          "rowKey": "360"
+        }
+      ]
+    }
+  ],
+  "unknownOrUnparseable": [],
+  "integrityHash": "54c491904640ddcb761160209fd62e5a2834e8b0ae880ee9a0d71eb4543b1a4a",
+  "sourcesScanned": [
+    "categories.image",
+    "customers.logo_url",
+    "parts.image",
+    "gallery_albums.cover",
+    "gallery_albums.images",
+    "custom_builds.image_url",
+    "custom_builds.images",
+    "products.hero_image",
+    "products.gallery",
+    "products.video_url",
+    "product_images.url"
+  ],
+  "sourcesFailed": []
+}

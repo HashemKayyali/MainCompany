@@ -1,4 +1,4 @@
-import { IMAGE_BUCKET, VIDEO_BUCKET } from '../storage.service'
+import { IMAGE_BUCKET, VIDEO_BUCKET } from '../storage-identity'
 import type {
   BrokenReference,
   ClassifiedObject,

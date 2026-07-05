@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { buildReferenceIndex } from '../reference-index'
-import { IMAGE_BUCKET, VIDEO_BUCKET } from '../../storage.service'
+import { IMAGE_BUCKET, VIDEO_BUCKET } from '../../storage-identity'
 
 const PROJECT = 'https://example.supabase.co'
 const url = (bucket: string, path: string) =>
