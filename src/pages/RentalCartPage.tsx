@@ -114,29 +114,33 @@ function DateField({
 function QtyStepper({
   quantity,
   onChange,
+  compact = false,
 }: {
   quantity: number
   onChange: (next: number) => void
+  compact?: boolean
 }) {
   const { translateText } = useI18n()
 
   return (
-    <div className="flex w-full flex-col items-center">
-      <label className="mb-1.5 block w-full text-center text-[11px] font-semibold uppercase tracking-wide text-[#4b3a63]">
-        {translateText('Quantity')}
-      </label>
+    <div className="inline-flex flex-col items-start">
+      {!compact && (
+        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6b5a82]">
+          {translateText('Quantity')}
+        </label>
+      )}
       <div
         dir="ltr"
-        className="grid grid-cols-[2.5rem_3.5rem_2.5rem] items-center overflow-hidden rounded-[12px] border border-violet-200 bg-white"
+        className="grid grid-cols-[2.25rem_3rem_2.25rem] items-center overflow-hidden rounded-[10px] border border-violet-200 bg-white"
       >
         <button
           type="button"
           aria-label={translateText('Decrease quantity')}
           disabled={quantity <= 1}
           onClick={() => onChange(quantity - 1)}
-          className="inline-flex h-10 w-10 items-center justify-center text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
+          className="inline-flex h-9 items-center justify-center text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
         >
-          <Minus size={15} strokeWidth={2.4} />
+          <Minus size={14} strokeWidth={2.4} />
         </button>
         <input
           type="number"
@@ -147,7 +151,7 @@ function QtyStepper({
           onChange={event => onChange(Number(event.target.value) || 1)}
           onBlur={event => onChange(Math.max(1, Math.min(999, Number(event.target.value) || 1)))}
           dir="ltr"
-          className="h-10 w-14 border-x border-violet-200 bg-transparent px-0 !text-center text-[14px] font-bold tabular-nums text-[#1a0b3d] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          className="h-9 border-x border-violet-200 bg-transparent px-0 !text-center text-[13px] font-bold tabular-nums text-[#1a0b3d] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           style={{ direction: 'ltr', textAlign: 'center' }}
         />
         <button
@@ -155,9 +159,9 @@ function QtyStepper({
           aria-label={translateText('Increase quantity')}
           disabled={quantity >= 999}
           onClick={() => onChange(quantity + 1)}
-          className="inline-flex h-10 w-10 items-center justify-center text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
+          className="inline-flex h-9 items-center justify-center text-[#1a0b3d] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-35"
         >
-          <Plus size={15} strokeWidth={2.4} />
+          <Plus size={14} strokeWidth={2.4} />
         </button>
       </div>
     </div>
@@ -267,30 +271,17 @@ function RentalItemCard({
       transition={motionEnabled ? { duration: 0.4, ease, delay: index * 0.05 } : undefined}
       className="rounded-[18px] border border-violet-100 bg-white p-4 shadow-[0_4px_20px_rgba(124,58,237,0.05)] sm:p-5"
     >
-      <div className="flex items-start justify-between gap-3">
-        <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#6b5a82]">
-          {translateText(`Item ${index + 1} of ${total}`)}
-        </span>
-        <button
-          type="button"
-          onClick={onRemove}
-          aria-label={`${translateText('Remove')} ${item.productTitle}`}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100 hover:text-red-700"
-        >
-          <Trash2 size={15} strokeWidth={2} />
-        </button>
-      </div>
-
-      <div className="mt-3 flex gap-4">
-        <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[14px] border border-violet-100 bg-violet-50">
+      {/* Header row: image + title/price on start side, qty + trash on end side */}
+      <div className="flex items-center gap-3 sm:gap-4">
+        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-[12px] border border-violet-100 bg-violet-50 sm:h-[72px] sm:w-[72px]">
           {item.productImage ? (
             <FramedImage
               media={item.productImage}
               alt={item.productTitle}
-              width={160}
-              height={160}
+              width={144}
+              height={144}
               loading="lazy"
-              sizes="80px"
+              sizes="72px"
               className="h-full w-full object-cover"
               fallbackTransform={{ fit: 'cover' }}
             />
@@ -302,39 +293,50 @@ function RentalItemCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-display text-[1.05rem] font-extrabold leading-tight tracking-[-0.02em] text-[#1a0b3d]">
+          <div className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#6b5a82]">
+            {translateText(`Item ${index + 1} of ${total}`)}
+          </div>
+          <h3 className="mt-1 truncate font-display text-[1.05rem] font-extrabold leading-tight tracking-[-0.02em] text-[#1a0b3d]">
             {item.productTitle}
           </h3>
           <p className="mt-1 text-[12.5px] font-semibold text-[#4b3a63]">
             <span className="font-bold text-[#1a0b3d]">{unitPriceLabel}</span>
-            <span className="mx-1.5 text-violet-400">/</span>
+            <span className="mx-1.5 text-violet-400">·</span>
             {minimumDaysLabel}
           </p>
         </div>
+
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <QtyStepper quantity={item.quantity} onChange={onQty} compact />
+          <button
+            type="button"
+            onClick={onRemove}
+            aria-label={`${translateText('Remove')} ${item.productTitle}`}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100 hover:text-red-700"
+          >
+            <Trash2 size={14} strokeWidth={2} />
+          </button>
+        </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-start gap-4">
-        <QtyStepper quantity={item.quantity} onChange={onQty} />
+      {perItem && (
+        <div className="mt-4 flex flex-wrap items-start gap-3">
+          <DateField
+            label="Start date"
+            value={startDate}
+            min={todayISO()}
+            onChange={value => onDates(value, endDate)}
+          />
+          <DateField
+            label="End date"
+            value={endDate}
+            min={startDate || todayISO()}
+            onChange={value => onDates(startDate, value)}
+          />
+        </div>
+      )}
 
-        {perItem && (
-          <>
-            <DateField
-              label="Start date"
-              value={startDate}
-              min={todayISO()}
-              onChange={value => onDates(value, endDate)}
-            />
-            <DateField
-              label="End date"
-              value={endDate}
-              min={startDate || todayISO()}
-              onChange={value => onDates(startDate, value)}
-            />
-          </>
-        )}
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-violet-100 pt-3">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[11.5px] font-bold text-[#140832]">
           <Clock size={11} strokeWidth={2.4} />
           {translateText(days ? `${days} day${days === 1 ? '' : 's'}` : 'No dates')}

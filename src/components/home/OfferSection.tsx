@@ -221,11 +221,10 @@ export default function OfferSection() {
       const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
       const targetTop = Math.max(0, Math.min(top, maxTop))
 
-      window.__appLenis?.scrollTo(targetTop, { immediate: prefersReducedMotion, force: true })
       window.scrollTo({
         top: targetTop,
         left: 0,
-        behavior: 'auto',
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
       })
     }
 

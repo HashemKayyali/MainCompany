@@ -1,11 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
 
-/* ── Lenis smooth scroll ── */
-html.lenis-root,
-html.lenis-root body {
-  height: auto;
-}
-
 [data-native-scroll] {
   overscroll-behavior-x: contain;
   overscroll-behavior-y: auto;
@@ -879,11 +873,17 @@ html[dir="rtl"] .eventies-logo-wordmark,
 }
 
 
-/* ── Arabic typography QA ──
-   Use IBM Plex Sans Arabic for RTL and loosen display line-height so large Arabic
-   headlines do not overlap when the language switcher is set to العربية. */
+/* ── Arabic typography ──
+   Font stack strategy: `Alexandria` is loaded from Google Fonts with the Latin
+   subset only, so its @font-face has `unicode-range` restricted to Latin
+   codepoints. Putting Alexandria FIRST means Latin characters render in
+   Alexandria (identical to English mode) while Arabic codepoints naturally fall
+   through to IBM Plex Sans Arabic. That way English words embedded in Arabic
+   pages (product names from DB, "JOD", numbers, etc.) keep the exact same font,
+   weight, and metrics as in English mode — no drift. */
 :root {
-  --eventies-arabic-font: "IBM Plex Sans Arabic", "Alexandria", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --eventies-arabic-font: "Alexandria", "IBM Plex Sans Arabic", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --eventies-arabic-display-font: "Zodiak", "Alexandria", "IBM Plex Sans Arabic", system-ui, serif;
 }
 
 html[dir="rtl"] body,
@@ -896,44 +896,25 @@ html[dir="rtl"] .font-sans {
 }
 
 html[dir="rtl"] .font-display:not([data-i18n-skip]):not([data-i18n-skip] *) {
-  font-family: var(--eventies-arabic-font) !important;
-  line-height: 1.18 !important;
-  letter-spacing: 0 !important;
-}
-
-html[dir="rtl"] h1.font-display:not([data-i18n-skip]):not([data-i18n-skip] *),
-html[dir="rtl"] .hero-title-silver {
-  font-size: clamp(2.05rem, 4vw, 3.8rem) !important;
-  line-height: 1.2 !important;
-  letter-spacing: 0 !important;
-}
-
-html[dir="rtl"] h2.font-display:not([data-i18n-skip]):not([data-i18n-skip] *) {
-  line-height: 1.18 !important;
-  letter-spacing: 0 !important;
-}
-
-html[dir="rtl"] .uppercase:not([data-i18n-skip]):not([data-i18n-skip] *),
-html[dir="rtl"] [class*="tracking-"]:not([data-i18n-skip]):not([data-i18n-skip] *) {
-  letter-spacing: 0 !important;
-}
-
-html[dir="rtl"] .font-display.leading-none:not([data-i18n-skip]):not([data-i18n-skip] *),
-html[dir="rtl"] .font-display[class*="leading-"]:not([data-i18n-skip]):not([data-i18n-skip] *) {
-  line-height: 1.2 !important;
-}
-
-html[dir="rtl"] p:not([data-i18n-skip]):not([data-i18n-skip] *),
-html[dir="rtl"] li:not([data-i18n-skip]):not([data-i18n-skip] *),
-html[dir="rtl"] .text-sm:not([data-i18n-skip]):not([data-i18n-skip] *),
-html[dir="rtl"] .text-base:not([data-i18n-skip]):not([data-i18n-skip] *),
-html[dir="rtl"] .text-lg:not([data-i18n-skip]):not([data-i18n-skip] *),
-html[dir="rtl"] .text-xl:not([data-i18n-skip]):not([data-i18n-skip] *) {
-  line-height: 1.95;
+  font-family: var(--eventies-arabic-display-font) !important;
 }
 
 html[dir="rtl"] .nav-search-input::placeholder {
   font-family: var(--eventies-arabic-font) !important;
+}
+
+/* Belt-and-braces: any element the i18n bridge marked as LTR (English content
+   inside an Arabic page) is force-restored to the English font stack, weight
+   inheritance, and default letter-spacing so it renders identically to English
+   mode regardless of any RTL rule that landed earlier. */
+html[dir="rtl"] [dir="ltr"] {
+  font-family: "Alexandria", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+html[dir="rtl"] [dir="ltr"].font-display,
+html[dir="rtl"] [dir="ltr"] .font-display,
+html[dir="rtl"] .font-display [dir="ltr"] {
+  font-family: "Zodiak", "Alexandria", system-ui, serif !important;
 }
 
 /* RTL spacing fixes for translated accordion/content rows. */

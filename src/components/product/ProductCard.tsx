@@ -73,7 +73,11 @@ const ProductCard = memo(function ProductCard({
   const priceDisplay = showRentalPrice
     ? `${product.rentalPricePerDay} ${product.currency}`
     : translateText('Reviewed pricing')
-  const priceLabel = translateText(showRentalPrice ? 'Per Day' : 'Reviewed Pricing')
+  // Only render the tiny eyebrow label when we actually have a numeric price
+  // to describe. Without a price the value ("Reviewed pricing") is
+  // self-explanatory, so avoid the duplicate "REVIEWED PRICING / Reviewed
+  // pricing" stack the card used to render.
+  const priceLabel = showRentalPrice ? translateText('Per Day') : null
 
   // Pause and reset the video when the card scrolls out of the viewport.
   // Never autoplay — on desktop, hover events handle playback; on mobile, no autoplay at all.
@@ -257,18 +261,18 @@ const ProductCard = memo(function ProductCard({
         className={cn(
           'relative z-10 flex flex-1 flex-col',
           compact
-            ? 'px-3 pb-3 pt-2.5'
-            : 'px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3.5 lg:px-5 lg:pb-5 lg:pt-4'
+            ? 'px-2.5 pb-2.5 pt-2'
+            : 'px-2.5 pb-2.5 pt-2 sm:px-4 sm:pb-4 sm:pt-3.5 lg:px-5 lg:pb-5 lg:pt-4'
         )}
       >
-        <div className={compact ? 'mb-1.5' : 'mb-1.5 sm:mb-2.5'}>
+        <div className={compact ? 'mb-1' : 'mb-1 sm:mb-2.5'}>
           <span
             data-i18n-skip
             className={cn(
               'inline-flex items-center rounded-full font-bold uppercase',
               compact
-                ? 'px-2 py-[2px] text-[8px] tracking-[0.13em]'
-                : 'px-2 py-[3px] text-[8.5px] tracking-[0.14em] sm:px-2.5 sm:text-[9px] sm:tracking-[0.16em]',
+                ? 'px-1.5 py-[2px] text-[7.5px] tracking-[0.12em]'
+                : 'px-1.5 py-[2px] text-[7.5px] tracking-[0.12em] sm:px-2.5 sm:py-[3px] sm:text-[9px] sm:tracking-[0.16em]',
               isDark
                 ? 'bg-violet-500/[0.13] text-violet-300/95 ring-1 ring-violet-400/[0.17]'
                 : 'bg-violet-50 text-violet-700 ring-1 ring-violet-200/80'
@@ -278,7 +282,7 @@ const ProductCard = memo(function ProductCard({
           </span>
         </div>
 
-        <div className={compact ? 'mb-2 flex-1' : 'mb-2.5 flex-1 sm:mb-4'}>
+        <div className={compact ? 'mb-1.5 flex-1' : 'mb-1.5 flex-1 sm:mb-4'}>
           <Link
             to={`/products/${product.slug}`}
             draggable={false}
@@ -290,7 +294,7 @@ const ProductCard = memo(function ProductCard({
               data-i18n-skip
               className={cn(
                 'product-data-ltr font-sans font-bold leading-tight tracking-[-0.028em] line-clamp-1 transition-colors duration-300',
-                compact ? 'text-[1rem]' : 'text-[0.98rem] sm:text-[1.16rem]',
+                compact ? 'text-[0.9rem]' : 'text-[0.9rem] sm:text-[1.16rem]',
                 isDark ? 'text-white group-hover:text-violet-100' : 'text-slate-900 group-hover:text-violet-900'
               )}
             >
@@ -303,8 +307,8 @@ const ProductCard = memo(function ProductCard({
             data-i18n-skip
             className={cn(
               compact
-                ? 'product-data-ltr mt-1 text-[10.5px] leading-[1.45] line-clamp-1'
-                : 'product-data-ltr mt-1 text-[11px] leading-[1.55] line-clamp-2 sm:mt-1.5 sm:text-[12.5px] sm:leading-[1.6]',
+                ? 'product-data-ltr mt-1 text-[10px] leading-[1.4] line-clamp-1'
+                : 'product-data-ltr mt-1 text-[10px] leading-[1.4] line-clamp-2 sm:mt-1.5 sm:text-[12.5px] sm:leading-[1.6]',
               isDark ? 'text-slate-400/88' : 'text-slate-500'
             )}
           >
@@ -315,26 +319,29 @@ const ProductCard = memo(function ProductCard({
         <div
           className={cn(
             'flex items-end justify-between border-t',
-            compact ? 'mb-2 pt-2' : 'mb-2 pt-2.5 sm:mb-3.5 sm:pt-3',
+            compact ? 'mb-1.5 pt-1.5' : 'mb-1.5 pt-1.5 sm:mb-3.5 sm:pt-3',
             isDark ? 'border-white/[0.07]' : 'border-slate-100'
           )}
         >
           <div>
-            <div
-              dir={dir}
-              className={cn(
-                'font-semibold uppercase tracking-[0.12em]',
-                compact ? 'text-[8.5px]' : 'text-[10px]',
-                isDark ? 'text-slate-500' : 'text-slate-400'
-              )}
-            >
-              {priceLabel}
-            </div>
+            {priceLabel && (
+              <div
+                dir={dir}
+                className={cn(
+                  'font-semibold uppercase tracking-[0.12em]',
+                  compact ? 'text-[8px]' : 'text-[8.5px] sm:text-[10px]',
+                  isDark ? 'text-slate-500' : 'text-slate-400'
+                )}
+              >
+                {priceLabel}
+              </div>
+            )}
             <div
               dir={showRentalPrice ? 'ltr' : dir}
               className={cn(
-                'mt-0.5 font-sans font-black tracking-[-0.04em]',
-                compact ? 'text-[0.92rem]' : 'text-[0.95rem] sm:text-[1.18rem]',
+                'font-sans font-black tracking-[-0.04em]',
+                priceLabel ? 'mt-0.5' : '',
+                compact ? 'text-[0.85rem]' : 'text-[0.85rem] sm:text-[1.18rem]',
                 isDark ? 'text-white' : 'text-slate-900'
               )}
             >

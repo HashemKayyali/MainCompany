@@ -371,7 +371,12 @@ export default function ProductDetailsPage() {
                   title={translateText('About this service')}
                   isDark={isDark}
                 >
-                  <div className="space-y-4">
+                  <div
+                    dir="ltr"
+                    lang="en"
+                    className="product-data-ltr space-y-4"
+                    style={{ direction: 'ltr', textAlign: 'left', unicodeBidi: 'isolate' }}
+                  >
                     {aboutBlocks.map((block, index) =>
                       block.type === 'paragraph' ? (
                         <p

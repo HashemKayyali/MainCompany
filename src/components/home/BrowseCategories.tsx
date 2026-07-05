@@ -36,8 +36,7 @@ export default function BrowseCategories() {
       const headerHeight = header instanceof HTMLElement ? header.offsetHeight : 0
       const top = window.scrollY + sectionRef.current.getBoundingClientRect().top - headerHeight - 16
       const targetTop = Math.max(0, top)
-      window.__appLenis?.scrollTo(targetTop, { immediate: prefersReducedMotion, force: true })
-      window.scrollTo({ top: targetTop, left: 0, behavior: 'auto' })
+      window.scrollTo({ top: targetTop, left: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
     }
 
     const timeouts = [0, 250, 750, 1500].map(delay => window.setTimeout(scrollToSection, delay))

@@ -282,5 +282,5 @@ Recommended next steps based on the current repository state:
 
 git status
 git add .
-git commit -m "PHONE RESPONS FIX6 "
+git commit -m "final update (redesign ) "
 git push origin main

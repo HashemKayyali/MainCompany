@@ -1,6 +1,6 @@
 import { memo, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ShoppingCart, FileText, MessageCircle, X, ArrowRight } from 'lucide-react'
+import { ShoppingCart, FileText, MessageCircle, X } from 'lucide-react'
 import type { Product } from '../../data/products/types'
 import { usePurchaseQuote } from '../../contexts/PurchaseQuoteContext'
 import { useRentalCart } from '../../contexts/RentalCartContext'
@@ -140,13 +140,9 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
 
   // ── CARD VARIANT (redesigned) ─────────────────────────────────────────────
   const cardStackClass = compact ? 'space-y-1' : 'space-y-1.5'
-  const cardGridGapClass = compact ? 'gap-1' : 'gap-1.5'
   const cardPrimaryButtonClass = compact
-    ? 'inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-[11px] px-2.5 py-1.5 text-[9.75px] font-bold transition-all duration-300'
-    : 'inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-[13px] px-3 py-2 text-[10.75px] font-bold transition-all duration-300'
-  const cardSecondaryButtonClass = compact
-    ? 'inline-flex min-h-[31px] items-center justify-center gap-1.5 rounded-[10px] px-2.5 py-1 text-[9.75px] font-semibold transition-all duration-300'
-    : 'inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-[12px] px-3 py-1.5 text-[10.5px] font-semibold transition-all duration-300'
+    ? 'inline-flex min-h-[34px] w-full items-center justify-center gap-1.5 rounded-[11px] px-2 py-1.5 text-[10px] font-bold transition-all duration-300'
+    : 'inline-flex min-h-[38px] w-full items-center justify-center gap-1.5 rounded-[12px] px-2.5 py-1.5 text-[10.5px] font-bold transition-all duration-300 sm:min-h-[40px] sm:text-[11px]'
   const primaryIconSize = compact ? 11 : 12
   const secondaryIconSize = compact ? 10 : 11
 
@@ -161,7 +157,6 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
               type="button"
               onClick={removeFromRentalCart}
               className={cn(
-                'w-full',
                 cardPrimaryButtonClass,
                 isDark
                   ? 'border border-red-500/22 bg-red-500/8 text-red-400 hover:border-red-500/38 hover:bg-red-500/14'
@@ -169,14 +164,13 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
               )}
             >
               <X size={primaryIconSize} strokeWidth={2.5} />
-              {translateText('Remove from Rental Request')}
+              {translateText('Remove Rental')}
             </button>
           ) : (
             <button
               type="button"
               onClick={addToRentalCart}
               className={cn(
-                'w-full',
                 cardPrimaryButtonClass,
                 isDark
                   ? 'bg-[linear-gradient(135deg,#1cc4ff_0%,#4f5fff_26%,#8b5cf6_64%,#ec4899_100%)] text-white shadow-[0_12px_32px_-10px_rgba(76,29,149,0.38)] hover:shadow-[0_16px_38px_-10px_rgba(76,29,149,0.48)] hover:brightness-105'
@@ -184,53 +178,33 @@ const ProductCommerceActions = memo(function ProductCommerceActions({
               )}
             >
               <ShoppingCart size={primaryIconSize} />
-              {translateText('Add to Rental Request')}
+              {translateText('Add to Rental')}
             </button>
           )
         )}
 
-        {/* ── Row 2: Details + optional Quote ── */}
-        <div className={cn(
-          'grid',
-          cardGridGapClass,
-          saleEnabled ? 'grid-cols-2' : 'grid-cols-1'
-        )}>
-          <Link
-            to={`/products/${product.slug}`}
+        {/* ── Row 2: Purchase quote (styled the same as the rental button) ── */}
+        {saleEnabled && (
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
             className={cn(
-              cardSecondaryButtonClass,
+              cardPrimaryButtonClass,
               isDark
-                ? 'border border-white/[0.09] bg-white/[0.04] text-white/72 hover:border-violet-400/22 hover:bg-white/[0.08] hover:text-white/90'
-                : 'border border-slate-200/80 bg-white text-slate-600 hover:border-violet-300/60 hover:bg-violet-50/60 hover:text-violet-700'
+                ? 'border border-white/[0.10] bg-white/[0.03] text-violet-200/90 hover:border-violet-400/30 hover:bg-white/[0.06] hover:text-white'
+                : 'border border-violet-200 bg-white text-violet-700 hover:border-violet-400 hover:bg-violet-50/70'
             )}
           >
-            {translateText('Service Details')}
-            <ArrowRight size={secondaryIconSize} />
-          </Link>
-
-          {saleEnabled && (
-            <button
-              type="button"
-              onClick={() => setModalOpen(true)}
-              className={cn(
-                cardSecondaryButtonClass,
-                isDark
-                  ? 'border border-white/[0.09] bg-white/[0.04] text-white/72 hover:border-cyan-400/22 hover:bg-white/[0.08] hover:text-white/90'
-                  : 'border border-slate-200/80 bg-white text-slate-600 hover:border-violet-300/60 hover:bg-violet-50/60 hover:text-violet-700'
-              )}
-            >
-              <FileText size={secondaryIconSize} />
-              {translateText('Request a Purchase Quote')}
-            </button>
-          )}
-        </div>
+            <FileText size={primaryIconSize} />
+            {translateText('Request Quote')}
+          </button>
+        )}
 
         {showContactLink && (
           <Link
             to={`/contact?product=${product.slug}`}
             className={cn(
-              'w-full',
-              cardSecondaryButtonClass,
+              cardPrimaryButtonClass,
               isDark
                 ? 'border border-white/[0.09] bg-white/[0.04] text-white/72 hover:border-violet-400/22 hover:bg-white/[0.08]'
                 : 'border border-slate-200/80 bg-white text-slate-600 hover:border-violet-300/60'

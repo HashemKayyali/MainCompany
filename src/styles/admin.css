@@ -129,6 +129,42 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* ─── Force the admin dashboard to stay LTR regardless of site language.
+   The admin panel is dense and grid-heavy — flipping columns to RTL creates
+   header/value misalignment (email/phone/number cells are inherently LTR).
+   We keep the shell LTR and let translated Arabic labels render normally via
+   the strong-RTL bidi rules inside each cell. */
+html[dir="rtl"] .admin-scope,
+html[dir="rtl"] .admin-scope .admin-table-wrap {
+  direction: ltr;
+}
+
+/* ─── Centered cells site-wide.
+   Every column header sits directly above its cell so nothing drifts when
+   values are short (chips, single digits, dates) or long (emails). Chips,
+   avatars and icon buttons are inline-flex so text-align: center on the
+   parent centers them too, without needing per-column tweaks. */
+.admin-scope table th,
+.admin-scope table td {
+  text-align: center;
+  vertical-align: middle;
+}
+.admin-scope table th > *,
+.admin-scope table td > * {
+  margin-left: auto;
+  margin-right: auto;
+}
+/* Cells that intentionally stack children (avatar + name) still need block
+   flow — turn off the auto-margin trick when the cell is explicitly opting
+   into a flex layout so the alignment classes on the flex container win. */
+.admin-scope table td > .flex,
+.admin-scope table td > .inline-flex,
+.admin-scope table td > .grid {
+  margin-left: 0;
+  margin-right: 0;
+  justify-content: center;
+}
+
 /* ─── Chip / badge pill ─── */
 .admin-scope .admin-chip {
   display: inline-flex;

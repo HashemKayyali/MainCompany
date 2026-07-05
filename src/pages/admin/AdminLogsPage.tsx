@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Activity, Clock, Eye, RefreshCw, Search } from 'lucide-react'
 import { getAllLogs, type AdminLog } from '../../services/logs.service'
 import AdminDetailModal from '../../components/admin/AdminDetailModal'
-import AdminKebabMenu from '../../components/admin/AdminKebabMenu'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminStatCard from '../../components/admin/AdminStatCard'
 import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
@@ -160,16 +159,15 @@ export default function AdminLogsPage() {
   )
 
   const renderActions = (log: AdminLog) => (
-    <AdminKebabMenu
-      label={`Actions for log ${log.id}`}
-      items={[
-        {
-          label: 'Details',
-          icon: <Eye className="h-4 w-4" strokeWidth={2} aria-hidden="true" />,
-          onSelect: () => setDetails(log),
-        },
-      ]}
-    />
+    <button
+      type="button"
+      onClick={() => setDetails(log)}
+      aria-label={`View details for log ${log.id}`}
+      className="inline-flex items-center gap-1.5 rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--admin-text-muted)] transition hover:border-[var(--admin-accent)] hover:bg-[var(--admin-surface-2)] hover:text-[var(--admin-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-accent-soft)]"
+    >
+      <Eye className="h-3.5 w-3.5" strokeWidth={2.2} aria-hidden="true" />
+      Details
+    </button>
   )
 
   return (
@@ -315,9 +313,8 @@ export default function AdminLogsPage() {
                             <div className="truncate text-[13px] font-bold text-[var(--admin-text)]">
                               {log.entity_name || log.entity_id}
                             </div>
-                            <div className="mt-0.5 flex flex-wrap gap-1.5">
+                            <div className="mt-0.5">
                               <span className="admin-chip !py-0.5 !text-[10px]">{formatEntity(log.entity_type)}</span>
-                              <span className="max-w-[12rem] truncate font-mono text-[11px] text-[var(--admin-text-muted)]">{log.entity_id}</span>
                             </div>
                           </div>
                         </td>
@@ -385,7 +382,6 @@ export default function AdminLogsPage() {
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span className="admin-chip">{timeAgo(log.created_at)}</span>
-                    <span className="admin-chip max-w-full truncate font-mono">{log.entity_id}</span>
                   </div>
                 </article>
               ))}
