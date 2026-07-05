@@ -6,7 +6,13 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/prerender-seo.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "storage:audit": "tsx scripts/storage-gc/audit.ts",
+    "storage:cleanup": "tsx scripts/storage-gc/cleanup.ts",
+    "storage:verify": "tsx scripts/storage-gc/verify.ts"
   },
   "dependencies": {
     "@paper-design/shaders-react": "^0.0.76",
@@ -29,10 +35,14 @@
     "@types/react-dom": "^18.3.1",
     "@types/three": "^0.185.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^4.1.9",
     "autoprefixer": "^10.4.20",
+    "jsdom": "^29.1.1",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
+    "tsx": "^4.23.0",
     "typescript": "^5.6.3",
-    "vite": "^5.4.10"
+    "vite": "^5.4.10",
+    "vitest": "^4.1.9"
   }
 }

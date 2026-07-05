@@ -6,6 +6,7 @@ import VideoUploader from '../../../components/ui/VideoUploader'
 import AdminBadge from '../../../components/admin/primitives/AdminBadge'
 import AdminKebabMenu, { type AdminKebabItem } from '../../../components/admin/AdminKebabMenu'
 import type { Product } from '../../../data/products/types'
+import type { AssetSession } from '../../../services/asset-session'
 
 interface MediaTabProps {
   form: any
@@ -16,6 +17,12 @@ interface MediaTabProps {
   addGalleryImage: (url: string) => void
   renderProductPreview: (overrides?: Partial<Product>) => ReactNode
   previewProduct: Product
+  /**
+   * Shared asset session created by the parent editor. Uploads made
+   * here participate in the session's cleanup lifecycle, and late
+   * completions after the modal closes are auto-cleaned.
+   */
+  session?: AssetSession | null
 }
 
 export default function MediaTab({
@@ -27,6 +34,7 @@ export default function MediaTab({
   addGalleryImage,
   renderProductPreview,
   previewProduct,
+  session,
 }: MediaTabProps) {
   const gallery: string[] = form.gallery || []
 
@@ -65,6 +73,7 @@ export default function MediaTab({
             compact
             onChange={addGalleryImage}
             folder="products"
+            session={session}
             frameAspect={4 / 3}
             defaultFit="cover"
             previewAspectClass="aspect-square"
@@ -90,8 +99,12 @@ export default function MediaTab({
           label="Product video"
           value={form.videoUrl || ''}
           onChange={url => setForm((f: any) => ({ ...f, videoUrl: url }))}
+          // Form-state only. The persisted video (if any) is retained
+          // until Save commits or the session cancels. This matches
+          // the same lifecycle as gallery images.
           onRemove={() => setForm((f: any) => ({ ...f, videoUrl: '' }))}
           folder="products"
+          session={session}
           frameAspect={4 / 3}
           defaultFit="cover"
           frameTitle="Adjust Product Video"

@@ -17,6 +17,8 @@ import AdminBadge from '../../components/admin/primitives/AdminBadge'
 import AdminButton from '../../components/admin/primitives/AdminButton'
 import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
+import { useAssetSession } from '../../hooks/useAssetSession'
+import { deleteAssetsSafely } from '../../services/storage.service'
 import { cn } from '../../utils/cn'
 import { getErrorMessage } from '../../lib/errors'
 
@@ -143,6 +145,23 @@ export default function AdminCategoriesPage() {
   const [isNew, setIsNew] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  // Snapshot of the original media the entity holds at editor-open
+  // time. Kept in state so it does not drift as the user replaces or
+  // removes assets during the session.
+  const [sessionOriginals, setSessionOriginals] = useState<string[]>([])
+
+  const {
+    session,
+    snapshot: sessionSnapshot,
+    isUploading,
+    isPersisting,
+    canSave: canCommit,
+    runPersistence,
+    cancel,
+  } = useAssetSession({
+    sessionKey: editing?.id ?? null,
+    originalUrls: sessionOriginals,
+  })
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<CategoryFilter>('all')
   const [sortKey, setSortKey] = useState<CategorySort>('name')
@@ -258,6 +277,7 @@ export default function AdminCategoriesPage() {
   }, [iconPickerOpen, isDesktop])
 
   const openNew = () => {
+    setSessionOriginals([])
     setEditing({ ...empty, id: `cat-${Date.now()}` })
     setIsNew(true)
     setIconQuery('')
@@ -265,6 +285,7 @@ export default function AdminCategoriesPage() {
   }
 
   const openEdit = (category: Category) => {
+    setSessionOriginals(category.image ? [category.image] : [])
     setEditing({ ...category })
     setIsNew(false)
     setIconQuery('')
@@ -272,17 +293,27 @@ export default function AdminCategoriesPage() {
   }
 
   const closeEditor = () => {
+    // If the session was not already committed (i.e. Save didn't run
+    // or Save failed), fire-and-forget cancel so every temporary
+    // upload from this session is removed. Never touches originals.
+    if (!sessionSnapshot.committed && !sessionSnapshot.disposed) {
+      void cancel()
+    }
     setEditing(null)
     setIsNew(false)
     setIconQuery('')
     setIconPickerOpen(false)
+    setSessionOriginals([])
   }
 
   const updateEditing = <K extends keyof Category>(key: K, value: Category[K]) => {
     setEditing(current => (current ? { ...current, [key]: value } : null))
   }
 
-  const canSave = Boolean(editing?.name?.trim())
+  // Gate Save on: form validity + no upload/persistence in flight +
+  // session ready to commit + no duplicate submission.
+  const canSave =
+    Boolean(editing?.name?.trim()) && !isUploading && !isPersisting && !saving && canCommit
 
   const save = async () => {
     if (!editing || !canSave) return
@@ -291,11 +322,39 @@ export default function AdminCategoriesPage() {
 
     setSaving(true)
     try {
-      if (isNew) await addCategory(data)
-      else await updateCategory(data.id, data)
-      closeEditor()
+      // runPersistence owns the whole DB-then-storage transaction.
+      // While `mutate` is running, any dispose/cancel is DEFERRED
+      // and cannot delete a session-temporary that is about to
+      // become the persisted asset.
+      const outcome = await runPersistence({
+        mutate: async () => {
+          if (isNew) await addCategory(data)
+          else await updateCategory(data.id, data)
+          return data
+        },
+        finalRefs: result => [result.image],
+      })
+      if (outcome.status === 'success') {
+        if (outcome.cleanup.failed.length > 0) {
+          console.warn('[Categories] storage cleanup partial failure', outcome.cleanup.failed)
+        }
+        closeEditor()
+      } else if (!outcome.disposed) {
+        dialog.alert({
+          title: 'Error',
+          message: getErrorMessage(outcome.error, 'Failed to save'),
+          variant: 'danger',
+        })
+      }
     } catch (error: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to save'), variant: 'danger' })
+      // Only reached if runPersistence's state-machine guards throw
+      // (canSave should have blocked us — belt-and-braces).
+      console.error('[Categories] runPersistence rejected', error)
+      dialog.alert({
+        title: 'Error',
+        message: getErrorMessage(error, 'Save cannot start right now'),
+        variant: 'danger',
+      })
     } finally {
       setSaving(false)
     }
@@ -316,11 +375,23 @@ export default function AdminCategoriesPage() {
 
   const confirmDelete = async () => {
     if (!deleteTarget) return
+    // Snapshot media refs BEFORE the row disappears so we still have
+    // URLs to clean after the DB delete resolves.
+    const mediaRefs = deleteTarget.image ? [deleteTarget.image] : []
     setDeleting(true)
     try {
+      // DB first: if this throws we abort and never touch storage.
       await deleteCategory(deleteTarget.id)
       if (details?.id === deleteTarget.id) setDetails(null)
       setDeleteTarget(null)
+      // DB delete succeeded → clean storage. Cleanup failure is
+      // reported separately; the DB deletion itself is complete.
+      if (mediaRefs.length > 0) {
+        const cleanup = await deleteAssetsSafely(mediaRefs)
+        if (cleanup.failed.length > 0) {
+          console.warn('[Categories] entity-delete cleanup partial failure', cleanup.failed)
+        }
+      }
     } catch (error: unknown) {
       dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to delete'), variant: 'danger' })
     } finally {
@@ -738,8 +809,12 @@ export default function AdminCategoriesPage() {
                   value={editing.image}
                   onChange={url => updateEditing('image', url)}
                   removable
+                  // Remove is form-state only. The persisted image
+                  // (if any) is not deleted here — the session
+                  // reconciles storage on Save or Cancel.
                   onRemove={() => updateEditing('image', '')}
                   folder="categories"
+                  session={session}
                   frameAspect={4 / 3}
                   defaultFit="cover"
                   frameTitle="Adjust Category Image"

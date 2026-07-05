@@ -15,6 +15,8 @@ import AdminButton from '../../components/admin/primitives/AdminButton'
 import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
 import { cn } from '../../utils/cn'
 import { getErrorMessage } from '../../lib/errors'
+import { useAssetSession } from '../../hooks/useAssetSession'
+import { deleteAssetsSafely } from '../../services/storage.service'
 
 const emptyPart: ProductPart = {
   id: '',
@@ -120,6 +122,20 @@ export default function AdminPartsPage() {
   const [sortKey, setSortKey] = useState<PartSort>('name')
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0])
   const [page, setPage] = useState(1)
+  const [sessionOriginals, setSessionOriginals] = useState<string[]>([])
+
+  const {
+    session,
+    snapshot: sessionSnapshot,
+    isUploading,
+    isPersisting,
+    canSave: canCommit,
+    runPersistence,
+    cancel,
+  } = useAssetSession({
+    sessionKey: editing?.id ?? null,
+    originalUrls: sessionOriginals,
+  })
 
   const getProductName = (slug: string) => products.find(product => product.slug === slug)?.name || slug || 'Unlinked'
   const countForProduct = (slug: string) => parts.filter(part => part.productSlug === slug).length
@@ -170,25 +186,36 @@ export default function AdminPartsPage() {
   }, [pageSize, productFilter, search, sortKey, statusFilter])
 
   const openNew = () => {
+    setSessionOriginals([])
     setEditing({ ...emptyPart, id: `part-${Date.now()}` })
     setIsNew(true)
   }
 
   const openEdit = (part: ProductPart) => {
+    setSessionOriginals(part.image ? [part.image] : [])
     setEditing({ ...part, showPrice: part.showPrice !== false })
     setIsNew(false)
   }
 
   const closeEditor = () => {
+    if (!sessionSnapshot.committed && !sessionSnapshot.disposed) {
+      void cancel()
+    }
     setEditing(null)
     setIsNew(false)
+    setSessionOriginals([])
   }
 
   const updateEditing = <K extends keyof ProductPart>(key: K, value: ProductPart[K]) => {
     setEditing(current => (current ? { ...current, [key]: value } : null))
   }
 
-  const canSave = Boolean(editing?.productSlug && editing?.name?.trim())
+  const canSave =
+    Boolean(editing?.productSlug && editing?.name?.trim()) &&
+    !isUploading &&
+    !isPersisting &&
+    !saving &&
+    canCommit
 
   const save = async () => {
     if (!editing || !canSave) return
@@ -204,11 +231,33 @@ export default function AdminPartsPage() {
 
     setSaving(true)
     try {
-      if (isNew) await addPart(payload)
-      else await updatePart(payload.id, payload)
-      closeEditor()
+      const outcome = await runPersistence({
+        mutate: async () => {
+          if (isNew) await addPart(payload)
+          else await updatePart(payload.id, payload)
+          return payload
+        },
+        finalRefs: result => [result.image],
+      })
+      if (outcome.status === 'success') {
+        if (outcome.cleanup.failed.length > 0) {
+          console.warn('[Parts] storage cleanup partial failure', outcome.cleanup.failed)
+        }
+        closeEditor()
+      } else if (!outcome.disposed) {
+        dialog.alert({
+          title: 'Error',
+          message: getErrorMessage(outcome.error, 'Failed to save'),
+          variant: 'danger',
+        })
+      }
     } catch (error: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to save'), variant: 'danger' })
+      console.error('[Parts] runPersistence rejected', error)
+      dialog.alert({
+        title: 'Error',
+        message: getErrorMessage(error, 'Save cannot start right now'),
+        variant: 'danger',
+      })
     } finally {
       setSaving(false)
     }
@@ -216,11 +265,18 @@ export default function AdminPartsPage() {
 
   const confirmDelete = async () => {
     if (!deleteTarget) return
+    const mediaRefs = deleteTarget.image ? [deleteTarget.image] : []
     setDeleting(true)
     try {
       await deletePart(deleteTarget.id)
       if (details?.id === deleteTarget.id) setDetails(null)
       setDeleteTarget(null)
+      if (mediaRefs.length > 0) {
+        const cleanup = await deleteAssetsSafely(mediaRefs)
+        if (cleanup.failed.length > 0) {
+          console.warn('[Parts] entity-delete cleanup partial failure', cleanup.failed)
+        }
+      }
     } catch (error: unknown) {
       dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to delete'), variant: 'danger' })
     } finally {
@@ -621,8 +677,11 @@ export default function AdminPartsPage() {
                   value={editing.image}
                   onChange={url => updateEditing('image', url)}
                   removable
+                  // Form-state only; the persisted image (if any) is
+                  // kept until Save commits or the session cancels.
                   onRemove={() => updateEditing('image', '')}
                   folder="parts"
+                  session={session}
                   frameAspect={1}
                   defaultFit="contain"
                   frameTitle="Adjust Part Image"

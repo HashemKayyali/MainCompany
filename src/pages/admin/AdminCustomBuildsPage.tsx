@@ -16,6 +16,8 @@ import AdminButton from '../../components/admin/primitives/AdminButton'
 import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
 import { cn } from '../../utils/cn'
 import { getErrorMessage } from '../../lib/errors'
+import { useAssetSession } from '../../hooks/useAssetSession'
+import { deleteAssetsSafely } from '../../services/storage.service'
 
 const emptyBuild: CustomBuild = {
   title: '',
@@ -271,6 +273,21 @@ export default function AdminCustomBuildsPage() {
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0])
   const [page, setPage] = useState(1)
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
+  const [sessionOriginals, setSessionOriginals] = useState<string[]>([])
+  const [openId, setOpenId] = useState(0)
+
+  const {
+    session,
+    snapshot: sessionSnapshot,
+    isUploading,
+    isPersisting,
+    canSave: canCommit,
+    runPersistence,
+    cancel,
+  } = useAssetSession({
+    sessionKey: editing ? openId : null,
+    originalUrls: sessionOriginals,
+  })
 
   const sortedBuilds = useMemo(
     () => [...customBuilds].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.title.localeCompare(b.title)),
@@ -391,6 +408,8 @@ export default function AdminCustomBuildsPage() {
       ? Math.max(...sortedBuilds.map(build => build.sortOrder || 0)) + 10
       : 10
     setNewCategoryName('')
+    setSessionOriginals([])
+    setOpenId(id => id + 1)
     setEditing({ ...emptyBuild, images: [], sortOrder: nextOrder })
     setIsNew(true)
   }
@@ -398,21 +417,38 @@ export default function AdminCustomBuildsPage() {
   const openEdit = (build: CustomBuild) => {
     const images = buildImages(build)
     setNewCategoryName('')
+    // `buildImages` already dedupes `image` into `images`, so this
+    // captures the full canonical original set — including a legacy
+    // hero that happens not to appear in `images` (buildImages puts
+    // `image` first).
+    setSessionOriginals(images)
+    setOpenId(id => id + 1)
     setEditing({ ...build, image: images[0] || '', images })
     setIsNew(false)
   }
 
   const closeEditor = () => {
+    if (!sessionSnapshot.committed && !sessionSnapshot.disposed) {
+      void cancel()
+    }
     setEditing(null)
     setIsNew(false)
     setActiveImageIndex(null)
     setNewCategoryName('')
+    setSessionOriginals([])
   }
 
+  const canSave =
+    Boolean(editing?.title.trim()) && !isUploading && !isPersisting && !saving && canCommit
+
   const save = async () => {
-    if (!editing?.title.trim()) return
+    if (!editing || !canSave) return
+    const editingId = editing.id
     const images = buildImages(editing)
 
+    // Invariant: `image = images[0] || ''`. Enforced before
+    // persistence so a stale hero URL cannot survive when the
+    // image list becomes empty.
     const payload: CustomBuild = {
       ...editing,
       title: editing.title.trim(),
@@ -427,11 +463,36 @@ export default function AdminCustomBuildsPage() {
 
     setSaving(true)
     try {
-      if (isNew) await addCustomBuild(payload)
-      else if (editing.id) await updateCustomBuild(editing.id, payload)
-      closeEditor()
+      const outcome = await runPersistence({
+        mutate: async () => {
+          if (isNew) await addCustomBuild(payload)
+          else if (editingId) await updateCustomBuild(editingId, payload)
+          return payload
+        },
+        finalRefs: result =>
+          [result.image, ...result.images].filter(
+            (url): url is string => Boolean(url),
+          ),
+      })
+      if (outcome.status === 'success') {
+        if (outcome.cleanup.failed.length > 0) {
+          console.warn('[CustomBuilds] storage cleanup partial failure', outcome.cleanup.failed)
+        }
+        closeEditor()
+      } else if (!outcome.disposed) {
+        dialog.alert({
+          title: 'Error',
+          message: getErrorMessage(outcome.error, 'Failed to save custom build'),
+          variant: 'danger',
+        })
+      }
     } catch (error: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to save custom build'), variant: 'danger' })
+      console.error('[CustomBuilds] runPersistence rejected', error)
+      dialog.alert({
+        title: 'Error',
+        message: getErrorMessage(error, 'Save cannot start right now'),
+        variant: 'danger',
+      })
     } finally {
       setSaving(false)
     }
@@ -439,12 +500,20 @@ export default function AdminCustomBuildsPage() {
 
   const confirmDelete = async () => {
     if (!deleteTarget?.id) return
-
+    // Snapshot media refs — use buildImages so the deduped canonical
+    // list (image + images[]) is fully cleaned once DB delete lands.
+    const mediaRefs = buildImages(deleteTarget)
     setDeleting(true)
     try {
       await deleteCustomBuild(deleteTarget.id)
       if (details?.id === deleteTarget.id) setDetails(null)
       setDeleteTarget(null)
+      if (mediaRefs.length > 0) {
+        const cleanup = await deleteAssetsSafely(mediaRefs)
+        if (cleanup.failed.length > 0) {
+          console.warn('[CustomBuilds] entity-delete cleanup partial failure', cleanup.failed)
+        }
+      }
     } catch (error: unknown) {
       dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to delete custom build'), variant: 'danger' })
     } finally {
@@ -861,7 +930,7 @@ export default function AdminCustomBuildsPage() {
             </div>
             <div className="flex flex-col gap-2.5 sm:flex-row sm:justify-end">
               <AdminButton variant="ghost" onClick={closeEditor} disabled={saving} className="sm:min-w-[110px]">Cancel</AdminButton>
-              <AdminButton onClick={save} loading={saving} disabled={!editing?.title.trim()} className="sm:min-w-[140px]">
+              <AdminButton onClick={save} loading={saving} disabled={!canSave} className="sm:min-w-[140px]">
                 {isNew ? 'Create Build' : 'Save Changes'}
               </AdminButton>
             </div>
@@ -993,6 +1062,7 @@ export default function AdminCustomBuildsPage() {
                     compact
                     onChange={addImage}
                     folder="custom-builds"
+                    session={session}
                     frameAspect={16 / 9}
                     defaultFit="contain"
                     frameTitle="Adjust Custom Build Photo"

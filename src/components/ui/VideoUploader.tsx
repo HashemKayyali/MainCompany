@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useDialog } from '../../contexts/DialogContext'
-import { deleteVideo, uploadVideo } from '../../services/storage.service'
+import { uploadVideo } from '../../services/storage.service'
+import type { AssetSession } from '../../services/asset-session'
 import { getErrorMessage } from '../../lib/errors'
 import type { MediaFit } from '../../utils/media-frame'
 import FramedVideo from './FramedVideo'
@@ -21,6 +22,13 @@ interface Props {
   frameContextTitle?: string
   frameContextHint?: string
   compactPreview?: boolean
+  /**
+   * Optional asset session. When provided, uploads route through
+   * `session.runUpload` so late completions (video finished uploading
+   * after the editor closed) are detected and the resulting storage
+   * object is auto-deleted. See ImageUploader for the same pattern.
+   */
+  session?: AssetSession | null
 }
 
 const ACCEPTED_TYPES = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v']
@@ -41,6 +49,7 @@ export default function VideoUploader({
   frameContextTitle,
   frameContextHint,
   compactPreview = false,
+  session,
 }: Props) {
   const { isDark } = useTheme()
   const dialog = useDialog()
@@ -105,8 +114,18 @@ export default function VideoUploader({
     setProgress('Preparing video...')
 
     try {
-      const url = await uploadVideo(file, folder, undefined, setProgress)
+      const url = session
+        ? await session.runUpload<string>(
+            () => uploadVideo(file, folder, undefined, setProgress),
+            result => [result],
+          )
+        : await uploadVideo(file, folder, undefined, setProgress)
       setProgress('')
+
+      // Late completion — session was disposed while upload ran.
+      // The video has already been cleaned up by the session; do
+      // not touch form state (parent editor is gone).
+      if (url === null) return
 
       if (isCollectionUploader) {
         openFrameEditor(url, true)
@@ -140,15 +159,13 @@ export default function VideoUploader({
     if (file) void handleFile(file)
   }
 
-  const handleRemove = async () => {
-    if (value) {
-      try {
-        await deleteVideo(value)
-      } catch {
-        // ignore delete failures here
-      }
-    }
-
+  // Remove only mutates form state; the currently-persisted video is
+  // NEVER deleted here. Storage reconciliation happens when the
+  // parent editor session commits (successful DB save) or cancels
+  // (throwing away session-temporary uploads). This prevents a
+  // "Remove then Cancel" flow from destroying a persisted asset the
+  // database still points at.
+  const handleRemove = () => {
     onRemove?.()
     onChange('')
   }

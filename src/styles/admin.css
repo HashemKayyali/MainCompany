@@ -165,6 +165,35 @@ html[dir="rtl"] .admin-scope .admin-table-wrap {
   justify-content: center;
 }
 
+/* ─── First column always LTR.
+   Every admin table's first column carries the row's primary identity
+   (user, customer, entity) — usually avatar + name + role stacked. Keeping
+   this column LTR regardless of site locale means the avatar is always on
+   the left and the header label always reads left-to-right, matching the
+   visual mental model of "identity → details" that the rest of the row
+   builds on. The rule uses the direct `> tr > th/td` child selector so it
+   only targets top-level table cells (not nested cells inside a detail
+   panel). */
+.admin-scope table > thead > tr > th:first-child,
+.admin-scope table > tbody > tr > td:first-child,
+.admin-scope table > tr > th:first-child,
+.admin-scope table > tr > td:first-child {
+  direction: ltr;
+  text-align: left;
+}
+/* Inside the first cell, restore left-aligned flex so the avatar sits on
+   the leading edge and the name/role text starts right after it. */
+.admin-scope table > thead > tr > th:first-child > .flex,
+.admin-scope table > thead > tr > th:first-child > .inline-flex,
+.admin-scope table > tbody > tr > td:first-child > .flex,
+.admin-scope table > tbody > tr > td:first-child > .inline-flex,
+.admin-scope table > tr > th:first-child > .flex,
+.admin-scope table > tr > th:first-child > .inline-flex,
+.admin-scope table > tr > td:first-child > .flex,
+.admin-scope table > tr > td:first-child > .inline-flex {
+  justify-content: flex-start;
+}
+
 /* ─── Chip / badge pill ─── */
 .admin-scope .admin-chip {
   display: inline-flex;

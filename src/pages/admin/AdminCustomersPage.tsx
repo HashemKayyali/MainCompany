@@ -15,6 +15,8 @@ import AdminField from '../../components/admin/primitives/AdminField'
 import AdminPagination from '../../components/admin/primitives/AdminPagination'
 import CustomerCard from '../../components/customer/CustomerCard'
 import { stripMediaTransform } from '../../utils/media-frame'
+import { useAssetSession } from '../../hooks/useAssetSession'
+import { deleteAssetsSafely } from '../../services/storage.service'
 import { cn } from '../../utils/cn'
 import { getErrorMessage } from '../../lib/errors'
 
@@ -90,6 +92,25 @@ export default function AdminCustomersPage() {
   const [editing, setEditing] = useState<Customer | null>(null)
   const [isNew, setIsNew] = useState(false)
   const [saving, setSaving] = useState(false)
+  // Snapshot of the original logo the customer holds when the editor
+  // opens. Never drifts as the user replaces/removes during editing.
+  const [sessionOriginals, setSessionOriginals] = useState<string[]>([])
+  // Distinct per-open key so consecutive opens of the same customer
+  // (or `new`) always start a fresh session.
+  const [openId, setOpenId] = useState(0)
+
+  const {
+    session,
+    snapshot: sessionSnapshot,
+    isUploading,
+    isPersisting,
+    canSave: canCommit,
+    runPersistence,
+    cancel,
+  } = useAssetSession({
+    sessionKey: editing ? openId : null,
+    originalUrls: sessionOriginals,
+  })
   const [search, setSearch] = useState('')
   const [filterCat, setFilterCat] = useState<string>('all')
   const [sortBy, setSortBy] = useState<SortKey>('name')
@@ -142,24 +163,37 @@ export default function AdminCustomersPage() {
   )
 
   const openNew = () => {
+    setSessionOriginals([])
+    setOpenId(id => id + 1)
     setEditing({ ...empty })
     setIsNew(true)
   }
 
   const openEdit = (customer: Customer) => {
+    setSessionOriginals(customer.logo ? [customer.logo] : [])
+    setOpenId(id => id + 1)
     setEditing({ ...customer })
     setIsNew(false)
   }
 
   const close = () => {
     if (saving) return
+    // Cancel pending session uploads (never touches original logo).
+    if (!sessionSnapshot.committed && !sessionSnapshot.disposed) {
+      void cancel()
+    }
     setEditing(null)
     setIsNew(false)
+    setSessionOriginals([])
   }
 
   const up = (field: keyof Customer, value: string) => setEditing(current => (current ? { ...current, [field]: value } : null))
 
-  const canSave = !!editing?.name?.trim()
+  // Prevent Save while uploads/conversions/persistence in flight,
+  // session not ready to commit, or a submission is already in
+  // progress.
+  const canSave =
+    !!editing?.name?.trim() && !isUploading && !isPersisting && !saving && canCommit
 
   const previewCustomer: Customer = {
     name: editing?.name?.trim() || 'Customer Name',
@@ -175,18 +209,40 @@ export default function AdminCustomersPage() {
   )
 
   const save = async () => {
-    if (!editing || !editing.name?.trim()) return
+    if (!editing || !canSave) return
 
     const slug = editing.slug?.trim() || makeSlug(editing.name)
     const data = { ...editing, slug }
 
     setSaving(true)
     try {
-      if (isNew) await addCustomer(data)
-      else await updateCustomer(data.slug, data)
-      close()
+      const outcome = await runPersistence({
+        mutate: async () => {
+          if (isNew) await addCustomer(data)
+          else await updateCustomer(data.slug, data)
+          return data
+        },
+        finalRefs: result => [result.logo],
+      })
+      if (outcome.status === 'success') {
+        if (outcome.cleanup.failed.length > 0) {
+          console.warn('[Customers] storage cleanup partial failure', outcome.cleanup.failed)
+        }
+        close()
+      } else if (!outcome.disposed) {
+        dialog.alert({
+          title: 'Error',
+          message: getErrorMessage(outcome.error, 'Failed to save'),
+          variant: 'danger',
+        })
+      }
     } catch (err: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to save'), variant: 'danger' })
+      console.error('[Customers] runPersistence rejected', err)
+      dialog.alert({
+        title: 'Error',
+        message: getErrorMessage(err, 'Save cannot start right now'),
+        variant: 'danger',
+      })
     } finally {
       setSaving(false)
     }
@@ -201,8 +257,19 @@ export default function AdminCustomersPage() {
     })
     if (!ok) return
 
+    // Snapshot logo refs BEFORE DB delete so we retain the URL after
+    // the row is gone.
+    const mediaRefs = customer.logo ? [customer.logo] : []
     try {
       await deleteCustomer(customer.slug)
+      // DB delete succeeded → clean storage. Cleanup errors are
+      // reported separately from the DB result.
+      if (mediaRefs.length > 0) {
+        const cleanup = await deleteAssetsSafely(mediaRefs)
+        if (cleanup.failed.length > 0) {
+          console.warn('[Customers] entity-delete cleanup partial failure', cleanup.failed)
+        }
+      }
     } catch (err: unknown) {
       dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to delete'), variant: 'danger' })
     }
@@ -463,8 +530,11 @@ export default function AdminCustomersPage() {
                 value={editing.logo}
                 onChange={url => setEditing(current => (current ? { ...current, logo: url } : null))}
                 removable
+                // Form-state only — the persisted logo is retained
+                // until Save commits or the session cancels.
                 onRemove={() => setEditing(current => (current ? { ...current, logo: '' } : null))}
                 folder="customers"
+                session={session}
                 frameAspect={1}
                 defaultFit="contain"
                 frameTitle="Adjust Customer Logo"

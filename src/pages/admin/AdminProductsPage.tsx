@@ -1,9 +1,10 @@
-import { useMemo, useRef, useState, type ReactNode } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { useData } from '../../contexts/DataContext'
 import { useDialog } from '../../contexts/DialogContext'
 import * as productsApi from '../../services/products.service'
-import { deleteImage } from '../../services/storage.service'
+import { deleteAssetsSafely } from '../../services/storage.service'
+import { useAssetSession } from '../../hooks/useAssetSession'
 import Modal from '../../components/ui/Modal'
 import FramedImage from '../../components/ui/FramedImage'
 import MediaPlacementModal from '../../components/ui/MediaPlacementModal'
@@ -20,7 +21,6 @@ import ProductCard from '../../components/product/ProductCard'
 import ProductAdminCard from './productForm/ProductAdminCard'
 import { slugify } from '../../utils/format'
 import { getErrorMessage } from '../../lib/errors'
-import { stripMediaTransform } from '../../utils/media-frame'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import type { Product } from '../../data/products/types'
 import { cn } from '../../utils/cn'
@@ -35,6 +35,10 @@ import ContentTab from './productForm/ContentTab'
 import MediaTab from './productForm/MediaTab'
 import OptionsTab from './productForm/OptionsTab'
 import SettingsTab from './productForm/SettingsTab'
+import {
+  collectProductMediaRefs,
+  enforceHeroInvariant,
+} from './productForm/media-invariants'
 
 const TABS_META: Array<{ k: TabKey; label: string }> = [
   { k: 'basic', label: 'Basic' },
@@ -43,8 +47,6 @@ const TABS_META: Array<{ k: TabKey; label: string }> = [
   { k: 'options', label: 'Options' },
   { k: 'settings', label: 'Pricing/Settings' },
 ]
-
-const storageBase = (url: string) => stripMediaTransform(url || '')
 
 function DetailFact({ label, value }: { label: string; value: ReactNode }) {
   return (
@@ -85,10 +87,27 @@ export default function AdminProductsPage() {
   const [optimisticProducts, setOptimisticProducts] = useState<Product[] | null>(null)
   const { cardView, setCardView } = useAdminCardView('products')
 
-  // Tracks storage objects uploaded during the current editor session so we
-  // can delete orphans when they are removed before saving or the editor is
-  // cancelled. (See storage cleanup notes below.)
-  const sessionUploadsRef = useRef<Set<string>>(new Set())
+  // Snapshot of the media references the product holds at editor-open
+  // time — includes heroImage, every gallery entry, and videoUrl so
+  // both images and video participate in one session lifecycle. The
+  // legacy heroImage (if it differs from gallery[0]) is included so
+  // it can be reconciled by the commit diff without being silently
+  // lost.
+  const [sessionOriginals, setSessionOriginals] = useState<string[]>([])
+  const [openId, setOpenId] = useState(0)
+
+  const {
+    session,
+    snapshot: sessionSnapshot,
+    isUploading,
+    isPersisting,
+    canSave: canCommit,
+    runPersistence,
+    cancel,
+  } = useAssetSession({
+    sessionKey: modal ? openId : null,
+    originalUrls: sessionOriginals,
+  })
 
   const orderedProducts = optimisticProducts ?? products
 
@@ -98,7 +117,8 @@ export default function AdminProductsPage() {
   }
 
   const openNew = () => {
-    sessionUploadsRef.current = new Set()
+    setSessionOriginals([])
+    setOpenId(id => id + 1)
     setEdit(null)
     setForm({
       ...EMPTY,
@@ -122,7 +142,8 @@ export default function AdminProductsPage() {
   }
 
   const openEdit = (product: Product) => {
-    sessionUploadsRef.current = new Set()
+    setSessionOriginals(collectProductMediaRefs(product))
+    setOpenId(id => id + 1)
     setEdit(product)
     setForm({
       ...product,
@@ -146,12 +167,17 @@ export default function AdminProductsPage() {
   }
 
   const closeModal = () => {
-    // Cancel/close: any images uploaded this session were never persisted to a
-    // saved product, so remove their orphan objects from storage.
-    sessionUploadsRef.current.forEach(url => void deleteImage(url))
-    sessionUploadsRef.current.clear()
+    // Cancel/close: any session-temporary uploads that were made
+    // during this editor session are cleaned up by the session's
+    // cancel path. Original persisted media (heroImage, gallery,
+    // videoUrl on disk) is NEVER touched here — that only happens
+    // after a successful save via the commit diff.
+    if (!sessionSnapshot.committed && !sessionSnapshot.disposed) {
+      void cancel()
+    }
     setModal(false)
     setActiveGalleryIndex(null)
+    setSessionOriginals([])
   }
 
   const productCategoryName = (product: Product) =>
@@ -217,7 +243,11 @@ export default function AdminProductsPage() {
       description: form.description || '',
       featured: !!form.featured,
       showPrice: form.showPrice !== false,
-      heroImage: gallery[0] || form.heroImage || '',
+      // Invariant: heroImage strictly derives from gallery[0]. This
+      // eliminates the stale-hero bug where an empty gallery could
+      // still carry an old heroImage that then gets deleted while
+      // the DB still references it.
+      heroImage: enforceHeroInvariant(gallery),
       gallery,
       videoUrl: form.videoUrl || '',
       quickOptions: form.quickOptions || [],
@@ -263,32 +293,49 @@ export default function AdminProductsPage() {
 
     setSaving(true)
     try {
-      if (edit) await updateProduct(edit.slug, finalProduct)
-      else await addProduct(finalProduct)
+      const outcome = await runPersistence({
+        mutate: async () => {
+          if (edit) await updateProduct(edit.slug, finalProduct)
+          else await addProduct(finalProduct)
 
-      if (reorderUpdates.length > 0) {
-        await Promise.all(reorderUpdates.map(product => productsApi.update(product.slug, { displayOrder: product.displayOrder })))
-      }
+          if (reorderUpdates.length > 0) {
+            await Promise.all(
+              reorderUpdates.map(product =>
+                productsApi.update(product.slug, { displayOrder: product.displayOrder }),
+              ),
+            )
+          }
 
-      await refreshAll()
-
-      // Storage cleanup: when editing, delete storage objects for original
-      // images that are no longer referenced by the saved product. Comparison
-      // is on the underlying storage object (transform-stripped) so re-framing
-      // the same image is never treated as a removal.
-      if (edit) {
-        const keptBases = new Set((data.gallery || []).map(storageBase))
-        ;(edit.gallery || []).forEach(url => {
-          if (!keptBases.has(storageBase(url))) void deleteImage(url)
+          await refreshAll()
+          return data
+        },
+        // Final refs = heroImage + gallery + videoUrl. The
+        // canonical dedup in the session collapses
+        // heroImage===gallery[0] into one identity, and reports
+        // the legacy hero for cleanup only if it was not
+        // referenced by the final payload.
+        finalRefs: result => collectProductMediaRefs(result),
+      })
+      if (outcome.status === 'success') {
+        if (outcome.cleanup.failed.length > 0) {
+          console.warn('[Products] storage cleanup partial failure', outcome.cleanup.failed)
+        }
+        setOptimisticProducts(null)
+        closeModal()
+      } else if (!outcome.disposed) {
+        dialog.alert({
+          title: 'Error',
+          message: getErrorMessage(outcome.error, 'Failed to save'),
+          variant: 'danger',
         })
       }
-      // Session uploads are now persisted; clear so closeModal does not remove them.
-      sessionUploadsRef.current.clear()
-
-      setOptimisticProducts(null)
-      closeModal()
     } catch (err: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to save'), variant: 'danger' })
+      console.error('[Products] runPersistence rejected', err)
+      dialog.alert({
+        title: 'Error',
+        message: getErrorMessage(err, 'Save cannot start right now'),
+        variant: 'danger',
+      })
     } finally {
       setSaving(false)
     }
@@ -313,6 +360,11 @@ export default function AdminProductsPage() {
       return getProductDisplayOrder(existing, fallbackDisplayOrderForSlug(existing.slug)) !== product.displayOrder
     })
 
+    // Snapshot all media refs BEFORE the DB delete so we retain the
+    // URLs after the row is gone. Storage cleanup runs ONLY after DB
+    // delete succeeds; failure here is reported separately and does
+    // not falsify the DB result.
+    const mediaRefs = target ? collectProductMediaRefs(target) : []
     try {
       await deleteProduct(slug)
       if (reorderUpdates.length > 0) {
@@ -321,29 +373,31 @@ export default function AdminProductsPage() {
       await refreshAll()
       setOptimisticProducts(null)
       if (details?.slug === slug) setDetails(null)
+      if (mediaRefs.length > 0) {
+        const cleanup = await deleteAssetsSafely(mediaRefs)
+        if (cleanup.failed.length > 0) {
+          console.warn('[Products] entity-delete cleanup partial failure', cleanup.failed)
+        }
+      }
     } catch (err: unknown) {
       dialog.alert({ title: 'Error', message: getErrorMessage(err, 'Failed to delete'), variant: 'danger' })
     }
   }
 
+  // Adding an image: form-state only. The `ImageUploader` has
+  // already registered the upload with the session (via its
+  // `session` prop), so cleanup on Cancel or unreferenced-on-Save is
+  // handled centrally.
   const addGalleryImage = (url: string) => {
-    sessionUploadsRef.current.add(storageBase(url))
     setForm((f: any) => ({ ...f, gallery: [...(f.gallery || []), url] }))
   }
+  // Removing an image: form-state only. The persisted asset — if
+  // any — is NOT deleted here; the session's Save-commit diff or
+  // Cancel path is the single point of truth for storage cleanup.
   const removeGalleryImage = (idx: number) =>
     setForm((f: any) => {
       const gallery = [...(f.gallery || [])]
-      const [removed] = gallery.splice(idx, 1)
-      if (removed) {
-        const base = storageBase(removed)
-        const stillReferenced = gallery.some((url: string) => storageBase(url) === base)
-        // Only auto-delete objects uploaded in THIS session. Original saved
-        // images are left untouched here and handled on save (so Cancel is safe).
-        if (!stillReferenced && sessionUploadsRef.current.has(base)) {
-          void deleteImage(removed)
-          sessionUploadsRef.current.delete(base)
-        }
-      }
+      gallery.splice(idx, 1)
       return { ...f, gallery }
     })
   const moveGalleryImage = (idx: number, dir: -1 | 1) =>
@@ -717,7 +771,12 @@ export default function AdminProductsPage() {
               <AdminButton variant="ghost" onClick={closeModal} disabled={saving} className="sm:min-w-[110px]">
                 Cancel
               </AdminButton>
-              <AdminButton onClick={save} loading={saving} className="sm:min-w-[140px]">
+              <AdminButton
+                onClick={save}
+                loading={saving}
+                disabled={saving || isUploading || isPersisting || !canCommit}
+                className="sm:min-w-[140px]"
+              >
                 {edit ? 'Save Changes' : 'Add Product'}
               </AdminButton>
             </div>
@@ -771,6 +830,7 @@ export default function AdminProductsPage() {
                 addGalleryImage={addGalleryImage}
                 renderProductPreview={renderProductPreview}
                 previewProduct={previewProduct}
+                session={session}
               />
             )}
             {tab === 'options' && (

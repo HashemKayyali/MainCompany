@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useDialog } from '../../contexts/DialogContext'
-import { uploadImage, uploadImageVariants } from '../../services/storage.service'
+import { uploadImage } from '../../services/storage.service'
+import type { AssetSession } from '../../services/asset-session'
 import { stripMediaTransform, type MediaFit } from '../../utils/media-frame'
 import { cn } from '../../utils/cn'
 import FramedImage from './FramedImage'
@@ -37,6 +38,17 @@ interface Props {
   maxFiles?: number
   onChangeMany?: (urls: string[]) => void
   adjustAfterUpload?: boolean
+  /**
+   * Optional asset session. When provided, uploads are wrapped in
+   * `session.runUpload`, which:
+   *   - registers each successful upload as a session-temporary
+   *     asset (cleaned up on cancel or on save-if-not-referenced);
+   *   - detects late completions after the parent editor has been
+   *     closed and cleans the resulting storage object automatically.
+   * When omitted (backward-compat), the uploader behaves as before
+   * — the parent is fully responsible for storage lifecycle.
+   */
+  session?: AssetSession | null
 }
 
 export default function ImageUploader({
@@ -64,6 +76,7 @@ export default function ImageUploader({
   maxFiles = 100,
   onChangeMany,
   adjustAfterUpload = true,
+  session,
 }: Props) {
   const { isDark } = useTheme()
   const dialog = useDialog()
@@ -145,7 +158,14 @@ export default function ImageUploader({
 
     setUploading(true)
     try {
-      const { heroUrl } = await uploadImageVariants(file, folder)
+      // Single-hero upload: the previous variant-pair path was
+      // creating an orphan thumb every time because no caller here
+      // consumes the thumb URL. `uploadImage` uploads exactly one
+      // storage object. When a session is provided we route through
+      // `runUpload` so a late completion after editor close is
+      // detected and cleaned up automatically.
+      const heroUrl = await runSessionUpload(() => uploadImage(file, folder))
+      if (heroUrl === null) return
 
       if (isCollectionUploader) {
         if (adjustAfterUpload) openFrameEditor(heroUrl, true)
@@ -164,6 +184,20 @@ export default function ImageUploader({
     } finally {
       setUploading(false)
     }
+  }
+
+  /**
+   * Route uploads through the parent session when one is provided so
+   * late completions (uploader done AFTER the editor closed) do not
+   * become storage orphans. Returns null when the session detected a
+   * late completion and cleaned the result.
+   */
+  const runSessionUpload = async (work: () => Promise<string>): Promise<string | null> => {
+    if (!session) return await work()
+    return session.runUpload<string>(
+      () => work(),
+      url => [url],
+    )
   }
 
   const handleFiles = async (files: File[]) => {
@@ -216,7 +250,11 @@ export default function ImageUploader({
         try {
           // Gallery bulk uploads only need the display asset. Avoid generating
           // and uploading a second unused thumbnail for every gallery photo.
-          uploaded[index] = await uploadImage(file, folder)
+          const url = await runSessionUpload(() => uploadImage(file, folder))
+          // A null return means the session was disposed before the
+          // upload finished and the result has already been cleaned;
+          // treat it as a soft skip rather than a failure.
+          if (url !== null) uploaded[index] = url
         } catch (error) {
           console.error(`Upload failed for ${file.name}:`, error)
           failed.push(file.name)

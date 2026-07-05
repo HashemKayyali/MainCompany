@@ -16,6 +16,27 @@ import AdminButton from '../../components/admin/primitives/AdminButton'
 import AdminEmptyState from '../../components/admin/primitives/AdminEmptyState'
 import { cn } from '../../utils/cn'
 import { getErrorMessage } from '../../lib/errors'
+import { useAssetSession } from '../../hooks/useAssetSession'
+import { deleteAssetsSafely } from '../../services/storage.service'
+
+/**
+ * Enforce the cover invariant BEFORE persistence.
+ *
+ * Rule: `cover === images[0] || ''`. This is deterministic, matches
+ * the existing behaviour whenever images is non-empty, and — critically
+ * — refuses to silently keep a stale cover URL when the last image was
+ * removed. The forbidden state
+ *
+ *     images = []
+ *     cover  = <some-old-image-that-was-removed>
+ *
+ * can no longer be persisted. The old cover is reconciled by the
+ * session's commit diff.
+ */
+function enforceCoverInvariant(images: string[], _existingCover: string): string {
+  void _existingCover
+  return images[0] || ''
+}
 
 const emptyAlbum: GalleryAlbum = { slug: '', title: '', cover: '', images: [], category: '' }
 const PAGE_SIZE_OPTIONS = [16, 32, 64]
@@ -175,6 +196,24 @@ export default function AdminGalleryPage() {
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0])
   const [page, setPage] = useState(1)
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
+  // Snapshot of every media reference the album holds at open time
+  // — both `cover` and `images[]`, so a legacy cover that lives
+  // outside images is not lost.
+  const [sessionOriginals, setSessionOriginals] = useState<string[]>([])
+  const [openId, setOpenId] = useState(0)
+
+  const {
+    session,
+    snapshot: sessionSnapshot,
+    isUploading,
+    isPersisting,
+    canSave: canCommit,
+    runPersistence,
+    cancel,
+  } = useAssetSession({
+    sessionKey: editing ? openId : null,
+    originalUrls: sessionOriginals,
+  })
 
   const categories = useMemo(
     () => Array.from(new Set(galleryAlbums.map(album => album.category).filter(Boolean))).sort((a, b) => a.localeCompare(b)),
@@ -212,38 +251,84 @@ export default function AdminGalleryPage() {
   }, [filterCat, pageSize, search, sortKey])
 
   const openNew = () => {
+    setSessionOriginals([])
+    setOpenId(id => id + 1)
     setEditing({ ...emptyAlbum, images: [] })
     setIsNew(true)
   }
 
   const openEdit = (album: GalleryAlbum) => {
+    // Original ref set = union of cover + images so a legacy
+    // independently-set cover is tracked and reconciled correctly.
+    const originals = [album.cover, ...album.images].filter(
+      (url): url is string => Boolean(url),
+    )
+    setSessionOriginals(originals)
+    setOpenId(id => id + 1)
     setEditing({ ...album, images: [...album.images] })
     setIsNew(false)
   }
 
   const closeEditor = () => {
+    if (!sessionSnapshot.committed && !sessionSnapshot.disposed) {
+      void cancel()
+    }
     setEditing(null)
     setIsNew(false)
     setActiveImageIndex(null)
+    setSessionOriginals([])
   }
 
+  const canSave =
+    Boolean(editing?.title.trim()) && !isUploading && !isPersisting && !saving && canCommit
+
   const save = async () => {
-    if (!editing || !editing.title.trim()) return
-    const slug = editing.slug || slugify(editing.title)
+    if (!editing || !canSave) return
+    const editingSlug = editing.slug
+    const slug = editingSlug || slugify(editing.title)
+    const cover = enforceCoverInvariant(editing.images, editing.cover)
     const data: GalleryAlbum = {
       ...editing,
       title: editing.title.trim(),
       slug,
       category: editing.category.trim(),
-      cover: editing.images?.[0] || editing.cover || '',
+      cover,
     }
     setSaving(true)
     try {
-      if (isNew) await addGalleryAlbum(data)
-      else await updateGalleryAlbum(editing.slug || slug, data)
-      closeEditor()
+      const outcome = await runPersistence({
+        mutate: async () => {
+          if (isNew) await addGalleryAlbum(data)
+          else await updateGalleryAlbum(editingSlug || slug, data)
+          return data
+        },
+        // Canonical dedup collapses cover===images[0] into one identity,
+        // so a shared URL is never scheduled for deletion while still
+        // referenced.
+        finalRefs: result =>
+          [result.cover, ...result.images].filter(
+            (url): url is string => Boolean(url),
+          ),
+      })
+      if (outcome.status === 'success') {
+        if (outcome.cleanup.failed.length > 0) {
+          console.warn('[Gallery] storage cleanup partial failure', outcome.cleanup.failed)
+        }
+        closeEditor()
+      } else if (!outcome.disposed) {
+        dialog.alert({
+          title: 'Error',
+          message: getErrorMessage(outcome.error, 'Failed to save'),
+          variant: 'danger',
+        })
+      }
     } catch (error: unknown) {
-      dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to save'), variant: 'danger' })
+      console.error('[Gallery] runPersistence rejected', error)
+      dialog.alert({
+        title: 'Error',
+        message: getErrorMessage(error, 'Save cannot start right now'),
+        variant: 'danger',
+      })
     } finally {
       setSaving(false)
     }
@@ -251,11 +336,24 @@ export default function AdminGalleryPage() {
 
   const confirmDelete = async () => {
     if (!deleteTarget) return
+    // Snapshot ALL media refs — cover + every image — before DB
+    // delete. Storage cleanup happens ONLY after DB delete succeeds
+    // and is deduplicated canonically (so a shared cover/image URL
+    // is only removed once).
+    const mediaRefs = [deleteTarget.cover, ...deleteTarget.images].filter(
+      (url): url is string => Boolean(url),
+    )
     setDeleting(true)
     try {
       await deleteGalleryAlbum(deleteTarget.slug)
       if (details?.slug === deleteTarget.slug) setDetails(null)
       setDeleteTarget(null)
+      if (mediaRefs.length > 0) {
+        const cleanup = await deleteAssetsSafely(mediaRefs)
+        if (cleanup.failed.length > 0) {
+          console.warn('[Gallery] entity-delete cleanup partial failure', cleanup.failed)
+        }
+      }
     } catch (error: unknown) {
       dialog.alert({ title: 'Error', message: getErrorMessage(error, 'Failed to delete'), variant: 'danger' })
     } finally {
@@ -535,7 +633,7 @@ export default function AdminGalleryPage() {
             </div>
             <div className="flex flex-col gap-2.5 sm:flex-row sm:justify-end">
               <AdminButton variant="ghost" onClick={closeEditor} disabled={saving} className="sm:min-w-[110px]">Cancel</AdminButton>
-              <AdminButton onClick={save} loading={saving} disabled={!editing?.title.trim()} className="sm:min-w-[140px]">
+              <AdminButton onClick={save} loading={saving} disabled={!canSave} className="sm:min-w-[140px]">
                 {isNew ? 'Create Album' : 'Save Changes'}
               </AdminButton>
             </div>
@@ -613,6 +711,7 @@ export default function AdminGalleryPage() {
                     onChange={addImage}
                     onChangeMany={addImages}
                     folder="gallery"
+                    session={session}
                     frameAspect={1}
                     defaultFit="cover"
                     frameTitle="Adjust Gallery Photo"
