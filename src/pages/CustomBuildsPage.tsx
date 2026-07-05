@@ -31,6 +31,7 @@ import {
 import type { CustomBuild } from '../data/custom-builds'
 import { useCustomBuildsData } from '../contexts/DataContext'
 import { usePageMeta } from '../hooks/usePageMeta'
+import { useElementActivity } from '../hooks/useElementActivity'
 import { useMotionEnabled } from '../hooks/useMotionEnabled'
 import { preloadRoute } from '../utils/route-preload'
 import FramedImage from '../components/ui/FramedImage'
@@ -335,20 +336,22 @@ function CornerTicks({ color = 'rgba(124,58,237,0.45)' }: { color?: string }) {
 
 function WorkSideDecor({ side }: { side: 'left' | 'right' }) {
   const motionEnabled = useMotionEnabled()
+  const { ref: activityRef, active: activityActive } = useElementActivity<HTMLDivElement>()
+  const effectiveMotion = motionEnabled && activityActive
   const isLeft = side === 'left'
   const sideClass = isLeft ? 'left-8 2xl:left-20' : 'right-8 2xl:right-20'
   const cardAlign = isLeft ? 'items-start text-left' : 'items-end text-right'
   const rowDir = isLeft ? 'flex-row' : 'flex-row-reverse'
 
   return (
-    <div className={`pointer-events-none absolute top-1/2 z-[1] hidden -translate-y-1/2 ${sideClass} xl:block`} aria-hidden="true">
+    <div ref={activityRef} className={`pointer-events-none absolute top-1/2 z-[1] hidden -translate-y-1/2 ${sideClass} xl:block`} aria-hidden="true">
       <div className="relative h-[300px] w-[190px] 2xl:h-[330px] 2xl:w-[230px]">
         <div className={`absolute inset-y-8 ${isLeft ? 'left-1/2 right-0' : 'left-0 right-1/2'} rounded-full bg-gradient-to-b ${isLeft ? 'from-fuchsia-500/8 via-violet-500/8 to-cyan-400/6' : 'from-cyan-400/6 via-violet-500/8 to-fuchsia-500/8'} blur-3xl`} />
 
         <motion.div
           className={`absolute ${isLeft ? 'left-3 top-1' : 'right-3 top-1'} h-[112px] w-[112px] rounded-full border border-white/12 bg-white/[0.04] backdrop-blur-sm`}
-          animate={motionEnabled ? { y: [0, -7, 0], rotate: isLeft ? [0, 6, 0] : [0, -6, 0] } : undefined}
-          transition={motionEnabled ? { duration: 8.5, repeat: Infinity, ease: 'easeInOut' } : undefined}
+          animate={effectiveMotion ? { y: [0, -7, 0], rotate: isLeft ? [0, 6, 0] : [0, -6, 0] } : undefined}
+          transition={effectiveMotion ? { duration: 8.5, repeat: Infinity, ease: 'easeInOut' } : undefined}
         >
           <span className="absolute inset-[13px] rounded-full border border-dashed border-white/18" />
           <span className="absolute inset-[29px] rounded-full border border-white/12" />
@@ -362,8 +365,8 @@ function WorkSideDecor({ side }: { side: 'left' | 'right' }) {
 
         <motion.div
           className={`absolute ${isLeft ? 'left-0 top-[138px]' : 'right-0 top-[132px]'} flex w-[170px] flex-col gap-2.5 rounded-[22px] border border-white/10 bg-white/[0.05] p-3.5 shadow-[0_26px_60px_-44px_rgba(0,0,0,0.88)] backdrop-blur-md 2xl:w-[200px]`}
-          animate={motionEnabled ? { y: [0, 8, 0] } : undefined}
-          transition={motionEnabled ? { duration: 9.5, repeat: Infinity, ease: 'easeInOut', delay: isLeft ? 0.6 : 0.2 } : undefined}
+          animate={effectiveMotion ? { y: [0, 8, 0] } : undefined}
+          transition={effectiveMotion ? { duration: 9.5, repeat: Infinity, ease: 'easeInOut', delay: isLeft ? 0.6 : 0.2 } : undefined}
         >
           <div className={`flex ${rowDir} items-center gap-2`}>
             <span className="flex h-8 w-8 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/85 to-fuchsia-500/85 text-white shadow-[0_16px_32px_-18px_rgba(217,70,239,0.92)]">
@@ -392,8 +395,8 @@ function WorkSideDecor({ side }: { side: 'left' | 'right' }) {
 
         <motion.div
           className={`absolute ${isLeft ? 'bottom-1 left-6' : 'bottom-1 right-6'} flex ${rowDir} gap-2`}
-          animate={motionEnabled ? { y: [0, -5, 0] } : undefined}
-          transition={motionEnabled ? { duration: 7.5, repeat: Infinity, ease: 'easeInOut', delay: isLeft ? 0.3 : 0.8 } : undefined}
+          animate={effectiveMotion ? { y: [0, -5, 0] } : undefined}
+          transition={effectiveMotion ? { duration: 7.5, repeat: Infinity, ease: 'easeInOut', delay: isLeft ? 0.3 : 0.8 } : undefined}
         >
           {[CircuitBoard, Radio, Cpu].map((Icon, idx) => (
             <span key={idx} className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-white/70 backdrop-blur-sm">
@@ -421,10 +424,12 @@ function CustomBuildSectionBackdrop({ variant }: { variant: 'electric' | 'waves'
 
 function Marquee({ items }: { items: string[] }) {
   const motionEnabled = useMotionEnabled()
+  const { ref: activityRef, active: activityActive } = useElementActivity<HTMLDivElement>()
+  const effectiveMotion = motionEnabled && activityActive
   const loop = [...items, ...items]
   return (
-    <div className="relative flex overflow-hidden py-2.5" aria-hidden="true">
-      <motion.div className="flex shrink-0 items-center gap-5 pr-5" style={MONO} animate={motionEnabled ? { x: ['0%', '-50%'] } : undefined} transition={motionEnabled ? { duration: 24, repeat: Infinity, ease: 'linear' } : undefined}>
+    <div ref={activityRef} className="relative flex overflow-hidden py-2.5" aria-hidden="true">
+      <motion.div className="flex shrink-0 items-center gap-5 pr-5" style={MONO} animate={effectiveMotion ? { x: ['0%', '-50%'] } : undefined} transition={effectiveMotion ? { duration: 24, repeat: Infinity, ease: 'linear' } : undefined}>
         {loop.map((item, index) => (
           <span key={`${item}-${index}`} className="flex shrink-0 items-center gap-5 text-[11px] font-bold uppercase tracking-[0.18em] text-white/40">
             <span className="text-fuchsia-300/70">▹</span> {item}
@@ -455,7 +460,7 @@ function Globe() {
         canvas: canvasRef.current,
         alpha: true,
         antialias: true,
-        preserveDrawingBuffer: true,
+        preserveDrawingBuffer: false,
         powerPreference: 'high-performance',
       })
       renderer.setClearColor(0x000000, 0)
@@ -584,7 +589,12 @@ function Globe() {
       canvas.addEventListener('pointercancel', onPointerUp)
 
       const clock = new THREE.Clock()
+      let elementVisible = true
+      let animationRunning = false
+
       const animate = () => {
+        if (!animationRunning) return
+
         const delta = Math.min(clock.getDelta(), 0.04)
         if (!isDragging) {
           globe.rotation.y += delta * 0.2
@@ -598,10 +608,48 @@ function Globe() {
         renderer.render(scene, camera)
         frameId = requestAnimationFrame(animate)
       }
-      animate()
+
+      const stopAnimation = () => {
+        if (!animationRunning) return
+        animationRunning = false
+        cancelAnimationFrame(frameId)
+      }
+
+      const startAnimation = () => {
+        if (animationRunning || !elementVisible || document.visibilityState === 'hidden') return
+        animationRunning = true
+        clock.start()
+        clock.getDelta()
+        frameId = requestAnimationFrame(animate)
+      }
+
+      const syncAnimationState = () => {
+        if (elementVisible && document.visibilityState !== 'hidden') {
+          startAnimation()
+        } else {
+          stopAnimation()
+        }
+      }
+
+      const visibilityObserver = typeof IntersectionObserver !== 'undefined'
+        ? new IntersectionObserver(
+            entries => {
+              elementVisible = Boolean(entries[0]?.isIntersecting)
+              syncAnimationState()
+            },
+            { rootMargin: '240px 0px', threshold: 0.01 }
+          )
+        : null
+
+      renderer.render(scene, camera)
+      visibilityObserver?.observe(canvas)
+      document.addEventListener('visibilitychange', syncAnimationState)
+      startAnimation()
 
       cleanupScene = () => {
-        cancelAnimationFrame(frameId)
+        stopAnimation()
+        visibilityObserver?.disconnect()
+        document.removeEventListener('visibilitychange', syncAnimationState)
         resizeObserver?.disconnect()
         if (!resizeObserver) window.removeEventListener('resize', resize)
         canvas.removeEventListener('pointerdown', onPointerDown)
@@ -848,6 +896,7 @@ function CustomBuildsHeroShowcase({ motionEnabled }: { motionEnabled: boolean })
 export default function CustomBuildsPage() {
   const { customBuilds, customBuildCategories } = useCustomBuildsData()
   const motionEnabled = useMotionEnabled()
+  const { ref: heroSectionRef, active: heroActive } = useElementActivity<HTMLElement>()
   const { translateText, locale } = useI18n()
 
   const faqJsonLd = useMemo(
@@ -942,6 +991,7 @@ export default function CustomBuildsPage() {
     <div className="overflow-x-clip pb-2">
       {/* ══ 1. HERO — short lab bench (the only grid section) ══ */}
       <EventiesHero
+        sectionRef={heroSectionRef}
         eyebrow="R&D Studio - Custom Builds"
         title="Custom interactive experiences, built for your event."
         description="Custom builds can be reviewed for rental, purchase, or international shipping depending on scope, size, materials, and timeline."
@@ -949,7 +999,7 @@ export default function CustomBuildsPage() {
         secondaryAction={{ label: 'Inspect Our Work', href: '#work' }}
         chipsLabel="Studio"
         chips={heroFocusAreas.map(({ label }) => ({ label }))}
-        rightSlot={<CustomBuildsHeroShowcase motionEnabled={motionEnabled} />}
+        rightSlot={<CustomBuildsHeroShowcase motionEnabled={motionEnabled && heroActive} />}
       />
       <div className="bg-[#f7f4ff]">
       {/* 2. CAPABILITIES - clean section */}

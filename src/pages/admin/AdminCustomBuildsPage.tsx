@@ -33,15 +33,24 @@ const PAGE_SIZE_OPTIONS = [12, 24, 48]
 type BuildFilter = 'all' | 'active' | 'hidden' | 'featured'
 type BuildSort = 'order' | 'title' | 'category' | 'photos_desc' | 'photos_asc'
 
+function toIntegerOrder(value: number | undefined, fallback = 0) {
+  if (value === undefined) return fallback
+  const numeric = Number(value)
+  return Number.isFinite(numeric) ? Math.round(numeric) : fallback
+}
+
 function orderValueForPosition(orderedWithoutCurrent: CustomBuild[], targetIndex: number) {
-  const previous = orderedWithoutCurrent[targetIndex - 1]?.sortOrder
-  const next = orderedWithoutCurrent[targetIndex]?.sortOrder
+  const previousValue = orderedWithoutCurrent[targetIndex - 1]?.sortOrder
+  const nextValue = orderedWithoutCurrent[targetIndex]?.sortOrder
+  const previous = previousValue === undefined ? undefined : toIntegerOrder(previousValue)
+  const next = nextValue === undefined ? undefined : toIntegerOrder(nextValue)
 
   if (previous === undefined && next === undefined) return 10
-  if (previous === undefined) return next - 10
+  if (previous === undefined) return next! - 10
   if (next === undefined) return previous + 10
-  if (previous === next) return previous + 0.01
-  return previous + (next - previous) / 2
+  if (previous === next) return previous + 1
+
+  return Math.round(previous + (next - previous) / 2)
 }
 
 function buildOrderIndex(build: CustomBuild, orderedBuilds: CustomBuild[]) {
@@ -411,7 +420,7 @@ export default function AdminCustomBuildsPage() {
       category: editing.category.trim(),
       image: images[0] || '',
       images,
-      sortOrder: Number(editing.sortOrder || 0),
+      sortOrder: toIntegerOrder(editing.sortOrder),
       featured: Boolean(editing.featured),
       active: editing.active !== false,
     }

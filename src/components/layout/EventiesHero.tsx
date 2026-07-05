@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import { type ReactNode, type Ref } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles } from 'lucide-react'
@@ -41,6 +41,7 @@ type EventiesHeroProps = {
   className?: string
   contentClassName?: string
   rightSlotClassName?: string
+  sectionRef?: Ref<HTMLElement>
 }
 
 function HeroAction({ action, variant }: { action: EventiesHeroAction; variant: 'primary' | 'secondary' }) {
@@ -130,13 +131,14 @@ export default function EventiesHero({
   className,
   contentClassName,
   rightSlotClassName,
+  sectionRef,
 }: EventiesHeroProps) {
   const heroEntrance = useHeroEntranceMotion()
   const { translateText } = useI18n()
   const translateNode = (value: ReactNode) => (typeof value === 'string' ? translateText(value) : value)
 
   return (
-    <section className={cn('relative -mt-[var(--app-header-offset)] w-full overflow-hidden', className)}>
+    <section ref={sectionRef} className={cn('relative -mt-[var(--app-header-offset)] w-full overflow-hidden', className)}>
       <div
         className="eventies-hero-shell site-container-wide relative z-20 grid grid-cols-1 items-center gap-10 pb-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12 lg:pb-20"
         style={{ paddingTop: 'calc(var(--app-navbar-height, 72px) + clamp(1.5rem, 4vw, 3rem))' }}

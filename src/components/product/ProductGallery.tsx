@@ -210,6 +210,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
                 muted
                 loop
                 playsInline
+                pauseWhenOffscreen
               />
               <div
                 className={cn(

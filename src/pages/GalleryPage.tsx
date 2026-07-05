@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ImageIcon, Images } from 'lucide-react'
 import { useGalleryData } from '../contexts/DataContext'
 import { galleryAlbums as staticAlbums, type GalleryAlbum } from '../data/gallery'
+import { useElementActivity } from '../hooks/useElementActivity'
 import { usePageMeta } from '../hooks/usePageMeta'
 import FramedImage from '../components/ui/FramedImage'
 import { ImageGallery, type GalleryImage } from '../components/ui/image-gallery'
@@ -19,6 +20,7 @@ const GALLERY_FALLBACK_IMAGES = [
 ]
 
 function GalleryHeroShowcase({ albums }: { albums: GalleryAlbum[] }) {
+  const { ref: activityRef, active: activityActive } = useElementActivity<HTMLDivElement>()
   const previewImages = useMemo(() => {
     const images = albums
       .flatMap(album => [album.cover, ...album.images])
@@ -40,17 +42,18 @@ function GalleryHeroShowcase({ albums }: { albums: GalleryAlbum[] }) {
   }, [previewImages])
 
   useEffect(() => {
-    if (previewImages.length < 2) return
+    if (!activityActive || previewImages.length < 2) return
 
     const timer = window.setInterval(() => {
       setActiveIndex(current => (current + 1 + Math.floor(Math.random() * Math.min(3, previewImages.length - 1))) % previewImages.length)
     }, 3200)
 
     return () => window.clearInterval(timer)
-  }, [previewImages.length])
+  }, [activityActive, previewImages.length])
 
   return (
     <div
+      ref={activityRef}
       className="relative mx-auto w-full max-w-[620px] overflow-hidden rounded-[30px] border border-white/16 bg-white/[0.07] p-3 backdrop-blur-xl"
       style={{ boxShadow: '0 40px 90px -34px rgba(8,3,26,0.8), inset 0 1px 0 rgba(255,255,255,0.18)' }}
     >

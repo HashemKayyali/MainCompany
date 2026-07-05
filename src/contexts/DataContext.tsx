@@ -270,6 +270,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [loadedResources, setLoadedResources] = useState<ReadonlySet<ResourceKey>>(new Set())
 
   const snapshotTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const snapshotIdleHandle = useRef<number | null>(null)
   const mountedRef = useRef(true)
   const cacheVisibleRef = useRef(false)
   // Per-resource load bookkeeping: which resources have been requested this
@@ -493,10 +494,52 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
 
     if (snapshotTimer.current) clearTimeout(snapshotTimer.current)
+
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout?: number }) => number
+      cancelIdleCallback?: (handle: number) => void
+    }
+
+    if (snapshotIdleHandle.current !== null) {
+      idleWindow.cancelIdleCallback?.(snapshotIdleHandle.current)
+      snapshotIdleHandle.current = null
+    }
+
+    const snapshot = {
+      products,
+      parts,
+      customers,
+      categories,
+      galleryAlbums,
+      customBuilds,
+      customBuildCategories,
+    }
+
     snapshotTimer.current = setTimeout(() => {
-      writeSnapshot({ products, parts, customers, categories, galleryAlbums, customBuilds, customBuildCategories })
       snapshotTimer.current = null
+
+      const persist = () => {
+        writeSnapshot(snapshot)
+        snapshotIdleHandle.current = null
+      }
+
+      if (idleWindow.requestIdleCallback) {
+        snapshotIdleHandle.current = idleWindow.requestIdleCallback(persist, { timeout: 3000 })
+      } else {
+        persist()
+      }
     }, 1500)
+
+    return () => {
+      if (snapshotTimer.current) {
+        clearTimeout(snapshotTimer.current)
+        snapshotTimer.current = null
+      }
+      if (snapshotIdleHandle.current !== null) {
+        idleWindow.cancelIdleCallback?.(snapshotIdleHandle.current)
+        snapshotIdleHandle.current = null
+      }
+    }
   }, [categories, customBuildCategories, customBuilds, customers, galleryAlbums, loading, parts, products])
 
   const addProduct = useCallback(

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useElementActivity } from '../../hooks/useElementActivity'
 import { useMotionEnabled } from '../../hooks/useMotionEnabled'
 import { cn } from '../../utils/cn'
 import FramedImage from './FramedImage'
@@ -156,13 +157,14 @@ export function ShuffleGrid({
 }: ShuffleGridProps) {
   const motionEnabled = useMotionEnabled()
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { ref: activityRef, active: activityActive } = useElementActivity<HTMLDivElement>()
   const pool = useMemo(() => normalizeItems(items, cellsPerPage), [cellsPerPage, items])
   const [visibleItems, setVisibleItems] = useState(() => takeVisibleItems(pool, cellsPerPage))
 
   useEffect(() => {
     setVisibleItems(takeVisibleItems(pool, cellsPerPage))
 
-    if (!motionEnabled || pool.length <= 1) return undefined
+    if (!motionEnabled || !activityActive || pool.length <= 1) return undefined
 
     const shuffleSquares = () => {
       setVisibleItems(takeVisibleItems(pool, cellsPerPage))
@@ -176,12 +178,13 @@ export function ShuffleGrid({
         clearTimeout(timeoutRef.current)
       }
     }
-  }, [cellsPerPage, intervalMs, motionEnabled, pool])
+  }, [activityActive, cellsPerPage, intervalMs, motionEnabled, pool])
 
   const skeletons = Array.from({ length: cellsPerPage }, (_, index) => index)
 
   return (
     <div
+      ref={activityRef}
       className={cn(
         'grid grid-cols-4 grid-rows-4 gap-2 sm:gap-2.5',
         className ?? 'h-[450px]'

@@ -41,6 +41,13 @@ function readInitialLocale(): Locale {
 
 const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA'])
 const TRANSLATABLE_ATTRS = ['placeholder', 'aria-label', 'title', 'alt'] as const
+const I18N_OBSERVER_OPTIONS: MutationObserverInit = {
+  subtree: true,
+  childList: true,
+  characterData: true,
+  attributes: true,
+  attributeFilter: [...TRANSLATABLE_ATTRS],
+}
 
 // Text blocks should follow the language of their own content rather than the
 // page shell. This matters in Arabic mode because product/category data is
@@ -237,7 +244,20 @@ function DocumentI18nBridge({ locale }: { locale: Locale }) {
     if (pendingRef.current !== null) return
     pendingRef.current = window.requestAnimationFrame(() => {
       pendingRef.current = null
-      applyTranslations()
+
+      // Translation itself mutates text nodes. Temporarily disconnect the
+      // observer so those internal writes do not schedule a second full DOM
+      // pass immediately after the first one. The current pass already scans
+      // the latest document state, so no user-visible behavior changes.
+      const observer = observerRef.current
+      observer?.disconnect()
+      try {
+        applyTranslations()
+      } finally {
+        if (observer && document.body) {
+          observer.observe(document.body, I18N_OBSERVER_OPTIONS)
+        }
+      }
     })
   }, [applyTranslations])
 
@@ -256,13 +276,7 @@ function DocumentI18nBridge({ locale }: { locale: Locale }) {
 
       if (needsApply) scheduleApply()
     })
-    observerRef.current.observe(document.body, {
-      subtree: true,
-      childList: true,
-      characterData: true,
-      attributes: true,
-      attributeFilter: [...TRANSLATABLE_ATTRS],
-    })
+    observerRef.current.observe(document.body, I18N_OBSERVER_OPTIONS)
 
     return () => {
       observerRef.current?.disconnect()

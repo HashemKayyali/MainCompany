@@ -13,6 +13,7 @@ import FramedImage from '../components/ui/FramedImage'
 import EventiesHero from '../components/layout/EventiesHero'
 import { useCategoriesData, useProductsData } from '../contexts/DataContext'
 import type { Category, Product } from '../data/products/types'
+import { useElementActivity } from '../hooks/useElementActivity'
 import { useMotionEnabled } from '../hooks/useMotionEnabled'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { useTheme } from '../contexts/ThemeContext'
@@ -245,6 +246,7 @@ function ProductsHero({
   categories: Category[]
 }) {
   const motionEnabled = useMotionEnabled()
+  const { ref: heroSectionRef, active: heroActive } = useElementActivity<HTMLElement>()
   const [heroSlotIndexes, setHeroSlotIndexes] = useState<number[]>([])
 
   useEffect(() => {
@@ -265,7 +267,7 @@ function ProductsHero({
   }, [products.length])
 
   useEffect(() => {
-    if (!motionEnabled || products.length <= 1) return
+    if (!motionEnabled || !heroActive || products.length <= 1) return
 
     const timer = window.setInterval(() => {
       setHeroSlotIndexes(previous => {
@@ -306,7 +308,7 @@ function ProductsHero({
     }, HERO_CARD_ROTATION_MS)
 
     return () => window.clearInterval(timer)
-  }, [motionEnabled, products.length])
+  }, [heroActive, motionEnabled, products.length])
 
   const categoryNameById = useMemo(
     () => new Map(categories.map(category => [category.id, category.name])),
@@ -331,6 +333,7 @@ function ProductsHero({
 
   return (
     <EventiesHero
+      sectionRef={heroSectionRef}
       eyebrow="Service Catalog - Jordan"
       title="Discover event services and rentals for every kind of occasion."
       description="Browse interactive games, screens, booths, production support, and event services from trusted providers across Jordan. Compare options and submit a rental or purchase quote request for review."
@@ -345,7 +348,7 @@ function ProductsHero({
         <ProductsHeroShowcase
           heroProducts={heroProducts}
           categoryNameById={categoryNameById}
-          motionEnabled={motionEnabled}
+          motionEnabled={motionEnabled && heroActive}
         />
       }
     />

@@ -10,7 +10,7 @@ const MAX_SCROLL_HISTORY = 50
  * navigation and scrolls to hash targets. Scrolling itself stays on the
  * browser's compositor thread — no wheel hijacking.
  */
-export function useSmoothScroll(_enabled = true) {
+export function useSmoothScroll(enabled = true) {
   const location = useLocation()
   const navigationType = useNavigationType()
   const { prefersReducedMotion } = usePerfMode()
@@ -42,7 +42,7 @@ export function useSmoothScroll(_enabled = true) {
         const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
         const targetTop = Math.max(0, Math.min(top, maxTop))
 
-        const immediate = navigationType === 'POP' || prefersReducedMotion
+        const immediate = !enabled || navigationType === 'POP' || prefersReducedMotion
         window.scrollTo({
           top: targetTop,
           left: 0,
@@ -72,5 +72,5 @@ export function useSmoothScroll(_enabled = true) {
       window.cancelAnimationFrame(frame)
       window.clearTimeout(retryTimer)
     }
-  }, [location.hash, location.key, navigationType, prefersReducedMotion])
+  }, [enabled, location.hash, location.key, navigationType, prefersReducedMotion])
 }

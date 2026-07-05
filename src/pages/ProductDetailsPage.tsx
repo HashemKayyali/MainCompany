@@ -24,13 +24,13 @@ import PageLoader from '../components/ui/PageLoader'
 import {
   useCategoriesData,
   useDataMeta,
-  usePartsData,
   useProductsData,
 } from '../contexts/DataContext'
 import { useI18n } from '../contexts/LanguageContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { social } from '../data/social'
 import { usePageMeta } from '../hooks/usePageMeta'
+import { useProductParts } from '../hooks/useProductParts'
 import { cn } from '../utils/cn'
 import NotFoundPage from './NotFoundPage'
 
@@ -136,9 +136,8 @@ function getPublicImageUrl(value?: string) {
 
 export default function ProductDetailsPage() {
   const { slug } = useParams<{ slug: string }>()
-  // Split hooks (batch 2): this page ensures products + categories + parts.
+  // Product data stays global; parts are fetched only for the active product.
   const { products, getProductBySlug } = useProductsData()
-  const { getPartsByProduct, partsLoading } = usePartsData()
   const { categories } = useCategoriesData()
   const { loading } = useDataMeta()
   const { isDark } = useTheme()
@@ -146,7 +145,7 @@ export default function ProductDetailsPage() {
   const [includedOpen, setIncludedOpen] = useState(false)
 
   const product = getProductBySlug(slug || '')
-  const parts = getPartsByProduct(slug || '')
+  const { parts } = useProductParts(slug || '')
   const showPrice = product ? product.showPrice !== false : true
   const productUrl = product
     ? `${SITE_URL}/products/${encodeURIComponent(product.slug)}`
@@ -208,12 +207,6 @@ export default function ProductDetailsPage() {
 
   if (loading && !product) return <PageLoader />
   if (!product) return <NotFoundPage />
-  // Parts are lazy-loaded (batch 2). Hold the page loader until they resolve
-  // so the "What's included" section never flashes in late or reads as
-  // "no parts" while the fetch is still in flight. Cached non-empty parts
-  // count as loaded, so warm visits still paint instantly.
-  if (partsLoading) return <PageLoader />
-
   const categoryName =
     categories.find(category => category.id === product.categoryId)?.name || 'Marketplace'
   const headingText = isDark ? 'text-white' : 'text-slate-950'

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, CalendarCheck, Sparkles, Store } from 'lucide-react'
 import { useCategoriesData } from '../../contexts/DataContext'
+import { useElementActivity } from '../../hooks/useElementActivity'
 import { useHeroEntranceMotion } from '../../hooks/useHeroEntranceMotion'
 import { useMotionEnabled } from '../../hooks/useMotionEnabled'
 import { preloadRoute } from '../../utils/route-preload'
@@ -26,11 +27,13 @@ export default function Hero({ image = HERO_IMAGE }: { image?: string }) {
   const { categories } = useCategoriesData()
   const { translateText } = useI18n()
   const motionEnabled = useMotionEnabled()
+  const { ref: activityRef, active: activityActive } = useElementActivity<HTMLElement>()
+  const effectiveMotion = motionEnabled && activityActive
   const heroEntrance = useHeroEntranceMotion()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => setMounted(true), [])
-  const shadersOn = mounted && motionEnabled
+  const shadersOn = mounted && effectiveMotion
 
   const chips = useMemo(
     () => categories.filter(category => category.slug.trim().length > 0).slice(0, 5),
@@ -38,12 +41,12 @@ export default function Hero({ image = HERO_IMAGE }: { image?: string }) {
   )
 
   const float = (delay: number) =>
-    motionEnabled
+    effectiveMotion
       ? { animate: { y: [0, -9, 0] }, transition: { duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay } }
       : {}
 
   return (
-    <section className="relative w-full overflow-hidden">
+    <section ref={activityRef} className="relative w-full overflow-hidden">
       {/* Content */}
       <div
         className="eventies-hero-shell site-container-wide relative z-20 grid grid-cols-1 items-center gap-10 pb-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12 lg:pb-20"
@@ -227,8 +230,8 @@ export default function Hero({ image = HERO_IMAGE }: { image?: string }) {
                     <motion.svg
                       className="absolute inset-0 h-full w-full"
                       viewBox="0 0 100 100"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+                      animate={effectiveMotion ? { rotate: 360 } : undefined}
+                      transition={effectiveMotion ? { duration: 18, repeat: Infinity, ease: 'linear' } : undefined}
                       style={{ transform: 'scale(1.55)' }}
                     >
                       <defs>

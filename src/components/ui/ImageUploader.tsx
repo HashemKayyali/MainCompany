@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useDialog } from '../../contexts/DialogContext'
-import { uploadImageVariants } from '../../services/storage.service'
+import { uploadImage, uploadImageVariants } from '../../services/storage.service'
 import { stripMediaTransform, type MediaFit } from '../../utils/media-frame'
 import { cn } from '../../utils/cn'
 import FramedImage from './FramedImage'
@@ -33,6 +33,10 @@ interface Props {
   compactPreview?: boolean
   ignoreTransformPreview?: boolean
   resetFrameOnOpen?: boolean
+  multiple?: boolean
+  maxFiles?: number
+  onChangeMany?: (urls: string[]) => void
+  adjustAfterUpload?: boolean
 }
 
 export default function ImageUploader({
@@ -56,12 +60,17 @@ export default function ImageUploader({
   compactPreview = false,
   ignoreTransformPreview = false,
   resetFrameOnOpen = false,
+  multiple = false,
+  maxFiles = 100,
+  onChangeMany,
+  adjustAfterUpload = true,
 }: Props) {
   const { isDark } = useTheme()
   const dialog = useDialog()
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<{ completed: number; total: number } | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const [editorOpen, setEditorOpen] = useState(false)
   const [editorMedia, setEditorMedia] = useState('')
@@ -111,20 +120,24 @@ export default function ImageUploader({
   }
 
   const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
+  const BULK_UPLOAD_CONCURRENCY = 4
 
-  const handleFile = async (file: File) => {
+  const validateFile = (file: File): string | null => {
     if (!file.type.startsWith('image/') || file.type === 'image/svg+xml') {
-      dialog.alert({
-        title: 'Unsupported file',
-        message: 'Please upload a JPG, PNG, WebP, or GIF image.',
-        variant: 'warning',
-      })
-      return
+      return `${file.name}: unsupported file type`
     }
     if (file.size > MAX_IMAGE_SIZE) {
+      return `${file.name}: larger than 10MB`
+    }
+    return null
+  }
+
+  const handleFile = async (file: File) => {
+    const validationError = validateFile(file)
+    if (validationError) {
       dialog.alert({
-        title: 'Image too large',
-        message: `Image must be smaller than 10MB (yours is ${(file.size / 1024 / 1024).toFixed(1)}MB).`,
+        title: 'Unsupported image',
+        message: validationError,
         variant: 'warning',
       })
       return
@@ -135,10 +148,11 @@ export default function ImageUploader({
       const { heroUrl } = await uploadImageVariants(file, folder)
 
       if (isCollectionUploader) {
-        openFrameEditor(heroUrl, true)
+        if (adjustAfterUpload) openFrameEditor(heroUrl, true)
+        else onChange(heroUrl)
       } else {
         onChange(heroUrl)
-        openFrameEditor(heroUrl)
+        if (adjustAfterUpload) openFrameEditor(heroUrl)
       }
     } catch (err) {
       console.error('Upload failed:', err)
@@ -152,24 +166,108 @@ export default function ImageUploader({
     }
   }
 
+  const handleFiles = async (files: File[]) => {
+    if (!files.length) return
+
+    if (!multiple) {
+      await handleFile(files[0])
+      return
+    }
+
+    if (files.length > maxFiles) {
+      dialog.alert({
+        title: 'Too many images',
+        message: `You can upload up to ${maxFiles} images at once. You selected ${files.length}.`,
+        variant: 'warning',
+      })
+      return
+    }
+
+    const invalidFiles = files
+      .map(file => validateFile(file))
+      .filter((message): message is string => Boolean(message))
+
+    if (invalidFiles.length) {
+      const preview = invalidFiles.slice(0, 5).join('\n')
+      const remaining = invalidFiles.length > 5 ? `\n+ ${invalidFiles.length - 5} more invalid file(s)` : ''
+      dialog.alert({
+        title: 'Some images cannot be uploaded',
+        message: `${preview}${remaining}`,
+        variant: 'warning',
+      })
+      return
+    }
+
+    setUploading(true)
+    setUploadProgress({ completed: 0, total: files.length })
+
+    const uploaded = new Array<string | null>(files.length).fill(null)
+    const failed: string[] = []
+    let cursor = 0
+    let completed = 0
+
+    const worker = async () => {
+      while (true) {
+        const index = cursor
+        cursor += 1
+        if (index >= files.length) return
+
+        const file = files[index]
+        try {
+          // Gallery bulk uploads only need the display asset. Avoid generating
+          // and uploading a second unused thumbnail for every gallery photo.
+          uploaded[index] = await uploadImage(file, folder)
+        } catch (error) {
+          console.error(`Upload failed for ${file.name}:`, error)
+          failed.push(file.name)
+        } finally {
+          completed += 1
+          setUploadProgress({ completed, total: files.length })
+        }
+      }
+    }
+
+    try {
+      const workerCount = Math.min(BULK_UPLOAD_CONCURRENCY, files.length)
+      await Promise.all(Array.from({ length: workerCount }, () => worker()))
+
+      const urls = uploaded.filter((url): url is string => Boolean(url))
+      if (urls.length) {
+        if (onChangeMany) onChangeMany(urls)
+        else urls.forEach(url => onChange(url))
+      }
+
+      if (failed.length) {
+        dialog.alert({
+          title: 'Upload partially completed',
+          message: `${urls.length} image(s) uploaded successfully. ${failed.length} failed and can be retried.`,
+          variant: 'warning',
+        })
+      }
+    } finally {
+      setUploading(false)
+      setUploadProgress(null)
+    }
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) void handleFile(file)
+    const files = Array.from(e.target.files || [])
+    if (files.length) void handleFiles(files)
     e.target.value = ''
   }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
-    const file = e.dataTransfer.files?.[0]
-    if (file) void handleFile(file)
+    const files = Array.from(e.dataTransfer.files || [])
+    if (files.length) void handleFiles(files)
   }
 
   if (compact) {
     return (
       <>
         <div className="relative group">
-          <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleChange} className="hidden" />
+          <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple={multiple} onChange={handleChange} className="hidden" />
 
           {value ? (
             <div className={`relative overflow-hidden rounded-xl ${aspectClass}`}>
@@ -228,8 +326,8 @@ export default function ImageUploader({
                   : 'border-violet-200 bg-violet-50/50 hover:border-violet-400'
               }`}
             >
-              <span className="text-lg">{uploading ? '...' : 'Add'}</span>
-              <span className={`text-[9px] font-medium ${sub}`}>{uploading ? 'Uploading...' : 'Add Image'}</span>
+              <span className="text-lg">{uploading ? `${uploadProgress?.completed ?? 0}/${uploadProgress?.total ?? 1}` : 'Add'}</span>
+              <span className={`text-[9px] font-medium ${sub}`}>{uploading ? 'Uploading...' : multiple ? 'Add Images' : 'Add Image'}</span>
             </button>
           )}
         </div>

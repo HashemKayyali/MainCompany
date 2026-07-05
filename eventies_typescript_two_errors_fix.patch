@@ -1,0 +1,26 @@
+diff --git a/src/components/admin/AdminDetailModal.tsx b/src/components/admin/AdminDetailModal.tsx
+index cc898be..4f05c0e 100644
+--- a/src/components/admin/AdminDetailModal.tsx
++++ b/src/components/admin/AdminDetailModal.tsx
+@@ -121,7 +121,7 @@ export default function AdminDetailModal({
+         <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:items-center sm:justify-end">
+           <AdminActionButton
+             onClick={onClose}
+-            className={cn('w-full !min-h-[44px] sm:w-auto sm:!min-h-[38px]', actions && 'hidden sm:inline-flex')}
++            className={cn('w-full !min-h-[44px] sm:w-auto sm:!min-h-[38px]', actions ? 'hidden sm:inline-flex' : undefined)}
+           >
+             {translateText('Cancel')}
+           </AdminActionButton>
+diff --git a/src/components/ui/bento-gallery.tsx b/src/components/ui/bento-gallery.tsx
+index 5048d54..b4c9109 100644
+--- a/src/components/ui/bento-gallery.tsx
++++ b/src/components/ui/bento-gallery.tsx
+@@ -41,7 +41,7 @@ export default function BentoGallery({ imageItems, eager = false }: BentoGallery
+   const [dragConstraint, setDragConstraint] = useState(0)
+   const x = useMotionValue(0)
+   const reduceMotion = useReducedMotion()
+-  const containerRef = useRef<HTMLDivElement>(null)
++  const containerRef = useRef<HTMLDivElement | null>(null)
+   const gridRef = useRef<HTMLDivElement>(null)
+   const autoDirectionRef = useRef(-1)
+   const isHoveringRef = useRef(false)

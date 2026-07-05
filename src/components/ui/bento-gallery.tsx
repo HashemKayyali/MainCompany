@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, useAnimationFrame, useMotionValue, useReducedMotion } from 'framer-motion'
+import { motion, useMotionValue, useReducedMotion } from 'framer-motion'
+import { useElementActivity } from '../../hooks/useElementActivity'
 import { cn } from '../../utils/cn'
 import FramedImage from './FramedImage'
 
@@ -40,33 +41,44 @@ export default function BentoGallery({ imageItems, eager = false }: BentoGallery
   const [dragConstraint, setDragConstraint] = useState(0)
   const x = useMotionValue(0)
   const reduceMotion = useReducedMotion()
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
   const gridRef = useRef<HTMLDivElement>(null)
   const autoDirectionRef = useRef(-1)
   const isHoveringRef = useRef(false)
   const isDraggingRef = useRef(false)
+  const { ref: activityRef, active: activityActive } = useElementActivity<HTMLDivElement>()
 
-  useAnimationFrame((_, delta) => {
-    if (reduceMotion || isHoveringRef.current || isDraggingRef.current) return
-    if (dragConstraint >= 0) return
+  useEffect(() => {
+    if (reduceMotion || !activityActive || dragConstraint >= 0) return undefined
 
-    const step = (AUTO_SCROLL_SPEED * delta) / 1000
-    const nextX = x.get() + autoDirectionRef.current * step
+    let frameId = 0
+    let previousTime = performance.now()
 
-    if (nextX <= dragConstraint) {
-      autoDirectionRef.current = 1
-      x.set(dragConstraint)
-      return
+    const tick = (time: number) => {
+      const delta = Math.min(time - previousTime, 64)
+      previousTime = time
+
+      if (!isHoveringRef.current && !isDraggingRef.current) {
+        const step = (AUTO_SCROLL_SPEED * delta) / 1000
+        const nextX = x.get() + autoDirectionRef.current * step
+
+        if (nextX <= dragConstraint) {
+          autoDirectionRef.current = 1
+          x.set(dragConstraint)
+        } else if (nextX >= 0) {
+          autoDirectionRef.current = -1
+          x.set(0)
+        } else {
+          x.set(nextX)
+        }
+      }
+
+      frameId = window.requestAnimationFrame(tick)
     }
 
-    if (nextX >= 0) {
-      autoDirectionRef.current = -1
-      x.set(0)
-      return
-    }
-
-    x.set(nextX)
-  })
+    frameId = window.requestAnimationFrame(tick)
+    return () => window.cancelAnimationFrame(frameId)
+  }, [activityActive, dragConstraint, reduceMotion, x])
 
   useEffect(() => {
     const calculateConstraints = () => {
@@ -91,7 +103,10 @@ export default function BentoGallery({ imageItems, eager = false }: BentoGallery
 
   return (
     <div
-      ref={containerRef}
+      ref={node => {
+        containerRef.current = node
+        activityRef(node)
+      }}
       className="gallery-strip relative w-full cursor-grab overflow-hidden active:cursor-grabbing"
       dir="ltr"
       onPointerEnter={() => {

@@ -13,6 +13,12 @@ function ensureSupabase() {
   }
 }
 
+function toDatabaseInteger(value: number | undefined, fallback = 0) {
+  if (value === undefined) return fallback
+  const numeric = Number(value)
+  return Number.isFinite(numeric) ? Math.round(numeric) : fallback
+}
+
 function dbToApp(row: CustomBuildRow): CustomBuild {
   const images = row.images ?? []
   const cover = row.image_url || images[0] || ''
@@ -42,7 +48,7 @@ function appToDb(build: CustomBuild): CustomBuildInsert {
     image_url: cover,
     images: images.length > 0 ? images : cover ? [cover] : [],
     category: build.category || '',
-    sort_order: Number(build.sortOrder ?? 0),
+    sort_order: toDatabaseInteger(build.sortOrder),
     is_featured: build.featured ?? false,
     is_active: build.active !== false,
   }
@@ -62,7 +68,7 @@ function categoryDbToApp(row: CustomBuildCategoryRow): CustomBuildCategory {
 function categoryAppToDb(category: CustomBuildCategory): CustomBuildCategoryInsert {
   return {
     name: category.name.trim(),
-    sort_order: Number(category.sortOrder ?? 0),
+    sort_order: toDatabaseInteger(category.sortOrder),
     is_active: category.active !== false,
   }
 }
@@ -138,7 +144,7 @@ export async function update(id: string, build: Partial<CustomBuild>): Promise<C
     dbData.image_url = build.image || images[0] || ''
   }
   if (build.category !== undefined) dbData.category = build.category || ''
-  if (build.sortOrder !== undefined) dbData.sort_order = Number(build.sortOrder)
+  if (build.sortOrder !== undefined) dbData.sort_order = toDatabaseInteger(build.sortOrder)
   if (build.featured !== undefined) dbData.is_featured = build.featured
   if (build.active !== undefined) dbData.is_active = build.active
 
@@ -160,7 +166,7 @@ export async function updateCategory(id: string, category: Partial<CustomBuildCa
   const dbData: CustomBuildCategoryUpdate = {}
 
   if (category.name !== undefined) dbData.name = category.name.trim()
-  if (category.sortOrder !== undefined) dbData.sort_order = Number(category.sortOrder)
+  if (category.sortOrder !== undefined) dbData.sort_order = toDatabaseInteger(category.sortOrder)
   if (category.active !== undefined) dbData.is_active = category.active
 
   const { data, error } = await supabase

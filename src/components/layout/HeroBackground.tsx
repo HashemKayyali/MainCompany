@@ -17,6 +17,9 @@ let heroBackgroundInstanceSeed = 0
 export default function HeroBackground({ active = true, className, fixed = false }: HeroBackgroundProps) {
   const motionEnabled = useMotionEnabled()
   const [mounted, setMounted] = useState(false)
+  const [documentVisible, setDocumentVisible] = useState(
+    () => typeof document === 'undefined' || document.visibilityState !== 'hidden'
+  )
   const instanceId = useRef<number | null>(null)
 
   if (instanceId.current === null) {
@@ -25,7 +28,22 @@ export default function HeroBackground({ active = true, className, fixed = false
   }
 
   useEffect(() => setMounted(true), [])
-  const shadersOn = mounted && motionEnabled
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined
+
+    const onVisibilityChange = () => {
+      setDocumentVisible(document.visibilityState !== 'hidden')
+    }
+
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [])
+
+  // Keep this component mounted across route changes so the hero remains
+  // visually continuous. Only suspend GPU-heavy shaders when the surface is
+  // actually hidden or the browser tab is not visible.
+  const shadersOn = active && mounted && motionEnabled && documentVisible
 
   return (
     <div
@@ -61,6 +79,7 @@ export default function HeroBackground({ active = true, className, fixed = false
             distortion={0.8}
             swirl={0.6}
             speed={0.3}
+            maxPixelCount={2_500_000}
           />
           <MeshGradient
             className="absolute inset-0 z-[2] h-full w-full opacity-50"
@@ -68,6 +87,7 @@ export default function HeroBackground({ active = true, className, fixed = false
             distortion={1}
             swirl={0.2}
             speed={0.2}
+            maxPixelCount={2_500_000}
           />
         </Suspense>
       )}

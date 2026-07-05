@@ -121,7 +121,7 @@ export default function AdminDetailModal({
         <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:items-center sm:justify-end">
           <AdminActionButton
             onClick={onClose}
-            className={cn('w-full !min-h-[44px] sm:w-auto sm:!min-h-[38px]', actions && 'hidden sm:inline-flex')}
+            className={cn('w-full !min-h-[44px] sm:w-auto sm:!min-h-[38px]', actions ? 'hidden sm:inline-flex' : undefined)}
           >
             {translateText('Cancel')}
           </AdminActionButton>

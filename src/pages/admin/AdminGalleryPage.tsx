@@ -133,7 +133,7 @@ function PhotoTile({
       </div>
       <div className="mt-2 grid grid-cols-2 gap-1.5">
         <button type="button" onClick={onFrame} className="min-h-[44px] rounded-[8px] bg-[var(--admin-accent-soft)] px-2 text-[11px] font-bold text-[var(--admin-accent)] md:min-h-[34px]">
-          Frame
+          Adjust
         </button>
         <button type="button" onClick={onRemove} className="min-h-[44px] rounded-[8px] bg-[color-mix(in_srgb,var(--admin-danger)_11%,transparent)] px-2 text-[11px] font-bold text-[var(--admin-danger)] md:min-h-[34px]">
           Remove
@@ -265,6 +265,15 @@ export default function AdminGalleryPage() {
 
   const addImage = (url: string) => {
     setEditing(current => (current ? { ...current, images: [...current.images, url], cover: current.images[0] || current.cover || url } : null))
+  }
+
+  const addImages = (urls: string[]) => {
+    if (!urls.length) return
+    setEditing(current => {
+      if (!current) return current
+      const images = [...current.images, ...urls]
+      return { ...current, images, cover: images[0] || current.cover || '' }
+    })
   }
 
   const removeImage = (index: number) => {
@@ -579,7 +588,7 @@ export default function AdminGalleryPage() {
                 </div>
               </FieldSection>
 
-              <FieldSection title="Photos" description="The first photo becomes the cover. Controls stay visible for tap users.">
+              <FieldSection title="Photos" description="Select up to 100 photos at once. The first photo becomes the cover; use Adjust only when you want to refine a frame.">
                 <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-4">
                   {editing.images.map((url, index) => (
                     <PhotoTile
@@ -598,7 +607,11 @@ export default function AdminGalleryPage() {
 
                   <ImageUploader
                     compact
+                    multiple
+                    maxFiles={100}
+                    adjustAfterUpload={false}
                     onChange={addImage}
+                    onChangeMany={addImages}
                     folder="gallery"
                     frameAspect={1}
                     defaultFit="cover"
