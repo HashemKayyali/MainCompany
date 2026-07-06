@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Activity, Clock, Eye, RefreshCw, Search } from 'lucide-react'
-import { getAllLogs, type AdminLog } from '../../services/logs.service'
+import { Activity, Clock, Eye, ImageOff, RefreshCw, Search } from 'lucide-react'
+import { getAllLogs, type AdminLog, type StructuredLogPayload } from '../../services/logs.service'
+import type { Change } from '../../utils/entity-diff'
+import { useI18n } from '../../contexts/LanguageContext'
 import AdminDetailModal from '../../components/admin/AdminDetailModal'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminStatCard from '../../components/admin/AdminStatCard'
@@ -48,6 +50,258 @@ function formatDateTime(value: string) {
 function formatEntity(type: string) {
   if (!type) return 'Unknown'
   return type.charAt(0).toUpperCase() + type.slice(1)
+}
+
+const IMAGE_KINDS: Change['kind'][] = ['image-added', 'image-removed', 'image-replaced']
+
+function isImageUrl(value: unknown): value is string {
+  if (typeof value !== 'string') return false
+  return /^https?:\/\//i.test(value) || value.startsWith('/') || value.startsWith('data:image')
+}
+
+function fileNameOf(url: string): string {
+  if (typeof url !== 'string') return String(url)
+  try {
+    const clean = url.split('?')[0].split('#')[0]
+    const parts = clean.split('/')
+    const last = parts[parts.length - 1] || clean
+    return last.length > 60 ? `…${last.slice(-59)}` : last
+  } catch {
+    return url
+  }
+}
+
+// Small reusable preview: renders an <img> and swaps to a text fallback if the
+// image fails to load (typical case: source was deleted from Storage).
+function SafeImagePreview({
+  url,
+  fallbackText,
+}: {
+  url: string
+  fallbackText: string
+}) {
+  const [failed, setFailed] = useState(false)
+  if (failed || !isImageUrl(url)) {
+    return (
+      <div className="flex h-16 w-16 flex-col items-center justify-center rounded-md border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-2)] p-1 text-center">
+        <ImageOff className="h-4 w-4 text-[var(--admin-text-muted)]" strokeWidth={2} aria-hidden="true" />
+        <span className="mt-0.5 text-[9px] font-bold leading-tight text-[var(--admin-text-muted)]" dir="auto">
+          {fallbackText}
+        </span>
+      </div>
+    )
+  }
+  return (
+    <img
+      src={url}
+      alt=""
+      loading="lazy"
+      onError={() => setFailed(true)}
+      className="h-16 w-16 rounded-md border border-white object-cover shadow-sm transition group-hover:scale-105"
+    />
+  )
+}
+
+function renderScalar(value: unknown): React.ReactNode {
+  if (value === null || value === undefined || value === '') {
+    return <span className="text-[var(--admin-text-muted)] italic">empty</span>
+  }
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No'
+  if (Array.isArray(value)) {
+    if (value.length === 0) return <span className="text-[var(--admin-text-muted)] italic">empty</span>
+    return (
+      <div className="flex flex-wrap gap-1">
+        {value.map((item, i) => (
+          <span key={i} className="admin-chip !py-0.5 !text-[10px]">
+            {typeof item === 'object' ? JSON.stringify(item) : String(item)}
+          </span>
+        ))}
+      </div>
+    )
+  }
+  if (typeof value === 'object') {
+    return <pre className="whitespace-pre-wrap break-all text-[11px]">{JSON.stringify(value, null, 2)}</pre>
+  }
+  return String(value)
+}
+
+// Renders added images: thumbnail via SafeImagePreview + optional URL text.
+function AddedImageStrip({
+  label,
+  urls,
+  fallbackText,
+}: {
+  label: string
+  urls: string[]
+  fallbackText: string
+}) {
+  if (!urls.length) return null
+  return (
+    <div className="rounded-md border border-emerald-300 bg-emerald-50 p-2">
+      <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800">{label}</div>
+      <div className="flex flex-wrap gap-2">
+        {urls.map((url, i) => (
+          <a
+            key={`${url}-${i}`}
+            href={isImageUrl(url) ? url : undefined}
+            target="_blank"
+            rel="noreferrer"
+            className="group flex flex-col items-start gap-1"
+            title={url}
+          >
+            <SafeImagePreview url={url} fallbackText={fallbackText} />
+            <span className="max-w-[160px] truncate text-[10px] text-[var(--admin-text-muted)]">{url}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Renders removed images as text only — never renders the deleted URL as <img>.
+function RemovedImageNotice({
+  label,
+  urls,
+  message,
+}: {
+  label: string
+  urls: string[]
+  message: string
+}) {
+  if (!urls.length) return null
+  return (
+    <div className="rounded-md border border-rose-300 bg-rose-50 p-2">
+      <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-rose-800">{label}</div>
+      <div className="space-y-1.5">
+        {urls.map((url, i) => (
+          <div key={`${url}-${i}`} className="flex items-start gap-2">
+            <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-md border border-dashed border-rose-300 bg-rose-100/60 p-1 text-center">
+              <ImageOff className="h-4 w-4 text-rose-700" strokeWidth={2} aria-hidden="true" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[12px] font-bold text-rose-800" dir="auto">
+                {message}
+              </div>
+              <div className="mt-0.5 truncate text-[10px] text-[var(--admin-text-muted)]" title={url}>
+                {fileNameOf(url)}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ChangeRow({ change }: { change: Change }) {
+  const { locale } = useI18n()
+  const isAr = locale === 'ar'
+  const L = {
+    added: isAr ? 'مضاف' : 'Added',
+    removed: isAr ? 'محذوف' : 'Removed',
+    imageRemoved: isAr ? 'تم حذف الصورة' : 'Image removed',
+    prevImageRemoved: isAr ? 'تم حذف الصورة السابقة من التخزين' : 'Previous image removed from storage',
+    imageDeletedStorage: isAr ? 'تم حذف الصورة من التخزين' : 'Image deleted from storage',
+    before: isAr ? 'قبل' : 'Before',
+    after: isAr ? 'بعد' : 'After',
+  }
+  const kindClass = (() => {
+    switch (change.kind) {
+      case 'set':
+      case 'image-added':
+      case 'list-added':
+        return 'admin-chip admin-chip--success'
+      case 'clear':
+      case 'image-removed':
+      case 'list-removed':
+        return 'admin-chip admin-chip--danger'
+      case 'update':
+      case 'image-replaced':
+      case 'list-reordered':
+      case 'object-updated':
+      default:
+        return 'admin-chip admin-chip--warning'
+    }
+  })()
+
+  const kindLabel = change.kind.replace(/-/g, ' ')
+  const isImage = IMAGE_KINDS.includes(change.kind)
+  const isImageArray = change.field === 'gallery' || change.field === 'images'
+  const isListChange = change.kind === 'list-added' || change.kind === 'list-removed'
+
+  return (
+    <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className={kindClass}>{kindLabel}</span>
+        <span className="text-[13px] font-bold text-[var(--admin-text)]">{change.label}</span>
+      </div>
+      <p className="mt-1.5 text-[12.5px] leading-5 text-[var(--admin-text-muted)]" dir="auto">
+        {change.summary}
+      </p>
+
+      {isImage || isImageArray ? (
+        <div className="mt-3 space-y-2">
+          <ImageStrip label="Added" urls={change.added || []} tone="add" />
+          <ImageStrip label="Removed" urls={change.removed || []} tone="remove" />
+        </div>
+      ) : isListChange ? (
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {change.added && change.added.length > 0 && (
+            <div className="rounded-md border border-emerald-300 bg-emerald-50 p-2">
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-800">Added</div>
+              <div>{renderScalar(change.added)}</div>
+            </div>
+          )}
+          {change.removed && change.removed.length > 0 && (
+            <div className="rounded-md border border-rose-300 bg-rose-50 p-2">
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-rose-800">Removed</div>
+              <div>{renderScalar(change.removed)}</div>
+            </div>
+          )}
+        </div>
+      ) : change.kind === 'update' || change.kind === 'set' || change.kind === 'clear' ? (
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <div className="rounded-md border border-rose-200 bg-rose-50/60 p-2">
+            <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-rose-800">Before</div>
+            <div className="text-[12px] leading-5 text-[var(--admin-text)] break-words" dir="auto">
+              {renderScalar(change.before)}
+            </div>
+          </div>
+          <div className="rounded-md border border-emerald-200 bg-emerald-50/60 p-2">
+            <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-800">After</div>
+            <div className="text-[12px] leading-5 text-[var(--admin-text)] break-words" dir="auto">
+              {renderScalar(change.after)}
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function LogChangeList({ payload, action }: { payload: StructuredLogPayload; action: AdminLog['action'] }) {
+  const changes = payload.changes || []
+  if (!changes.length) {
+    return (
+      <p className="text-[13px] leading-6 text-[var(--admin-text-muted)]">
+        {action === 'delete'
+          ? 'Entity deleted (no captured fields).'
+          : action === 'create'
+          ? 'Entity created (no captured fields).'
+          : 'No field-level changes were detected.'}
+      </p>
+    )
+  }
+  // Filter out the parent 'object-updated' rows when the nested children are also present
+  // to avoid double-rendering.
+  const filtered = changes.filter(c => c.kind !== 'object-updated')
+  return (
+    <div className="space-y-2.5">
+      {filtered.map((change, i) => (
+        <ChangeRow key={`${change.field}-${i}`} change={change} />
+      ))}
+    </div>
+  )
 }
 
 function actionChipClass(action: AdminLog['action']) {
@@ -334,9 +588,14 @@ export default function AdminLogsPage() {
                           </div>
                         </td>
                         <td className="px-3 py-2.5">
-                          <p className="line-clamp-2 max-w-[280px] text-[12px] font-semibold leading-5 text-[var(--admin-text-muted)]">
-                            {log.details || 'No additional details.'}
+                          <p className="line-clamp-2 max-w-[280px] text-[12px] font-semibold leading-5 text-[var(--admin-text-muted)]" dir="auto">
+                            {log.structured?.summary || log.details || 'No additional details.'}
                           </p>
+                          {log.structured?.changes && log.structured.changes.length > 0 && (
+                            <div className="mt-1 text-[10px] font-bold uppercase tracking-wider text-[var(--admin-accent)]">
+                              {log.structured.changes.filter(c => c.kind !== 'object-updated').length} change{log.structured.changes.length === 1 ? '' : 's'}
+                            </div>
+                          )}
                         </td>
                         <td className="px-3 py-2.5 text-[12px] font-semibold text-[var(--admin-text-muted)]">
                           <div className="flex items-center gap-1.5">
@@ -377,8 +636,8 @@ export default function AdminLogsPage() {
                     </div>
                     {renderActions(log)}
                   </div>
-                  <p className="mt-3 line-clamp-2 text-[12px] leading-5 text-[var(--admin-text-muted)]">
-                    {log.details || 'No additional details.'}
+                  <p className="mt-3 line-clamp-2 text-[12px] leading-5 text-[var(--admin-text-muted)]" dir="auto">
+                    {log.structured?.summary || log.details || 'No additional details.'}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span className="admin-chip">{timeAgo(log.created_at)}</span>
@@ -434,8 +693,11 @@ export default function AdminLogsPage() {
                   ],
                 },
                 {
-                  title: 'Details',
-                  content: (
+                  title: 'What changed',
+                  wide: true,
+                  content: details.structured ? (
+                    <LogChangeList payload={details.structured} action={details.action} />
+                  ) : (
                     <p className="text-[13px] leading-6 text-[var(--admin-text-muted)]">
                       {details.details || 'No additional log details were stored for this entry.'}
                     </p>

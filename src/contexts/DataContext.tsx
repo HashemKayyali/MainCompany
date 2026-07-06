@@ -27,6 +27,7 @@ import * as logsApi from '../services/logs.service'
 import * as partsApi from '../services/parts.service'
 import * as productsApi from '../services/products.service'
 import { sortProductsForDisplay } from '../utils/product-order'
+import { diffEntities, summarizeChanges, summarizeCreate, summarizeDelete } from '../utils/entity-diff'
 
 interface DataCtx {
   products: Product[]
@@ -342,9 +343,40 @@ export function DataProvider({ children }: { children: ReactNode }) {
       entityType: string,
       entityId: string,
       entityName: string,
-      details?: string
+      snapshot?: {
+        before?: Record<string, unknown> | null
+        after?: Record<string, unknown> | null
+      }
     ) => {
       if (!currentUser) return
+
+      let details:
+        | string
+        | {
+            summary: string
+            changes?: ReturnType<typeof diffEntities>
+            before?: Record<string, unknown> | null
+            after?: Record<string, unknown> | null
+          }
+        = ''
+
+      if (snapshot) {
+        if (action === 'create') {
+          const { changes, summary } = summarizeCreate(snapshot.after)
+          details = { summary, changes, before: null, after: snapshot.after }
+        } else if (action === 'delete') {
+          const { changes, summary } = summarizeDelete(snapshot.before)
+          details = { summary, changes, before: snapshot.before, after: null }
+        } else {
+          const changes = diffEntities(snapshot.before, snapshot.after)
+          details = {
+            summary: summarizeChanges(changes),
+            changes,
+            before: snapshot.before,
+            after: snapshot.after,
+          }
+        }
+      }
 
       void logsApi
         .addLog({
@@ -355,7 +387,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           entity_type: entityType,
           entity_id: entityId,
           entity_name: entityName,
-          details: details || '',
+          details,
         })
         .catch(logError => {
           console.warn('[DataContext] Failed to write admin log:', logError)
@@ -547,7 +579,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       try {
         const created = await productsApi.create(product)
         safeSet(() => setProducts(prev => sortProductsForDisplay([...prev, created])))
-        writeLog('create', 'product', created.slug, created.name || created.slug)
+        writeLog('create', 'product', created.slug, created.name || created.slug, {
+          after: created as unknown as Record<string, unknown>,
+        })
         toast(`${created.name} added`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to add product'), 'error')
@@ -560,20 +594,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const updateProduct = useCallback(
     async (slug: string, updates: Partial<Product>) => {
       try {
+        const previous = products.find(product => product.slug === slug)
         const updated = await productsApi.update(slug, updates)
         safeSet(() =>
           setProducts(prev =>
             sortProductsForDisplay(prev.map(product => (product.slug === slug ? updated : product)))
           )
         )
-        writeLog('update', 'product', slug, updated.name || slug)
+        writeLog('update', 'product', slug, updated.name || slug, {
+          before: previous as unknown as Record<string, unknown>,
+          after: updated as unknown as Record<string, unknown>,
+        })
         toast(`${updated.name} updated`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to update product'), 'error')
         throw actionError
       }
     },
-    [safeSet, toast, writeLog]
+    [products, safeSet, toast, writeLog]
   )
 
   const deleteProduct = useCallback(
@@ -585,7 +623,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
           setProducts(prev => prev.filter(product => product.slug !== slug))
           setParts(prev => prev.filter(part => part.productSlug !== slug))
         })
-        writeLog('delete', 'product', slug, existing?.name || slug)
+        writeLog('delete', 'product', slug, existing?.name || slug, {
+          before: existing as unknown as Record<string, unknown>,
+        })
         toast(`${existing?.name || slug} deleted`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to delete product'), 'error')
@@ -600,7 +640,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       try {
         const created = await partsApi.create(part)
         safeSet(() => setParts(prev => [...prev, created]))
-        writeLog('create', 'part', created.id, created.name || created.id)
+        writeLog('create', 'part', created.id, created.name || created.id, {
+          after: created as unknown as Record<string, unknown>,
+        })
         toast(`${created.name} added`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to add part'), 'error')
@@ -613,16 +655,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const updatePart = useCallback(
     async (id: string, updates: Partial<ProductPart>) => {
       try {
+        const previous = parts.find(part => part.id === id)
         const updated = await partsApi.update(id, updates)
         safeSet(() => setParts(prev => prev.map(part => (part.id === id ? updated : part))))
-        writeLog('update', 'part', id, updated.name || id)
+        writeLog('update', 'part', id, updated.name || id, {
+          before: previous as unknown as Record<string, unknown>,
+          after: updated as unknown as Record<string, unknown>,
+        })
         toast(`${updated.name} updated`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to update part'), 'error')
         throw actionError
       }
     },
-    [safeSet, toast, writeLog]
+    [parts, safeSet, toast, writeLog]
   )
 
   const deletePart = useCallback(
@@ -631,7 +677,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const existing = parts.find(part => part.id === id)
         await partsApi.remove(id)
         safeSet(() => setParts(prev => prev.filter(part => part.id !== id)))
-        writeLog('delete', 'part', id, existing?.name || id)
+        writeLog('delete', 'part', id, existing?.name || id, {
+          before: existing as unknown as Record<string, unknown>,
+        })
         toast(`${existing?.name || id} deleted`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to delete part'), 'error')
@@ -646,7 +694,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       try {
         const created = await customersApi.create(customer)
         safeSet(() => setCustomers(prev => [...prev, created]))
-        writeLog('create', 'customer', created.slug, created.name || created.slug)
+        writeLog('create', 'customer', created.slug, created.name || created.slug, {
+          after: created as unknown as Record<string, unknown>,
+        })
         toast(`${created.name} added`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to add customer'), 'error')
@@ -659,20 +709,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const updateCustomer = useCallback(
     async (slug: string, updates: Partial<Customer>) => {
       try {
+        const previous = customers.find(customer => customer.slug === slug)
         const updated = await customersApi.update(slug, updates)
         safeSet(() =>
           setCustomers(prev =>
             prev.map(customer => (customer.slug === slug ? updated : customer))
           )
         )
-        writeLog('update', 'customer', slug, updated.name || slug)
+        writeLog('update', 'customer', slug, updated.name || slug, {
+          before: previous as unknown as Record<string, unknown>,
+          after: updated as unknown as Record<string, unknown>,
+        })
         toast(`${updated.name} updated`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to update customer'), 'error')
         throw actionError
       }
     },
-    [safeSet, toast, writeLog]
+    [customers, safeSet, toast, writeLog]
   )
 
   const deleteCustomer = useCallback(
@@ -681,7 +735,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const existing = customers.find(customer => customer.slug === slug)
         await customersApi.remove(slug)
         safeSet(() => setCustomers(prev => prev.filter(customer => customer.slug !== slug)))
-        writeLog('delete', 'customer', slug, existing?.name || slug)
+        writeLog('delete', 'customer', slug, existing?.name || slug, {
+          before: existing as unknown as Record<string, unknown>,
+        })
         toast(`${existing?.name || slug} deleted`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to delete customer'), 'error')
@@ -696,7 +752,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       try {
         const created = await categoriesApi.create(category)
         safeSet(() => setCategories(prev => [...prev, created]))
-        writeLog('create', 'category', created.id, created.name || created.id)
+        writeLog('create', 'category', created.id, created.name || created.id, {
+          after: created as unknown as Record<string, unknown>,
+        })
         toast(`${created.name} added`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to add category'), 'error')
@@ -709,20 +767,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const updateCategory = useCallback(
     async (id: string, updates: Partial<Category>) => {
       try {
+        const previous = categories.find(category => category.id === id)
         const updated = await categoriesApi.update(id, updates)
         safeSet(() =>
           setCategories(prev =>
             prev.map(category => (category.id === id ? updated : category))
           )
         )
-        writeLog('update', 'category', id, updated.name || id)
+        writeLog('update', 'category', id, updated.name || id, {
+          before: previous as unknown as Record<string, unknown>,
+          after: updated as unknown as Record<string, unknown>,
+        })
         toast(`${updated.name} updated`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to update category'), 'error')
         throw actionError
       }
     },
-    [safeSet, toast, writeLog]
+    [categories, safeSet, toast, writeLog]
   )
 
   const deleteCategory = useCallback(
@@ -731,7 +793,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const existing = categories.find(category => category.id === id)
         await categoriesApi.remove(id)
         safeSet(() => setCategories(prev => prev.filter(category => category.id !== id)))
-        writeLog('delete', 'category', id, existing?.name || id)
+        writeLog('delete', 'category', id, existing?.name || id, {
+          before: existing as unknown as Record<string, unknown>,
+        })
         toast(`${existing?.name || id} deleted`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to delete category'), 'error')
@@ -746,7 +810,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       try {
         const created = await galleryApi.create(album)
         safeSet(() => setGalleryAlbums(prev => [...prev, created]))
-        writeLog('create', 'gallery', created.slug, created.title || created.slug)
+        writeLog('create', 'gallery', created.slug, created.title || created.slug, {
+          after: created as unknown as Record<string, unknown>,
+        })
         toast(`${created.title} added`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to add album'), 'error')
@@ -759,20 +825,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const updateGalleryAlbum = useCallback(
     async (slug: string, updates: Partial<GalleryAlbum>) => {
       try {
+        const previous = galleryAlbums.find(album => album.slug === slug)
         const updated = await galleryApi.update(slug, updates)
         safeSet(() =>
           setGalleryAlbums(prev =>
             prev.map(album => (album.slug === slug ? updated : album))
           )
         )
-        writeLog('update', 'gallery', slug, updated.title || slug)
+        writeLog('update', 'gallery', slug, updated.title || slug, {
+          before: previous as unknown as Record<string, unknown>,
+          after: updated as unknown as Record<string, unknown>,
+        })
         toast(`${updated.title} updated`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to update album'), 'error')
         throw actionError
       }
     },
-    [safeSet, toast, writeLog]
+    [galleryAlbums, safeSet, toast, writeLog]
   )
 
   const deleteGalleryAlbum = useCallback(
@@ -781,7 +851,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const existing = galleryAlbums.find(album => album.slug === slug)
         await galleryApi.remove(slug)
         safeSet(() => setGalleryAlbums(prev => prev.filter(album => album.slug !== slug)))
-        writeLog('delete', 'gallery', slug, existing?.title || slug)
+        writeLog('delete', 'gallery', slug, existing?.title || slug, {
+          before: existing as unknown as Record<string, unknown>,
+        })
         toast(`${existing?.title || slug} deleted`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to delete album'), 'error')
@@ -800,7 +872,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
             [...prev, created].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
           )
         )
-        writeLog('create', 'custom_build', created.id || created.title, created.title)
+        writeLog('create', 'custom_build', created.id || created.title, created.title, {
+          after: created as unknown as Record<string, unknown>,
+        })
         toast(`${created.title} added`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to add custom build'), 'error')
@@ -813,6 +887,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const updateCustomBuild = useCallback(
     async (id: string, updates: Partial<CustomBuild>) => {
       try {
+        const previous = customBuilds.find(build => build.id === id)
         const updated = await customBuildsApi.update(id, updates)
         safeSet(() =>
           setCustomBuilds(prev =>
@@ -821,14 +896,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
               .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
           )
         )
-        writeLog('update', 'custom_build', id, updated.title || id)
+        writeLog('update', 'custom_build', id, updated.title || id, {
+          before: previous as unknown as Record<string, unknown>,
+          after: updated as unknown as Record<string, unknown>,
+        })
         toast(`${updated.title} updated`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to update custom build'), 'error')
         throw actionError
       }
     },
-    [safeSet, toast, writeLog]
+    [customBuilds, safeSet, toast, writeLog]
   )
 
   const deleteCustomBuild = useCallback(
@@ -837,7 +915,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const existing = customBuilds.find(build => build.id === id)
         await customBuildsApi.remove(id)
         safeSet(() => setCustomBuilds(prev => prev.filter(build => build.id !== id)))
-        writeLog('delete', 'custom_build', id, existing?.title || id)
+        writeLog('delete', 'custom_build', id, existing?.title || id, {
+          before: existing as unknown as Record<string, unknown>,
+        })
         toast(`${existing?.title || 'Custom build'} deleted`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to delete custom build'), 'error')
@@ -856,7 +936,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
             [...prev, created].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
           )
         )
-        writeLog('create', 'custom_build_category', created.id || created.name, created.name)
+        writeLog('create', 'custom_build_category', created.id || created.name, created.name, {
+          after: created as unknown as Record<string, unknown>,
+        })
         toast(`${created.name} added`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to add custom build category'), 'error')
@@ -869,6 +951,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const updateCustomBuildCategory = useCallback(
     async (id: string, updates: Partial<CustomBuildCategory>) => {
       try {
+        const previous = customBuildCategories.find(category => category.id === id)
         const updated = await customBuildsApi.updateCategory(id, updates)
         safeSet(() =>
           setCustomBuildCategories(prev =>
@@ -877,14 +960,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
               .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
           )
         )
-        writeLog('update', 'custom_build_category', id, updated.name || id)
+        writeLog('update', 'custom_build_category', id, updated.name || id, {
+          before: previous as unknown as Record<string, unknown>,
+          after: updated as unknown as Record<string, unknown>,
+        })
         toast(`${updated.name} updated`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to update custom build category'), 'error')
         throw actionError
       }
     },
-    [safeSet, toast, writeLog]
+    [customBuildCategories, safeSet, toast, writeLog]
   )
 
   const deleteCustomBuildCategory = useCallback(
@@ -893,7 +979,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const existing = customBuildCategories.find(category => category.id === id)
         await customBuildsApi.removeCategory(id)
         safeSet(() => setCustomBuildCategories(prev => prev.filter(category => category.id !== id)))
-        writeLog('delete', 'custom_build_category', id, existing?.name || id)
+        writeLog('delete', 'custom_build_category', id, existing?.name || id, {
+          before: existing as unknown as Record<string, unknown>,
+        })
         toast(`${existing?.name || 'Custom build category'} deleted`, 'success')
       } catch (actionError: unknown) {
         toast(getErrorMessage(actionError, 'Failed to delete custom build category'), 'error')

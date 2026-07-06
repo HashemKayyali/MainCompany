@@ -27,3 +27,6 @@ dist/
 
 public/eventies_complete_logo_files/
 storage-gc-reports/
+storage-gc-reports/
+.env.local
+.env
