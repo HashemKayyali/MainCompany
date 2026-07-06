@@ -241,20 +241,28 @@ function ChangeRow({ change }: { change: Change }) {
 
       {isImage || isImageArray ? (
         <div className="mt-3 space-y-2">
-          <ImageStrip label="Added" urls={change.added || []} tone="add" />
-          <ImageStrip label="Removed" urls={change.removed || []} tone="remove" />
+          <AddedImageStrip
+            label={L.added}
+            urls={change.added || []}
+            fallbackText={L.imageDeletedStorage}
+          />
+          <RemovedImageNotice
+            label={L.removed}
+            urls={change.removed || []}
+            message={change.kind === 'image-replaced' ? L.prevImageRemoved : L.imageRemoved}
+          />
         </div>
       ) : isListChange ? (
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {change.added && change.added.length > 0 && (
             <div className="rounded-md border border-emerald-300 bg-emerald-50 p-2">
-              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-800">Added</div>
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-800">{L.added}</div>
               <div>{renderScalar(change.added)}</div>
             </div>
           )}
           {change.removed && change.removed.length > 0 && (
             <div className="rounded-md border border-rose-300 bg-rose-50 p-2">
-              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-rose-800">Removed</div>
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-rose-800">{L.removed}</div>
               <div>{renderScalar(change.removed)}</div>
             </div>
           )}
@@ -262,13 +270,13 @@ function ChangeRow({ change }: { change: Change }) {
       ) : change.kind === 'update' || change.kind === 'set' || change.kind === 'clear' ? (
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           <div className="rounded-md border border-rose-200 bg-rose-50/60 p-2">
-            <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-rose-800">Before</div>
+            <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-rose-800">{L.before}</div>
             <div className="text-[12px] leading-5 text-[var(--admin-text)] break-words" dir="auto">
               {renderScalar(change.before)}
             </div>
           </div>
           <div className="rounded-md border border-emerald-200 bg-emerald-50/60 p-2">
-            <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-800">After</div>
+            <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-800">{L.after}</div>
             <div className="text-[12px] leading-5 text-[var(--admin-text)] break-words" dir="auto">
               {renderScalar(change.after)}
             </div>

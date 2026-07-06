@@ -75,11 +75,14 @@ function AuthInput({
         className={cn(
           'h-[44px] w-full rounded-xl border bg-[#f8f5fc]/95 text-sm font-semibold text-[#150628]',
           'placeholder:text-xs placeholder:text-slate-400/70',
-          'transition-all duration-300',
-          'focus:bg-white focus:outline-none focus:ring-4 focus:ring-violet-500/10',
+          // Transition color only — transition-all animated the ring/border
+          // width and caused the focused field to visibly "grow" and the old
+          // field to keep a lingering purple outline while re-rendering.
+          'transition-colors duration-200',
+          'focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/25',
           error
             ? 'border-red-300 focus:border-red-400'
-            : 'border-slate-200/90 focus:border-violet-400',
+            : 'border-slate-200/90 focus:border-violet-500',
           Icon ? 'pl-9 pr-3' : 'px-3',
           right ? '!pr-9' : ''
         )}
@@ -497,10 +500,10 @@ export default function AuthPage() {
         loading="eager"
         decoding="async"
         draggable={false}
-        className="fixed inset-0 h-full w-full scale-105 object-cover object-right opacity-16 blur-[2px]"
+        className="fixed inset-0 h-full w-full scale-105 object-cover object-right opacity-70"
       />
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(217,70,239,0.12),transparent_30%),radial-gradient(circle_at_86%_76%,rgba(124,58,237,0.09),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.94),rgba(250,245,255,0.86)_48%,rgba(255,255,255,0.96))]" />
-      <div className="fixed inset-0 bg-[linear-gradient(135deg,rgba(124,58,237,0.06)_0_1px,transparent_1px_100%)] bg-[length:56px_56px] opacity-40" />
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(217,70,239,0.14),transparent_36%),radial-gradient(circle_at_86%_76%,rgba(124,58,237,0.10),transparent_36%),linear-gradient(135deg,rgba(255,255,255,0.55),rgba(250,245,255,0.42)_48%,rgba(255,255,255,0.60))]" />
+      <div className="fixed inset-0 bg-[linear-gradient(135deg,rgba(124,58,237,0.06)_0_1px,transparent_1px_100%)] bg-[length:56px_56px] opacity-25" />
 
       <motion.section
         initial={skipCardIntro || reduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
@@ -518,7 +521,10 @@ export default function AuthPage() {
               <div className="absolute -left-28 bottom-20 h-64 w-64 rounded-full bg-violet-200/24 blur-3xl" />
             </div>
 
-            <div className="relative z-10 w-full max-w-[430px] overflow-x-hidden py-2 lg:py-0">
+            {/* No overflow-x-hidden here — it was clipping the input focus ring
+                on the left/right edges. The parent <section> still has
+                overflow-x-hidden so page-level horizontal scroll is not possible. */}
+            <div className="relative z-10 w-full max-w-[430px] py-2 lg:py-0">
               <Link
                 to="/"
                 aria-label="Eventies home"
