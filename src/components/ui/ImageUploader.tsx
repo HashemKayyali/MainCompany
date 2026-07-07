@@ -81,6 +81,9 @@ export default function ImageUploader({
   const { isDark } = useTheme()
   const dialog = useDialog()
   const inputRef = useRef<HTMLInputElement>(null)
+  // Synchronous guard prevents rapid replace/drop/change events from starting
+  // overlapping uploads before React commits the `uploading` state.
+  const uploadGuardRef = useRef(false)
 
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<{ completed: number; total: number } | null>(null)
@@ -201,10 +204,15 @@ export default function ImageUploader({
   }
 
   const handleFiles = async (files: File[]) => {
-    if (!files.length) return
+    if (!files.length || uploadGuardRef.current) return
 
     if (!multiple) {
-      await handleFile(files[0])
+      uploadGuardRef.current = true
+      try {
+        await handleFile(files[0])
+      } finally {
+        uploadGuardRef.current = false
+      }
       return
     }
 
@@ -232,6 +240,7 @@ export default function ImageUploader({
       return
     }
 
+    uploadGuardRef.current = true
     setUploading(true)
     setUploadProgress({ completed: 0, total: files.length })
 
@@ -283,6 +292,7 @@ export default function ImageUploader({
         })
       }
     } finally {
+      uploadGuardRef.current = false
       setUploading(false)
       setUploadProgress(null)
     }
@@ -327,7 +337,8 @@ export default function ImageUploader({
                 <button
                   type="button"
                   onClick={() => openFrameEditor(value)}
-                  className={`min-h-[44px] rounded-lg px-2 py-1 text-[10px] font-semibold md:min-h-[32px] ${
+                  disabled={uploading}
+                  className={`min-h-[44px] rounded-lg disabled:cursor-not-allowed disabled:opacity-60 px-2 py-1 text-[10px] font-semibold md:min-h-[32px] ${
                     isDark ? 'bg-cyan-500/25 text-white' : 'bg-violet-100 text-violet-700'
                   }`}
                 >
@@ -336,7 +347,8 @@ export default function ImageUploader({
                 <button
                   type="button"
                   onClick={() => inputRef.current?.click()}
-                  className={`min-h-[44px] rounded-lg px-2 py-1 text-[10px] font-semibold md:min-h-[32px] ${
+                  disabled={uploading}
+                  className={`min-h-[44px] rounded-lg disabled:cursor-not-allowed disabled:opacity-60 px-2 py-1 text-[10px] font-semibold md:min-h-[32px] ${
                     isDark ? 'bg-purple-500/30 text-white' : 'bg-violet-100 text-violet-700'
                   }`}
                 >
@@ -346,7 +358,8 @@ export default function ImageUploader({
                   <button
                     type="button"
                     onClick={onRemove}
-                    className="min-h-[44px] rounded-lg bg-red-500/30 px-2 py-1 text-[10px] font-semibold text-white md:min-h-[32px]"
+                    disabled={uploading}
+                    className="min-h-[44px] rounded-lg disabled:cursor-not-allowed disabled:opacity-60 bg-red-500/30 px-2 py-1 text-[10px] font-semibold text-white md:min-h-[32px]"
                   >
                     Remove
                   </button>
@@ -439,6 +452,7 @@ export default function ImageUploader({
                 <button
                   type="button"
                   onClick={() => openFrameEditor(value)}
+                  disabled={uploading}
                   className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 text-[12px] font-bold text-[var(--admin-accent)] transition hover:border-[var(--admin-accent)] hover:bg-[var(--admin-surface-2)]"
                 >
                   Adjust Logo
@@ -455,6 +469,7 @@ export default function ImageUploader({
                   <button
                     type="button"
                     onClick={onRemove}
+                    disabled={uploading}
                     className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[color-mix(in_srgb,var(--admin-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--admin-danger)_8%,transparent)] px-3 text-[12px] font-bold text-[var(--admin-danger)] transition hover:bg-[color-mix(in_srgb,var(--admin-danger)_12%,transparent)]"
                   >
                     Remove
@@ -484,7 +499,7 @@ export default function ImageUploader({
                 {uploading ? 'Uploading...' : 'Click or drop logo'}
               </span>
               <span className="text-[10.5px] font-medium text-[#4a2c8f]">
-                PNG / SVG / JPG · transparent background recommended
+                PNG / WebP / JPG · transparent background recommended
               </span>
             </button>
           )}
@@ -541,6 +556,7 @@ export default function ImageUploader({
             <button
               type="button"
               onClick={() => openFrameEditor(value)}
+              disabled={uploading}
               className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 text-[12px] font-bold text-[var(--admin-accent)] transition hover:border-[var(--admin-accent)] hover:bg-[var(--admin-surface-2)]"
             >
               Adjust frame
@@ -564,6 +580,7 @@ export default function ImageUploader({
               <button
                 type="button"
                 onClick={onRemove}
+                disabled={uploading}
                 className="inline-flex min-h-[44px] items-center justify-center rounded-[var(--admin-radius-sm)] border border-[color-mix(in_srgb,var(--admin-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--admin-danger)_8%,transparent)] px-3 text-[12px] font-bold text-[var(--admin-danger)] transition hover:bg-[color-mix(in_srgb,var(--admin-danger)_12%,transparent)]"
               >
                 Remove
@@ -616,6 +633,7 @@ export default function ImageUploader({
               <button
                 type="button"
                 onClick={() => openFrameEditor(value)}
+                disabled={uploading}
                 className={`min-h-[44px] rounded-xl px-3.5 py-2 text-[11px] font-semibold md:min-h-[38px] ${
                   isDark ? 'bg-cyan-500/25 text-white' : 'bg-violet-100 text-violet-700'
                 }`}
@@ -636,6 +654,7 @@ export default function ImageUploader({
                 <button
                   type="button"
                   onClick={onRemove}
+                  disabled={uploading}
                   className="min-h-[44px] rounded-xl bg-red-500/40 px-3.5 py-2 text-[11px] font-semibold text-white md:min-h-[38px]"
                 >
                   Remove
