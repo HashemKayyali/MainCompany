@@ -1,0 +1,10 @@
+Eventies QA fixes
+=================
+1) Extract this ZIP into the project root and replace existing files.
+2) Run: powershell -ExecutionPolicy Bypass -File .\REMOVE_OBSOLETE_FILE.ps1
+3) Then run: npx tsc --noEmit
+4) Then run: npm test
+5) Then run: npm run build
+
+The PowerShell script only removes:
+src/pages/CustomBuildsPage - Copy.tsx

@@ -49,7 +49,7 @@ const WEBP_QUALITY = 0.78
 const PREVIEW_WEBP_QUALITY = 0.74
 const HERO_MAX_WIDTH = 1600
 const THUMB_MAX_WIDTH = 720
-const IMAGE_UPLOAD_PROVIDER = String(import.meta.env.VITE_IMAGE_UPLOAD_PROVIDER ?? 'supabase').trim().toLowerCase()
+const IMAGE_UPLOAD_PROVIDER = String(import.meta.env.VITE_IMAGE_UPLOAD_PROVIDER ?? 'cloudinary').trim().toLowerCase()
 
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024
 const VIDEO_MAX_WIDTH = 960
@@ -97,10 +97,14 @@ function toErrorMessage(value: unknown): string {
  *  Image processing (WebP conversion)                                 *
  * ------------------------------------------------------------------ */
 
-async function loadImageBitmap(file: File): Promise<{ bitmap: ImageBitmap }> {
+type DecodedImageSource = ImageBitmap | HTMLImageElement
+
+async function loadImageBitmap(
+  file: File,
+): Promise<{ bitmap: DecodedImageSource; cleanup: () => void }> {
   if (typeof createImageBitmap !== 'undefined') {
     const bitmap = await createImageBitmap(file)
-    return { bitmap }
+    return { bitmap, cleanup: () => bitmap.close() }
   }
 
   const url = URL.createObjectURL(file)
@@ -108,27 +112,23 @@ async function loadImageBitmap(file: File): Promise<{ bitmap: ImageBitmap }> {
   img.decoding = 'async'
   img.src = url
 
-  await new Promise<void>((resolve, reject) => {
-    img.onload = () => resolve()
-    img.onerror = () => reject(new Error('Failed to load image'))
-  })
+  try {
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve()
+      img.onerror = () => reject(new Error('Failed to load image'))
+    })
+  } catch (error) {
+    URL.revokeObjectURL(url)
+    throw error
+  }
 
-  const canvas = document.createElement('canvas')
-  canvas.width = img.naturalWidth || img.width
-  canvas.height = img.naturalHeight || img.height
-
-  const ctx = canvas.getContext('2d')
-  if (!ctx) throw new Error('Canvas 2D not supported')
-
-  ctx.drawImage(img, 0, 0)
-  const bitmap = await createImageBitmap(canvas)
-  URL.revokeObjectURL(url)
-
-  return { bitmap }
+  // HTMLImageElement is a valid canvas draw source, so the no-createImageBitmap
+  // fallback can use it directly instead of calling the unavailable API again.
+  return { bitmap: img, cleanup: () => URL.revokeObjectURL(url) }
 }
 
 async function bitmapToWebpFile(
-  bitmap: ImageBitmap,
+  bitmap: DecodedImageSource,
   outNameBase: string,
   maxDimension: number,
   quality = WEBP_QUALITY,
@@ -166,7 +166,7 @@ async function bitmapToWebpFile(
 }
 
 async function createWebpVariants(file: File, base: string): Promise<[File, File]> {
-  const { bitmap } = await loadImageBitmap(file)
+  const { bitmap, cleanup } = await loadImageBitmap(file)
   try {
     // Decode the source once, then render both delivery sizes from the same
     // bitmap. This avoids doing two full image decodes in parallel on the
@@ -176,7 +176,7 @@ async function createWebpVariants(file: File, base: string): Promise<[File, File
       bitmapToWebpFile(bitmap, `${base}-hero`, HERO_MAX_WIDTH),
     ])
   } finally {
-    bitmap.close?.()
+    cleanup()
   }
 }
 
@@ -507,10 +507,17 @@ async function loadVideoElement(
   video.playsInline = true
   video.src = url
 
-  await new Promise<void>((resolve, reject) => {
-    video.onloadedmetadata = () => resolve()
-    video.onerror = () => reject(new Error('Failed to read the selected video.'))
-  })
+  try {
+    await new Promise<void>((resolve, reject) => {
+      video.onloadedmetadata = () => resolve()
+      video.onerror = () => reject(new Error('Failed to read the selected video.'))
+    })
+  } catch (error) {
+    video.removeAttribute('src')
+    video.load()
+    URL.revokeObjectURL(url)
+    throw error
+  }
 
   return {
     video,

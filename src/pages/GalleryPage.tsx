@@ -186,24 +186,6 @@ export default function GalleryPage() {
     [galleryAlbums]
   )
 
-  useEffect(() => {
-    const covers = new Set<string>()
-    const photos = new Set<string>()
-
-    albums.forEach(album => {
-      if (album.cover && !covers.has(album.cover)) {
-        covers.add(album.cover)
-        void preloadImage(album.cover, 'card')
-      }
-
-      album.images.forEach(image => {
-        if (!image || photos.has(image)) return
-        photos.add(image)
-        void preloadImage(image, 'thumbnail')
-      })
-    })
-  }, [albums])
-
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
   const [lightbox, setLightbox] = useState<{ open: boolean; index: number }>({ open: false, index: 0 })
 
@@ -271,7 +253,7 @@ export default function GalleryPage() {
           ) : (
             <>
               <div className="scrollbar-hide -mx-1 flex gap-3 overflow-x-auto px-1 py-2">
-                {albums.map(album => {
+                {albums.map((album, index) => {
                   const isActive = album.slug === selected?.slug
                   return (
                     <button
@@ -294,7 +276,7 @@ export default function GalleryPage() {
                         alt={album.title}
                         width={640}
                         height={400}
-                        loading="eager"
+                        loading={index < 3 ? 'eager' : 'lazy'}
                         fetchPriority={isActive ? 'high' : 'auto'}
                         sizes="(max-width: 640px) 180px, 210px"
                         fallbackTransform={{ fit: 'cover' }}

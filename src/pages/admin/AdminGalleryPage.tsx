@@ -362,7 +362,11 @@ export default function AdminGalleryPage() {
   }
 
   const addImage = (url: string) => {
-    setEditing(current => (current ? { ...current, images: [...current.images, url], cover: current.images[0] || current.cover || url } : null))
+    setEditing(current => {
+      if (!current) return current
+      const images = [...current.images, url]
+      return { ...current, images, cover: images[0] || '' }
+    })
   }
 
   const addImages = (urls: string[]) => {
@@ -370,7 +374,7 @@ export default function AdminGalleryPage() {
     setEditing(current => {
       if (!current) return current
       const images = [...current.images, ...urls]
-      return { ...current, images, cover: images[0] || current.cover || '' }
+      return { ...current, images, cover: images[0] || '' }
     })
   }
 
@@ -378,7 +382,7 @@ export default function AdminGalleryPage() {
     setEditing(current => {
       if (!current) return current
       const images = current.images.filter((_, imageIndex) => imageIndex !== index)
-      return { ...current, images, cover: images[0] || current.cover || '' }
+      return { ...current, images, cover: images[0] || '' }
     })
   }
 
@@ -389,7 +393,7 @@ export default function AdminGalleryPage() {
       const nextIndex = index + direction
       if (nextIndex < 0 || nextIndex >= images.length) return current
       ;[images[index], images[nextIndex]] = [images[nextIndex], images[index]]
-      return { ...current, images, cover: images[0] || current.cover || '' }
+      return { ...current, images, cover: images[0] || '' }
     })
   }
 
@@ -397,7 +401,7 @@ export default function AdminGalleryPage() {
     setEditing(current => {
       if (!current) return current
       const images = current.images.map((image, imageIndex) => (imageIndex === index ? media : image))
-      return { ...current, images, cover: images[0] || current.cover || '' }
+      return { ...current, images, cover: images[0] || '' }
     })
   }
 
@@ -409,7 +413,7 @@ export default function AdminGalleryPage() {
     ? {
         ...editing,
         slug: editing.slug || slugify(editing.title || 'album'),
-        cover: editing.images[0] || editing.cover || '',
+        cover: editing.images[0] || '',
       }
     : emptyAlbum
 

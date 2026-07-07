@@ -169,18 +169,18 @@ const DEFAULT_SNAPSHOT: DataSnapshot = {
 }
 
 // One fetcher per resource. Each returns only the snapshot slice it owns, so a
-// resource load never touches unrelated state. gallery/custom builds keep the
-// same defensive `.catch(() => [])` the previous monolithic loader had.
+// resource load never touches unrelated state. Errors intentionally propagate
+// to loadResource so retry/backoff and later-session recovery remain effective.
 const RESOURCE_LOADERS: Record<ResourceKey, () => Promise<Partial<DataSnapshot>>> = {
   products: async () => ({ products: sortProductsForDisplay(await productsApi.getAll()) }),
   categories: async () => ({ categories: await categoriesApi.getAll() }),
   customers: async () => ({ customers: await customersApi.getAll() }),
-  gallery: async () => ({ galleryAlbums: await galleryApi.getAll().catch(() => []) }),
+  gallery: async () => ({ galleryAlbums: await galleryApi.getAll() }),
   parts: async () => ({ parts: await partsApi.getAll() }),
   customBuilds: async () => {
     const [builds, buildCategories] = await Promise.all([
-      customBuildsApi.getAll().catch(() => []),
-      customBuildsApi.getCategories().catch(() => []),
+      customBuildsApi.getAll(),
+      customBuildsApi.getCategories(),
     ])
     return { customBuilds: builds, customBuildCategories: buildCategories }
   },
@@ -436,8 +436,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
             applyResourcePart(RESOURCE_DEFAULTS[key])
             // Even a failed load resolves the resource's loading state — the
             // default fallback is what we display, so consumers must not spin
-            // forever waiting for it.
+            // forever waiting for it. Remove the once-per-session request mark
+            // so a later page visit can recover after a temporary outage.
             markLoaded([key])
+            requestedRef.current.delete(key)
             throw loadError
           }
         }
@@ -451,8 +453,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [applyResourcePart, markLoaded]
   )
 
-  // Public entry point: load a resource at most once per session (revalidation
-  // still happens once even when hydrated from cache — SWR). Never throws.
+  // Public entry point: load a resource at most once after a successful load
+  // (revalidation still happens once when hydrated from cache — SWR). A final
+  // network failure clears the request mark so a later visit can retry. Never throws.
   const ensureResource = useCallback(
     (key: ResourceKey): Promise<void> => {
       if (requestedRef.current.has(key)) {
