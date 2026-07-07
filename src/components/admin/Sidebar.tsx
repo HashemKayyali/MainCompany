@@ -3,12 +3,16 @@ import { useMemo } from 'react'
 import {
   ChevronsLeft,
   ChevronsRight,
+  Bell,
   ClipboardList,
   FileText,
+  Mail,
   FolderOpen,
   Image,
   LayoutDashboard,
+  MessageCircle,
   Package,
+  Send,
   ShieldCheck,
   Sparkles,
   UserRound,
@@ -22,6 +26,8 @@ import { BRAND_ICON } from '../../config/brand'
 import UserAvatar from '../ui/UserAvatar'
 import LanguageSwitcher from '../layout/LanguageSwitcher'
 import { useI18n } from '../../contexts/LanguageContext'
+import { useChat } from '../../contexts/ChatContext'
+import { useNotifications } from '../../contexts/NotificationContext'
 import { cn } from '../../utils/cn'
 
 type SidebarVariant = 'desktop' | 'drawer'
@@ -31,6 +37,7 @@ type SidebarLink = {
   label: string
   icon: LucideIcon
   exact?: boolean
+  superadminOnly?: boolean
 }
 
 type SidebarGroup = {
@@ -57,6 +64,10 @@ const NAV_GROUPS: SidebarGroup[] = [
     label: 'Operations',
     links: [
       { to: '/admin/requests', label: 'Requests', icon: ClipboardList },
+      { to: '/admin/chats', label: 'Chats', icon: MessageCircle, superadminOnly: true },
+      { to: '/admin/contacts', label: 'Contact Inquiries', icon: Mail },
+      { to: '/admin/notifications', label: 'Notifications', icon: Bell, exact: true },
+      { to: '/admin/notifications/send', label: 'Send Notification', icon: Send, superadminOnly: true },
       { to: '/admin/customers', label: 'Customers', icon: Users },
     ],
   },
@@ -91,6 +102,8 @@ export default function Sidebar({
   const { products, parts, customers, categories, galleryAlbums, customBuilds } = useData()
   const { currentUser } = useUser()
   const { translateText } = useI18n()
+  const { unreadCount: chatUnreadCount } = useChat()
+  const { unreadCount: notificationUnreadCount } = useNotifications()
 
   // The drawer always renders expanded; only the desktop rail collapses.
   const isCollapsed = variant === 'desktop' && collapsed
@@ -106,8 +119,10 @@ export default function Sidebar({
       '/admin/categories': categories?.length ?? 0,
       '/admin/custom-builds': customBuilds?.length ?? 0,
       '/admin/gallery': galleryAlbums?.length ?? 0,
+      ...(chatUnreadCount > 0 ? { '/admin/chats': chatUnreadCount } : {}),
+      ...(notificationUnreadCount > 0 ? { '/admin/notifications': notificationUnreadCount } : {}),
     }),
-    [products, parts, customers, categories, customBuilds, galleryAlbums]
+    [products, parts, customers, categories, customBuilds, galleryAlbums, chatUnreadCount, notificationUnreadCount]
   )
 
   const isActive = (to: string, exact?: boolean) =>
@@ -226,7 +241,11 @@ export default function Sidebar({
                   {translateText(group.label)}
                 </div>
               )}
-              <div className="space-y-1">{group.links.map(renderLink)}</div>
+              <div className="space-y-1">
+                {group.links
+                  .filter(link => !link.superadminOnly || currentUser?.role === 'superadmin')
+                  .map(renderLink)}
+              </div>
             </section>
           ))}
         </nav>

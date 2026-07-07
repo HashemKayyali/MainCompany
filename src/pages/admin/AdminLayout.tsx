@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronRight, Menu } from 'lucide-react'
+import { ChevronRight, Menu, MessageCircle } from 'lucide-react'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
@@ -10,9 +10,11 @@ import Sidebar from '../../components/admin/Sidebar'
 import AdminBottomBar from '../../components/admin/AdminBottomBar'
 import AdminUserMenu from '../../components/admin/AdminUserMenu'
 import LanguageSwitcher from '../../components/layout/LanguageSwitcher'
+import NotificationBell from '../../components/notifications/NotificationBell'
 import { useI18n } from '../../contexts/LanguageContext'
 import AnimatedBackground from '../../components/theme/AnimatedBackground'
 import { cn } from '../../utils/cn'
+import { useChat } from '../../contexts/ChatContext'
 import '../../styles/admin.css'
 
 type Crumb = { label: string; to?: string }
@@ -22,6 +24,10 @@ function usePageTitle(pathname: string) {
     if (pathname === '/admin') return 'Dashboard'
     if (pathname.startsWith('/admin/products')) return 'Products'
     if (pathname.startsWith('/admin/requests')) return 'Requests'
+    if (pathname.startsWith('/admin/chats')) return 'Chats'
+    if (pathname.startsWith('/admin/contacts')) return 'Contact Inquiries'
+    if (pathname.startsWith('/admin/notifications/send')) return 'Send Notification'
+    if (pathname.startsWith('/admin/notifications')) return 'Notifications'
     if (pathname.startsWith('/admin/parts')) return 'Parts'
     if (pathname.startsWith('/admin/customers')) return 'Customers'
     if (pathname.startsWith('/admin/categories')) return 'Categories'
@@ -43,6 +49,9 @@ function buildBreadcrumbs(pathname: string): Crumb[] {
   const labelMap: Record<string, string> = {
     products: 'Products',
     requests: 'Requests',
+    chats: 'Chats',
+    contacts: 'Contact Inquiries',
+    notifications: 'Notifications',
     parts: 'Parts',
     customers: 'Customers',
     categories: 'Categories',
@@ -200,6 +209,7 @@ function MobileDrawer({
 
 export default function AdminLayout() {
   const { currentUser, logout } = useUser()
+  const { unreadCount } = useChat()
   const { pathname } = useLocation()
   const { translateText, dir } = useI18n()
   usePageMeta({ title: translateText('Admin Panel'), noIndex: true })
@@ -291,6 +301,24 @@ export default function AdminLayout() {
                 })}
               </nav>
             </div>
+
+            <NotificationBell mode="admin" buttonClassName="admin-icon-btn relative" />
+
+            {currentUser?.role === 'superadmin' && (
+              <Link
+                to="/admin/chats"
+                className="admin-icon-btn relative"
+                aria-label={translateText('Support Chats')}
+                title={translateText('Support Chats')}
+              >
+                <MessageCircle className="h-[18px] w-[18px]" strokeWidth={2.1} aria-hidden="true" />
+                {unreadCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-red-500 px-1 text-[9px] font-extrabold leading-none text-white">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             <LanguageSwitcher
               compact

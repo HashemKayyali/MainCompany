@@ -7,6 +7,7 @@ import AnimatedBackground from '../theme/AnimatedBackground'
 import { useSmoothScroll } from '../../hooks/useSmoothScroll'
 import { usePerfMode } from '../../hooks/usePerfMode'
 import { installLinkPreloadListeners, warmCommonRoutes } from '../../utils/route-preload'
+import ChatWidget from '../chat/ChatWidget'
 
 const HERO_BACKGROUND_PATHS = new Set([
   '/',
@@ -69,6 +70,7 @@ export default function PageContainer({ children }: { children: ReactNode }) {
         </main>
 
         <Footer />
+        <ChatWidget />
       </div>
     </div>
   )

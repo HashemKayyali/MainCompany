@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { createBrowserRouter, Navigate, useLocation } from 'react-router-dom'
 import App from './App'
 import AdminGuard from './components/AdminGuard'
+import SuperAdminGuard from './components/SuperAdminGuard'
 import PageLoader from './components/ui/PageLoader'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
@@ -30,6 +31,7 @@ const {
   PurchaseQuotePage,
   MyRequestsPage,
   MyRequestDetailsPage,
+  NotificationsPage,
   AdminLayout,
   DashboardPage,
   AdminProductsPage,
@@ -43,6 +45,10 @@ const {
   AdminGalleryPage,
   AdminRequestsPage,
   AdminRequestDetailsPage,
+  AdminChatsPage,
+  AdminNotificationsPage,
+  AdminNotificationSendPage,
+  AdminContactSubmissionsPage,
 } = lazyRoutes
 
 function S({ children }: { children: React.ReactNode }) {
@@ -84,6 +90,7 @@ export const router = createBrowserRouter([
       { path: 'purchase-quote', element: <S><PurchaseQuotePage /></S> },
       { path: 'my-requests', element: <S><MyRequestsPage /></S> },
       { path: 'my-requests/:requestNumber', element: <S><MyRequestDetailsPage /></S> },
+      { path: 'notifications', element: <S><NotificationsPage /></S> },
       { path: '*', element: <S><NotFoundPage /></S> },
     ],
   },
@@ -117,6 +124,10 @@ export const router = createBrowserRouter([
       { path: 'logs', element: <S><AdminLogsPage /></S> },
       { path: 'requests', element: <S><AdminRequestsPage /></S> },
       { path: 'requests/:type/:id', element: <S><AdminRequestDetailsPage /></S> },
+      { path: 'chats', element: <SuperAdminGuard><S><AdminChatsPage /></S></SuperAdminGuard> },
+      { path: 'contacts', element: <S><AdminContactSubmissionsPage /></S> },
+      { path: 'notifications', element: <S><AdminNotificationsPage /></S> },
+      { path: 'notifications/send', element: <SuperAdminGuard><S><AdminNotificationSendPage /></S></SuperAdminGuard> },
       { path: '*', element: <S><NotFoundPage /></S> },
     ],
   },

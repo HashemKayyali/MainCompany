@@ -26,6 +26,7 @@ export const routeImporters = {
   purchaseQuote: () => import('../pages/PurchaseQuotePage'),
   myRequests: () => import('../pages/MyRequestsPage'),
   myRequestDetails: () => import('../pages/MyRequestDetailsPage'),
+  notifications: () => import('../pages/NotificationsPage'),
   adminLayout: () => import('../pages/admin/AdminLayout'),
   adminDashboard: () => import('../pages/admin/DashboardPage'),
   adminProducts: () => import('../pages/admin/AdminProductsPage'),
@@ -39,6 +40,10 @@ export const routeImporters = {
   adminGallery: () => import('../pages/admin/AdminGalleryPage'),
   adminRequests: () => import('../pages/admin/AdminRequestsPage'),
   adminRequestDetails: () => import('../pages/admin/AdminRequestDetailsPage'),
+  adminChats: () => import('../pages/admin/AdminChatsPage'),
+  adminNotifications: () => import('../pages/admin/AdminNotificationsPage'),
+  adminNotificationSend: () => import('../pages/admin/AdminNotificationSendPage'),
+  adminContacts: () => import('../pages/admin/AdminContactSubmissionsPage'),
 } as const
 
 export const lazyRoutes = {
@@ -55,6 +60,7 @@ export const lazyRoutes = {
   PurchaseQuotePage: lazyRoute(routeImporters.purchaseQuote),
   MyRequestsPage: lazyRoute(routeImporters.myRequests),
   MyRequestDetailsPage: lazyRoute(routeImporters.myRequestDetails),
+  NotificationsPage: lazyRoute(routeImporters.notifications),
   AdminLayout: lazyRoute(routeImporters.adminLayout),
   DashboardPage: lazyRoute(routeImporters.adminDashboard),
   AdminProductsPage: lazyRoute(routeImporters.adminProducts),
@@ -68,6 +74,10 @@ export const lazyRoutes = {
   AdminGalleryPage: lazyRoute(routeImporters.adminGallery),
   AdminRequestsPage: lazyRoute(routeImporters.adminRequests),
   AdminRequestDetailsPage: lazyRoute(routeImporters.adminRequestDetails),
+  AdminChatsPage: lazyRoute(routeImporters.adminChats),
+  AdminNotificationsPage: lazyRoute(routeImporters.adminNotifications),
+  AdminNotificationSendPage: lazyRoute(routeImporters.adminNotificationSend),
+  AdminContactSubmissionsPage: lazyRoute(routeImporters.adminContacts),
 } as const
 
 // Main public pages are eager in router.tsx so hero-page transitions do not wait
@@ -89,6 +99,7 @@ const PUBLIC_ROUTE_PRELOADERS: Record<string, (() => Promise<unknown>) | undefin
   '/checkout': routeImporters.checkout,
   '/purchase-quote': routeImporters.purchaseQuote,
   '/my-requests': routeImporters.myRequests,
+  '/notifications': routeImporters.notifications,
   '/login': undefined,
   '/register': undefined,
   '/reset-password': routeImporters.resetPassword,

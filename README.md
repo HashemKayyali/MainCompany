@@ -282,5 +282,5 @@ Recommended next steps based on the current repository state:
 
 git status
 git add .
-git commit -m "123 "
+git commit -m "Custom Build Page Update \ notification & live chat system "
 git push origin main

@@ -4,7 +4,7 @@
 // `supabase/migrations/` (newest wins). After applying a new migration you
 // should regenerate / reconcile these types, e.g.:
 //   supabase gen types typescript --project-id <id> --schema public > src/lib/database.types.ts
-// Last reconciled against: 20260629_custom_build_categories.sql.
+// Last reconciled against: 20260706_notification_system.sql.
 // ----------------------------------------------------------------------------
 
 export type Json =
@@ -387,32 +387,34 @@ export interface Database {
         Relationships: []
       }
 
-        contact_submissions: {
-          Row: {
-            id: string
-            name: string
-            email: string
-            phone: string
-            product_id: string | null
-            product_slug: string | null
-            city: string
-            address: string
-            message: string
-            status: string
-            created_at: string
+      contact_submissions: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          phone: string
+          product_id: string | null
+          product_slug: string | null
+          city: string
+          address: string
+          message: string
+          status: string
+          created_at: string
+          submitter_profile_id: string | null
         }
-          Insert: {
-            id?: string
-            name: string
-            email: string
-            phone: string
-            product_id?: string | null
-            product_slug?: string | null
-            city?: string
-            address?: string
-            message?: string
-            status?: string
-            created_at?: string
+        Insert: {
+          id?: string
+          name: string
+          email: string
+          phone: string
+          product_id?: string | null
+          product_slug?: string | null
+          city?: string
+          address?: string
+          message?: string
+          status?: string
+          created_at?: string
+          submitter_profile_id?: string | null
         }
         Update: {
           name?: string
@@ -424,12 +426,84 @@ export interface Database {
           address?: string
           message?: string
           status?: string
+          submitter_profile_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: 'contact_submissions_product_id_fkey'
             columns: ['product_id']
             referencedRelation: 'products'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'contact_submissions_submitter_profile_id_fkey'
+            columns: ['submitter_profile_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+
+      notifications: {
+        Row: {
+          id: string
+          recipient_user_id: string
+          type: string
+          priority: 'normal' | 'high'
+          title: string
+          title_ar: string | null
+          message: string
+          message_ar: string | null
+          entity_type: string | null
+          entity_id: string | null
+          target_url: string | null
+          metadata: Json
+          read_at: string | null
+          created_at: string
+          created_by: string | null
+          dedupe_key: string | null
+        }
+        Insert: {
+          id?: string
+          recipient_user_id: string
+          type: string
+          priority?: 'normal' | 'high'
+          title: string
+          title_ar?: string | null
+          message: string
+          message_ar?: string | null
+          entity_type?: string | null
+          entity_id?: string | null
+          target_url?: string | null
+          metadata?: Json
+          read_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          dedupe_key?: string | null
+        }
+        Update: {
+          priority?: 'normal' | 'high'
+          title?: string
+          title_ar?: string | null
+          message?: string
+          message_ar?: string | null
+          entity_type?: string | null
+          entity_id?: string | null
+          target_url?: string | null
+          metadata?: Json
+          read_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'notifications_recipient_user_id_fkey'
+            columns: ['recipient_user_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'notifications_created_by_fkey'
+            columns: ['created_by']
+            referencedRelation: 'profiles'
             referencedColumns: ['id']
           }
         ]
@@ -685,6 +759,171 @@ export interface Database {
         Relationships: []
       }
 
+
+
+      chat_conversations: {
+        Row: {
+          id: string
+          customer_id: string
+          status: 'open' | 'resolved'
+          context_type: string | null
+          context_ref: string | null
+          context_label: string | null
+          context_url: string | null
+          last_message_at: string
+          created_at: string
+          updated_at: string
+          resolved_at: string | null
+          resolved_by: string | null
+        }
+        Insert: {
+          id?: string
+          customer_id: string
+          status?: 'open' | 'resolved'
+          context_type?: string | null
+          context_ref?: string | null
+          context_label?: string | null
+          context_url?: string | null
+          last_message_at?: string
+          created_at?: string
+          updated_at?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+        }
+        Update: {
+          status?: 'open' | 'resolved'
+          context_type?: string | null
+          context_ref?: string | null
+          context_label?: string | null
+          context_url?: string | null
+          last_message_at?: string
+          updated_at?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'chat_conversations_customer_id_fkey'
+            columns: ['customer_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'chat_conversations_resolved_by_fkey'
+            columns: ['resolved_by']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+
+      chat_quick_questions: {
+        Row: {
+          id: string
+          text_en: string
+          text_ar: string
+          sort_order: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          text_en: string
+          text_ar: string
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          text_en?: string
+          text_ar?: string
+          sort_order?: number
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+
+      chat_messages: {
+        Row: {
+          id: string
+          conversation_id: string
+          sender_id: string
+          sender_type: 'customer' | 'superadmin'
+          kind: 'text' | 'quick_question' | 'system'
+          quick_question_id: string | null
+          body: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          sender_id?: string
+          sender_type?: 'customer' | 'superadmin'
+          kind?: 'text' | 'quick_question' | 'system'
+          quick_question_id?: string | null
+          body: string
+          created_at?: string
+        }
+        Update: {
+          body?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'chat_messages_conversation_id_fkey'
+            columns: ['conversation_id']
+            referencedRelation: 'chat_conversations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'chat_messages_sender_id_fkey'
+            columns: ['sender_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'chat_messages_quick_question_id_fkey'
+            columns: ['quick_question_id']
+            referencedRelation: 'chat_quick_questions'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+
+      chat_read_states: {
+        Row: {
+          conversation_id: string
+          user_id: string
+          last_read_at: string
+          updated_at: string
+        }
+        Insert: {
+          conversation_id: string
+          user_id: string
+          last_read_at?: string
+          updated_at?: string
+        }
+        Update: {
+          last_read_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'chat_read_states_conversation_id_fkey'
+            columns: ['conversation_id']
+            referencedRelation: 'chat_conversations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'chat_read_states_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       request_status_history: {
         Row: {
           id: string
@@ -718,6 +957,80 @@ export interface Database {
 
     Views: Record<string, never>
     Functions: {
+
+      get_notification_unread_count: {
+        Args: Record<string, never>
+        Returns: number
+      }
+      mark_notification_read: {
+        Args: { p_notification_id: string }
+        Returns: boolean
+      }
+      mark_all_notifications_read: {
+        Args: Record<string, never>
+        Returns: number
+      }
+      preview_notification_audience: {
+        Args: {
+          p_clients: boolean
+          p_admins: boolean
+          p_superadmins: boolean
+        }
+        Returns: Json
+      }
+      send_custom_notification: {
+        Args: {
+          p_title: string
+          p_message: string
+          p_clients: boolean
+          p_admins: boolean
+          p_superadmins: boolean
+          p_target_url?: string | null
+          p_type?: string
+        }
+        Returns: Json
+      }
+      get_or_create_chat_conversation: {
+        Args: {
+          p_context_type?: string | null
+          p_context_ref?: string | null
+          p_context_label?: string | null
+          p_context_url?: string | null
+        }
+        Returns: string
+      }
+      mark_chat_conversation_read: {
+        Args: { p_conversation_id: string }
+        Returns: boolean
+      }
+      get_chat_unread_count: {
+        Args: Record<string, never>
+        Returns: number
+      }
+      get_superadmin_chat_inbox: {
+        Args: { p_status?: string; p_search?: string }
+        Returns: {
+          id: string
+          customer_id: string
+          customer_name: string
+          customer_email: string
+          status: string
+          context_type: string | null
+          context_ref: string | null
+          context_label: string | null
+          context_url: string | null
+          last_message_at: string
+          created_at: string
+          resolved_at: string | null
+          last_message_body: string
+          last_message_sender_type: string
+          unread_count: number
+        }[]
+      }
+      set_chat_conversation_status: {
+        Args: { p_conversation_id: string; p_status: string }
+        Returns: boolean
+      }
       get_all_admins: {
         Args: Record<string, never>
         Returns: { id: string; email: string; name: string; role: string; created_at: string }[]
@@ -789,6 +1102,7 @@ export type ProductRow = Database['public']['Tables']['products']['Row']
 export type CustomerRow = Database['public']['Tables']['customers']['Row']
 export type PartRow = Database['public']['Tables']['parts']['Row']
 export type ContactSubmissionRow = Database['public']['Tables']['contact_submissions']['Row']
+export type NotificationRow = Database['public']['Tables']['notifications']['Row']
 export type ProductImageRow = Database['public']['Tables']['product_images']['Row']
 export type GalleryAlbumRow = Database['public']['Tables']['gallery_albums']['Row']
 export type CustomBuildRow = Database['public']['Tables']['custom_builds']['Row']
@@ -799,3 +1113,8 @@ export type PurchaseQuoteRequestRow = Database['public']['Tables']['purchase_quo
 export type PurchaseQuoteItemRow = Database['public']['Tables']['purchase_quote_items']['Row']
 export type InventoryReservationRow = Database['public']['Tables']['inventory_reservations']['Row']
 export type RequestStatusHistoryRow = Database['public']['Tables']['request_status_history']['Row']
+
+export type ChatConversationRow = Database['public']['Tables']['chat_conversations']['Row']
+export type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row']
+export type ChatQuickQuestionRow = Database['public']['Tables']['chat_quick_questions']['Row']
+export type ChatReadStateRow = Database['public']['Tables']['chat_read_states']['Row']

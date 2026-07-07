@@ -6,6 +6,8 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { SessionProvider } from './contexts/SessionContext'
 import { AuthProvider } from './contexts/AuthContext'
 import { UserProvider } from './contexts/UserContext'
+import { ChatProvider } from './contexts/ChatContext'
+import { NotificationProvider } from './contexts/NotificationContext'
 import { DataProvider } from './contexts/DataContext'
 import { RentalCartProvider } from './contexts/RentalCartContext'
 import { PurchaseQuoteProvider } from './contexts/PurchaseQuoteContext'
@@ -29,13 +31,17 @@ const AppTree = (
                 <SessionProvider>
                   <AuthProvider>
                     <UserProvider>
-                      <DataProvider>
-                        <RentalCartProvider>
-                          <PurchaseQuoteProvider>
-                            <RouterProvider router={router} future={{ v7_startTransition: true }} />
-                          </PurchaseQuoteProvider>
-                        </RentalCartProvider>
-                      </DataProvider>
+                      <NotificationProvider>
+                        <ChatProvider>
+                          <DataProvider>
+                            <RentalCartProvider>
+                              <PurchaseQuoteProvider>
+                                <RouterProvider router={router} future={{ v7_startTransition: true }} />
+                              </PurchaseQuoteProvider>
+                            </RentalCartProvider>
+                          </DataProvider>
+                        </ChatProvider>
+                      </NotificationProvider>
                     </UserProvider>
                   </AuthProvider>
                 </SessionProvider>

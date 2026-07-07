@@ -108,6 +108,21 @@ export function t(key: string, vars?: Record<string, string | number>): string {
 }
 
 const arPhraseMap: Record<string, string> = {
+  // ── Notifications page & popup ──
+  Notifications: 'الإشعارات',
+  'Mark all as read': 'تحديد الكل كمقروء',
+  'View all notifications': 'عرض جميع الإشعارات',
+  'You are all caught up': 'لا توجد إشعارات جديدة',
+  'No notifications yet': 'لا توجد إشعارات بعد',
+  'No unread notifications': 'لا توجد إشعارات غير مقروءة',
+  // 'All' is already defined further down in the map.
+  Unread: 'غير مقروءة',
+  unread: 'غير مقروء',
+  'unread notification(s)': 'إشعار غير مقروء',
+  'Sign in to view notifications': 'سجّل الدخول لعرض الإشعارات',
+  'Notifications are private and tied to your Eventies account.':
+    'الإشعارات خاصة ومرتبطة بحسابك على Eventies.',
+
   // ── Public site UI (Phase 7.6 localization audit) ──
   Breadcrumb: 'مسار التنقل',
   Highlights: 'أبرز النقاط',
@@ -1896,6 +1911,48 @@ const arPhraseMap: Record<string, string> = {
   'Available for purchase quote request': 'متاح لطلب عرض سعر للشراء',
   'Purchase quote request status': 'حالة طلب عرض سعر الشراء',
   'Purchase Quote Request for': 'طلب عرض سعر للشراء لـ',
+
+
+  // Live support chat
+  Chats: 'المحادثات',
+  'Support Chats': 'محادثات الدعم',
+  'Live customer conversations': 'محادثات العملاء المباشرة',
+  'Refresh chats': 'تحديث المحادثات',
+  'Search chats...': 'ابحث في المحادثات...',
+  Resolved: 'تم حلها',
+  'No conversations yet': 'لا توجد محادثات بعد',
+  'No conversations match your search.': 'لا توجد محادثات تطابق بحثك.',
+  'Select a conversation': 'اختر محادثة',
+  'Choose a customer chat from the list to read messages and reply live.': 'اختر محادثة عميل من القائمة لقراءة الرسائل والرد مباشرة.',
+  'Conversation started': 'بدأت المحادثة',
+  Resolve: 'إنهاء المحادثة',
+  Reopen: 'إعادة فتح',
+  'Related to': 'مرتبطة بـ',
+  'Type a reply...': 'اكتب ردك...',
+  Send: 'إرسال',
+  'Send reply': 'إرسال الرد',
+  'Reply could not be sent. Please try again.': 'تعذر إرسال الرد. يرجى المحاولة مرة أخرى.',
+  'Could not load support chats.': 'تعذر تحميل محادثات الدعم.',
+  'Could not load this conversation.': 'تعذر تحميل هذه المحادثة.',
+  'Conversation resolved.': 'تم إنهاء المحادثة.',
+  'Conversation reopened.': 'تمت إعادة فتح المحادثة.',
+  'Could not update conversation status.': 'تعذر تحديث حالة المحادثة.',
+  'This conversation is resolved. Reopen it before sending another reply.': 'تم إنهاء هذه المحادثة. أعد فتحها قبل إرسال رد جديد.',
+  'Chat with Eventies': 'تحدث مع Eventies',
+  'Eventies Support': 'دعم Eventies',
+  'Send us your question and our team will reply here.': 'أرسل سؤالك وسيرد فريقنا عليك هنا.',
+  'Close chat': 'إغلاق المحادثة',
+  'Sign in to start a conversation': 'سجّل الدخول لبدء محادثة',
+  'Your chat history stays connected to your Eventies account.': 'يبقى سجل محادثاتك مرتبطًا بحسابك في Eventies.',
+  'Loading conversation': 'جارٍ تحميل المحادثة',
+  'How can we help?': 'كيف يمكننا مساعدتك؟',
+  'Choose a quick question or write your own message. A super admin will reply here.': 'اختر سؤالًا جاهزًا أو اكتب رسالتك. سيرد عليك أحد المشرفين الرئيسيين هنا.',
+  'This conversation is resolved. Sending a new message will start a new conversation.': 'تم إنهاء هذه المحادثة. إرسال رسالة جديدة سيبدأ محادثة جديدة.',
+  'Type your message...': 'اكتب رسالتك...',
+  'Send message': 'إرسال الرسالة',
+  'Could not load the conversation. Please try again.': 'تعذر تحميل المحادثة. يرجى المحاولة مرة أخرى.',
+  'Your message could not be sent. Please try again.': 'تعذر إرسال رسالتك. يرجى المحاولة مرة أخرى.',
+  'Back to chats': 'العودة إلى المحادثات',
 
   // Legal footer links and public policy pages
   'Privacy Policy': 'سياسة الخصوصية',

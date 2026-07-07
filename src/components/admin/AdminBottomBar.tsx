@@ -4,10 +4,13 @@ import {
   FolderOpen,
   LayoutDashboard,
   Menu,
+  MessageCircle,
   Package,
   type LucideIcon,
 } from 'lucide-react'
 import { useI18n } from '../../contexts/LanguageContext'
+import { useUser } from '../../contexts/UserContext'
+import { useChat } from '../../contexts/ChatContext'
 import { cn } from '../../utils/cn'
 
 type BottomTab = {
@@ -17,7 +20,7 @@ type BottomTab = {
   exact?: boolean
 }
 
-const TABS: BottomTab[] = [
+const DEFAULT_TABS: BottomTab[] = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { to: '/admin/products', label: 'Products', icon: Package },
   { to: '/admin/requests', label: 'Requests', icon: ClipboardList },
@@ -31,6 +34,17 @@ const TABS: BottomTab[] = [
 export default function AdminBottomBar({ onMore }: { onMore: () => void }) {
   const { pathname } = useLocation()
   const { translateText } = useI18n()
+  const { currentUser } = useUser()
+  const { unreadCount } = useChat()
+
+  const tabs: BottomTab[] = currentUser?.role === 'superadmin'
+    ? [
+        { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+        { to: '/admin/chats', label: 'Chats', icon: MessageCircle },
+        { to: '/admin/requests', label: 'Requests', icon: ClipboardList },
+        { to: '/admin/products', label: 'Products', icon: Package },
+      ]
+    : DEFAULT_TABS
 
   const isActive = (tab: BottomTab) =>
     tab.exact ? pathname === tab.to : pathname.startsWith(tab.to)
@@ -47,7 +61,7 @@ export default function AdminBottomBar({ onMore }: { onMore: () => void }) {
       className="admin-bottombar fixed inset-x-0 bottom-0 z-40 md:hidden"
     >
       <div className="grid h-[var(--admin-bottombar-h)] grid-cols-5">
-        {TABS.map(tab => {
+        {tabs.map(tab => {
           const active = isActive(tab)
           const IconComp = tab.icon
           return (
@@ -58,8 +72,15 @@ export default function AdminBottomBar({ onMore }: { onMore: () => void }) {
               className={itemClass(active)}
             >
               <IconComp className="h-5 w-5" strokeWidth={active ? 2.4 : 2} aria-hidden="true" />
-              <span className={cn('text-[10px] leading-tight', active ? 'font-extrabold' : 'font-semibold')}>
-                {translateText(tab.label)}
+              <span className="relative">
+                <span className={cn('text-[10px] leading-tight', active ? 'font-extrabold' : 'font-semibold')}>
+                  {translateText(tab.label)}
+                </span>
+                {tab.to === '/admin/chats' && unreadCount > 0 && (
+                  <span className="absolute -right-3 -top-3 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[8px] font-extrabold text-white">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </span>
             </Link>
           )

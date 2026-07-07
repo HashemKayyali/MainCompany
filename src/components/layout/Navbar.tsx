@@ -25,6 +25,7 @@ import { useI18n } from '../../contexts/LanguageContext'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import { preloadRoute } from '../../utils/route-preload'
 import LanguageSwitcher from './LanguageSwitcher'
+import NotificationBell from '../notifications/NotificationBell'
 
 const NAV_LINKS = [
   { to: '/', label: 'Home' },
@@ -170,6 +171,7 @@ export default function Navbar() {
   const emailName = currentUser?.email?.split('@')[0]?.replace(/[._-]+/g, ' ').trim() || ''
   const accountButtonLabel = userName.split(/\s+/)[0] || emailName.split(/\s+/)[0] || translateText('My Account')
   const isArabic = dir === 'rtl'
+  const isStaff = currentUser?.role === 'admin' || currentUser?.role === 'superadmin'
   const tr = useCallback((value: string) => translateText(value), [translateText])
   const serviceCountLabel = useCallback(
     (count: number) => `${count} ${translateText(count === 1 ? 'service' : 'services')}`,
@@ -645,6 +647,13 @@ export default function Navbar() {
             </div>
 
             <LanguageSwitcher className={`hidden shrink-0 md:inline-flex ${utilityBtn}`} />
+
+            {isLoggedIn && !isStaff && (
+              <NotificationBell
+                mode="client"
+                buttonClassName={`relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all ${utilityBtn}`}
+              />
+            )}
 
             {/* Request draft */}
             <Link
