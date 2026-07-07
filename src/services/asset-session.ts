@@ -1,6 +1,6 @@
 import {
-  deleteStorageIdentities,
-  getStorageIdentities,
+  deleteManagedAssetIdentities,
+  getManagedAssetIdentities,
   type AssetDeletionResult,
   type StorageIdentity,
 } from './storage.service'
@@ -35,7 +35,7 @@ export interface AssetSessionInit {
 
   /**
    * Injected deletion function — mostly for tests. Defaults to the
-   * real `deleteStorageIdentities` from storage.service. It operates
+   * real `deleteManagedAssetIdentities` from storage.service. It operates
    * on parsed identities rather than raw URLs because the session
    * already has canonical-parsed data internally; making the deleter
    * URL-based would force a round-trip through URL synthesis.
@@ -220,7 +220,7 @@ export class AssetSession {
   constructor(init: AssetSessionInit = {}) {
     this.onLateCleanup = init.onLateCleanup
     this.onCleanupFailure = init.onCleanupFailure
-    this.deleter = init.deleter ?? deleteStorageIdentities
+    this.deleter = init.deleter ?? deleteManagedAssetIdentities
     this.ingestOriginals(init.originalUrls ?? [])
   }
 
@@ -304,7 +304,7 @@ export class AssetSession {
       }
 
       for (const url of producedUrls) {
-        for (const identity of getStorageIdentities(url)) {
+        for (const identity of getManagedAssetIdentities(url)) {
           this.sessionUploads.set(identity.canonical, identity)
         }
       }
@@ -324,7 +324,7 @@ export class AssetSession {
    */
   registerSessionUpload(url: string | null | undefined): void {
     if (this.disposed) return
-    const identities = getStorageIdentities(url)
+    const identities = getManagedAssetIdentities(url)
     if (identities.length === 0) return
     for (const identity of identities) {
       this.sessionUploads.set(identity.canonical, identity)
@@ -436,7 +436,7 @@ export class AssetSession {
 
     const finalCanonicals = new Set<string>()
     for (const url of finalUrls) {
-      for (const identity of getStorageIdentities(url)) {
+      for (const identity of getManagedAssetIdentities(url)) {
         finalCanonicals.add(identity.canonical)
       }
     }
@@ -487,7 +487,7 @@ export class AssetSession {
 
     const finalCanonicals = new Set<string>()
     for (const url of finalUrls) {
-      for (const identity of getStorageIdentities(url)) {
+      for (const identity of getManagedAssetIdentities(url)) {
         finalCanonicals.add(identity.canonical)
       }
     }
@@ -594,12 +594,12 @@ export class AssetSession {
   /* -------- introspection helpers (mostly for tests) -------- */
 
   hasOriginal(url: string | null | undefined): boolean {
-    const identities = getStorageIdentities(url)
+    const identities = getManagedAssetIdentities(url)
     return identities.length > 0 && identities.every(identity => this.originalPersisted.has(identity.canonical))
   }
 
   hasSessionUpload(url: string | null | undefined): boolean {
-    const identities = getStorageIdentities(url)
+    const identities = getManagedAssetIdentities(url)
     return identities.some(identity => this.sessionUploads.has(identity.canonical))
   }
 
@@ -627,7 +627,7 @@ export class AssetSession {
 
   private ingestOriginals(urls: Array<string | null | undefined>): void {
     for (const url of urls) {
-      for (const identity of getStorageIdentities(url)) {
+      for (const identity of getManagedAssetIdentities(url)) {
         this.originalPersisted.set(identity.canonical, identity)
       }
     }
@@ -670,7 +670,7 @@ function urlsToIdentities(
 ): StorageIdentity[] {
   const map = new Map<string, StorageIdentity>()
   for (const url of urls) {
-    for (const identity of getStorageIdentities(url)) {
+    for (const identity of getManagedAssetIdentities(url)) {
       if (!map.has(identity.canonical)) {
         map.set(identity.canonical, identity)
       }

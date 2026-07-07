@@ -13,6 +13,9 @@ import {
   type StorageIdentity,
 } from './storage-identity'
 import { encodeMediaValue } from '../utils/media-frame'
+import { uploadImageToCloudinary, deleteCloudinaryIdentities } from './cloudinary.service'
+import { isCloudinaryIdentity } from './cloudinary-identity'
+import { getManagedAssetIdentities } from './managed-asset-identity'
 
 /* ------------------------------------------------------------------ *
  *  Re-exports — callers used to import these from `storage.service`   *
@@ -35,6 +38,7 @@ export type {
   StorageAssetKind,
   StorageIdentity,
 }
+export { getManagedAssetIdentities }
 
 /* ------------------------------------------------------------------ *
  *  Constants                                                          *
@@ -45,6 +49,7 @@ const WEBP_QUALITY = 0.78
 const PREVIEW_WEBP_QUALITY = 0.74
 const HERO_MAX_WIDTH = 1600
 const THUMB_MAX_WIDTH = 720
+const IMAGE_UPLOAD_PROVIDER = String(import.meta.env.VITE_IMAGE_UPLOAD_PROVIDER ?? 'supabase').trim().toLowerCase()
 
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024
 const VIDEO_MAX_WIDTH = 960
@@ -219,6 +224,11 @@ export async function uploadImageVariants(
   folder: string,
   fileName?: string,
 ): Promise<UploadedImageVariants> {
+  if (IMAGE_UPLOAD_PROVIDER === 'cloudinary') {
+    const url = await uploadImageToCloudinary(file, folder)
+    return { thumbUrl: url, heroUrl: url }
+  }
+
   if (!isSupabaseConfigured()) {
     const dataUrl = await fileToDataUrl(file)
     return { thumbUrl: dataUrl, heroUrl: dataUrl }
@@ -333,14 +343,33 @@ export async function deleteAssetsSafely(
   const identities = new Map<string, StorageIdentity>()
 
   for (const url of urls) {
-    for (const identity of getStorageIdentities(url)) {
+    for (const identity of getManagedAssetIdentities(url)) {
       if (!identities.has(identity.canonical)) {
         identities.set(identity.canonical, identity)
       }
     }
   }
 
-  return deleteStorageIdentities(Array.from(identities.values()))
+  return deleteManagedAssetIdentities(Array.from(identities.values()))
+}
+
+/**
+ * Delete a mixed provider set. Supabase identities keep the existing batched
+ * bucket deletion path; Cloudinary identities are sent to the authenticated
+ * Edge Function so the API secret never reaches the browser.
+ */
+export async function deleteManagedAssetIdentities(
+  identities: StorageIdentity[],
+): Promise<AssetDeletionResult> {
+  const supabaseIdentities = identities.filter(identity => !isCloudinaryIdentity(identity))
+  const cloudinaryIdentities = identities.filter(isCloudinaryIdentity)
+
+  const [supabaseResult, cloudinaryResult] = await Promise.all([
+    deleteStorageIdentities(supabaseIdentities),
+    deleteCloudinaryIdentities(cloudinaryIdentities),
+  ])
+
+  return mergeDeletionResults(supabaseResult, cloudinaryResult)
 }
 
 /**

@@ -58,6 +58,7 @@ const HERO_B = url(IMAGE_BUCKET, 'products/b-hero.webp')
 const HERO_C = url(IMAGE_BUCKET, 'products/c-hero.webp')
 const HERO_D = url(IMAGE_BUCKET, 'products/d-hero.webp')
 const VIDEO_A = url(VIDEO_BUCKET, 'products/v-a.webm')
+const CLOUDINARY_A = 'https://res.cloudinary.com/vcax8jxb/image/upload/v1783447500/eventies/products/a.jpg'
 
 beforeEach(() => {
   vi.useRealTimers()
@@ -442,6 +443,22 @@ describe('AssetSession — canonical dedup guards against duplicate-URL bugs', (
     // shared underlying storage object.
     const cleanup = await session.commit([framed])
     expect(cleanup.deleted).toHaveLength(0)
+  })
+})
+
+
+describe('AssetSession — Cloudinary hybrid lifecycle', () => {
+  it('tracks and cleans a Cloudinary upload by canonical public ID', async () => {
+    const { fn: deleter, calls } = makeDeleter()
+    const session = createAssetSession({ deleter })
+
+    await session.runUpload<string>(async () => CLOUDINARY_A, value => [value])
+    expect(session.snapshot().sessionUploadsCount).toBe(1)
+
+    await session.cancel()
+    expect(calls[0]).toEqual([
+      'cloudinary:vcax8jxb:image/eventies/products/a',
+    ])
   })
 })
 

@@ -30,3 +30,5 @@ storage-gc-reports/
 storage-gc-reports/
 .env.local
 .env
+
+supabase/.temp/

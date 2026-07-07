@@ -156,12 +156,24 @@ export function useAssetSession(options: UseAssetSessionOptions = {}): UseAssetS
     return unsubscribe
   }, [session])
 
-  // Unmount cleanup. `session.dispose()` is idempotent and
-  // fire-and-forget for its own cleanup. Any in-flight uploads that
-  // resolve later detect the disposed flag and clean themselves.
+  // Unmount cleanup. React StrictMode replays Effect setup/cleanup once
+  // in development without actually unmounting the component. Disposing
+  // synchronously in that probe cleanup permanently killed the live session,
+  // so every local upload returned `null` before any network request started.
+  //
+  // Defer disposal to a microtask and cancel it when the Effect is set up
+  // again first. A real unmount has no subsequent setup, so the session is
+  // still disposed and temporary assets are still cleaned as intended.
+  const cleanupEpochRef = useRef(0)
   useEffect(() => {
+    const effectEpoch = ++cleanupEpochRef.current
+    const targetSession = session
+
     return () => {
-      if (!session.isDisposed) session.dispose()
+      queueMicrotask(() => {
+        if (cleanupEpochRef.current !== effectEpoch) return
+        if (!targetSession.isDisposed) targetSession.dispose()
+      })
     }
   }, [session])
 

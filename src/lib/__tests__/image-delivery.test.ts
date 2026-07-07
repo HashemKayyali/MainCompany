@@ -38,6 +38,25 @@ describe('image delivery strategy', () => {
     expect(srcSet).toContain('960w')
   })
 
+
+  it('builds responsive Cloudinary f_auto/q_auto URLs without a feature flag', async () => {
+    vi.stubEnv('VITE_IMAGE_TRANSFORMATIONS_ENABLED', 'false')
+    vi.resetModules()
+    const mod = await import('../image-delivery')
+
+    const cloudinary =
+      'https://res.cloudinary.com/vcax8jxb/image/upload/v1783447500/eventies/gallery/sample.jpg'
+
+    const src = mod.getImageDeliverySource(cloudinary, 'card')
+    expect(src).toContain('/image/upload/c_limit,w_720,f_auto,q_auto/v1783447500/')
+
+    const srcSet = mod.getImageDeliverySrcSet(cloudinary, 'card')
+    expect(srcSet).toContain('c_limit,w_320,f_auto,q_auto')
+    expect(srcSet).toContain('c_limit,w_960,f_auto,q_auto')
+    expect(srcSet).toContain('320w')
+    expect(srcSet).toContain('960w')
+  })
+
   it('leaves non-Supabase local assets untouched', async () => {
     vi.stubEnv('VITE_IMAGE_TRANSFORMATIONS_ENABLED', 'true')
     vi.resetModules()

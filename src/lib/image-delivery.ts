@@ -32,6 +32,8 @@ const PRESETS: Record<ImagePreset, ImagePresetConfig> = {
 
 const SUPABASE_PUBLIC_MARKER = '/storage/v1/object/public/'
 const SUPABASE_RENDER_MARKER = '/storage/v1/render/image/public/'
+const CLOUDINARY_UPLOAD_MARKER = '/image/upload/'
+const CLOUDINARY_DELIVERY_ORIGIN = 'https://res.cloudinary.com'
 const transformationsEnabled =
   String(import.meta.env.VITE_IMAGE_TRANSFORMATIONS_ENABLED ?? '').toLowerCase() === 'true'
 
@@ -46,7 +48,16 @@ function isSupabaseTransformable(src: string) {
   return src.includes(SUPABASE_PUBLIC_MARKER) || src.includes(SUPABASE_RENDER_MARKER)
 }
 
-function toTransformUrl(src: string, width: number, quality: number) {
+export function isCloudinaryImageUrl(src: string) {
+  try {
+    const url = new URL(src)
+    return url.hostname === 'res.cloudinary.com' && url.pathname.includes(CLOUDINARY_UPLOAD_MARKER)
+  } catch {
+    return false
+  }
+}
+
+function toSupabaseTransformUrl(src: string, width: number, quality: number) {
   if (!src || !isSupabaseTransformable(src)) return src
 
   const withoutHash = src.split('#')[0] || src
@@ -56,6 +67,37 @@ function toTransformUrl(src: string, width: number, quality: number) {
   url.searchParams.set('width', String(width))
   url.searchParams.set('quality', String(quality))
   url.searchParams.set('resize', 'contain')
+  return url.toString()
+}
+
+/**
+ * Build a Cloudinary delivery URL from the stored original secure_url.
+ *
+ * We intentionally use Cloudinary's automatic format and quality selection,
+ * while `srcset` controls the requested pixel width. `c_limit` prevents an
+ * accidental upscale when the source is smaller than the preset width.
+ */
+function toCloudinaryTransformUrl(src: string, width: number) {
+  if (!src || !isCloudinaryImageUrl(src)) return src
+
+  const url = new URL(src)
+  const markerIndex = url.pathname.indexOf(CLOUDINARY_UPLOAD_MARKER)
+  if (markerIndex < 0) return src
+
+  const prefix = url.pathname.slice(0, markerIndex + CLOUDINARY_UPLOAD_MARKER.length)
+  const tail = url.pathname.slice(markerIndex + CLOUDINARY_UPLOAD_MARKER.length)
+  const segments = tail.split('/').filter(Boolean)
+  const versionIndex = segments.findIndex(segment => /^v\d+$/.test(segment))
+
+  // Stored Eventies Cloudinary URLs are versioned Upload API secure URLs. If a
+  // non-versioned URL slips through, inserting the transformation directly is
+  // still a valid Cloudinary delivery form.
+  const assetTail = versionIndex >= 0 ? segments.slice(versionIndex).join('/') : tail
+  const transform = `c_limit,w_${Math.max(1, Math.round(width))},f_auto,q_auto`
+
+  url.pathname = `${prefix}${transform}/${assetTail}`
+  url.search = ''
+  url.hash = ''
   return url.toString()
 }
 
@@ -72,8 +114,12 @@ export function getImageDeliverySource(media: string | undefined, preset: ImageP
   const { original, preview } = getParsedSources(media)
   if (!original) return ''
 
+  if (isCloudinaryImageUrl(original)) {
+    return toCloudinaryTransformUrl(original, config.width)
+  }
+
   if (transformationsEnabled && isSupabaseTransformable(original)) {
-    return toTransformUrl(original, config.width, config.quality)
+    return toSupabaseTransformUrl(original, config.width, config.quality)
   }
 
   if (config.useEmbeddedPreview && preview) return preview
@@ -81,14 +127,21 @@ export function getImageDeliverySource(media: string | undefined, preset: ImageP
 }
 
 export function getImageDeliverySrcSet(media: string | undefined, preset: ImagePreset = 'card') {
-  if (!transformationsEnabled) return undefined
-
   const { original } = getParsedSources(media)
-  if (!original || !isSupabaseTransformable(original)) return undefined
+  if (!original) return undefined
 
   const config = PRESETS[preset]
+
+  if (isCloudinaryImageUrl(original)) {
+    return config.srcSetWidths
+      .map(width => `${toCloudinaryTransformUrl(original, width)} ${width}w`)
+      .join(', ')
+  }
+
+  if (!transformationsEnabled || !isSupabaseTransformable(original)) return undefined
+
   return config.srcSetWidths
-    .map(width => `${toTransformUrl(original, width, config.quality)} ${width}w`)
+    .map(width => `${toSupabaseTransformUrl(original, width, config.quality)} ${width}w`)
     .join(', ')
 }
 
@@ -169,14 +222,15 @@ export function preloadImageWhenIdle(media: string | undefined, preset: ImagePre
 export function ensureImageOriginPreconnect() {
   if (typeof document === 'undefined') return
 
-  const raw = import.meta.env.VITE_SUPABASE_URL as string | undefined
-  if (!raw) return
+  const origins = new Set<string>([CLOUDINARY_DELIVERY_ORIGIN])
+  const rawSupabase = import.meta.env.VITE_SUPABASE_URL as string | undefined
 
-  let origin = ''
-  try {
-    origin = new URL(raw).origin
-  } catch {
-    return
+  if (rawSupabase) {
+    try {
+      origins.add(new URL(rawSupabase).origin)
+    } catch {
+      // Ignore malformed local configuration; image rendering still falls back.
+    }
   }
 
   const addLink = (rel: 'preconnect' | 'dns-prefetch', href: string) => {
@@ -189,8 +243,10 @@ export function ensureImageOriginPreconnect() {
     document.head.appendChild(link)
   }
 
-  addLink('dns-prefetch', origin)
-  addLink('preconnect', origin)
+  for (const origin of origins) {
+    addLink('dns-prefetch', origin)
+    addLink('preconnect', origin)
+  }
 }
 
 export function imageTransformationsEnabled() {
