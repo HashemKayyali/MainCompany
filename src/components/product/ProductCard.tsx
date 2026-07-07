@@ -15,6 +15,8 @@ import FramedVideo from '../ui/FramedVideo'
 import ProductCommerceActions from './ProductCommerceActions'
 import { cn } from '../../utils/cn'
 import { useSpotlight, SpotlightOverlay } from '../ui/spotlight-card'
+import { preloadImage } from '../../lib/image-delivery'
+import { preloadRoute } from '../../utils/route-preload'
 
 const CARD_IMAGE_SIZES = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
 
@@ -66,6 +68,12 @@ const ProductCard = memo(function ProductCard({
   const hasVideo = Boolean(product.videoUrl)
   const spotlight = useSpotlight(!reducedCardEffects)
   const interactivePreviewEnabled = hasVideo && !reducedCardEffects
+  const productHref = `/products/${product.slug}`
+
+  const prepareProduct = () => {
+    preloadRoute(productHref)
+    void preloadImage(product.heroImage, 'detail')
+  }
 
   const categoryLabel =
     categories.find(category => category.id === product.categoryId)?.name || 'Marketplace'
@@ -129,7 +137,7 @@ const ProductCard = memo(function ProductCard({
 
   const openProductFromCard = (event: MouseEvent<HTMLElement>) => {
     if (isCardActionTarget(event.target)) return
-    navigate(`/products/${product.slug}`)
+    navigate(productHref)
   }
 
   return (
@@ -138,7 +146,12 @@ const ProductCard = memo(function ProductCard({
       ref={cardRef}
       onClick={openProductFromCard}
       onDragStart={event => event.preventDefault()}
-      onMouseEnter={startPreview}
+      onMouseEnter={() => {
+        prepareProduct()
+        startPreview()
+      }}
+      onFocusCapture={prepareProduct}
+      onTouchStart={prepareProduct}
       onMouseLeave={stopPreview}
       {...spotlight.handlers}
       className={cn(
@@ -169,13 +182,14 @@ const ProductCard = memo(function ProductCard({
       )}
 
       <Link
-        to={`/products/${product.slug}`}
+        to={productHref}
         aria-label={`${translateText('Open')} ${product.name}`}
         draggable={false}
         className="relative z-10 block aspect-[4/3] w-full shrink-0 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2"
       >
         <FramedImage
           media={product.heroImage}
+          preset="card"
           alt={product.name}
           width={800}
           height={600}
@@ -284,7 +298,7 @@ const ProductCard = memo(function ProductCard({
 
         <div className={compact ? 'mb-1.5 flex-1' : 'mb-1.5 flex-1 sm:mb-4'}>
           <Link
-            to={`/products/${product.slug}`}
+            to={productHref}
             draggable={false}
             className="outline-none focus-visible:underline"
           >

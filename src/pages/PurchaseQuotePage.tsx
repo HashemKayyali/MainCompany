@@ -261,6 +261,7 @@ export default function PurchaseQuotePage() {
                       {item.productImage ? (
                         <FramedImage
                           media={item.productImage}
+                          preset="tiny"
                           alt={item.productTitle}
                           width={128}
                           height={128}

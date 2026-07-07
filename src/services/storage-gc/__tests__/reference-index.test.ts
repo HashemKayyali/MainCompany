@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { buildReferenceIndex } from '../reference-index'
 import { IMAGE_BUCKET, VIDEO_BUCKET } from '../../storage-identity'
+import { encodeMediaValue } from '../../../utils/media-frame'
 
 const PROJECT = 'https://example.supabase.co'
 const url = (bucket: string, path: string) =>
@@ -62,6 +63,19 @@ describe('reference-index: sources coverage', () => {
     expect(scan.index.size).toBe(1)
     const entry = scan.index.get(`${IMAGE_BUCKET}/products/a-hero.webp`)
     expect(entry?.sources).toHaveLength(2)
+  })
+
+  it('protects an embedded preview sibling as a real database reference', () => {
+    const hero = url(IMAGE_BUCKET, 'products/p-hero.webp')
+    const preview = url(IMAGE_BUCKET, 'products/p-thumb.webp')
+    const media = encodeMediaValue(hero, undefined, { previewSrc: preview })
+    const scan = buildReferenceIndex({
+      products: [{ slug: 'p', hero_image: media, gallery: [], video_url: null }],
+    })
+
+    expect(scan.index.has(`${IMAGE_BUCKET}/products/p-hero.webp`)).toBe(true)
+    expect(scan.index.has(`${IMAGE_BUCKET}/products/p-thumb.webp`)).toBe(true)
+    expect(scan.rawReferenceCount).toBe(2)
   })
 
   it('product_images.url IS registered — protects a legacy row', () => {

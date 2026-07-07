@@ -26,6 +26,8 @@ import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import { preloadRoute } from '../../utils/route-preload'
 import LanguageSwitcher from './LanguageSwitcher'
 import NotificationBell from '../notifications/NotificationBell'
+import FramedImage from '../ui/FramedImage'
+import { preloadImage } from '../../lib/image-delivery'
 
 const NAV_LINKS = [
   { to: '/', label: 'Home' },
@@ -608,8 +610,9 @@ export default function Navbar() {
                           onMouseEnter={() => {
                             setActiveIndex(index)
                             preloadRoute(result.to)
+                            if (result.image) void preloadImage(result.image, 'thumbnail')
                           }}
-                          onFocus={() => preloadRoute(result.to)}
+                          onFocus={() => { preloadRoute(result.to); if (result.image) void preloadImage(result.image, 'thumbnail') }}
                           {...fastNavProps(result.to, () => {
                             setSearchFocused(false)
                             setQuery('')
@@ -620,7 +623,7 @@ export default function Navbar() {
                         >
                           <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[11px] border border-violet-200 bg-violet-50 text-violet-600">
                             {result.type === 'product' && result.image ? (
-                              <img src={result.image} alt="" width={40} height={40} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                              <FramedImage media={result.image} preset="tiny" alt="" width={40} height={40} loading="lazy" className="h-full w-full object-cover" fallbackTransform={{ fit: 'cover' }} />
                             ) : result.type === 'category' ? (
                               <Tag className="h-4 w-4" strokeWidth={2.2} />
                             ) : (
@@ -839,14 +842,15 @@ export default function Navbar() {
                     <Link
                       key={`m-${result.type}-${result.to}`}
                       to={result.to}
-                      onMouseEnter={() => preloadRoute(result.to)}
-                      onFocus={() => preloadRoute(result.to)}
+                      onMouseEnter={() => { preloadRoute(result.to); if (result.image) void preloadImage(result.image, 'thumbnail') }}
+                      onFocus={() => { preloadRoute(result.to); if (result.image) void preloadImage(result.image, 'thumbnail') }}
+                      onTouchStart={() => { preloadRoute(result.to); if (result.image) void preloadImage(result.image, 'thumbnail') }}
                       {...fastNavProps(result.to, () => setMobileOpen(false))}
                       className="flex items-center gap-3 border-b border-violet-50 px-3 py-2.5 last:border-0 hover:bg-violet-50"
                     >
                       <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[9px] border border-violet-200 bg-violet-50 text-violet-600">
                         {result.type === 'product' && result.image ? (
-                          <img src={result.image} alt="" width={32} height={32} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                          <FramedImage media={result.image} preset="tiny" alt="" width={32} height={32} loading="lazy" className="h-full w-full object-cover" fallbackTransform={{ fit: 'cover' }} />
                         ) : result.type === 'category' ? (
                           <Tag className="h-3.5 w-3.5" strokeWidth={2.2} />
                         ) : (

@@ -21,6 +21,7 @@ import { useRequireAuthAction } from '../hooks/useRequireAuthAction'
 import { buildInitialRequestForm, hasValidDateRange } from '../utils/commerce'
 import { getErrorMessage } from '../lib/errors'
 import { cn } from '../utils/cn'
+import FramedImage from '../components/ui/FramedImage'
 
 const cardShell =
   'rounded-[22px] border border-violet-200/70 bg-white shadow-[0_18px_44px_-34px_rgba(89,23,196,0.30)]'
@@ -493,8 +494,9 @@ export default function CheckoutPage() {
                   <div key={item.productSlug} className="flex gap-3 rounded-[15px] border border-violet-100 bg-violet-50/40 p-3">
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[11px] bg-white ring-1 ring-violet-200/60">
                       {item.productImage ? (
-                        <img
-                          src={item.productImage}
+                        <FramedImage
+                          media={item.productImage}
+                          preset="tiny"
                           alt={item.productTitle}
                           width={96}
                           height={96}

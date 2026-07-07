@@ -22,6 +22,7 @@ function ClientLogo({ customer }: { customer: Customer }) {
     <div className="flex h-20 w-[150px] shrink-0 items-center justify-center px-5 sm:h-24 sm:w-[180px] sm:px-7 lg:h-28 lg:w-[210px]">
       <FramedImage
         media={customer.logo}
+        preset="logo"
         alt=""
         width={320}
         height={180}

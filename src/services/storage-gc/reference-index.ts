@@ -1,4 +1,4 @@
-import { getStorageIdentity } from '../storage-identity'
+import { getStorageIdentities } from '../storage-identity'
 import type { DbReference, DbReferenceSource, ReferenceIndex } from './types'
 
 /* ------------------------------------------------------------------ *
@@ -92,23 +92,23 @@ export function buildReferenceIndex(
     source: DbReferenceSource,
   ) => {
     if (!url) return
-    const identity = getStorageIdentity(url)
-    if (!identity) return
-    raw += 1
-    const existing = index.get(identity.canonical)
-    if (existing) {
-      duplicates += 1
-      existing.sources.push(source)
-      return
+    for (const identity of getStorageIdentities(url)) {
+      raw += 1
+      const existing = index.get(identity.canonical)
+      if (existing) {
+        duplicates += 1
+        existing.sources.push(source)
+        continue
+      }
+      const entry: DbReference = {
+        canonical: identity.canonical,
+        bucket: identity.bucket,
+        path: identity.path,
+        kind: identity.kind,
+        sources: [source],
+      }
+      index.set(identity.canonical, entry)
     }
-    const entry: DbReference = {
-      canonical: identity.canonical,
-      bucket: identity.bucket,
-      path: identity.path,
-      kind: identity.kind,
-      sources: [source],
-    }
-    index.set(identity.canonical, entry)
   }
 
   if (inputs.categories) {

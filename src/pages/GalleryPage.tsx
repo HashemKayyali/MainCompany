@@ -10,6 +10,7 @@ import { ImageGallery, type GalleryImage } from '../components/ui/image-gallery'
 import Lightbox from '../components/gallery/Lightbox'
 import EventiesHero from '../components/layout/EventiesHero'
 import SectionHeading from '../components/home/SectionHeading'
+import { preloadImage, preloadImageWhenIdle } from '../lib/image-delivery'
 
 const GALLERY_FALLBACK_IMAGES = [
   '/images/hero-bg-event.webp',
@@ -44,6 +45,16 @@ function GalleryHeroShowcase({ albums }: { albums: GalleryAlbum[] }) {
   useEffect(() => {
     if (!activityActive || previewImages.length < 2) return
 
+    const cancelIdlePreloads = previewImages
+      .slice(1)
+      .map(image => preloadImageWhenIdle(image, 'hero'))
+
+    return () => cancelIdlePreloads.forEach(cancel => cancel())
+  }, [activityActive, previewImages])
+
+  useEffect(() => {
+    if (!activityActive || previewImages.length < 2) return
+
     const timer = window.setInterval(() => {
       setActiveIndex(current => (current + 1 + Math.floor(Math.random() * Math.min(3, previewImages.length - 1))) % previewImages.length)
     }, 3200)
@@ -62,17 +73,18 @@ function GalleryHeroShowcase({ albums }: { albums: GalleryAlbum[] }) {
 
       <div className="relative grid h-[420px] gap-3 sm:grid-cols-[1fr_0.52fr]">
         <div className="relative overflow-hidden rounded-[24px]">
-          <AnimatePresence mode="wait">
+          <AnimatePresence initial={false}>
             <motion.div
               key={activeImage}
               className="absolute inset-0"
               initial={{ opacity: 0, scale: 1.04 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.985 }}
-              transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
             >
               <FramedImage
                 media={activeImage}
+                preset="hero"
                 alt="Eventies event gallery preview"
                 width={1200}
                 height={900}
@@ -115,9 +127,10 @@ function GalleryHeroShowcase({ albums }: { albums: GalleryAlbum[] }) {
             >
               <FramedImage
                 media={image}
+                preset="thumbnail"
                 alt=""
-                width={800}
-                height={600}
+                width={480}
+                height={360}
                 loading="lazy"
                 sizes="(max-width: 640px) 50vw, 260px"
                 fallbackTransform={{ fit: 'cover' }}
@@ -134,6 +147,7 @@ function GalleryHeroShowcase({ albums }: { albums: GalleryAlbum[] }) {
           <div key={`${image}-strip-${index}-${activeIndex}`} className="relative aspect-[4/3] overflow-hidden rounded-[12px] border border-white/12 bg-white/[0.06]">
             <FramedImage
               media={image}
+              preset="thumbnail"
               alt=""
               width={480}
               height={360}
@@ -172,6 +186,24 @@ export default function GalleryPage() {
     [galleryAlbums]
   )
 
+  useEffect(() => {
+    const covers = new Set<string>()
+    const photos = new Set<string>()
+
+    albums.forEach(album => {
+      if (album.cover && !covers.has(album.cover)) {
+        covers.add(album.cover)
+        void preloadImage(album.cover, 'card')
+      }
+
+      album.images.forEach(image => {
+        if (!image || photos.has(image)) return
+        photos.add(image)
+        void preloadImage(image, 'thumbnail')
+      })
+    })
+  }, [albums])
+
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
   const [lightbox, setLightbox] = useState<{ open: boolean; index: number }>({ open: false, index: 0 })
 
@@ -180,7 +212,10 @@ export default function GalleryPage() {
     setSelectedSlug(current => (current && albums.some(album => album.slug === current) ? current : albums[0].slug))
   }, [albums])
 
-  const selected = useMemo(() => albums.find(album => album.slug === selectedSlug) ?? null, [albums, selectedSlug])
+  const selected = useMemo(
+    () => albums.find(album => album.slug === selectedSlug) ?? albums[0] ?? null,
+    [albums, selectedSlug]
+  )
 
   const galleryImages = useMemo<GalleryImage[]>(
     () => (selected?.images ?? []).map((src, index) => ({ src, alt: `${selected?.title} - photo ${index + 1}` })),
@@ -237,12 +272,15 @@ export default function GalleryPage() {
             <>
               <div className="scrollbar-hide -mx-1 flex gap-3 overflow-x-auto px-1 py-2">
                 {albums.map(album => {
-                  const isActive = album.slug === selectedSlug
+                  const isActive = album.slug === selected?.slug
                   return (
                     <button
                       key={album.slug}
                       type="button"
                       onClick={() => setSelectedSlug(album.slug)}
+                      onMouseEnter={() => { void preloadImage(album.images[0] || album.cover, 'thumbnail') }}
+                      onFocus={() => { void preloadImage(album.images[0] || album.cover, 'thumbnail') }}
+                      onTouchStart={() => { void preloadImage(album.images[0] || album.cover, 'thumbnail') }}
                       aria-pressed={isActive}
                       className={`group relative aspect-[16/10] w-[180px] shrink-0 overflow-hidden rounded-[18px] border text-left outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 sm:w-[210px] ${
                         isActive
@@ -252,10 +290,12 @@ export default function GalleryPage() {
                     >
                       <FramedImage
                         media={album.cover}
+                        preset="card"
                         alt={album.title}
                         width={640}
                         height={400}
-                        loading="lazy"
+                        loading="eager"
+                        fetchPriority={isActive ? 'high' : 'auto'}
                         sizes="(max-width: 640px) 180px, 210px"
                         fallbackTransform={{ fit: 'cover' }}
                         className={`absolute inset-0 h-full w-full object-cover transition-transform duration-500 ${
@@ -298,17 +338,12 @@ export default function GalleryPage() {
                       This album has no photos yet.
                     </div>
                   ) : (
-                    <motion.div
-                      key={selected.slug}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                    >
+                    <div key={selected.slug}>
                       <ImageGallery
                         images={galleryImages}
                         onImageClick={index => setLightbox({ open: true, index })}
                       />
-                    </motion.div>
+                    </div>
                   )}
                 </div>
               )}

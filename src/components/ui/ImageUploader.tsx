@@ -248,8 +248,8 @@ export default function ImageUploader({
 
         const file = files[index]
         try {
-          // Gallery bulk uploads only need the display asset. Avoid generating
-          // and uploading a second unused thumbnail for every gallery photo.
+          // Upload returns one media value that references the detail asset and
+          // embeds its lightweight preview sibling for grids/placeholders.
           const url = await runSessionUpload(() => uploadImage(file, folder))
           // A null return means the session was disposed before the
           // upload finished and the result has already been cleaned;

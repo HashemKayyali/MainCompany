@@ -144,6 +144,24 @@ describe('uploadImageVariants — atomic rollback (scenario 3)', () => {
     expect(result.heroUrl).toBe('https://cdn/products/test-3-hero.webp')
     expect(fake.removals).toHaveLength(0)
   })
+
+
+  it('uploadImage returns one media value with hero source + embedded preview', async () => {
+    const mod = await import('../storage.service')
+    const { parseMediaValue } = await import('../../utils/media-frame')
+    fake.nextUploads = [{ ok: true }, { ok: true }]
+
+    const file = new File([new Uint8Array([9])], 'x.jpg', { type: 'image/jpeg' })
+    const media = await mod.uploadImage(file, 'products', 'test-4')
+    const parsed = parseMediaValue(media)
+
+    expect(parsed.src).toBe('https://cdn/products/test-4-hero.webp')
+    expect(parsed.previewSrc).toBe('https://cdn/products/test-4-thumb.webp')
+    expect(fake.uploads.map(u => u.path)).toEqual([
+      'products/test-4-thumb.webp',
+      'products/test-4-hero.webp',
+    ])
+  })
 })
 
 describe('deleteAssetsSafely — delete/missing/failure (scenarios 4/5/6)', () => {
@@ -172,6 +190,21 @@ describe('deleteAssetsSafely — delete/missing/failure (scenarios 4/5/6)', () =
     expect(result.failed).toHaveLength(1)
     expect(result.failed[0].error).toContain('permission denied')
     expect(mod.isDeletionSuccessful(result)).toBe(false)
+  })
+
+  it('deletes both hero and embedded preview objects from one media value', async () => {
+    const mod = await import('../storage.service')
+    const { encodeMediaValue } = await import('../../utils/media-frame')
+    fake.nextRemovals = [{ ok: true }]
+
+    const hero = 'https://example.supabase.co/storage/v1/object/public/product-images/foo/d-hero.webp'
+    const thumb = 'https://example.supabase.co/storage/v1/object/public/product-images/foo/d-thumb.webp'
+    const media = encodeMediaValue(hero, undefined, { previewSrc: thumb })
+
+    const result = await mod.deleteAssetsSafely([media])
+    expect(result.requested).toBe(2)
+    expect(fake.removals).toHaveLength(1)
+    expect(new Set(fake.removals[0])).toEqual(new Set(['foo/d-hero.webp', 'foo/d-thumb.webp']))
   })
 
   it('dedupes duplicate URLs pointing at the same canonical', async () => {

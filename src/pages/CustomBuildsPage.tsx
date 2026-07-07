@@ -39,6 +39,7 @@ import { usePageMeta } from '../hooks/usePageMeta'
 import { useElementActivity } from '../hooks/useElementActivity'
 import { useMotionEnabled } from '../hooks/useMotionEnabled'
 import { preloadRoute } from '../utils/route-preload'
+import { preloadImage } from '../lib/image-delivery'
 import FramedImage from '../components/ui/FramedImage'
 import Reveal from '../components/home/Reveal'
 import Lightbox from '../components/gallery/Lightbox'
@@ -1313,6 +1314,12 @@ function buildImages(build: CustomBuild) {
     })
 }
 
+function preloadBuildDetailImages(build: CustomBuild) {
+  buildImages(build).forEach((image) => {
+    void preloadImage(image, 'detail')
+  })
+}
+
 function cleanRepeatedText(value?: string) {
   const text = value?.trim().replace(/\s+/g, ' ') ?? ''
   if (!text) return ''
@@ -1365,12 +1372,14 @@ function CustomBuildsHeroShowcase({
         }}
       >
         <div className="relative overflow-hidden rounded-[22px] border border-white/10 bg-[#0f0630]/40">
-          <img
-            src="/images/randd.webp"
+          <FramedImage
+            media="/images/randd.webp"
+            preset="hero"
             alt={translateText('Eventies R&D custom builds studio')}
             width={1600}
             height={1100}
             loading="eager"
+            fetchPriority="high"
             decoding="async"
             draggable={false}
             className="block h-full w-full object-cover"
@@ -1406,6 +1415,12 @@ export default function CustomBuildsPage() {
       'Eventies designs and builds custom interactive experiences, branded activations, games, software, hardware, and event-ready setups for local and international projects.',
     canonical: 'https://www.eventiesjo.com/custom-builds',
   })
+
+  useEffect(() => {
+    capabilities.forEach((item) => {
+      void preloadImage(item.image, 'gallery')
+    })
+  }, [])
 
   useEffect(() => {
     const scheduleGlobePreload = () => preloadGlobeAssets()
@@ -1485,6 +1500,15 @@ export default function CustomBuildsPage() {
     [builds, activeTab]
   )
 
+  useEffect(() => {
+    visibleBuilds.forEach((build) => {
+      buildImages(build).forEach((image, index) => {
+        void preloadImage(image, 'thumbnail')
+        if (index === 0) void preloadImage(image, 'detail')
+      })
+    })
+  }, [visibleBuilds])
+
   // In-section inspection viewer
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   useEffect(() => {
@@ -1510,6 +1534,11 @@ export default function CustomBuildsPage() {
     () => (selectedBuild ? buildImages(selectedBuild) : []),
     [selectedBuild]
   )
+  useEffect(() => {
+    photos.forEach((image) => {
+      void preloadImage(image, 'detail')
+    })
+  }, [photos])
   const selectedDescription = useMemo(
     () =>
       selectedBuild
@@ -1647,19 +1676,20 @@ export default function CustomBuildsPage() {
                     </div>
 
                     <div className="relative aspect-[16/10] overflow-hidden rounded-[18px] bg-[#08031c] sm:aspect-video">
-                      <AnimatePresence mode="wait">
+                      <AnimatePresence initial={false}>
                         <motion.div
                           key={activeCapability.image}
                           initial={
-                            motionEnabled ? { opacity: 0, scale: 1.025 } : false
+                            motionEnabled ? { opacity: 0, scale: 1.012 } : false
                           }
                           animate={{ opacity: 1, scale: 1 }}
-                          exit={motionEnabled ? { opacity: 0 } : undefined}
-                          transition={{ duration: 0.42, ease: EASE }}
+                          exit={motionEnabled ? { opacity: 0, scale: 0.995 } : undefined}
+                          transition={{ duration: 0.3, ease: EASE }}
                           className="absolute inset-0"
                         >
-                          <img
-                            src={activeCapability.image}
+                          <FramedImage
+                            media={activeCapability.image}
+                            preset="gallery"
                             alt={
                               locale === 'ar'
                                 ? activeCapability.titleAr
@@ -1667,7 +1697,8 @@ export default function CustomBuildsPage() {
                             }
                             width={1600}
                             height={900}
-                            loading="lazy"
+                            loading="eager"
+                            fetchPriority="high"
                             decoding="async"
                             className="h-full w-full object-cover"
                           />
@@ -1806,8 +1837,9 @@ export default function CustomBuildsPage() {
                 <div className="relative overflow-hidden rounded-[28px] border border-white/14 bg-white/[0.06] p-3 shadow-[0_34px_90px_-48px_rgba(0,0,0,0.92)] backdrop-blur-xl">
                   <CornerTicks color="rgba(232,121,249,0.58)" />
                   <div className="relative aspect-video overflow-hidden rounded-[20px] bg-[#08031c]">
-                    <img
-                      src="/images/custom-builds/lab/eventies-electronics-lab.webp"
+                    <FramedImage
+                      media="/images/custom-builds/lab/eventies-electronics-lab.webp"
+                      preset="gallery"
                       alt={locale === 'ar' ? 'مختبر Eventies للإلكترونيات والتطوير' : 'Eventies electronics and prototyping lab'}
                       width={1600}
                       height={900}
@@ -2055,7 +2087,10 @@ export default function CustomBuildsPage() {
                         <button
                           key={tab}
                           type="button"
-                          onClick={() => setActiveTab(tab)}
+                          onClick={() => {
+                            setPhotoIdx(0)
+                            setActiveTab(tab)
+                          }}
                           aria-pressed={isActive}
                           className={`relative isolate overflow-hidden rounded-full border px-4 py-2 text-[11px] font-bold transition-all sm:px-5 sm:text-[12px] ${isActive ? 'border-fuchsia-400/35 text-white shadow-[0_12px_30px_-18px_rgba(217,70,239,0.8)]' : 'border-white/14 bg-white/[0.045] text-white/68 hover:border-white/30 hover:bg-white/[0.08] hover:text-white'}`}
                         >
@@ -2141,7 +2176,8 @@ export default function CustomBuildsPage() {
                                     alt=""
                                     width={240}
                                     height={160}
-                                    loading="lazy"
+                                    preset="thumbnail"
+                                    loading="eager"
                                     sizes="64px"
                                     fallbackTransform={{ fit: 'cover' }}
                                     className="h-full w-full object-cover"
@@ -2158,7 +2194,7 @@ export default function CustomBuildsPage() {
 
                             <div className="relative aspect-[4/3] overflow-hidden rounded-[19px] bg-[#050214] sm:aspect-video">
                             {/* Soft backdrop prevents empty bars for portrait or transparent assets. */}
-                            <AnimatePresence mode="wait">
+                            <AnimatePresence initial={false}>
                               <motion.div
                                 key={`backdrop-${photos[safeIdx]}`}
                                 initial={motionEnabled ? { opacity: 0 } : false}
@@ -2166,14 +2202,15 @@ export default function CustomBuildsPage() {
                                 exit={
                                   motionEnabled ? { opacity: 0 } : undefined
                                 }
-                                transition={{ duration: 0.35, ease: EASE }}
+                                transition={{ duration: 0.26, ease: EASE }}
                                 className="absolute inset-0"
                               >
                                 <FramedImage
                                   media={photos[safeIdx]}
+                                  preset="thumbnail"
                                   alt=""
-                                  width={1600}
-                                  height={900}
+                                  width={640}
+                                  height={360}
                                   loading="eager"
                                   sizes="(max-width: 1024px) 100vw, 980px"
                                   fallbackTransform={{ fit: 'cover' }}
@@ -2194,23 +2231,24 @@ export default function CustomBuildsPage() {
                               className="absolute inset-0 block h-full w-full outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fuchsia-400"
                               aria-label={`${locale === 'ar' ? 'فتح' : 'Open'} ${selectedBuild.title}`}
                             >
-                              <AnimatePresence mode="wait">
+                              <AnimatePresence initial={false}>
                                 <motion.div
                                   key={photos[safeIdx]}
                                   initial={
                                     motionEnabled
-                                      ? { opacity: 0, scale: 1.02 }
+                                      ? { opacity: 0, scale: 1.01 }
                                       : false
                                   }
                                   animate={{ opacity: 1, scale: 1 }}
                                   exit={
-                                    motionEnabled ? { opacity: 0 } : undefined
+                                    motionEnabled ? { opacity: 0, scale: 0.995 } : undefined
                                   }
-                                  transition={{ duration: 0.42, ease: EASE }}
+                                  transition={{ duration: 0.3, ease: EASE }}
                                   className="absolute inset-0"
                                 >
                                   <FramedImage
                                     media={photos[safeIdx]}
+                                    preset="detail"
                                     alt={`${selectedBuild.title} — photo ${safeIdx + 1}`}
                                     width={1600}
                                     height={900}
@@ -2328,7 +2366,13 @@ export default function CustomBuildsPage() {
                             <button
                               key={key}
                               type="button"
-                              onClick={() => setSelectedKey(key)}
+                              onClick={() => {
+                                setPhotoIdx(0)
+                                setSelectedKey(key)
+                              }}
+                              onMouseEnter={() => preloadBuildDetailImages(build)}
+                              onFocus={() => preloadBuildDetailImages(build)}
+                              onTouchStart={() => preloadBuildDetailImages(build)}
                               aria-pressed={isActive}
                               dir="ltr"
                               className={`group relative flex w-[250px] shrink-0 items-center gap-2.5 overflow-hidden rounded-[15px] border p-2 text-left transition-all sm:w-[280px] lg:w-full ${isActive ? 'border-fuchsia-300/60 bg-gradient-to-r from-violet-600/36 to-fuchsia-500/18 shadow-[0_18px_40px_-28px_rgba(217,70,239,0.82)]' : 'border-white/10 bg-white/[0.035] hover:border-white/24 hover:bg-white/[0.075]'}`}
@@ -2336,6 +2380,7 @@ export default function CustomBuildsPage() {
                               <span className="relative h-[56px] w-[76px] shrink-0 overflow-hidden rounded-[11px] border border-white/10 bg-black/20">
                                 <FramedImage
                                   media={cover}
+                                  preset="card"
                                   alt={build.title}
                                   width={384}
                                   height={256}

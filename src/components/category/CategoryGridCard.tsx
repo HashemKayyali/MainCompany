@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import CategoryTileView from '../home/CategoryTileView'
 import { preloadRoute } from '../../utils/route-preload'
+import { preloadImage } from '../../lib/image-delivery'
 
 export type CategoryGridCardData = {
   name: string
@@ -23,8 +24,9 @@ export default function CategoryGridCard({
   return (
     <Link
       to={href}
-      onMouseEnter={() => preloadRoute(href)}
-      onFocus={() => preloadRoute(href)}
+      onMouseEnter={() => { preloadRoute(href); void preloadImage(category.image, 'hero') }}
+      onFocus={() => { preloadRoute(href); void preloadImage(category.image, 'hero') }}
+      onTouchStart={() => { preloadRoute(href); void preloadImage(category.image, 'hero') }}
       aria-label={`Explore ${category.name}`}
       className="block h-full w-full cursor-pointer text-left outline-none transition-transform duration-400 hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f8f3ff]"
     >

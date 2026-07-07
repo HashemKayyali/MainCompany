@@ -124,6 +124,51 @@ export function getStorageIdentity(
   }
 }
 
+
+/**
+ * Return every storage object encoded by one media value. New optimized image
+ * uploads keep the full-detail source as the URL itself and embed a lightweight
+ * preview URL inside the existing `#m=` media payload. This helper expands both
+ * identities so cleanup/audit code never treats the preview sibling as orphaned.
+ */
+export function getStorageIdentities(
+  url: string | null | undefined,
+): StorageIdentity[] {
+  if (!url || typeof url !== 'string') return []
+
+  const identities = new Map<string, StorageIdentity>()
+  const primary = getStorageIdentity(url)
+  if (primary) identities.set(primary.canonical, primary)
+
+  const previewSrc = extractEmbeddedPreviewSource(url)
+  if (previewSrc) {
+    const preview = getStorageIdentity(previewSrc)
+    if (preview) identities.set(preview.canonical, preview)
+  }
+
+  return Array.from(identities.values())
+}
+
+function extractEmbeddedPreviewSource(media: string): string {
+  const hash = media.split('#')[1] || ''
+  if (!hash.startsWith('m=')) return ''
+
+  try {
+    const encoded = hash.slice(2).replace(/-/g, '+').replace(/_/g, '/')
+    const padded = encoded + (encoded.length % 4 === 0 ? '' : '='.repeat(4 - (encoded.length % 4)))
+    const decode = typeof atob === 'function'
+      ? atob
+      : (value: string) => {
+          const maybeBuffer = (globalThis as unknown as { Buffer?: { from: (input: string, encoding: string) => { toString: (encoding: string) => string } } }).Buffer
+          return maybeBuffer ? maybeBuffer.from(value, 'base64').toString('utf8') : ''
+        }
+    const payload = JSON.parse(decode(padded)) as { previewSrc?: unknown }
+    return typeof payload.previewSrc === 'string' ? payload.previewSrc : ''
+  } catch {
+    return ''
+  }
+}
+
 function pickMarker(url: string): string | null {
   if (url.includes(PUBLIC_MARKER)) return PUBLIC_MARKER
   if (url.includes(RENDER_MARKER)) return RENDER_MARKER

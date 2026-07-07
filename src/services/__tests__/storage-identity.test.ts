@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { getStorageIdentity, IMAGE_BUCKET, VIDEO_BUCKET } from '../storage.service'
+import { getStorageIdentities, getStorageIdentity, IMAGE_BUCKET, VIDEO_BUCKET } from '../storage.service'
+import { encodeMediaValue } from '../../utils/media-frame'
 
 /*
  * Canonical storage-identity extraction is the entire foundation for
@@ -70,6 +71,25 @@ describe('getStorageIdentity', () => {
     const transformed = `${project}/storage/v1/render/image/public/${IMAGE_BUCKET}/gallery/b.webp?width=800`
     const canonicals = [bare, framed, transformed].map(u => getStorageIdentity(u)?.canonical)
     expect(new Set(canonicals).size).toBe(1)
+  })
+
+
+
+  it('expands the primary and embedded preview identities from one media value', () => {
+    const hero = `${project}/storage/v1/object/public/${IMAGE_BUCKET}/products/a-hero.webp`
+    const preview = `${project}/storage/v1/object/public/${IMAGE_BUCKET}/products/a-thumb.webp`
+    const media = encodeMediaValue(hero, undefined, { previewSrc: preview })
+
+    expect(getStorageIdentities(media).map(identity => identity.canonical)).toEqual([
+      `${IMAGE_BUCKET}/products/a-hero.webp`,
+      `${IMAGE_BUCKET}/products/a-thumb.webp`,
+    ])
+  })
+
+  it('deduplicates a preview identity when it matches the primary source', () => {
+    const hero = `${project}/storage/v1/object/public/${IMAGE_BUCKET}/products/a.webp`
+    const media = encodeMediaValue(hero, undefined, { previewSrc: hero })
+    expect(getStorageIdentities(media)).toHaveLength(1)
   })
 
   it('rejects data: and blob: URLs', () => {

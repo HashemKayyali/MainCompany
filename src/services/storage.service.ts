@@ -5,12 +5,14 @@ import {
   bucketKind,
   emptyDeletionResult,
   getStorageIdentity,
+  getStorageIdentities,
   stripMediaTransform,
   type AssetDeletionFailure,
   type AssetDeletionResult,
   type StorageAssetKind,
   type StorageIdentity,
 } from './storage-identity'
+import { encodeMediaValue } from '../utils/media-frame'
 
 /* ------------------------------------------------------------------ *
  *  Re-exports — callers used to import these from `storage.service`   *
@@ -24,6 +26,7 @@ export {
   bucketKind,
   emptyDeletionResult,
   getStorageIdentity,
+  getStorageIdentities,
   stripMediaTransform,
 }
 export type {
@@ -39,8 +42,9 @@ export type {
 
 const CACHE_1Y = '31536000'
 const WEBP_QUALITY = 0.78
+const PREVIEW_WEBP_QUALITY = 0.74
 const HERO_MAX_WIDTH = 1600
-const THUMB_MAX_WIDTH = 512
+const THUMB_MAX_WIDTH = 720
 
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024
 const VIDEO_MAX_WIDTH = 960
@@ -118,17 +122,18 @@ async function loadImageBitmap(file: File): Promise<{ bitmap: ImageBitmap }> {
   return { bitmap }
 }
 
-async function toWebpFile(
-  file: File,
+async function bitmapToWebpFile(
+  bitmap: ImageBitmap,
   outNameBase: string,
-  maxWidth: number,
+  maxDimension: number,
   quality = WEBP_QUALITY,
 ): Promise<File> {
-  const { bitmap } = await loadImageBitmap(file)
-
   const srcW = bitmap.width
   const srcH = bitmap.height
-  const scale = srcW > maxWidth ? maxWidth / srcW : 1
+  // Bound both dimensions. The previous width-only limiter could still emit
+  // multi-megapixel portrait files (for example 1600×3000), which is costly
+  // on first visit even after WebP encoding.
+  const scale = Math.min(1, maxDimension / srcW, maxDimension / srcH)
 
   const dstW = Math.max(1, Math.round(srcW * scale))
   const dstH = Math.max(1, Math.round(srcH * scale))
@@ -146,7 +151,7 @@ async function toWebpFile(
 
   const blob: Blob = await new Promise((resolve, reject) => {
     canvas.toBlob(
-      b => (b ? resolve(b) : reject(new Error('Failed to encode WEBP'))),
+      value => (value ? resolve(value) : reject(new Error('Failed to encode WEBP'))),
       'image/webp',
       quality,
     )
@@ -155,39 +160,46 @@ async function toWebpFile(
   return new File([blob], `${outNameBase}.webp`, { type: 'image/webp' })
 }
 
+async function createWebpVariants(file: File, base: string): Promise<[File, File]> {
+  const { bitmap } = await loadImageBitmap(file)
+  try {
+    // Decode the source once, then render both delivery sizes from the same
+    // bitmap. This avoids doing two full image decodes in parallel on the
+    // admin device for every upload.
+    return await Promise.all([
+      bitmapToWebpFile(bitmap, `${base}-thumb`, THUMB_MAX_WIDTH, PREVIEW_WEBP_QUALITY),
+      bitmapToWebpFile(bitmap, `${base}-hero`, HERO_MAX_WIDTH),
+    ])
+  } finally {
+    bitmap.close?.()
+  }
+}
+
 /* ------------------------------------------------------------------ *
  *  Image upload                                                       *
  * ------------------------------------------------------------------ */
 
 /**
- * Upload a single optimized WebP hero image. This replaces the older
- * behaviour of always emitting a thumb+hero pair (the thumb was almost
- * always orphaned in the admin UI), so callers who only need one asset
- * get exactly one storage object.
+ * Upload an optimized preview+hero pair and return one media value.
+ * The hero remains the canonical source while the preview URL is embedded in
+ * the existing #m= payload. This keeps the database schema unchanged while
+ * letting cards and progressive placeholders use the lightweight preview.
  */
 export async function uploadImage(
   file: File,
   folder: string,
   fileName?: string,
 ): Promise<string> {
-  if (!isSupabaseConfigured()) {
-    return fileToDataUrl(file)
+  const variants = await uploadImageVariants(file, folder, fileName)
+
+  // Store the lightweight preview URL inside the existing media payload so no
+  // database migration is required. FramedImage uses it for cards/thumbnails
+  // and as a progressive placeholder while the detail source downloads.
+  if (!variants.heroUrl || variants.heroUrl === variants.thumbUrl) {
+    return variants.heroUrl
   }
 
-  const safeFolder = folder?.trim() ? folder.trim() : 'uploads'
-  const base = safeBaseName(fileName)
-  const webpFile = await toWebpFile(file, `${base}-hero`, HERO_MAX_WIDTH)
-  const path = normalizePath(`${safeFolder}/${base}-hero.webp`)
-
-  const { error } = await supabase.storage.from(IMAGE_BUCKET).upload(path, webpFile, {
-    cacheControl: CACHE_1Y,
-    upsert: true,
-    contentType: 'image/webp',
-  })
-  if (error) throw error
-
-  const { data: urlData } = supabase.storage.from(IMAGE_BUCKET).getPublicUrl(path)
-  return urlData.publicUrl
+  return encodeMediaValue(variants.heroUrl, undefined, { previewSrc: variants.thumbUrl })
 }
 
 export async function uploadImages(files: File[], folder: string): Promise<string[]> {
@@ -215,10 +227,7 @@ export async function uploadImageVariants(
   const safeFolder = folder?.trim() ? folder.trim() : 'uploads'
   const base = safeBaseName(fileName)
 
-  const [thumbFile, heroFile] = await Promise.all([
-    toWebpFile(file, `${base}-thumb`, THUMB_MAX_WIDTH),
-    toWebpFile(file, `${base}-hero`, HERO_MAX_WIDTH),
-  ])
+  const [thumbFile, heroFile] = await createWebpVariants(file, base)
 
   const thumbPath = normalizePath(`${safeFolder}/${base}-thumb.webp`)
   const heroPath = normalizePath(`${safeFolder}/${base}-hero.webp`)
@@ -324,10 +333,10 @@ export async function deleteAssetsSafely(
   const identities = new Map<string, StorageIdentity>()
 
   for (const url of urls) {
-    const identity = getStorageIdentity(url)
-    if (!identity) continue
-    if (!identities.has(identity.canonical)) {
-      identities.set(identity.canonical, identity)
+    for (const identity of getStorageIdentities(url)) {
+      if (!identities.has(identity.canonical)) {
+        identities.set(identity.canonical, identity)
+      }
     }
   }
 

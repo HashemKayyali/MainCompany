@@ -6,6 +6,7 @@ import { cn } from '../../utils/cn'
 import { preloadRoute } from '../../utils/route-preload'
 import Reveal from './Reveal'
 import SectionHeading from './SectionHeading'
+import FramedImage from '../ui/FramedImage'
 
 type EventType = {
   label: string
@@ -99,8 +100,9 @@ function EventOption({
           className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]"
           aria-hidden="true"
         >
-          <img
-            src={type.image}
+          <FramedImage
+            media={type.image}
+            preset="card"
             alt=""
             width={1400}
             height={876}

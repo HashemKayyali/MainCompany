@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "storage:audit": "tsx scripts/storage-gc/audit.ts",
     "storage:cleanup": "tsx scripts/storage-gc/cleanup.ts",
-    "storage:verify": "tsx scripts/storage-gc/verify.ts"
+    "storage:verify": "tsx scripts/storage-gc/verify.ts",
+    "images:audit": "node scripts/image-audit.mjs"
   },
   "dependencies": {
     "@paper-design/shaders-react": "^0.0.76",

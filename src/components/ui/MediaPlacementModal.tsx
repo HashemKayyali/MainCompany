@@ -113,11 +113,14 @@ export default function MediaPlacementModal({
 
   const kind = type === 'auto' ? inferMediaKind(media) : type
   const parsedMedia = useMemo(() => parseMediaValue(media, { fit: defaultFit }), [defaultFit, media])
-  const previewMedia = useMemo(() => encodeMediaValue(parsedMedia.src, draft), [draft, parsedMedia.src])
+  const previewMedia = useMemo(
+    () => encodeMediaValue(parsedMedia.src, draft, { previewSrc: parsedMedia.previewSrc }),
+    [draft, parsedMedia.previewSrc, parsedMedia.src]
+  )
   const minScale = draft.fit === 'cover' ? 1 : 0.25
 
   const apply = () => {
-    onApply(encodeMediaValue(parsedMedia.src, draft))
+    onApply(encodeMediaValue(parsedMedia.src, draft, { previewSrc: parsedMedia.previewSrc }))
     onClose()
   }
 

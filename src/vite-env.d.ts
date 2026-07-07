@@ -2,6 +2,8 @@
 
 interface ImportMetaEnv {
   readonly NEXT_PUBLIC_GOOGLE_CLIENT_ID?: string
+  readonly VITE_SUPABASE_URL?: string
+  readonly VITE_IMAGE_TRANSFORMATIONS_ENABLED?: string
 }
 
 type GoogleCredentialResponse = {

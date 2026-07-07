@@ -88,6 +88,7 @@ const CategoryTileView = memo(function CategoryTileView({
           >
             <FramedImage
               media={image}
+              preset="category"
               alt={name}
               width={800}
               height={600}

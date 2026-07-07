@@ -121,6 +121,7 @@ function ShuffleGridCell({
       {showImage ? (
         <FramedImage
           media={item.image}
+          preset="card"
           alt={item.name}
           width={320}
           height={180}

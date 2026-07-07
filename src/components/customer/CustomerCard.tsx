@@ -38,6 +38,7 @@ const CustomerCard = memo(function CustomerCard({ customer }: { customer: Custom
         {imgOk ? (
           <FramedImage
             media={customer.logo}
+            preset="logo"
             alt={customer.name}
             width={320}
             height={180}

@@ -38,6 +38,7 @@ export default function GalleryGrid({
             <div className="aspect-[16/10] overflow-hidden">
               <FramedImage
                 media={album.cover}
+                preset="card"
                 alt={album.title}
                 width={800}
                 height={500}

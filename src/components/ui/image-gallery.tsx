@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react'
-import { useInView } from 'framer-motion'
+import { useEffect } from 'react'
 import { cn } from '../../utils/cn'
-import { useMotionEnabled } from '../../hooks/useMotionEnabled'
+import FramedImage from './FramedImage'
+import { preloadImage } from '../../lib/image-delivery'
 
 export type GalleryImage = { src: string; alt?: string }
 
@@ -16,38 +16,37 @@ function AnimatedImage({
   index: number
   onClick?: () => void
 }) {
-  const ref = useRef<HTMLButtonElement>(null)
-  const motionEnabled = useMotionEnabled()
-  const isInView = useInView(ref, { once: true, margin: '0px 0px -8% 0px' })
-  const [loaded, setLoaded] = useState(false)
-
-  // Reveal as soon as it loads when motion is disabled; otherwise wait until
-  // it scrolls into view so the gallery fades in progressively.
-  const show = loaded && (!motionEnabled || isInView)
+  const preloadFullscreenNow = () => {
+    void preloadImage(src, 'fullscreen')
+  }
 
   return (
     <button
-      ref={ref}
       type="button"
       onClick={onClick}
+      onPointerDown={preloadFullscreenNow}
+      onFocus={preloadFullscreenNow}
+      onTouchStart={preloadFullscreenNow}
       aria-label={alt || `Open image ${index + 1}`}
-      className="group relative mb-4 block w-full break-inside-avoid overflow-hidden rounded-[16px] border border-violet-200/60 bg-violet-50 outline-none transition-shadow duration-300 hover:shadow-[0_24px_50px_-26px_rgba(89,23,196,0.5)] focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2"
+      className={cn(
+        'group relative block aspect-[4/5] w-full overflow-hidden rounded-[14px] border border-violet-200/60 bg-violet-50 outline-none',
+        'transition-shadow duration-300 hover:shadow-[0_20px_42px_-24px_rgba(89,23,196,0.45)]',
+        'focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2',
+      )}
     >
-      <img
-        src={src}
+      <FramedImage
+        media={src}
+        preset="thumbnail"
         alt={alt || ''}
-        width={900}
-        height={675}
-        loading="lazy"
+        width={480}
+        height={600}
+        loading="eager"
         decoding="async"
-        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-        onLoad={() => setLoaded(true)}
-        className={cn(
-          'h-auto w-full object-cover transition-all duration-700 ease-out',
-          show ? 'scale-100 opacity-100 blur-0' : 'scale-[1.03] opacity-0 blur-[6px]'
-        )}
+        fetchPriority={index < 7 ? 'high' : 'auto'}
+        sizes="(max-width: 639px) 50vw, (max-width: 767px) 33vw, (max-width: 1023px) 25vw, (max-width: 1279px) 20vw, 14.3vw"
+        fallbackTransform={{ fit: 'cover' }}
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.025]"
       />
-      {/* hover overlay */}
       <span
         className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{ background: 'linear-gradient(180deg, transparent 55%, rgba(13,4,36,0.45) 100%)' }}
@@ -58,9 +57,12 @@ function AnimatedImage({
 }
 
 /**
- * Responsive masonry image gallery with a progressive scroll fade-in.
- * Pass a fresh `key` (e.g. the album slug) when the image set changes so the
- * reveal animation replays for the new images.
+ * Fast, stable gallery grid.
+ *
+ * All tiles use the same row height and are rendered in normal row-major grid
+ * order. This avoids masonry/multi-column rebalancing, so already-visible
+ * photos never jump to another column and desktop columns stay visually even.
+ * The thumbnail cache is warmed as soon as the gallery receives its image list.
  */
 export function ImageGallery({
   images,
@@ -71,10 +73,25 @@ export function ImageGallery({
   onImageClick?: (index: number) => void
   className?: string
 }) {
+  useEffect(() => {
+    const seen = new Set<string>()
+
+    images.forEach(image => {
+      if (!image.src || seen.has(image.src)) return
+      seen.add(image.src)
+      void preloadImage(image.src, 'thumbnail')
+    })
+  }, [images])
+
   if (images.length === 0) return null
 
   return (
-    <div className={cn('columns-1 gap-4 sm:columns-2 lg:columns-3 xl:columns-4', className)}>
+    <div
+      className={cn(
+        'grid grid-cols-2 items-start gap-2.5 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7',
+        className,
+      )}
+    >
       {images.map((image, index) => (
         <AnimatedImage
           key={`${image.src}-${index}`}

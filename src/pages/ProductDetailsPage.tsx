@@ -21,6 +21,7 @@ import ProductGallery from '../components/product/ProductGallery'
 import ProductOptions from '../components/product/ProductOptions'
 import ProductSuggestionsCarousel from '../components/product/ProductSuggestionsCarousel'
 import PageLoader from '../components/ui/PageLoader'
+import FramedImage from '../components/ui/FramedImage'
 import {
   useCategoriesData,
   useDataMeta,
@@ -489,8 +490,9 @@ export default function ProductDetailsPage() {
                           )}
                         >
                           {part.image ? (
-                            <img
-                              src={part.image}
+                            <FramedImage
+                              media={part.image}
+                              preset="tiny"
                               alt={part.name}
                               width={96}
                               height={96}

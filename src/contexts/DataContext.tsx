@@ -89,7 +89,7 @@ type PartDataCtx = Pick<DataCtx, 'parts' | 'getPartsByProduct'> & { partsLoading
 // rendering a premature "no customer results" state while customers load.
 type CustomerDataCtx = Pick<DataCtx, 'customers'> & { customersLoading: boolean }
 type CategoryDataCtx = Pick<DataCtx, 'categories'>
-type GalleryDataCtx = Pick<DataCtx, 'galleryAlbums'>
+type GalleryDataCtx = Pick<DataCtx, 'galleryAlbums'> & { galleryLoading: boolean }
 type CustomBuildDataCtx = Pick<DataCtx, 'customBuilds' | 'customBuildCategories'>
 type DataMetaCtx = Pick<DataCtx, 'loading' | 'error' | 'refreshAll' | 'resetToDefaults'>
 type DataActionsCtx = Pick<
@@ -1054,7 +1054,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [customers, loadedResources]
   )
   const categoryValue = useMemo<CategoryDataCtx>(() => ({ categories }), [categories])
-  const galleryValue = useMemo<GalleryDataCtx>(() => ({ galleryAlbums }), [galleryAlbums])
+  const galleryValue = useMemo<GalleryDataCtx>(
+    () => ({ galleryAlbums, galleryLoading: !loadedResources.has('gallery') }),
+    [galleryAlbums, loadedResources]
+  )
   const customBuildValue = useMemo<CustomBuildDataCtx>(
     () => ({ customBuilds, customBuildCategories }),
     [customBuildCategories, customBuilds]

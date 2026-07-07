@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
+import FramedImage from '../ui/FramedImage'
+import { preloadImage } from '../../lib/image-delivery'
 
 export default function Lightbox({ images, open, onClose, initialIndex = 0 }: { images: string[]; initialIndex?: number; open: boolean; onClose: () => void }) {
   const [idx, setIdx] = useState(initialIndex)
@@ -8,6 +10,15 @@ export default function Lightbox({ images, open, onClose, initialIndex = 0 }: { 
   useEffect(() => {
     if (open) setIdx(Math.min(Math.max(initialIndex, 0), Math.max(images.length - 1, 0)))
   }, [open, initialIndex, images.length])
+
+
+  useEffect(() => {
+    if (!open || images.length < 2) return
+    const nextIndex = (idx + 1) % images.length
+    const prevIndex = (idx - 1 + images.length) % images.length
+    void preloadImage(images[nextIndex], 'fullscreen')
+    void preloadImage(images[prevIndex], 'fullscreen')
+  }, [idx, images, open])
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
@@ -38,8 +49,9 @@ export default function Lightbox({ images, open, onClose, initialIndex = 0 }: { 
         &#8249;
       </button>
 
-      <img
-        src={images[idx]}
+      <FramedImage
+        media={images[idx]}
+        preset="fullscreen"
         alt={`Gallery photo ${idx + 1} of ${images.length}`}
         width={1600}
         height={1200}

@@ -102,6 +102,7 @@ const CustomerLogoCardView = memo(function CustomerLogoCardView({
       <div className={logoWrapClass}>
         <FramedImage
           media={customer.logo}
+          preset="logo"
           alt={customer.name}
           width={320}
           height={180}

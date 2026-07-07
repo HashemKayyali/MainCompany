@@ -277,6 +277,7 @@ function RentalItemCard({
           {item.productImage ? (
             <FramedImage
               media={item.productImage}
+                          preset="tiny"
               alt={item.productTitle}
               width={144}
               height={144}

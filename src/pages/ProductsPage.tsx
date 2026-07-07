@@ -18,6 +18,7 @@ import { useMotionEnabled } from '../hooks/useMotionEnabled'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { useTheme } from '../contexts/ThemeContext'
 import { preloadRoute } from '../utils/route-preload'
+import { preloadImage } from '../lib/image-delivery'
 import { useI18n } from '../contexts/LanguageContext'
 
 const ease = [0.16, 1, 0.3, 1]
@@ -111,8 +112,9 @@ function ProductHeroCard({
       >
         <Link
           to={href}
-          onMouseEnter={() => preloadRoute(href)}
-          onFocus={() => preloadRoute(href)}
+          onMouseEnter={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail') }}
+          onFocus={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail') }}
+          onTouchStart={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail') }}
           className="group block overflow-hidden rounded-[18px] border border-white/20 bg-white/[0.11] text-left shadow-[0_30px_70px_-34px_rgba(8,3,26,0.95)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-fuchsia-200/50 hover:bg-white/[0.16]"
         >
           <div className="relative aspect-[4/3] overflow-hidden bg-white/10">
@@ -127,6 +129,7 @@ function ProductHeroCard({
               >
                 <FramedImage
                   media={product.heroImage}
+                  preset="card"
                   alt={product.name}
                   width={800}
                   height={600}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Maximize2, Play, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -7,6 +7,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 import { cn } from '../../utils/cn'
 import FramedImage from '../ui/FramedImage'
 import FramedVideo from '../ui/FramedVideo'
+import { preloadImage } from '../../lib/image-delivery'
 
 interface Props {
   images: string[]
@@ -36,6 +37,12 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
   const isVideoActive = hasVideo && active === 0
   const activeImageIndex = hasVideo ? active - 1 : active
   const activeImage = !isVideoActive ? images[activeImageIndex] : undefined
+
+  useEffect(() => {
+    if (!activeImage || images.length < 2) return
+    const nextIndex = (activeImageIndex + 1) % images.length
+    void preloadImage(images[nextIndex], 'detail')
+  }, [activeImage, activeImageIndex, images])
 
   const navigate = (next: number) => {
     const clamped = Math.max(0, Math.min(next, totalItems - 1))
@@ -82,6 +89,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
                   <div className="inline-flex max-h-[calc(100dvh-2rem)] max-w-[calc(100vw-2rem)] items-center justify-center overflow-hidden rounded-[20px] border border-white/12 bg-black shadow-[0_28px_80px_-24px_rgba(0,0,0,0.75)]">
                     <FramedImage
                       media={activeImage}
+                      preset="detail"
                       alt={`${name} - enlarged photo ${activeImageIndex + 1}`}
                       width={1600}
                       height={1200}
@@ -154,6 +162,9 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
               key={`${img}-${index}`}
               type="button"
               onClick={() => navigate(itemIndex)}
+              onMouseEnter={() => { void preloadImage(img, 'detail') }}
+              onFocus={() => { void preloadImage(img, 'detail') }}
+              onTouchStart={() => { void preloadImage(img, 'detail') }}
               aria-label={`${translateText('View photo')} ${index + 1}`}
               className={cn(
                 'relative h-[64px] w-[86px] shrink-0 overflow-hidden rounded-[12px] border bg-white transition-all duration-250',
@@ -168,6 +179,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
             >
               <FramedImage
                 media={img}
+                preset="thumbnail"
                 alt=""
                 width={172}
                 height={128}
@@ -238,6 +250,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
               {images[activeImageIndex] && (
                 <FramedImage
                   media={images[activeImageIndex]}
+                  preset="detail"
                   alt={`${name} - photo ${activeImageIndex + 1}`}
                   width={1400}
                   height={1050}

@@ -17,8 +17,11 @@ import ErrorBoundary from './components/ErrorBoundary'
 import { ToastProvider } from './contexts/ToastContext'
 import { router } from './router'
 import PerfClass from './components/PerfClass'
+import { ensureImageOriginPreconnect } from './lib/image-delivery'
 import './styles/input.css'
 import './styles/site.css'
+
+ensureImageOriginPreconnect()
 
 const AppTree = (
   <ErrorBoundary>

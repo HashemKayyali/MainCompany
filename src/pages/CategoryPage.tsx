@@ -264,6 +264,7 @@ export default function CategoryPage() {
             >
               <FramedImage
                 media={category.image}
+                preset="hero"
                 alt={category.name}
                 loading="eager"
                 fetchPriority="high"

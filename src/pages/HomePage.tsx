@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react'
 import Hero from '../components/home/Hero'
 import BrowseCategories from '../components/home/BrowseCategories'
 import PopularServices from '../components/home/PopularServices'
+import { useGalleryData } from '../contexts/DataContext'
 import { usePageMeta } from '../hooks/usePageMeta'
 
 const HowItWorks = lazy(() => import('../components/home/HowItWorks'))
@@ -11,6 +12,11 @@ const GalleryPreview = lazy(() => import('../components/home/GalleryPreview'))
 const FAQ = lazy(() => import('../components/home/FAQ'))
 const HomeCTA = lazy(() => import('../components/home/HomeCTA'))
 const LogoCloud = lazy(() => import('../components/home/LogoCloud'))
+
+function GalleryDataWarmup() {
+  useGalleryData()
+  return null
+}
 
 export default function HomePage() {
   usePageMeta({
@@ -22,6 +28,7 @@ export default function HomePage() {
 
   return (
     <>
+      <GalleryDataWarmup />
       <Hero />
       <div className="bg-white">
         <div className="home-band home-band--theme">
