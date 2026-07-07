@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 /*
  * Scenario 3 — partial variant upload failure MUST NOT leave an
@@ -21,6 +21,16 @@ interface FakeStorage {
 }
 
 let fake: FakeStorage
+
+beforeAll(() => {
+  vi.stubEnv('VITE_IMAGE_UPLOAD_PROVIDER', 'supabase')
+  vi.resetModules()
+})
+
+afterAll(() => {
+  vi.unstubAllEnvs()
+  vi.resetModules()
+})
 
 vi.mock('../../lib/supabase', () => {
   return {
