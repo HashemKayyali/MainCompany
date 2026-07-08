@@ -1,175 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { ImageIcon, Images } from 'lucide-react'
 import { useGalleryData } from '../contexts/DataContext'
-import { galleryAlbums as staticAlbums, type GalleryAlbum } from '../data/gallery'
-import { useElementActivity } from '../hooks/useElementActivity'
+import { galleryAlbums as staticAlbums } from '../data/gallery'
 import { usePageMeta } from '../hooks/usePageMeta'
 import FramedImage from '../components/ui/FramedImage'
 import { ImageGallery, type GalleryImage } from '../components/ui/image-gallery'
 import Lightbox from '../components/gallery/Lightbox'
 import EventiesHero from '../components/layout/EventiesHero'
 import SectionHeading from '../components/home/SectionHeading'
-import { preloadImage, preloadImageWhenIdle } from '../lib/image-delivery'
-
-const GALLERY_FALLBACK_IMAGES = [
-  '/images/hero-bg-event.webp',
-  '/images/Corporate.webp',
-  '/images/Exhibitions.webp',
-  '/images/Festivals.webp',
-  '/images/Brand.webp',
-]
-
-function GalleryHeroShowcase({ albums }: { albums: GalleryAlbum[] }) {
-  const { ref: activityRef, active: activityActive } = useElementActivity<HTMLDivElement>()
-  const previewImages = useMemo(() => {
-    const images = albums
-      .flatMap(album => [album.cover, ...album.images])
-      .filter(image => image.trim().length > 0)
-
-    const source = images.length > 0 ? images : GALLERY_FALLBACK_IMAGES
-    return [...source, ...GALLERY_FALLBACK_IMAGES].slice(0, 9)
-  }, [albums])
-
-  const [activeIndex, setActiveIndex] = useState(0)
-  const activeImage = previewImages[activeIndex % previewImages.length]
-  const tiles = Array.from({ length: 5 }, (_, offset) => previewImages[(activeIndex + offset + 1) % previewImages.length])
-  const albumNames = albums.length > 0
-    ? albums.slice(0, 3).map(album => album.title)
-    : ['Activations', 'Setups', 'Event moments']
-
-  useEffect(() => {
-    setActiveIndex(0)
-  }, [previewImages])
-
-  useEffect(() => {
-    if (!activityActive || previewImages.length < 2) return
-
-    const cancelIdlePreloads = previewImages
-      .slice(1)
-      .map(image => preloadImageWhenIdle(image, 'hero'))
-
-    return () => cancelIdlePreloads.forEach(cancel => cancel())
-  }, [activityActive, previewImages])
-
-  useEffect(() => {
-    if (!activityActive || previewImages.length < 2) return
-
-    const timer = window.setInterval(() => {
-      setActiveIndex(current => (current + 1 + Math.floor(Math.random() * Math.min(3, previewImages.length - 1))) % previewImages.length)
-    }, 3200)
-
-    return () => window.clearInterval(timer)
-  }, [activityActive, previewImages.length])
-
-  return (
-    <div
-      ref={activityRef}
-      className="relative mx-auto w-full max-w-[620px] overflow-hidden rounded-[30px] border border-white/16 bg-white/[0.07] p-3 backdrop-blur-xl"
-      style={{ boxShadow: '0 40px 90px -34px rgba(8,3,26,0.8), inset 0 1px 0 rgba(255,255,255,0.18)' }}
-    >
-      <div className="pointer-events-none absolute -right-16 top-10 h-44 w-44 rounded-full bg-fuchsia-400/24 blur-3xl" aria-hidden="true" />
-      <div className="pointer-events-none absolute -bottom-20 left-10 h-52 w-52 rounded-full bg-violet-400/20 blur-3xl" aria-hidden="true" />
-
-      <div className="relative grid h-[420px] gap-3 sm:grid-cols-[1fr_0.52fr]">
-        <div className="relative overflow-hidden rounded-[24px]">
-          <AnimatePresence initial={false}>
-            <motion.div
-              key={activeImage}
-              className="absolute inset-0"
-              initial={{ opacity: 0, scale: 1.04 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.985 }}
-              transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <FramedImage
-                media={activeImage}
-                preset="hero"
-                alt="Eventies event gallery preview"
-                width={1200}
-                height={900}
-                loading="eager"
-                fetchPriority="high"
-                sizes="(max-width: 1024px) 100vw, 520px"
-                fallbackTransform={{ fit: 'cover' }}
-                className="h-full w-full object-cover"
-              />
-            </motion.div>
-          </AnimatePresence>
-          <span
-            className="absolute inset-0"
-            style={{ background: 'linear-gradient(180deg, rgba(8,3,26,0.16) 0%, transparent 34%, rgba(8,3,26,0.78) 100%)' }}
-            aria-hidden="true"
-          />
-          <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/30 px-3 py-1.5 backdrop-blur-md">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" style={{ boxShadow: '0 0 8px rgba(52,211,153,0.9)' }} />
-            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/90">Live event work</span>
-          </span>
-          <span className="absolute inset-x-4 bottom-4">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.12] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-violet-100 backdrop-blur-md">
-              <Images className="h-3.5 w-3.5" strokeWidth={2.3} />
-              {albums.length || 'Fresh'} albums
-            </span>
-            <span className="mt-3 block font-display text-[1.35rem] font-bold leading-tight text-white">
-              Photos from real Eventies setups
-            </span>
-          </span>
-        </div>
-
-        <div className="hidden grid-cols-1 grid-rows-3 gap-3 sm:grid">
-          {tiles.slice(0, 3).map((image, index) => (
-            <motion.div
-              key={`${image}-${index}-${activeIndex}`}
-              className="relative overflow-hidden rounded-[18px] border border-white/12 bg-white/[0.06]"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.06 }}
-            >
-              <FramedImage
-                media={image}
-                preset="thumbnail"
-                alt=""
-                width={480}
-                height={360}
-                loading="lazy"
-                sizes="(max-width: 640px) 50vw, 260px"
-                fallbackTransform={{ fit: 'cover' }}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              <span className="absolute inset-0 bg-gradient-to-t from-black/56 via-transparent to-transparent" aria-hidden="true" />
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-3 grid grid-cols-5 gap-2">
-        {tiles.map((image, index) => (
-          <div key={`${image}-strip-${index}-${activeIndex}`} className="relative aspect-[4/3] overflow-hidden rounded-[12px] border border-white/12 bg-white/[0.06]">
-            <FramedImage
-              media={image}
-              preset="thumbnail"
-              alt=""
-              width={480}
-              height={360}
-              loading="lazy"
-              sizes="96px"
-              fallbackTransform={{ fit: 'cover' }}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          </div>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2 px-2 pb-1 pt-3">
-        {albumNames.map(name => (
-          <span key={name} className="rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold text-white/80">
-            {name}
-          </span>
-        ))}
-      </div>
-    </div>
-  )
-}
+import { preloadImage } from '../lib/image-delivery'
 
 export default function GalleryPage() {
   // Split hook (batch 3): this page only ensures gallery_albums.
@@ -229,7 +68,7 @@ export default function GalleryPage() {
         primaryAction={{ label: 'Browse Albums', href: '#gallery-work' }}
         secondaryAction={{ label: 'Plan an Event', to: '/contact' }}
         chips={heroChips}
-        rightSlot={<GalleryHeroShowcase albums={albums} />}
+        contentClassName="lg:col-span-2"
       />
 
       <div className="bg-[#f8f3ff]">
