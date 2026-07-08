@@ -12,7 +12,6 @@ import {
   type StorageAssetKind,
   type StorageIdentity,
 } from './storage-identity'
-import { encodeMediaValue } from '../utils/media-frame'
 import { uploadImageToCloudinary, deleteCloudinaryIdentities } from './cloudinary.service'
 import { isCloudinaryIdentity } from './cloudinary-identity'
 import { getManagedAssetIdentities } from './managed-asset-identity'
@@ -45,11 +44,6 @@ export { getManagedAssetIdentities }
  * ------------------------------------------------------------------ */
 
 const CACHE_1Y = '31536000'
-const WEBP_QUALITY = 0.78
-const PREVIEW_WEBP_QUALITY = 0.74
-const HERO_MAX_WIDTH = 1600
-const THUMB_MAX_WIDTH = 720
-const IMAGE_UPLOAD_PROVIDER = String(import.meta.env.VITE_IMAGE_UPLOAD_PROVIDER ?? 'cloudinary').trim().toLowerCase()
 
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024
 const VIDEO_MAX_WIDTH = 960
@@ -64,15 +58,6 @@ export interface UploadedImageVariants {
 /* ------------------------------------------------------------------ *
  *  Small utils                                                        *
  * ------------------------------------------------------------------ */
-
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = () => reject(new Error('Failed to read file'))
-    reader.readAsDataURL(file)
-  })
-}
 
 function normalizePath(path: string): string {
   return path.replace(/^\/+/, '')
@@ -94,117 +79,24 @@ function toErrorMessage(value: unknown): string {
 }
 
 /* ------------------------------------------------------------------ *
- *  Image processing (WebP conversion)                                 *
- * ------------------------------------------------------------------ */
-
-type DecodedImageSource = ImageBitmap | HTMLImageElement
-
-async function loadImageBitmap(
-  file: File,
-): Promise<{ bitmap: DecodedImageSource; cleanup: () => void }> {
-  if (typeof createImageBitmap !== 'undefined') {
-    const bitmap = await createImageBitmap(file)
-    return { bitmap, cleanup: () => bitmap.close() }
-  }
-
-  const url = URL.createObjectURL(file)
-  const img = new Image()
-  img.decoding = 'async'
-  img.src = url
-
-  try {
-    await new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve()
-      img.onerror = () => reject(new Error('Failed to load image'))
-    })
-  } catch (error) {
-    URL.revokeObjectURL(url)
-    throw error
-  }
-
-  // HTMLImageElement is a valid canvas draw source, so the no-createImageBitmap
-  // fallback can use it directly instead of calling the unavailable API again.
-  return { bitmap: img, cleanup: () => URL.revokeObjectURL(url) }
-}
-
-async function bitmapToWebpFile(
-  bitmap: DecodedImageSource,
-  outNameBase: string,
-  maxDimension: number,
-  quality = WEBP_QUALITY,
-): Promise<File> {
-  const srcW = bitmap.width
-  const srcH = bitmap.height
-  // Bound both dimensions. The previous width-only limiter could still emit
-  // multi-megapixel portrait files (for example 1600×3000), which is costly
-  // on first visit even after WebP encoding.
-  const scale = Math.min(1, maxDimension / srcW, maxDimension / srcH)
-
-  const dstW = Math.max(1, Math.round(srcW * scale))
-  const dstH = Math.max(1, Math.round(srcH * scale))
-
-  const canvas = document.createElement('canvas')
-  canvas.width = dstW
-  canvas.height = dstH
-
-  const ctx = canvas.getContext('2d', { alpha: true })
-  if (!ctx) throw new Error('Canvas 2D not supported')
-
-  ctx.imageSmoothingEnabled = true
-  ;(ctx as CanvasRenderingContext2D & { imageSmoothingQuality?: string }).imageSmoothingQuality = 'high'
-  ctx.drawImage(bitmap, 0, 0, dstW, dstH)
-
-  const blob: Blob = await new Promise((resolve, reject) => {
-    canvas.toBlob(
-      value => (value ? resolve(value) : reject(new Error('Failed to encode WEBP'))),
-      'image/webp',
-      quality,
-    )
-  })
-
-  return new File([blob], `${outNameBase}.webp`, { type: 'image/webp' })
-}
-
-async function createWebpVariants(file: File, base: string): Promise<[File, File]> {
-  const { bitmap, cleanup } = await loadImageBitmap(file)
-  try {
-    // Decode the source once, then render both delivery sizes from the same
-    // bitmap. This avoids doing two full image decodes in parallel on the
-    // admin device for every upload.
-    return await Promise.all([
-      bitmapToWebpFile(bitmap, `${base}-thumb`, THUMB_MAX_WIDTH, PREVIEW_WEBP_QUALITY),
-      bitmapToWebpFile(bitmap, `${base}-hero`, HERO_MAX_WIDTH),
-    ])
-  } finally {
-    cleanup()
-  }
-}
-
-/* ------------------------------------------------------------------ *
  *  Image upload                                                       *
  * ------------------------------------------------------------------ */
 
 /**
- * Upload an optimized preview+hero pair and return one media value.
- * The hero remains the canonical source while the preview URL is embedded in
- * the existing #m= payload. This keeps the database schema unchanged while
- * letting cards and progressive placeholders use the lightweight preview.
+ * Upload one image directly to Cloudinary. Image uploads intentionally have
+ * no Supabase Storage fallback: a deployment-time environment variable can no
+ * longer switch production image traffic back to the `product-images` bucket.
+ *
+ * The Supabase Edge Function used by `uploadImageToCloudinary` only signs the
+ * Cloudinary request; the image bytes are posted directly from the browser to
+ * Cloudinary.
  */
 export async function uploadImage(
   file: File,
   folder: string,
-  fileName?: string,
+  _fileName?: string,
 ): Promise<string> {
-  const variants = await uploadImageVariants(file, folder, fileName)
-
-  // Store the lightweight preview URL inside the existing media payload so no
-  // database migration is required. FramedImage uses it for cards/thumbnails
-  // and as a progressive placeholder while the detail source downloads.
-  if (!variants.heroUrl || variants.heroUrl === variants.thumbUrl) {
-    return variants.heroUrl
-  }
-
-  return encodeMediaValue(variants.heroUrl, undefined, { previewSrc: variants.thumbUrl })
+  return uploadImageToCloudinary(file, folder)
 }
 
 export async function uploadImages(files: File[], folder: string): Promise<string[]> {
@@ -212,93 +104,18 @@ export async function uploadImages(files: File[], folder: string): Promise<strin
 }
 
 /**
- * Upload a thumb+hero pair atomically. If either upload fails, the
- * partially-uploaded sibling (if any) is rolled back so no orphan
- * storage object is left behind.
- *
- * Rollback cleanup failures are re-surfaced via the thrown error so the
- * caller can log them — they are never silently swallowed.
+ * Compatibility wrapper kept for callers/tests that still expect the old
+ * variant API. Cloudinary is now the single image-upload provider, so both
+ * delivery slots point at the same Cloudinary asset. Delivery transforms can
+ * derive lighter card/thumbnail variants from that canonical URL.
  */
 export async function uploadImageVariants(
   file: File,
   folder: string,
-  fileName?: string,
+  _fileName?: string,
 ): Promise<UploadedImageVariants> {
-  if (IMAGE_UPLOAD_PROVIDER === 'cloudinary') {
-    const url = await uploadImageToCloudinary(file, folder)
-    return { thumbUrl: url, heroUrl: url }
-  }
-
-  if (!isSupabaseConfigured()) {
-    const dataUrl = await fileToDataUrl(file)
-    return { thumbUrl: dataUrl, heroUrl: dataUrl }
-  }
-
-  const safeFolder = folder?.trim() ? folder.trim() : 'uploads'
-  const base = safeBaseName(fileName)
-
-  const [thumbFile, heroFile] = await createWebpVariants(file, base)
-
-  const thumbPath = normalizePath(`${safeFolder}/${base}-thumb.webp`)
-  const heroPath = normalizePath(`${safeFolder}/${base}-hero.webp`)
-
-  const up = supabase.storage.from(IMAGE_BUCKET)
-
-  const [thumbRes, heroRes] = await Promise.allSettled([
-    up.upload(thumbPath, thumbFile, {
-      cacheControl: CACHE_1Y,
-      upsert: true,
-      contentType: 'image/webp',
-    }),
-    up.upload(heroPath, heroFile, {
-      cacheControl: CACHE_1Y,
-      upsert: true,
-      contentType: 'image/webp',
-    }),
-  ])
-
-  const thumbOk = thumbRes.status === 'fulfilled' && !thumbRes.value.error
-  const heroOk = heroRes.status === 'fulfilled' && !heroRes.value.error
-
-  if (thumbOk && heroOk) {
-    const { data: t } = up.getPublicUrl(thumbPath)
-    const { data: h } = up.getPublicUrl(heroPath)
-    return { thumbUrl: t.publicUrl, heroUrl: h.publicUrl }
-  }
-
-  // At least one failed — roll back any successful upload.
-  const rollbackPaths: string[] = []
-  if (thumbOk) rollbackPaths.push(thumbPath)
-  if (heroOk) rollbackPaths.push(heroPath)
-
-  let rollbackError: string | null = null
-  if (rollbackPaths.length > 0) {
-    try {
-      const { error: removeErr } = await up.remove(rollbackPaths)
-      if (removeErr) rollbackError = toErrorMessage(removeErr)
-    } catch (err) {
-      rollbackError = toErrorMessage(err)
-    }
-  }
-
-  const failure =
-    !thumbOk && thumbRes.status === 'fulfilled'
-      ? thumbRes.value.error
-      : !thumbOk && thumbRes.status === 'rejected'
-        ? thumbRes.reason
-        : !heroOk && heroRes.status === 'fulfilled'
-          ? heroRes.value.error
-          : !heroOk && heroRes.status === 'rejected'
-            ? heroRes.reason
-            : new Error('Unknown upload failure')
-
-  const baseMsg = `Image variant upload failed: ${toErrorMessage(failure)}`
-  const rollbackMsg = rollbackError
-    ? ` (rollback cleanup also failed: ${rollbackError} — orphan may remain at ${rollbackPaths.join(', ')})`
-    : rollbackPaths.length > 0
-      ? ' (rollback cleanup succeeded)'
-      : ''
-  throw new Error(baseMsg + rollbackMsg)
+  const url = await uploadImageToCloudinary(file, folder)
+  return { thumbUrl: url, heroUrl: url }
 }
 
 /* ------------------------------------------------------------------ *

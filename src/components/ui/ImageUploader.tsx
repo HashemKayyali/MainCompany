@@ -8,6 +8,18 @@ import { cn } from '../../utils/cn'
 import FramedImage from './FramedImage'
 import MediaPlacementModal from './MediaPlacementModal'
 
+function getUploadErrorMessage(error: unknown): string {
+  const fallback = 'Failed to upload image. Please try again.'
+  const message = error instanceof Error
+    ? error.message.trim()
+    : typeof error === 'string'
+      ? error.trim()
+      : ''
+
+  if (!message) return fallback
+  return message.length > 260 ? `${message.slice(0, 257)}...` : message
+}
+
 interface Props {
   value?: string
   onChange: (url: string) => void
@@ -181,7 +193,7 @@ export default function ImageUploader({
       console.error('Upload failed:', err)
       dialog.alert({
         title: 'Upload Failed',
-        message: 'Failed to upload image. Please try again.',
+        message: getUploadErrorMessage(err),
         variant: 'danger',
       })
     } finally {
@@ -245,7 +257,7 @@ export default function ImageUploader({
     setUploadProgress({ completed: 0, total: files.length })
 
     const uploaded = new Array<string | null>(files.length).fill(null)
-    const failed: string[] = []
+    const failed: Array<{ fileName: string; message: string }> = []
     let cursor = 0
     let completed = 0
 
@@ -266,7 +278,7 @@ export default function ImageUploader({
           if (url !== null) uploaded[index] = url
         } catch (error) {
           console.error(`Upload failed for ${file.name}:`, error)
-          failed.push(file.name)
+          failed.push({ fileName: file.name, message: getUploadErrorMessage(error) })
         } finally {
           completed += 1
           setUploadProgress({ completed, total: files.length })
@@ -287,7 +299,7 @@ export default function ImageUploader({
       if (failed.length) {
         dialog.alert({
           title: 'Upload partially completed',
-          message: `${urls.length} image(s) uploaded successfully. ${failed.length} failed and can be retried.`,
+          message: `${urls.length} image(s) uploaded successfully. ${failed.length} failed and can be retried.\nFirst error: ${failed[0]?.message || 'Unknown upload error'}`,
           variant: 'warning',
         })
       }

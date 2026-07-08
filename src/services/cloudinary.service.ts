@@ -10,6 +10,9 @@ import type {
 
 const CLOUDINARY_EDGE_FUNCTION = 'cloudinary-assets'
 const MAX_DELETE_BATCH = 100
+const SIGNATURE_MAX_ATTEMPTS = 3
+const SIGNATURE_RETRY_DELAYS_MS = [250, 700] as const
+const CLOUDINARY_RATE_LIMIT_RETRY_MS = 900
 
 interface UploadSignatureResponse {
   cloudName: string
@@ -36,41 +39,122 @@ interface DeleteAssetsResponse {
 }
 
 export async function uploadImageToCloudinary(file: File, folder: string): Promise<string> {
-  const { data, error } = await supabase.functions.invoke<UploadSignatureResponse>(
-    CLOUDINARY_EDGE_FUNCTION,
-    {
-      body: { action: 'sign-upload', folder },
-    },
+  const signature = await requestUploadSignature(folder)
+  return postImageDirectlyToCloudinary(file, signature)
+}
+
+async function requestUploadSignature(folder: string): Promise<UploadSignatureResponse> {
+  let lastError = 'Unknown authorization error'
+
+  for (let attempt = 1; attempt <= SIGNATURE_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const { data, error } = await supabase.functions.invoke<UploadSignatureResponse>(
+        CLOUDINARY_EDGE_FUNCTION,
+        {
+          body: { action: 'sign-upload', folder },
+        },
+      )
+
+      if (error) {
+        lastError = error.message || 'Edge Function returned an error'
+      } else if (!isCompleteUploadSignature(data)) {
+        lastError = 'Cloudinary upload authorization returned an incomplete response'
+      } else {
+        return data
+      }
+    } catch (error) {
+      lastError = toErrorMessage(error)
+    }
+
+    if (attempt < SIGNATURE_MAX_ATTEMPTS) {
+      const delay =
+        SIGNATURE_RETRY_DELAYS_MS[attempt - 1] ??
+        SIGNATURE_RETRY_DELAYS_MS[SIGNATURE_RETRY_DELAYS_MS.length - 1] ??
+        700
+      await sleep(delay)
+    }
+  }
+
+  throw new Error(
+    `Cloudinary upload authorization failed after ${SIGNATURE_MAX_ATTEMPTS} attempts: ${lastError}`,
   )
+}
 
-  if (error) {
-    throw new Error(`Cloudinary upload authorization failed: ${error.message}`)
-  }
+function isCompleteUploadSignature(
+  data: UploadSignatureResponse | null | undefined,
+): data is UploadSignatureResponse {
+  return Boolean(
+    data?.cloudName &&
+      data.apiKey &&
+      data.timestamp &&
+      data.signature &&
+      data.folder,
+  )
+}
 
-  if (!data?.cloudName || !data.apiKey || !data.timestamp || !data.signature || !data.folder) {
-    throw new Error('Cloudinary upload authorization returned an incomplete response')
-  }
-
-  const body = new FormData()
-  body.set('file', file)
-  body.set('api_key', data.apiKey)
-  body.set('timestamp', String(data.timestamp))
-  body.set('signature', data.signature)
-  body.set('folder', data.folder)
-
+async function postImageDirectlyToCloudinary(
+  file: File,
+  data: UploadSignatureResponse,
+): Promise<string> {
   const endpoint = `https://api.cloudinary.com/v1_1/${encodeURIComponent(data.cloudName)}/image/upload`
-  const response = await fetch(endpoint, { method: 'POST', body })
-  const payload = (await response.json().catch(() => ({}))) as CloudinaryUploadResponse
 
-  if (!response.ok || payload.error?.message) {
+  // A 429 means Cloudinary explicitly rejected the request before accepting the
+  // upload, so one bounded retry is safe. Ambiguous network failures are NOT
+  // retried here because the first request may actually have completed and an
+  // automatic replay could create a duplicate asset.
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const body = new FormData()
+    body.set('file', file)
+    body.set('api_key', data.apiKey)
+    body.set('timestamp', String(data.timestamp))
+    body.set('signature', data.signature)
+    body.set('folder', data.folder)
+
+    let response: Response
+    try {
+      response = await fetch(endpoint, { method: 'POST', body })
+    } catch (error) {
+      throw new Error(`Cloudinary upload network request failed: ${toErrorMessage(error)}`)
+    }
+
+    const payload = (await response.json().catch(() => ({}))) as CloudinaryUploadResponse
+
+    if (response.ok && !payload.error?.message) {
+      if (!payload.secure_url || !payload.public_id) {
+        throw new Error('Cloudinary upload succeeded without a usable asset URL')
+      }
+      return payload.secure_url
+    }
+
+    if (response.status === 429 && attempt === 0) {
+      await sleep(retryAfterMs(response.headers.get('retry-after')))
+      continue
+    }
+
     throw new Error(payload.error?.message || `Cloudinary upload failed with HTTP ${response.status}`)
   }
 
-  if (!payload.secure_url || !payload.public_id) {
-    throw new Error('Cloudinary upload succeeded without a usable asset URL')
+  throw new Error('Cloudinary upload failed after rate-limit retry')
+}
+
+function retryAfterMs(value: string | null): number {
+  if (!value) return CLOUDINARY_RATE_LIMIT_RETRY_MS
+
+  const seconds = Number(value)
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return Math.max(CLOUDINARY_RATE_LIMIT_RETRY_MS, Math.round(seconds * 1000))
   }
 
-  return payload.secure_url
+  const at = Date.parse(value)
+  if (Number.isFinite(at)) {
+    return Math.max(CLOUDINARY_RATE_LIMIT_RETRY_MS, at - Date.now())
+  }
+
+  return CLOUDINARY_RATE_LIMIT_RETRY_MS
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 export async function deleteCloudinaryIdentities(
