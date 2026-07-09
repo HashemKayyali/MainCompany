@@ -191,6 +191,36 @@ function getSupabaseConfig() {
   return { supabaseUrl, keyCandidates }
 }
 
+function isRecoverablePrerenderDataError(error) {
+  const status = Number(error?.status)
+
+  if (Number.isFinite(status)) {
+    return status === 402 || status === 429 || status >= 500
+  }
+
+  // Native fetch rejects with TypeError for DNS, connection, and other network failures.
+  return error instanceof TypeError
+}
+
+function resolvePrerenderData(result, label) {
+  if (result.status === 'fulfilled') {
+    return { data: result.value, skipped: false }
+  }
+
+  if (!isRecoverablePrerenderDataError(result.reason)) {
+    throw result.reason
+  }
+
+  const status = Number(result.reason?.status)
+  const reason = Number.isFinite(status) ? `HTTP ${status}` : 'network failure'
+
+  console.warn(
+    `[seo-prerender] Skipping ${label} route metadata because Supabase is temporarily unavailable (${reason}). Static SEO pages will still be generated.`
+  )
+
+  return { data: [], skipped: true }
+}
+
 async function fetchActiveProductsWithKey(supabaseUrl, supabaseKey) {
   const products = []
   const pageSize = 1000
@@ -279,7 +309,12 @@ async function fetchActiveProducts() {
     } catch (error) {
       lastError = error
 
-      if (candidate.label === 'service-role' || keyCandidates.length === 1) {
+      // HTTP 402 is an organization-wide quota restriction; another key cannot bypass it.
+      if (
+        Number(error?.status) === 402 ||
+        candidate.label === 'service-role' ||
+        keyCandidates.length === 1
+      ) {
         throw error
       }
 
@@ -377,7 +412,12 @@ async function fetchActiveCategories() {
     } catch (error) {
       lastError = error
 
-      if (candidate.label === 'service-role' || keyCandidates.length === 1) {
+      // HTTP 402 is an organization-wide quota restriction; another key cannot bypass it.
+      if (
+        Number(error?.status) === 402 ||
+        candidate.label === 'service-role' ||
+        keyCandidates.length === 1
+      ) {
         throw error
       }
 
@@ -578,10 +618,14 @@ async function main() {
   await loadEnvFiles()
 
   const template = await readFile(TEMPLATE_PATH, 'utf8')
-  const [products, categories] = await Promise.all([
+  const [productsResult, categoriesResult] = await Promise.allSettled([
     fetchActiveProducts(),
     fetchActiveCategories(),
   ])
+  const resolvedProducts = resolvePrerenderData(productsResult, 'product')
+  const resolvedCategories = resolvePrerenderData(categoriesResult, 'category')
+  const products = resolvedProducts.data
+  const categories = resolvedCategories.data
   const metas = [
     ...STATIC_PAGES.map(staticPageToMeta),
     ...categories.map(category => categoryToMeta(category, products)),
@@ -595,6 +639,12 @@ async function main() {
   console.log(
     `[seo-prerender] Generated SEO HTML for ${metas.length} routes (${STATIC_PAGES.length} static pages, ${categories.length} category pages, ${products.length} product pages).`
   )
+
+  if (resolvedProducts.skipped || resolvedCategories.skipped) {
+    console.warn(
+      '[seo-prerender] Build completed with partial SEO prerendering. Redeploy after Supabase service is restored to regenerate dynamic product/category route metadata.'
+    )
+  }
 }
 
 main().catch(error => {
