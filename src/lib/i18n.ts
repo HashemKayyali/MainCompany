@@ -1307,6 +1307,11 @@ const arPhraseMap: Record<string, string> = {
   'Clear filters': 'مسح الفلاتر',
   'Clear search': 'مسح البحث',
   'No categories match': 'لا توجد فئات تطابق',
+  'No categories are available right now.': 'لا توجد فئات متاحة حاليًا.',
+  'Categories are temporarily unavailable': 'الفئات غير متاحة مؤقتًا',
+  'Services are temporarily unavailable': 'الخدمات غير متاحة مؤقتًا',
+  'We could not load the live catalog right now. Please try again shortly.':
+    'تعذر تحميل الكتالوج المباشر حاليًا. يرجى المحاولة مرة أخرى بعد قليل.',
   'Gallery highlight': 'لقطة من المعرض',
   'Submit Your Rental Request': 'إرسال طلب التأجير',
   'Pick dates': 'اختر التواريخ',

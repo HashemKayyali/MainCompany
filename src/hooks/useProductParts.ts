@@ -53,10 +53,15 @@ function loadProductParts(productSlug: string) {
 
 function initialState(productSlug: string): ProductPartsState {
   const cached = productSlug ? readCachedParts(productSlug) : undefined
+  const supabaseConfigured = isSupabaseConfigured()
+  const useDemoDefaults = import.meta.env.DEV && !supabaseConfigured
+
   return {
     slug: productSlug,
-    parts: cached ?? defaultPartsFor(productSlug),
-    loading: Boolean(productSlug && !cached && isSupabaseConfigured()),
+    // Demo parts are only available for local development. Production must
+    // never flash fake parts while live data is loading or unavailable.
+    parts: cached ?? (useDemoDefaults ? defaultPartsFor(productSlug) : []),
+    loading: Boolean(productSlug && !cached && supabaseConfigured),
   }
 }
 
@@ -88,7 +93,11 @@ export function useProductParts(productSlug: string) {
     }
 
     if (!isSupabaseConfigured()) {
-      setState({ slug: productSlug, parts: defaultPartsFor(productSlug), loading: false })
+      setState({
+        slug: productSlug,
+        parts: import.meta.env.DEV ? defaultPartsFor(productSlug) : [],
+        loading: false,
+      })
       return () => {
         cancelled = true
       }

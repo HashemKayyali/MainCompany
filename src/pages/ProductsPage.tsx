@@ -11,7 +11,7 @@ import SectionHeading from '../components/home/SectionHeading'
 import Chip from '../components/ui/Chip'
 import FramedImage from '../components/ui/FramedImage'
 import EventiesHero from '../components/layout/EventiesHero'
-import { useCategoriesData, useProductsData } from '../contexts/DataContext'
+import { useCategoriesData, useDataMeta, useProductsData } from '../contexts/DataContext'
 import type { Category, Product } from '../data/products/types'
 import { useElementActivity } from '../hooks/useElementActivity'
 import { useMotionEnabled } from '../hooks/useMotionEnabled'
@@ -207,10 +207,12 @@ function ProductsHeroShowcase({
   heroProducts,
   categoryNameById,
   motionEnabled,
+  loading,
 }: {
   heroProducts: Product[]
   categoryNameById: Map<string, string>
   motionEnabled: boolean
+  loading: boolean
 }) {
   return (
     <>
@@ -234,9 +236,9 @@ function ProductsHeroShowcase({
             motionEnabled={motionEnabled}
           />
         ))
-      ) : (
+      ) : loading ? (
         <ProductHeroSkeletonCards motionEnabled={motionEnabled} />
-      )}
+      ) : null}
     </>
   )
 }
@@ -244,9 +246,11 @@ function ProductsHeroShowcase({
 function ProductsHero({
   products,
   categories,
+  loading,
 }: {
   products: Product[]
   categories: Category[]
+  loading: boolean
 }) {
   const motionEnabled = useMotionEnabled()
   const { ref: heroSectionRef, active: heroActive } = useElementActivity<HTMLElement>()
@@ -352,6 +356,7 @@ function ProductsHero({
           heroProducts={heroProducts}
           categoryNameById={categoryNameById}
           motionEnabled={motionEnabled && heroActive}
+          loading={loading}
         />
       }
     />
@@ -369,6 +374,7 @@ export default function ProductsPage() {
   // Split hooks so this page only ensures products + categories (batch 2).
   const { products, getProductsByCategory } = useProductsData()
   const { categories } = useCategoriesData()
+  const { loading, error } = useDataMeta()
   const { isDark } = useTheme()
   const { translateText } = useI18n()
   const [searchParams] = useSearchParams()
@@ -389,9 +395,11 @@ export default function ProductsPage() {
       .filter((p, i, arr) => arr.findIndex(x => x.slug === p.slug) === i)
   }, [filter, products, categories, getProductsByCategory])
 
+  const dataUnavailable = Boolean(error && !loading && products.length === 0)
+
   return (
     <>
-      <ProductsHero products={products} categories={categories} />
+      <ProductsHero products={products} categories={categories} loading={loading} />
 
       <div className="bg-[#f8f3ff]">
       <section id="products-catalog" className="site-section scroll-mt-[96px] bg-transparent">
@@ -478,7 +486,24 @@ export default function ProductsPage() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3, ease }}
               >
-                {filtered.length > 0 ? (
+                {dataUnavailable ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className={`rounded-[22px] border border-dashed px-6 py-18 text-center ${
+                      isDark
+                        ? 'border-white/[0.10] bg-white/[0.025]'
+                        : 'border-violet-200/70 bg-slate-50/60'
+                    }`}
+                  >
+                    <p className={`text-[1.08rem] font-semibold ${isDark ? 'text-white/70' : 'text-slate-800'}`}>
+                      {translateText('Services are temporarily unavailable')}
+                    </p>
+                    <p className={`mx-auto mt-2 max-w-xl text-[13px] leading-6 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                      {translateText('We could not load the live catalog right now. Please try again shortly.')}
+                    </p>
+                  </motion.div>
+                ) : filtered.length > 0 ? (
                   <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4 xl:gap-5 2xl:grid-cols-5">
                     {filtered.map((p, i) => (
                       <ProductCard key={p.slug} product={p} index={i} />

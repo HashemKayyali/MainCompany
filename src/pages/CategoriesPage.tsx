@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Search } from 'lucide-react'
-import { useCategoriesData, useProductsData } from '../contexts/DataContext'
+import { useCategoriesData, useDataMeta, useProductsData } from '../contexts/DataContext'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { preloadRoute } from '../utils/route-preload'
 import CategoryGridCard, { type CategoryGridCardData } from '../components/category/CategoryGridCard'
@@ -102,6 +102,7 @@ function CategoriesHeroShowcase({
 export default function CategoriesPage() {
   const { categories } = useCategoriesData()
   const { getProductsByCategory } = useProductsData()
+  const { loading, error } = useDataMeta()
   const { translateText } = useI18n()
   const [query, setQuery] = useState('')
 
@@ -140,6 +141,7 @@ export default function CategoriesPage() {
     [items]
   )
   const featuredCategories = useMemo(() => items.filter(category => category.count > 0).slice(0, 4), [items])
+  const dataUnavailable = Boolean(error && !loading && items.length === 0)
 
   return (
     <>
@@ -172,16 +174,31 @@ export default function CategoriesPage() {
             className="mb-10"
           />
 
-          {filtered.length === 0 ? (
+          {dataUnavailable ? (
+            <div className="rounded-[22px] border border-violet-200/70 bg-white px-6 py-16 text-center shadow-sm">
+              <p className="font-display text-[1.25rem] font-bold text-ink-900">
+                {translateText('Categories are temporarily unavailable')}
+              </p>
+              <p className="mx-auto mt-2 max-w-xl text-[13px] leading-6 text-ink-600">
+                {translateText('We could not load the live catalog right now. Please try again shortly.')}
+              </p>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="py-20 text-center">
-              <p className="text-[15px] font-semibold text-ink-700">{translateText('No categories match')} “{query.trim()}”.</p>
-              <button
-                type="button"
-                onClick={() => setQuery('')}
-                className="mt-4 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-5 py-2.5 text-[12px] font-bold text-violet-700 transition-colors hover:bg-violet-50"
-              >
-                {translateText('Clear search')}
-              </button>
+              <p className="text-[15px] font-semibold text-ink-700">
+                {query.trim()
+                  ? <>{translateText('No categories match')} “{query.trim()}”.</>
+                  : translateText('No categories are available right now.')}
+              </p>
+              {query.trim() && (
+                <button
+                  type="button"
+                  onClick={() => setQuery('')}
+                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-5 py-2.5 text-[12px] font-bold text-violet-700 transition-colors hover:bg-violet-50"
+                >
+                  {translateText('Clear search')}
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">

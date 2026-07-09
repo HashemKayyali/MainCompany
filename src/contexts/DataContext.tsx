@@ -127,11 +127,6 @@ type DataSnapshot = {
   customBuildCategories: CustomBuildCategory[]
 }
 
-type CachedDataSnapshot = DataSnapshot & {
-  savedAt: number
-  version: 5
-}
-
 const Ctx = createContext<DataCtx>({} as DataCtx)
 const ProductsCtx = createContext<ProductDataCtx>({} as ProductDataCtx)
 const PartsCtx = createContext<PartDataCtx>({} as PartDataCtx)
@@ -148,16 +143,37 @@ const DataActionsCtx = createContext<DataActionsCtx>({} as DataActionsCtx)
 // call it on mount, so a page only pays for the tables it renders.
 const RESOURCE_KEYS = ['products', 'categories', 'customers', 'gallery', 'parts', 'customBuilds'] as const
 type ResourceKey = (typeof RESOURCE_KEYS)[number]
+
+type CachedDataSnapshot = DataSnapshot & {
+  savedAt: number
+  version: 6
+  validResources: ResourceKey[]
+  resourceSavedAt: Partial<Record<ResourceKey, number>>
+}
 // Loaded eagerly at app mount because the global Navbar mega-menu, Footer
 // and ProductCard need them on every route.
 const EAGER_RESOURCES: ResourceKey[] = ['products', 'categories']
 
 const EnsureCtx = createContext<(key: ResourceKey) => Promise<void>>(async () => {})
 
-const CACHE_KEY = 'eventies:data-cache:v5'
-const CACHE_VERSION = 5 as const
-const MAX_RETRIES = 3
-const RETRY_DELAY = 2000
+const CACHE_KEY = 'eventies:data-cache:v6'
+const LEGACY_CACHE_KEYS = ['eventies:data-cache:v5'] as const
+const CACHE_VERSION = 6 as const
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000
+const MAX_RETRIES = 2
+const RETRY_BASE_DELAY_MS = 750
+const DEMO_DEFAULTS_ENABLED = import.meta.env.DEV && !isSupabaseConfigured()
+
+const EMPTY_SNAPSHOT: DataSnapshot = {
+  products: [],
+  parts: [],
+  customers: [],
+  categories: [],
+  galleryAlbums: [],
+  customBuilds: [],
+  customBuildCategories: [],
+}
+
 const DEFAULT_SNAPSHOT: DataSnapshot = {
   products: sortProductsForDisplay(DEFAULT_PRODUCTS),
   parts: DEFAULT_PARTS,
@@ -186,30 +202,94 @@ const RESOURCE_LOADERS: Record<ResourceKey, () => Promise<Partial<DataSnapshot>>
   },
 }
 
-// Fallback slice applied when a resource load fails after all retries — mirrors
-// the previous "show default content" behavior, but scoped to one resource.
-const RESOURCE_DEFAULTS: Record<ResourceKey, Partial<DataSnapshot>> = {
-  products: { products: DEFAULT_SNAPSHOT.products },
-  categories: { categories: DEFAULT_SNAPSHOT.categories },
-  customers: { customers: DEFAULT_SNAPSHOT.customers },
-  gallery: { galleryAlbums: DEFAULT_SNAPSHOT.galleryAlbums },
-  parts: { parts: DEFAULT_SNAPSHOT.parts },
-  customBuilds: {
-    customBuilds: DEFAULT_SNAPSHOT.customBuilds,
-    customBuildCategories: DEFAULT_SNAPSHOT.customBuildCategories,
-  },
+function removeStorageKey(key: string) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.removeItem(key)
+  } catch {
+    // Ignore storage failures; cache cleanup must never break rendering.
+  }
 }
 
-function readSnapshot() {
+function clearSnapshotCache() {
+  removeStorageKey(CACHE_KEY)
+  LEGACY_CACHE_KEYS.forEach(removeStorageKey)
+}
+
+function getErrorStatus(error: unknown): number | undefined {
+  if (typeof error !== 'object' || error === null) return undefined
+
+  const candidate = error as {
+    status?: unknown
+    statusCode?: unknown
+    httpStatus?: unknown
+    code?: unknown
+  }
+
+  for (const value of [candidate.status, candidate.statusCode, candidate.httpStatus, candidate.code]) {
+    const numeric = typeof value === 'number' ? value : Number(value)
+    if (Number.isInteger(numeric) && numeric >= 100 && numeric <= 599) return numeric
+  }
+
+  return undefined
+}
+
+function isRetryableLoadError(error: unknown) {
+  const status = getErrorStatus(error)
+  if (status !== undefined) {
+    return status === 408 || status === 425 || status === 429 || status >= 500
+  }
+
+  const message = getErrorMessage(error, '').toLowerCase()
+  if (!message) return error instanceof TypeError
+
+  return (
+    error instanceof TypeError ||
+    /failed to fetch|fetch failed|network error|network request failed|timeout|timed out|connection reset|connection refused|temporarily unavailable|service unavailable|bad gateway|gateway timeout|internal server error/.test(
+      message
+    )
+  )
+}
+
+function getRetryDelay(attempt: number) {
+  return RETRY_BASE_DELAY_MS * 2 ** attempt
+}
+
+function readSnapshot(): {
+  snapshot: DataSnapshot
+  validResources: Set<ResourceKey>
+  resourceSavedAt: Partial<Record<ResourceKey, number>>
+} | null {
   if (typeof window === 'undefined') return null
+
+  LEGACY_CACHE_KEYS.forEach(removeStorageKey)
 
   try {
     const raw = window.localStorage.getItem(CACHE_KEY)
     if (!raw) return null
 
     const parsed = JSON.parse(raw) as Partial<CachedDataSnapshot>
+    const rawResourceSavedAt =
+      typeof parsed.resourceSavedAt === 'object' && parsed.resourceSavedAt !== null
+        ? parsed.resourceSavedAt
+        : {}
+    const now = Date.now()
+    const resourceSavedAt: Partial<Record<ResourceKey, number>> = {}
+    const validResources = Array.isArray(parsed.validResources)
+      ? parsed.validResources.filter((key): key is ResourceKey => {
+          if (!RESOURCE_KEYS.includes(key as ResourceKey)) return false
+          const savedAt = Number(rawResourceSavedAt[key as ResourceKey])
+          const age = now - savedAt
+          if (!Number.isFinite(savedAt) || age < 0 || age > CACHE_TTL_MS) return false
+          resourceSavedAt[key as ResourceKey] = savedAt
+          return true
+        })
+      : []
+
     if (
       parsed.version !== CACHE_VERSION ||
+      !Number.isFinite(Number(parsed.savedAt)) ||
+      validResources.length === 0 ||
       !Array.isArray(parsed.products) ||
       !Array.isArray(parsed.parts) ||
       !Array.isArray(parsed.customers) ||
@@ -218,31 +298,58 @@ function readSnapshot() {
       !Array.isArray(parsed.customBuilds) ||
       !Array.isArray(parsed.customBuildCategories)
     ) {
+      removeStorageKey(CACHE_KEY)
       return null
     }
 
+    const validSet = new Set(validResources)
     return {
-      products: sortProductsForDisplay(parsed.products),
-      parts: parsed.parts,
-      customers: parsed.customers,
-      categories: parsed.categories,
-      galleryAlbums: parsed.galleryAlbums,
-      customBuilds: parsed.customBuilds,
-      customBuildCategories: parsed.customBuildCategories,
-    } satisfies DataSnapshot
+      snapshot: {
+        products: validSet.has('products') ? sortProductsForDisplay(parsed.products) : [],
+        parts: validSet.has('parts') ? parsed.parts : [],
+        customers: validSet.has('customers') ? parsed.customers : [],
+        categories: validSet.has('categories') ? parsed.categories : [],
+        galleryAlbums: validSet.has('gallery') ? parsed.galleryAlbums : [],
+        customBuilds: validSet.has('customBuilds') ? parsed.customBuilds : [],
+        customBuildCategories: validSet.has('customBuilds') ? parsed.customBuildCategories : [],
+      },
+      validResources: validSet,
+      resourceSavedAt,
+    }
   } catch {
+    removeStorageKey(CACHE_KEY)
     return null
   }
 }
 
-function writeSnapshot(snapshot: DataSnapshot) {
+function writeSnapshot(
+  snapshot: DataSnapshot,
+  resourceSavedAt: Readonly<Partial<Record<ResourceKey, number>>>
+) {
   if (typeof window === 'undefined') return
+
+  const now = Date.now()
+  const freshResourceSavedAt: Partial<Record<ResourceKey, number>> = {}
+  const cacheableResources = RESOURCE_KEYS.filter(key => {
+    const savedAt = Number(resourceSavedAt[key])
+    const age = now - savedAt
+    if (!Number.isFinite(savedAt) || age < 0 || age > CACHE_TTL_MS) return false
+    freshResourceSavedAt[key] = savedAt
+    return true
+  })
+
+  if (cacheableResources.length === 0) {
+    removeStorageKey(CACHE_KEY)
+    return
+  }
 
   try {
     const payload: CachedDataSnapshot = {
       ...snapshot,
-      savedAt: Date.now(),
+      savedAt: now,
       version: CACHE_VERSION,
+      validResources: cacheableResources,
+      resourceSavedAt: freshResourceSavedAt,
     }
 
     window.localStorage.setItem(CACHE_KEY, JSON.stringify(payload))
@@ -265,15 +372,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [customBuildCategories, setCustomBuildCategories] = useState<CustomBuildCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  // Resources that have data ready to display: a completed network load
-  // (success or default fallback) or a non-empty cached slice. Drives the
-  // per-resource loading flags (currently just partsLoading).
+  // Resources that have finished loading for the current UI session. A failed
+  // request is marked finished so lazy consumers can render an empty/error state
+  // instead of spinning forever; only successful network data or trusted cache
+  // is eligible for persistence.
   const [loadedResources, setLoadedResources] = useState<ReadonlySet<ResourceKey>>(new Set())
 
   const snapshotTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const snapshotIdleHandle = useRef<number | null>(null)
   const mountedRef = useRef(true)
-  const cacheVisibleRef = useRef(false)
+  const validResourcesRef = useRef<Set<ResourceKey>>(new Set())
+  const resourceSavedAtRef = useRef<Partial<Record<ResourceKey, number>>>({})
   // Per-resource load bookkeeping: which resources have been requested this
   // session, and the in-flight promise for each (so concurrent callers and
   // React StrictMode double-invokes share one request instead of racing).
@@ -286,7 +395,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const applySnapshot = useCallback(
     (snapshot: DataSnapshot, nextError: string | null, nextLoading: boolean) => {
-      cacheVisibleRef.current = true
       safeSet(() => {
         setProducts(snapshot.products)
         setParts(snapshot.parts)
@@ -318,23 +426,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
   )
 
   const hydrateCache = useCallback(() => {
-    const snapshot = readSnapshot()
-    if (!snapshot) return false
+    const cached = readSnapshot()
+    if (!cached) return new Set<ResourceKey>()
 
-    applySnapshot(snapshot, null, false)
-    // A cached slice only counts as "loaded" when it actually has rows. An
-    // empty slice may just mean it was never fetched in the session that
-    // wrote the snapshot (e.g. a Home-only visit never loads parts), so it
-    // must not masquerade as a confirmed empty result.
-    const hydrated: ResourceKey[] = []
-    if (snapshot.products.length) hydrated.push('products')
-    if (snapshot.categories.length) hydrated.push('categories')
-    if (snapshot.customers.length) hydrated.push('customers')
-    if (snapshot.galleryAlbums.length) hydrated.push('gallery')
-    if (snapshot.parts.length) hydrated.push('parts')
-    if (snapshot.customBuilds.length || snapshot.customBuildCategories.length) hydrated.push('customBuilds')
-    markLoaded(hydrated)
-    return true
+    validResourcesRef.current = new Set(cached.validResources)
+    resourceSavedAtRef.current = { ...cached.resourceSavedAt }
+    applySnapshot(cached.snapshot, null, false)
+    markLoaded([...cached.validResources])
+    return new Set(cached.validResources)
   }, [applySnapshot, markLoaded])
 
   const writeLog = useCallback(
@@ -411,10 +510,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [safeSet]
   )
 
-  // Fetch a single resource with the same retry/backoff the monolithic loader
-  // used, applying the result (or its default fallback) to just that slice.
-  // Concurrent callers share one in-flight promise. Rejects on final failure so
-  // the eager mount load can surface a global error; lazy callers swallow it.
+  // Fetch one resource independently. Only transient failures are retried;
+  // permanent responses such as 401/403/402 fail immediately instead of causing
+  // long request storms. On failure we keep trusted cache already on screen, or
+  // leave the slice empty when no cache exists — demo defaults are never injected
+  // into a configured production app.
   const loadResource = useCallback(
     (key: ResourceKey): Promise<void> => {
       const existing = inFlightRef.current.get(key)
@@ -423,21 +523,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const run = (async () => {
         for (let attempt = 0; ; attempt += 1) {
           try {
-            applyResourcePart(await RESOURCE_LOADERS[key]())
+            const part = await RESOURCE_LOADERS[key]()
+            applyResourcePart(part)
+            validResourcesRef.current.add(key)
+            resourceSavedAtRef.current[key] = Date.now()
             markLoaded([key])
             return
           } catch (loadError: unknown) {
-            if (attempt < MAX_RETRIES) {
-              await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (attempt + 1)))
+            const shouldRetry = attempt < MAX_RETRIES && isRetryableLoadError(loadError)
+            if (shouldRetry) {
+              await new Promise(resolve => setTimeout(resolve, getRetryDelay(attempt)))
               if (!mountedRef.current) return
               continue
             }
+
             console.error(`Failed to load "${key}" from Supabase:`, loadError)
-            applyResourcePart(RESOURCE_DEFAULTS[key])
-            // Even a failed load resolves the resource's loading state — the
-            // default fallback is what we display, so consumers must not spin
-            // forever waiting for it. Remove the once-per-session request mark
-            // so a later page visit can recover after a temporary outage.
             markLoaded([key])
             requestedRef.current.delete(key)
             throw loadError
@@ -476,10 +576,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     mountedRef.current = true
-    const hasCache = hydrateCache()
+    const cachedResources = hydrateCache()
 
     if (!isSupabaseConfigured()) {
-      applySnapshot(DEFAULT_SNAPSHOT, null, false)
+      applySnapshot(
+        DEMO_DEFAULTS_ENABLED ? DEFAULT_SNAPSHOT : EMPTY_SNAPSHOT,
+        DEMO_DEFAULTS_ENABLED ? null : 'Live data service is not configured.',
+        false
+      )
       markLoaded([...RESOURCE_KEYS])
       return () => {
         mountedRef.current = false
@@ -489,10 +593,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (sessionLoading) return
 
     // Only products + categories load at mount; everything else is pulled in
-    // lazily by the split hooks when a page that needs it renders. The global
-    // `loading`/`error` state now tracks just this eager pair — lazy resources
-    // stream in silently without toggling the app-level spinner.
-    if (!hasCache) {
+    // lazily by the split hooks when a page that needs it renders. Cached live
+    // data is displayed immediately and then revalidated in the background.
+    const hasCompleteEagerCache = EAGER_RESOURCES.every(key => cachedResources.has(key))
+    if (!hasCompleteEagerCache) {
       safeSet(() => {
         setLoading(true)
         setError(null)
@@ -501,11 +605,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     EAGER_RESOURCES.forEach(key => requestedRef.current.add(key))
     void Promise.allSettled(EAGER_RESOURCES.map(key => loadResource(key))).then(results => {
-      cacheVisibleRef.current = true
-      const allFailed = results.every(result => result.status === 'rejected')
+      const missingResources = results.flatMap((result, index) =>
+        result.status === 'rejected' && !cachedResources.has(EAGER_RESOURCES[index])
+          ? [EAGER_RESOURCES[index]]
+          : []
+      )
+
       safeSet(() => {
         setLoading(false)
-        setError(allFailed && !hasCache ? 'Supabase unavailable. Showing default content.' : null)
+        setError(
+          missingResources.length > 0
+            ? 'Unable to load live data right now. Please try again shortly.'
+            : null
+        )
       })
     })
 
@@ -515,18 +627,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [applySnapshot, hydrateCache, loadResource, markLoaded, safeSet, sessionLoading])
 
   useEffect(() => {
-    if (loading) return
-    if (
-      !products.length &&
-      !parts.length &&
-      !customers.length &&
-      !categories.length &&
-      !galleryAlbums.length &&
-      !customBuilds.length &&
-      !customBuildCategories.length
-    ) {
-      return
-    }
+    if (loading || !isSupabaseConfigured()) return
+
+    const resourceSavedAt = { ...resourceSavedAtRef.current }
+    if (Object.keys(resourceSavedAt).length === 0) return
 
     if (snapshotTimer.current) clearTimeout(snapshotTimer.current)
 
@@ -554,7 +658,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       snapshotTimer.current = null
 
       const persist = () => {
-        writeSnapshot(snapshot)
+        writeSnapshot(snapshot, resourceSavedAt)
         snapshotIdleHandle.current = null
       }
 
@@ -575,7 +679,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
         snapshotIdleHandle.current = null
       }
     }
-  }, [categories, customBuildCategories, customBuilds, customers, galleryAlbums, loading, parts, products])
+  }, [
+    categories,
+    customBuildCategories,
+    customBuilds,
+    customers,
+    galleryAlbums,
+    loadedResources,
+    loading,
+    parts,
+    products,
+  ])
 
   const addProduct = useCallback(
     async (product: Product) => {
@@ -1020,11 +1134,35 @@ export function DataProvider({ children }: { children: ReactNode }) {
   )
 
   const resetToDefaults = useCallback(() => {
+    clearSnapshotCache()
+    validResourcesRef.current.clear()
+    resourceSavedAtRef.current = {}
     requestedRef.current.clear()
-    inFlightRef.current.clear()
-    applySnapshot(DEFAULT_SNAPSHOT, null, false)
-    markLoaded([...RESOURCE_KEYS])
-  }, [applySnapshot, markLoaded])
+    safeSet(() => setLoadedResources(new Set()))
+
+    if (!isSupabaseConfigured()) {
+      applySnapshot(
+        DEMO_DEFAULTS_ENABLED ? DEFAULT_SNAPSHOT : EMPTY_SNAPSHOT,
+        DEMO_DEFAULTS_ENABLED ? null : 'Live data service is not configured.',
+        false
+      )
+      markLoaded([...RESOURCE_KEYS])
+      return
+    }
+
+    applySnapshot(EMPTY_SNAPSHOT, null, true)
+    void refreshAll().finally(() => {
+      const eagerDataAvailable = EAGER_RESOURCES.every(key => validResourcesRef.current.has(key))
+      safeSet(() => {
+        setLoading(false)
+        setError(
+          eagerDataAvailable
+            ? null
+            : 'Unable to load live data right now. Please try again shortly.'
+        )
+      })
+    })
+  }, [applySnapshot, markLoaded, refreshAll, safeSet])
 
   const productValue = useMemo<ProductDataCtx>(
     () => ({
