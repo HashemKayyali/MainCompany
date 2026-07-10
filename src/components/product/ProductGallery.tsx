@@ -7,7 +7,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 import { cn } from '../../utils/cn'
 import FramedImage from '../ui/FramedImage'
 import FramedVideo from '../ui/FramedVideo'
-import { preloadImage } from '../../lib/image-delivery'
+import { PRODUCT_DETAIL_IMAGE_SIZES, preloadImage } from '../../lib/image-delivery'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import { APP_ROUTE_CHANGE_EVENT } from '../../utils/route-lifecycle'
 
@@ -44,7 +44,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
   useEffect(() => {
     if (!activeImage || images.length < 2) return
     const nextIndex = (activeImageIndex + 1) % images.length
-    void preloadImage(images[nextIndex], 'detail')
+    void preloadImage(images[nextIndex], 'detail', 'products', PRODUCT_DETAIL_IMAGE_SIZES)
   }, [activeImage, activeImageIndex, images])
 
   useEffect(() => {
@@ -171,9 +171,9 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
               key={`${img}-${index}`}
               type="button"
               onClick={() => navigate(itemIndex)}
-              onMouseEnter={() => { void preloadImage(img, 'detail') }}
-              onFocus={() => { void preloadImage(img, 'detail') }}
-              onTouchStart={() => { void preloadImage(img, 'detail') }}
+              onMouseEnter={() => { void preloadImage(img, 'detail', 'products', PRODUCT_DETAIL_IMAGE_SIZES) }}
+              onFocus={() => { void preloadImage(img, 'detail', 'products', PRODUCT_DETAIL_IMAGE_SIZES) }}
+              onTouchStart={() => { void preloadImage(img, 'detail', 'products', PRODUCT_DETAIL_IMAGE_SIZES) }}
               aria-label={`${translateText('View photo')} ${index + 1}`}
               className={cn(
                 'relative h-[64px] w-[86px] shrink-0 overflow-hidden rounded-[12px] border bg-white transition-all duration-250',
@@ -265,7 +265,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
                   height={1050}
                   loading="eager"
                   fetchPriority="high"
-                  sizes="(max-width: 1024px) 100vw, 760px"
+                  sizes={PRODUCT_DETAIL_IMAGE_SIZES}
                   className={mobileMainMedia}
                   fallbackTransform={{ fit: 'contain', bgColor: '#ffffff', bgOpacity: 0 }}
                   style={{ objectFit: 'contain', transform: 'none' }}

@@ -73,8 +73,8 @@ function AuthInput({
       <input
         {...props}
         className={cn(
-          'h-[44px] w-full rounded-xl border bg-[#f8f5fc]/95 text-sm font-semibold text-[#150628]',
-          'placeholder:text-xs placeholder:text-slate-400/70',
+          'h-[44px] w-full rounded-xl border bg-[#f8f5fc]/95 text-[13px] font-medium text-[#150628]',
+          'placeholder:text-xs placeholder:font-normal placeholder:text-slate-400/70',
           // Transition color only — transition-all animated the ring/border
           // width and caused the focused field to visibly "grow" and the old
           // field to keep a lingering purple outline while re-rendering.

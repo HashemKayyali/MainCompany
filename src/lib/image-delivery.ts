@@ -45,6 +45,9 @@ const transformationsEnabled =
 const loadedImages = new Set<string>()
 const preloadPromises = new Map<string, Promise<void>>()
 
+export const CATEGORY_HERO_IMAGE_SIZES = '(max-width: 1023px) 100vw, 42vw'
+export const PRODUCT_DETAIL_IMAGE_SIZES = '(max-width: 1024px) 100vw, 760px'
+
 const PRELOAD_SIZES: Record<ImagePreset, string> = {
   tiny: '96px',
   logo: '240px',

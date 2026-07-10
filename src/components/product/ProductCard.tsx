@@ -15,7 +15,7 @@ import FramedVideo from '../ui/FramedVideo'
 import ProductCommerceActions from './ProductCommerceActions'
 import { cn } from '../../utils/cn'
 import { useSpotlight, SpotlightOverlay } from '../ui/spotlight-card'
-import { preloadImage } from '../../lib/image-delivery'
+import { PRODUCT_DETAIL_IMAGE_SIZES, preloadImage } from '../../lib/image-delivery'
 import { preloadRoute } from '../../utils/route-preload'
 
 const CARD_IMAGE_SIZES = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
@@ -72,7 +72,7 @@ const ProductCard = memo(function ProductCard({
 
   const prepareProduct = () => {
     preloadRoute(productHref)
-    void preloadImage(product.heroImage, 'detail')
+    void preloadImage(product.heroImage, 'detail', 'products', PRODUCT_DETAIL_IMAGE_SIZES)
   }
 
   const categoryLabel =

@@ -11,6 +11,7 @@ import { usePageMeta } from '../hooks/usePageMeta'
 import { cn } from '../utils/cn'
 import NotFoundPage from './NotFoundPage'
 import { useI18n } from '../contexts/LanguageContext'
+import { CATEGORY_HERO_IMAGE_SIZES } from '../lib/image-delivery'
 
 const SITE_URL = 'https://www.eventiesjo.com'
 const DEFAULT_SOCIAL_IMAGE = `${SITE_URL}/images/og-default.png`
@@ -268,7 +269,7 @@ export default function CategoryPage() {
                 alt={category.name}
                 loading="eager"
                 fetchPriority="high"
-                sizes="(max-width: 1023px) 100vw, 42vw"
+                sizes={CATEGORY_HERO_IMAGE_SIZES}
                 fallbackTransform={{ fit: 'cover' }}
                 className="absolute inset-0 h-full w-full object-cover"
               />

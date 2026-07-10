@@ -4,7 +4,7 @@ import { ArrowUpRight } from 'lucide-react'
 import { useCategoriesData, useProductsData } from '../../contexts/DataContext'
 import type { Product } from '../../data/products/types'
 import { preloadRoute } from '../../utils/route-preload'
-import { preloadImage } from '../../lib/image-delivery'
+import { PRODUCT_DETAIL_IMAGE_SIZES, preloadImage } from '../../lib/image-delivery'
 import FramedImage from '../ui/FramedImage'
 import Reveal from './Reveal'
 import SectionHeading, { ViewAllButton } from './SectionHeading'
@@ -34,9 +34,9 @@ function ServiceCard({
   return (
     <Link
       to={href}
-      onMouseEnter={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail', 'products', '100vw') }}
-      onFocus={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail', 'products', '100vw') }}
-      onTouchStart={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail', 'products', '100vw') }}
+      onMouseEnter={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail', 'products', PRODUCT_DETAIL_IMAGE_SIZES) }}
+      onFocus={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail', 'products', PRODUCT_DETAIL_IMAGE_SIZES) }}
+      onTouchStart={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail', 'products', PRODUCT_DETAIL_IMAGE_SIZES) }}
       aria-label={product.name}
       className="group flex h-full flex-col overflow-hidden rounded-[18px] border border-violet-200/70 bg-white outline-none transition-all duration-400 hover:-translate-y-1 hover:border-violet-300 hover:shadow-[0_24px_50px_-26px_rgba(89,23,196,0.5)] focus-visible:ring-2 focus-visible:ring-violet-400"
       style={{ boxShadow: '0 1px 2px rgba(20,8,50,0.04), 0 12px 30px -22px rgba(89,23,196,0.22)' }}

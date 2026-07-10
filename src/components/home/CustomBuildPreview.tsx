@@ -107,27 +107,30 @@ export default function CustomBuildPreview() {
                   }}
                   aria-hidden="true"
                 />
-                <div className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/12" aria-hidden="true" />
-                <div className="pointer-events-none absolute left-[14%] right-[14%] top-1/2 h-px bg-gradient-to-r from-transparent via-white/46 to-transparent" aria-hidden="true" />
+                <div className="relative mx-auto min-h-[310px] max-w-3xl sm:min-h-[356px]">
+                  <div className="pointer-events-none absolute left-1/2 top-1/2 h-[68%] w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-[34px] border border-white/12 bg-gradient-to-b from-white/[0.05] to-white/[0.015] shadow-[0_30px_70px_-42px_rgba(0,0,0,0.85)] backdrop-blur-[2px]" aria-hidden="true" />
 
-                <div className="relative mx-auto flex min-h-[310px] max-w-3xl items-center justify-between gap-3 sm:min-h-[356px]">
-                  {buildSignals.map((item, index) => {
-                    const Icon = item.icon
-                    return (
-                      <div key={item.label} className="relative flex flex-1 flex-col items-center">
-                        <div
-                          className="absolute top-1/2 h-24 w-24 -translate-y-1/2 rounded-full bg-white/10 blur-2xl"
-                          aria-hidden="true"
-                        />
-                        <div className={`relative flex h-[72px] w-[72px] items-center justify-center rounded-[24px] bg-gradient-to-br ${item.tone} text-white shadow-[0_22px_44px_-24px_rgba(0,0,0,0.75)] sm:h-[88px] sm:w-[88px] sm:rounded-[28px]`}>
-                          <Icon className="h-7 w-7 sm:h-8 sm:w-8" strokeWidth={2.35} />
-                        </div>
-                        <div className="mt-4 text-center">
-                          <div className="mt-1 text-[12.5px] font-black text-white sm:text-[14px]">{item.label}</div>
-                        </div>
-                      </div>
-                    )
-                  })}
+                  <div className="relative flex min-h-[310px] items-center justify-center sm:min-h-[356px]">
+                    <div className="grid w-full max-w-[26rem] grid-cols-4 gap-2 px-2 sm:max-w-[34rem] sm:gap-3 sm:px-4">
+                      {buildSignals.map(item => {
+                        const Icon = item.icon
+                        return (
+                          <div key={item.label} className="relative flex min-w-0 flex-col items-center text-center">
+                            <div
+                              className="absolute top-1/2 h-16 w-16 -translate-y-1/2 rounded-full bg-white/10 blur-2xl sm:h-24 sm:w-24"
+                              aria-hidden="true"
+                            />
+                            <div className={`relative flex h-[56px] w-[56px] items-center justify-center rounded-[18px] bg-gradient-to-br ${item.tone} text-white shadow-[0_22px_44px_-24px_rgba(0,0,0,0.75)] sm:h-[82px] sm:w-[82px] sm:rounded-[26px]`}>
+                              <Icon className="h-5 w-5 sm:h-8 sm:w-8" strokeWidth={2.35} />
+                            </div>
+                            <div className="mt-3 min-w-0 text-center">
+                              <div className="text-[10px] font-black leading-tight text-white sm:text-[13px]">{item.label}</div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="relative -mt-8 rounded-[22px] border border-white/14 bg-[#12042d]/72 p-4 shadow-[0_24px_54px_-34px_rgba(0,0,0,0.8)]">
