@@ -1,0 +1,439 @@
+{
+  "task": "BASE-005",
+  "capturedAt": "2026-07-10T23:03:59.950Z",
+  "baseUrl": "https://www.eventiesjo.com",
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": null,
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/products",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": null,
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/gallery",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": null,
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/sitemap.xml",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": null,
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public",
+        "content-type": "application/xml; charset=utf-8"
+      }
+    },
+    {
+      "path": "/robots.txt",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": null,
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/plain; charset=utf-8"
+      }
+    },
+    {
+      "path": "/login",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/register",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/user-login",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/auth/callback",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/reset-password",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/update-password",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/profile",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/rental-cart",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/checkout",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/order-summary/TEST-000",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/purchase-quote",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/my-requests",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/my-requests/TEST-000",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/admin",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/admin/products",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": "noindex, nofollow",
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/notifications",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": null,
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "path": "/images/og-default.png",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": null,
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=86400, stale-while-revalidate=604800",
+        "content-type": "image/png"
+      }
+    },
+    {
+      "path": "/brand/favicon.svg",
+      "status": 200,
+      "location": null,
+      "headers": {
+        "strict-transport-security": "max-age=63072000",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-robots-tag": null,
+        "content-security-policy": null,
+        "content-security-policy-report-only": null,
+        "permissions-policy": null,
+        "cross-origin-opener-policy": null,
+        "cache-control": "public, max-age=86400, stale-while-revalidate=604800",
+        "content-type": "text/html; charset=utf-8"
+      }
+    }
+  ]
+}
