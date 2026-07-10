@@ -73,7 +73,7 @@ function ServiceCard({
       {/* Body */}
       <div className="flex flex-1 flex-col p-3">
         <span className="mb-1 truncate text-[9px] font-bold uppercase tracking-[0.14em] text-violet-500">{categoryLabel}</span>
-        <h3 className="line-clamp-1 font-sans text-[13.5px] font-bold tracking-[-0.01em] text-ink-900 transition-colors group-hover:text-violet-900">
+        <h3 className="line-clamp-2 min-h-[2.5em] font-sans text-[0.9rem] font-bold leading-tight tracking-[-0.028em] text-ink-900 transition-colors group-hover:text-violet-900 sm:text-[1.16rem]">
           {product.name}
         </h3>
         <div className="mt-2.5 flex items-end justify-between gap-2 border-t border-violet-100 pt-2.5">

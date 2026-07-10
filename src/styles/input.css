@@ -78,6 +78,11 @@
     max-width: 100vw;
     overflow-x: clip;
     font-size: 14.05px;
+    /* Stop mobile browsers (iOS Safari, in-app WebViews, Android Chrome font
+       boosting) from auto-inflating text on real devices — the reason inputs
+       look larger on a physical phone than in desktop devtools emulation. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: auto;

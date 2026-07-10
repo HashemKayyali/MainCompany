@@ -160,7 +160,7 @@ const CategoryTileView = memo(function CategoryTileView({
           dir="auto"
           data-i18n-skip
           className={cn(
-            'font-sans text-[0.92rem] font-bold leading-snug tracking-[-0.02em] line-clamp-2 min-h-[2.53rem] sm:text-[1.13rem] sm:leading-tight sm:line-clamp-1 sm:min-h-0',
+            'font-sans text-[0.9rem] font-bold leading-tight tracking-[-0.028em] line-clamp-2 min-h-[2.5em] sm:text-[1.16rem]',
             isDark ? 'text-white/92' : 'text-slate-900'
           )}
         >

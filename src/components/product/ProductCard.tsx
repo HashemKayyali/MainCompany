@@ -307,7 +307,11 @@ const ProductCard = memo(function ProductCard({
               lang="en"
               data-i18n-skip
               className={cn(
-                'product-data-ltr font-sans font-bold leading-tight tracking-[-0.028em] line-clamp-1 transition-colors duration-300',
+                // Reserve exactly two lines: long names wrap to 2 lines (then
+                // clamp) instead of truncating on 1, and short names still
+                // occupy 2 lines so card heights stay identical. leading-tight
+                // is 1.25, so 2 lines = 2.5em regardless of the responsive size.
+                'product-data-ltr font-sans font-bold leading-tight tracking-[-0.028em] line-clamp-2 min-h-[2.5em] transition-colors duration-300',
                 compact ? 'text-[0.9rem]' : 'text-[0.9rem] sm:text-[1.16rem]',
                 isDark ? 'text-white group-hover:text-violet-100' : 'text-slate-900 group-hover:text-violet-900'
               )}
