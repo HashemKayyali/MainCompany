@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:baseline": "playwright test --config playwright.baseline.config.ts",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "storage:audit": "tsx scripts/storage-gc/audit.ts",
