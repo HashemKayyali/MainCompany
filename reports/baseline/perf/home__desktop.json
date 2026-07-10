@@ -1,0 +1,64 @@
+{
+  "task": "BASE-004",
+  "fetchTime": "2026-07-10T23:04:31.017Z",
+  "requestedUrl": "https://www.eventiesjo.com/",
+  "finalDisplayedUrl": "https://www.eventiesjo.com/",
+  "formFactor": "desktop",
+  "lighthouseVersion": "13.4.0",
+  "scores": {
+    "performance": 0.21,
+    "accessibility": 0.93,
+    "best-practices": 1,
+    "seo": 1,
+    "agentic-browsing": 0
+  },
+  "metrics": {
+    "first-contentful-paint": {
+      "score": 0.4,
+      "numericValue": 1776.0418,
+      "displayValue": "1.8 s"
+    },
+    "largest-contentful-paint": {
+      "score": 0.6,
+      "numericValue": 2068.0507,
+      "displayValue": "2.1 s"
+    },
+    "total-blocking-time": {
+      "score": 0,
+      "numericValue": 1760.83185,
+      "displayValue": "1,760 ms"
+    },
+    "cumulative-layout-shift": {
+      "score": 0.01,
+      "numericValue": 1.2301350671988383,
+      "displayValue": "1.23"
+    },
+    "speed-index": {
+      "score": 0.15,
+      "numericValue": 3597.5092804051083,
+      "displayValue": "3.6 s"
+    },
+    "interactive": {
+      "score": 0.57,
+      "numericValue": 4138.799365,
+      "displayValue": "4.1 s"
+    },
+    "server-response-time": {
+      "score": 1,
+      "numericValue": 57,
+      "displayValue": "Root document took 60 ms"
+    },
+    "total-byte-weight": {
+      "score": 1,
+      "numericValue": 1834095,
+      "displayValue": "Total size was 1,791 KiB"
+    },
+    "unused-javascript": {
+      "score": 0,
+      "numericValue": 290,
+      "displayValue": "Est savings of 143 KiB"
+    },
+    "render-blocking-resources": null,
+    "largest-contentful-paint-element": null
+  }
+}

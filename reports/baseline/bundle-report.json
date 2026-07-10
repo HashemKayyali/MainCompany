@@ -1,0 +1,136 @@
+{
+  "task": "BASE-004",
+  "capturedAt": "2026-07-10T23:10:26.031Z",
+  "source": "local vite build @ f1d441a4 (deployed hashes differ, sizes equivalent)",
+  "totals": {
+    "jsBytes": 2915410,
+    "cssBytes": 305364,
+    "files": 76
+  },
+  "assets": [
+    {
+      "file": "vendor-three-p89X_SmM.js",
+      "bytes": 734498
+    },
+    {
+      "file": "index-cRsRm27s.js",
+      "bytes": 694050
+    },
+    {
+      "file": "vendor-react-WfcwYyJx.js",
+      "bytes": 315686
+    },
+    {
+      "file": "index-DabVNxke.css",
+      "bytes": 298578
+    },
+    {
+      "file": "vendor-shaders-Dtf9DFwx.js",
+      "bytes": 193982
+    },
+    {
+      "file": "vendor-supabase-C2dnBSkW.js",
+      "bytes": 166723
+    },
+    {
+      "file": "vendor-motion-C1BrGLw_.js",
+      "bytes": 110298
+    },
+    {
+      "file": "vendor-misc-BdOm14b1.js",
+      "bytes": 107647
+    },
+    {
+      "file": "AdminProductsPage-CNXZ4iFl.js",
+      "bytes": 49026
+    },
+    {
+      "file": "ImageUploader-CfwA8V-4.js",
+      "bytes": 43580
+    },
+    {
+      "file": "ProductDetailsPage-7MdNfsRG.js",
+      "bytes": 31796
+    },
+    {
+      "file": "AdminCustomBuildsPage-6GJWUIJi.js",
+      "bytes": 30711
+    },
+    {
+      "file": "RentalCartPage-i61euBSA.js",
+      "bytes": 25420
+    },
+    {
+      "file": "AdminUsersPage-DfNBPb-k.js",
+      "bytes": 25172
+    },
+    {
+      "file": "AdminCategoriesPage-BD02eV18.js",
+      "bytes": 24241
+    },
+    {
+      "file": "AdminPartsPage-CVcpSIP9.js",
+      "bytes": 22022
+    },
+    {
+      "file": "AdminGalleryPage-DuF3BV7A.js",
+      "bytes": 20179
+    },
+    {
+      "file": "AdminLogsPage-BP57KanO.js",
+      "bytes": 19745
+    },
+    {
+      "file": "AdminLayout-DURAVcUd.js",
+      "bytes": 18226
+    },
+    {
+      "file": "AdminRequestDetailsPage-Cj6OJ8z_.js",
+      "bytes": 16983
+    },
+    {
+      "file": "DashboardPage-CnpISZP9.js",
+      "bytes": 15646
+    },
+    {
+      "file": "CheckoutPage-CrKYOteB.js",
+      "bytes": 15277
+    },
+    {
+      "file": "AdminAdminsPage-DBE5Esgo.js",
+      "bytes": 15154
+    },
+    {
+      "file": "PurchaseQuotePage-BWX1zJyj.js",
+      "bytes": 15149
+    },
+    {
+      "file": "AdminCustomersPage-DDMZz2QY.js",
+      "bytes": 13406
+    },
+    {
+      "file": "AdminChatsPage-C3DF88lz.js",
+      "bytes": 13174
+    },
+    {
+      "file": "AdminRequestsPage-Bnks7ZBD.js",
+      "bytes": 12975
+    },
+    {
+      "file": "MyRequestDetailsPage-BPLlAK4_.js",
+      "bytes": 12204
+    },
+    {
+      "file": "CategoryPage-Dp6LN_kN.js",
+      "bytes": 10786
+    },
+    {
+      "file": "MyRequestsPage-BRc9AiDS.js",
+      "bytes": 10629
+    },
+    {
+      "file": "OrderSummaryPage-BbQtn7fy.js",
+      "bytes": 10545
+    }
+  ]
+}
