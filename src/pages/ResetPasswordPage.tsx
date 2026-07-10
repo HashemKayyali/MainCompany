@@ -47,7 +47,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <main className="relative flex h-[100dvh] min-h-[100dvh] w-full items-center justify-center overflow-x-hidden bg-[#fbf8ff] p-4">
+    <main className="relative flex min-h-[100svh] w-full items-center justify-center overflow-x-hidden overflow-y-auto bg-[#fbf8ff] p-4">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(217,70,239,0.10),transparent_30%),radial-gradient(circle_at_86%_76%,rgba(124,58,237,0.08),transparent_32%)]" />
 
       <section className="relative z-10 w-full max-w-[420px] overflow-hidden rounded-[28px] border border-slate-200/90 bg-white p-6 shadow-[0_30px_100px_-60px_rgba(76,29,149,0.35)] sm:p-8">
@@ -97,7 +97,6 @@ export default function ResetPasswordPage() {
                   placeholder="you@company.com"
                   autoComplete="email"
                   inputMode="email"
-                  autoFocus
                   className={cn(
                     'h-[44px] w-full rounded-xl border bg-[#f8f5fc]/95 pl-9 pr-3 text-[12.5px] font-semibold text-[#150628] placeholder:text-xs placeholder:text-slate-400/70 focus:bg-white focus:outline-none focus:ring-4 focus:ring-violet-500/10',
                     error ? 'border-red-300 focus:border-red-400' : 'border-slate-200/90 focus:border-violet-400'

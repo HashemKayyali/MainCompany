@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { MoreVertical } from 'lucide-react'
 import { useI18n } from '../../contexts/LanguageContext'
 import { cn } from '../../utils/cn'
+import { APP_ROUTE_CHANGE_EVENT } from '../../utils/route-lifecycle'
 
 export type AdminKebabItem = {
   label: string
@@ -58,6 +59,12 @@ export default function AdminKebabMenu({ items, label, className, align = 'end' 
   useEffect(() => {
     if (!open) setPosition(null)
   }, [open])
+
+  useEffect(() => {
+    const close = () => setOpen(false)
+    window.addEventListener(APP_ROUTE_CHANGE_EVENT, close)
+    return () => window.removeEventListener(APP_ROUTE_CHANGE_EVENT, close)
+  }, [])
 
   useLayoutEffect(() => {
     if (!open) return

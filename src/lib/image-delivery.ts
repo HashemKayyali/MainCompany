@@ -1,4 +1,9 @@
 import { parseMediaValue, stripMediaTransform } from '../utils/media-frame'
+import {
+  traceImagePreloadComplete,
+  traceImagePreloadStart,
+  type ImageLoadingGroup,
+} from './image-loading-trace'
 
 export type ImagePreset =
   | 'tiny'
@@ -40,6 +45,32 @@ const transformationsEnabled =
 const loadedImages = new Set<string>()
 const preloadPromises = new Map<string, Promise<void>>()
 
+const PRELOAD_SIZES: Record<ImagePreset, string> = {
+  tiny: '96px',
+  logo: '240px',
+  thumbnail: '320px',
+  card: '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw',
+  category: '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw',
+  gallery: '(max-width: 640px) 78vw, (max-width: 1024px) 48vw, 32vw',
+  detail: '100vw',
+  hero: '100vw',
+  fullscreen: '100vw',
+}
+
+function withDevelopmentAuditCacheBuster(src: string) {
+  if (!import.meta.env.DEV || typeof window === 'undefined') return src
+  const auditRun = new URLSearchParams(window.location.search).get('imageAuditRun')
+  if (!auditRun) return src
+
+  try {
+    const url = new URL(src, window.location.href)
+    url.searchParams.set('__image_audit', auditRun)
+    return url.toString()
+  } catch {
+    return src
+  }
+}
+
 function cleanSource(value?: string | null) {
   return stripMediaTransform(value ?? '').trim()
 }
@@ -67,7 +98,7 @@ function toSupabaseTransformUrl(src: string, width: number, quality: number) {
   url.searchParams.set('width', String(width))
   url.searchParams.set('quality', String(quality))
   url.searchParams.set('resize', 'contain')
-  return url.toString()
+  return withDevelopmentAuditCacheBuster(url.toString())
 }
 
 /**
@@ -98,7 +129,7 @@ function toCloudinaryTransformUrl(src: string, width: number) {
   url.pathname = `${prefix}${transform}/${assetTail}`
   url.search = ''
   url.hash = ''
-  return url.toString()
+  return withDevelopmentAuditCacheBuster(url.toString())
 }
 
 function getParsedSources(media?: string) {
@@ -161,23 +192,36 @@ export function markImageDeliveryLoaded(src: string | undefined) {
   if (src) loadedImages.add(src)
 }
 
-export function preloadImage(media: string | undefined, preset: ImagePreset = 'detail'): Promise<void> {
+export function preloadImage(
+  media: string | undefined,
+  preset: ImagePreset = 'detail',
+  group: ImageLoadingGroup = 'other',
+  sizes = PRELOAD_SIZES[preset],
+): Promise<void> {
   const src = getImageDeliverySource(media, preset)
+  const srcSet = getImageDeliverySrcSet(media, preset)
   if (!src || typeof window === 'undefined' || typeof Image === 'undefined') {
     return Promise.resolve()
   }
 
   if (loadedImages.has(src)) return Promise.resolve()
-  const existing = preloadPromises.get(src)
+  const requestKey = srcSet ? `${srcSet}|${sizes}` : src
+  const existing = preloadPromises.get(requestKey)
   if (existing) return existing
 
   const promise = new Promise<void>(resolve => {
+    const candidates = srcSet
+      ? Array.from(srcSet.matchAll(/([^\s]+)\s+\d+w/g), match => match[1])
+      : []
+    traceImagePreloadStart(src, cleanSource(media), group, candidates)
     const image = new Image()
     image.decoding = 'async'
     image.onload = () => {
       const done = () => {
-        loadedImages.add(src)
-        preloadPromises.delete(src)
+        const loadedSrc = image.currentSrc || src
+        loadedImages.add(loadedSrc)
+        preloadPromises.delete(requestKey)
+        traceImagePreloadComplete(loadedSrc)
         resolve()
       }
 
@@ -188,17 +232,27 @@ export function preloadImage(media: string | undefined, preset: ImagePreset = 'd
       }
     }
     image.onerror = () => {
-      preloadPromises.delete(src)
+      preloadPromises.delete(requestKey)
+      traceImagePreloadComplete(image.currentSrc || src)
       resolve()
+    }
+    if (srcSet) {
+      image.sizes = sizes
+      image.srcset = srcSet
     }
     image.src = src
   })
 
-  preloadPromises.set(src, promise)
+  preloadPromises.set(requestKey, promise)
   return promise
 }
 
-export function preloadImageWhenIdle(media: string | undefined, preset: ImagePreset = 'detail') {
+export function preloadImageWhenIdle(
+  media: string | undefined,
+  preset: ImagePreset = 'detail',
+  group: ImageLoadingGroup = 'other',
+  sizes = PRELOAD_SIZES[preset],
+) {
   if (typeof window === 'undefined') return () => undefined
 
   const idleWindow = window as Window & {
@@ -208,13 +262,13 @@ export function preloadImageWhenIdle(media: string | undefined, preset: ImagePre
 
   if (idleWindow.requestIdleCallback) {
     const handle = idleWindow.requestIdleCallback(() => {
-      void preloadImage(media, preset)
+      void preloadImage(media, preset, group, sizes)
     }, { timeout: 1800 })
     return () => idleWindow.cancelIdleCallback?.(handle)
   }
 
   const timer = window.setTimeout(() => {
-    void preloadImage(media, preset)
+    void preloadImage(media, preset, group, sizes)
   }, 600)
   return () => window.clearTimeout(timer)
 }

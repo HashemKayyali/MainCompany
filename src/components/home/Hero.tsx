@@ -155,6 +155,7 @@ export default function Hero({ image = HERO_IMAGE }: { image?: string }) {
                 draggable={false}
                 loading="eager"
                 decoding="async"
+                data-image-group="critical"
                 {...{ fetchpriority: 'high' }}
                 className="h-[300px] w-full object-cover object-center sm:h-[360px] lg:h-[420px]"
                 style={{ filter: 'saturate(1.1) contrast(1.04)' }}

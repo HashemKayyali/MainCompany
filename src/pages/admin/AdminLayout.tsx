@@ -15,6 +15,7 @@ import { useI18n } from '../../contexts/LanguageContext'
 import AnimatedBackground from '../../components/theme/AnimatedBackground'
 import { cn } from '../../utils/cn'
 import { useChat } from '../../contexts/ChatContext'
+import { APP_ROUTE_CHANGE_EVENT } from '../../utils/route-lifecycle'
 import '../../styles/admin.css'
 
 type Crumb = { label: string; to?: string }
@@ -232,6 +233,12 @@ export default function AdminLayout() {
   const [open, setOpen] = useState(false)
   const [collapsed, setCollapsed] = useLocalStorage('eventies.admin.sidebar-collapsed', false)
   useEffect(() => setOpen(false), [pathname])
+
+  useEffect(() => {
+    const closeDrawer = () => setOpen(false)
+    window.addEventListener(APP_ROUTE_CHANGE_EVENT, closeDrawer)
+    return () => window.removeEventListener(APP_ROUTE_CHANGE_EVENT, closeDrawer)
+  }, [])
 
   useEffect(() => {
     const container = mainScrollRef.current

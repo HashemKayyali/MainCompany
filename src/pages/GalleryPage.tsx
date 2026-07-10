@@ -99,9 +99,9 @@ export default function GalleryPage() {
                       key={album.slug}
                       type="button"
                       onClick={() => setSelectedSlug(album.slug)}
-                      onMouseEnter={() => { void preloadImage(album.images[0] || album.cover, 'thumbnail') }}
-                      onFocus={() => { void preloadImage(album.images[0] || album.cover, 'thumbnail') }}
-                      onTouchStart={() => { void preloadImage(album.images[0] || album.cover, 'thumbnail') }}
+                      onMouseEnter={() => { void preloadImage(album.images[0] || album.cover, 'thumbnail', 'gallery-warmup', '210px') }}
+                      onFocus={() => { void preloadImage(album.images[0] || album.cover, 'thumbnail', 'gallery-warmup', '210px') }}
+                      onTouchStart={() => { void preloadImage(album.images[0] || album.cover, 'thumbnail', 'gallery-warmup', '210px') }}
                       aria-pressed={isActive}
                       className={`group relative aspect-[16/10] w-[180px] shrink-0 overflow-hidden rounded-[18px] border text-left outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 sm:w-[210px] ${
                         isActive

@@ -1,5 +1,49 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
 
+@supports (min-height: 100svh) {
+  .min-h-screen {
+    min-height: 100svh;
+  }
+}
+
+@supports (height: 100dvh) {
+  .h-screen {
+    height: 100dvh;
+  }
+}
+
+@media (max-width: 640px) {
+  html input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='color']),
+  html textarea,
+  html select {
+    font-size: 16px !important;
+  }
+
+  .fixed.inset-x-0.bottom-0 {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .glass:hover,
+  .premium-card:hover,
+  .card-surface:hover,
+  .contact-info-card:hover,
+  .hover-lift:hover,
+  .btn-primary:hover,
+  .btn-outline:hover,
+  .btn-danger:hover,
+  .btn-admin-create:hover,
+  .hover\:-translate-y-0\.5:hover,
+  .hover\:-translate-y-1:hover,
+  .hover\:-translate-y-2:hover,
+  .hover\:scale-\[1\.05\]:hover,
+  .group:hover .group-hover\:scale-105,
+  .group:hover .group-hover\:scale-110 {
+    transform: none !important;
+  }
+}
+
 [data-native-scroll] {
   overscroll-behavior-x: contain;
   overscroll-behavior-y: auto;

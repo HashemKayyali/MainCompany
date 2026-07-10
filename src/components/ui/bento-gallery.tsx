@@ -9,7 +9,6 @@ import {
 } from 'react'
 import { motion, useMotionValue, useReducedMotion } from 'framer-motion'
 import { useElementActivity } from '../../hooks/useElementActivity'
-import { preloadImage } from '../../lib/image-delivery'
 import { cn } from '../../utils/cn'
 import FramedImage from './FramedImage'
 
@@ -23,7 +22,6 @@ export type BentoGalleryItem = {
 
 interface BentoGalleryProps {
   imageItems: BentoGalleryItem[]
-  eager?: boolean
 }
 
 const AUTO_SCROLL_SPEED = 54
@@ -44,7 +42,7 @@ function wrapTrackX(value: number, cycleWidth: number) {
   return next
 }
 
-export default function BentoGallery({ imageItems, eager = false }: BentoGalleryProps) {
+export default function BentoGallery({ imageItems }: BentoGalleryProps) {
   const [cycleWidth, setCycleWidth] = useState(0)
   const x = useMotionValue(0)
   const reduceMotion = useReducedMotion()
@@ -77,16 +75,6 @@ export default function BentoGallery({ imageItems, eager = false }: BentoGallery
     (value: number) => wrapTrackX(value, cycleWidth),
     [cycleWidth],
   )
-
-  useEffect(() => {
-    const seen = new Set<string>()
-
-    imageItems.forEach(item => {
-      if (!item.url || seen.has(item.url)) return
-      seen.add(item.url)
-      void preloadImage(item.url, 'card')
-    })
-  }, [imageItems])
 
   useLayoutEffect(() => {
     const calculateCycleWidth = () => {
@@ -234,10 +222,11 @@ export default function BentoGallery({ imageItems, eager = false }: BentoGallery
             width={640}
             height={640}
             preset="card"
-            loading={eager && copyIndex === 0 && index < 12 ? 'eager' : 'lazy'}
-            fetchPriority={eager && copyIndex === 0 && index < 4 ? 'high' : 'auto'}
+            loading={copyIndex === 0 && index < 12 ? 'eager' : 'lazy'}
+            data-image-group="home-gallery"
+            fetchPriority="auto"
             draggable={false}
-            revealMode={eager ? 'crisp' : 'soft'}
+            revealMode="crisp"
             fallbackTransform={{ fit: 'cover' }}
             sizes="(max-width: 640px) 78vw, (max-width: 1024px) 48vw, 32vw"
             className="absolute inset-0 h-full w-full select-none object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"

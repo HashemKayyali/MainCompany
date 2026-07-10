@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type CSSProperties, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
@@ -6,6 +6,7 @@ import { useI18n } from '../../contexts/LanguageContext'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { cn } from '../../utils/cn'
+import { APP_ROUTE_CHANGE_EVENT } from '../../utils/route-lifecycle'
 
 interface ModalProps {
   open: boolean
@@ -51,6 +52,21 @@ function getFocusableElements(container: HTMLElement | null) {
   return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
     element => !element.hasAttribute('disabled') && element.getAttribute('aria-hidden') !== 'true'
   )
+}
+
+function isEditableElement(element: HTMLElement) {
+  const tagName = element.tagName.toLowerCase()
+  if (tagName === 'textarea' || tagName === 'select') return true
+  if (tagName !== 'input') return element.isContentEditable
+
+  const type = (element as HTMLInputElement).type
+  return !['button', 'checkbox', 'color', 'file', 'hidden', 'image', 'radio', 'range', 'reset', 'submit'].includes(type)
+}
+
+function shouldRestoreFocus(element: HTMLElement) {
+  if (!document.contains(element)) return false
+  const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches ?? false
+  return !(coarsePointer && isEditableElement(element))
 }
 
 export default function Modal({
@@ -104,7 +120,7 @@ export default function Modal({
     if (open) return
 
     const previousFocus = previousFocusRef.current
-    if (previousFocus && typeof previousFocus.focus === 'function') {
+    if (previousFocus && typeof previousFocus.focus === 'function' && shouldRestoreFocus(previousFocus)) {
       previousFocus.focus()
     }
   }, [open])
@@ -155,6 +171,12 @@ export default function Modal({
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [canDismiss, onClose, open])
 
+  useEffect(() => {
+    if (!open) return undefined
+    window.addEventListener(APP_ROUTE_CHANGE_EVENT, onClose)
+    return () => window.removeEventListener(APP_ROUTE_CHANGE_EVENT, onClose)
+  }, [onClose, open])
+
   const handleBackdropClick = () => {
     if (canDismiss) onClose()
   }
@@ -190,6 +212,17 @@ export default function Modal({
           animate: { y: 0 },
           exit: { y: '100%' },
           transition: { type: 'spring' as const, stiffness: 360, damping: 34 },
+        }
+
+  const mobilePanelStyle: CSSProperties | undefined = isDesktop
+    ? undefined
+    : resolvedMobilePresentation === 'fullscreen'
+      ? {
+          height: 'var(--app-visual-viewport-height, 100dvh)',
+          maxHeight: 'var(--app-visual-viewport-height, 100dvh)',
+        }
+      : {
+          maxHeight: 'min(92dvh, calc(var(--app-visual-viewport-height, 100dvh) - max(0.75rem, env(safe-area-inset-bottom))))',
         }
 
   return createPortal(
@@ -232,6 +265,7 @@ export default function Modal({
                 SIZE_CLASSES[size],
                 contentClassName
               )}
+              style={mobilePanelStyle}
               onClick={event => event.stopPropagation()}
             >
               {/* Mobile drag handle is only shown for bottom sheets. */}

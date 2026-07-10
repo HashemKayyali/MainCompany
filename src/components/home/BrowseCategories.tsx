@@ -1,14 +1,20 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useCategoriesData, useProductsData } from '../../contexts/DataContext'
 import { preloadRoute } from '../../utils/route-preload'
 import CategoryGridCard, { type CategoryGridCardData } from '../category/CategoryGridCard'
 import Reveal from './Reveal'
 import SectionHeading, { ViewAllButton } from './SectionHeading'
 
-export default function BrowseCategories() {
+export default function BrowseCategories({
+  onUsefulBatchReady,
+}: {
+  onUsefulBatchReady?: () => void
+}) {
   const { categories } = useCategoriesData()
   const { getProductsByCategory } = useProductsData()
   const sectionRef = useRef<HTMLElement | null>(null)
+  const settledImagesRef = useRef(new Set<string>())
+  const readyReportedRef = useRef(false)
 
   const items = useMemo<CategoryGridCardData[]>(
     () =>
@@ -25,6 +31,38 @@ export default function BrowseCategories() {
         .sort((a, b) => b.count - a.count),
     [categories, getProductsByCategory]
   )
+  const visibleItems = useMemo(() => items.slice(0, 10), [items])
+  const imageItemKeys = useMemo(
+    () => visibleItems.filter(item => Boolean(item.image)).map(item => item.slug),
+    [visibleItems],
+  )
+  const batchKey = imageItemKeys.join('|')
+
+  const reportReady = useCallback(() => {
+    if (readyReportedRef.current) return
+    readyReportedRef.current = true
+    onUsefulBatchReady?.()
+  }, [onUsefulBatchReady])
+
+  const reportImageSettled = useCallback((key: string) => {
+    settledImagesRef.current.add(key)
+    const threshold = Math.max(1, Math.ceil(imageItemKeys.length * 0.6))
+    if (settledImagesRef.current.size >= threshold) reportReady()
+  }, [imageItemKeys.length, reportReady])
+
+  useEffect(() => {
+    settledImagesRef.current.clear()
+    readyReportedRef.current = false
+    if (visibleItems.length > 0 && imageItemKeys.length === 0) reportReady()
+  }, [batchKey, imageItemKeys.length, reportReady, visibleItems.length])
+
+  useEffect(() => {
+    if (imageItemKeys.length === 0 || readyReportedRef.current) return undefined
+    // If decoding callbacks lag behind an already-active category batch, open
+    // four product slots after a short head start so the network never sits idle.
+    const timer = window.setTimeout(reportReady, 650)
+    return () => window.clearTimeout(timer)
+  }, [batchKey, imageItemKeys.length, reportReady])
 
   useEffect(() => {
     if (typeof window === 'undefined' || window.location.hash !== '#categories') return
@@ -61,9 +99,13 @@ export default function BrowseCategories() {
         />
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-          {items.slice(0, 10).map((category, index) => (
+          {visibleItems.map((category, index) => (
             <Reveal key={category.slug} delay={Math.min(index * 0.05, 0.35)} y={22} className="h-full">
-              <CategoryGridCard category={category} imageLoading="lazy" />
+              <CategoryGridCard
+                category={category}
+                imageLoading="eager"
+                onImageSettled={() => reportImageSettled(category.slug)}
+              />
             </Reveal>
           ))}
         </div>

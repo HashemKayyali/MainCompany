@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useI18n } from '../../contexts/LanguageContext'
 import { cn } from '../../utils/cn'
+import { APP_ROUTE_CHANGE_EVENT } from '../../utils/route-lifecycle'
 
 type ThemedDatePickerProps = {
   label: string
@@ -146,6 +147,12 @@ export default function ThemedDatePicker({
       window.removeEventListener('scroll', handleViewportChange, true)
     }
   }, [open, updatePosition])
+
+  useEffect(() => {
+    const close = () => setOpen(false)
+    window.addEventListener(APP_ROUTE_CHANGE_EVENT, close)
+    return () => window.removeEventListener(APP_ROUTE_CHANGE_EVENT, close)
+  }, [])
 
   const previousMonthDisabled = Boolean(
     minDate &&

@@ -17,14 +17,20 @@ import ErrorBoundary from './components/ErrorBoundary'
 import { ToastProvider } from './contexts/ToastContext'
 import { router } from './router'
 import PerfClass from './components/PerfClass'
+import ViewportEnvironment from './components/ViewportEnvironment'
 import { ensureImageOriginPreconnect } from './lib/image-delivery'
+import { installImageLoadingTrace } from './lib/image-loading-trace'
+import { installAppRouteChangeEmitter } from './utils/route-lifecycle'
 import './styles/input.css'
 import './styles/site.css'
 
+installImageLoadingTrace()
 ensureImageOriginPreconnect()
+installAppRouteChangeEmitter(router)
 
 const AppTree = (
   <ErrorBoundary>
+    <ViewportEnvironment />
     <PerfClass>
       <MotionConfig reducedMotion="user">
         <ThemeProvider>

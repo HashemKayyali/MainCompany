@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ArrowRight, CheckCircle2, Loader2, MessageCircle, Send, Sparkles, X } from 'lucide-react'
 import { useUser } from '../../contexts/UserContext'
@@ -7,6 +7,7 @@ import { useChat } from '../../contexts/ChatContext'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { supabase } from '../../lib/supabase'
+import { APP_ROUTE_CHANGE_EVENT } from '../../utils/route-lifecycle'
 import {
   FALLBACK_QUICK_QUESTIONS,
   fetchChatConversation,
@@ -82,7 +83,9 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [questions, setQuestions] = useState<ChatQuickQuestion[]>(FALLBACK_QUICK_QUESTIONS)
   const endRef = useRef<HTMLDivElement | null>(null)
+  const panelRef = useRef<HTMLElement | null>(null)
   const openRef = useRef(open)
+  const previousLocationRef = useRef(`${location.key}:${location.pathname}${location.search}${location.hash}`)
   const questionsScrollerRef = useRef<HTMLDivElement | null>(null)
   const questionDragRef = useRef({
     active: false,
@@ -100,8 +103,35 @@ export default function ChatWidget() {
     openRef.current = open
   }, [open])
 
+  const closeChat = useCallback(() => {
+    const active = document.activeElement
+    if (active instanceof HTMLElement && panelRef.current?.contains(active)) {
+      active.blur()
+    }
+    openRef.current = false
+    setOpen(false)
+  }, [])
+
+  const openChat = useCallback(() => {
+    openRef.current = true
+    setOpen(true)
+  }, [])
+
   const isStaff = currentUser?.role === 'admin' || currentUser?.role === 'superadmin'
   const supportChatId = useMemo(() => new URLSearchParams(location.search).get('supportChat'), [location.search])
+
+  useEffect(() => {
+    const currentLocation = `${location.key}:${location.pathname}${location.search}${location.hash}`
+    if (previousLocationRef.current === currentLocation) return
+
+    previousLocationRef.current = currentLocation
+    closeChat()
+  }, [closeChat, location.hash, location.key, location.pathname, location.search])
+
+  useEffect(() => {
+    window.addEventListener(APP_ROUTE_CHANGE_EVENT, closeChat)
+    return () => window.removeEventListener(APP_ROUTE_CHANGE_EVENT, closeChat)
+  }, [closeChat])
 
   const loadConversation = useCallback(async () => {
     if (!isLoggedIn || isStaff) return
@@ -130,8 +160,8 @@ export default function ChatWidget() {
   }, [isLoggedIn, isStaff, loadConversation])
 
   useEffect(() => {
-    if (isLoggedIn && !isStaff && supportChatId) setOpen(true)
-  }, [isLoggedIn, isStaff, supportChatId])
+    if (isLoggedIn && !isStaff && supportChatId) openChat()
+  }, [isLoggedIn, isStaff, location.key, openChat, supportChatId])
 
   useEffect(() => {
     if (!conversation || isStaff) return undefined
@@ -187,11 +217,11 @@ export default function ChatWidget() {
   useEffect(() => {
     if (!open) return undefined
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false)
+      if (event.key === 'Escape') closeChat()
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [open])
+  }, [closeChat, open])
 
   const visibleQuestions = useMemo(
     () => questions.filter(question => question.is_active),
@@ -372,10 +402,20 @@ export default function ChatWidget() {
 
   if (isStaff) return null
 
+  const mobilePanelStyle: CSSProperties | undefined = isMobile
+    ? {
+        bottom: 'auto',
+        top: 'calc(var(--app-visual-viewport-offset-top, 0px) + max(8px, env(safe-area-inset-top)))',
+        height: 'calc(var(--app-visual-viewport-height, 100dvh) - max(8px, env(safe-area-inset-top)) - max(8px, env(safe-area-inset-bottom)))',
+        maxHeight: 'none',
+      }
+    : undefined
+
   return (
     <div className="fixed bottom-4 right-4 z-[90] sm:bottom-6 sm:right-6" data-i18n-manual>
       {open && (
         <section
+          ref={panelRef}
           role="dialog"
           aria-modal={isMobile}
           aria-label={translateText('Chat with Eventies')}
@@ -384,6 +424,7 @@ export default function ChatWidget() {
             dir === 'rtl' ? 'text-right' : 'text-left'
           )}
           dir={dir}
+          style={mobilePanelStyle}
         >
           <header className="relative shrink-0 overflow-hidden border-b border-white/10 bg-[linear-gradient(135deg,#5f1fd2_0%,#7928e8_48%,#a23fe7_100%)] px-3.5 py-3.5 text-white sm:px-5 sm:py-5">
             <div className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
@@ -409,7 +450,7 @@ export default function ChatWidget() {
 
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={closeChat}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] border border-white/10 bg-white/10 text-white transition duration-200 hover:rotate-3 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:h-10 sm:w-10 sm:rounded-2xl"
                 aria-label={translateText('Close chat')}
               >
@@ -587,7 +628,7 @@ export default function ChatWidget() {
                     rows={1}
                     maxLength={4000}
                     placeholder={translateText('Type your message...')}
-                    className="min-h-[44px] max-h-28 flex-1 resize-none rounded-[17px] border border-violet-200 bg-[#fcfaff] px-3.5 py-[11px] text-[13px] text-[#1a0b3d] outline-none transition placeholder:text-[#8a789f] focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100 sm:min-h-[46px] sm:rounded-2xl sm:py-3"
+                    className="min-h-[44px] max-h-28 flex-1 resize-none rounded-[17px] border border-violet-200 bg-[#fcfaff] px-3.5 py-[11px] text-[16px] text-[#1a0b3d] outline-none transition placeholder:text-[#8a789f] focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100 sm:min-h-[46px] sm:rounded-2xl sm:py-3 sm:text-[13px]"
                     dir="auto"
                   />
                   <button
@@ -615,7 +656,13 @@ export default function ChatWidget() {
 
       <button
         type="button"
-        onClick={() => setOpen(value => !value)}
+        onClick={() => {
+          if (open) {
+            closeChat()
+            return
+          }
+          openChat()
+        }}
         className={cn(
           open && isMobile && 'hidden',
           'group relative flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-[linear-gradient(135deg,#6422d8,#8432eb_58%,#a23fe7)] text-white shadow-[0_18px_44px_-12px_rgba(109,40,217,0.68)] transition duration-200 hover:scale-[1.05] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-200 sm:h-16 sm:w-16'

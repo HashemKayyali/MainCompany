@@ -1,7 +1,6 @@
-import { useEffect } from 'react'
 import { cn } from '../../utils/cn'
 import FramedImage from './FramedImage'
-import { preloadImage, preloadImageWhenIdle } from '../../lib/image-delivery'
+import { preloadImage } from '../../lib/image-delivery'
 
 export type GalleryImage = { src: string; alt?: string }
 
@@ -17,7 +16,7 @@ function AnimatedImage({
   onClick?: () => void
 }) {
   const preloadFullscreenNow = () => {
-    void preloadImage(src, 'fullscreen')
+    void preloadImage(src, 'fullscreen', 'fullscreen', '100vw')
   }
 
   return (
@@ -41,6 +40,7 @@ function AnimatedImage({
         width={480}
         height={600}
         loading={index < 7 ? 'eager' : 'lazy'}
+        data-image-group="gallery-warmup"
         decoding="async"
         fetchPriority={index < 2 ? 'high' : 'auto'}
         sizes="(max-width: 639px) 50vw, (max-width: 767px) 33vw, (max-width: 1023px) 25vw, (max-width: 1279px) 20vw, 14.3vw"
@@ -62,7 +62,7 @@ function AnimatedImage({
  * All tiles use the same row height and are rendered in normal row-major grid
  * order. This avoids masonry/multi-column rebalancing, so already-visible
  * photos never jump to another column and desktop columns stay visually even.
- * The first visible row is warmed immediately; the next row is warmed during idle time.
+ * The first visible row is eager; later rows rely on native lazy loading.
  */
 export function ImageGallery({
   images,
@@ -73,25 +73,6 @@ export function ImageGallery({
   onImageClick?: (index: number) => void
   className?: string
 }) {
-  useEffect(() => {
-    const uniqueSources = Array.from(
-      new Set(images.map(image => image.src).filter(Boolean)),
-    )
-
-    // Warm only the first visible row immediately. A second row is queued for
-    // idle time; the rest relies on native lazy loading as the user scrolls.
-    // This keeps the instant gallery feel without firing hundreds of requests
-    // when albums grow large.
-    uniqueSources.slice(0, 7).forEach(src => {
-      void preloadImage(src, 'thumbnail')
-    })
-    const cancelIdlePreloads = uniqueSources
-      .slice(7, 14)
-      .map(src => preloadImageWhenIdle(src, 'thumbnail'))
-
-    return () => cancelIdlePreloads.forEach(cancel => cancel())
-  }, [images])
-
   if (images.length === 0) return null
 
   return (

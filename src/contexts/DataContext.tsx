@@ -1340,8 +1340,8 @@ export const useCategoriesData = () => {
   useEnsureResource('categories')
   return useContext(CategoriesCtx)
 }
-export const useGalleryData = () => {
-  useEnsureResource('gallery')
+export const useGalleryData = (enabled = true) => {
+  useEnsureResource('gallery', enabled)
   return useContext(GalleryCtx)
 }
 export const useCustomBuildsData = () => {

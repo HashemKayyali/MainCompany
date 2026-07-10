@@ -3,6 +3,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useCallback,
   type ReactNode,
@@ -11,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from './ThemeContext'
 import { useI18n } from './LanguageContext'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import { APP_ROUTE_CHANGE_EVENT } from '../utils/route-lifecycle'
 
 /* ── Types ── */
 interface DialogOptions {
@@ -42,6 +44,25 @@ interface DialogState extends DialogOptions {
 /* ── Provider ── */
 export function DialogProvider({ children }: { children: ReactNode }) {
   const [dialog, setDialog] = useState<DialogState | null>(null)
+  const dialogRef = useRef<DialogState | null>(null)
+
+  useEffect(() => {
+    dialogRef.current = dialog
+  }, [dialog])
+
+  useEffect(() => {
+    const closeTransientDialog = () => {
+      const current = dialogRef.current
+      if (!current) return
+
+      current.resolve(false)
+      dialogRef.current = null
+      setDialog(null)
+    }
+
+    window.addEventListener(APP_ROUTE_CHANGE_EVENT, closeTransientDialog)
+    return () => window.removeEventListener(APP_ROUTE_CHANGE_EVENT, closeTransientDialog)
+  }, [])
 
   const confirm = useCallback(
     (opts: DialogOptions): Promise<boolean> =>

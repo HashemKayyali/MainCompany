@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowUpRight } from 'lucide-react'
 import { useCategoriesData, useProductsData } from '../../contexts/DataContext'
@@ -13,40 +13,55 @@ function ServiceCard({
   product,
   categoryLabel,
   imageLoading = 'lazy',
+  imageActive = true,
+  onImageSettled,
 }: {
   product: Product
   categoryLabel: string
   imageLoading?: 'eager' | 'lazy'
+  imageActive?: boolean
+  onImageSettled?: () => void
 }) {
   const href = `/products/${product.slug}`
   const showRentalPrice = product.rentalEnabled !== false && product.showPrice !== false
   const priceValue = showRentalPrice ? `${product.rentalPricePerDay} ${product.currency}` : 'Request'
   const priceNote = showRentalPrice ? '/ day' : 'on request'
 
+  useEffect(() => {
+    if (imageActive && !product.heroImage) onImageSettled?.()
+  }, [imageActive, onImageSettled, product.heroImage])
+
   return (
     <Link
       to={href}
-      onMouseEnter={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail') }}
-      onFocus={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail') }}
-      onTouchStart={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail') }}
+      onMouseEnter={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail', 'products', '100vw') }}
+      onFocus={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail', 'products', '100vw') }}
+      onTouchStart={() => { preloadRoute(href); void preloadImage(product.heroImage, 'detail', 'products', '100vw') }}
       aria-label={product.name}
       className="group flex h-full flex-col overflow-hidden rounded-[18px] border border-violet-200/70 bg-white outline-none transition-all duration-400 hover:-translate-y-1 hover:border-violet-300 hover:shadow-[0_24px_50px_-26px_rgba(89,23,196,0.5)] focus-visible:ring-2 focus-visible:ring-violet-400"
       style={{ boxShadow: '0 1px 2px rgba(20,8,50,0.04), 0 12px 30px -22px rgba(89,23,196,0.22)' }}
     >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-violet-50">
-        <FramedImage
-          media={product.heroImage}
-          preset="card"
-          alt={product.name}
-          width={800}
-          height={600}
-          loading={imageLoading}
-          fetchPriority="auto"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 17vw"
-          fallbackTransform={{ fit: 'cover' }}
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.07]"
-        />
+        {imageActive ? (
+          <FramedImage
+            media={product.heroImage}
+            preset="card"
+            alt={product.name}
+            width={800}
+            height={600}
+            loading={imageLoading}
+            data-image-group="products"
+            fetchPriority="auto"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 17vw"
+            fallbackTransform={{ fit: 'cover' }}
+            onLoad={onImageSettled}
+            onError={onImageSettled}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.07]"
+          />
+        ) : (
+          <div className="absolute inset-0 animate-pulse bg-violet-100/70" aria-hidden="true" />
+        )}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-black/20 to-transparent" />
         {product.featured && (
           <span className="absolute left-2.5 top-2.5 inline-flex items-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-2 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.1em] text-white shadow-[0_4px_12px_-4px_rgba(192,38,211,0.6)]">
@@ -75,15 +90,67 @@ function ServiceCard({
   )
 }
 
-export default function PopularServices() {
+export default function PopularServices({
+  enabled = true,
+  onUsefulBatchReady,
+  onBatchComplete,
+}: {
+  enabled?: boolean
+  onUsefulBatchReady?: () => void
+  onBatchComplete?: () => void
+}) {
   const { featuredProducts } = useProductsData()
   const { categories } = useCategoriesData()
 
   const items = useMemo(() => (featuredProducts ?? []).slice(0, 12), [featuredProducts])
+  const [activeImageCount, setActiveImageCount] = useState(0)
+  const settledImagesRef = useRef(new Set<string>())
+  const usefulReportedRef = useRef(false)
+  const completeReportedRef = useRef(false)
+  const batchKey = items.map(item => item.slug).join('|')
   const categoryName = useMemo(() => {
     const map = new Map(categories.map(category => [category.id, category.name]))
     return (id: string) => map.get(id) || 'Marketplace'
   }, [categories])
+
+  const reportUseful = useCallback(() => {
+    if (usefulReportedRef.current) return
+    usefulReportedRef.current = true
+    onUsefulBatchReady?.()
+  }, [onUsefulBatchReady])
+
+  const reportComplete = useCallback(() => {
+    if (completeReportedRef.current) return
+    completeReportedRef.current = true
+    onBatchComplete?.()
+  }, [onBatchComplete])
+
+  const reportImageSettled = useCallback((key: string) => {
+    if (settledImagesRef.current.has(key)) return
+    settledImagesRef.current.add(key)
+    setActiveImageCount(current => Math.min(items.length, current + 1))
+
+    const settledCount = settledImagesRef.current.size
+    if (settledCount >= Math.max(1, Math.ceil(items.length * 0.66))) reportUseful()
+    if (settledCount >= items.length) reportComplete()
+  }, [items.length, reportComplete, reportUseful])
+
+  useEffect(() => {
+    settledImagesRef.current.clear()
+    usefulReportedRef.current = false
+    completeReportedRef.current = false
+    setActiveImageCount(enabled ? Math.min(4, items.length) : 0)
+    if (enabled && items.length === 0) {
+      reportUseful()
+      reportComplete()
+    }
+  }, [batchKey, enabled, items.length, reportComplete, reportUseful])
+
+  useEffect(() => {
+    if (!enabled || items.length === 0 || usefulReportedRef.current) return undefined
+    const timer = window.setTimeout(reportUseful, 3000)
+    return () => window.clearTimeout(timer)
+  }, [batchKey, enabled, items.length, reportUseful])
 
   if (items.length === 0) return null
 
@@ -103,7 +170,9 @@ export default function PopularServices() {
               <ServiceCard
                 product={product}
                 categoryLabel={categoryName(product.categoryId)}
-                imageLoading="lazy"
+                imageActive={enabled && index < activeImageCount}
+                imageLoading="eager"
+                onImageSettled={() => reportImageSettled(product.slug)}
               />
             </Reveal>
           ))}

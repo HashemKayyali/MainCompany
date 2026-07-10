@@ -1,0 +1,39 @@
+/* Zodiak */
+@font-face {
+  font-family: 'Zodiak';
+  src: url('//cdn.fontshare.com/wf/ECUEQQ5BLZLFJS3PPLWOEEVS7SQONQMH/WNTXEMDDVWUVWDURRKDXCJC6G7TMP277/TBWKTFSYABV4KN4GNIJMAOQUOTYBUWB3.woff2') format('woff2'),
+       url('//cdn.fontshare.com/wf/ECUEQQ5BLZLFJS3PPLWOEEVS7SQONQMH/WNTXEMDDVWUVWDURRKDXCJC6G7TMP277/TBWKTFSYABV4KN4GNIJMAOQUOTYBUWB3.woff') format('woff'),
+       url('//cdn.fontshare.com/wf/ECUEQQ5BLZLFJS3PPLWOEEVS7SQONQMH/WNTXEMDDVWUVWDURRKDXCJC6G7TMP277/TBWKTFSYABV4KN4GNIJMAOQUOTYBUWB3.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Zodiak';
+  src: url('//cdn.fontshare.com/wf/63K42MQSJZ57SBX4XJ4J7L4M5IM6V2HQ/DTT4Y5AJV6DYRVZQST5O4K2E6SESQNV3/VGG36BIEB6ODAX4ZN7UV43FK742PFGDV.woff2') format('woff2'),
+       url('//cdn.fontshare.com/wf/63K42MQSJZ57SBX4XJ4J7L4M5IM6V2HQ/DTT4Y5AJV6DYRVZQST5O4K2E6SESQNV3/VGG36BIEB6ODAX4ZN7UV43FK742PFGDV.woff') format('woff'),
+       url('//cdn.fontshare.com/wf/63K42MQSJZ57SBX4XJ4J7L4M5IM6V2HQ/DTT4Y5AJV6DYRVZQST5O4K2E6SESQNV3/VGG36BIEB6ODAX4ZN7UV43FK742PFGDV.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Zodiak';
+  src: url('//cdn.fontshare.com/wf/A6U4G5UNFS3UVTXKRHBP6I4WIG25I5P6/S43VVGQNPWABEEINYIB3HOT5WBP7JDFU/7BCVT6EXVT32KF7LTFPU7KBYLR463OET.woff2') format('woff2'),
+       url('//cdn.fontshare.com/wf/A6U4G5UNFS3UVTXKRHBP6I4WIG25I5P6/S43VVGQNPWABEEINYIB3HOT5WBP7JDFU/7BCVT6EXVT32KF7LTFPU7KBYLR463OET.woff') format('woff'),
+       url('//cdn.fontshare.com/wf/A6U4G5UNFS3UVTXKRHBP6I4WIG25I5P6/S43VVGQNPWABEEINYIB3HOT5WBP7JDFU/7BCVT6EXVT32KF7LTFPU7KBYLR463OET.ttf') format('truetype');
+  font-weight: 800;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Zodiak';
+  src: url('//cdn.fontshare.com/wf/M7LM45Y7I7SGBX7VDIU2OOS2B25Z6SHP/EPCQVGBI6ODRRDJYRA7KPCH5OTK5TJVX/DXMDRQ75ZJD6EXQHKMOW3LYNEVM3GYH6.woff2') format('woff2'),
+       url('//cdn.fontshare.com/wf/M7LM45Y7I7SGBX7VDIU2OOS2B25Z6SHP/EPCQVGBI6ODRRDJYRA7KPCH5OTK5TJVX/DXMDRQ75ZJD6EXQHKMOW3LYNEVM3GYH6.woff') format('woff'),
+       url('//cdn.fontshare.com/wf/M7LM45Y7I7SGBX7VDIU2OOS2B25Z6SHP/EPCQVGBI6ODRRDJYRA7KPCH5OTK5TJVX/DXMDRQ75ZJD6EXQHKMOW3LYNEVM3GYH6.ttf') format('truetype');
+  font-weight: 900;
+  font-display: swap;
+  font-style: normal;
+}
+
+

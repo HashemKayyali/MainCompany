@@ -24,6 +24,7 @@ export interface CategoryTileViewProps {
    */
   reducedVisualEffects?: boolean
   imageLoading?: 'eager' | 'lazy'
+  onImageSettled?: () => void
   /**
    * Optional override — by default, theme is read from ThemeContext.
    * Admin previews can force light mode if they want.
@@ -40,6 +41,7 @@ const CategoryTileView = memo(function CategoryTileView({
   active = false,
   reducedVisualEffects = false,
   imageLoading = 'lazy',
+  onImageSettled,
   isDarkOverride,
   className,
 }: CategoryTileViewProps) {
@@ -93,8 +95,11 @@ const CategoryTileView = memo(function CategoryTileView({
               width={800}
               height={600}
               loading={imageLoading}
+              data-image-group="categories"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               draggable={false}
+              onLoad={onImageSettled}
+              onError={onImageSettled}
               fallbackTransform={{ fit: 'cover' }}
               className="h-full w-full select-none object-cover object-center"
             />

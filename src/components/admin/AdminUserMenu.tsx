@@ -4,6 +4,7 @@ import { ExternalLink, LogOut, UserRound, type LucideIcon } from 'lucide-react'
 import UserAvatar from '../ui/UserAvatar'
 import { useI18n } from '../../contexts/LanguageContext'
 import { cn } from '../../utils/cn'
+import { APP_ROUTE_CHANGE_EVENT } from '../../utils/route-lifecycle'
 
 type AdminUserMenuProps = {
   name: string
@@ -50,6 +51,12 @@ export default function AdminUserMenu({ name, email, subtitle, onLogout }: Admin
       document.removeEventListener('keydown', onKeyDown)
     }
   }, [open])
+
+  useEffect(() => {
+    const close = () => setOpen(false)
+    window.addEventListener(APP_ROUTE_CHANGE_EVENT, close)
+    return () => window.removeEventListener(APP_ROUTE_CHANGE_EVENT, close)
+  }, [])
 
   return (
     <div ref={wrapRef} className="relative">

@@ -14,6 +14,7 @@ import { useNotifications } from '../../contexts/NotificationContext'
 import { getNotificationFallbackTarget } from '../../lib/notification-targets'
 import type { AppNotification } from '../../services/notifications.service'
 import { cn } from '../../utils/cn'
+import { APP_ROUTE_CHANGE_EVENT } from '../../utils/route-lifecycle'
 
 function iconForNotification(type: string) {
   if (type.includes('chat')) return MessageCircle
@@ -82,6 +83,12 @@ export default function NotificationBell({
       document.removeEventListener('keydown', onKey)
     }
   }, [open])
+
+  useEffect(() => {
+    const close = () => setOpen(false)
+    window.addEventListener(APP_ROUTE_CHANGE_EVENT, close)
+    return () => window.removeEventListener(APP_ROUTE_CHANGE_EVENT, close)
+  }, [])
 
   const openNotification = async (notification: AppNotification) => {
     await readNotification(notification.id)

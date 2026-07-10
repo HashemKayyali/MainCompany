@@ -93,6 +93,12 @@
   resize: vertical;
 }
 
+@media (max-width: 640px) {
+  .admin-scope .admin-input {
+    font-size: 16px !important;
+  }
+}
+
 .admin-scope select.admin-input {
   cursor: pointer;
   -webkit-appearance: none;

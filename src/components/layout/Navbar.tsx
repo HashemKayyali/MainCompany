@@ -24,10 +24,12 @@ import { useUser } from '../../contexts/UserContext'
 import { useI18n } from '../../contexts/LanguageContext'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import { preloadRoute } from '../../utils/route-preload'
+import { APP_ROUTE_CHANGE_EVENT } from '../../utils/route-lifecycle'
 import LanguageSwitcher from './LanguageSwitcher'
 import NotificationBell from '../notifications/NotificationBell'
 import FramedImage from '../ui/FramedImage'
 import { preloadImage } from '../../lib/image-delivery'
+import { signalGalleryImageIntent } from '../../lib/gallery-image-warmup'
 
 const NAV_LINKS = [
   { to: '/', label: 'Home' },
@@ -55,6 +57,11 @@ const SECONDARY_NAV_LINKS = [
   { to: '/about', label: 'About' },
   { to: '/contact', label: 'Contact' },
 ]
+
+function preloadNavTarget(to: string) {
+  preloadRoute(to)
+  if (to === '/gallery') signalGalleryImageIntent()
+}
 
 type SearchResult = {
   type: 'category' | 'product'
@@ -118,6 +125,7 @@ function BrandLogo({ overHero, compact = false }: { overHero: boolean; compact?:
         height={52}
         loading="eager"
         decoding="async"
+        data-image-group="critical"
         className={`${logoSize} eventies-logo-full ${logoTone} block shrink-0 object-contain transition-[filter] duration-300`}
         onError={event => {
           const image = event.currentTarget
@@ -180,6 +188,20 @@ export default function Navbar() {
     [translateText]
   )
 
+  const closeTransientNav = useCallback(() => {
+    const active = document.activeElement
+    if (active instanceof HTMLElement && searchRef.current?.contains(active)) {
+      active.blur()
+    }
+
+    setMobileOpen(false)
+    setCatsOpen(false)
+    setMoreOpen(false)
+    setUserOpen(false)
+    setSearchFocused(false)
+    setQuery('')
+  }, [])
+
   useBodyScrollLock(mobileOpen)
 
   useEffect(() => {
@@ -190,13 +212,13 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
-    setMobileOpen(false)
-    setCatsOpen(false)
-    setMoreOpen(false)
-    setUserOpen(false)
-    setSearchFocused(false)
-    setQuery('')
-  }, [pathname])
+    closeTransientNav()
+  }, [closeTransientNav, pathname])
+
+  useEffect(() => {
+    window.addEventListener(APP_ROUTE_CHANGE_EVENT, closeTransientNav)
+    return () => window.removeEventListener(APP_ROUTE_CHANGE_EVENT, closeTransientNav)
+  }, [closeTransientNav])
 
   useEffect(() => {
     const onDown = (event: MouseEvent) => {
@@ -249,7 +271,7 @@ export default function Navbar() {
     (to: string, afterNavigate?: () => void) => {
       const target = normalizeNavTarget(to)
       afterNavigate?.()
-      preloadRoute(to)
+      preloadNavTarget(to)
 
       if (target === `${pathname}${search}${hash}`) return
 
@@ -283,7 +305,7 @@ export default function Navbar() {
         }
 
         afterNavigate?.()
-        preloadRoute(to)
+        preloadNavTarget(to)
       },
     }),
     [normalizeNavTarget, runFastNav]
@@ -402,8 +424,9 @@ export default function Navbar() {
       <Link
         key={item.to}
         to={item.to}
-        onMouseEnter={() => preloadRoute(item.to)}
-        onFocus={() => preloadRoute(item.to)}
+        onMouseEnter={() => preloadNavTarget(item.to)}
+        onFocus={() => preloadNavTarget(item.to)}
+        onTouchStart={() => preloadNavTarget(item.to)}
         {...fastNavProps(item.to)}
         aria-current={isCurrent ? 'page' : undefined}
         className={`relative inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-full px-3.5 font-display text-[13px] font-semibold transition-colors ${linkColor(isCurrent)} ${extraClass}`}
@@ -548,8 +571,9 @@ export default function Navbar() {
                       <Link
                         key={item.to}
                         to={item.to}
-                        onMouseEnter={() => preloadRoute(item.to)}
-                        onFocus={() => preloadRoute(item.to)}
+                        onMouseEnter={() => preloadNavTarget(item.to)}
+                        onFocus={() => preloadNavTarget(item.to)}
+                        onTouchStart={() => preloadNavTarget(item.to)}
                         {...fastNavProps(item.to, () => setMoreOpen(false))}
                         role="menuitem"
                         aria-current={active(item.to) ? 'page' : undefined}
@@ -794,7 +818,7 @@ export default function Navbar() {
             />
             <motion.div
               dir={dir}
-              className="fixed inset-x-0 top-0 z-50 max-h-[92vh] overflow-y-auto rounded-b-[24px] border-b border-violet-100 bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl lg:hidden"
+              className="fixed inset-x-0 top-0 z-50 max-h-[min(92dvh,var(--app-visual-viewport-height,92dvh))] overflow-y-auto rounded-b-[24px] border-b border-violet-100 bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl lg:hidden"
               initial={{ y: '-100%' }}
               animate={{ y: 0 }}
               exit={{ y: '-100%' }}
@@ -878,8 +902,9 @@ export default function Navbar() {
                   <Link
                     key={item.to}
                     to={item.to}
-                    onMouseEnter={() => preloadRoute(item.to)}
-                    onFocus={() => preloadRoute(item.to)}
+                    onMouseEnter={() => preloadNavTarget(item.to)}
+                    onFocus={() => preloadNavTarget(item.to)}
+                    onTouchStart={() => preloadNavTarget(item.to)}
                     {...fastNavProps(item.to, () => setMobileOpen(false))}
                     className={`inline-flex min-h-[46px] items-center rounded-xl border px-3.5 font-display text-[13px] font-semibold transition-all ${
                       active(item.to) ? 'border-violet-300 bg-violet-50 text-violet-900' : 'border-violet-100 bg-white text-ink-700 hover:bg-violet-50'

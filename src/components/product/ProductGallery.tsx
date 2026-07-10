@@ -8,6 +8,8 @@ import { cn } from '../../utils/cn'
 import FramedImage from '../ui/FramedImage'
 import FramedVideo from '../ui/FramedVideo'
 import { preloadImage } from '../../lib/image-delivery'
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
+import { APP_ROUTE_CHANGE_EVENT } from '../../utils/route-lifecycle'
 
 interface Props {
   images: string[]
@@ -33,6 +35,7 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
   const [active, setActive] = useState(0)
   const [direction, setDirection] = useState(1)
   const [zoomOpen, setZoomOpen] = useState(false)
+  useBodyScrollLock(zoomOpen)
 
   const isVideoActive = hasVideo && active === 0
   const activeImageIndex = hasVideo ? active - 1 : active
@@ -43,6 +46,12 @@ export default function ProductGallery({ images, name, videoUrl }: Props) {
     const nextIndex = (activeImageIndex + 1) % images.length
     void preloadImage(images[nextIndex], 'detail')
   }, [activeImage, activeImageIndex, images])
+
+  useEffect(() => {
+    const closeZoom = () => setZoomOpen(false)
+    window.addEventListener(APP_ROUTE_CHANGE_EVENT, closeZoom)
+    return () => window.removeEventListener(APP_ROUTE_CHANGE_EVENT, closeZoom)
+  }, [])
 
   const navigate = (next: number) => {
     const clamped = Math.max(0, Math.min(next, totalItems - 1))

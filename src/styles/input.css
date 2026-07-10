@@ -87,6 +87,7 @@
 
   body {
     min-height: 100vh;
+    min-height: 100svh;
     width: 100%;
     max-width: 100vw;
     font-family: 'Alexandria', system-ui, sans-serif;
@@ -103,6 +104,7 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    min-height: 100svh;
     width: 100%;
     max-width: 100%;
     overflow-x: clip;
@@ -1112,7 +1114,7 @@
     .form-field {
       min-height: 46px;
       padding: 11px 14px;
-      font-size: 13.5px;
+      font-size: 16px;
     }
 
     .site-container,

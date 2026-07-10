@@ -81,7 +81,7 @@ const FramedImage = memo(
 
       const image = imageRef.current
       if (image?.complete && image.naturalWidth > 0) {
-        markImageDeliveryLoaded(realSrc)
+        markImageDeliveryLoaded(image.currentSrc || realSrc)
         setIsLoaded(true)
       }
     }, [realSrc])
@@ -125,7 +125,7 @@ const FramedImage = memo(
           ...style,
         }}
         onLoad={event => {
-          markImageDeliveryLoaded(displaySrc)
+          markImageDeliveryLoaded(event.currentTarget.currentSrc || displaySrc)
           setIsLoaded(true)
           onLoad?.(event)
         }}

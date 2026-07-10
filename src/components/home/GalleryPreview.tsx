@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useGalleryData, useProductsData } from '../../contexts/DataContext'
 import { preloadRoute } from '../../utils/route-preload'
+import { signalGalleryImageIntent } from '../../lib/gallery-image-warmup'
 import BentoGallery, { type BentoGalleryItem } from '../ui/bento-gallery'
 import SectionHeading, { ViewAllButton } from './SectionHeading'
 
@@ -68,7 +69,7 @@ export default function GalleryPreview() {
       return true
     })
 
-    return mixShots(uniqueFallbackShots).map((shot, index) => ({
+    return mixShots(uniqueFallbackShots).slice(0, 12).map((shot, index) => ({
       id: `${stableHash(shot.src)}-${index}`,
       title: shot.title || 'Gallery highlight',
       url: shot.src,
@@ -89,10 +90,13 @@ export default function GalleryPreview() {
         />
       </div>
 
-      <BentoGallery imageItems={shots} eager />
+      <BentoGallery imageItems={shots} />
 
       <div className="site-container-wide">
-        <ViewAllButton to="/gallery" onMouseEnter={() => preloadRoute('/gallery')}>
+        <ViewAllButton to="/gallery" onMouseEnter={() => {
+          preloadRoute('/gallery')
+          signalGalleryImageIntent()
+        }}>
           View full gallery
         </ViewAllButton>
       </div>
