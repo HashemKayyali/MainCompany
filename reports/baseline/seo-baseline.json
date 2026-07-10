@@ -1,0 +1,2954 @@
+{
+  "task": "BASE-003",
+  "capturedAt": "2026-07-10T23:01:15.396Z",
+  "baseUrl": "https://www.eventiesjo.com",
+  "routeCount": 53,
+  "sitemapRouteCount": 44,
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Eventies | Event Services Marketplace in Jordan",
+      "description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+      "canonical": "https://www.eventiesjo.com/",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Eventies | Event Services Marketplace in Jordan",
+        "og:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "og:url": "https://www.eventiesjo.com/",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Eventies | Event Services Marketplace in Jordan",
+        "twitter:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/about",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/about",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "About Eventies | Jordan Event Services Marketplace",
+      "description": "Learn how Eventies helps clients, organizers, companies, and providers discover rentals, activations, production support, custom builds, and trusted event services across Jordan.",
+      "canonical": "https://www.eventiesjo.com/about",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "About Eventies | Jordan Event Services Marketplace",
+        "og:description": "Learn how Eventies helps clients, organizers, companies, and providers discover rentals, activations, production support, custom builds, and trusted event services across Jordan.",
+        "og:url": "https://www.eventiesjo.com/about",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "About Eventies | Jordan Event Services Marketplace",
+        "twitter:description": "Learn how Eventies helps clients, organizers, companies, and providers discover rentals, activations, production support, custom builds, and trusted event services across Jordan.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/categories",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/categories",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Eventies | Event Services Marketplace in Jordan",
+      "description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+      "canonical": "https://www.eventiesjo.com/",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Eventies | Event Services Marketplace in Jordan",
+        "og:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "og:url": "https://www.eventiesjo.com/",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Eventies | Event Services Marketplace in Jordan",
+        "twitter:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/categories/arcade-games",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/categories/arcade-games",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Interactive Arcade Games Event Services in Jordan | Eventies",
+      "description": "Arcade machines and interactive skill games for fun, competitive event experiences.",
+      "canonical": "https://www.eventiesjo.com/categories/arcade-games",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Interactive Arcade Games Event Services in Jordan | Eventies",
+        "og:description": "Arcade machines and interactive skill games for fun, competitive event experiences.",
+        "og:url": "https://www.eventiesjo.com/categories/arcade-games",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468505/eventies/categories/lsxrugmbntv8pc9pngi4.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468505/eventies/categories/lsxrugmbntv8pc9pngi4.webp",
+        "og:image:alt": "Interactive Arcade Games event services in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Interactive Arcade Games Event Services in Jordan | Eventies",
+        "twitter:description": "Arcade machines and interactive skill games for fun, competitive event experiences.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468505/eventies/categories/lsxrugmbntv8pc9pngi4.webp",
+        "twitter:image:alt": "Interactive Arcade Games event services in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Interactive Arcade Games Event Services in Jordan",
+          "description": "Arcade machines and interactive skill games for fun, competitive event experiences.",
+          "url": "https://www.eventiesjo.com/categories/arcade-games",
+          "image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468505/eventies/categories/lsxrugmbntv8pc9pngi4.webp",
+          "mainEntity": {
+            "@id": "https://www.eventiesjo.com/categories/arcade-games#item-list"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "@id": "https://www.eventiesjo.com/categories/arcade-games#item-list",
+          "name": "Interactive Arcade Games Event Services in Jordan",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Air Hockey",
+              "url": "https://www.eventiesjo.com/products/air-hockey"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Basket Beats",
+              "url": "https://www.eventiesjo.com/products/arena-basket-hit-race"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Basketball",
+              "url": "https://www.eventiesjo.com/products/basketball"
+            },
+            {
+              "@type": "ListItem",
+              "position": 4,
+              "name": "Boxing Machine",
+              "url": "https://www.eventiesjo.com/products/boxing-machine"
+            },
+            {
+              "@type": "ListItem",
+              "position": 5,
+              "name": "Claw Machine",
+              "url": "https://www.eventiesjo.com/products/claw-machine"
+            },
+            {
+              "@type": "ListItem",
+              "position": 6,
+              "name": "Fast Reaction",
+              "url": "https://www.eventiesjo.com/products/fast-reaction"
+            },
+            {
+              "@type": "ListItem",
+              "position": 7,
+              "name": "Foosball",
+              "url": "https://www.eventiesjo.com/products/foosball"
+            },
+            {
+              "@type": "ListItem",
+              "position": 8,
+              "name": "Fun Slap",
+              "url": "https://www.eventiesjo.com/products/fun-slap"
+            },
+            {
+              "@type": "ListItem",
+              "position": 9,
+              "name": "Soccer Kicker",
+              "url": "https://www.eventiesjo.com/products/soccer-kicker"
+            },
+            {
+              "@type": "ListItem",
+              "position": 10,
+              "name": "Subsoccer",
+              "url": "https://www.eventiesjo.com/products/subsoccer"
+            }
+          ]
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/categories/bike-land",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/categories/bike-land",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Bike Activities ( Bike Land ) Event Services in Jordan | Eventies",
+      "description": "Interactive cycling-based games and fitness activations that combine movement, competition, and entertainment, perfect for events, brand activations, family days, and health-focused experiences.",
+      "canonical": "https://www.eventiesjo.com/categories/bike-land",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Bike Activities ( Bike Land ) Event Services in Jordan | Eventies",
+        "og:description": "Interactive cycling-based games and fitness activations that combine movement, competition, and entertainment, perfect for events, brand activations, family days, and health-focused experiences.",
+        "og:url": "https://www.eventiesjo.com/categories/bike-land",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468420/eventies/categories/zqfvxmbinigtenpdg3tx.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468420/eventies/categories/zqfvxmbinigtenpdg3tx.webp",
+        "og:image:alt": "Bike Activities ( Bike Land ) event services in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Bike Activities ( Bike Land ) Event Services in Jordan | Eventies",
+        "twitter:description": "Interactive cycling-based games and fitness activations that combine movement, competition, and entertainment, perfect for events, brand activations, family days, and health-focused experiences.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468420/eventies/categories/zqfvxmbinigtenpdg3tx.webp",
+        "twitter:image:alt": "Bike Activities ( Bike Land ) event services in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Bike Activities ( Bike Land ) Event Services in Jordan",
+          "description": "Interactive cycling-based games and fitness activations that combine movement, competition, and entertainment, perfect for events, brand activations, family days, and health-focused experiences.",
+          "url": "https://www.eventiesjo.com/categories/bike-land",
+          "image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468420/eventies/categories/zqfvxmbinigtenpdg3tx.webp",
+          "mainEntity": {
+            "@id": "https://www.eventiesjo.com/categories/bike-land#item-list"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "@id": "https://www.eventiesjo.com/categories/bike-land#item-list",
+          "name": "Bike Activities ( Bike Land ) Event Services in Jordan",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Bike Blender",
+              "url": "https://www.eventiesjo.com/products/bike-blender"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Bike Race",
+              "url": "https://www.eventiesjo.com/products/bike-race"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Bike Tower",
+              "url": "https://www.eventiesjo.com/products/bike-tower"
+            },
+            {
+              "@type": "ListItem",
+              "position": 4,
+              "name": "Bike VR",
+              "url": "https://www.eventiesjo.com/products/bike-vr"
+            }
+          ]
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/categories/custom-booths--event-branding",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/categories/custom-booths--event-branding",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Custom Booths & Event Branding Event Services in Jordan | Eventies",
+      "description": "Custom exhibition booths, branded event structures, signage, printing, and fabrication solutions designed for corporate events, activations, exhibitions, and branded experiences.",
+      "canonical": "https://www.eventiesjo.com/categories/custom-booths--event-branding",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Custom Booths & Event Branding Event Services in Jordan | Eventies",
+        "og:description": "Custom exhibition booths, branded event structures, signage, printing, and fabrication solutions designed for corporate events, activations, exhibitions, and branded experiences.",
+        "og:url": "https://www.eventiesjo.com/categories/custom-booths--event-branding",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468433/eventies/categories/llqidpcudfjopkxfqjug.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468433/eventies/categories/llqidpcudfjopkxfqjug.webp",
+        "og:image:alt": "Custom Booths & Event Branding event services in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Custom Booths & Event Branding Event Services in Jordan | Eventies",
+        "twitter:description": "Custom exhibition booths, branded event structures, signage, printing, and fabrication solutions designed for corporate events, activations, exhibitions, and branded experiences.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468433/eventies/categories/llqidpcudfjopkxfqjug.webp",
+        "twitter:image:alt": "Custom Booths & Event Branding event services in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Custom Booths & Event Branding Event Services in Jordan",
+          "description": "Custom exhibition booths, branded event structures, signage, printing, and fabrication solutions designed for corporate events, activations, exhibitions, and branded experiences.",
+          "url": "https://www.eventiesjo.com/categories/custom-booths--event-branding",
+          "image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468433/eventies/categories/llqidpcudfjopkxfqjug.webp",
+          "mainEntity": {
+            "@id": "https://www.eventiesjo.com/categories/custom-booths--event-branding#item-list"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "@id": "https://www.eventiesjo.com/categories/custom-booths--event-branding#item-list",
+          "name": "Custom Booths & Event Branding Event Services in Jordan",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "3D Booth & Event Space Design",
+              "url": "https://www.eventiesjo.com/products/3d-booth-event-space-design"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Brand Activation Booths & Kiosks",
+              "url": "https://www.eventiesjo.com/products/brand-activation-booths-kiosks"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Event Banners & Large-Format Printing",
+              "url": "https://www.eventiesjo.com/products/event-banners-large-format-printing"
+            }
+          ]
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/categories/face-glitter-art",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/categories/face-glitter-art",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Face & Glitter Art Event Services in Jordan | Eventies",
+      "description": "Face painting and glitter art services for events, including kids face designs, face glitter, body glitter, festival looks, and custom sparkle designs for parties and activations.",
+      "canonical": "https://www.eventiesjo.com/categories/face-glitter-art",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Face & Glitter Art Event Services in Jordan | Eventies",
+        "og:description": "Face painting and glitter art services for events, including kids face designs, face glitter, body glitter, festival looks, and custom sparkle designs for parties and activations.",
+        "og:url": "https://www.eventiesjo.com/categories/face-glitter-art",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468470/eventies/categories/gkvlvic74juvt3flivyw.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468470/eventies/categories/gkvlvic74juvt3flivyw.webp",
+        "og:image:alt": "Face & Glitter Art event services in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Face & Glitter Art Event Services in Jordan | Eventies",
+        "twitter:description": "Face painting and glitter art services for events, including kids face designs, face glitter, body glitter, festival looks, and custom sparkle designs for parties and activations.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468470/eventies/categories/gkvlvic74juvt3flivyw.webp",
+        "twitter:image:alt": "Face & Glitter Art event services in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Face & Glitter Art Event Services in Jordan",
+          "description": "Face painting and glitter art services for events, including kids face designs, face glitter, body glitter, festival looks, and custom sparkle designs for parties and activations.",
+          "url": "https://www.eventiesjo.com/categories/face-glitter-art",
+          "image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468470/eventies/categories/gkvlvic74juvt3flivyw.webp",
+          "mainEntity": {
+            "@id": "https://www.eventiesjo.com/categories/face-glitter-art#item-list"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "@id": "https://www.eventiesjo.com/categories/face-glitter-art#item-list",
+          "name": "Face & Glitter Art Event Services in Jordan",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Glitter Art for Events",
+              "url": "https://www.eventiesjo.com/products/glitter-art-for-events"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Kids Face Painting",
+              "url": "https://www.eventiesjo.com/products/kids-face-painting"
+            }
+          ]
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/categories/graduation-celebrations",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/categories/graduation-celebrations",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Graduation Celebrations Event Services in Jordan | Eventies",
+      "description": "Graduation backdrops, personalized photo corners, welcome mirrors, ceremony decor, and custom celebration setups designed for unforgettable graduation moments.",
+      "canonical": "https://www.eventiesjo.com/categories/graduation-celebrations",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Graduation Celebrations Event Services in Jordan | Eventies",
+        "og:description": "Graduation backdrops, personalized photo corners, welcome mirrors, ceremony decor, and custom celebration setups designed for unforgettable graduation moments.",
+        "og:url": "https://www.eventiesjo.com/categories/graduation-celebrations",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468480/eventies/categories/nv6rbt4rl4zazeho5fon.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468480/eventies/categories/nv6rbt4rl4zazeho5fon.webp",
+        "og:image:alt": "Graduation Celebrations event services in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Graduation Celebrations Event Services in Jordan | Eventies",
+        "twitter:description": "Graduation backdrops, personalized photo corners, welcome mirrors, ceremony decor, and custom celebration setups designed for unforgettable graduation moments.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468480/eventies/categories/nv6rbt4rl4zazeho5fon.webp",
+        "twitter:image:alt": "Graduation Celebrations event services in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Graduation Celebrations Event Services in Jordan",
+          "description": "Graduation backdrops, personalized photo corners, welcome mirrors, ceremony decor, and custom celebration setups designed for unforgettable graduation moments.",
+          "url": "https://www.eventiesjo.com/categories/graduation-celebrations",
+          "image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468480/eventies/categories/nv6rbt4rl4zazeho5fon.webp",
+          "mainEntity": {
+            "@id": "https://www.eventiesjo.com/categories/graduation-celebrations#item-list"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "@id": "https://www.eventiesjo.com/categories/graduation-celebrations#item-list",
+          "name": "Graduation Celebrations Event Services in Jordan",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Custom Graduation Backdrops & Photo Corners",
+              "url": "https://www.eventiesjo.com/products/custom-graduation-backdrops-photo-corners"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Welcome Mirror Graduation",
+              "url": "https://www.eventiesjo.com/products/welcome-mirror-graduation"
+            }
+          ]
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/categories/photo--print-experiences",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/categories/photo--print-experiences",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Photo & Print Experiences Event Services in Jordan | Eventies",
+      "description": "Create memorable event moments with interactive photo, print, and personalization experiences, from instant photo printing and photo booths to custom keepsakes for guests.",
+      "canonical": "https://www.eventiesjo.com/categories/photo--print-experiences",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Photo & Print Experiences Event Services in Jordan | Eventies",
+        "og:description": "Create memorable event moments with interactive photo, print, and personalization experiences, from instant photo printing and photo booths to custom keepsakes for guests.",
+        "og:url": "https://www.eventiesjo.com/categories/photo--print-experiences",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468515/eventies/categories/ghbmrmddacfgcct632zy.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468515/eventies/categories/ghbmrmddacfgcct632zy.webp",
+        "og:image:alt": "Photo & Print Experiences event services in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Photo & Print Experiences Event Services in Jordan | Eventies",
+        "twitter:description": "Create memorable event moments with interactive photo, print, and personalization experiences, from instant photo printing and photo booths to custom keepsakes for guests.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468515/eventies/categories/ghbmrmddacfgcct632zy.webp",
+        "twitter:image:alt": "Photo & Print Experiences event services in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Photo & Print Experiences Event Services in Jordan",
+          "description": "Create memorable event moments with interactive photo, print, and personalization experiences, from instant photo printing and photo booths to custom keepsakes for guests.",
+          "url": "https://www.eventiesjo.com/categories/photo--print-experiences",
+          "image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468515/eventies/categories/ghbmrmddacfgcct632zy.webp",
+          "mainEntity": {
+            "@id": "https://www.eventiesjo.com/categories/photo--print-experiences#item-list"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "@id": "https://www.eventiesjo.com/categories/photo--print-experiences#item-list",
+          "name": "Photo & Print Experiences Event Services in Jordan",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Instant Photo Printing Station",
+              "url": "https://www.eventiesjo.com/products/instant-photo-printing-station"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Phone Case Printing Vending Machine",
+              "url": "https://www.eventiesjo.com/products/phone-case-printing-vending-machine"
+            }
+          ]
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/categories/screens",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/categories/screens",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Event Screens & Digital Displays Event Services in Jordan | Eventies",
+      "description": "Digital screens, kiosks, touch displays, and presentation solutions for events.",
+      "canonical": "https://www.eventiesjo.com/categories/screens",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Event Screens & Digital Displays Event Services in Jordan | Eventies",
+        "og:description": "Digital screens, kiosks, touch displays, and presentation solutions for events.",
+        "og:url": "https://www.eventiesjo.com/categories/screens",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468459/eventies/categories/kdqpc8dvi5wmompjfdsf.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468459/eventies/categories/kdqpc8dvi5wmompjfdsf.webp",
+        "og:image:alt": "Event Screens & Digital Displays event services in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Event Screens & Digital Displays Event Services in Jordan | Eventies",
+        "twitter:description": "Digital screens, kiosks, touch displays, and presentation solutions for events.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468459/eventies/categories/kdqpc8dvi5wmompjfdsf.webp",
+        "twitter:image:alt": "Event Screens & Digital Displays event services in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Event Screens & Digital Displays Event Services in Jordan",
+          "description": "Digital screens, kiosks, touch displays, and presentation solutions for events.",
+          "url": "https://www.eventiesjo.com/categories/screens",
+          "image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468459/eventies/categories/kdqpc8dvi5wmompjfdsf.webp",
+          "mainEntity": {
+            "@id": "https://www.eventiesjo.com/categories/screens#item-list"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "@id": "https://www.eventiesjo.com/categories/screens#item-list",
+          "name": "Event Screens & Digital Displays Event Services in Jordan",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "75 Inch Floor Standing LCD Touch",
+              "url": "https://www.eventiesjo.com/products/75-inch-floor-standing-lcd-touch"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "HOLOGRAM SCREEN",
+              "url": "https://www.eventiesjo.com/products/hologram-screen"
+            }
+          ]
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/categories/the-terminal-vr",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/categories/the-terminal-vr",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Virtual Reality Games Event Services in Jordan | Eventies",
+      "description": "VR games and simulator rentals for events, including virtual reality stations, motion simulators, racing simulators, and gaming setups.",
+      "canonical": "https://www.eventiesjo.com/categories/the-terminal-vr",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Virtual Reality Games Event Services in Jordan | Eventies",
+        "og:description": "VR games and simulator rentals for events, including virtual reality stations, motion simulators, racing simulators, and gaming setups.",
+        "og:url": "https://www.eventiesjo.com/categories/the-terminal-vr",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468525/eventies/categories/kgax9cf90ffhpp5ykx5g.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468525/eventies/categories/kgax9cf90ffhpp5ykx5g.webp",
+        "og:image:alt": "Virtual Reality Games event services in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Virtual Reality Games Event Services in Jordan | Eventies",
+        "twitter:description": "VR games and simulator rentals for events, including virtual reality stations, motion simulators, racing simulators, and gaming setups.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468525/eventies/categories/kgax9cf90ffhpp5ykx5g.webp",
+        "twitter:image:alt": "Virtual Reality Games event services in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Virtual Reality Games Event Services in Jordan",
+          "description": "VR games and simulator rentals for events, including virtual reality stations, motion simulators, racing simulators, and gaming setups.",
+          "url": "https://www.eventiesjo.com/categories/the-terminal-vr",
+          "image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468525/eventies/categories/kgax9cf90ffhpp5ykx5g.webp",
+          "mainEntity": {
+            "@id": "https://www.eventiesjo.com/categories/the-terminal-vr#item-list"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "@id": "https://www.eventiesjo.com/categories/the-terminal-vr#item-list",
+          "name": "Virtual Reality Games Event Services in Jordan",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "VR 360° Rotating Chair",
+              "url": "https://www.eventiesjo.com/products/360"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Car Racing VR",
+              "url": "https://www.eventiesjo.com/products/car-racing"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Chair",
+              "url": "https://www.eventiesjo.com/products/chair"
+            },
+            {
+              "@type": "ListItem",
+              "position": 4,
+              "name": "Slider",
+              "url": "https://www.eventiesjo.com/products/slider"
+            },
+            {
+              "@type": "ListItem",
+              "position": 5,
+              "name": "VR Shooting Game",
+              "url": "https://www.eventiesjo.com/products/vr-shooting-game"
+            }
+          ]
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/contact",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/contact",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Contact Eventies | Event Requests in Jordan",
+      "description": "Contact Eventies for event rentals, purchase requests, custom builds, support, provider inquiries, and event service partnerships in Jordan.",
+      "canonical": "https://www.eventiesjo.com/contact",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Contact Eventies | Event Requests in Jordan",
+        "og:description": "Contact Eventies for event rentals, purchase requests, custom builds, support, provider inquiries, and event service partnerships in Jordan.",
+        "og:url": "https://www.eventiesjo.com/contact",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Contact Eventies | Event Requests in Jordan",
+        "twitter:description": "Contact Eventies for event rentals, purchase requests, custom builds, support, provider inquiries, and event service partnerships in Jordan.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/cookie-policy",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/cookie-policy",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Eventies | Event Services Marketplace in Jordan",
+      "description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+      "canonical": "https://www.eventiesjo.com/",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Eventies | Event Services Marketplace in Jordan",
+        "og:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "og:url": "https://www.eventiesjo.com/",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Eventies | Event Services Marketplace in Jordan",
+        "twitter:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/cookies",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/cookies",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Eventies | Event Services Marketplace in Jordan",
+      "description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+      "canonical": "https://www.eventiesjo.com/",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Eventies | Event Services Marketplace in Jordan",
+        "og:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "og:url": "https://www.eventiesjo.com/",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Eventies | Event Services Marketplace in Jordan",
+        "twitter:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/customers",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/customers",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Eventies Clients & Event Partners in Jordan",
+      "description": "A curated look at brands, schools, venues, and organizations connected to Eventies activations, custom builds, and event services across Jordan and the region.",
+      "canonical": "https://www.eventiesjo.com/customers",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Eventies Clients & Event Partners in Jordan",
+        "og:description": "A curated look at brands, schools, venues, and organizations connected to Eventies activations, custom builds, and event services across Jordan and the region.",
+        "og:url": "https://www.eventiesjo.com/customers",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Eventies Clients & Event Partners in Jordan",
+        "twitter:description": "A curated look at brands, schools, venues, and organizations connected to Eventies activations, custom builds, and event services across Jordan and the region.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/gallery",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/gallery",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Event Gallery & Activations in Jordan | Eventies",
+      "description": "Browse albums from Eventies activations, service setups, custom builds, and real event moments across Jordan.",
+      "canonical": "https://www.eventiesjo.com/gallery",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Event Gallery & Activations in Jordan | Eventies",
+        "og:description": "Browse albums from Eventies activations, service setups, custom builds, and real event moments across Jordan.",
+        "og:url": "https://www.eventiesjo.com/gallery",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Event Gallery & Activations in Jordan | Eventies",
+        "twitter:description": "Browse albums from Eventies activations, service setups, custom builds, and real event moments across Jordan.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/privacy",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Eventies | Event Services Marketplace in Jordan",
+      "description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+      "canonical": "https://www.eventiesjo.com/",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Eventies | Event Services Marketplace in Jordan",
+        "og:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "og:url": "https://www.eventiesjo.com/",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Eventies | Event Services Marketplace in Jordan",
+        "twitter:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/privacy-policy",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/privacy-policy",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Eventies | Event Services Marketplace in Jordan",
+      "description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+      "canonical": "https://www.eventiesjo.com/",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Eventies | Event Services Marketplace in Jordan",
+        "og:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "og:url": "https://www.eventiesjo.com/",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Eventies | Event Services Marketplace in Jordan",
+        "twitter:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Event Services & Rentals in Jordan | Eventies",
+      "description": "Browse interactive games, screens, booths, production support, and event rentals from trusted providers across Jordan. Compare options and submit one clear request for review.",
+      "canonical": "https://www.eventiesjo.com/products",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Event Services & Rentals in Jordan | Eventies",
+        "og:description": "Browse interactive games, screens, booths, production support, and event rentals from trusted providers across Jordan. Compare options and submit one clear request for review.",
+        "og:url": "https://www.eventiesjo.com/products",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Event Services & Rentals in Jordan | Eventies",
+        "twitter:description": "Browse interactive games, screens, booths, production support, and event rentals from trusted providers across Jordan. Compare options and submit one clear request for review.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/360",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/360",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "VR 360° Rotating Chair for Events in Jordan | Eventies",
+      "description": "Request VR 360° Rotating Chair for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/360",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "VR 360° Rotating Chair for Events in Jordan | Eventies",
+        "og:description": "Request VR 360° Rotating Chair for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/360",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469252/eventies/products/bnho6blzmmjracr2clvk.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469252/eventies/products/bnho6blzmmjracr2clvk.webp",
+        "og:image:alt": "VR 360° Rotating Chair service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "VR 360° Rotating Chair for Events in Jordan | Eventies",
+        "twitter:description": "Request VR 360° Rotating Chair for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469252/eventies/products/bnho6blzmmjracr2clvk.webp",
+        "twitter:image:alt": "VR 360° Rotating Chair service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/3d-booth-event-space-design",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/3d-booth-event-space-design",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "3D Booth & Event Space Design for Events in Jordan | Eventies",
+      "description": "Request 3D Booth & Event Space Design for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/3d-booth-event-space-design",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "3D Booth & Event Space Design for Events in Jordan | Eventies",
+        "og:description": "Request 3D Booth & Event Space Design for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/3d-booth-event-space-design",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469914/eventies/products/g7vmbrhndnfkbbttmidt.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469914/eventies/products/g7vmbrhndnfkbbttmidt.webp",
+        "og:image:alt": "3D Booth & Event Space Design service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "3D Booth & Event Space Design for Events in Jordan | Eventies",
+        "twitter:description": "Request 3D Booth & Event Space Design for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469914/eventies/products/g7vmbrhndnfkbbttmidt.webp",
+        "twitter:image:alt": "3D Booth & Event Space Design service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/75-inch-floor-standing-lcd-touch",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/75-inch-floor-standing-lcd-touch",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "75 Inch Floor Standing LCD Touch for Events in Jordan | Eventies",
+      "description": "Request 75 Inch Floor Standing LCD Touch for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/75-inch-floor-standing-lcd-touch",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "75 Inch Floor Standing LCD Touch for Events in Jordan | Eventies",
+        "og:description": "Request 75 Inch Floor Standing LCD Touch for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/75-inch-floor-standing-lcd-touch",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469637/eventies/products/rwn53vf0qdqkkm6eefg0.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469637/eventies/products/rwn53vf0qdqkkm6eefg0.webp",
+        "og:image:alt": "75 Inch Floor Standing LCD Touch service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "75 Inch Floor Standing LCD Touch for Events in Jordan | Eventies",
+        "twitter:description": "Request 75 Inch Floor Standing LCD Touch for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469637/eventies/products/rwn53vf0qdqkkm6eefg0.webp",
+        "twitter:image:alt": "75 Inch Floor Standing LCD Touch service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/air-hockey",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/air-hockey",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Air Hockey for Events in Jordan | Eventies",
+      "description": "Request Air Hockey for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/air-hockey",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Air Hockey for Events in Jordan | Eventies",
+        "og:description": "Request Air Hockey for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/air-hockey",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469367/eventies/products/tzanrcl9ppntnzvv729e.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469367/eventies/products/tzanrcl9ppntnzvv729e.webp",
+        "og:image:alt": "Air Hockey service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Air Hockey for Events in Jordan | Eventies",
+        "twitter:description": "Request Air Hockey for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469367/eventies/products/tzanrcl9ppntnzvv729e.webp",
+        "twitter:image:alt": "Air Hockey service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/arena-basket-hit-race",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/arena-basket-hit-race",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Basket Beats for Events in Jordan | Eventies",
+      "description": "Request Basket Beats for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/arena-basket-hit-race",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Basket Beats for Events in Jordan | Eventies",
+        "og:description": "Request Basket Beats for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/arena-basket-hit-race",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469137/eventies/products/a3ofnuapcx5c8zcg4owq.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469137/eventies/products/a3ofnuapcx5c8zcg4owq.webp",
+        "og:image:alt": "Basket Beats service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Basket Beats for Events in Jordan | Eventies",
+        "twitter:description": "Request Basket Beats for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469137/eventies/products/a3ofnuapcx5c8zcg4owq.webp",
+        "twitter:image:alt": "Basket Beats service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/basketball",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/basketball",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Basketball for Events in Jordan | Eventies",
+      "description": "Request Basketball for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/basketball",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Basketball for Events in Jordan | Eventies",
+        "og:description": "Request Basketball for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/basketball",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469394/eventies/products/vkzpjhsbrflvdsfbttod.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469394/eventies/products/vkzpjhsbrflvdsfbttod.webp",
+        "og:image:alt": "Basketball service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Basketball for Events in Jordan | Eventies",
+        "twitter:description": "Request Basketball for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469394/eventies/products/vkzpjhsbrflvdsfbttod.webp",
+        "twitter:image:alt": "Basketball service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/bike-blender",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/bike-blender",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Bike Blender for Events in Jordan | Eventies",
+      "description": "Request Bike Blender for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/bike-blender",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Bike Blender for Events in Jordan | Eventies",
+        "og:description": "Request Bike Blender for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/bike-blender",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468807/eventies/products/bwdbphmbwtne8jazeliw.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468807/eventies/products/bwdbphmbwtne8jazeliw.webp",
+        "og:image:alt": "Bike Blender service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Bike Blender for Events in Jordan | Eventies",
+        "twitter:description": "Request Bike Blender for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468807/eventies/products/bwdbphmbwtne8jazeliw.webp",
+        "twitter:image:alt": "Bike Blender service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": "Bike Blender",
+          "description": "An innovative experience that combines cycling with making fresh natural smoothies. Every spin on the bike means more fun and a cup full of vitality. Perfect for companies, malls, and events looking to attract crowds in a fun and healthy way.",
+          "url": "https://www.eventiesjo.com/products/bike-blender",
+          "image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468807/eventies/products/bwdbphmbwtne8jazeliw.webp",
+          "offers": {
+            "@type": "Offer",
+            "url": "https://www.eventiesjo.com/products/bike-blender",
+            "price": 320,
+            "priceCurrency": "JOD",
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition"
+          }
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/bike-race",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/bike-race",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Bike Race for Events in Jordan | Eventies",
+      "description": "Request Bike Race for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/bike-race",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Bike Race for Events in Jordan | Eventies",
+        "og:description": "Request Bike Race for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/bike-race",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469100/eventies/products/bye9cilcov8rtt5szlp8.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469100/eventies/products/bye9cilcov8rtt5szlp8.webp",
+        "og:image:alt": "Bike Race service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Bike Race for Events in Jordan | Eventies",
+        "twitter:description": "Request Bike Race for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469100/eventies/products/bye9cilcov8rtt5szlp8.webp",
+        "twitter:image:alt": "Bike Race service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/bike-tower",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/bike-tower",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Bike Tower for Events in Jordan | Eventies",
+      "description": "Request Bike Tower for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/bike-tower",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Bike Tower for Events in Jordan | Eventies",
+        "og:description": "Request Bike Tower for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/bike-tower",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468867/eventies/products/sbgeoq3qfaqf87htcs69.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468867/eventies/products/sbgeoq3qfaqf87htcs69.webp",
+        "og:image:alt": "Bike Tower service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Bike Tower for Events in Jordan | Eventies",
+        "twitter:description": "Request Bike Tower for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468867/eventies/products/sbgeoq3qfaqf87htcs69.webp",
+        "twitter:image:alt": "Bike Tower service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/bike-vr",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/bike-vr",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Bike VR for Events in Jordan | Eventies",
+      "description": "Request Bike VR for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/bike-vr",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Bike VR for Events in Jordan | Eventies",
+        "og:description": "Request Bike VR for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/bike-vr",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468891/eventies/products/qzftyguz8eza1epneyso.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468891/eventies/products/qzftyguz8eza1epneyso.webp",
+        "og:image:alt": "Bike VR service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Bike VR for Events in Jordan | Eventies",
+        "twitter:description": "Request Bike VR for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783468891/eventies/products/qzftyguz8eza1epneyso.webp",
+        "twitter:image:alt": "Bike VR service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/boxing-machine",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/boxing-machine",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Boxing Machine for Events in Jordan | Eventies",
+      "description": "Request Boxing Machine for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/boxing-machine",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Boxing Machine for Events in Jordan | Eventies",
+        "og:description": "Request Boxing Machine for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/boxing-machine",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469522/eventies/products/zgfkgfmhoohjmjjwtnhe.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469522/eventies/products/zgfkgfmhoohjmjjwtnhe.webp",
+        "og:image:alt": "Boxing Machine service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Boxing Machine for Events in Jordan | Eventies",
+        "twitter:description": "Request Boxing Machine for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469522/eventies/products/zgfkgfmhoohjmjjwtnhe.webp",
+        "twitter:image:alt": "Boxing Machine service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/brand-activation-booths-kiosks",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/brand-activation-booths-kiosks",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Brand Activation Booths & Kiosks for Events in Jordan | Eventies",
+      "description": "Request Brand Activation Booths & Kiosks for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/brand-activation-booths-kiosks",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Brand Activation Booths & Kiosks for Events in Jordan | Eventies",
+        "og:description": "Request Brand Activation Booths & Kiosks for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/brand-activation-booths-kiosks",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469766/eventies/products/ndvbd59hjfcztctswmdx.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469766/eventies/products/ndvbd59hjfcztctswmdx.webp",
+        "og:image:alt": "Brand Activation Booths & Kiosks service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Brand Activation Booths & Kiosks for Events in Jordan | Eventies",
+        "twitter:description": "Request Brand Activation Booths & Kiosks for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469766/eventies/products/ndvbd59hjfcztctswmdx.webp",
+        "twitter:image:alt": "Brand Activation Booths & Kiosks service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/car-racing",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/car-racing",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Car Racing VR for Events in Jordan | Eventies",
+      "description": "Request Car Racing VR for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/car-racing",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Car Racing VR for Events in Jordan | Eventies",
+        "og:description": "Request Car Racing VR for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/car-racing",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469176/eventies/products/bda3wcj3qdupdnlwe1c4.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469176/eventies/products/bda3wcj3qdupdnlwe1c4.webp",
+        "og:image:alt": "Car Racing VR service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Car Racing VR for Events in Jordan | Eventies",
+        "twitter:description": "Request Car Racing VR for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469176/eventies/products/bda3wcj3qdupdnlwe1c4.webp",
+        "twitter:image:alt": "Car Racing VR service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/chair",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/chair",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Chair for Events in Jordan | Eventies",
+      "description": "Request Chair for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/chair",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Chair for Events in Jordan | Eventies",
+        "og:description": "Request Chair for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/chair",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469310/eventies/products/uia1wb1k7btthsacoxc6.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469310/eventies/products/uia1wb1k7btthsacoxc6.webp",
+        "og:image:alt": "Chair service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Chair for Events in Jordan | Eventies",
+        "twitter:description": "Request Chair for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469310/eventies/products/uia1wb1k7btthsacoxc6.webp",
+        "twitter:image:alt": "Chair service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/claw-machine",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/claw-machine",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Claw Machine for Events in Jordan | Eventies",
+      "description": "Request Claw Machine for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/claw-machine",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Claw Machine for Events in Jordan | Eventies",
+        "og:description": "Request Claw Machine for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/claw-machine",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469418/eventies/products/z1almmnpnwuanq1cnhqg.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469418/eventies/products/z1almmnpnwuanq1cnhqg.webp",
+        "og:image:alt": "Claw Machine service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Claw Machine for Events in Jordan | Eventies",
+        "twitter:description": "Request Claw Machine for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469418/eventies/products/z1almmnpnwuanq1cnhqg.webp",
+        "twitter:image:alt": "Claw Machine service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/custom-graduation-backdrops-photo-corners",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/custom-graduation-backdrops-photo-corners",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Custom Graduation Backdrops & Photo Corners for Events in Jordan | Eventies",
+      "description": "Request Custom Graduation Backdrops & Photo Corners for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/custom-graduation-backdrops-photo-corners",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Custom Graduation Backdrops & Photo Corners for Events in Jordan | Eventies",
+        "og:description": "Request Custom Graduation Backdrops & Photo Corners for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/custom-graduation-backdrops-photo-corners",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783470039/eventies/products/fhrdrfuc1kwwpxeswddq.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783470039/eventies/products/fhrdrfuc1kwwpxeswddq.webp",
+        "og:image:alt": "Custom Graduation Backdrops & Photo Corners service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Custom Graduation Backdrops & Photo Corners for Events in Jordan | Eventies",
+        "twitter:description": "Request Custom Graduation Backdrops & Photo Corners for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783470039/eventies/products/fhrdrfuc1kwwpxeswddq.webp",
+        "twitter:image:alt": "Custom Graduation Backdrops & Photo Corners service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/event-banners-large-format-printing",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/event-banners-large-format-printing",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Event Banners & Large-Format Printing for Events in Jordan | Eventies",
+      "description": "Request Event Banners & Large-Format Printing for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/event-banners-large-format-printing",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Event Banners & Large-Format Printing for Events in Jordan | Eventies",
+        "og:description": "Request Event Banners & Large-Format Printing for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/event-banners-large-format-printing",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469824/eventies/products/k7e8nji0gkmv1affmk3z.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469824/eventies/products/k7e8nji0gkmv1affmk3z.webp",
+        "og:image:alt": "Event Banners & Large-Format Printing service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Event Banners & Large-Format Printing for Events in Jordan | Eventies",
+        "twitter:description": "Request Event Banners & Large-Format Printing for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469824/eventies/products/k7e8nji0gkmv1affmk3z.webp",
+        "twitter:image:alt": "Event Banners & Large-Format Printing service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/fast-reaction",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/fast-reaction",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Fast Reaction for Events in Jordan | Eventies",
+      "description": "Request Fast Reaction for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/fast-reaction",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Fast Reaction for Events in Jordan | Eventies",
+        "og:description": "Request Fast Reaction for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/fast-reaction",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469453/eventies/products/uvvjrphhlhe4lhwky6c5.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469453/eventies/products/uvvjrphhlhe4lhwky6c5.webp",
+        "og:image:alt": "Fast Reaction service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Fast Reaction for Events in Jordan | Eventies",
+        "twitter:description": "Request Fast Reaction for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469453/eventies/products/uvvjrphhlhe4lhwky6c5.webp",
+        "twitter:image:alt": "Fast Reaction service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/foosball",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/foosball",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Foosball for Events in Jordan | Eventies",
+      "description": "Request Foosball for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/foosball",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Foosball for Events in Jordan | Eventies",
+        "og:description": "Request Foosball for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/foosball",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469546/eventies/products/qvksu5der5pjwv57kwlu.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469546/eventies/products/qvksu5der5pjwv57kwlu.webp",
+        "og:image:alt": "Foosball service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Foosball for Events in Jordan | Eventies",
+        "twitter:description": "Request Foosball for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469546/eventies/products/qvksu5der5pjwv57kwlu.webp",
+        "twitter:image:alt": "Foosball service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/fun-slap",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/fun-slap",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Fun Slap for Events in Jordan | Eventies",
+      "description": "Request Fun Slap for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/fun-slap",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Fun Slap for Events in Jordan | Eventies",
+        "og:description": "Request Fun Slap for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/fun-slap",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469481/eventies/products/yiyn8p7v2sze5tll1veo.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469481/eventies/products/yiyn8p7v2sze5tll1veo.webp",
+        "og:image:alt": "Fun Slap service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Fun Slap for Events in Jordan | Eventies",
+        "twitter:description": "Request Fun Slap for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469481/eventies/products/yiyn8p7v2sze5tll1veo.webp",
+        "twitter:image:alt": "Fun Slap service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/glitter-art-for-events",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/glitter-art-for-events",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Glitter Art for Events for Events in Jordan | Eventies",
+      "description": "Request Glitter Art for Events for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/glitter-art-for-events",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Glitter Art for Events for Events in Jordan | Eventies",
+        "og:description": "Request Glitter Art for Events for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/glitter-art-for-events",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469748/eventies/products/d14hyczqjkdybkygqznn.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469748/eventies/products/d14hyczqjkdybkygqznn.webp",
+        "og:image:alt": "Glitter Art for Events service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Glitter Art for Events for Events in Jordan | Eventies",
+        "twitter:description": "Request Glitter Art for Events for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469748/eventies/products/d14hyczqjkdybkygqznn.webp",
+        "twitter:image:alt": "Glitter Art for Events service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/hologram-screen",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/hologram-screen",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "HOLOGRAM SCREEN for Events in Jordan | Eventies",
+      "description": "Request HOLOGRAM SCREEN for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/hologram-screen",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "HOLOGRAM SCREEN for Events in Jordan | Eventies",
+        "og:description": "Request HOLOGRAM SCREEN for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/hologram-screen",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469619/eventies/products/wq0gblb1vxnpjfqmyyt3.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469619/eventies/products/wq0gblb1vxnpjfqmyyt3.webp",
+        "og:image:alt": "HOLOGRAM SCREEN service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "HOLOGRAM SCREEN for Events in Jordan | Eventies",
+        "twitter:description": "Request HOLOGRAM SCREEN for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469619/eventies/products/wq0gblb1vxnpjfqmyyt3.webp",
+        "twitter:image:alt": "HOLOGRAM SCREEN service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/instant-photo-printing-station",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/instant-photo-printing-station",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Instant Photo Printing Station for Events in Jordan | Eventies",
+      "description": "Request Instant Photo Printing Station for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/instant-photo-printing-station",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Instant Photo Printing Station for Events in Jordan | Eventies",
+        "og:description": "Request Instant Photo Printing Station for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/instant-photo-printing-station",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469714/eventies/products/cyuklykfcwvjjuvgpkk9.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469714/eventies/products/cyuklykfcwvjjuvgpkk9.webp",
+        "og:image:alt": "Instant Photo Printing Station service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Instant Photo Printing Station for Events in Jordan | Eventies",
+        "twitter:description": "Request Instant Photo Printing Station for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469714/eventies/products/cyuklykfcwvjjuvgpkk9.webp",
+        "twitter:image:alt": "Instant Photo Printing Station service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/kids-face-painting",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/kids-face-painting",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Kids Face Painting for Events in Jordan | Eventies",
+      "description": "Request Kids Face Painting for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/kids-face-painting",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Kids Face Painting for Events in Jordan | Eventies",
+        "og:description": "Request Kids Face Painting for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/kids-face-painting",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469736/eventies/products/wfjwi0kh7ezkfcs9x4sw.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469736/eventies/products/wfjwi0kh7ezkfcs9x4sw.webp",
+        "og:image:alt": "Kids Face Painting service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Kids Face Painting for Events in Jordan | Eventies",
+        "twitter:description": "Request Kids Face Painting for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469736/eventies/products/wfjwi0kh7ezkfcs9x4sw.webp",
+        "twitter:image:alt": "Kids Face Painting service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/phone-case-printing-vending-machine",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/phone-case-printing-vending-machine",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Phone Case Printing Vending Machine for Events in Jordan | Eventies",
+      "description": "Request Phone Case Printing Vending Machine for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/phone-case-printing-vending-machine",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Phone Case Printing Vending Machine for Events in Jordan | Eventies",
+        "og:description": "Request Phone Case Printing Vending Machine for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/phone-case-printing-vending-machine",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469653/eventies/products/thtgw8xhl0xzptdhfimk.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469653/eventies/products/thtgw8xhl0xzptdhfimk.webp",
+        "og:image:alt": "Phone Case Printing Vending Machine service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Phone Case Printing Vending Machine for Events in Jordan | Eventies",
+        "twitter:description": "Request Phone Case Printing Vending Machine for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469653/eventies/products/thtgw8xhl0xzptdhfimk.webp",
+        "twitter:image:alt": "Phone Case Printing Vending Machine service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/slider",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/slider",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Slider for Events in Jordan | Eventies",
+      "description": "Request Slider for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/slider",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Slider for Events in Jordan | Eventies",
+        "og:description": "Request Slider for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/slider",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469285/eventies/products/lwmhou0ulwqlcr30ue6g.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469285/eventies/products/lwmhou0ulwqlcr30ue6g.webp",
+        "og:image:alt": "Slider service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Slider for Events in Jordan | Eventies",
+        "twitter:description": "Request Slider for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469285/eventies/products/lwmhou0ulwqlcr30ue6g.webp",
+        "twitter:image:alt": "Slider service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/soccer-kicker",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/soccer-kicker",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Soccer Kicker for Events in Jordan | Eventies",
+      "description": "Request Soccer Kicker for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/soccer-kicker",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Soccer Kicker for Events in Jordan | Eventies",
+        "og:description": "Request Soccer Kicker for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/soccer-kicker",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469606/eventies/products/q9dd5jwplpxnyyx5duqd.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469606/eventies/products/q9dd5jwplpxnyyx5duqd.webp",
+        "og:image:alt": "Soccer Kicker service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Soccer Kicker for Events in Jordan | Eventies",
+        "twitter:description": "Request Soccer Kicker for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469606/eventies/products/q9dd5jwplpxnyyx5duqd.webp",
+        "twitter:image:alt": "Soccer Kicker service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/subsoccer",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/subsoccer",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Subsoccer for Events in Jordan | Eventies",
+      "description": "Request Subsoccer for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/subsoccer",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Subsoccer for Events in Jordan | Eventies",
+        "og:description": "Request Subsoccer for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/subsoccer",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469565/eventies/products/bjw36rym8auxg41yeddr.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469565/eventies/products/bjw36rym8auxg41yeddr.webp",
+        "og:image:alt": "Subsoccer service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Subsoccer for Events in Jordan | Eventies",
+        "twitter:description": "Request Subsoccer for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469565/eventies/products/bjw36rym8auxg41yeddr.webp",
+        "twitter:image:alt": "Subsoccer service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/vr-shooting-game",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/vr-shooting-game",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "VR Shooting Game for Events in Jordan | Eventies",
+      "description": "Request VR Shooting Game for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/vr-shooting-game",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "VR Shooting Game for Events in Jordan | Eventies",
+        "og:description": "Request VR Shooting Game for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/vr-shooting-game",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469330/eventies/products/bq10b54z2u2zd7p14fni.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469330/eventies/products/bq10b54z2u2zd7p14fni.webp",
+        "og:image:alt": "VR Shooting Game service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "VR Shooting Game for Events in Jordan | Eventies",
+        "twitter:description": "Request VR Shooting Game for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783469330/eventies/products/bq10b54z2u2zd7p14fni.webp",
+        "twitter:image:alt": "VR Shooting Game service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/products/welcome-mirror-graduation",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/products/welcome-mirror-graduation",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Welcome Mirror Graduation for Events in Jordan | Eventies",
+      "description": "Request Welcome Mirror Graduation for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+      "canonical": "https://www.eventiesjo.com/products/welcome-mirror-graduation",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Welcome Mirror Graduation for Events in Jordan | Eventies",
+        "og:description": "Request Welcome Mirror Graduation for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "og:url": "https://www.eventiesjo.com/products/welcome-mirror-graduation",
+        "og:type": "product",
+        "og:site_name": "Eventies",
+        "og:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783470176/eventies/products/zon1ekndkrq1g4n9zrds.webp",
+        "og:image:secure_url": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783470176/eventies/products/zon1ekndkrq1g4n9zrds.webp",
+        "og:image:alt": "Welcome Mirror Graduation service for events in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Welcome Mirror Graduation for Events in Jordan | Eventies",
+        "twitter:description": "Request Welcome Mirror Graduation for corporate events, exhibitions, schools, malls, celebrations, and activations across Jordan.",
+        "twitter:image": "https://res.cloudinary.com/vcax8jxb/image/upload/v1783470176/eventies/products/zon1ekndkrq1g4n9zrds.webp",
+        "twitter:image:alt": "Welcome Mirror Graduation service for events in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/refund-policy",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/refund-policy",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Eventies | Event Services Marketplace in Jordan",
+      "description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+      "canonical": "https://www.eventiesjo.com/",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Eventies | Event Services Marketplace in Jordan",
+        "og:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "og:url": "https://www.eventiesjo.com/",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Eventies | Event Services Marketplace in Jordan",
+        "twitter:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/terms",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/terms",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Eventies | Event Services Marketplace in Jordan",
+      "description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+      "canonical": "https://www.eventiesjo.com/",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Eventies | Event Services Marketplace in Jordan",
+        "og:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "og:url": "https://www.eventiesjo.com/",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Eventies | Event Services Marketplace in Jordan",
+        "twitter:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/terms-of-service",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/terms-of-service",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Eventies | Event Services Marketplace in Jordan",
+      "description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+      "canonical": "https://www.eventiesjo.com/",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Eventies | Event Services Marketplace in Jordan",
+        "og:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "og:url": "https://www.eventiesjo.com/",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Eventies | Event Services Marketplace in Jordan",
+        "twitter:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    },
+    {
+      "path": "/vendor-terms",
+      "status": 200,
+      "finalUrl": "https://www.eventiesjo.com/vendor-terms",
+      "redirected": false,
+      "xRobotsTag": null,
+      "contentType": "text/html; charset=utf-8",
+      "title": "Eventies | Event Services Marketplace in Jordan",
+      "description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+      "canonical": "https://www.eventiesjo.com/",
+      "robotsMeta": null,
+      "og": {
+        "og:title": "Eventies | Event Services Marketplace in Jordan",
+        "og:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "og:url": "https://www.eventiesjo.com/",
+        "og:type": "website",
+        "og:site_name": "Eventies",
+        "og:image": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:secure_url": "https://www.eventiesjo.com/images/og-default.png",
+        "og:image:alt": "Eventies event services and trusted providers marketplace in Jordan",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+        "og:locale": "en_JO"
+      },
+      "twitter": {
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Eventies | Event Services Marketplace in Jordan",
+        "twitter:description": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan, then send one clear request for review.",
+        "twitter:image": "https://www.eventiesjo.com/images/og-default.png",
+        "twitter:image:alt": "Eventies event services and trusted providers marketplace in Jordan"
+      },
+      "jsonLd": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com",
+          "email": "info@eventiesjo.com",
+          "logo": "https://www.eventiesjo.com/brand/eventies_icon_transparent_master.png"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Eventies",
+          "url": "https://www.eventiesjo.com"
+        }
+      ],
+      "h1": null
+    }
+  ]
+}
