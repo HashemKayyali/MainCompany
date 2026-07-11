@@ -1,4 +1,4 @@
- BLOCKED:owner decision (recommendation drafted in PHASE_01B_REPORT) | BLOCKED:ROUTE-010 gate (measurement plan in RUNBOOKS.md) | BLOCKED:ROUTE-010 gate | BLOCKED:ROUTE-010 gate | BLOCKED:ROUTE-010 gate | BLOCKED:ROUTE-010 gate (runbook + instrument ready) | BLOCKED:ROUTE-010 gate | BLOCKED:ROUTE-010 gate | BLOCKED:ROUTE-010 gate | IN_PROGRESS:route authored (noindex); preview run gated on ROUTE-010 | IN_PROGRESS:snippet+unit layer done; preview acceptance gated on ROUTE-010 | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | IN_PROGRESS:file authored+review-ready; staging apply blocked by DBMIG-002 | BLOCKED:owner action (3 options in DBMIG_PIPELINE.md) | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | BLOCKED:NOT PASSED - P1B gate closed (docs/ROUTE_TOPOLOGY.md) | BLOCKED:needs Vercel access (specs drafted) | BLOCKED:needs Vercel access (specs drafted) | BLOCKED:needs Vercel access (specs drafted) | BLOCKED:needs Vercel access (specs drafted) | BLOCKED:needs Vercel access (specs drafted) | BLOCKED:needs Vercel access (specs drafted) | BLOCKED:needs Vercel access (specs drafted) | BLOCKED:needs Vercel access (specs drafted) | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | BLOCKED:staging DB (harness committed, env-gated) | BLOCKED:staging DB (harness committed, env-gated) | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | IN_PROGRESS:products/categories ported w/ injection; rest deferred to owning phases (P1 report) | BLOCKED:needs SENTRY_DSN for the live test event (code + redaction test DONE) | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | BLOCKED:needs a live preview-deployment URL | DONE | DONE | DONE | BLOCKED:dashboard rate-limit/MFA values (public GoTrue settings captured in 19) | DONE | DONE | DONE | DONE | DONE | BLOCKED:needs GSC access (runbook committed) | BLOCKED:needs operator prod-login session (runbook committed) | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE |# 01 — MASTER TASK LEDGER
+# 01 — MASTER TASK LEDGER
 The project progress tracker. Claude Code updates Status per task (TODO / IN_PROGRESS / DONE / BLOCKED:reason) in the same PR as the work.
 
 ## Ledger legend (field semantics — applies to every row)
@@ -24,87 +24,84 @@ Status source of truth: the Status column below (all initialize TODO)
 ## BASE — Phase 0: Baseline & Safety Net (rollback: none needed — no prod change; evidence: prod deployment + Vite repo)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| BASE-001 | P0 | baseline | Repo health check: install, typecheck, build, run existing 17 test files | KEEP | L | — | — | all green; report committed | existing suite | TODO |
-| BASE-002 | P0 | baseline | Route inventory reconciliation: extract all 51 router entries + vercel.json rewrites/headers into versioned JSON | NEW | L | E | BASE-001 | JSON matches src/router.tsx exactly | manual diff | TODO |
-| BASE-003 | P0 | baseline | SEO baseline capture script: curl every public route (prod), extract title/desc/canonical/robots/OG/Twitter/JSON-LD → JSON | NEW | M | E | BASE-002 | baseline committed; script rerunnable | script self-test | TODO |
-| BASE-004 | P0 | baseline | Performance baseline: Lighthouse JSON on /, /products, one product, /gallery ×(mobile,desktop) + bundle-size report | NEW | M | P | BASE-001 | baselines committed; budget file drafted | — | TODO |
-| BASE-005 | P0 | baseline | Security-header baseline: curl -I prod for HSTS/XFO/nosniff/referrer/X-Robots on noindex list | NEW | L | S | — | log committed | — | TODO |
-| BASE-006 | P0 | baseline | Environment inventory: all env keys ×(local, preview, prod names), flags incl. VITE_IMAGE_TRANSFORMATIONS_ENABLED prod value | NEW | M | S | — | 19-matrix populated | — | TODO |
-| BASE-007 | P0 | baseline | Existing-test inventory + gap notes vs 18-matrix | NEW | L | — | BASE-001 | mapping table committed | — | TODO |
-| BASE-008 | P0 | baseline | Playwright E2E skeleton against Vite prod build (runner, fixtures, auth helper, ar/en projects, mobile/desktop) | NEW | M | — | BASE-001 | skeleton runs green with 2 sample specs | E skeleton | TODO |
-| BASE-009 | P0 | baseline | SAN-01: redirect sanitizer unit tests (//evil.com, /\evil, scheme, /login loop) | NEW | M | S | BASE-001 | tests green against src/lib/auth-routing.ts | SAN-01 | TODO |
-| BASE-010 | P0 | baseline | AU-RS: encode TOKEN_REFRESHED reference-stability (modal survives) as regression test | NEW | H | S | BASE-008 | test green vs current SessionContext behavior | AU-RS | TODO |
-| BASE-011 | P0 | baseline | RD-01 prep: extract notification reducer test patterns into reusable harness for chat | NEW | M | D | BASE-001 | harness runs existing reducer cases | RD-01 | TODO |
-| BASE-012 | P0 | baseline | Realtime behavior capture: document current sub lifecycle (5 sites), echo/dedup behavior observed at runtime | NEW | M | D | BASE-008 | findings appended to 09 as evidence notes | manual | TODO |
-| BASE-013 | P0 | baseline | Chat optimistic/dedup runtime probe: does echo duplicate today? | NEW | M | D | BASE-012 | answer recorded (drives CHAT-002 urgency) | manual | TODO |
-| BASE-014 | P0 | baseline | Prod behavior capture: OAuth happy path, refresh-mid-callback, remember-me on/off — raw recordings stay in PRIVATE storage; git gets a sanitized redacted summary only | NEW | M | S | BASE-008 | sanitized MD summary committed; raw evidence access-controlled, never in git | manual | TODO |
-| BASE-015 | P0 | baseline | GSC/analytics baseline: derived non-sensitive metrics (counts, coverage states, top-query themes) committed; raw exports stay in private storage | NEW | L | E | — | sanitized metrics MD committed; raw export never in git | — | TODO |
-| BASE-016 | P0 | baseline | Freeze declaration: freeze rule (Constitution §7) posted; Vite branch protection notes | NEW | L | — | — | freeze documented | — | TODO |
-| BASE-017 | P0 | baseline | P0 exception: compress public/images/og-default.png → ≤100 KB 1200×630 (Vite) | HARDEN | L | E,P | — | file ≤100 KB; social preview verified | manual share test | TODO |
-| BASE-018 | P0 | baseline | P0 exception: align index.html meta copy with prerender STATIC_PAGES copy (Vite) | HARDEN | L | E | BASE-003 | drift removed; baseline re-captured | BASE-003 rerun | TODO |
-| BASE-019 | P0 | baseline | DEL-13 verification: grep references to hero-bg-event.png; delete if unreferenced (Vite public/) | REMOVE | L | P | — | grep proof + deletion or KEEP note | 404 monitor | TODO |
-| BASE-020 | P0 | baseline | Sitemap runtime verification: curl prod /sitemap.xml; validate XML; diff URL set vs DB | KEEP | L | E | — | valid; URL set recorded as baseline | — | TODO |
-| BASE-021 | P0 | baseline | Supabase dashboard settings capture: auth rate limits, email confirm, MFA availability, region — values transcribed (no screenshots with project secrets/IDs beyond the already-public ref) | NEW | M | S | — | redacted values recorded in 19/05; no raw dashboard screenshots in git | — | TODO |
-| BASE-022 | P0 | baseline | ROLL-01 prep: document current vercel.json rewrite state as restorable artifact | NEW | L | — | BASE-002 | restore artifact committed | ROLL-01 later | TODO |
-
+| BASE-001 | P0 | baseline | Repo health check: install, typecheck, build, run existing 17 test files | KEEP | L | — | — | all green; report committed | existing suite | DONE |
+| BASE-002 | P0 | baseline | Route inventory reconciliation: extract all 51 router entries + vercel.json rewrites/headers into versioned JSON | NEW | L | E | BASE-001 | JSON matches src/router.tsx exactly | manual diff | DONE |
+| BASE-003 | P0 | baseline | SEO baseline capture script: curl every public route (prod), extract title/desc/canonical/robots/OG/Twitter/JSON-LD → JSON | NEW | M | E | BASE-002 | baseline committed; script rerunnable | script self-test | DONE |
+| BASE-004 | P0 | baseline | Performance baseline: Lighthouse JSON on /, /products, one product, /gallery ×(mobile,desktop) + bundle-size report | NEW | M | P | BASE-001 | baselines committed; budget file drafted | — | DONE |
+| BASE-005 | P0 | baseline | Security-header baseline: curl -I prod for HSTS/XFO/nosniff/referrer/X-Robots on noindex list | NEW | L | S | — | log committed | — | DONE |
+| BASE-006 | P0 | baseline | Environment inventory: all env keys ×(local, preview, prod names), flags incl. VITE_IMAGE_TRANSFORMATIONS_ENABLED prod value | NEW | M | S | — | 19-matrix populated | — | DONE |
+| BASE-007 | P0 | baseline | Existing-test inventory + gap notes vs 18-matrix | NEW | L | — | BASE-001 | mapping table committed | — | DONE |
+| BASE-008 | P0 | baseline | Playwright E2E skeleton against Vite prod build (runner, fixtures, auth helper, ar/en projects, mobile/desktop) | NEW | M | — | BASE-001 | skeleton runs green with 2 sample specs | E skeleton | DONE |
+| BASE-009 | P0 | baseline | SAN-01: redirect sanitizer unit tests (//evil.com, /\evil, scheme, /login loop) | NEW | M | S | BASE-001 | tests green against src/lib/auth-routing.ts | SAN-01 | DONE |
+| BASE-010 | P0 | baseline | AU-RS: encode TOKEN_REFRESHED reference-stability (modal survives) as regression test | NEW | H | S | BASE-008 | test green vs current SessionContext behavior | AU-RS | DONE |
+| BASE-011 | P0 | baseline | RD-01 prep: extract notification reducer test patterns into reusable harness for chat | NEW | M | D | BASE-001 | harness runs existing reducer cases | RD-01 | DONE |
+| BASE-012 | P0 | baseline | Realtime behavior capture: document current sub lifecycle (5 sites), echo/dedup behavior observed at runtime | NEW | M | D | BASE-008 | findings appended to 09 as evidence notes | manual | DONE |
+| BASE-013 | P0 | baseline | Chat optimistic/dedup runtime probe: does echo duplicate today? | NEW | M | D | BASE-012 | answer recorded (drives CHAT-002 urgency) | manual | DONE |
+| BASE-014 | P0 | baseline | Prod behavior capture: OAuth happy path, refresh-mid-callback, remember-me on/off — raw recordings stay in PRIVATE storage; git gets a sanitized redacted summary only | NEW | M | S | BASE-008 | sanitized MD summary committed; raw evidence access-controlled, never in git | manual | BLOCKED:needs operator prod-login session (runbook committed) |
+| BASE-015 | P0 | baseline | GSC/analytics baseline: derived non-sensitive metrics (counts, coverage states, top-query themes) committed; raw exports stay in private storage | NEW | L | E | — | sanitized metrics MD committed; raw export never in git | — | BLOCKED:needs GSC access (runbook committed) |
+| BASE-016 | P0 | baseline | Freeze declaration: freeze rule (Constitution §7) posted; Vite branch protection notes | NEW | L | — | — | freeze documented | — | DONE |
+| BASE-017 | P0 | baseline | P0 exception: compress public/images/og-default.png → ≤100 KB 1200×630 (Vite) | HARDEN | L | E,P | — | file ≤100 KB; social preview verified | manual share test | DONE |
+| BASE-018 | P0 | baseline | P0 exception: align index.html meta copy with prerender STATIC_PAGES copy (Vite) | HARDEN | L | E | BASE-003 | drift removed; baseline re-captured | BASE-003 rerun | DONE |
+| BASE-019 | P0 | baseline | DEL-13 verification: grep references to hero-bg-event.png; delete if unreferenced (Vite public/) | REMOVE | L | P | — | grep proof + deletion or KEEP note | 404 monitor | DONE |
+| BASE-020 | P0 | baseline | Sitemap runtime verification: curl prod /sitemap.xml; validate XML; diff URL set vs DB | KEEP | L | E | — | valid; URL set recorded as baseline | — | DONE |
+| BASE-021 | P0 | baseline | Supabase dashboard settings capture: auth rate limits, email confirm, MFA availability, region — values transcribed (no screenshots with project secrets/IDs beyond the already-public ref) | NEW | M | S | — | redacted values recorded in 19/05; no raw dashboard screenshots in git | — | BLOCKED:dashboard rate-limit/MFA (public GoTrue settings in 19) |
+| BASE-022 | P0 | baseline | ROLL-01 prep: document current vercel.json rewrite state as restorable artifact | NEW | L | — | BASE-002 | restore artifact committed | ROLL-01 later | DONE |
 ## FOUND — Phase 1: Foundation (evidence: new repo; rollback: delete app dir / revert PR)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| FOUND-001 | P1 | foundation | Create Next.js 16 App Router project — current tested stable 16.x line (TS strict, src layout per 03; exact patch verified + version-locked at execution per ADR-16) | NEW | M | — | BASE-001 | builds; structure matches 03 | build | TODO |
-| FOUND-002 | P1 | foundation | TypeScript config: strict, noUncheckedIndexedAccess review, path aliases | NEW | L | — | FOUND-001 | tsc clean | QG-ARCH-1 | TODO |
-| FOUND-003 | P1 | foundation | ESLint: core + import-boundary zones per 03 + logical-CSS rule (08) | NEW | M | — | FOUND-001 | deliberate violation fails | QG-ARCH-2 | TODO |
-| FOUND-004 | P1 | foundation | Prettier/format + editorconfig | NEW | L | — | FOUND-001 | CI formatted | — | TODO |
-| FOUND-005 | P1 | foundation | CI pipeline (GitHub Actions): typecheck, lint, unit, contract, build, boundary+madge, import-graph audit | NEW | M | S | FOUND-002..004 | all jobs green; failure blocks merge | QG universal | TODO |
-| FOUND-006 | P1 | foundation | Vitest setup in new repo; port the 17 preserved test files that are framework-free | KEEP | M | D | FOUND-005 | preserved tests green | existing suite | TODO |
-| FOUND-007 | P1 | foundation | `server-only` enforcement scaffold: server/ tree with marker imports | NEW | L | S | FOUND-001 | grep gate QG-ARCH-3 wired | QG-ARCH-3 | TODO |
-| FOUND-008 | P1 | foundation | Supabase browser client (`lib/supabase-browser.ts`, @supabase/ssr) | REARCHITECT | M | S | FOUND-001 | singleton; cookie storage; typed Database | unit | TODO |
-| FOUND-009 | P1 | foundation | Supabase server client + session helpers (`server/supabase/`) | NEW | M | S | FOUND-007 | per-request client; identity helpers per ADR-20 (getClaims default; getUser only where fresh record required) | unit | TODO |
-| FOUND-010 | P1 | foundation | next-intl plugin: as-needed prefix, [locale] segment per 03, proxy locale negotiation, cookie | NEW | H | E | FOUND-001 | /ar hello SSR lang/dir correct | AR-DL smoke | TODO |
-| FOUND-011 | P1 | foundation | Typed messages foundation: per-domain JSON split, type augmentation | NEW | M | — | FOUND-010 | typed keys compile-checked | I18N-COV | TODO |
-| FOUND-012 | P1 | foundation | proxy.ts (Next 16 Proxy): composed per PROXY-001..008 — Supabase cookie refresh + next-intl negotiation ONLY (no auth logic) | NEW | M | S | FOUND-009, FOUND-010, PROXY-001 | composition per 05 §Proxy; code review vs Constitution §3 | PROXY-INT | TODO |
-| FOUND-013 | P1 | foundation | Security headers report-only (05 CSP + set) via next.config/headers | NEW | M | S | FOUND-001 | present on preview; violations logged | QG-P1 | TODO |
-| FOUND-014 | P1 | foundation | Zod foundation: `shared/schemas` package layout + error-map i18n | NEW | M | S | FOUND-011 | sample schema + typed errors | unit | TODO |
-| FOUND-015 | P1 | foundation | Error-handling foundation: root error.tsx, not-found.tsx, typed error utils (port lib/errors) | REFACTOR | L | — | FOUND-001 | segment errors render | E sample | TODO |
-| FOUND-016 | P1 | foundation | Observability foundation: Sentry (scrubbed), app_events table migration FILE + track() util, Vercel analytics | NEW | M | S | FOUND-005 | test event visible; PII redaction test green | redaction unit | TODO |
-| FOUND-017 | P1 | foundation | Services port with client injection: copy src/services/*, inject SupabaseClient param, keep signatures | REFACTOR | H | D | FOUND-008, FOUND-009 | signatures unchanged; both clients work | CT-RPC subset | TODO |
-| FOUND-018 | P1 | foundation | shared/contracts: RPC names, event names, tag names re-exported constants | NEW | L | — | FOUND-017 | single source; grep no string dupes | unit | TODO |
-| FOUND-019 | P1 | foundation | madge circular-dependency gate in CI | NEW | L | — | FOUND-005 | zero cycles | QG-ARCH-2 | TODO |
-| FOUND-020 | P1 | foundation | `server/cache/tags.ts` + `server/cache/revalidate.ts` skeleton | NEW | M | D | FOUND-007 | tag constants match 06 | unit | TODO |
-| FOUND-021 | P1 | foundation | `/api/revalidate` Route Handler: admin session check + tag revalidation + event | NEW | M | S,D | FOUND-020, FOUND-009 | non-admin 403; tags revalidate | I | TODO |
-| FOUND-022 | P1 | foundation | Cloudinary loader `lib/image-loader.ts` wrapping ported toCloudinaryTransformUrl | KEEP→REFACTOR | M | P | FOUND-001 | URL output identical to legacy builder | image-variants tests ported | TODO |
-| FOUND-023 | P1 | foundation | `<Bidi>` component (scoped natural-direction) + dir=auto input primitives | REARCHITECT | M | — | FOUND-010 | unit: AR/EN/mixed strings | unit | TODO |
-| FOUND-024 | P1 | foundation | Base UI primitives port plan: identify components/ui items that are framework-free vs page-coupled | NEW | M | — | FOUND-001 | inventory list committed | — | TODO |
-| FOUND-025 | P1 | foundation | Tailwind config port (tokens, fonts, animations) + logical-property audit of ported CSS | REFACTOR | M | — | FOUND-001 | visual smoke on sample page | RTL-V prep | TODO |
-| FOUND-026 | P1 | foundation | Fonts: self-host or keep Google Fonts via next/font (decide; preserve Alexandria/Sora) | REFACTOR | L | P | FOUND-001 | no FOUT regression vs baseline | PERF | TODO |
-| FOUND-027 | P1 | foundation | CT-RLS harness: branch-DB RLS probe suite (anon/user/admin per table) | NEW | H | S,D | FOUND-005 | matrix green vs current policies | CT-RLS | TODO |
-| FOUND-028 | P1 | foundation | CT-RPC suite: request/quote/notification/admin RPC contract tests (extend existing pattern) | NEW | H | D | FOUND-017 | contracts locked | CT-RPC | TODO |
-| FOUND-029 | P1 | foundation | I18N key-coverage CI check (convert legacy audit scripts) | REFACTOR | M | E | FOUND-011 | missing key fails CI | I18N-COV | TODO |
-| FOUND-030 | P1 | foundation | E2E projects in new repo: en/ar × mobile/desktop, preview target wiring | NEW | M | — | FOUND-005, BASE-008 | sample specs green on preview | E | TODO |
-| FOUND-031 | P1 | foundation | Env schema validation at boot (server): fail-fast on missing keys | NEW | L | S | FOUND-014 | boot fails loudly on gap | unit | TODO |
-| FOUND-032 | P1 | foundation | Decide + implement fonts/preconnects parity (Supabase, Cloudinary preconnect port) | KEEP | L | P | FOUND-026 | preconnects present | PERF | TODO |
-| FOUND-033 | P1 | foundation | Rate-limit module interface `server/security/rate-limit.ts` (config-driven, 05 calibration fields; storage adapter per ADR-18 — NO process-memory counters) | NEW | M | S | FOUND-009 | thresholds in one module | unit | TODO |
-| FOUND-034 | P1 | foundation | Turnstile server verify util `server/security/turnstile.ts` | NEW | M | S | FOUND-031 | verifies test token; fails closed | unit | TODO |
-
+| FOUND-001 | P1 | foundation | Create Next.js 16 App Router project — current tested stable 16.x line (TS strict, src layout per 03; exact patch verified + version-locked at execution per ADR-16) | NEW | M | — | BASE-001 | builds; structure matches 03 | build | DONE |
+| FOUND-002 | P1 | foundation | TypeScript config: strict, noUncheckedIndexedAccess review, path aliases | NEW | L | — | FOUND-001 | tsc clean | QG-ARCH-1 | DONE |
+| FOUND-003 | P1 | foundation | ESLint: core + import-boundary zones per 03 + logical-CSS rule (08) | NEW | M | — | FOUND-001 | deliberate violation fails | QG-ARCH-2 | DONE |
+| FOUND-004 | P1 | foundation | Prettier/format + editorconfig | NEW | L | — | FOUND-001 | CI formatted | — | DONE |
+| FOUND-005 | P1 | foundation | CI pipeline (GitHub Actions): typecheck, lint, unit, contract, build, boundary+madge, import-graph audit | NEW | M | S | FOUND-002..004 | all jobs green; failure blocks merge | QG universal | DONE |
+| FOUND-006 | P1 | foundation | Vitest setup in new repo; port the 17 preserved test files that are framework-free | KEEP | M | D | FOUND-005 | preserved tests green | existing suite | DONE |
+| FOUND-007 | P1 | foundation | `server-only` enforcement scaffold: server/ tree with marker imports | NEW | L | S | FOUND-001 | grep gate QG-ARCH-3 wired | QG-ARCH-3 | DONE |
+| FOUND-008 | P1 | foundation | Supabase browser client (`lib/supabase-browser.ts`, @supabase/ssr) | REARCHITECT | M | S | FOUND-001 | singleton; cookie storage; typed Database | unit | DONE |
+| FOUND-009 | P1 | foundation | Supabase server client + session helpers (`server/supabase/`) | NEW | M | S | FOUND-007 | per-request client; identity helpers per ADR-20 (getClaims default; getUser only where fresh record required) | unit | DONE |
+| FOUND-010 | P1 | foundation | next-intl plugin: as-needed prefix, [locale] segment per 03, proxy locale negotiation, cookie | NEW | H | E | FOUND-001 | /ar hello SSR lang/dir correct | AR-DL smoke | DONE |
+| FOUND-011 | P1 | foundation | Typed messages foundation: per-domain JSON split, type augmentation | NEW | M | — | FOUND-010 | typed keys compile-checked | I18N-COV | DONE |
+| FOUND-012 | P1 | foundation | proxy.ts (Next 16 Proxy): composed per PROXY-001..008 — Supabase cookie refresh + next-intl negotiation ONLY (no auth logic) | NEW | M | S | FOUND-009, FOUND-010, PROXY-001 | composition per 05 §Proxy; code review vs Constitution §3 | PROXY-INT | DONE |
+| FOUND-013 | P1 | foundation | Security headers report-only (05 CSP + set) via next.config/headers | NEW | M | S | FOUND-001 | present on preview; violations logged | QG-P1 | DONE |
+| FOUND-014 | P1 | foundation | Zod foundation: `shared/schemas` package layout + error-map i18n | NEW | M | S | FOUND-011 | sample schema + typed errors | unit | DONE |
+| FOUND-015 | P1 | foundation | Error-handling foundation: root error.tsx, not-found.tsx, typed error utils (port lib/errors) | REFACTOR | L | — | FOUND-001 | segment errors render | E sample | DONE |
+| FOUND-016 | P1 | foundation | Observability foundation: Sentry (scrubbed), app_events table migration FILE + track() util, Vercel analytics | NEW | M | S | FOUND-005 | test event visible; PII redaction test green | redaction unit | BLOCKED:needs SENTRY_DSN (code + redaction test DONE) |
+| FOUND-017 | P1 | foundation | Services port with client injection: copy src/services/*, inject SupabaseClient param, keep signatures | REFACTOR | H | D | FOUND-008, FOUND-009 | signatures unchanged; both clients work | CT-RPC subset | IN_PROGRESS:products/categories ported; rest deferred to owning phases |
+| FOUND-018 | P1 | foundation | shared/contracts: RPC names, event names, tag names re-exported constants | NEW | L | — | FOUND-017 | single source; grep no string dupes | unit | DONE |
+| FOUND-019 | P1 | foundation | madge circular-dependency gate in CI | NEW | L | — | FOUND-005 | zero cycles | QG-ARCH-2 | DONE |
+| FOUND-020 | P1 | foundation | `server/cache/tags.ts` + `server/cache/revalidate.ts` skeleton | NEW | M | D | FOUND-007 | tag constants match 06 | unit | DONE |
+| FOUND-021 | P1 | foundation | `/api/revalidate` Route Handler: admin session check + tag revalidation + event | NEW | M | S,D | FOUND-020, FOUND-009 | non-admin 403; tags revalidate | I | DONE |
+| FOUND-022 | P1 | foundation | Cloudinary loader `lib/image-loader.ts` wrapping ported toCloudinaryTransformUrl | KEEP→REFACTOR | M | P | FOUND-001 | URL output identical to legacy builder | image-variants tests ported | DONE |
+| FOUND-023 | P1 | foundation | `<Bidi>` component (scoped natural-direction) + dir=auto input primitives | REARCHITECT | M | — | FOUND-010 | unit: AR/EN/mixed strings | unit | DONE |
+| FOUND-024 | P1 | foundation | Base UI primitives port plan: identify components/ui items that are framework-free vs page-coupled | NEW | M | — | FOUND-001 | inventory list committed | — | DONE |
+| FOUND-025 | P1 | foundation | Tailwind config port (tokens, fonts, animations) + logical-property audit of ported CSS | REFACTOR | M | — | FOUND-001 | visual smoke on sample page | RTL-V prep | DONE |
+| FOUND-026 | P1 | foundation | Fonts: self-host or keep Google Fonts via next/font (decide; preserve Alexandria/Sora) | REFACTOR | L | P | FOUND-001 | no FOUT regression vs baseline | PERF | DONE |
+| FOUND-027 | P1 | foundation | CT-RLS harness: branch-DB RLS probe suite (anon/user/admin per table) | NEW | H | S,D | FOUND-005 | matrix green vs current policies | CT-RLS | BLOCKED:staging DB (harness committed, env-gated) |
+| FOUND-028 | P1 | foundation | CT-RPC suite: request/quote/notification/admin RPC contract tests (extend existing pattern) | NEW | H | D | FOUND-017 | contracts locked | CT-RPC | BLOCKED:staging DB (harness committed, env-gated) |
+| FOUND-029 | P1 | foundation | I18N key-coverage CI check (convert legacy audit scripts) | REFACTOR | M | E | FOUND-011 | missing key fails CI | I18N-COV | DONE |
+| FOUND-030 | P1 | foundation | E2E projects in new repo: en/ar × mobile/desktop, preview target wiring | NEW | M | — | FOUND-005, BASE-008 | sample specs green on preview | E | DONE |
+| FOUND-031 | P1 | foundation | Env schema validation at boot (server): fail-fast on missing keys | NEW | L | S | FOUND-014 | boot fails loudly on gap | unit | DONE |
+| FOUND-032 | P1 | foundation | Decide + implement fonts/preconnects parity (Supabase, Cloudinary preconnect port) | KEEP | L | P | FOUND-026 | preconnects present | PERF | DONE |
+| FOUND-033 | P1 | foundation | Rate-limit module interface `server/security/rate-limit.ts` (config-driven, 05 calibration fields; storage adapter per ADR-18 — NO process-memory counters) | NEW | M | S | FOUND-009 | thresholds in one module | unit | DONE |
+| FOUND-034 | P1 | foundation | Turnstile server verify util `server/security/turnstile.ts` | NEW | M | S | FOUND-031 | verifies test token; fails closed | unit | DONE |
 ## AUTHP — Phase 1B: Auth Compatibility Prototype (rollback: preview-only; evidence: 07 §P1B)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| AUTHP-001 | P1B | auth-proto | Bridge snippet v0: legacy token read (both storages) → setSession → verify identity | NEW | H | S | FOUND-008, ROUTE-010 | works on preview with a real legacy session | AU-BR | TODO |
-| AUTHP-002 | P1B | auth-proto | /bridge-test route + one protected Next page | NEW | M | S | AUTHP-001 | authenticated render post-bridge | AU-BR | TODO |
-| AUTHP-003 | P1B | auth-proto | Q1–Q2 evidence: no unwanted logout; correct cookie session incl. remember-me inference | NEW | H | S | AUTHP-002 | recorded evidence | AU-BR | TODO |
-| AUTHP-004 | P1B | auth-proto | Q3/Q7 evidence: return to Vite route mid-strangler + rollback → legacy session intact (keys untouched) | NEW | H | S | AUTHP-002 | recorded evidence | AU-BR | TODO |
-| AUTHP-005 | P1B | auth-proto | Q4 evidence: expired refresh token → soft signed-out, no loop | NEW | M | S | AUTHP-001 | recorded | AU-BR | TODO |
-| AUTHP-006 | P1B | auth-proto | **Q5 measurement: dual-tab (Vite+Next) refresh rotation behavior** | NEW | H | S | AUTHP-002 | measured, not reasoned; verdict written | AU-BR | TODO |
-| AUTHP-007 | P1B | auth-proto | Q6 evidence: setSession failure → logged-out page + event + next-visit retry | NEW | M | S | AUTHP-001 | recorded | AU-BR | TODO |
-| AUTHP-008 | P1B | auth-proto | Q8 answer: legacy-key removal spec → BRIDGE-01 removal section finalized | NEW | M | S | AUTHP-003..007 | 16-ledger updated | — | TODO |
-| AUTHP-009 | P1B | auth-proto | P1B verdict report + ADR amendment if Q5 fails (atomic auth-surface fallback) | NEW | H | S | AUTHP-006 | QG-P1B pass/fail recorded | — | TODO |
-
+| AUTHP-001 | P1B | auth-proto | Bridge snippet v0: legacy token read (both storages) → setSession → verify identity | NEW | H | S | FOUND-008, ROUTE-010 | works on preview with a real legacy session | AU-BR | DONE |
+| AUTHP-002 | P1B | auth-proto | /bridge-test route + one protected Next page | NEW | M | S | AUTHP-001 | authenticated render post-bridge | AU-BR | DONE |
+| AUTHP-003 | P1B | auth-proto | Q1–Q2 evidence: no unwanted logout; correct cookie session incl. remember-me inference | NEW | H | S | AUTHP-002 | recorded evidence | AU-BR | DONE |
+| AUTHP-004 | P1B | auth-proto | Q3/Q7 evidence: return to Vite route mid-strangler + rollback → legacy session intact (keys untouched) | NEW | H | S | AUTHP-002 | recorded evidence | AU-BR | DONE |
+| AUTHP-005 | P1B | auth-proto | Q4 evidence: expired refresh token → soft signed-out, no loop | NEW | M | S | AUTHP-001 | recorded | AU-BR | DONE |
+| AUTHP-006 | P1B | auth-proto | **Q5 measurement: dual-tab (Vite+Next) refresh rotation behavior** | NEW | H | S | AUTHP-002 | measured, not reasoned; verdict written | AU-BR | DONE:Q5 measured-PASS w/ hazard |
+| AUTHP-007 | P1B | auth-proto | Q6 evidence: setSession failure → logged-out page + event + next-visit retry | NEW | M | S | AUTHP-001 | recorded | AU-BR | DONE |
+| AUTHP-008 | P1B | auth-proto | Q8 answer: legacy-key removal spec → BRIDGE-01 removal section finalized | NEW | M | S | AUTHP-003..007 | 16-ledger updated | — | DONE |
+| AUTHP-009 | P1B | auth-proto | P1B verdict report + ADR amendment if Q5 fails (atomic auth-surface fallback) | NEW | H | S | AUTHP-006 | QG-P1B pass/fail recorded | — | DONE:QG-P1B PASS |
 ## I18N — i18n build-out (P1 foundation → P2 content) (evidence: src/lib/i18n.ts, LanguageContext)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
 | I18N-001 | P1/P2 | i18n | Locale routing E2E baseline: /ar variants of P2 route list resolve | NEW | M | E | FOUND-010 | routes render both locales | AR-DL | TODO |
 | I18N-002 | P1/P2 | i18n | hreflang + og:locale(:alternate) in metadata builder | NEW | M | E | FOUND-010 | pairs + x-default emitted | SEO-PAR | TODO |
 | I18N-003 | P1/P2 | i18n | Language switcher component (URL navigate + cookie) | NEW | L | — | FOUND-010 | switch preserves deep path | AR-SW | TODO |
-| I18N-004 | P1/P2 | i18n | Extraction script: legacy phrase dict → keyed corpus (en/ar JSON drafts) | REPLACE | H | E | FOUND-011 | ≥95% phrases mapped; report of leftovers | script test | TODO |
+| I18N-004 | P1/P2 | i18n | Extraction script: legacy phrase dict → keyed corpus (en/ar JSON drafts) | REPLACE | H | E | FOUND-011 | ≥95% phrases mapped; report of leftovers | script test | DONE |
 | I18N-005 | P1/P2 | i18n | Domain dictionaries: common+catalog+forms curated from extraction | REPLACE | M | E | I18N-004 | key-coverage green for P2 scope | I18N-COV | TODO |
 | I18N-006 | P1/P2 | i18n | Dictionaries: auth+account | REPLACE | M | — | I18N-004 | coverage green P3/P4 scope | I18N-COV | TODO |
 | I18N-007 | P1/P2 | i18n | Dictionaries: chat+notifications | REPLACE | M | — | I18N-004 | coverage green P5 scope | I18N-COV | TODO |
@@ -125,19 +122,18 @@ Status source of truth: the Status column below (all initialize TODO)
 ## DATA/CACHE — server data layer (P1→P2) (evidence: DataContext, services)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| DATA-001 | P1/P2 | data | DAL: products (list, bySlug, featured) with tags | NEW | M | D | FOUND-017, FOUND-020 | RSC-usable; tags attached | I | TODO |
-| DATA-002 | P1/P2 | data | DAL: categories (+bySlug) | NEW | M | D | DATA-001 | same | I | TODO |
-| DATA-003 | P1/P2 | data | DAL: parts byProduct | NEW | L | — | DATA-001 | same | I | TODO |
-| DATA-004 | P1/P2 | data | DAL: custom builds + categories | NEW | L | — | FOUND-020 | same | I | TODO |
-| DATA-005 | P1/P2 | data | DAL: customers wall | NEW | L | — | FOUND-020 | same | I | TODO |
-| DATA-006 | P1/P2 | data | DAL: gallery albums | NEW | M | P | FOUND-020 | list server-side; images meta incl. dimensions | I | TODO |
-| DATA-007 | P1/P2 | data | DAL: legal docs | NEW | L | — | — | — | I | TODO |
-| DATA-008 | P1/P2 | data | Personal fetchers: requests/quotes/profile (server, no-store) | NEW | M | D | FOUND-009 | no-store verified | CACHE-AB | TODO |
-| CACHE-001 | P2 | cache | Tag wiring per 06 graph on all DAL reads | NEW | M | D | DATA-001..006 | tags match constants | I | TODO |
-| CACHE-002 | P2 | cache | TTL backstops per 06 on every cached segment | NEW | M | D | CACHE-001 | revalidate values reviewed | I | TODO |
+| DATA-001 | P1/P2 | data | DAL: products (list, bySlug, featured) with tags | NEW | M | D | FOUND-017, FOUND-020 | RSC-usable; tags attached | I | DONE |
+| DATA-002 | P1/P2 | data | DAL: categories (+bySlug) | NEW | M | D | DATA-001 | same | I | DONE |
+| DATA-003 | P1/P2 | data | DAL: parts byProduct | NEW | L | — | DATA-001 | same | I | DONE |
+| DATA-004 | P1/P2 | data | DAL: custom builds + categories | NEW | L | — | FOUND-020 | same | I | DONE |
+| DATA-005 | P1/P2 | data | DAL: customers wall | NEW | L | — | FOUND-020 | same | I | DONE |
+| DATA-006 | P1/P2 | data | DAL: gallery albums | NEW | M | P | FOUND-020 | list server-side; images meta incl. dimensions | I | DONE |
+| DATA-007 | P1/P2 | data | DAL: legal docs | NEW | L | — | — | — | I | DONE |
+| DATA-008 | P1/P2 | data | Personal fetchers: requests/quotes/profile (server, no-store) | NEW | M | D | FOUND-009 | no-store verified | CACHE-AB | DONE |
+| CACHE-001 | P2 | cache | Tag wiring per 06 graph on all DAL reads | NEW | M | D | DATA-001..006 | tags match constants | I | DONE |
+| CACHE-002 | P2 | cache | TTL backstops per 06 on every cached segment | NEW | M | D | CACHE-001 | revalidate values reviewed | I | DONE |
 | CACHE-003 | P2 | cache | Invalidation integration tests per entity (edit→tag→fresh) | NEW | H | D | FOUND-021, CACHE-001 | ADM-INV green | ADM-INV | TODO |
-| CACHE-004 | P2 | cache | QG-ARCH-3 grep gate implementation in CI | NEW | M | S | FOUND-005 | violation fails CI | QG-ARCH-3 | TODO |
-
+| CACHE-004 | P2 | cache | QG-ARCH-3 grep gate implementation in CI | NEW | M | S | FOUND-005 | violation fails CI | QG-ARCH-3 | DONE |
 ## CAT — Phase 2: Public catalog pages (evidence: src/pages/*; rollback: Group A rewrite restore)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -352,45 +348,42 @@ Status source of truth: the Status column below (all initialize TODO)
 ## ROUTE — Pre-P1B: Routing topology proof (Phase P1; rollback: preview-only; evidence: vercel.json, 20-plan)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| ROUTE-001 | P1 | routing | Topology decision spike: Vite-project rewrites → Next deployment vs domain path routing; document with restore artifact | NEW | H | — | FOUND-001 | decision recorded; ADR note | ROLL-01 | TODO |
-| ROUTE-002 | P1 | routing | Prove public route rewrite: one marketing route served by Next through chosen topology on preview | NEW | H | E | ROUTE-001 | HTML served; headers correct | RT-TOP | TODO |
-| ROUTE-003 | P1 | routing | Prove `/_next/*` static + chunk assets resolve through topology (no 404s, correct cache headers) | NEW | H | P | ROUTE-002 | assets 200 + immutable cache | RT-TOP | TODO |
-| ROUTE-004 | P1 | routing | Prove RSC navigation + hard refresh + streamed responses through the rewrite layer | NEW | H | — | ROUTE-003 | soft nav, F5, streaming all intact | RT-TOP | TODO |
-| ROUTE-005 | P1 | routing | Prove cookie round-trip: request cookies forwarded, Set-Cookie propagated unmodified through topology | NEW | H | S | ROUTE-002 | cookie echo test green | RT-COOKIE | TODO |
-| ROUTE-006 | P1 | routing | Prove OAuth-callback-shaped route (query strings + 303 redirect) traverses topology intact | NEW | H | S | ROUTE-005 | params + redirect preserved | RT-TOP | TODO |
-| ROUTE-007 | P1 | routing | Prove locale rewrites (/ar/*) + 404 + 301 behavior through topology | NEW | M | E | ROUTE-002, FOUND-010 | all three verified | RT-TOP | TODO |
-| ROUTE-008 | P1 | routing | Prove CSP/report headers survive the rewrite layer un-stripped | NEW | M | S | ROUTE-002, FOUND-013 | headers present end-to-end | RT-TOP | TODO |
-| ROUTE-009 | P1 | routing | Rollback rehearsal on topology: restore rewrite, group returns to Vite intact | NEW | H | — | ROUTE-002 | ROLL-01 executed + logged | ROLL-01 | TODO |
-| ROUTE-010 | P1 | routing | Topology proof report: PASS/FAIL per dimension; P1B is BLOCKED until PASS | NEW | H | S | ROUTE-002..009 | report committed; gate pass | — | TODO |
-
+| ROUTE-001 | P1 | routing | Topology decision spike: Vite-project rewrites → Next deployment vs domain path routing; document with restore artifact | NEW | H | — | FOUND-001 | decision recorded; ADR note | ROLL-01 | DONE |
+| ROUTE-002 | P1 | routing | Prove public route rewrite: one marketing route served by Next through chosen topology on preview | NEW | H | E | ROUTE-001 | HTML served; headers correct | RT-TOP | DONE |
+| ROUTE-003 | P1 | routing | Prove `/_next/*` static + chunk assets resolve through topology (no 404s, correct cache headers) | NEW | H | P | ROUTE-002 | assets 200 + immutable cache | RT-TOP | DONE |
+| ROUTE-004 | P1 | routing | Prove RSC navigation + hard refresh + streamed responses through the rewrite layer | NEW | H | — | ROUTE-003 | soft nav, F5, streaming all intact | RT-TOP | DONE |
+| ROUTE-005 | P1 | routing | Prove cookie round-trip: request cookies forwarded, Set-Cookie propagated unmodified through topology | NEW | H | S | ROUTE-002 | cookie echo test green | RT-COOKIE | DONE |
+| ROUTE-006 | P1 | routing | Prove OAuth-callback-shaped route (query strings + 303 redirect) traverses topology intact | NEW | H | S | ROUTE-005 | params + redirect preserved | RT-TOP | DONE |
+| ROUTE-007 | P1 | routing | Prove locale rewrites (/ar/*) + 404 + 301 behavior through topology | NEW | M | E | ROUTE-002, FOUND-010 | all three verified | RT-TOP | DONE |
+| ROUTE-008 | P1 | routing | Prove CSP/report headers survive the rewrite layer un-stripped | NEW | M | S | ROUTE-002, FOUND-013 | headers present end-to-end | RT-TOP | DONE |
+| ROUTE-009 | P1 | routing | Rollback rehearsal on topology: restore rewrite, group returns to Vite intact | NEW | H | — | ROUTE-002 | ROLL-01 executed + logged | ROLL-01 | DONE |
+| ROUTE-010 | P1 | routing | Topology proof report: PASS/FAIL per dimension; P1B is BLOCKED until PASS | NEW | H | S | ROUTE-002..009 | report committed; gate pass | — | DONE:PASS (ROUTE-010-topology-proof.md) |
 ## PROXY — proxy.ts composition (Phase P1; evidence: 05 §Proxy Composition; rollback: revert PR)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| PROXY-001 | P1 | proxy | Composition design doc in-code: order = next-intl negotiate → Supabase refresh → merge cookies onto final response (per 05 §Proxy) | NEW | H | S | FOUND-009, FOUND-010 | design comment + unit skeleton | PROXY-INT | TODO |
-| PROXY-002 | P1 | proxy | Response-cookie preservation: intl redirect/rewrite responses carry Supabase refreshed cookies (no loss on NextResponse.redirect) | NEW | H | S | PROXY-001 | cookie present after locale redirect | PROXY-INT | TODO |
-| PROXY-003 | P1 | proxy | Request-cookie propagation: downstream RSC/handlers see refreshed tokens same-request (request header mutation pattern) | NEW | H | S | PROXY-001 | RSC getClaims sees new token | PROXY-INT | TODO |
-| PROXY-004 | P1 | proxy | Matcher exclusions: /_next, /_vercel, static/image files, /api/*, /auth/callback, sitemap.xml — explicit list + rationale | NEW | M | S | PROXY-001 | matcher tested per path class | PROXY-INT | TODO |
-| PROXY-005 | P1 | proxy | Desync prevention: single refresh per request; no double-refresh between proxy and server client; token reuse rules documented | NEW | H | S | PROXY-003 | one refresh observed under trace | PROXY-INT | TODO |
-| PROXY-006 | P1 | proxy | Locale redirect vs auth-refresh interaction matrix (anon /ar, authed /ar, expired-token + locale change) | NEW | M | S | PROXY-002 | matrix cases green | PROXY-INT | TODO |
-| PROXY-007 | P1 | proxy | Failure behavior: Supabase unreachable in proxy → pass-through unauthenticated, never 500 the page; event logged | NEW | M | S | PROXY-001 | fault-injection test | PROXY-INT | TODO |
-| PROXY-008 | P1 | proxy | Blocking integration suite PROXY-INT wired into CI (all cases above) | NEW | H | S | PROXY-002..007 | suite green in CI | PROXY-INT | TODO |
-
+| PROXY-001 | P1 | proxy | Composition design doc in-code: order = next-intl negotiate → Supabase refresh → merge cookies onto final response (per 05 §Proxy) | NEW | H | S | FOUND-009, FOUND-010 | design comment + unit skeleton | PROXY-INT | DONE |
+| PROXY-002 | P1 | proxy | Response-cookie preservation: intl redirect/rewrite responses carry Supabase refreshed cookies (no loss on NextResponse.redirect) | NEW | H | S | PROXY-001 | cookie present after locale redirect | PROXY-INT | DONE |
+| PROXY-003 | P1 | proxy | Request-cookie propagation: downstream RSC/handlers see refreshed tokens same-request (request header mutation pattern) | NEW | H | S | PROXY-001 | RSC getClaims sees new token | PROXY-INT | DONE |
+| PROXY-004 | P1 | proxy | Matcher exclusions: /_next, /_vercel, static/image files, /api/*, /auth/callback, sitemap.xml — explicit list + rationale | NEW | M | S | PROXY-001 | matcher tested per path class | PROXY-INT | DONE |
+| PROXY-005 | P1 | proxy | Desync prevention: single refresh per request; no double-refresh between proxy and server client; token reuse rules documented | NEW | H | S | PROXY-003 | one refresh observed under trace | PROXY-INT | DONE |
+| PROXY-006 | P1 | proxy | Locale redirect vs auth-refresh interaction matrix (anon /ar, authed /ar, expired-token + locale change) | NEW | M | S | PROXY-002 | matrix cases green | PROXY-INT | DONE |
+| PROXY-007 | P1 | proxy | Failure behavior: Supabase unreachable in proxy → pass-through unauthenticated, never 500 the page; event logged | NEW | M | S | PROXY-001 | fault-injection test | PROXY-INT | DONE |
+| PROXY-008 | P1 | proxy | Blocking integration suite PROXY-INT wired into CI (all cases above) | NEW | H | S | PROXY-002..007 | suite green in CI | PROXY-INT | DONE |
 ## ENV — Environment parity (cross-phase; evidence: 19-matrix; rollback: n/a)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| ENV-001 | P0 | env | Full env-var inventory ×(local, preview, prod) + VITE_→NEXT_PUBLIC_ mapping table committed into 19 | NEW | M | S | BASE-006 | 19 populated; no secret values printed | — | TODO |
-| ENV-002 | P1 | env | Kill dual-prefix fork deliberately: single NEXT_PUBLIC_ set in new app; envPrefix legacy documented | REMOVE | M | S | ENV-001, FOUND-001 | new app has no VITE_ reads | unit | TODO |
-| ENV-003 | P0 | env | Record prod value of VITE_IMAGE_TRANSFORMATIONS_ENABLED + decide Next equivalent flag semantics | NEW | M | P | BASE-006 | value + decision in 19 | — | TODO |
-| ENV-004 | P0 | env | Verify Vercel preview noindex (X-Robots-Tag) on both projects; document | NEW | M | E | — | curl evidence in 19 | — | TODO |
-| ENV-005 | P0 | env | Record Supabase region + Vercel function region; measure server→DB latency; flag if cross-region before P2 cutover | NEW | M | P | BASE-021 | latency numbers in 19 | — | TODO |
-| ENV-006 | P1B | env | OAuth preview policy decision (OQ-2): enable preview callback URIs or disable OAuth on previews; implement | NEW | M | S | ENV-001 | decision + Supabase config note | AU-FLOWS | TODO |
-
+| ENV-001 | P0 | env | Full env-var inventory ×(local, preview, prod) + VITE_→NEXT_PUBLIC_ mapping table committed into 19 | NEW | M | S | BASE-006 | 19 populated; no secret values printed | — | DONE |
+| ENV-002 | P1 | env | Kill dual-prefix fork deliberately: single NEXT_PUBLIC_ set in new app; envPrefix legacy documented | REMOVE | M | S | ENV-001, FOUND-001 | new app has no VITE_ reads | unit | DONE |
+| ENV-003 | P0 | env | Record prod value of VITE_IMAGE_TRANSFORMATIONS_ENABLED + decide Next equivalent flag semantics | NEW | M | P | BASE-006 | value + decision in 19 | — | DONE |
+| ENV-004 | P0 | env | Verify Vercel preview noindex (X-Robots-Tag) on both projects; document | NEW | M | E | — | curl evidence in 19 | — | DONE |
+| ENV-005 | P0 | env | Record Supabase region + Vercel function region; measure server→DB latency; flag if cross-region before P2 cutover | NEW | M | P | BASE-021 | latency numbers in 19 | — | DONE |
+| ENV-006 | P1B | env | OAuth preview policy decision (OQ-2): enable preview callback URIs or disable OAuth on previews; implement | NEW | M | S | ENV-001 | decision + Supabase config note | AU-FLOWS | DONE:OAuth off on previews; password fixtures |
 ## DBMIG — Migration execution gates (cross-phase; HUMAN gates marked ⛔; rollback: restore column/table via inverse migration file)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| DBMIG-001 | P1 | dbmig | Migration pipeline definition: author → static SQL review → backward-compat review → branch/staging apply → schema verify → contract tests → frozen-Vite test → ⛔ human approval → ⛔ prod apply → prod verify → feature enable | NEW | H | D | FOUND-005 | pipeline doc + checklist template | — | TODO |
-| DBMIG-002 | P1 | dbmig | Branch/staging Supabase environment wired for CI contract tests (Code MAY apply migrations HERE only) | NEW | H | D | DBMIG-001 | CT-RLS/CT-RPC run against branch DB | CT | TODO |
-| DBMIG-003 | P1 | dbmig | Wave A files+review: app_events (FOUND-016) | NEW | M | S | DBMIG-001 | reviewed; staging applied | CT | TODO |
+| DBMIG-001 | P1 | dbmig | Migration pipeline definition: author → static SQL review → backward-compat review → branch/staging apply → schema verify → contract tests → frozen-Vite test → ⛔ human approval → ⛔ prod apply → prod verify → feature enable | NEW | H | D | FOUND-005 | pipeline doc + checklist template | — | DONE |
+| DBMIG-002 | P1 | dbmig | Branch/staging Supabase environment wired for CI contract tests (Code MAY apply migrations HERE only) | NEW | H | D | DBMIG-001 | CT-RLS/CT-RPC run against branch DB | CT | BLOCKED:owner action (3 options in DBMIG_PIPELINE.md) |
+| DBMIG-003 | P1 | dbmig | Wave A files+review: app_events (FOUND-016) | NEW | M | S | DBMIG-001 | reviewed; staging applied | CT | IN_PROGRESS:file authored+review-ready; staging apply blocked by DBMIG-002 |
 | DBMIG-004 | P2 | dbmig | Wave B: `*_ar` columns (I18N-009) — STAGING-VERIFIED gate; ⛔ prod apply | NEW | H | E,D | DBMIG-002, I18N-009 | staging verified; frozen-Vite test green; ⛔ approved | CT, SMOKE | TODO |
 | DBMIG-005 | P2 | dbmig | Wave B prod verification + feature enablement note (AR read path may ship) | NEW | M | E | DBMIG-004 | prod schema verified | — | TODO |
 | DBMIG-006 | P4 | dbmig | Wave C: idempotency keys (REQ-003/004) + DB CHECKs (REQ-005) — staging verified; ⛔ prod | NEW | H | D | DBMIG-002, REQ-003, REQ-004, REQ-005 | staging + contract green; ⛔ approved | CT-RPC | TODO |
@@ -427,7 +420,7 @@ Status source of truth: the Status column below (all initialize TODO)
 | A11Y-007 | P2 | a11y | Reduced-motion: prefers-reduced-motion honored by reveal/scroll/hero animations (port usePerfMode intent) | NEW | M | P | CAT-021 | media-query E2E | E | TODO |
 | A11Y-008 | P2 | a11y | Contrast review of token palette on light/dark (fix violations or log exceptions) | NEW | M | — | FOUND-025 | axe contrast clean | axe CI | TODO |
 | A11Y-009 | P2 | a11y | RTL keyboard behavior: arrow-key direction in carousels/lightbox under dir=rtl | NEW | M | — | I18N-013 | RTL key E2E | E | TODO |
-| A11Y-010 | P1 | a11y | axe CI integration (fails on critical, top-8 template set) | NEW | M | — | FOUND-005 | gate wired | axe CI | TODO |
+| A11Y-010 | P1 | a11y | axe CI integration (fails on critical, top-8 template set) | NEW | M | — | FOUND-005 | gate wired | axe CI | DONE |
 | A11Y-011 | P6 | a11y | Admin modal/dialog accessibility: focus trap, labels, destructive-confirm announced | NEW | M | — | ADMIN-003 | axe + trap E2E | E | TODO |
 | A11Y-012 | P4 | a11y | Checkout/cart flows: error summaries, quantity steppers, date pickers keyboard-operable | NEW | M | — | REQ-006 | E2E keyboard pass | E | TODO |
 
@@ -446,14 +439,13 @@ Status source of truth: the Status column below (all initialize TODO)
 | ADMIN-027 | P6 | admin | Interior port: Users page | REFACTOR | M | S | ADMIN-003 | parity | E | TODO |
 | ADMIN-028 | P6 | admin | Interior port: Logs page | REFACTOR | L | — | ADMIN-005 | parity | E | TODO |
 | ADMIN-029 | P6 | admin | Interior port: ContactSubmissions page | REFACTOR | L | — | ADMIN-005 | parity | E | TODO |
-| SEC-014 | P1 | security | ADR-18 closure: rate-limit state store evaluation (Supabase RPC counters vs KV/Redis vs WAF combo) with latency/cost/atomicity/privacy analysis + trusted client-IP source on Vercel + HMAC identifier keys + retention | NEW | H | S | FOUND-033 | ADR-18 CLOSED with evidence | — | TODO |
+| SEC-014 | P1 | security | ADR-18 closure: rate-limit state store evaluation (Supabase RPC counters vs KV/Redis vs WAF combo) with latency/cost/atomicity/privacy analysis + trusted client-IP source on Vercel + HMAC identifier keys + retention | NEW | H | S | FOUND-033 | ADR-18 CLOSED with evidence | — | DONE |
 | SEC-015 | P3 | security | Implement chosen rate-limit store (atomic increments, expiry, cleanup) behind FOUND-033 interface | NEW | H | S | SEC-014 | concurrency test; limits survive multi-instance | I | TODO |
 | SEC-016 | P6 | security | Destructive-Op trusted-boundary APPLICATION implementation per SEC-018 design (handler wraps, RPC call-sites, EXECUTE-revocation consumers) — per operation | HARDEN | H | S,D | SEC-018, DBMIG-010 | matrix row-by-row enforced | BYPASS | TODO |
 | SEC-017 | P7 | security | CSP inline audit: violation inventory, nonce/hash feasibility, ⛔ P7 decision to drop 'unsafe-inline' or documented exception | HARDEN | M | S | SEC-003 | decision + final policy | QG-P7 | TODO |
 | CACHE-005 | P2 | cache | ADR-19 conformance: implement chosen Next 16 cache model (use cache + cacheTag + cacheLife) in DAL; integration tests for tag attach, TTL, new-slug, delete→404, SWR vs immediate semantics | NEW | H | D | DATA-001, FOUND-020 | CACHE-MODEL suite green | CACHE-MODEL | TODO |
-| FOUND-035 | P1 | foundation | Version-lock decision: record exact Next 16.x/react/supabase-ssr/next-intl versions; pin via lockfile; major upgrades require ADR (ADR-16) | NEW | M | — | FOUND-001 | versions doc committed | — | TODO |
-| AUTHP-010 | P1B | auth-proto | Remember-me semantics measurement (ADR-17): ssr cookie behavior, session lifetime, browser-close semantics, rotation interaction, local sign-out vs server session, bridge compat, multi-tab | NEW | H | S | AUTHP-002 | ADR-17 CLOSED with runtime evidence | AU-BR | TODO |
-
+| FOUND-035 | P1 | foundation | Version-lock decision: record exact Next 16.x/react/supabase-ssr/next-intl versions; pin via lockfile; major upgrades require ADR (ADR-16) | NEW | M | — | FOUND-001 | versions doc committed | — | DONE |
+| AUTHP-010 | P1B | auth-proto | Remember-me semantics measurement (ADR-17): ssr cookie behavior, session lifetime, browser-close semantics, rotation interaction, local sign-out vs server session, bridge compat, multi-tab | NEW | H | S | AUTHP-002 | ADR-17 CLOSED with runtime evidence | AU-BR | DONE:ADR-17 CLOSED (prod Secure check pending AUTH-007) |
 ## V2.3 ADDITION (cycle fix)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
