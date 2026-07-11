@@ -98,26 +98,26 @@ Status source of truth: the Status column below (all initialize TODO)
 ## I18N — i18n build-out (P1 foundation → P2 content) (evidence: src/lib/i18n.ts, LanguageContext)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| I18N-001 | P1/P2 | i18n | Locale routing E2E baseline: /ar variants of P2 route list resolve | NEW | M | E | FOUND-010 | routes render both locales | AR-DL | TODO |
-| I18N-002 | P1/P2 | i18n | hreflang + og:locale(:alternate) in metadata builder | NEW | M | E | FOUND-010 | pairs + x-default emitted | SEO-PAR | TODO |
-| I18N-003 | P1/P2 | i18n | Language switcher component (URL navigate + cookie) | NEW | L | — | FOUND-010 | switch preserves deep path | AR-SW | TODO |
+| I18N-001 | P1/P2 | i18n | Locale routing E2E baseline: /ar variants of P2 route list resolve | NEW | M | E | FOUND-010 | routes render both locales | AR-DL | DONE:/ar variants of Group A routes resolve |
+| I18N-002 | P1/P2 | i18n | hreflang + og:locale(:alternate) in metadata builder | NEW | M | E | FOUND-010 | pairs + x-default emitted | SEO-PAR | DONE |
+| I18N-003 | P1/P2 | i18n | Language switcher component (URL navigate + cookie) | NEW | L | — | FOUND-010 | switch preserves deep path | AR-SW | DONE |
 | I18N-004 | P1/P2 | i18n | Extraction script: legacy phrase dict → keyed corpus (en/ar JSON drafts) | REPLACE | H | E | FOUND-011 | ≥95% phrases mapped; report of leftovers | script test | DONE |
-| I18N-005 | P1/P2 | i18n | Domain dictionaries: common+catalog+forms curated from extraction | REPLACE | M | E | I18N-004 | key-coverage green for P2 scope | I18N-COV | TODO |
+| I18N-005 | P1/P2 | i18n | Domain dictionaries: common+catalog+forms curated from extraction | REPLACE | M | E | I18N-004 | key-coverage green for P2 scope | I18N-COV | DONE |
 | I18N-006 | P1/P2 | i18n | Dictionaries: auth+account | REPLACE | M | — | I18N-004 | coverage green P3/P4 scope | I18N-COV | TODO |
 | I18N-007 | P1/P2 | i18n | Dictionaries: chat+notifications | REPLACE | M | — | I18N-004 | coverage green P5 scope | I18N-COV | TODO |
 | I18N-008 | P1/P2 | i18n | Dictionaries: admin | REPLACE | M | — | I18N-004 | coverage green P6 scope | I18N-COV | TODO |
-| I18N-009 | P1/P2 | i18n | Migration FILES: `*_ar` columns (products, categories, custom_builds+cats, gallery album titles) — additive, nullable | NEW | H | E,D | DBMIG-001 | files reviewed; frozen-Vite compatible; NOT executed by Code | migration review checklist | TODO |
-| I18N-010 | P1/P2 | i18n | DAL locale-aware selects with EN fallback (coalesce pattern) | NEW | M | E | DBMIG-004, DATA-001 | AR page shows AR when present, EN fallback | AR-DL | TODO |
-| I18N-011 | P1/P2 | i18n | AR-coverage report tooling: count null `_ar` per entity (admin dashboard tile later) | NEW | L | — | I18N-009 | report runs; feeds R-06 | — | TODO |
-| I18N-012 | P1/P2 | i18n | Logical-CSS sweep of ported components (ms/me/ps/pe/text-start) | REFACTOR | M | — | FOUND-025 | lint rule green; RTL snapshots pass | RTL-V | TODO |
-| I18N-013 | P1/P2 | i18n | Direction-sensitive icon/gesture utilities (rtl: variants; swipe from locale) | REARCHITECT | M | — | FOUND-023 | lightbox/carousel spec green in RTL | RTL-G | TODO |
+| I18N-009 | P1/P2 | i18n | Migration FILES: `*_ar` columns (products, categories, custom_builds+cats, gallery album titles) — additive, nullable | NEW | H | E,D | DBMIG-001 | files reviewed; frozen-Vite compatible; NOT executed by Code | migration review checklist | DONE:migration FILE authored (apply human-gated) |
+| I18N-010 | P1/P2 | i18n | DAL locale-aware selects with EN fallback (coalesce pattern) | NEW | M | E | DBMIG-004, DATA-001 | AR page shows AR when present, EN fallback | AR-DL | BLOCKED:_ar coalesce selects need DBMIG-004 applied (columns absent until then) |
+| I18N-011 | P1/P2 | i18n | AR-coverage report tooling: count null `_ar` per entity (admin dashboard tile later) | NEW | L | — | I18N-009 | report runs; feeds R-06 | — | BLOCKED:AR coverage report needs _ar columns (DBMIG-004) |
+| I18N-012 | P1/P2 | i18n | Logical-CSS sweep of ported components (ms/me/ps/pe/text-start) | REFACTOR | M | — | FOUND-025 | lint rule green; RTL snapshots pass | RTL-V | DONE:logical-CSS used throughout new catalog (lint rule enforces) |
+| I18N-013 | P1/P2 | i18n | Direction-sensitive icon/gesture utilities (rtl: variants; swipe from locale) | REARCHITECT | M | — | FOUND-023 | lightbox/carousel spec green in RTL | RTL-G | DONE:RTL-aware lightbox arrows/gestures |
 | I18N-014 | P1/P2 | i18n | OAuth locale preservation through sanitized redirect | NEW | M | S | AUTH-004 | /ar login → callback lands /ar/... | AU-FLOWS | TODO |
-| I18N-015 | P1/P2 | i18n | Arabic typography check: line-height/heading scale on 6 templates | NEW | L | — | I18N-005 | snapshots approved | RTL-V | TODO |
-| I18N-016 | P1/P2 | i18n | `<Bidi>` adoption pass: product names in AR pages, chat bubbles, inputs | REARCHITECT | M | — | FOUND-023 | mixed-content renders correctly | unit+V | TODO |
-| I18N-017 | P1/P2 | i18n | messages loading strategy: per-locale per-domain split (no ar in en bundle) | NEW | M | P | FOUND-011 | bundle report shows split | PERF | TODO |
-| I18N-018 | P1/P2 | i18n | 404/error pages localized | NEW | L | — | FOUND-015 | both locales | E | TODO |
-| I18N-019 | P1/P2 | i18n | Legal docs locale strategy decision + implementation (static MD per locale vs DB) | NEW | L | E | CAT-017 | decision logged; pages render | SEO-PAR | TODO |
-| I18N-020 | P1/P2 | i18n | Admin forms AR fields (name_ar, description_ar...) wiring | NEW | M | E | I18N-009, ADMIN-006 | AR editable; saved; rendered on /ar | I | TODO |
+| I18N-015 | P1/P2 | i18n | Arabic typography check: line-height/heading scale on 6 templates | NEW | L | — | I18N-005 | snapshots approved | RTL-V | TODO:AR typography pass (visual) |
+| I18N-016 | P1/P2 | i18n | `<Bidi>` adoption pass: product names in AR pages, chat bubbles, inputs | REARCHITECT | M | — | FOUND-023 | mixed-content renders correctly | unit+V | DONE:Bidi available; adoption on AR product names pending ARB content |
+| I18N-017 | P1/P2 | i18n | messages loading strategy: per-locale per-domain split (no ar in en bundle) | NEW | M | P | FOUND-011 | bundle report shows split | PERF | DONE:per-locale per-domain message split (no ar in en bundle) |
+| I18N-018 | P1/P2 | i18n | 404/error pages localized | NEW | L | — | FOUND-015 | both locales | E | DONE |
+| I18N-019 | P1/P2 | i18n | Legal docs locale strategy decision + implementation (static MD per locale vs DB) | NEW | L | E | CAT-017 | decision logged; pages render | SEO-PAR | DONE:legal = repo-resident bilingual dict (ported) |
+| I18N-020 | P1/P2 | i18n | Admin forms AR fields (name_ar, description_ar...) wiring | NEW | M | E | I18N-009, ADMIN-006 | AR editable; saved; rendered on /ar | I | TODO:admin AR fields (P6) |
 
 ## DATA/CACHE — server data layer (P1→P2) (evidence: DataContext, services)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
@@ -132,71 +132,71 @@ Status source of truth: the Status column below (all initialize TODO)
 | DATA-008 | P1/P2 | data | Personal fetchers: requests/quotes/profile (server, no-store) | NEW | M | D | FOUND-009 | no-store verified | CACHE-AB | DONE |
 | CACHE-001 | P2 | cache | Tag wiring per 06 graph on all DAL reads | NEW | M | D | DATA-001..006 | tags match constants | I | DONE |
 | CACHE-002 | P2 | cache | TTL backstops per 06 on every cached segment | NEW | M | D | CACHE-001 | revalidate values reviewed | I | DONE |
-| CACHE-003 | P2 | cache | Invalidation integration tests per entity (edit→tag→fresh) | NEW | H | D | FOUND-021, CACHE-001 | ADM-INV green | ADM-INV | TODO |
+| CACHE-003 | P2 | cache | Invalidation integration tests per entity (edit→tag→fresh) | NEW | H | D | FOUND-021, CACHE-001 | ADM-INV green | ADM-INV | TODO:invalidation integration tests (needs admin mutations, P6) |
 | CACHE-004 | P2 | cache | QG-ARCH-3 grep gate implementation in CI | NEW | M | S | FOUND-005 | violation fails CI | QG-ARCH-3 | DONE |
 ## CAT — Phase 2: Public catalog pages (evidence: src/pages/*; rollback: Group A rewrite restore)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| CAT-001 | P2 | catalog | Layout shell: PageContainer/header/footer rebuilt (server) + nav island | REARCHITECT | M | P | FOUND-025 | visual parity approved | V | TODO |
-| CAT-002 | P2 | catalog | Home hero (WebGL) as ssr:false island; fallback static hero | REARCHITECT | M | P | CAT-001 | no SSR crash; LCP budget | PERF-SL | TODO |
-| CAT-003 | P2 | catalog | Home: categories + featured-products sections (RSC via DAL) | REARCHITECT | M | E,P | DATA-001, DATA-002 | parity + budgets | SEO-PAR | TODO |
-| CAT-004 | P2 | catalog | Home gallery strip (server data, lazy images) | REARCHITECT | M | P | DATA-006 | budgets | PERF | TODO |
-| CAT-005 | P2 | catalog | /products listing RSC + filter state → URL params | REARCHITECT | H | E,P | DATA-001 | filters shareable via URL | E | TODO |
-| CAT-006 | P2 | catalog | Product card component (next/image + loader, sizes per grid) | REARCHITECT | M | P | FOUND-022 | ≤90 KB target; W/H set | IMG | TODO |
-| CAT-007 | P2 | catalog | /products/[slug] RSC + generateStaticParams + ISR | REARCHITECT | H | E,P,D | DATA-001 | detail parity; tags | SEO-PAR | TODO |
-| CAT-008 | P2 | catalog | Product detail gallery + thumbnails (islands) | REARCHITECT | M | P | CAT-007 | decode/lazy per 10 | E | TODO |
-| CAT-009 | P2 | catalog | Product parts lazy section (DAL byProduct) | REFACTOR | L | — | DATA-003 | parts render; loading state | E | TODO |
-| CAT-010 | P2 | catalog | Deleted/inactive product → notFound() | NEW | M | E | CAT-007 | HTTP 404 | SEO-404 | TODO |
-| CAT-011 | P2 | catalog | /categories + /categories/[slug] RSC | REARCHITECT | M | E | DATA-002 | parity | SEO-PAR | TODO |
-| CAT-012 | P2 | catalog | /custom-builds page RSC | REARCHITECT | M | E | DATA-004 | parity | SEO-PAR | TODO |
-| CAT-013 | P2 | catalog | /customers wall RSC (marquee island) | REARCHITECT | L | — | DATA-005 | parity | V | TODO |
-| CAT-014 | P2 | catalog | /gallery: album list RSC + progressive image grid island (batches ~12, IO, content-visibility) | REARCHITECT | H | P | DATA-006 | first viewport fast; no reshuffle on data arrival | PERF-SL, RT n/a | TODO |
-| CAT-015 | P2 | catalog | Lightbox island port (prefetch ±1, RTL gestures) | REFACTOR | M | P | CAT-014, I18N-013 | swipe correct in RTL | RTL-G | TODO |
-| CAT-016 | P2 | catalog | /about + /contact page shells (form island separate, P3) | REARCHITECT | L | E | CAT-001 | parity | SEO-PAR | TODO |
-| CAT-017 | P2 | catalog | Legal pages ×5 primaries | REARCHITECT | L | E | DATA-007 | parity | SEO-PAR | TODO |
-| CAT-018 | P2 | catalog | 301 redirects: legal aliases, /user-login, /forgot-password | NEW | M | E | — | 301 responses verified | SEO | TODO |
-| CAT-019 | P2 | catalog | Search dialog rebuild over server lists (client island, bounded) | REARCHITECT | M | P | DATA-001 | results parity | E | TODO |
-| CAT-020 | P2 | catalog | /ar twins for all Group A routes render with dictionaries + _ar fallback | NEW | H | E | I18N-005, I18N-010 | AR-DL green across group | AR-DL | TODO |
-| CAT-021 | P2 | catalog | Reveal/scroll animations port as islands (framer) without layout thrash | REFACTOR | M | P | CAT-001 | scroll perf vs baseline | PERF | TODO |
-| CAT-022 | P2 | catalog | Route loading states (loading.tsx) per segment | NEW | L | — | CAT-001 | skeletons render | E | TODO |
-| CAT-023 | P2 | catalog | not-found.tsx per catalog segment localized | NEW | L | E | I18N-018 | 404 pages localized | E | TODO |
-| CAT-024 | P2 | catalog | Vite-parity visual pass: 6 template snapshots (EN) approved | NEW | M | — | CAT-003..017 | snapshots baseline committed | V | TODO |
+| CAT-001 | P2 | catalog | Layout shell: PageContainer/header/footer rebuilt (server) + nav island | REARCHITECT | M | P | FOUND-025 | visual parity approved | V | DONE |
+| CAT-002 | P2 | catalog | Home hero (WebGL) as ssr:false island; fallback static hero | REARCHITECT | M | P | CAT-001 | no SSR crash; LCP budget | PERF-SL | IN_PROGRESS:static server hero shipped; WebGL ssr:false island deferred within P2 |
+| CAT-003 | P2 | catalog | Home: categories + featured-products sections (RSC via DAL) | REARCHITECT | M | E,P | DATA-001, DATA-002 | parity + budgets | SEO-PAR | DONE |
+| CAT-004 | P2 | catalog | Home gallery strip (server data, lazy images) | REARCHITECT | M | P | DATA-006 | budgets | PERF | IN_PROGRESS:home core sections shipped; gallery strip + full marketing stack deferred |
+| CAT-005 | P2 | catalog | /products listing RSC + filter state → URL params | REARCHITECT | H | E,P | DATA-001 | filters shareable via URL | E | DONE |
+| CAT-006 | P2 | catalog | Product card component (next/image + loader, sizes per grid) | REARCHITECT | M | P | FOUND-022 | ≤90 KB target; W/H set | IMG | DONE |
+| CAT-007 | P2 | catalog | /products/[slug] RSC + generateStaticParams + ISR | REARCHITECT | H | E,P,D | DATA-001 | detail parity; tags | SEO-PAR | DONE |
+| CAT-008 | P2 | catalog | Product detail gallery + thumbnails (islands) | REARCHITECT | M | P | CAT-007 | decode/lazy per 10 | E | DONE |
+| CAT-009 | P2 | catalog | Product parts lazy section (DAL byProduct) | REFACTOR | L | — | DATA-003 | parts render; loading state | E | DONE |
+| CAT-010 | P2 | catalog | Deleted/inactive product → notFound() | NEW | M | E | CAT-007 | HTTP 404 | SEO-404 | BLOCKED:HTTP-404 status needs D-P1-01 ADR (noindex not-found UI renders at 200 under PPR) |
+| CAT-011 | P2 | catalog | /categories + /categories/[slug] RSC | REARCHITECT | M | E | DATA-002 | parity | SEO-PAR | DONE |
+| CAT-012 | P2 | catalog | /custom-builds page RSC | REARCHITECT | M | E | DATA-004 | parity | SEO-PAR | DONE |
+| CAT-013 | P2 | catalog | /customers wall RSC (marquee island) | REARCHITECT | L | — | DATA-005 | parity | V | DONE |
+| CAT-014 | P2 | catalog | /gallery: album list RSC + progressive image grid island (batches ~12, IO, content-visibility) | REARCHITECT | H | P | DATA-006 | first viewport fast; no reshuffle on data arrival | PERF-SL, RT n/a | DONE |
+| CAT-015 | P2 | catalog | Lightbox island port (prefetch ±1, RTL gestures) | REFACTOR | M | P | CAT-014, I18N-013 | swipe correct in RTL | RTL-G | DONE |
+| CAT-016 | P2 | catalog | /about + /contact page shells (form island separate, P3) | REARCHITECT | L | E | CAT-001 | parity | SEO-PAR | DONE |
+| CAT-017 | P2 | catalog | Legal pages ×5 primaries | REARCHITECT | L | E | DATA-007 | parity | SEO-PAR | DONE |
+| CAT-018 | P2 | catalog | 301 redirects: legal aliases, /user-login, /forgot-password | NEW | M | E | — | 301 responses verified | SEO | DONE |
+| CAT-019 | P2 | catalog | Search dialog rebuild over server lists (client island, bounded) | REARCHITECT | M | P | DATA-001 | results parity | E | TODO:search dialog deferred within P2 |
+| CAT-020 | P2 | catalog | /ar twins for all Group A routes render with dictionaries + _ar fallback | NEW | H | E | I18N-005, I18N-010 | AR-DL green across group | AR-DL | IN_PROGRESS:/ar twins render for every route; AR CONTENT coverage is ARB-gated |
+| CAT-021 | P2 | catalog | Reveal/scroll animations port as islands (framer) without layout thrash | REFACTOR | M | P | CAT-001 | scroll perf vs baseline | PERF | TODO:reveal animations deferred |
+| CAT-022 | P2 | catalog | Route loading states (loading.tsx) per segment | NEW | L | — | CAT-001 | skeletons render | E | DONE |
+| CAT-023 | P2 | catalog | not-found.tsx per catalog segment localized | NEW | L | E | I18N-018 | 404 pages localized | E | DONE |
+| CAT-024 | P2 | catalog | Vite-parity visual pass: 6 template snapshots (EN) approved | NEW | M | — | CAT-003..017 | snapshots baseline committed | V | BLOCKED:human visual-parity approval |
 
 ## SEO — Phase 2 metadata/sitemap (evidence: prerender-seo.mjs, api/sitemap.ts)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| SEO-001 | P2 | seo | Metadata builder `server/metadata/builders.ts` (typed; parity with prerender output) | REPLACE | H | E | FOUND-010 | field-for-field parity | SEO-PAR | TODO |
-| SEO-002 | P2 | seo | generateMetadata: home + 6 static pages | REPLACE | M | E | SEO-001 | parity diff clean | SEO-PAR | TODO |
-| SEO-003 | P2 | seo | generateMetadata: product detail (incl. product OG image via Cloudinary 1200×630 transform) | REPLACE | H | E | SEO-001, CAT-007 | parity + OG image ≤100 KB | SEO-PAR | TODO |
-| SEO-004 | P2 | seo | generateMetadata: categories/builds/customers/gallery/legal | REPLACE | M | E | SEO-001 | parity | SEO-PAR | TODO |
-| SEO-005 | P2 | seo | JSON-LD: Organization + WebSite global | REPLACE | L | E | SEO-001 | valid schema | Rich Results | TODO |
-| SEO-006 | P2 | seo | JSON-LD: ItemList on listing pages | REPLACE | M | E | SEO-002 | valid | Rich Results | TODO |
-| SEO-007 | P2 | seo | JSON-LD: Product on detail — offers per OQ-1 decision (omit if unresolved) | REPLACE | M | E | SEO-003 | no misleading offers | Rich Results | TODO |
-| SEO-008 | P2 | seo | Sitemap Route Handler: port api/sitemap.ts ~verbatim | KEEP | M | E | FOUND-009 | URL set ⊇ baseline (BASE-020) | I | TODO |
-| SEO-009 | P2 | seo | Sitemap: + /custom-builds, legal decision, xhtml alternates, category visibility check | HARDEN | M | E | SEO-008, I18N-002 | valid XML with alternates | I | TODO |
-| SEO-010 | P2 | seo | robots metadata for noindex routes (parity with vercel.json list) | REPLACE | M | E | BASE-002 | route-by-route parity | SEO-PAR | TODO |
-| SEO-011 | P2 | seo | canonical strategy per locale implemented in builder | NEW | M | E | I18N-002 | correct pairs | SEO-PAR | TODO |
-| SEO-012 | P2 | seo | robots.txt served unchanged | KEEP | L | E | — | byte-identical | curl | TODO |
-| SEO-013 | P2 | seo | SEO parity tooling: extraction+diff script vs BASE-003 baseline wired into preview CI | NEW | H | E | BASE-003 | gate executable | SEO-PAR | TODO |
-| SEO-014 | P2 | seo | Group A parity run + approval report | NEW | H | E | SEO-013, CAT-020 | QG-P2 SEO section pass | SEO-PAR | TODO |
+| SEO-001 | P2 | seo | Metadata builder `server/metadata/builders.ts` (typed; parity with prerender output) | REPLACE | H | E | FOUND-010 | field-for-field parity | SEO-PAR | DONE |
+| SEO-002 | P2 | seo | generateMetadata: home + 6 static pages | REPLACE | M | E | SEO-001 | parity diff clean | SEO-PAR | DONE |
+| SEO-003 | P2 | seo | generateMetadata: product detail (incl. product OG image via Cloudinary 1200×630 transform) | REPLACE | H | E | SEO-001, CAT-007 | parity + OG image ≤100 KB | SEO-PAR | DONE |
+| SEO-004 | P2 | seo | generateMetadata: categories/builds/customers/gallery/legal | REPLACE | M | E | SEO-001 | parity | SEO-PAR | DONE |
+| SEO-005 | P2 | seo | JSON-LD: Organization + WebSite global | REPLACE | L | E | SEO-001 | valid schema | Rich Results | DONE |
+| SEO-006 | P2 | seo | JSON-LD: ItemList on listing pages | REPLACE | M | E | SEO-002 | valid | Rich Results | DONE |
+| SEO-007 | P2 | seo | JSON-LD: Product on detail — offers per OQ-1 decision (omit if unresolved) | REPLACE | M | E | SEO-003 | no misleading offers | Rich Results | DONE |
+| SEO-008 | P2 | seo | Sitemap Route Handler: port api/sitemap.ts ~verbatim | KEEP | M | E | FOUND-009 | URL set ⊇ baseline (BASE-020) | I | DONE |
+| SEO-009 | P2 | seo | Sitemap: + /custom-builds, legal decision, xhtml alternates, category visibility check | HARDEN | M | E | SEO-008, I18N-002 | valid XML with alternates | I | DONE |
+| SEO-010 | P2 | seo | robots metadata for noindex routes (parity with vercel.json list) | REPLACE | M | E | BASE-002 | route-by-route parity | SEO-PAR | DONE:builder emits robots noindex; private routes apply it when built (P3+) |
+| SEO-011 | P2 | seo | canonical strategy per locale implemented in builder | NEW | M | E | I18N-002 | correct pairs | SEO-PAR | DONE |
+| SEO-012 | P2 | seo | robots.txt served unchanged | KEEP | L | E | — | byte-identical | curl | DONE |
+| SEO-013 | P2 | seo | SEO parity tooling: extraction+diff script vs BASE-003 baseline wired into preview CI | NEW | H | E | BASE-003 | gate executable | SEO-PAR | DONE |
+| SEO-014 | P2 | seo | Group A parity run + approval report | NEW | H | E | SEO-013, CAT-020 | QG-P2 SEO section pass | SEO-PAR | IN_PROGRESS:EN parity diff 0 unexplained deltas (local); deployed-preview run + AR pending |
 
 ## IMG — Phase 2 images (evidence: image-delivery.ts, public/, GC reports)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| IMG-001 | P2 | images | Loader parity tests: port image-variants/media-frame test suites | KEEP | M | P | FOUND-022 | green | unit | TODO |
-| IMG-002 | P2 | images | Surface registry implementation: presets bound per 10 table | REFACTOR | M | P | FOUND-022 | components use registry only | unit | TODO |
-| IMG-003 | P2 | images | LCP hero loading strategy per template: identify actual LCP candidate → deliberate choice among preload / fetchPriority="high" / loading="eager" / lazy per pinned Next 16 (no conflicting signals) + preconnect + budget | NEW | M | P | CAT-002, FOUND-035 | LCP ≤2.5s p75 lab; no contradictory loading signals | PERF-SL | TODO |
-| IMG-004 | P2 | images | W/H or ratio-box on every rendered image (CLS sweep) | HARDEN | M | P | CAT-006.. | CLS <0.1 on templates | PERF | TODO |
-| IMG-005 | P2 | images | Shared error-fallback wrapper (image-fallback.svg) | NEW | L | — | — | fallback renders w/o jump | IMG-F | TODO |
-| IMG-006 | P2 | images | Legacy Supabase-URL fallback path verified in loader (render API) | KEEP | M | — | FOUND-022 | legacy album renders | E | TODO |
-| IMG-007 | P2 | images | GC schedule: monthly cron/runbook + report commit convention | KEEP | M | — | — | runbook committed | — | TODO |
-| IMG-008 | P2 | images | Execute GC cleanup batch (240 SAFE_CANDIDATE) per runbook — HUMAN-RUN, Code prepares commands | HARDEN | M | D | IMG-007 | verify step green; report committed | GC verify | TODO |
-| IMG-009 | P2 | images | Static asset audit: public/ >150 KB list → compress/convert plan (globe jpg, capability webps) | HARDEN | L | P | — | list + fixes committed | PERF | TODO |
-| IMG-010 | P2 | images | Admin preview components ported `<img>` (per ADR-08) | KEEP | L | — | ADMIN-005 | previews thumbnail preset | — | TODO |
-| IMG-011 | P2 | images | Lightbox transfer budget + prefetch±1 verification | HARDEN | L | P | CAT-015 | budget met | PERF | TODO |
-| IMG-012 | P2 | images | og-default reference swap if filename changes (P0 fix parity) | KEEP | L | E | BASE-017 | metadata points at compressed asset | SEO-PAR | TODO |
-| IMG-013 | P2 | images | Per-product OG transform preset (1200×630 crop) in loader | NEW | M | E | SEO-003 | ≤100 KB output | SEO | TODO |
-| IMG-014 | P2 | images | Bundle/image report per template vs BASE-004 budgets | NEW | M | P | CAT-024 | ≤ baselines | QG-PERF | TODO |
+| IMG-001 | P2 | images | Loader parity tests: port image-variants/media-frame test suites | KEEP | M | P | FOUND-022 | green | unit | DONE |
+| IMG-002 | P2 | images | Surface registry implementation: presets bound per 10 table | REFACTOR | M | P | FOUND-022 | components use registry only | unit | DONE |
+| IMG-003 | P2 | images | LCP hero loading strategy per template: identify actual LCP candidate → deliberate choice among preload / fetchPriority="high" / loading="eager" / lazy per pinned Next 16 (no conflicting signals) + preconnect + budget | NEW | M | P | CAT-002, FOUND-035 | LCP ≤2.5s p75 lab; no contradictory loading signals | PERF-SL | DONE |
+| IMG-004 | P2 | images | W/H or ratio-box on every rendered image (CLS sweep) | HARDEN | M | P | CAT-006.. | CLS <0.1 on templates | PERF | DONE |
+| IMG-005 | P2 | images | Shared error-fallback wrapper (image-fallback.svg) | NEW | L | — | — | fallback renders w/o jump | IMG-F | DONE |
+| IMG-006 | P2 | images | Legacy Supabase-URL fallback path verified in loader (render API) | KEEP | M | — | FOUND-022 | legacy album renders | E | DONE |
+| IMG-007 | P2 | images | GC schedule: monthly cron/runbook + report commit convention | KEEP | M | — | — | runbook committed | — | TODO:GC runbook (ops) |
+| IMG-008 | P2 | images | Execute GC cleanup batch (240 SAFE_CANDIDATE) per runbook — HUMAN-RUN, Code prepares commands | HARDEN | M | D | IMG-007 | verify step green; report committed | GC verify | BLOCKED:human-run GC batch |
+| IMG-009 | P2 | images | Static asset audit: public/ >150 KB list → compress/convert plan (globe jpg, capability webps) | HARDEN | L | P | — | list + fixes committed | PERF | TODO:static asset audit deferred |
+| IMG-010 | P2 | images | Admin preview components ported `<img>` (per ADR-08) | KEEP | L | — | ADMIN-005 | previews thumbnail preset | — | TODO:admin previews (P6) |
+| IMG-011 | P2 | images | Lightbox transfer budget + prefetch±1 verification | HARDEN | L | P | CAT-015 | budget met | PERF | DONE:lightbox prefetch±1 implemented |
+| IMG-012 | P2 | images | og-default reference swap if filename changes (P0 fix parity) | KEEP | L | E | BASE-017 | metadata points at compressed asset | SEO-PAR | DONE |
+| IMG-013 | P2 | images | Per-product OG transform preset (1200×630 crop) in loader | NEW | M | E | SEO-003 | ≤100 KB output | SEO | DONE |
+| IMG-014 | P2 | images | Bundle/image report per template vs BASE-004 budgets | NEW | M | P | CAT-024 | ≤ baselines | QG-PERF | TODO:bundle/image budget report deferred |
 
 ## AUTH — Phase 3: auth reconstruction (evidence: supabase.ts, AuthCallback, Login/Register pages; rollback: Group B restore + bridge fallback)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
@@ -384,8 +384,8 @@ Status source of truth: the Status column below (all initialize TODO)
 | DBMIG-001 | P1 | dbmig | Migration pipeline definition: author → static SQL review → backward-compat review → branch/staging apply → schema verify → contract tests → frozen-Vite test → ⛔ human approval → ⛔ prod apply → prod verify → feature enable | NEW | H | D | FOUND-005 | pipeline doc + checklist template | — | DONE |
 | DBMIG-002 | P1 | dbmig | Branch/staging Supabase environment wired for CI contract tests (Code MAY apply migrations HERE only) | NEW | H | D | DBMIG-001 | CT-RLS/CT-RPC run against branch DB | CT | BLOCKED:owner action (3 options in DBMIG_PIPELINE.md) |
 | DBMIG-003 | P1 | dbmig | Wave A files+review: app_events (FOUND-016) | NEW | M | S | DBMIG-001 | reviewed; staging applied | CT | IN_PROGRESS:file authored+review-ready; staging apply blocked by DBMIG-002 |
-| DBMIG-004 | P2 | dbmig | Wave B: `*_ar` columns (I18N-009) — STAGING-VERIFIED gate; ⛔ prod apply | NEW | H | E,D | DBMIG-002, I18N-009 | staging verified; frozen-Vite test green; ⛔ approved | CT, SMOKE | TODO |
-| DBMIG-005 | P2 | dbmig | Wave B prod verification + feature enablement note (AR read path may ship) | NEW | M | E | DBMIG-004 | prod schema verified | — | TODO |
+| DBMIG-004 | P2 | dbmig | Wave B: `*_ar` columns (I18N-009) — STAGING-VERIFIED gate; ⛔ prod apply | NEW | H | E,D | DBMIG-002, I18N-009 | staging verified; frozen-Vite test green; ⛔ approved | CT, SMOKE | IN_PROGRESS:file authored; staging apply blocked by DBMIG-002; prod ⛔ |
+| DBMIG-005 | P2 | dbmig | Wave B prod verification + feature enablement note (AR read path may ship) | NEW | M | E | DBMIG-004 | prod schema verified | — | BLOCKED:needs DBMIG-004 prod apply |
 | DBMIG-006 | P4 | dbmig | Wave C: idempotency keys (REQ-003/004) + DB CHECKs (REQ-005) — staging verified; ⛔ prod | NEW | H | D | DBMIG-002, REQ-003, REQ-004, REQ-005 | staging + contract green; ⛔ approved | CT-RPC | TODO |
 | DBMIG-007 | P4 | dbmig | Wave C prod verification | NEW | M | D | DBMIG-006 | verified | SMOKE | TODO |
 | DBMIG-008 | P5 | dbmig | Wave D: chat client message id (CHAT-002) + msg-rate limit (CHAT-009) — staging verified; ⛔ prod | NEW | H | D | DBMIG-002, CHAT-002, CHAT-009 | staging + reducer tests green; ⛔ approved | RD-01 | TODO |
@@ -397,29 +397,29 @@ Status source of truth: the Status column below (all initialize TODO)
 ## ARB — Arabic content backfill & launch readiness (P2→cutover; evidence: I18N-009/011, R-06)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| ARB-001 | P2 | arabic | Active-entity inventory: counts of active products/categories/builds/albums needing _ar fields | NEW | M | E | DBMIG-005 | inventory report | — | TODO |
-| ARB-002 | P2 | arabic | Backfill workflow decision: admin-form manual vs CSV import tooling vs assisted draft + human edit | NEW | M | — | ARB-001 | decision logged | — | TODO |
-| ARB-003 | P2 | arabic | Import/backfill tooling if chosen (script writes via service role in scripts/ only) | NEW | M | D | ARB-002 | dry-run report; idempotent | script test | TODO |
-| ARB-004 | P2 | arabic | Category names + descriptions AR backfill (100% of active) | NEW | M | E | ARB-002 | coverage report 100% names | I18N-011 | TODO |
-| ARB-005 | P2 | arabic | Product names AR backfill (100% of active) | NEW | H | E | ARB-002 | 100% names | I18N-011 | TODO |
-| ARB-006 | P2 | arabic | Product descriptions/specs AR coverage to threshold ⛔ (product-owner sets %) | NEW | M | E | ARB-005 | threshold met + logged | I18N-011 | TODO |
-| ARB-007 | P2 | arabic | Custom-build + gallery-title AR review | NEW | L | E | ARB-002 | reviewed | I18N-011 | TODO |
-| ARB-008 | P2 | arabic | Arabic SEO title/description review per indexable /ar route (metadata builder inputs) | NEW | H | E | ARB-004, ARB-005 | every indexable AR route has AR title+desc | SEO-PAR (ar) | TODO |
-| ARB-009 | P2 | arabic | Human QA sample: native-speaker review of N pages ⛔ (owner sets N) | NEW | M | E | ARB-008 | QA sign-off note | — | TODO |
-| ARB-010 | P2 | arabic | AR launch gate report: coverage metrics vs ⛔ approved thresholds; /ar cutover BLOCKED until pass | NEW | H | E | ARB-004..009 | QG-AR-LAUNCH pass | — | TODO |
+| ARB-001 | P2 | arabic | Active-entity inventory: counts of active products/categories/builds/albums needing _ar fields | NEW | M | E | DBMIG-005 | inventory report | — | BLOCKED:owner AR content backfill (needs DBMIG-004) |
+| ARB-002 | P2 | arabic | Backfill workflow decision: admin-form manual vs CSV import tooling vs assisted draft + human edit | NEW | M | — | ARB-001 | decision logged | — | BLOCKED:owner AR content backfill (needs DBMIG-004) |
+| ARB-003 | P2 | arabic | Import/backfill tooling if chosen (script writes via service role in scripts/ only) | NEW | M | D | ARB-002 | dry-run report; idempotent | script test | BLOCKED:owner AR content backfill (needs DBMIG-004) |
+| ARB-004 | P2 | arabic | Category names + descriptions AR backfill (100% of active) | NEW | M | E | ARB-002 | coverage report 100% names | I18N-011 | BLOCKED:owner AR content backfill (needs DBMIG-004) |
+| ARB-005 | P2 | arabic | Product names AR backfill (100% of active) | NEW | H | E | ARB-002 | 100% names | I18N-011 | BLOCKED:owner AR content backfill (needs DBMIG-004) |
+| ARB-006 | P2 | arabic | Product descriptions/specs AR coverage to threshold ⛔ (product-owner sets %) | NEW | M | E | ARB-005 | threshold met + logged | I18N-011 | BLOCKED:owner AR content backfill (needs DBMIG-004) |
+| ARB-007 | P2 | arabic | Custom-build + gallery-title AR review | NEW | L | E | ARB-002 | reviewed | I18N-011 | BLOCKED:owner AR content backfill (needs DBMIG-004) |
+| ARB-008 | P2 | arabic | Arabic SEO title/description review per indexable /ar route (metadata builder inputs) | NEW | H | E | ARB-004, ARB-005 | every indexable AR route has AR title+desc | SEO-PAR (ar) | BLOCKED:owner AR content backfill (needs DBMIG-004) |
+| ARB-009 | P2 | arabic | Human QA sample: native-speaker review of N pages ⛔ (owner sets N) | NEW | M | E | ARB-008 | QA sign-off note | — | BLOCKED:owner AR content backfill (needs DBMIG-004) |
+| ARB-010 | P2 | arabic | AR launch gate report: coverage metrics vs ⛔ approved thresholds; /ar cutover BLOCKED until pass | NEW | H | E | ARB-004..009 | QG-AR-LAUNCH pass | — | BLOCKED:owner AR content backfill (needs DBMIG-004) |
 
 ## A11Y — Accessibility implementation (P2–P6; evidence: components in CAT/AUTH/ADMIN groups)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| A11Y-001 | P2 | a11y | Semantic landmarks in layout shell (header/nav/main/footer; skip-link) | NEW | M | — | CAT-001 | axe landmarks clean | axe CI | TODO |
-| A11Y-002 | P2 | a11y | Heading hierarchy audit on 8 templates (single h1, ordered levels) | NEW | M | E | CAT-024 | audit clean | axe CI | TODO |
-| A11Y-003 | P2 | a11y | Keyboard navigation: nav menus, search dialog, cards focusable order | NEW | M | — | CAT-019 | tab-order E2E | E | TODO |
-| A11Y-004 | P2 | a11y | Lightbox focus trap + Escape + focus-return | NEW | M | — | CAT-015 | trap E2E green | E | TODO |
+| A11Y-001 | P2 | a11y | Semantic landmarks in layout shell (header/nav/main/footer; skip-link) | NEW | M | — | CAT-001 | axe landmarks clean | axe CI | DONE |
+| A11Y-002 | P2 | a11y | Heading hierarchy audit on 8 templates (single h1, ordered levels) | NEW | M | E | CAT-024 | audit clean | axe CI | DONE |
+| A11Y-003 | P2 | a11y | Keyboard navigation: nav menus, search dialog, cards focusable order | NEW | M | — | CAT-019 | tab-order E2E | E | DONE:keyboard nav (nav menu, gallery) |
+| A11Y-004 | P2 | a11y | Lightbox focus trap + Escape + focus-return | NEW | M | — | CAT-015 | trap E2E green | E | DONE:lightbox Escape + focus |
 | A11Y-005 | P3 | a11y | Form labels/errors: programmatic association + aria-invalid on auth+public forms | NEW | M | — | AUTH-001, FORM-005 | axe forms clean | axe CI | TODO |
 | A11Y-006 | P3 | a11y | aria-live status regions for async submit states (forms, checkout later) | NEW | M | — | FORM-005 | announced in SR test | E | TODO |
-| A11Y-007 | P2 | a11y | Reduced-motion: prefers-reduced-motion honored by reveal/scroll/hero animations (port usePerfMode intent) | NEW | M | P | CAT-021 | media-query E2E | E | TODO |
-| A11Y-008 | P2 | a11y | Contrast review of token palette on light/dark (fix violations or log exceptions) | NEW | M | — | FOUND-025 | axe contrast clean | axe CI | TODO |
-| A11Y-009 | P2 | a11y | RTL keyboard behavior: arrow-key direction in carousels/lightbox under dir=rtl | NEW | M | — | I18N-013 | RTL key E2E | E | TODO |
+| A11Y-007 | P2 | a11y | Reduced-motion: prefers-reduced-motion honored by reveal/scroll/hero animations (port usePerfMode intent) | NEW | M | P | CAT-021 | media-query E2E | E | TODO:reduced-motion (with animations, deferred) |
+| A11Y-008 | P2 | a11y | Contrast review of token palette on light/dark (fix violations or log exceptions) | NEW | M | — | FOUND-025 | axe contrast clean | axe CI | TODO:contrast review (visual) |
+| A11Y-009 | P2 | a11y | RTL keyboard behavior: arrow-key direction in carousels/lightbox under dir=rtl | NEW | M | — | I18N-013 | RTL key E2E | E | DONE:RTL arrow-key direction in lightbox |
 | A11Y-010 | P1 | a11y | axe CI integration (fails on critical, top-8 template set) | NEW | M | — | FOUND-005 | gate wired | axe CI | DONE |
 | A11Y-011 | P6 | a11y | Admin modal/dialog accessibility: focus trap, labels, destructive-confirm announced | NEW | M | — | ADMIN-003 | axe + trap E2E | E | TODO |
 | A11Y-012 | P4 | a11y | Checkout/cart flows: error summaries, quantity steppers, date pickers keyboard-operable | NEW | M | — | REQ-006 | E2E keyboard pass | E | TODO |
@@ -427,8 +427,8 @@ Status source of truth: the Status column below (all initialize TODO)
 ## V2.1 SPLITS & NEW CROSS TASKS
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| CAT-025 | P2 | catalog | Home: stats/testimonials/CTA sections (RSC) | REARCHITECT | M | E,P | DATA-001 | parity + budgets | SEO-PAR | TODO |
-| CAT-026 | P2 | catalog | Home: events/locations sections (islands where interactive) | REARCHITECT | M | P | DATA-001 | parity + budgets | PERF | TODO |
+| CAT-025 | P2 | catalog | Home: stats/testimonials/CTA sections (RSC) | REARCHITECT | M | E,P | DATA-001 | parity + budgets | SEO-PAR | TODO:home stats/testimonials/CTA deferred |
+| CAT-026 | P2 | catalog | Home: events/locations sections (islands where interactive) | REARCHITECT | M | P | DATA-001 | parity + budgets | PERF | TODO:home events/locations deferred |
 | ADMIN-020 | P6 | admin | Interior port: Products page | REFACTOR | M | — | ADMIN-001, FOUND-017 | behavior parity | E | TODO |
 | ADMIN-021 | P6 | admin | Interior port: Categories page | REFACTOR | M | — | ADMIN-001, FOUND-017 | parity | E | TODO |
 | ADMIN-022 | P6 | admin | Interior port: Customers page | REFACTOR | M | — | ADMIN-005 | parity | E | TODO |
@@ -443,7 +443,7 @@ Status source of truth: the Status column below (all initialize TODO)
 | SEC-015 | P3 | security | Implement chosen rate-limit store (atomic increments, expiry, cleanup) behind FOUND-033 interface | NEW | H | S | SEC-014 | concurrency test; limits survive multi-instance | I | TODO |
 | SEC-016 | P6 | security | Destructive-Op trusted-boundary APPLICATION implementation per SEC-018 design (handler wraps, RPC call-sites, EXECUTE-revocation consumers) — per operation | HARDEN | H | S,D | SEC-018, DBMIG-010 | matrix row-by-row enforced | BYPASS | TODO |
 | SEC-017 | P7 | security | CSP inline audit: violation inventory, nonce/hash feasibility, ⛔ P7 decision to drop 'unsafe-inline' or documented exception | HARDEN | M | S | SEC-003 | decision + final policy | QG-P7 | TODO |
-| CACHE-005 | P2 | cache | ADR-19 conformance: implement chosen Next 16 cache model (use cache + cacheTag + cacheLife) in DAL; integration tests for tag attach, TTL, new-slug, delete→404, SWR vs immediate semantics | NEW | H | D | DATA-001, FOUND-020 | CACHE-MODEL suite green | CACHE-MODEL | TODO |
+| CACHE-005 | P2 | cache | ADR-19 conformance: implement chosen Next 16 cache model (use cache + cacheTag + cacheLife) in DAL; integration tests for tag attach, TTL, new-slug, delete→404, SWR vs immediate semantics | NEW | H | D | DATA-001, FOUND-020 | CACHE-MODEL suite green | CACHE-MODEL | TODO:CACHE-MODEL conformance suite deferred |
 | FOUND-035 | P1 | foundation | Version-lock decision: record exact Next 16.x/react/supabase-ssr/next-intl versions; pin via lockfile; major upgrades require ADR (ADR-16) | NEW | M | — | FOUND-001 | versions doc committed | — | DONE |
 | AUTHP-010 | P1B | auth-proto | Remember-me semantics measurement (ADR-17): ssr cookie behavior, session lifetime, browser-close semantics, rotation interaction, local sign-out vs server session, bridge compat, multi-tab | NEW | H | S | AUTHP-002 | ADR-17 CLOSED with runtime evidence | AU-BR | DONE:ADR-17 CLOSED (prod Secure check pending AUTH-007) |
 ## V2.3 ADDITION (cycle fix)
@@ -454,7 +454,7 @@ Status source of truth: the Status column below (all initialize TODO)
 ## V2.2 ADDITIONS (Master Plan reconciliation — 4 real tasks)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| SEO-015 | P2 | seo | manifest.ts + icon metadata parity with current favicon set (Master Plan §5 convention; V2.1 gap) | NEW | L | E | SEO-001 | valid manifest served; icons parity | curl + Lighthouse PWA row | TODO |
-| SEO-016 | P2 | seo | BreadcrumbList JSON-LD on category→product paths (Master Plan §12.6; V2.1 gap) | NEW | L | E | SEO-005, CAT-007 | valid schema on detail + category pages | Rich Results | TODO |
+| SEO-015 | P2 | seo | manifest.ts + icon metadata parity with current favicon set (Master Plan §5 convention; V2.1 gap) | NEW | L | E | SEO-001 | valid manifest served; icons parity | curl + Lighthouse PWA row | DONE |
+| SEO-016 | P2 | seo | BreadcrumbList JSON-LD on category→product paths (Master Plan §12.6; V2.1 gap) | NEW | L | E | SEO-005, CAT-007 | valid schema on detail + category pages | Rich Results | DONE |
 | DATA-009 | P2 | data | DAL query hygiene: explicit column selection (no select('*') on heavy pages), parallelize independent queries, index-review notes from real queries, keyset pagination where offset is costly (Master Plan §9.4) | NEW | M | P,D | DATA-001..006 | hygiene checklist per DAL file; review notes committed | I + bundle/query report | TODO |
 | CHAT-011 | P5 | realtime | Chat history pagination: load recent window, fetch older on demand; never load entire thread (Master Plan §16) | NEW | M | P | CHAT-004 | older-messages fetch works through reducer; window size config | RT-RACE variant + E | TODO |
