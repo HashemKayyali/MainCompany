@@ -42,3 +42,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# canonical Control Pack lives at repo-root docs/reconstruction
+docs/reconstruction/
