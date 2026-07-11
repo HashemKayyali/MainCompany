@@ -1,0 +1,94 @@
+{
+  "generatedAt": "2026-07-11T18:23:24.046Z",
+  "next": "http://localhost:3458",
+  "results": [
+    {
+      "path": "/",
+      "status": 200,
+      "deltas": [
+        {
+          "field": "ogImage",
+          "baseline": "https://www.eventiesjo.com/images/og-default.png",
+          "next": "https://www.eventiesjo.com/images/og-default.jpg",
+          "approved": "BASE-017/IMG-012 og-default.png→.jpg"
+        }
+      ]
+    },
+    {
+      "path": "/products",
+      "status": 200,
+      "deltas": [
+        {
+          "field": "ogImage",
+          "baseline": "https://www.eventiesjo.com/images/og-default.png",
+          "next": "https://www.eventiesjo.com/images/og-default.jpg",
+          "approved": "BASE-017/IMG-012 og-default.png→.jpg"
+        }
+      ]
+    },
+    {
+      "path": "/gallery",
+      "status": 200,
+      "deltas": [
+        {
+          "field": "ogImage",
+          "baseline": "https://www.eventiesjo.com/images/og-default.png",
+          "next": "https://www.eventiesjo.com/images/og-default.jpg",
+          "approved": "BASE-017/IMG-012 og-default.png→.jpg"
+        }
+      ]
+    },
+    {
+      "path": "/customers",
+      "status": 200,
+      "deltas": [
+        {
+          "field": "ogImage",
+          "baseline": "https://www.eventiesjo.com/images/og-default.png",
+          "next": "https://www.eventiesjo.com/images/og-default.jpg",
+          "approved": "BASE-017/IMG-012 og-default.png→.jpg"
+        }
+      ]
+    },
+    {
+      "path": "/about",
+      "status": 200,
+      "deltas": [
+        {
+          "field": "ogImage",
+          "baseline": "https://www.eventiesjo.com/images/og-default.png",
+          "next": "https://www.eventiesjo.com/images/og-default.jpg",
+          "approved": "BASE-017/IMG-012 og-default.png→.jpg"
+        }
+      ]
+    },
+    {
+      "path": "/contact",
+      "status": 200,
+      "deltas": [
+        {
+          "field": "ogImage",
+          "baseline": "https://www.eventiesjo.com/images/og-default.png",
+          "next": "https://www.eventiesjo.com/images/og-default.jpg",
+          "approved": "BASE-017/IMG-012 og-default.png→.jpg"
+        }
+      ]
+    },
+    {
+      "path": "/products/360",
+      "status": 200,
+      "deltas": []
+    },
+    {
+      "path": "/products/3d-booth-event-space-design",
+      "status": 200,
+      "deltas": []
+    },
+    {
+      "path": "/products/75-inch-floor-standing-lcd-touch",
+      "status": 200,
+      "deltas": []
+    }
+  ],
+  "unexplained": []
+}
