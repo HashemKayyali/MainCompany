@@ -8,6 +8,7 @@ import { productJsonLd, breadcrumbJsonLd } from '@/server/metadata/jsonld'
 import { normalizePublicHttpsUrl, SITE_URL } from '@/server/metadata/site'
 import { JsonLd } from '@/components/JsonLd'
 import { SmartImage } from '@/components/ui/SmartImage'
+import { ProductGallery } from '@/features/catalog/ProductGallery'
 import { Link } from '@/i18n/navigation'
 import { routing } from '@/i18n/routing'
 
@@ -76,34 +77,7 @@ export default async function ProductDetailPage({
       </nav>
 
       <div className="grid gap-8 md:grid-cols-2">
-        <div>
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-ink-50">
-            <SmartImage
-              media={gallery[0] ?? ''}
-              alt={product.name}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority
-              fetchPriority="high"
-              className="object-cover"
-            />
-          </div>
-          {gallery.length > 1 ? (
-            <ul className="mt-3 grid grid-cols-4 gap-2">
-              {gallery.slice(1, 5).map((g, i) => (
-                <li key={i} className="relative aspect-square overflow-hidden rounded-lg bg-ink-50">
-                  <SmartImage
-                    media={g}
-                    alt={`${product.name} ${i + 2}`}
-                    fill
-                    sizes="120px"
-                    className="object-cover"
-                  />
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
+        <ProductGallery images={gallery} alt={product.name} />
 
         <div>
           <h1 className="text-3xl font-bold text-ink-900">{product.name}</h1>
