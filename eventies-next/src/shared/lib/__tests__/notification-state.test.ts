@@ -57,7 +57,7 @@ describe('notification state helpers', () => {
   it('preserves an existing read timestamp', () => {
     const original = '2026-07-06T09:00:00.000Z'
     const next = markNotificationRowRead([row('a', { read_at: original })], 'a', '2026-07-06T11:00:00.000Z')
-    expect(next[0].read_at).toBe(original)
+    expect(next[0]?.read_at).toBe(original)
   })
 
   it('mark-all affects only the supplied current-recipient rows', () => {
