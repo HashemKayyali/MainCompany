@@ -2,8 +2,13 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
+import { getTranslations } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
 import { alexandria, sora, ibmPlexSansArabic } from '@/lib/fonts'
+import { SiteHeader } from '@/components/layout/SiteHeader'
+import { SiteFooter } from '@/components/layout/SiteFooter'
+import { JsonLd } from '@/components/JsonLd'
+import { GLOBAL_JSON_LD } from '@/server/metadata/jsonld'
 import '../globals.css'
 
 /**
@@ -35,8 +40,9 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params
   if (!hasLocale(routing.locales, locale)) notFound()
-  setRequestLocale(locale)
+  setRequestLocale(locale as 'en' | 'ar')
 
+  const t = await getTranslations('nav')
   const dir = locale === 'ar' ? 'rtl' : 'ltr'
 
   return (
@@ -56,7 +62,20 @@ export default async function LocaleLayout({
         <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="" />
       </head>
       <body className="font-sans">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        {GLOBAL_JSON_LD.map((node, i) => (
+          <JsonLd key={i} data={node} />
+        ))}
+        <NextIntlClientProvider>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded focus:bg-white focus:px-3 focus:py-2"
+          >
+            {t('skipToContent')}
+          </a>
+          <SiteHeader locale={locale} />
+          <main id="main-content">{children}</main>
+          <SiteFooter />
+        </NextIntlClientProvider>
       </body>
     </html>
   )

@@ -1,0 +1,54 @@
+{
+  "products": {
+    "heading": "Event Services & Rentals",
+    "intro": "Browse interactive games, screens, booths, production support, and event rentals from trusted providers across Jordan.",
+    "empty": "No services are available right now. Please check back soon.",
+    "filterAll": "All",
+    "filterByCategory": "Filter by category",
+    "requestCta": "Request this",
+    "from": "From",
+    "featured": "Featured"
+  },
+  "categories": {
+    "heading": "Browse Categories",
+    "intro": "Explore Eventies services grouped by category.",
+    "empty": "No categories yet.",
+    "viewCategory": "View {name}"
+  },
+  "customBuilds": {
+    "heading": "Custom Event Builds & Interactive Experiences",
+    "intro": "Eventies designs and builds custom interactive experiences, branded activations, games, software, hardware, and event-ready setups.",
+    "empty": "No custom builds published yet."
+  },
+  "customers": {
+    "heading": "Clients & Event Partners",
+    "intro": "A curated look at brands, schools, venues, and organizations connected to Eventies.",
+    "empty": "Client list coming soon."
+  },
+  "gallery": {
+    "heading": "Event Gallery & Activations",
+    "intro": "Browse albums from Eventies activations, service setups, custom builds, and real event moments across Jordan.",
+    "empty": "No albums published yet.",
+    "viewAlbum": "View album",
+    "photoCount": "{count} photos"
+  },
+  "detail": {
+    "backToServices": "All Services",
+    "aboutHeading": "About this service",
+    "featuresHeading": "What's included",
+    "partsHeading": "Parts & add-ons",
+    "requestCta": "Request this service",
+    "priceOnRequest": "Price on request"
+  },
+  "about": {
+    "heading": "About Eventies",
+    "intro": "Learn how Eventies helps clients, organizers, companies, and providers discover rentals, activations, production support, custom builds, and trusted event services across Jordan."
+  },
+  "contact": {
+    "heading": "Contact Eventies",
+    "intro": "Contact Eventies for event rentals, purchase requests, custom builds, support, provider inquiries, and partnerships in Jordan.",
+    "formComingSoon": "The contact form is being upgraded. In the meantime, reach us by email or WhatsApp.",
+    "emailUs": "Email us",
+    "whatsapp": "WhatsApp"
+  }
+}

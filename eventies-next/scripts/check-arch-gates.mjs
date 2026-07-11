@@ -29,7 +29,12 @@ function* walk(dir) {
 
 for (const file of walk(SRC)) {
   const rel = relative(process.cwd(), file).split(sep).join('/')
-  const text = readFileSync(file, 'utf8').replace(/^﻿/, '')
+  const raw = readFileSync(file, 'utf8').replace(/^﻿/, '')
+  // Strip comments before pattern-matching: the gates analyze CODE, not prose
+  // (a comment may legitimately mention `import.meta.env` or `'use cache'`).
+  const text = raw
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1')
 
   // GATE 1 (tests are exercised via the vitest server-only shim, not at runtime)
   if (rel.startsWith('src/server/') && !rel.includes('__tests__')) {

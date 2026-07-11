@@ -34,6 +34,12 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // Monorepo-style layout: the Vite app owns the repo root; scope tracing here.
   outputFileTracingRoot: __dirname,
+  // ADR-08 / IMG: custom Cloudinary loader; Vercel optimizer bypassed (no image
+  // billing). The loader delegates to the KEPT toCloudinaryTransformUrl.
+  images: {
+    loader: 'custom',
+    loaderFile: './src/lib/image-loader-entry.ts',
+  },
   // ADR-19: Cache Components is the single primary cache model.
   cacheComponents: true,
   experimental: {
@@ -63,6 +69,22 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
     ];
+  },
+  // CAT-018 — 308 permanent redirects for aliases → canonical primaries, for
+  // both the unprefixed (EN) and /ar forms. Edge-level, before render, so the
+  // alias never returns 200 content (11_SEO_CONSTITUTION §Redirects).
+  async redirects() {
+    const pairs: [string, string][] = [
+      ["/privacy", "/privacy-policy"],
+      ["/terms-of-service", "/terms"],
+      ["/cookies", "/cookie-policy"],
+      ["/user-login", "/login"],
+      ["/forgot-password", "/reset-password"],
+    ];
+    return pairs.flatMap(([from, to]) => [
+      { source: from, destination: to, permanent: true },
+      { source: `/ar${from}`, destination: `/ar${to}`, permanent: true },
+    ]);
   },
 };
 
