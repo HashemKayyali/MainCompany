@@ -47,9 +47,11 @@
   "contact": {
     "heading": "Contact Eventies",
     "intro": "Contact Eventies for event rentals, purchase requests, custom builds, support, provider inquiries, and partnerships in Jordan.",
-    "formComingSoon": "The contact form is being upgraded. In the meantime, reach us by email or WhatsApp.",
-    "emailUs": "Email us",
-    "whatsapp": "WhatsApp"
+    "reachUs": "Reach us directly",
+    "emailUs": "Email",
+    "callUs": "Call",
+    "whatsapp": "WhatsApp",
+    "followUs": "Follow us"
   },
   "hero": {
     "eyebrow": "Event Services Marketplace · Jordan",
@@ -74,6 +76,18 @@
     "how3Title": "Celebrate",
     "how3Body": "The Eventies team coordinates availability, pricing, and logistics.",
     "eventsHeading": "Built for every kind of event",
+    "eventTypes": [
+      "Corporate",
+      "Exhibitions",
+      "Schools",
+      "Malls",
+      "Celebrations",
+      "Graduations",
+      "Activations",
+      "Weddings"
+    ],
+    "searchTypeProduct": "service",
+    "searchTypeCategory": "category",
     "faqHeading": "Frequently asked questions",
     "ctaHeading": "Ready to plan your event?",
     "ctaBody": "Send one clear request and the Eventies team will follow up.",

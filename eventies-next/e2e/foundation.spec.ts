@@ -16,7 +16,9 @@ test('locale page SSRs with correct lang/dir and hreflang set', async ({ page },
   const html = page.locator('html')
   await expect(html).toHaveAttribute('lang', locale)
   await expect(html).toHaveAttribute('dir', locale === 'ar' ? 'rtl' : 'ltr')
-  await expect(page.getByTestId('locale-value')).toHaveText(locale)
+  // The real home renders the localized hero headline (replaces the P1
+  // foundation `data-testid=locale-value` probe, which no longer exists).
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 
   const hreflangs = page.locator('link[rel="alternate"][hreflang]')
   await expect(hreflangs).toHaveCount(3) // en + ar + x-default
@@ -32,12 +34,15 @@ test('report-only security headers are present (FOUND-013)', async ({ page }, te
   expect(headers['permissions-policy']).toContain('camera=()')
 })
 
-test('unknown path shows 404 UI and is noindexed (D-P1-01 contract)', async ({ page }, testInfo) => {
-  await page.goto(prefix(testInfo) + '/definitely-not-a-page')
-  // D-P1-01: under cacheComponents the status is 200 + robots noindex + client
-  // 404 UI. THIS TEST ENCODES THAT CONTRACT — when the P2 SEO-404 decision
-  // lands real 404s, flip the status assertion deliberately.
-  // (two robots metas can coexist: the PPR shell's and the resumed 404 UI's —
-  // assert at least one noindex is present)
+test('unknown path returns a REAL HTTP 404 and is noindexed (ADR-23)', async ({ page }, testInfo) => {
+  // ADR-23 (traditional cache model): missing routes now return a genuine 404
+  // status, not a 200 shell. Also noindexed.
+  const response = await page.goto(prefix(testInfo) + '/definitely-not-a-page')
+  expect(response?.status()).toBe(404)
   await expect(page.locator('meta[name="robots"][content*="noindex"]').first()).toBeAttached()
+})
+
+test('missing product returns a real HTTP 404 (CAT-010)', async ({ page }, testInfo) => {
+  const response = await page.goto(prefix(testInfo) + '/products/definitely-not-a-real-product-xyz')
+  expect(response?.status()).toBe(404)
 })

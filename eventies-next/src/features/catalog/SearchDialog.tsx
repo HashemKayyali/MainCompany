@@ -90,7 +90,9 @@ export function SearchDialog({ items }: { items: SearchItem[] }) {
                       className="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-brand-50"
                     >
                       <span dir="auto">{r.name}</span>
-                      <span className="text-xs text-ink-400">{r.type}</span>
+                      <span className="text-xs text-ink-400">
+                        {r.type === 'product' ? t('searchTypeProduct') : t('searchTypeCategory')}
+                      </span>
                     </Link>
                   </li>
                 ))

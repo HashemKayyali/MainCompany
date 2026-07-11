@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { Mail, Phone, MessageCircle } from 'lucide-react'
 import { buildMetadata } from '@/server/metadata/builders'
+import { social, socialLinks } from '@/shared/data/social'
 
 /**
- * CAT-016 — /contact shell (RSC). The form ISLAND with server submission is
- * P3 (FORM group); this phase ships the page + SEO + email/WhatsApp fallbacks
- * only (no session, no submission).
+ * CAT-016 — /contact (RSC). Real contact channels from the ported social data
+ * (no placeholder numbers/text). The full contact FORM with server submission
+ * is P3 (FORM group) — not shipped here, and NOT stubbed with placeholder UI.
  */
 export async function generateMetadata({
   params,
@@ -26,28 +28,64 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
   const { locale } = await params
   setRequestLocale(locale as 'en' | 'ar')
   const t = await getTranslations('catalog.contact')
+
+  const channels = [
+    { icon: Mail, label: t('emailUs'), value: social.email, href: `mailto:${social.email}` },
+    { icon: Phone, label: t('callUs'), value: social.phoneFormatted, href: `tel:${social.phone}` },
+    {
+      icon: MessageCircle,
+      label: t('whatsapp'),
+      value: social.phoneFormatted,
+      href: social.whatsapp,
+    },
+  ]
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
       <h1 className="text-3xl font-bold text-ink-900">{t('heading')}</h1>
       <p className="mt-4 text-ink-600">{t('intro')}</p>
-      <div className="mt-8 rounded-xl border border-dashed border-ink-200 p-6">
-        <p className="text-sm text-ink-600">{t('formComingSoon')}</p>
+
+      <section className="mt-8">
+        <h2 className="section-label">{t('reachUs')}</h2>
+        <ul className="mt-4 grid gap-3 sm:grid-cols-3">
+          {channels.map((c) => (
+            <li key={c.label}>
+              <a
+                href={c.href}
+                {...(c.href.startsWith('http')
+                  ? { target: '_blank', rel: 'noopener noreferrer' }
+                  : {})}
+                className="premium-card flex h-full flex-col gap-2 p-4 transition hover:-translate-y-0.5"
+              >
+                <c.icon className="h-5 w-5 text-brand-600" strokeWidth={2} />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-ink-400">
+                  {c.label}
+                </span>
+                <span dir="ltr" className="text-sm font-semibold text-ink-900">
+                  {c.value}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="mt-8">
+        <h2 className="section-label">{t('followUs')}</h2>
         <div className="mt-4 flex flex-wrap gap-3">
-          <a
-            href="mailto:support@eventiesjo.com"
-            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white"
-          >
-            {t('emailUs')}
-          </a>
-          <a
-            href="https://wa.me/962790000000"
-            rel="noreferrer"
-            className="rounded-lg border border-ink-200 px-4 py-2 text-sm font-medium text-ink-700"
-          >
-            {t('whatsapp')}
-          </a>
+          {socialLinks.map((s) => (
+            <a
+              key={s.platform}
+              href={s.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-ink-200 bg-white px-4 py-2 text-sm font-medium text-ink-700 hover:border-brand-300 hover:bg-brand-50"
+            >
+              {s.platform} · {s.label}
+            </a>
+          ))}
         </div>
-      </div>
+      </section>
     </div>
   )
 }

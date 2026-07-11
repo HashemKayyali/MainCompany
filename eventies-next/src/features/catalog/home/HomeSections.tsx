@@ -37,19 +37,10 @@ export async function HowItWorks({ locale }: { locale: string }) {
   )
 }
 
-const EVENT_TYPES = [
-  'Corporate',
-  'Exhibitions',
-  'Schools',
-  'Malls',
-  'Celebrations',
-  'Graduations',
-  'Activations',
-  'Weddings',
-]
-
 export async function EventTypes({ locale }: { locale: string }) {
   const t = await getTranslations({ locale: locale as 'en' | 'ar', namespace: 'catalog.home' })
+  // Localized (fixes the previously-hardcoded English list on /ar).
+  const eventTypes = t.raw('eventTypes') as string[]
   return (
     <section className="bg-ink-50/40 py-16">
       <div className="mx-auto max-w-7xl px-4">
@@ -57,7 +48,7 @@ export async function EventTypes({ locale }: { locale: string }) {
           <h2 className="text-center text-2xl font-bold text-ink-900">{t('eventsHeading')}</h2>
         </Reveal>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          {EVENT_TYPES.map((e, i) => (
+          {eventTypes.map((e, i) => (
             <Reveal key={e} delay={i * 0.04}>
               <span className="rounded-full border border-ink-200 bg-white px-5 py-2 text-sm font-medium text-ink-700">
                 {e}
