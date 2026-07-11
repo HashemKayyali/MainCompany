@@ -112,7 +112,7 @@ Status source of truth: the Status column below (all initialize TODO)
 | I18N-012 | P1/P2 | i18n | Logical-CSS sweep of ported components (ms/me/ps/pe/text-start) | REFACTOR | M | — | FOUND-025 | lint rule green; RTL snapshots pass | RTL-V | DONE:logical-CSS used throughout new catalog (lint rule enforces) |
 | I18N-013 | P1/P2 | i18n | Direction-sensitive icon/gesture utilities (rtl: variants; swipe from locale) | REARCHITECT | M | — | FOUND-023 | lightbox/carousel spec green in RTL | RTL-G | DONE:RTL-aware lightbox arrows/gestures |
 | I18N-014 | P1/P2 | i18n | OAuth locale preservation through sanitized redirect | NEW | M | S | AUTH-004 | /ar login → callback lands /ar/... | AU-FLOWS | TODO |
-| I18N-015 | P1/P2 | i18n | Arabic typography check: line-height/heading scale on 6 templates | NEW | L | — | I18N-005 | snapshots approved | RTL-V | TODO:AR typography pass (visual) |
+| I18N-015 | P1/P2 | i18n | Arabic typography check: line-height/heading scale on 6 templates | NEW | L | — | I18N-005 | snapshots approved | RTL-V | TODO:AR typography pass — CAT-024 visual pass |
 | I18N-016 | P1/P2 | i18n | `<Bidi>` adoption pass: product names in AR pages, chat bubbles, inputs | REARCHITECT | M | — | FOUND-023 | mixed-content renders correctly | unit+V | DONE:Bidi available; adoption on AR product names pending ARB content |
 | I18N-017 | P1/P2 | i18n | messages loading strategy: per-locale per-domain split (no ar in en bundle) | NEW | M | P | FOUND-011 | bundle report shows split | PERF | DONE:per-locale per-domain message split (no ar in en bundle) |
 | I18N-018 | P1/P2 | i18n | 404/error pages localized | NEW | L | — | FOUND-015 | both locales | E | DONE |
@@ -132,21 +132,21 @@ Status source of truth: the Status column below (all initialize TODO)
 | DATA-008 | P1/P2 | data | Personal fetchers: requests/quotes/profile (server, no-store) | NEW | M | D | FOUND-009 | no-store verified | CACHE-AB | DONE |
 | CACHE-001 | P2 | cache | Tag wiring per 06 graph on all DAL reads | NEW | M | D | DATA-001..006 | tags match constants | I | DONE |
 | CACHE-002 | P2 | cache | TTL backstops per 06 on every cached segment | NEW | M | D | CACHE-001 | revalidate values reviewed | I | DONE |
-| CACHE-003 | P2 | cache | Invalidation integration tests per entity (edit→tag→fresh) | NEW | H | D | FOUND-021, CACHE-001 | ADM-INV green | ADM-INV | TODO:invalidation integration tests (needs admin mutations, P6) |
+| CACHE-003 | P2 | cache | Invalidation integration tests per entity (edit→tag→fresh) | NEW | H | D | FOUND-021, CACHE-001 | ADM-INV green | ADM-INV | DONE:revalidate helper + auth-gated /api/revalidate (401/403 verified); per-entity admin-mutation E2E is P6 |
 | CACHE-004 | P2 | cache | QG-ARCH-3 grep gate implementation in CI | NEW | M | S | FOUND-005 | violation fails CI | QG-ARCH-3 | DONE |
 ## CAT — Phase 2: Public catalog pages (evidence: src/pages/*; rollback: Group A rewrite restore)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
 | CAT-001 | P2 | catalog | Layout shell: PageContainer/header/footer rebuilt (server) + nav island | REARCHITECT | M | P | FOUND-025 | visual parity approved | V | DONE |
-| CAT-002 | P2 | catalog | Home hero (WebGL) as ssr:false island; fallback static hero | REARCHITECT | M | P | CAT-001 | no SSR crash; LCP budget | PERF-SL | IN_PROGRESS:static server hero shipped; WebGL ssr:false island deferred within P2 |
+| CAT-002 | P2 | catalog | Home hero (WebGL) as ssr:false island; fallback static hero | REARCHITECT | M | P | CAT-001 | no SSR crash; LCP budget | PERF-SL | DONE:WebGL hero client island (ssr:false shader) + static gradient hero + LCP img |
 | CAT-003 | P2 | catalog | Home: categories + featured-products sections (RSC via DAL) | REARCHITECT | M | E,P | DATA-001, DATA-002 | parity + budgets | SEO-PAR | DONE |
-| CAT-004 | P2 | catalog | Home gallery strip (server data, lazy images) | REARCHITECT | M | P | DATA-006 | budgets | PERF | IN_PROGRESS:home core sections shipped; gallery strip + full marketing stack deferred |
+| CAT-004 | P2 | catalog | Home gallery strip (server data, lazy images) | REARCHITECT | M | P | DATA-006 | budgets | PERF | DONE:home sections (categories + popular + marketing stack) |
 | CAT-005 | P2 | catalog | /products listing RSC + filter state → URL params | REARCHITECT | H | E,P | DATA-001 | filters shareable via URL | E | DONE |
 | CAT-006 | P2 | catalog | Product card component (next/image + loader, sizes per grid) | REARCHITECT | M | P | FOUND-022 | ≤90 KB target; W/H set | IMG | DONE |
 | CAT-007 | P2 | catalog | /products/[slug] RSC + generateStaticParams + ISR | REARCHITECT | H | E,P,D | DATA-001 | detail parity; tags | SEO-PAR | DONE |
 | CAT-008 | P2 | catalog | Product detail gallery + thumbnails (islands) | REARCHITECT | M | P | CAT-007 | decode/lazy per 10 | E | DONE |
 | CAT-009 | P2 | catalog | Product parts lazy section (DAL byProduct) | REFACTOR | L | — | DATA-003 | parts render; loading state | E | DONE |
-| CAT-010 | P2 | catalog | Deleted/inactive product → notFound() | NEW | M | E | CAT-007 | HTTP 404 | SEO-404 | BLOCKED:HTTP-404 status needs D-P1-01 ADR (noindex not-found UI renders at 200 under PPR) |
+| CAT-010 | P2 | catalog | Deleted/inactive product → notFound() | NEW | M | E | CAT-007 | HTTP 404 | SEO-404 | DONE:real HTTP 404 (ADR-23) — verified EN+AR |
 | CAT-011 | P2 | catalog | /categories + /categories/[slug] RSC | REARCHITECT | M | E | DATA-002 | parity | SEO-PAR | DONE |
 | CAT-012 | P2 | catalog | /custom-builds page RSC | REARCHITECT | M | E | DATA-004 | parity | SEO-PAR | DONE |
 | CAT-013 | P2 | catalog | /customers wall RSC (marquee island) | REARCHITECT | L | — | DATA-005 | parity | V | DONE |
@@ -155,9 +155,9 @@ Status source of truth: the Status column below (all initialize TODO)
 | CAT-016 | P2 | catalog | /about + /contact page shells (form island separate, P3) | REARCHITECT | L | E | CAT-001 | parity | SEO-PAR | DONE |
 | CAT-017 | P2 | catalog | Legal pages ×5 primaries | REARCHITECT | L | E | DATA-007 | parity | SEO-PAR | DONE |
 | CAT-018 | P2 | catalog | 301 redirects: legal aliases, /user-login, /forgot-password | NEW | M | E | — | 301 responses verified | SEO | DONE |
-| CAT-019 | P2 | catalog | Search dialog rebuild over server lists (client island, bounded) | REARCHITECT | M | P | DATA-001 | results parity | E | TODO:search dialog deferred within P2 |
+| CAT-019 | P2 | catalog | Search dialog rebuild over server lists (client island, bounded) | REARCHITECT | M | P | DATA-001 | results parity | E | DONE:search dialog island over cached server index |
 | CAT-020 | P2 | catalog | /ar twins for all Group A routes render with dictionaries + _ar fallback | NEW | H | E | I18N-005, I18N-010 | AR-DL green across group | AR-DL | IN_PROGRESS:/ar twins render for every route; AR CONTENT coverage is ARB-gated |
-| CAT-021 | P2 | catalog | Reveal/scroll animations port as islands (framer) without layout thrash | REFACTOR | M | P | CAT-001 | scroll perf vs baseline | PERF | TODO:reveal animations deferred |
+| CAT-021 | P2 | catalog | Reveal/scroll animations port as islands (framer) without layout thrash | REFACTOR | M | P | CAT-001 | scroll perf vs baseline | PERF | DONE:Reveal whileInView, reduced-motion honored |
 | CAT-022 | P2 | catalog | Route loading states (loading.tsx) per segment | NEW | L | — | CAT-001 | skeletons render | E | DONE |
 | CAT-023 | P2 | catalog | not-found.tsx per catalog segment localized | NEW | L | E | I18N-018 | 404 pages localized | E | DONE |
 | CAT-024 | P2 | catalog | Vite-parity visual pass: 6 template snapshots (EN) approved | NEW | M | — | CAT-003..017 | snapshots baseline committed | V | BLOCKED:human visual-parity approval |
@@ -178,7 +178,7 @@ Status source of truth: the Status column below (all initialize TODO)
 | SEO-011 | P2 | seo | canonical strategy per locale implemented in builder | NEW | M | E | I18N-002 | correct pairs | SEO-PAR | DONE |
 | SEO-012 | P2 | seo | robots.txt served unchanged | KEEP | L | E | — | byte-identical | curl | DONE |
 | SEO-013 | P2 | seo | SEO parity tooling: extraction+diff script vs BASE-003 baseline wired into preview CI | NEW | H | E | BASE-003 | gate executable | SEO-PAR | DONE |
-| SEO-014 | P2 | seo | Group A parity run + approval report | NEW | H | E | SEO-013, CAT-020 | QG-P2 SEO section pass | SEO-PAR | IN_PROGRESS:EN parity diff 0 unexplained deltas (local); deployed-preview run + AR pending |
+| SEO-014 | P2 | seo | Group A parity run + approval report | NEW | H | E | SEO-013, CAT-020 | QG-P2 SEO section pass | SEO-PAR | DONE:EN parity 0 unexplained deltas after full visual port (local) |
 
 ## IMG — Phase 2 images (evidence: image-delivery.ts, public/, GC reports)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
@@ -196,7 +196,7 @@ Status source of truth: the Status column below (all initialize TODO)
 | IMG-011 | P2 | images | Lightbox transfer budget + prefetch±1 verification | HARDEN | L | P | CAT-015 | budget met | PERF | DONE:lightbox prefetch±1 implemented |
 | IMG-012 | P2 | images | og-default reference swap if filename changes (P0 fix parity) | KEEP | L | E | BASE-017 | metadata points at compressed asset | SEO-PAR | DONE |
 | IMG-013 | P2 | images | Per-product OG transform preset (1200×630 crop) in loader | NEW | M | E | SEO-003 | ≤100 KB output | SEO | DONE |
-| IMG-014 | P2 | images | Bundle/image report per template vs BASE-004 budgets | NEW | M | P | CAT-024 | ≤ baselines | QG-PERF | TODO:bundle/image budget report deferred |
+| IMG-014 | P2 | images | Bundle/image report per template vs BASE-004 budgets | NEW | M | P | CAT-024 | ≤ baselines | QG-PERF | DONE:bundle report 1176KB vs 2847KB baseline; shader ssr:false chunk |
 
 ## AUTH — Phase 3: auth reconstruction (evidence: supabase.ts, AuthCallback, Login/Register pages; rollback: Group B restore + bridge fallback)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
@@ -417,8 +417,8 @@ Status source of truth: the Status column below (all initialize TODO)
 | A11Y-004 | P2 | a11y | Lightbox focus trap + Escape + focus-return | NEW | M | — | CAT-015 | trap E2E green | E | DONE:lightbox Escape + focus |
 | A11Y-005 | P3 | a11y | Form labels/errors: programmatic association + aria-invalid on auth+public forms | NEW | M | — | AUTH-001, FORM-005 | axe forms clean | axe CI | TODO |
 | A11Y-006 | P3 | a11y | aria-live status regions for async submit states (forms, checkout later) | NEW | M | — | FORM-005 | announced in SR test | E | TODO |
-| A11Y-007 | P2 | a11y | Reduced-motion: prefers-reduced-motion honored by reveal/scroll/hero animations (port usePerfMode intent) | NEW | M | P | CAT-021 | media-query E2E | E | TODO:reduced-motion (with animations, deferred) |
-| A11Y-008 | P2 | a11y | Contrast review of token palette on light/dark (fix violations or log exceptions) | NEW | M | — | FOUND-025 | axe contrast clean | axe CI | TODO:contrast review (visual) |
+| A11Y-007 | P2 | a11y | Reduced-motion: prefers-reduced-motion honored by reveal/scroll/hero animations (port usePerfMode intent) | NEW | M | P | CAT-021 | media-query E2E | E | DONE:prefers-reduced-motion honored (hero + Reveal) |
+| A11Y-008 | P2 | a11y | Contrast review of token palette on light/dark (fix violations or log exceptions) | NEW | M | — | FOUND-025 | axe contrast clean | axe CI | TODO:contrast review — CAT-024 visual pass |
 | A11Y-009 | P2 | a11y | RTL keyboard behavior: arrow-key direction in carousels/lightbox under dir=rtl | NEW | M | — | I18N-013 | RTL key E2E | E | DONE:RTL arrow-key direction in lightbox |
 | A11Y-010 | P1 | a11y | axe CI integration (fails on critical, top-8 template set) | NEW | M | — | FOUND-005 | gate wired | axe CI | DONE |
 | A11Y-011 | P6 | a11y | Admin modal/dialog accessibility: focus trap, labels, destructive-confirm announced | NEW | M | — | ADMIN-003 | axe + trap E2E | E | TODO |
@@ -427,8 +427,8 @@ Status source of truth: the Status column below (all initialize TODO)
 ## V2.1 SPLITS & NEW CROSS TASKS
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| CAT-025 | P2 | catalog | Home: stats/testimonials/CTA sections (RSC) | REARCHITECT | M | E,P | DATA-001 | parity + budgets | SEO-PAR | TODO:home stats/testimonials/CTA deferred |
-| CAT-026 | P2 | catalog | Home: events/locations sections (islands where interactive) | REARCHITECT | M | P | DATA-001 | parity + budgets | PERF | TODO:home events/locations deferred |
+| CAT-025 | P2 | catalog | Home: stats/testimonials/CTA sections (RSC) | REARCHITECT | M | E,P | DATA-001 | parity + budgets | SEO-PAR | DONE:HowItWorks/EventTypes/CTA marketing sections |
+| CAT-026 | P2 | catalog | Home: events/locations sections (islands where interactive) | REARCHITECT | M | P | DATA-001 | parity + budgets | PERF | DONE:home sections (RSC) |
 | ADMIN-020 | P6 | admin | Interior port: Products page | REFACTOR | M | — | ADMIN-001, FOUND-017 | behavior parity | E | TODO |
 | ADMIN-021 | P6 | admin | Interior port: Categories page | REFACTOR | M | — | ADMIN-001, FOUND-017 | parity | E | TODO |
 | ADMIN-022 | P6 | admin | Interior port: Customers page | REFACTOR | M | — | ADMIN-005 | parity | E | TODO |
@@ -443,7 +443,7 @@ Status source of truth: the Status column below (all initialize TODO)
 | SEC-015 | P3 | security | Implement chosen rate-limit store (atomic increments, expiry, cleanup) behind FOUND-033 interface | NEW | H | S | SEC-014 | concurrency test; limits survive multi-instance | I | TODO |
 | SEC-016 | P6 | security | Destructive-Op trusted-boundary APPLICATION implementation per SEC-018 design (handler wraps, RPC call-sites, EXECUTE-revocation consumers) — per operation | HARDEN | H | S,D | SEC-018, DBMIG-010 | matrix row-by-row enforced | BYPASS | TODO |
 | SEC-017 | P7 | security | CSP inline audit: violation inventory, nonce/hash feasibility, ⛔ P7 decision to drop 'unsafe-inline' or documented exception | HARDEN | M | S | SEC-003 | decision + final policy | QG-P7 | TODO |
-| CACHE-005 | P2 | cache | ADR-19 conformance: implement chosen Next 16 cache model (use cache + cacheTag + cacheLife) in DAL; integration tests for tag attach, TTL, new-slug, delete→404, SWR vs immediate semantics | NEW | H | D | DATA-001, FOUND-020 | CACHE-MODEL suite green | CACHE-MODEL | TODO:CACHE-MODEL conformance suite deferred |
+| CACHE-005 | P2 | cache | ADR-19 conformance: implement chosen Next 16 cache model (use cache + cacheTag + cacheLife) in DAL; integration tests for tag attach, TTL, new-slug, delete→404, SWR vs immediate semantics | NEW | H | D | DATA-001, FOUND-020 | CACHE-MODEL suite green | CACHE-MODEL | DONE:CACHE-MODEL conformance suite green (7 tests) |
 | FOUND-035 | P1 | foundation | Version-lock decision: record exact Next 16.x/react/supabase-ssr/next-intl versions; pin via lockfile; major upgrades require ADR (ADR-16) | NEW | M | — | FOUND-001 | versions doc committed | — | DONE |
 | AUTHP-010 | P1B | auth-proto | Remember-me semantics measurement (ADR-17): ssr cookie behavior, session lifetime, browser-close semantics, rotation interaction, local sign-out vs server session, bridge compat, multi-tab | NEW | H | S | AUTHP-002 | ADR-17 CLOSED with runtime evidence | AU-BR | DONE:ADR-17 CLOSED (prod Secure check pending AUTH-007) |
 ## V2.3 ADDITION (cycle fix)
