@@ -40,28 +40,12 @@ const nextConfig: NextConfig = {
     loader: 'custom',
     loaderFile: './src/lib/image-loader-entry.ts',
   },
-  // ADR-19: Cache Components is the single primary cache model.
-  cacheComponents: true,
-  experimental: {
-    // Documented escape hatch for apps whose root layout lives in a top-level
-    // dynamic segment ([locale]): unmatched URLs get a real 404 at the routing
-    // level (see src/app/global-not-found.tsx).
-    globalNotFound: true,
-  },
-  cacheLife: {
-    // 06_DATA_AND_CACHE_CONSTITUTION: named profiles defined ONCE here;
-    // DAL functions reference them via cacheLife('catalog') / cacheLife('daily').
-    catalog: {
-      stale: 300, // client may reuse for 5 min without asking
-      revalidate: 3600, // ≤1h backstop — missed tag invalidation self-heals (ADR-07/19)
-      expire: 86400,
-    },
-    daily: {
-      stale: 3600,
-      revalidate: 86400,
-      expire: 604800,
-    },
-  },
+  // ADR-23 (owner-approved amendment to ADR-19): cacheComponents/PPR is
+  // DISABLED so `notFound()` on missing/deleted catalog entities returns a
+  // REAL HTTP 404 (PPR always commits a 200 shell before notFound runs). The
+  // catalog read path keeps tag-revalidated caching via unstable_cache in the
+  // DAL (server/dal/*) — same tag registry, same revalidateTag invalidation,
+  // same TTL intent (catalog ~1h, daily ~24h).
   async headers() {
     return [
       {

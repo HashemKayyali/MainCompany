@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
-import { getTranslations } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
 import { alexandria, sora, ibmPlexSansArabic } from '@/lib/fonts'
 import { SiteHeader } from '@/components/layout/SiteHeader'
@@ -42,7 +41,6 @@ export default async function LocaleLayout({
   if (!hasLocale(routing.locales, locale)) notFound()
   setRequestLocale(locale as 'en' | 'ar')
 
-  const t = await getTranslations('nav')
   const dir = locale === 'ar' ? 'rtl' : 'ltr'
 
   return (
@@ -66,15 +64,9 @@ export default async function LocaleLayout({
           <JsonLd key={i} data={node} />
         ))}
         <NextIntlClientProvider>
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded focus:bg-white focus:px-3 focus:py-2"
-          >
-            {t('skipToContent')}
-          </a>
           <SiteHeader locale={locale} />
           <main id="main-content">{children}</main>
-          <SiteFooter />
+          <SiteFooter locale={locale} />
         </NextIntlClientProvider>
       </body>
     </html>

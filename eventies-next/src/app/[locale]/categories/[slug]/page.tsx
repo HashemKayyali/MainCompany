@@ -10,7 +10,13 @@ import { JsonLd } from '@/components/JsonLd'
 import { ProductCard } from '@/features/catalog/ProductCard'
 import { routing } from '@/i18n/routing'
 
-/** CAT-011 — /categories/[slug] detail (RSC) + CollectionPage/ItemList JSON-LD. */
+/**
+ * CAT-011 — /categories/[slug] detail (RSC, ADR-23 traditional model) +
+ * CollectionPage/ItemList JSON-LD. Missing category → notFound() → real 404.
+ */
+export const dynamicParams = true
+export const revalidate = 3600
+
 export async function generateStaticParams() {
   const categories = await getCategories()
   return categories.map((c) => ({ locale: routing.defaultLocale, slug: c.slug }))

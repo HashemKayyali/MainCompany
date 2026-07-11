@@ -18,10 +18,15 @@ export const TAGS = {
   legal: (doc: string) => `legal:${doc}`,
 } as const
 
-/** cacheLife profile names — the profiles themselves are defined ONCE in next.config.ts. */
-export const CACHE_PROFILES = {
-  catalog: 'catalog',
-  daily: 'daily',
+/**
+ * TTL backstops (seconds) for unstable_cache `revalidate` — ADR-23 traditional
+ * model. Same intent as the former cacheLife profiles (catalog ≈1h, daily
+ * ≈24h): a missed tag invalidation self-heals within the window (06 §Hard
+ * rule 2 / ADR-07).
+ */
+export const REVALIDATE = {
+  catalog: 3600,
+  daily: 86400,
 } as const
 
 /**

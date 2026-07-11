@@ -1,23 +1,22 @@
 import 'server-only'
 
-import { cacheLife, cacheTag } from 'next/cache'
+import { unstable_cache } from 'next/cache'
 import type { Category } from '@/shared/types/catalog'
 import { createCategoriesService } from '@/shared/services/categories'
 import { getAnonServerClient } from './anon-client'
-import { TAGS, CACHE_PROFILES } from '@/server/cache/tags'
+import { TAGS, REVALIDATE } from '@/server/cache/tags'
 
-/** DATA-002 — categories DAL (cache owner for the categories domain). */
+/** DATA-002 — categories DAL (cache owner; ADR-23 traditional model). */
 
-export async function getCategories(): Promise<Category[]> {
-  'use cache'
-  cacheTag(TAGS.categories)
-  cacheLife(CACHE_PROFILES.catalog)
-  return createCategoriesService(getAnonServerClient()).getAll()
-}
+export const getCategories = unstable_cache(
+  async (): Promise<Category[]> => createCategoriesService(getAnonServerClient()).getAll(),
+  ['dal:categories:all'],
+  { tags: [TAGS.categories], revalidate: REVALIDATE.catalog }
+)
 
-export async function getCategoryBySlug(slug: string): Promise<Category | null> {
-  'use cache'
-  cacheTag(TAGS.category(slug), TAGS.categories)
-  cacheLife(CACHE_PROFILES.catalog)
-  return createCategoriesService(getAnonServerClient()).getBySlug(slug)
-}
+export const getCategoryBySlug = unstable_cache(
+  async (slug: string): Promise<Category | null> =>
+    createCategoriesService(getAnonServerClient()).getBySlug(slug),
+  ['dal:categories:bySlug'],
+  { tags: [TAGS.categories], revalidate: REVALIDATE.catalog }
+)

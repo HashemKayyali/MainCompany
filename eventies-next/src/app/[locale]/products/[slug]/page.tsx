@@ -12,16 +12,18 @@ import { Link } from '@/i18n/navigation'
 import { routing } from '@/i18n/routing'
 
 /**
- * CAT-007/008/009/010 — /products/[slug] (RSC). generateStaticParams warms EN
- * slugs (warm-up only, never correctness — new slugs resolve on demand, 06);
- * an inactive/missing product → notFound() → HTTP 404 (CAT-010/SEO-404).
- * Product + BreadcrumbList JSON-LD (SEO-007/016), OG image via first product
- * image (SEO-003). Detail-main image is the LCP candidate → eager + high.
+ * CAT-007/008/009/010 — /products/[slug] (RSC, ADR-23 traditional model).
+ * generateStaticParams warms EN slugs (build warm-up only — correctness never
+ * depends on it, 06); dynamicParams renders unknown/new slugs on demand; an
+ * inactive/missing product → notFound() → **real HTTP 404** (SEO-404). The DAL
+ * read stays cached (unstable_cache + tags + revalidate). Product +
+ * BreadcrumbList JSON-LD (SEO-007/016); detail-main image is the LCP candidate.
  */
+export const dynamicParams = true
+export const revalidate = 3600
 
 export async function generateStaticParams() {
   const products = await getProducts()
-  // Warm EN only; AR resolves on demand. Cap to avoid a huge build fan-out.
   return products.slice(0, 50).map((p) => ({ locale: routing.defaultLocale, slug: p.slug }))
 }
 

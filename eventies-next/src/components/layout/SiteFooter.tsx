@@ -15,9 +15,10 @@ const LEGAL = [
   { href: '/cookie-policy', key: 'cookies' },
 ] as const
 
-export async function SiteFooter() {
-  const t = await getTranslations('footer')
-  const tn = await getTranslations('nav')
+export async function SiteFooter({ locale }: { locale: string }) {
+  const loc = locale as 'en' | 'ar'
+  const t = await getTranslations({ locale: loc, namespace: 'footer' })
+  const tn = await getTranslations({ locale: loc, namespace: 'nav' })
   // Static: reading the clock in a prerendered server component is disallowed
   // under cacheComponents. The copyright year updates on deploy.
   const year = 2026
