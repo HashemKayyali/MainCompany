@@ -6,9 +6,19 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --check src scripts",
+    "format:fix": "prettier --write src scripts",
+    "gate:arch": "node scripts/check-arch-gates.mjs",
+    "gate:i18n": "node scripts/check-i18n-coverage.mjs",
+    "gate:cycles": "madge --circular --extensions ts,tsx src",
+    "ci": "npm run typecheck && npm run lint && npm run gate:arch && npm run gate:i18n && npm run gate:cycles && npm run test && npm run build"
   },
   "dependencies": {
+    "@sentry/nextjs": "^10.65.0",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.110.2",
     "next": "16.2.10",
