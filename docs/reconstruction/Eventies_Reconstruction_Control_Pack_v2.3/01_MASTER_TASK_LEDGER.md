@@ -1,4 +1,4 @@
-# 01 — MASTER TASK LEDGER
+ DONE | BLOCKED:needs a live preview-deployment URL | DONE | DONE | DONE | BLOCKED:dashboard rate-limit/MFA values (public GoTrue settings captured in 19) | DONE | DONE | DONE | DONE | DONE | BLOCKED:needs GSC access (runbook committed) | BLOCKED:needs operator prod-login session (runbook committed) | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE | DONE |# 01 — MASTER TASK LEDGER
 The project progress tracker. Claude Code updates Status per task (TODO / IN_PROGRESS / DONE / BLOCKED:reason) in the same PR as the work.
 
 ## Ledger legend (field semantics — applies to every row)
