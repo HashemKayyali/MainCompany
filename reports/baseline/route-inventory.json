@@ -1,0 +1,91 @@
+{
+  "task": "BASE-002",
+  "generatedAt": "2026-07-11",
+  "sourceCommit": "f1d441a44c2d28f1a2a456d974d33d0a1d24bd5e",
+  "sources": ["src/router.tsx", "vercel.json", "scripts/prerender-seo.mjs (STATIC_PAGES)"],
+  "routeCount": 51,
+  "reconciliation": {
+    "ledgerClaim": 51,
+    "actual": 51,
+    "verdict": "MATCH — 27 root-layout children (incl. index + catch-all) + 7 top-level auth routes + 17 admin routes (incl. index + catch-all)"
+  },
+  "routes": [
+    { "path": "/", "component": "HomePage", "access": "public", "noindexHeader": false, "prerendered": true },
+    { "path": "/products", "component": "ProductsPage", "access": "public", "noindexHeader": false, "prerendered": true },
+    { "path": "/custom-builds", "component": "CustomBuildsPage", "access": "public", "noindexHeader": false, "prerendered": true },
+    { "path": "/products/:slug", "component": "ProductDetailsPage", "access": "public", "noindexHeader": false, "prerendered": true, "notes": "30 product pages prerendered at build time" },
+    { "path": "/categories", "component": "CategoriesPage", "access": "public", "noindexHeader": false, "prerendered": false, "notes": "listing page NOT in STATIC_PAGES; only per-category pages prerendered" },
+    { "path": "/categories/:slug", "component": "CategoryPage", "access": "public", "noindexHeader": false, "prerendered": true, "notes": "8 category pages prerendered at build time" },
+    { "path": "/customers", "component": "CustomersPage", "access": "public", "noindexHeader": false, "prerendered": true },
+    { "path": "/gallery", "component": "GalleryPage", "access": "public", "noindexHeader": false, "prerendered": true },
+    { "path": "/about", "component": "AboutPage", "access": "public", "noindexHeader": false, "prerendered": true },
+    { "path": "/contact", "component": "ContactPage", "access": "public", "noindexHeader": false, "prerendered": true },
+    { "path": "/privacy-policy", "component": "LegalPage(privacy)", "access": "public", "noindexHeader": false, "prerendered": false, "notes": "primary legal URL" },
+    { "path": "/privacy", "component": "LegalPage(privacy)", "access": "public", "noindexHeader": false, "prerendered": false, "notes": "alias renders 200 content — 301 target in Next (CAT-018)" },
+    { "path": "/terms", "component": "LegalPage(terms)", "access": "public", "noindexHeader": false, "prerendered": false, "notes": "primary legal URL" },
+    { "path": "/terms-of-service", "component": "LegalPage(terms)", "access": "public", "noindexHeader": false, "prerendered": false, "notes": "alias renders 200 content" },
+    { "path": "/vendor-terms", "component": "LegalPage(vendorTerms)", "access": "public", "noindexHeader": false, "prerendered": false, "notes": "primary legal URL" },
+    { "path": "/refund-policy", "component": "LegalPage(refund)", "access": "public", "noindexHeader": false, "prerendered": false, "notes": "primary legal URL" },
+    { "path": "/cookie-policy", "component": "LegalPage(cookies)", "access": "public", "noindexHeader": false, "prerendered": false, "notes": "primary legal URL" },
+    { "path": "/cookies", "component": "LegalPage(cookies)", "access": "public", "noindexHeader": false, "prerendered": false, "notes": "alias renders 200 content" },
+    { "path": "/profile", "component": "ProfilePage", "access": "authenticated", "noindexHeader": true, "prerendered": false },
+    { "path": "/rental-cart", "component": "RentalCartPage", "access": "authenticated", "noindexHeader": true, "prerendered": false },
+    { "path": "/checkout", "component": "CheckoutPage", "access": "authenticated", "noindexHeader": true, "prerendered": false },
+    { "path": "/order-summary/:requestNumber", "component": "OrderSummaryPage", "access": "authenticated", "noindexHeader": true, "prerendered": false },
+    { "path": "/purchase-quote", "component": "PurchaseQuotePage", "access": "authenticated", "noindexHeader": true, "prerendered": false },
+    { "path": "/my-requests", "component": "MyRequestsPage", "access": "authenticated", "noindexHeader": true, "prerendered": false },
+    { "path": "/my-requests/:requestNumber", "component": "MyRequestDetailsPage", "access": "authenticated", "noindexHeader": true, "prerendered": false },
+    { "path": "/notifications", "component": "NotificationsPage", "access": "authenticated", "noindexHeader": false, "prerendered": false, "notes": "DISCOVERY D-P0-04: private route MISSING from vercel.json X-Robots-Tag noindex list" },
+    { "path": "/* (root catch-all)", "component": "NotFoundPage", "access": "public", "noindexHeader": false, "prerendered": false, "notes": "SPA soft-404 — served 200 (known, fixed by SEO-404 in Next)" },
+    { "path": "/auth/callback", "component": "AuthCallback", "access": "public", "noindexHeader": true, "prerendered": false },
+    { "path": "/login", "component": "LoginPage", "access": "public", "noindexHeader": true, "prerendered": false },
+    { "path": "/user-login", "component": "UserLoginRedirect → /login", "access": "public", "noindexHeader": true, "prerendered": false, "notes": "client-side Navigate, preserves search params" },
+    { "path": "/register", "component": "RegisterPage", "access": "public", "noindexHeader": true, "prerendered": false },
+    { "path": "/reset-password", "component": "ResetPasswordPage", "access": "public", "noindexHeader": true, "prerendered": false },
+    { "path": "/forgot-password", "component": "ResetPasswordPage", "access": "public", "noindexHeader": true, "prerendered": false, "notes": "alias — 301 target in Next (CAT-018); NOT in vercel.json rewrites to / (covered by SPA catch-all rewrite)" },
+    { "path": "/update-password", "component": "UpdatePasswordPage", "access": "public (recovery session)", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin", "component": "DashboardPage (AdminGuard)", "access": "admin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/products", "component": "AdminProductsPage", "access": "admin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/parts", "component": "AdminPartsPage", "access": "admin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/customers", "component": "AdminCustomersPage", "access": "admin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/categories", "component": "AdminCategoriesPage", "access": "admin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/custom-builds", "component": "AdminCustomBuildsPage", "access": "admin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/gallery", "component": "AdminGalleryPage", "access": "admin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/users", "component": "AdminUsersPage", "access": "admin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/admins", "component": "AdminAdminsPage", "access": "admin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/logs", "component": "AdminLogsPage", "access": "admin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/requests", "component": "AdminRequestsPage", "access": "admin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/requests/:type/:id", "component": "AdminRequestDetailsPage", "access": "admin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/chats", "component": "AdminChatsPage (SuperAdminGuard)", "access": "superadmin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/contacts", "component": "AdminContactSubmissionsPage", "access": "admin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/notifications", "component": "AdminNotificationsPage", "access": "admin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/notifications/send", "component": "AdminNotificationSendPage (SuperAdminGuard)", "access": "superadmin", "noindexHeader": true, "prerendered": false },
+    { "path": "/admin/* (admin catch-all)", "component": "NotFoundPage", "access": "admin", "noindexHeader": true, "prerendered": false }
+  ],
+  "vercel": {
+    "cleanUrls": true,
+    "rewrites": [
+      { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+      { "source": "/reset-password", "destination": "/" },
+      { "source": "/update-password", "destination": "/" },
+      { "source": "/auth/callback", "destination": "/" },
+      { "source": "/((?!api/).*)", "destination": "/", "notes": "SPA catch-all — everything except /api/* serves index.html (or prerendered variant via cleanUrls)" }
+    ],
+    "globalHeaders": { "X-Frame-Options": "DENY", "X-Content-Type-Options": "nosniff", "Referrer-Policy": "strict-origin-when-cross-origin" },
+    "cacheHeaders": {
+      "/assets/*": "public, max-age=31536000, immutable",
+      "/images/*": "public, max-age=86400, stale-while-revalidate=604800",
+      "/brand/*": "public, max-age=86400, stale-while-revalidate=604800"
+    },
+    "noindexHeaderList": [
+      "/login", "/register", "/user-login", "/forgot-password", "/auth/callback",
+      "/reset-password", "/update-password", "/profile", "/rental-cart", "/checkout",
+      "/order-summary/(.*)", "/purchase-quote", "/my-requests", "/my-requests/(.*)",
+      "/admin", "/admin/(.*)"
+    ]
+  },
+  "discoveries": [
+    { "id": "D-P0-04", "severity": "M", "flag": "E", "finding": "/notifications (authenticated, personal data) is absent from the vercel.json X-Robots-Tag noindex list — the only private route without a noindex header. Must be added to the SEO-010 parity list for Next; optionally a Vite bugfix under the freeze rule if approved.", "proposedLedgerTask": "amend SEO-010 acceptance to include /notifications; optional freeze-rule bugfix decision for human" },
+    { "id": "D-P0-05", "severity": "L", "flag": "E", "finding": "/categories listing page and all 8 legal-document routes are not prerendered by scripts/prerender-seo.mjs — they serve the raw index.html shell with default meta. Baseline capture (BASE-003) will show default meta on these routes; SEO-002/004 must not treat that as the parity target copy.", "proposedLedgerTask": "note on SEO-002/SEO-004: parity target for non-prerendered routes is the intended copy, not the shell" }
+  ]
+}

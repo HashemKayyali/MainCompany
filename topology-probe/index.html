@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>P1B topology probe — Vite stand-in</title>
+</head>
+<body>
+  <h1>P1B topology probe — legacy (Vite) surface stand-in</h1>
+  <p>
+    This page reproduces the LEGACY side of the strangler topology on the same
+    origin that rewrites to the Next preview: a real supabase-js v2 client with
+    default localStorage persistence (key <code>sb-&lt;ref&gt;-auth-token</code>),
+    exactly like the audited Vite app. Preview-only; noindex; no tokens are
+    ever rendered.
+  </p>
+  <div id="status" style="white-space: pre-wrap; font-family: monospace; border: 1px solid #999; padding: 8px;">loading…</div>
+  <p>
+    <button id="refresh">Force token refresh (Q5 legacy-side)</button>
+    <button id="probe">Authed DB probe (own profile)</button>
+    <button id="signout">Sign out (local scope)</button>
+  </p>
+  <p><a href="/bridge-test">→ /bridge-test (served by Next through the rewrite)</a></p>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    async function main() {
+      const cfg = await (await fetch('/probe-config.json')).json()
+      const client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey)
+      window.sb = client // instrument handle for scripted experiment steps
+      window.sbStorageKey = 'sb-' + new URL(cfg.supabaseUrl).hostname.split('.')[0] + '-auth-token'
+
+      window.showStatus = async function () {
+        const { data } = await client.auth.getSession()
+        const raw = localStorage.getItem(window.sbStorageKey)
+        const lines = [
+          'origin: ' + location.origin,
+          'legacy key present in localStorage: ' + Boolean(raw),
+          'legacy blob fields: ' + (raw ? Object.keys(JSON.parse(raw)).sort().join(',') : 'n/a'),
+          'bl-auth-persistence(local): ' + localStorage.getItem('bl-auth-persistence'),
+          'session user: ' + (data.session ? data.session.user.id : 'none'),
+          'access token expires_at: ' + (data.session ? data.session.expires_at : 'n/a'),
+        ]
+        document.getElementById('status').textContent = lines.join('\n')
+        return lines
+      }
+
+      document.getElementById('refresh').onclick = async () => {
+        const { error } = await client.auth.refreshSession()
+        document.getElementById('status').textContent = 'refreshSession: ' + (error ? 'ERROR ' + error.message : 'ok')
+        setTimeout(window.showStatus, 400)
+      }
+      document.getElementById('probe').onclick = async () => {
+        const { data: s } = await client.auth.getSession()
+        if (!s.session) { document.getElementById('status').textContent = 'probe: no session'; return }
+        const { data, error } = await client.from('profiles').select('id').eq('id', s.session.user.id).maybeSingle()
+        document.getElementById('status').textContent = 'authed probe: ' + (error ? 'ERROR ' + error.message : (data ? 'OK own row visible' : 'OK (no row)'))
+      }
+      document.getElementById('signout').onclick = async () => {
+        await client.auth.signOut({ scope: 'local' })
+        window.showStatus()
+      }
+
+      window.showStatus()
+    }
+    main()
+  </script>
+</body>
+</html>

@@ -32,3 +32,8 @@ storage-gc-reports/
 .env
 
 supabase/.temp/
+
+reports/baseline/perf/raw/
+
+test-results/
+playwright-report/

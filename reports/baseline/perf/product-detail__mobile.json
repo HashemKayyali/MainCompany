@@ -1,0 +1,64 @@
+{
+  "task": "BASE-004",
+  "fetchTime": "2026-07-10T23:07:22.778Z",
+  "requestedUrl": "https://www.eventiesjo.com/products/3d-booth-event-space-design",
+  "finalDisplayedUrl": "https://www.eventiesjo.com/products/3d-booth-event-space-design",
+  "formFactor": "mobile",
+  "lighthouseVersion": "13.4.0",
+  "scores": {
+    "performance": 0.32,
+    "accessibility": 0.96,
+    "best-practices": 1,
+    "seo": 1,
+    "agentic-browsing": 0.14
+  },
+  "metrics": {
+    "first-contentful-paint": {
+      "score": 0.05,
+      "numericValue": 5610.283949999999,
+      "displayValue": "5.6 s"
+    },
+    "largest-contentful-paint": {
+      "score": 0.05,
+      "numericValue": 7270.987150000002,
+      "displayValue": "7.3 s"
+    },
+    "total-blocking-time": {
+      "score": 0.55,
+      "numericValue": 535.5,
+      "displayValue": "540 ms"
+    },
+    "cumulative-layout-shift": {
+      "score": 0.41,
+      "numericValue": 0.2940461725394897,
+      "displayValue": "0.294"
+    },
+    "speed-index": {
+      "score": 0.31,
+      "numericValue": 7076.776341018547,
+      "displayValue": "7.1 s"
+    },
+    "interactive": {
+      "score": 0.49,
+      "numericValue": 7302.125335000002,
+      "displayValue": "7.3 s"
+    },
+    "server-response-time": {
+      "score": 1,
+      "numericValue": 57,
+      "displayValue": "Root document took 60 ms"
+    },
+    "total-byte-weight": {
+      "score": 1,
+      "numericValue": 808311,
+      "displayValue": "Total size was 789 KiB"
+    },
+    "unused-javascript": {
+      "score": 1,
+      "numericValue": 0,
+      "displayValue": ""
+    },
+    "render-blocking-resources": null,
+    "largest-contentful-paint-element": null
+  }
+}

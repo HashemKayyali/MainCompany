@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/bridge-test", "destination": "__NEXT_PREVIEW_URL__/bridge-test" },
+    { "source": "/ar", "destination": "__NEXT_PREVIEW_URL__/ar" },
+    { "source": "/ar/:path*", "destination": "__NEXT_PREVIEW_URL__/ar/:path*" },
+    { "source": "/_next/:path*", "destination": "__NEXT_PREVIEW_URL__/_next/:path*" },
+    { "source": "/api/:path*", "destination": "__NEXT_PREVIEW_URL__/api/:path*" },
+    { "source": "/auth/callback", "destination": "__NEXT_PREVIEW_URL__/api/probe/callback-shape" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    }
+  ]
+}

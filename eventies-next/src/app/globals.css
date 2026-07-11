@@ -1,0 +1,9 @@
+/* FOUND-026 note: Zodiak (display serif) comes from Fontshare — next/font
+   cannot fetch it; self-hosting its files is queued for P2 (asset task).
+   Alexandria / Sora / IBM Plex Sans Arabic are served via next/font/google
+   (src/lib/fonts.ts) — no runtime Google request, no FOUT. */
+@import url('https://api.fontshare.com/v2/css?f[]=zodiak@400,500,600,700,800,900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

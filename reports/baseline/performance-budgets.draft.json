@@ -1,0 +1,31 @@
+{
+  "task": "BASE-004",
+  "status": "DRAFT — ratified as part of QG-P2; Phase 0 records, never fixes",
+  "capturedAt": "2026-07-11",
+  "method": "Lighthouse 13.4.0, headless Chrome, default mobile throttling / desktop preset, run against production from a Jordan-based client (edge fra1). Baselines are the regression ceiling; targets are the constitution goals.",
+  "baseline": {
+    "home":           { "mobile": { "perfScore": 0.28, "lcpMs": 8500 }, "desktop": { "perfScore": 0.21, "lcpMs": 2100 } },
+    "products":       { "mobile": { "perfScore": 0.28, "lcpMs": 6200 }, "desktop": { "perfScore": 0.52, "lcpMs": 1900 } },
+    "product-detail": { "mobile": { "perfScore": 0.32, "lcpMs": 7300 }, "desktop": { "perfScore": 0.61, "lcpMs": 1800 } },
+    "gallery":        { "mobile": { "perfScore": 0.34, "lcpMs": 5900 }, "desktop": { "perfScore": 0.53, "lcpMs": 1800 } }
+  },
+  "budgets": {
+    "rule": "Next preview must never regress below baseline on any cell; targets below are the P2 exit goals (IMG-003: LCP ≤ 2500 ms p75 lab).",
+    "perRoute": {
+      "lcpMsMobile": { "ceiling": "baseline per route", "target": 2500 },
+      "lcpMsDesktop": { "ceiling": "baseline per route", "target": 1500 },
+      "cls": { "target": 0.1 },
+      "tbtMs": { "target": 300 }
+    },
+    "transfer": {
+      "note": "Vite baseline ships 2847 KB raw JS (76 assets; largest: vendor-three 735 KB, index 634 KB, vendor-react 316 KB). Next public catalog routes must not ship three.js/shaders outside the ssr:false hero island (CAT-002).",
+      "jsPerPublicRouteKbTarget": 300,
+      "productCardImageKbTarget": 90
+    }
+  },
+  "notes": [
+    "Mobile perf 0.21–0.34 across all four templates is the recorded ground truth — the reconstruction's improvement claims measure against these exact numbers.",
+    "Desktop home 0.21 is anomalously low (WebGL shader hero dominates); recorded as-is, one-run lab variance accepted for Phase 0.",
+    "Raw LHR JSONs are kept locally under reports/baseline/perf/raw/ (gitignored); trimmed per-run JSONs are committed."
+  ]
+}

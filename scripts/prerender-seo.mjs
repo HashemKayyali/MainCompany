@@ -3,7 +3,7 @@ import path from 'node:path'
 
 const SITE_URL = 'https://www.eventiesjo.com'
 const SITE_NAME = 'Eventies'
-const DEFAULT_IMAGE = `${SITE_URL}/images/og-default.png`
+const DEFAULT_IMAGE = `${SITE_URL}/images/og-default.jpg`
 const DEFAULT_IMAGE_ALT = 'Eventies event services and trusted providers marketplace in Jordan'
 const BRAND_LOGO_ABSOLUTE = `${SITE_URL}/brand/eventies_icon_transparent_master.png`
 const DEFAULT_LOCALE = 'en_JO'
