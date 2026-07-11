@@ -1,0 +1,68 @@
+# FOUND-005 — CI pipeline for the Next reconstruction (QG universal gate).
+# Jobs mirror `npm run ci` in eventies-next/: typecheck, lint (boundary zones),
+# arch gates (server-only / QG-ARCH-3 / QG-ARCH-4 / ENV-002), I18N-COV,
+# madge cycles, unit+contract tests, build. E2E+axe runs on the built app.
+# Contract suites (CT-RLS/CT-RPC) activate when the DBMIG-002 staging secrets
+# exist — they skip loudly otherwise.
+name: eventies-next CI
+
+on:
+  push:
+    branches: [eventies-next-reconstruction, main]
+    paths: ['eventies-next/**', '.github/workflows/eventies-next-ci.yml']
+  pull_request:
+    paths: ['eventies-next/**']
+
+defaults:
+  run:
+    working-directory: eventies-next
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: eventies-next/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run gate:arch
+      - run: npm run gate:i18n
+      - run: npm run gate:cycles
+      - run: npm run format
+      - name: Unit + contract tests
+        run: npm test
+        env:
+          CT_SUPABASE_URL: ${{ secrets.CT_SUPABASE_URL }}
+          CT_SUPABASE_ANON_KEY: ${{ secrets.CT_SUPABASE_ANON_KEY }}
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: quality-gates
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: eventies-next/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      - name: E2E + axe gate (en/ar × desktop/mobile)
+        run: npx playwright test --project=en-desktop --project=ar-desktop
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
