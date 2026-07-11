@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
-import { alexandria, sora, ibmPlexSansArabic } from '@/lib/fonts'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import { JsonLd } from '@/components/JsonLd'
@@ -63,22 +62,19 @@ export default async function LocaleLayout({
   ]
 
   return (
-    <html
-      lang={locale}
-      dir={dir}
-      className={`${alexandria.variable} ${sora.variable} ${ibmPlexSansArabic.variable}`}
-    >
+    <html lang={locale} dir={dir} className="light">
       <head>
-        {/* FOUND-032 — preconnect parity with the audited index.html:
-            Supabase (data) + Cloudinary (images) + Fontshare (Zodiak, until
-            self-hosted in P2). Google Fonts preconnects are obsolete here:
-            next/font self-hosts those files. */}
+        {/* Font + data preconnects matching the audited index.html. Fonts load
+            by literal family name (globals.css @import) so the ported Vite CSS
+            resolves 'Alexandria'/'Sora'/'Zodiak'/'IBM Plex Sans Arabic'. */}
         <link rel="preconnect" href="https://dqizzlcsioqykfeldtsj.supabase.co" crossOrigin="" />
         <link rel="dns-prefetch" href="https://dqizzlcsioqykfeldtsj.supabase.co" />
         <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="" />
       </head>
-      <body className="font-sans">
+      <body>
         {GLOBAL_JSON_LD.map((node, i) => (
           <JsonLd key={i} data={node} />
         ))}
