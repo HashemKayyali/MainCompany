@@ -95,6 +95,166 @@
     "search": "Search",
     "searchPlaceholder": "Search services and categories…",
     "searchEmpty": "No matches. Try another term.",
-    "searchClose": "Close search"
+    "searchClose": "Close search",
+    "browseCategories": {
+      "eyebrow": "Browse by category",
+      "title": "What are you planning?",
+      "description": "Explore service categories built for every kind of event. Open any category to see available services, packages, and providers.",
+      "viewAll": "View all categories",
+      "serviceCount": "{count, plural, one {# Service} other {# Services}}"
+    },
+    "popularServices": {
+      "eyebrow": "Popular services",
+      "title": "Loved by organizers",
+      "description": "A selection of in-demand services from across the marketplace — ready to add to your next event request.",
+      "viewAll": "View all services",
+      "popular": "Popular",
+      "perDay": "/ day",
+      "onRequest": "on request",
+      "request": "Request",
+      "marketplace": "Marketplace"
+    },
+    "howItWorks": {
+      "eyebrow": "How Eventies works",
+      "title": "From idea to event-ready reality.",
+      "description": "Browse services, choose what fits your event, and submit one organized rental or purchase quote request with your date, location, quantity, and notes.",
+      "step1Title": "Discover Services",
+      "step1Body": "Browse rentals, activations, production support, screens, booths, custom builds, and eligible purchase quote options.",
+      "step1Tags": ["Services", "Options"],
+      "step2Title": "Build Your Request",
+      "step2Body": "Add services, quantities, dates, and notes into one rental or purchase quote request draft.",
+      "step2Tags": ["Details", "Draft"],
+      "step3Title": "Submit for Review",
+      "step3Body": "Send your request so the Eventies team can review availability, pricing, scope, delivery, shipping, and next steps.",
+      "step3Tags": ["Review", "Next steps"]
+    },
+    "eventTypesSection": {
+      "eyebrow": "Plan by event type",
+      "title": "Built for every occasion",
+      "description": "However you gather people, there's a way to make it memorable. Start from the kind of event you're planning.",
+      "showLabel": "Show {label}",
+      "browseLabel": "Browse products for {label}",
+      "items": [
+        {
+          "label": "Corporate Activations",
+          "description": "Engaging brand moments and interactive experiences for company events."
+        },
+        {
+          "label": "Exhibitions & Expos",
+          "description": "Stand-out displays and production for fairs and trade shows."
+        },
+        {
+          "label": "Private Events",
+          "description": "Memorable touches for celebrations and gatherings."
+        },
+        {
+          "label": "Brand Launches",
+          "description": "Make an entrance with high-impact activations."
+        },
+        {
+          "label": "University & Campus",
+          "description": "Energetic experiences built for student audiences."
+        },
+        {
+          "label": "Festivals & Public Events",
+          "description": "Crowd-ready displays, production, and activations at scale."
+        }
+      ]
+    },
+    "customBuild": {
+      "eyebrow": "Custom Builds",
+      "title": "Custom service builds for ideas that need more than a rental",
+      "description": "When the event needs something built from scratch, Eventies can shape the concept, prototype it, test it, and prepare it for the venue.",
+      "badge": "R&D studio",
+      "panelTitle": "From a rough event idea to a working custom build.",
+      "panelBody": "Use this when your event needs a branded activation, interactive game, special booth, or a custom setup that must be designed, built, tested, and delivered before showtime.",
+      "capabilities": [
+        "Branded games",
+        "Interactive booths",
+        "Control systems",
+        "Event-ready builds"
+      ],
+      "exploreCta": "Explore Custom Builds",
+      "startCta": "Start a Request",
+      "signals": ["Idea", "Prototype", "Test", "Deploy"],
+      "pipeline": "Event-ready pipeline",
+      "fieldTested": "Field tested"
+    },
+    "galleryPreview": {
+      "eyebrow": "Gallery",
+      "title": "Event Inspiration Gallery",
+      "description": "Explore setups, service showcases, and event ideas to shape your next experience.",
+      "viewAll": "View full gallery",
+      "highlight": "Gallery highlight"
+    },
+    "faqSection": {
+      "eyebrow": "FAQ",
+      "titleLead": "Questions?",
+      "titleHi": "Answered.",
+      "description": "Everything you need to know about planning, requesting, and providing event services on Eventies.",
+      "stillTitle": "Still have a question?",
+      "stillBody": "Our team is happy to help you plan your next event.",
+      "contactCta": "Contact us",
+      "viewAnswer": "View answer",
+      "closeAnswer": "Close answer",
+      "items": [
+        {
+          "q": "How does Eventies work?",
+          "a": "Browse service categories, add what you need to a single request, and send it with your event dates. Providers respond with availability and pricing, all tracked from your account."
+        },
+        {
+          "q": "What's the difference between rentals and quotes?",
+          "a": "Rental services can be added to your request draft with event dates. Custom services and purchase options are request-based, so the Eventies team reviews details before pricing and next steps are confirmed."
+        },
+        {
+          "q": "How do I check availability for my event date?",
+          "a": "Add the services you want and submit a request with your event dates. Availability is reviewed for those exact dates before anything is confirmed."
+        },
+        {
+          "q": "Do you cover all of Jordan?",
+          "a": "Yes. Our network of providers operates across Jordan, from Amman to events nationwide. Categories and coverage grow as more providers join."
+        },
+        {
+          "q": "How can I list my services as a provider?",
+          "a": "Use the provider request path, share your services, and start receiving qualified requests from event organizers. Listing is free and you manage your own availability."
+        },
+        {
+          "q": "How do I get help or support?",
+          "a": "Reach our team anytime through the contact page or our support email. We can help with planning, requests, provider questions, and anything in between."
+        }
+      ]
+    },
+    "getStarted": {
+      "eyebrow": "Get Started",
+      "title": "Choose how you want to get started",
+      "description": "Whether you're planning an event or offering services, Eventies keeps the next step simple.",
+      "providerBadge": "For Providers",
+      "providerTitle": "Are you an event service provider?",
+      "providerPoints": [
+        "List your services for free",
+        "Receive qualified event requests",
+        "Manage availability and requests"
+      ],
+      "joinCta": "Join as a Provider",
+      "buildBadge": "Custom Service Build",
+      "buildTitle": "Need a custom service built for your event?",
+      "buildBody": "Turn a special activation, game, booth, or physical-digital idea into a working event setup.",
+      "buildPoints": [
+        "Share the concept and use case",
+        "Prototype the interaction and flow",
+        "Prepare a venue-ready custom setup"
+      ],
+      "startBuildCta": "Start a Custom Build",
+      "readyBadge": "Ready when you are",
+      "readyTitle": "Plan your next event with us.",
+      "readyBody": "Browse services, check availability, and send a single request — we'll help bring it all together.",
+      "exploreCta": "Explore Services",
+      "quoteCta": "Request a Quote"
+    },
+    "logoCloud": {
+      "eyebrow": "Our clients",
+      "title": "Our Clients",
+      "description": "Brands, schools, venues, and organizations that trust Eventies for memorable event experiences."
+    }
   }
 }
