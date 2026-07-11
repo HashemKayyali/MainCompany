@@ -1,0 +1,41 @@
+{
+  "task": "BASE-020",
+  "capturedAt": "2026-07-10T23:46:08.750Z",
+  "baseUrl": "https://www.eventiesjo.com",
+  "wellFormedness": {
+    "httpStatus": 200,
+    "contentType": "application/xml; charset=utf-8",
+    "hasXmlDeclaration": true,
+    "hasUrlsetNamespace": true,
+    "balancedUrlTags": true,
+    "balancedLocTags": true,
+    "closesUrlset": true
+  },
+  "counts": {
+    "sitemapUrls": 44,
+    "dbActiveProducts": 30,
+    "dbCategories": 8,
+    "expectedTotal": 44
+  },
+  "diff": {
+    "missingFromSitemap": [],
+    "extraInSitemap": []
+  },
+  "categoryVisibilityQuestion": {
+    "categoryColumns": [
+      "id",
+      "name",
+      "slug",
+      "created_at",
+      "icon",
+      "description",
+      "image"
+    ],
+    "visibilityLikeColumns": [],
+    "note": "api/sitemap.ts applies NO filter to categories; SEO-009 must decide against these columns."
+  },
+  "knownGaps": [
+    "/custom-builds is intentionally absent today (SEO-009 adds it)",
+    "legal pages absent (SEO-009 decision)"
+  ]
+}
