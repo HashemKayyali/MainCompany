@@ -9,7 +9,13 @@ import type { Product } from '@/shared/types/catalog'
  */
 const CARD_SIZES = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
 
-export function ProductCard({ product, featuredLabel }: { product: Product; featuredLabel: string }) {
+export function ProductCard({
+  product,
+  featuredLabel,
+}: {
+  product: Product
+  featuredLabel: string
+}) {
   const media = product.heroImage || product.gallery?.[0] || ''
   return (
     <Link

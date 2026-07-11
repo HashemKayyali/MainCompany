@@ -3,7 +3,19 @@
 export type LegalDocumentKey = 'privacy' | 'terms' | 'vendorTerms' | 'refund' | 'cookies'
 type LegalLocale = 'en' | 'ar'
 type LegalSection = { heading: string; body?: string[]; bullets?: string[] }
-type LegalDocumentCopy = { eyebrow: string; title: string; description: string; lastUpdatedLabel: string; lastUpdated: string; note?: string; sections: LegalSection[]; contactHeading: string; contactBody: string; metaTitle: string; metaDescription: string }
+type LegalDocumentCopy = {
+  eyebrow: string
+  title: string
+  description: string
+  lastUpdatedLabel: string
+  lastUpdated: string
+  note?: string
+  sections: LegalSection[]
+  contactHeading: string
+  contactBody: string
+  metaTitle: string
+  metaDescription: string
+}
 type LegalDocument = Record<LegalLocale, LegalDocumentCopy>
 
 export const legalDocuments: Record<LegalDocumentKey, LegalDocument> = {
@@ -15,8 +27,7 @@ export const legalDocuments: Record<LegalDocumentKey, LegalDocument> = {
         'This Privacy Policy explains how Eventies collects, uses, shares, and protects personal information when you use our website, create an account, or submit an event request.',
       lastUpdatedLabel: 'Last updated',
       lastUpdated: 'July 1, 2026',
-      note:
-        'Eventies currently operates under the Eventies name. Formal company registration details may be updated here once available.',
+      note: 'Eventies currently operates under the Eventies name. Formal company registration details may be updated here once available.',
       metaTitle: 'Privacy Policy | Eventies',
       metaDescription:
         'Read how Eventies collects, uses, shares, and protects personal information for accounts, event requests, support, and vendor coordination.',
@@ -120,8 +131,7 @@ export const legalDocuments: Record<LegalDocumentKey, LegalDocument> = {
         'طھظˆط¶ط­ ظ‡ط°ظ‡ ط§ظ„ط³ظٹط§ط³ط© ظƒظٹظپ ظٹط¬ظ…ط¹ Eventies ط§ظ„ط¨ظٹط§ظ†ط§طھ ط§ظ„ط´ط®طµظٹط© ظˆظٹط³طھط®ط¯ظ…ظ‡ط§ ظˆظٹط´ط§ط±ظƒظ‡ط§ ظˆظٹط­ظ…ظٹظ‡ط§ ط¹ظ†ط¯ ط§ط³طھط®ط¯ط§ظ… ط§ظ„ظ…ظˆظ‚ط¹ ط£ظˆ ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ط£ظˆ ط¥ط±ط³ط§ظ„ ط·ظ„ط¨ ظپط¹ط§ظ„ظٹط©.',
       lastUpdatedLabel: 'ط¢ط®ط± طھط­ط¯ظٹط«',
       lastUpdated: '1 ظٹظˆظ„ظٹظˆ 2026',
-      note:
-        'ظٹط¹ظ…ظ„ Eventies ط­ط§ظ„ظٹظ‹ط§ طھط­طھ ط§ط³ظ… Eventies. ظ‚ط¯ ظٹطھظ… طھط­ط¯ظٹط« ط¨ظٹط§ظ†ط§طھ ط§ظ„طھط³ط¬ظٹظ„ ط§ظ„ط±ط³ظ…ظٹ ظ„ظ„ط´ط±ظƒط© ظپظٹ ظ‡ط°ظ‡ ط§ظ„طµظپط­ط© ط¹ظ†ط¯ طھظˆظپط±ظ‡ط§.',
+      note: 'ظٹط¹ظ…ظ„ Eventies ط­ط§ظ„ظٹظ‹ط§ طھط­طھ ط§ط³ظ… Eventies. ظ‚ط¯ ظٹطھظ… طھط­ط¯ظٹط« ط¨ظٹط§ظ†ط§طھ ط§ظ„طھط³ط¬ظٹظ„ ط§ظ„ط±ط³ظ…ظٹ ظ„ظ„ط´ط±ظƒط© ظپظٹ ظ‡ط°ظ‡ ط§ظ„طµظپط­ط© ط¹ظ†ط¯ طھظˆظپط±ظ‡ط§.',
       metaTitle: 'ط³ظٹط§ط³ط© ط§ظ„ط®طµظˆطµظٹط© | Eventies',
       metaDescription:
         'طھط¹ط±ظپ ط¹ظ„ظ‰ ظƒظٹظپظٹط© ط¬ظ…ط¹ Eventies ظ„ظ„ط¨ظٹط§ظ†ط§طھ ط§ظ„ط´ط®طµظٹط© ظˆط§ط³طھط®ط¯ط§ظ…ظ‡ط§ ظˆط­ظ…ط§ظٹطھظ‡ط§ ظ„ظ„ط­ط³ط§ط¨ط§طھ ظˆط·ظ„ط¨ط§طھ ط§ظ„ظپط¹ط§ظ„ظٹط§طھ ظˆط§ظ„ط¯ط¹ظ… ظˆط§ظ„طھظ†ط³ظٹظ‚ ظ…ط¹ ط§ظ„ظ…ط²ظˆط¯ظٹظ†.',
@@ -138,7 +148,9 @@ export const legalDocuments: Record<LegalDocumentKey, LegalDocument> = {
         },
         {
           heading: '2. ط§ظ„ظ…ط¹ظ„ظˆظ…ط§طھ ط§ظ„طھظٹ ظ†ط¬ظ…ط¹ظ‡ط§',
-          body: ['ط­ط³ط¨ ط·ط±ظٹظ‚ط© ط§ط³طھط®ط¯ط§ظ…ظƒ ظ„ظ€ EventiesطŒ ظ‚ط¯ ظ†ط¬ظ…ط¹ ط§ظ„ظ…ط¹ظ„ظˆظ…ط§طھ ط§ظ„طھط§ظ„ظٹط©:'],
+          body: [
+            'ط­ط³ط¨ ط·ط±ظٹظ‚ط© ط§ط³طھط®ط¯ط§ظ…ظƒ ظ„ظ€ EventiesطŒ ظ‚ط¯ ظ†ط¬ظ…ط¹ ط§ظ„ظ…ط¹ظ„ظˆظ…ط§طھ ط§ظ„طھط§ظ„ظٹط©:',
+          ],
           bullets: [
             'ط§ظ„ط§ط³ظ… ظˆط¨ظٹط§ظ†ط§طھ ط§ظ„طھظˆط§طµظ„طŒ ط¨ظ…ط§ ظپظٹ ط°ظ„ظƒ ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ ظˆط±ظ‚ظ… ط§ظ„ظ‡ط§طھظپ.',
             'ط¨ظٹط§ظ†ط§طھ ط§ظ„ط­ط³ط§ط¨ ظˆظ…ط¹ظ„ظˆظ…ط§طھ ط§ظ„ظ…ظ„ظپ ط§ظ„ط´ط®طµظٹ ظˆطµظˆط±ط© ط§ظ„ط­ط³ط§ط¨ ط¥ط°ط§ ط£ط¶ظپطھظ‡ط§.',
@@ -241,7 +253,9 @@ export const legalDocuments: Record<LegalDocumentKey, LegalDocument> = {
         },
         {
           heading: '2. Cookies and storage we use now',
-          body: ['Eventies currently uses necessary cookies or similar storage for core website functions, including:'],
+          body: [
+            'Eventies currently uses necessary cookies or similar storage for core website functions, including:',
+          ],
           bullets: [
             'Keeping you signed in and maintaining secure sessions when account features are used.',
             'Remembering your selected language preference, such as English or Arabic.',
@@ -287,7 +301,8 @@ export const legalDocuments: Record<LegalDocumentKey, LegalDocument> = {
       metaDescription:
         'طھط¹ط±ظپ ط¹ظ„ظ‰ ظƒظٹظپظٹط© ط§ط³طھط®ط¯ط§ظ… Eventies ظ„ظ…ظ„ظپط§طھ ط§ظ„ط§ط±طھط¨ط§ط· ط§ظ„ط¶ط±ظˆط±ظٹط© ظˆطھط®ط²ظٹظ† ط§ظ„ظ…طھطµظپط­ ظ„ظ„ط؛ط© ظˆط§ظ„ط¬ظ„ط³ط§طھ ظˆظ…ط³ظˆط¯ط§طھ ط§ظ„ط·ظ„ط¨ط§طھ ظˆظˆط¸ط§ط¦ظپ ط§ظ„ظ…ظˆظ‚ط¹.',
       contactHeading: 'ط§ظ„طھظˆط§طµظ„ ظ…ط¹ظ†ط§',
-      contactBody: 'ظ„ط£ظٹ ط£ط³ط¦ظ„ط© ط¨ط®طµظˆطµ ظ…ظ„ظپط§طھ ط§ظ„ط§ط±طھط¨ط§ط· ط£ظˆ ط§ظ„ط®طµظˆطµظٹط©طŒ طھظˆط§طµظ„ ظ…ط¹ظ†ط§ ط¹ظ„ظ‰ support@eventiesjo.com.',
+      contactBody:
+        'ظ„ط£ظٹ ط£ط³ط¦ظ„ط© ط¨ط®طµظˆطµ ظ…ظ„ظپط§طھ ط§ظ„ط§ط±طھط¨ط§ط· ط£ظˆ ط§ظ„ط®طµظˆطµظٹط©طŒ طھظˆط§طµظ„ ظ…ط¹ظ†ط§ ط¹ظ„ظ‰ support@eventiesjo.com.',
       sections: [
         {
           heading: '1. ظ…ط§ ظ‡ظٹ ظ…ظ„ظپط§طھ ط§ظ„ط§ط±طھط¨ط§ط·',
@@ -297,7 +312,9 @@ export const legalDocuments: Record<LegalDocumentKey, LegalDocument> = {
         },
         {
           heading: '2. ظ…ظ„ظپط§طھ ط§ظ„ط§ط±طھط¨ط§ط· ظˆط§ظ„طھط®ط²ظٹظ† ط§ظ„ظ…ط³طھط®ط¯ظ… ط­ط§ظ„ظٹظ‹ط§',
-          body: ['ظٹط³طھط®ط¯ظ… Eventies ط­ط§ظ„ظٹظ‹ط§ ظ…ظ„ظپط§طھ ط§ط±طھط¨ط§ط· ط£ظˆ طھط®ط²ظٹظ† ظ…ط´ط§ط¨ظ‡ ط¶ط±ظˆط±ظٹ ظ„ظˆط¸ط§ط¦ظپ ط§ظ„ظ…ظˆظ‚ط¹ ط§ظ„ط£ط³ط§ط³ظٹط©طŒ ظˆظ…ظ†ظ‡ط§:'],
+          body: [
+            'ظٹط³طھط®ط¯ظ… Eventies ط­ط§ظ„ظٹظ‹ط§ ظ…ظ„ظپط§طھ ط§ط±طھط¨ط§ط· ط£ظˆ طھط®ط²ظٹظ† ظ…ط´ط§ط¨ظ‡ ط¶ط±ظˆط±ظٹ ظ„ظˆط¸ط§ط¦ظپ ط§ظ„ظ…ظˆظ‚ط¹ ط§ظ„ط£ط³ط§ط³ظٹط©طŒ ظˆظ…ظ†ظ‡ط§:',
+          ],
           bullets: [
             'ط¥ط¨ظ‚ط§ط¤ظƒ ظ…ط³ط¬ظ„ ط§ظ„ط¯ط®ظˆظ„ ظˆط§ظ„ط­ظپط§ط¸ ط¹ظ„ظ‰ ط¬ظ„ط³ط§طھ ط¢ظ…ظ†ط© ط¹ظ†ط¯ ط§ط³طھط®ط¯ط§ظ… ظ…ظٹط²ط§طھ ط§ظ„ط­ط³ط§ط¨.',
             'طھط°ظƒط± ط§ظ„ظ„ط؛ط© ط§ظ„طھظٹ ط§ط®طھط±طھظ‡ط§طŒ ظ…ط«ظ„ ط§ظ„ط¹ط±ط¨ظٹط© ط£ظˆ ط§ظ„ط¥ظ†ط¬ظ„ظٹط²ظٹط©.',
@@ -341,8 +358,7 @@ export const legalDocuments: Record<LegalDocumentKey, LegalDocument> = {
         'These Terms explain the rules for using Eventies, submitting requests, creating accounts, and working with Eventies for event services.',
       lastUpdatedLabel: 'Last updated',
       lastUpdated: 'July 1, 2026',
-      note:
-        'Eventies is currently operated under the Eventies name. Formal company registration details may be added once available.',
+      note: 'Eventies is currently operated under the Eventies name. Formal company registration details may be added once available.',
       metaTitle: 'Terms of Service | Eventies',
       metaDescription:
         'Review Eventies Terms of Service for accounts, event requests, confirmation, vendor coordination, cancellations, and customer responsibilities.',
@@ -456,13 +472,13 @@ export const legalDocuments: Record<LegalDocumentKey, LegalDocument> = {
         'طھظˆط¶ط­ ظ‡ط°ظ‡ ط§ظ„ط´ط±ظˆط· ظ‚ظˆط§ط¹ط¯ ط§ط³طھط®ط¯ط§ظ… Eventies ظˆط¥ط±ط³ط§ظ„ ط§ظ„ط·ظ„ط¨ط§طھ ظˆط¥ظ†ط´ط§ط، ط§ظ„ط­ط³ط§ط¨ط§طھ ظˆط§ظ„طھط¹ط§ظ…ظ„ ظ…ط¹ Eventies ظ„ط®ط¯ظ…ط§طھ ط§ظ„ظپط¹ط§ظ„ظٹط§طھ.',
       lastUpdatedLabel: 'ط¢ط®ط± طھط­ط¯ظٹط«',
       lastUpdated: '1 ظٹظˆظ„ظٹظˆ 2026',
-      note:
-        'ظٹط¹ظ…ظ„ Eventies ط­ط§ظ„ظٹظ‹ط§ طھط­طھ ط§ط³ظ… Eventies. ظ‚ط¯ طھطھظ… ط¥ط¶ط§ظپط© ط¨ظٹط§ظ†ط§طھ ط§ظ„طھط³ط¬ظٹظ„ ط§ظ„ط±ط³ظ…ظٹ ظ„ظ„ط´ط±ظƒط© ط¹ظ†ط¯ طھظˆظپط±ظ‡ط§.',
+      note: 'ظٹط¹ظ…ظ„ Eventies ط­ط§ظ„ظٹظ‹ط§ طھط­طھ ط§ط³ظ… Eventies. ظ‚ط¯ طھطھظ… ط¥ط¶ط§ظپط© ط¨ظٹط§ظ†ط§طھ ط§ظ„طھط³ط¬ظٹظ„ ط§ظ„ط±ط³ظ…ظٹ ظ„ظ„ط´ط±ظƒط© ط¹ظ†ط¯ طھظˆظپط±ظ‡ط§.',
       metaTitle: 'ط´ط±ظˆط· ط§ظ„ط®ط¯ظ…ط© | Eventies',
       metaDescription:
         'ط±ط§ط¬ط¹ ط´ط±ظˆط· ط®ط¯ظ…ط© Eventies ظ„ظ„ط­ط³ط§ط¨ط§طھ ظˆط·ظ„ط¨ط§طھ ط§ظ„ظپط¹ط§ظ„ظٹط§طھ ظˆط§ظ„طھط£ظƒظٹط¯ ظˆط§ظ„طھظ†ط³ظٹظ‚ ظ…ط¹ ط§ظ„ظ…ط²ظˆط¯ظٹظ† ظˆط§ظ„ط¥ظ„ط؛ط§ط، ظˆظ…ط³ط¤ظˆظ„ظٹط§طھ ط§ظ„ط¹ظ…ظٹظ„.',
       contactHeading: 'ط§ظ„طھظˆط§طµظ„ ظ…ط¹ظ†ط§',
-      contactBody: 'ظ„ط£ظٹ ط£ط³ط¦ظ„ط© ط­ظˆظ„ ظ‡ط°ظ‡ ط§ظ„ط´ط±ظˆط·طŒ طھظˆط§طµظ„ ظ…ط¹ظ†ط§ ط¹ظ„ظ‰ support@eventiesjo.com.',
+      contactBody:
+        'ظ„ط£ظٹ ط£ط³ط¦ظ„ط© ط­ظˆظ„ ظ‡ط°ظ‡ ط§ظ„ط´ط±ظˆط·طŒ طھظˆط§طµظ„ ظ…ط¹ظ†ط§ ط¹ظ„ظ‰ support@eventiesjo.com.',
       sections: [
         {
           heading: '1. ظ‚ط¨ظˆظ„ ظ‡ط°ظ‡ ط§ظ„ط´ط±ظˆط·',
@@ -577,7 +593,8 @@ export const legalDocuments: Record<LegalDocumentKey, LegalDocument> = {
       metaDescription:
         'Read Eventies Vendor Terms for vendor listings, review, accuracy, availability, commission, requests, and account actions.',
       contactHeading: 'Vendor contact',
-      contactBody: 'For vendor onboarding, listing, or partnership questions, contact vendors@eventiesjo.com.',
+      contactBody:
+        'For vendor onboarding, listing, or partnership questions, contact vendors@eventiesjo.com.',
       sections: [
         {
           heading: '1. Scope of these Vendor Terms',
@@ -670,7 +687,8 @@ export const legalDocuments: Record<LegalDocumentKey, LegalDocument> = {
       metaDescription:
         'ط±ط§ط¬ط¹ ط´ط±ظˆط· ظ…ط²ظˆط¯ظٹ Eventies ظ„ظ„ظ‚ظˆط§ط¦ظ… ظˆط§ظ„ظ…ط±ط§ط¬ط¹ط© ظˆط§ظ„ط¯ظ‚ط© ظˆط§ظ„طھظˆظپط± ظˆط§ظ„ط¹ظ…ظˆظ„ط© ظˆط§ظ„ط·ظ„ط¨ط§طھ ظˆط¥ط¬ط±ط§ط،ط§طھ ط§ظ„ط­ط³ط§ط¨.',
       contactHeading: 'ط§ظ„طھظˆط§طµظ„ ظ…ط¹ ظپط±ظٹظ‚ ط§ظ„ظ…ط²ظˆط¯ظٹظ†',
-      contactBody: 'ظ„ط£ط³ط¦ظ„ط© ط§ظ†ط¶ظ…ط§ظ… ط§ظ„ظ…ط²ظˆط¯ظٹظ† ط£ظˆ ط§ظ„ظ‚ظˆط§ط¦ظ… ط£ظˆ ط§ظ„ط´ط±ط§ظƒط§طھطŒ طھظˆط§طµظ„ ط¹ظ„ظ‰ vendors@eventiesjo.com.',
+      contactBody:
+        'ظ„ط£ط³ط¦ظ„ط© ط§ظ†ط¶ظ…ط§ظ… ط§ظ„ظ…ط²ظˆط¯ظٹظ† ط£ظˆ ط§ظ„ظ‚ظˆط§ط¦ظ… ط£ظˆ ط§ظ„ط´ط±ط§ظƒط§طھطŒ طھظˆط§طµظ„ ط¹ظ„ظ‰ vendors@eventiesjo.com.',
       sections: [
         {
           heading: '1. ظ†ط·ط§ظ‚ ط´ط±ظˆط· ط§ظ„ظ…ط²ظˆط¯ظٹظ†',
@@ -765,7 +783,8 @@ export const legalDocuments: Record<LegalDocumentKey, LegalDocument> = {
       metaDescription:
         'Read Eventies Refund and Cancellation Policy for 72-hour cancellations, non-refundable deposits, service issues, and damage responsibility.',
       contactHeading: 'Need help with a booking?',
-      contactBody: 'For cancellation, rescheduling, or refund questions, contact support@eventiesjo.com or booking@eventiesjo.com.',
+      contactBody:
+        'For cancellation, rescheduling, or refund questions, contact support@eventiesjo.com or booking@eventiesjo.com.',
       sections: [
         {
           heading: '1. Scope of this policy',
@@ -840,7 +859,8 @@ export const legalDocuments: Record<LegalDocumentKey, LegalDocument> = {
       metaDescription:
         'ط±ط§ط¬ط¹ ط³ظٹط§ط³ط© ط§ظ„ط§ط³طھط±ط¯ط§ط¯ ظˆط§ظ„ط¥ظ„ط؛ط§ط، ظ…ظ† Eventies ظ„ظ„ط¥ظ„ط؛ط§ط، ظ‚ط¨ظ„ 72 ط³ط§ط¹ط© ظˆط§ظ„ط¹ط±ط¨ظˆظ† ط؛ظٹط± ط§ظ„ظ…ط³طھط±ط¯ ظˆظ…ط´ط§ظƒظ„ ط§ظ„ط®ط¯ظ…ط© ظˆظ…ط³ط¤ظˆظ„ظٹط© ط§ظ„طھظ„ظپ.',
       contactHeading: 'طھط­طھط§ط¬ ظ…ط³ط§ط¹ط¯ط© ط¨ط®طµظˆطµ ط­ط¬ط²طں',
-      contactBody: 'ظ„ط£ط³ط¦ظ„ط© ط§ظ„ط¥ظ„ط؛ط§ط، ط£ظˆ طھط؛ظٹظٹط± ط§ظ„ظ…ظˆط¹ط¯ ط£ظˆ ط§ظ„ط§ط³طھط±ط¯ط§ط¯طŒ طھظˆط§طµظ„ ط¹ظ„ظ‰ support@eventiesjo.com ط£ظˆ booking@eventiesjo.com.',
+      contactBody:
+        'ظ„ط£ط³ط¦ظ„ط© ط§ظ„ط¥ظ„ط؛ط§ط، ط£ظˆ طھط؛ظٹظٹط± ط§ظ„ظ…ظˆط¹ط¯ ط£ظˆ ط§ظ„ط§ط³طھط±ط¯ط§ط¯طŒ طھظˆط§طµظ„ ط¹ظ„ظ‰ support@eventiesjo.com ط£ظˆ booking@eventiesjo.com.',
       sections: [
         {
           heading: '1. ظ†ط·ط§ظ‚ ظ‡ط°ظ‡ ط§ظ„ط³ظٹط§ط³ط©',
@@ -879,7 +899,8 @@ export const legalDocuments: Record<LegalDocumentKey, LegalDocument> = {
           ],
         },
         {
-          heading: '7. ط§ظ„طھظ„ظپ ط£ظˆ ط§ظ„ظپظ‚ط¯ط§ظ† ط£ظˆ ط³ظˆط، ط§ظ„ط§ط³طھط®ط¯ط§ظ… ط¨ط³ط¨ط¨ ط§ظ„ط¹ظ…ظٹظ„',
+          heading:
+            '7. ط§ظ„طھظ„ظپ ط£ظˆ ط§ظ„ظپظ‚ط¯ط§ظ† ط£ظˆ ط³ظˆط، ط§ظ„ط§ط³طھط®ط¯ط§ظ… ط¨ط³ط¨ط¨ ط§ظ„ط¹ظ…ظٹظ„',
           body: [
             'ظٹظƒظˆظ† ط§ظ„ط¹ظ…ظٹظ„ ظ…ط³ط¤ظˆظ„ظ‹ط§ ط¹ظ† ط£ظٹ طھظ„ظپ ط£ظˆ ظپظ‚ط¯ط§ظ† ط£ظˆ ظ†ظ‚طµ ظپظٹ ط§ظ„ط¹ظ†ط§طµط± ط£ظˆ ط³ظˆط، ط§ط³طھط®ط¯ط§ظ… ط£ظˆ طھط¹ط§ظ…ظ„ ط؛ظٹط± ط¢ظ…ظ† ط£ظˆ طھظ†ط¸ظٹظپ ط²ط§ط¦ط¯ ط£ظˆ ط¥طµظ„ط§ط­ط§طھ ظٹطھط³ط¨ط¨ ط¨ظ‡ط§ ط§ظ„ط¹ظ…ظٹظ„ ط£ظˆ ط§ظ„ط¶ظٹظˆظپ ط£ظˆ ط§ظ„ظ…ظƒط§ظ† ط£ظˆ ط§ظ„ط·ط§ظ‚ظ… ط£ظˆ ط§ظ„ظ…ط´ط§ط±ظƒظˆظ† ظپظٹ ط§ظ„ظپط¹ط§ظ„ظٹط©. ظ‚ط¯ ظٹظپط±ط¶ Eventies ط¹ظ„ظ‰ ط§ظ„ط¹ظ…ظٹظ„ طھظƒظ„ظپط© ط§ظ„ط¥طµظ„ط§ط­ ط£ظˆ ط§ظ„ط§ط³طھط¨ط¯ط§ظ„ ط£ظˆ ط§ظ„طھظ†ط¸ظٹظپ ط£ظˆ ط§ظ„ط¹ظ†ط§طµط± ط§ظ„ظ…ظپظ‚ظˆط¯ط© ط£ظˆ ط§ظ„طھظˆظ‚ظپ ط£ظˆ ط§ظ„طھظƒط§ظ„ظٹظپ ط§ظ„ظ…ط±طھط¨ط·ط©.',
           ],

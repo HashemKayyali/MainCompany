@@ -20,7 +20,9 @@ export function LegalDocView({ docKey, locale }: { docKey: LegalDocumentKey; loc
       <p className="mt-2 text-sm text-ink-500">
         {copy.lastUpdatedLabel}: {copy.lastUpdated}
       </p>
-      {copy.note ? <p className="mt-4 rounded-lg bg-ink-50 p-4 text-sm text-ink-600">{copy.note}</p> : null}
+      {copy.note ? (
+        <p className="mt-4 rounded-lg bg-ink-50 p-4 text-sm text-ink-600">{copy.note}</p>
+      ) : null}
 
       <div className="mt-8 space-y-8">
         {copy.sections.map((section, i) => (

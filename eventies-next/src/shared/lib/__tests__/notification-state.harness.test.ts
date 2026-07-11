@@ -25,17 +25,17 @@ type State = NotificationRow[]
 const adapter: StreamReducerAdapter<State, NotificationRow> = {
   empty: () => [],
   ingest: (state, item) => mergeNotificationRows(state, item, NOTIFICATION_CAP),
-  items: state => state,
-  id: item => item.id,
-  timestamp: item => item.created_at,
+  items: (state) => state,
+  id: (item) => item.id,
+  timestamp: (item) => item.created_at,
   // mergeNotificationRows replaces the stored row with the incoming copy.
   duplicatePolicy: 'last-write-wins',
   capacity: NOTIFICATION_CAP,
   read: {
     markRead: (state, id, readAt) => markNotificationRowRead(state, id, readAt),
     markAllRead: (state, readAt) => markAllNotificationRowsRead(state, readAt),
-    unreadCount: state => countUnreadNotificationRows(state),
-    isRead: item => item.read_at !== null,
+    unreadCount: (state) => countUnreadNotificationRows(state),
+    isRead: (item) => item.read_at !== null,
     withReadAt: (item, readAt) => ({ ...item, read_at: readAt }),
   },
 }

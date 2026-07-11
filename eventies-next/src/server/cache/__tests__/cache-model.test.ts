@@ -10,7 +10,10 @@ import { describe, expect, it, vi, beforeAll } from 'vitest'
  * The DAL's `revalidate` TTL backstop is a config value asserted in tags.ts.
  */
 
-const calls = vi.hoisted(() => ({ unstable_cache: [] as Array<{ keys: string[]; opts: { tags: string[]; revalidate: number } }>, revalidateTag: [] as Array<[string, unknown]> }))
+const calls = vi.hoisted(() => ({
+  unstable_cache: [] as Array<{ keys: string[]; opts: { tags: string[]; revalidate: number } }>,
+  revalidateTag: [] as Array<[string, unknown]>,
+}))
 
 vi.mock('next/cache', () => ({
   unstable_cache: (fn: unknown, keys: string[], opts: { tags: string[]; revalidate: number }) => {
@@ -59,13 +62,20 @@ describe('CACHE-005: DAL cache-tag attachment', () => {
 describe('CACHE-005: invalidation graph (06 §Hard rule 5)', () => {
   it('a product edit fans out to product:{slug}, products, and home', () => {
     const tags = invalidationSet('product', 'vr-booth')
-    expect(tags).toEqual(expect.arrayContaining([TAGS.product('vr-booth'), TAGS.products, TAGS.homeContent]))
+    expect(tags).toEqual(
+      expect.arrayContaining([TAGS.product('vr-booth'), TAGS.products, TAGS.homeContent])
+    )
   })
 
   it('a category edit fans out to category, categories, products, and home', () => {
     const tags = invalidationSet('category', 'screens')
     expect(tags).toEqual(
-      expect.arrayContaining([TAGS.category('screens'), TAGS.categories, TAGS.products, TAGS.homeContent])
+      expect.arrayContaining([
+        TAGS.category('screens'),
+        TAGS.categories,
+        TAGS.products,
+        TAGS.homeContent,
+      ])
     )
   })
 

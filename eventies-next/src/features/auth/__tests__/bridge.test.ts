@@ -100,7 +100,10 @@ describe('runAuthBridge soft-failure guarantees', () => {
 
   it('expired/invalid refresh token → soft failed, no loop, keys untouched (Q4/Q6 shape)', async () => {
     localStorage.setItem(TOKEN_KEY, VALID_BLOB)
-    mocks.setSession.mockResolvedValue({ data: { session: null }, error: { message: 'Invalid Refresh Token' } })
+    mocks.setSession.mockResolvedValue({
+      data: { session: null },
+      error: { message: 'Invalid Refresh Token' },
+    })
 
     const result = await runAuthBridge()
     expect(result.status).toBe('failed')

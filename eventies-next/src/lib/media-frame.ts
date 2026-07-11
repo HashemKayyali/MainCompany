@@ -100,16 +100,28 @@ export function parseMediaValue(
 ): ParsedMediaValue {
   const src = stripMediaTransform(media)
   if (!media) {
-    return { src: '', previewSrc: '', transform: normalizeMediaTransform(undefined, fallback), hasTransform: false }
+    return {
+      src: '',
+      previewSrc: '',
+      transform: normalizeMediaTransform(undefined, fallback),
+      hasTransform: false,
+    }
   }
 
   const hash = media.split('#')[1] || ''
   if (!hash.startsWith(HASH_PREFIX)) {
-    return { src, previewSrc: '', transform: normalizeMediaTransform(undefined, fallback), hasTransform: false }
+    return {
+      src,
+      previewSrc: '',
+      transform: normalizeMediaTransform(undefined, fallback),
+      hasTransform: false,
+    }
   }
 
   try {
-    const raw = JSON.parse(decodeBase64Url(hash.slice(HASH_PREFIX.length))) as Partial<MediaFrameTransform> & MediaDeliveryMetadata
+    const raw = JSON.parse(
+      decodeBase64Url(hash.slice(HASH_PREFIX.length))
+    ) as Partial<MediaFrameTransform> & MediaDeliveryMetadata
     return {
       src,
       previewSrc: typeof raw.previewSrc === 'string' ? stripMediaTransform(raw.previewSrc) : '',
@@ -117,7 +129,12 @@ export function parseMediaValue(
       hasTransform: true,
     }
   } catch {
-    return { src, previewSrc: '', transform: normalizeMediaTransform(undefined, fallback), hasTransform: false }
+    return {
+      src,
+      previewSrc: '',
+      transform: normalizeMediaTransform(undefined, fallback),
+      hasTransform: false,
+    }
   }
 }
 
@@ -135,7 +152,7 @@ function isDefaultTransform(transform: MediaFrameTransform) {
 export function encodeMediaValue(
   src: string,
   transform?: Partial<MediaFrameTransform>,
-  delivery?: MediaDeliveryMetadata,
+  delivery?: MediaDeliveryMetadata
 ) {
   const cleanSrc = stripMediaTransform(src)
   const normalized = normalizeMediaTransform(transform)
@@ -144,10 +161,12 @@ export function encodeMediaValue(
   if (!cleanSrc) return ''
   if (isDefaultTransform(normalized) && !previewSrc) return cleanSrc
 
-  const payload = encodeBase64Url(JSON.stringify({
-    ...normalized,
-    ...(previewSrc ? { previewSrc } : {}),
-  }))
+  const payload = encodeBase64Url(
+    JSON.stringify({
+      ...normalized,
+      ...(previewSrc ? { previewSrc } : {}),
+    })
+  )
   return `${cleanSrc}#${HASH_PREFIX}${payload}`
 }
 
@@ -157,7 +176,11 @@ export function updateMediaTransform(
   fallback?: Partial<MediaFrameTransform>
 ) {
   const parsed = parseMediaValue(media, fallback)
-  return encodeMediaValue(parsed.src, { ...parsed.transform, ...transform }, { previewSrc: parsed.previewSrc })
+  return encodeMediaValue(
+    parsed.src,
+    { ...parsed.transform, ...transform },
+    { previewSrc: parsed.previewSrc }
+  )
 }
 
 export function replaceMediaSource(

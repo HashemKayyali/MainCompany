@@ -14,8 +14,21 @@ const url = process.env.CT_SUPABASE_URL
 const anonKey = process.env.CT_SUPABASE_ANON_KEY
 const enabled = Boolean(url && anonKey)
 
-const PUBLIC_READABLE = ['products', 'categories', 'parts', 'custom_builds', 'customers', 'gallery_albums'] as const
-const PRIVATE_TABLES = ['profiles', 'rental_requests', 'purchase_quote_requests', 'chat_messages', 'notifications'] as const
+const PUBLIC_READABLE = [
+  'products',
+  'categories',
+  'parts',
+  'custom_builds',
+  'customers',
+  'gallery_albums',
+] as const
+const PRIVATE_TABLES = [
+  'profiles',
+  'rental_requests',
+  'purchase_quote_requests',
+  'chat_messages',
+  'notifications',
+] as const
 
 describe.skipIf(!enabled)('CT-RLS: anon persona', () => {
   const anon = () => createClient<Database>(url!, anonKey!, { auth: { persistSession: false } })

@@ -92,7 +92,13 @@ export default async function ProductDetailPage({
             <ul className="mt-3 grid grid-cols-4 gap-2">
               {gallery.slice(1, 5).map((g, i) => (
                 <li key={i} className="relative aspect-square overflow-hidden rounded-lg bg-ink-50">
-                  <SmartImage media={g} alt={`${product.name} ${i + 2}`} fill sizes="120px" className="object-cover" />
+                  <SmartImage
+                    media={g}
+                    alt={`${product.name} ${i + 2}`}
+                    fill
+                    sizes="120px"
+                    className="object-cover"
+                  />
                 </li>
               ))}
             </ul>
@@ -136,7 +142,13 @@ export default async function ProductDetailPage({
             {parts.map((part) => (
               <li key={part.id} className="rounded-xl border border-ink-100 p-3">
                 <div className="relative aspect-square overflow-hidden rounded-lg bg-ink-50">
-                  <SmartImage media={part.image} alt={part.title} fill sizes="180px" className="object-cover" />
+                  <SmartImage
+                    media={part.image}
+                    alt={part.title}
+                    fill
+                    sizes="180px"
+                    className="object-cover"
+                  />
                 </div>
                 <p className="mt-2 line-clamp-1 text-sm font-medium text-ink-900">{part.title}</p>
               </li>

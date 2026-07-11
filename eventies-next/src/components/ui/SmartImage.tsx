@@ -21,9 +21,20 @@ type SmartImageProps = {
   priority?: boolean
   loading?: ImageProps['loading']
   fetchPriority?: ImageProps['fetchPriority']
-} & ({ fill: true; width?: never; height?: never } | { fill?: false; width: number; height: number })
+} & (
+  { fill: true; width?: never; height?: never } | { fill?: false; width: number; height: number }
+)
 
-export function SmartImage({ media, alt, className, sizes, priority, loading, fetchPriority, ...dim }: SmartImageProps) {
+export function SmartImage({
+  media,
+  alt,
+  className,
+  sizes,
+  priority,
+  loading,
+  fetchPriority,
+  ...dim
+}: SmartImageProps) {
   const parsed = parseMediaValue(media ?? undefined)
   const original = (parsed.src || '').trim()
   const [errored, setErrored] = useState(false)

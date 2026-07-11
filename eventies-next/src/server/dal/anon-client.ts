@@ -16,8 +16,12 @@ let anonClient: SupabaseClient<Database> | undefined
 export function getAnonServerClient(): SupabaseClient<Database> {
   if (anonClient) return anonClient
   const env = serverEnv()
-  anonClient = createClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
+  anonClient = createClient<Database>(
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      auth: { persistSession: false, autoRefreshToken: false },
+    }
+  )
   return anonClient
 }

@@ -23,14 +23,23 @@ const fadeUp = { hidden: { opacity: 0, y: 34 }, visible: { opacity: 1, y: 0 } }
 
 export type HeroChip = { id: string; slug: string; name: string }
 
-export function HeroClient({ chips, image = '/images/hero-bg-event.webp' }: { chips: HeroChip[]; image?: string }) {
+export function HeroClient({
+  chips,
+  image = '/images/hero-bg-event.webp',
+}: {
+  chips: HeroChip[]
+  image?: string
+}) {
   const t = useTranslations('catalog.hero')
   const reduce = useReducedMotion()
   const motionOn = !reduce
   const tr = (delay = 0) => ({ duration: 0.9, delay, ease: EASE })
   const float = (delay: number) =>
     motionOn
-      ? { animate: { y: [0, -9, 0] }, transition: { duration: 4.5, repeat: Infinity, ease: 'easeInOut' as const, delay } }
+      ? {
+          animate: { y: [0, -9, 0] },
+          transition: { duration: 4.5, repeat: Infinity, ease: 'easeInOut' as const, delay },
+        }
       : {}
 
   return (
@@ -76,7 +85,10 @@ export function HeroClient({ chips, image = '/images/hero-bg-event.webp' }: { ch
               className="group inline-flex items-center gap-2.5 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-8 py-3.5 text-sm font-bold text-white shadow-violet-lg transition hover:-translate-y-0.5"
             >
               {t('exploreCta')}
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={2.4} />
+              <ArrowRight
+                className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                strokeWidth={2.4}
+              />
             </Link>
             <Link
               href="/contact"
@@ -143,7 +155,9 @@ export function HeroClient({ chips, image = '/images/hero-bg-event.webp' }: { ch
               />
               <div className="absolute end-3.5 top-3.5 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/30 px-3 py-1.5 backdrop-blur-md">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">{t('trusted')}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">
+                  {t('trusted')}
+                </span>
               </div>
               <motion.div className="absolute start-3.5 top-14 w-52" {...float(0)}>
                 <div className="rounded-2xl border border-white/20 bg-white/[0.12] p-3 backdrop-blur-xl">
@@ -152,7 +166,9 @@ export function HeroClient({ chips, image = '/images/hero-bg-event.webp' }: { ch
                       <CalendarCheck className="h-5 w-5 text-white" strokeWidth={2} />
                     </span>
                     <div>
-                      <div className="text-[8.5px] font-bold uppercase tracking-widest text-fuchsia-100">{t('forClients')}</div>
+                      <div className="text-[8.5px] font-bold uppercase tracking-widest text-fuchsia-100">
+                        {t('forClients')}
+                      </div>
                       <div className="text-xs font-bold text-white">{t('browseRequest')}</div>
                     </div>
                   </div>
@@ -165,7 +181,9 @@ export function HeroClient({ chips, image = '/images/hero-bg-event.webp' }: { ch
                       <Store className="h-5 w-5 text-white" strokeWidth={2} />
                     </span>
                     <div>
-                      <div className="text-[8.5px] font-bold uppercase tracking-widest text-violet-100">{t('forProviders')}</div>
+                      <div className="text-[8.5px] font-bold uppercase tracking-widest text-violet-100">
+                        {t('forProviders')}
+                      </div>
                       <div className="text-xs font-bold text-white">{t('growWithUs')}</div>
                     </div>
                   </div>

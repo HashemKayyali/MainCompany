@@ -68,7 +68,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ revalidated: tags })
   } catch (error) {
     // 06 §Hard rule 4: failure is surfaced, evented, retryable — never silent.
-    await track('revalidate.failed', { entity, message: error instanceof Error ? error.message : 'unknown' })
+    await track('revalidate.failed', {
+      entity,
+      message: error instanceof Error ? error.message : 'unknown',
+    })
     return NextResponse.json({ error: 'revalidation failed' }, { status: 500 })
   }
 }

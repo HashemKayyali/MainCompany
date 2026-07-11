@@ -29,7 +29,10 @@ export async function SiteFooter({ locale }: { locale: string }) {
         <div>
           <p className="text-lg font-semibold text-ink-900">Eventies</p>
           <p className="mt-2 text-sm text-ink-600">{t('tagline')}</p>
-          <a href="mailto:support@eventiesjo.com" className="mt-3 inline-block text-sm text-brand-700">
+          <a
+            href="mailto:support@eventiesjo.com"
+            className="mt-3 inline-block text-sm text-brand-700"
+          >
             support@eventiesjo.com
           </a>
         </div>

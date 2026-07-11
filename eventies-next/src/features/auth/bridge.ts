@@ -50,7 +50,11 @@ function safeGet(storage: Storage | undefined, key: string): string | null {
  * (src/lib/supabase.ts): explicit persistent marker → true; explicit session
  * marker → false; token present in localStorage → true; default → true.
  */
-export function inferRememberMe(local: Storage | undefined, session: Storage | undefined, tokenKey: string): boolean {
+export function inferRememberMe(
+  local: Storage | undefined,
+  session: Storage | undefined,
+  tokenKey: string
+): boolean {
   if (safeGet(local, AUTH_PERSISTENCE_KEY) === 'persistent') return true
   if (safeGet(session, AUTH_PERSISTENCE_KEY) === 'session') return false
   if (safeGet(local, tokenKey)) return true
@@ -79,7 +83,10 @@ export function readLegacyTokens(
 }
 
 function hasAdoptedFlag(): boolean {
-  return typeof document !== 'undefined' && document.cookie.split('; ').some((c) => c.startsWith(`${ADOPTED_COOKIE}=1`))
+  return (
+    typeof document !== 'undefined' &&
+    document.cookie.split('; ').some((c) => c.startsWith(`${ADOPTED_COOKIE}=1`))
+  )
 }
 
 function setAdoptedFlag(rememberMe: boolean): void {

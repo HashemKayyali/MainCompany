@@ -51,9 +51,13 @@ export function sortProductsForDisplay(products: Product[]) {
     .map(({ product }) => product)
 }
 
-export function buildReorderedProducts(products: Product[], targetSlug: string, desiredOrder?: unknown) {
+export function buildReorderedProducts(
+  products: Product[],
+  targetSlug: string,
+  desiredOrder?: unknown
+) {
   const ordered = sortProductsForDisplay(products)
-  const targetIndex = ordered.findIndex(product => product.slug === targetSlug)
+  const targetIndex = ordered.findIndex((product) => product.slug === targetSlug)
 
   if (targetIndex === -1) return ordered
 

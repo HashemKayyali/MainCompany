@@ -1,8 +1,10 @@
 ﻿import { afterEach, describe, expect, it, vi } from 'vitest'
 import { encodeMediaValue } from '../media-frame'
 
-const hero = 'https://example.supabase.co/storage/v1/object/public/product-images/products/a-hero.webp'
-const preview = 'https://example.supabase.co/storage/v1/object/public/product-images/products/a-thumb.webp'
+const hero =
+  'https://example.supabase.co/storage/v1/object/public/product-images/products/a-hero.webp'
+const preview =
+  'https://example.supabase.co/storage/v1/object/public/product-images/products/a-thumb.webp'
 const media = encodeMediaValue(hero, undefined, { previewSrc: preview })
 
 afterEach(() => {
@@ -37,7 +39,6 @@ describe('image delivery strategy', () => {
     expect(srcSet).toContain('320w')
     expect(srcSet).toContain('960w')
   })
-
 
   it('builds responsive Cloudinary f_auto/q_auto URLs without a feature flag', async () => {
     vi.stubEnv('NEXT_PUBLIC_IMAGE_TRANSFORMATIONS_ENABLED', 'false')

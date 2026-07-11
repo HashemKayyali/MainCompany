@@ -50,8 +50,16 @@ export default async function LocaleLayout({
   // the header as a slot (keeps components/ free of server/feature imports).
   const [products, categories] = await Promise.all([getProducts(), getCategories()])
   const searchItems: SearchItem[] = [
-    ...products.map((p) => ({ type: 'product' as const, name: p.name, href: `/products/${p.slug}` })),
-    ...categories.map((c) => ({ type: 'category' as const, name: c.name, href: `/categories/${c.slug}` })),
+    ...products.map((p) => ({
+      type: 'product' as const,
+      name: p.name,
+      href: `/products/${p.slug}`,
+    })),
+    ...categories.map((c) => ({
+      type: 'category' as const,
+      name: c.name,
+      href: `/categories/${c.slug}`,
+    })),
   ]
 
   return (

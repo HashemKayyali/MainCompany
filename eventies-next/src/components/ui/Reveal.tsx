@@ -8,7 +8,15 @@ import type { ReactNode } from 'react'
  * thrash (transform/opacity only). Honours prefers-reduced-motion: reduced =
  * render in place, no animation.
  */
-export function Reveal({ children, delay = 0, className }: { children: ReactNode; delay?: number; className?: string }) {
+export function Reveal({
+  children,
+  delay = 0,
+  className,
+}: {
+  children: ReactNode
+  delay?: number
+  className?: string
+}) {
   const reduce = useReducedMotion()
   if (reduce) return <div className={className}>{children}</div>
   return (

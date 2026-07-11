@@ -66,7 +66,10 @@ while ((match = sectionRegex.exec(phraseLiteral))) {
 }
 function sectionFor(phrase) {
   const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const keyRegex = new RegExp(`(?:'${escaped}'|"${escaped}"|\`${escaped}\`|^\\s*${escaped}\\s*:)`, 'm')
+  const keyRegex = new RegExp(
+    `(?:'${escaped}'|"${escaped}"|\`${escaped}\`|^\\s*${escaped}\\s*:)`,
+    'm'
+  )
   const m = keyRegex.exec(phraseLiteral)
   const at = m ? m.index : -1
   let current = 'misc'

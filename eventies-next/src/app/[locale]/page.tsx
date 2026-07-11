@@ -61,7 +61,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     className="group block overflow-hidden rounded-xl border border-ink-100 bg-white"
                   >
                     <div className="relative aspect-square w-full overflow-hidden bg-ink-50">
-                      <SmartImage media={c.image} alt={c.name} fill sizes="160px" className="object-cover" />
+                      <SmartImage
+                        media={c.image}
+                        alt={c.name}
+                        fill
+                        sizes="160px"
+                        className="object-cover"
+                      />
                     </div>
                     <p className="p-2 text-center text-xs font-medium text-ink-800">{c.name}</p>
                   </Link>

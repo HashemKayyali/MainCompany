@@ -20,7 +20,11 @@ export async function generateMetadata({
   })
 }
 
-export default async function CustomBuildsPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function CustomBuildsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
   const { locale } = await params
   setRequestLocale(locale as 'en' | 'ar')
   const t = await getTranslations('catalog.customBuilds')
@@ -37,7 +41,10 @@ export default async function CustomBuildsPage({ params }: { params: Promise<{ l
       ) : (
         <ul className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {builds.map((b) => (
-            <li key={b.id} className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-violet-sm">
+            <li
+              key={b.id}
+              className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-violet-sm"
+            >
               <div className="relative aspect-[16/10] w-full overflow-hidden bg-ink-50">
                 <SmartImage
                   media={b.image_url || b.images?.[0] || ''}
@@ -49,7 +56,9 @@ export default async function CustomBuildsPage({ params }: { params: Promise<{ l
               </div>
               <div className="p-4">
                 <h2 className="text-base font-semibold text-ink-900">{b.title}</h2>
-                {b.description ? <p className="mt-1 line-clamp-3 text-sm text-ink-600">{b.description}</p> : null}
+                {b.description ? (
+                  <p className="mt-1 line-clamp-3 text-sm text-ink-600">{b.description}</p>
+                ) : null}
               </div>
             </li>
           ))}

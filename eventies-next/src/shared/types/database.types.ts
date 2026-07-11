@@ -7,13 +7,7 @@
 // Last reconciled against: 20260706_notification_system.sql.
 // ----------------------------------------------------------------------------
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export interface Database {
   public: {
@@ -47,7 +41,7 @@ export interface Database {
             columns: ['id']
             referencedRelation: 'users'
             referencedColumns: ['id']
-          }
+          },
         ]
       }
 
@@ -255,7 +249,7 @@ export interface Database {
             columns: ['product_id']
             referencedRelation: 'products'
             referencedColumns: ['id']
-          }
+          },
         ]
       }
 
@@ -357,7 +351,7 @@ export interface Database {
             columns: ['category_id']
             referencedRelation: 'categories'
             referencedColumns: ['id']
-          }
+          },
         ]
       }
 
@@ -440,7 +434,7 @@ export interface Database {
             columns: ['submitter_profile_id']
             referencedRelation: 'profiles'
             referencedColumns: ['id']
-          }
+          },
         ]
       }
 
@@ -505,7 +499,7 @@ export interface Database {
             columns: ['created_by']
             referencedRelation: 'profiles'
             referencedColumns: ['id']
-          }
+          },
         ]
       }
 
@@ -550,7 +544,7 @@ export interface Database {
             columns: ['admin_id']
             referencedRelation: 'profiles'
             referencedColumns: ['id']
-          }
+          },
         ]
       }
 
@@ -759,8 +753,6 @@ export interface Database {
         Relationships: []
       }
 
-
-
       chat_conversations: {
         Row: {
           id: string
@@ -813,7 +805,7 @@ export interface Database {
             columns: ['resolved_by']
             referencedRelation: 'profiles'
             referencedColumns: ['id']
-          }
+          },
         ]
       }
 
@@ -888,7 +880,7 @@ export interface Database {
             columns: ['quick_question_id']
             referencedRelation: 'chat_quick_questions'
             referencedColumns: ['id']
-          }
+          },
         ]
       }
 
@@ -921,7 +913,7 @@ export interface Database {
             columns: ['user_id']
             referencedRelation: 'profiles'
             referencedColumns: ['id']
-          }
+          },
         ]
       }
       request_status_history: {
@@ -957,7 +949,6 @@ export interface Database {
 
     Views: Record<string, never>
     Functions: {
-
       get_notification_unread_count: {
         Args: Record<string, never>
         Returns: number
@@ -1037,7 +1028,14 @@ export interface Database {
       }
       get_all_users: {
         Args: Record<string, never>
-        Returns: { id: string; email: string; name: string; phone: string; role: string; created_at: string }[]
+        Returns: {
+          id: string
+          email: string
+          name: string
+          phone: string
+          role: string
+          created_at: string
+        }[]
       }
       is_admin: {
         Args: Record<string, never>

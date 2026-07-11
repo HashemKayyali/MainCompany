@@ -61,7 +61,9 @@ export default async function CategoryDetailPage({
 
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-ink-900">{category.name}</h1>
-        {category.description ? <p className="mt-2 max-w-2xl text-ink-600">{category.description}</p> : null}
+        {category.description ? (
+          <p className="mt-2 max-w-2xl text-ink-600">{category.description}</p>
+        ) : null}
       </header>
 
       {products.length === 0 ? (

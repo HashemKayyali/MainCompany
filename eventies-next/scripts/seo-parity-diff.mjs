@@ -46,7 +46,11 @@ function extract(html) {
 //    og-default.jpg. Product OG images are unchanged (Cloudinary).
 //  - home title/description: BASE-018 aligned the shell to the prerender copy.
 function isApprovedDelta(path, field, baseVal, nextVal) {
-  if (field === 'ogImage' && baseVal?.endsWith('og-default.png') && nextVal?.endsWith('og-default.jpg'))
+  if (
+    field === 'ogImage' &&
+    baseVal?.endsWith('og-default.png') &&
+    nextVal?.endsWith('og-default.jpg')
+  )
     return 'BASE-017/IMG-012 og-default.png→.jpg'
   return null
 }
@@ -76,8 +80,18 @@ async function compare(path) {
 
 for (const p of [...ROUTES, ...PRODUCT_ROUTES]) await compare(p)
 
-const unexplained = results.flatMap((r) => r.deltas.filter((d) => !d.approved).map((d) => ({ path: r.path, ...d })))
-writeFileSync(OUT, JSON.stringify({ generatedAt: new Date().toISOString(), next: NEXT, results, unexplained }, null, 2))
+const unexplained = results.flatMap((r) =>
+  r.deltas.filter((d) => !d.approved).map((d) => ({ path: r.path, ...d }))
+)
+writeFileSync(
+  OUT,
+  JSON.stringify(
+    { generatedAt: new Date().toISOString(), next: NEXT, results, unexplained },
+    null,
+    2
+  )
+)
 console.log(`compared ${results.length} routes; ${unexplained.length} unexplained deltas`)
-for (const u of unexplained) console.log(`  DELTA ${u.path} ${u.field}: base="${u.baseline}" next="${u.next}"`)
+for (const u of unexplained)
+  console.log(`  DELTA ${u.path} ${u.field}: base="${u.baseline}" next="${u.next}"`)
 if (unexplained.length) process.exitCode = 2

@@ -44,7 +44,8 @@ export function GalleryGrid({ images }: { images: GalleryImage[] }) {
 
   const rtl = typeof document !== 'undefined' && document.dir === 'rtl'
   const move = useCallback(
-    (delta: number) => setLightbox((i) => (i === null ? i : (i + delta + images.length) % images.length)),
+    (delta: number) =>
+      setLightbox((i) => (i === null ? i : (i + delta + images.length) % images.length)),
     [images.length]
   )
 

@@ -43,7 +43,13 @@ export default async function CustomersPage({ params }: { params: Promise<{ loca
             >
               {c.logo_url ? (
                 <div className="relative h-12 w-full">
-                  <SmartImage media={c.logo_url} alt={c.name} fill sizes="160px" className="object-contain" />
+                  <SmartImage
+                    media={c.logo_url}
+                    alt={c.name}
+                    fill
+                    sizes="160px"
+                    className="object-contain"
+                  />
                 </div>
               ) : (
                 <span className="text-center text-sm font-medium text-ink-700">{c.name}</span>

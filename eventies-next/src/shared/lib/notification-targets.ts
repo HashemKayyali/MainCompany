@@ -12,23 +12,33 @@ export const notificationTargets = {
   adminPurchaseQuote: (id: string) => `/admin/requests/purchase_quote/${encodeURIComponent(id)}`,
   adminContactSubmission: (id: string) => `/admin/contacts?submission=${encodeURIComponent(id)}`,
   clientRequest: (requestNumber: string) => `/my-requests/${encodeURIComponent(requestNumber)}`,
-  superAdminChat: (conversationId: string) => `/admin/chats?conversation=${encodeURIComponent(conversationId)}`,
+  superAdminChat: (conversationId: string) =>
+    `/admin/chats?conversation=${encodeURIComponent(conversationId)}`,
   clientChat: (conversationId: string) => `/?supportChat=${encodeURIComponent(conversationId)}`,
 } as const
 
-export function getNotificationFallbackTarget(notification: NotificationRow, isAdmin: boolean): string {
+export function getNotificationFallbackTarget(
+  notification: NotificationRow,
+  isAdmin: boolean
+): string {
   if (isSafeInternalTarget(notification.target_url)) return notification.target_url
 
   if (isAdmin) {
     if (notification.entity_type === 'chat_conversation') return '/admin/chats'
     if (notification.entity_type === 'contact_submission') return '/admin/contacts'
-    if (notification.entity_type === 'rental_request' || notification.entity_type === 'purchase_quote') {
+    if (
+      notification.entity_type === 'rental_request' ||
+      notification.entity_type === 'purchase_quote'
+    ) {
       return '/admin/requests'
     }
     return '/admin/notifications'
   }
 
-  if (notification.entity_type === 'rental_request' || notification.entity_type === 'purchase_quote') {
+  if (
+    notification.entity_type === 'rental_request' ||
+    notification.entity_type === 'purchase_quote'
+  ) {
     return '/my-requests'
   }
 

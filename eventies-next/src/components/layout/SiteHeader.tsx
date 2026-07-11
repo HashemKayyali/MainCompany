@@ -11,7 +11,13 @@ import { LanguageSwitcher } from './LanguageSwitcher'
  * parts (mobile menu, language switch) are small client islands. Includes the
  * skip-link.
  */
-export async function SiteHeader({ locale, searchSlot }: { locale: string; searchSlot?: ReactNode }) {
+export async function SiteHeader({
+  locale,
+  searchSlot,
+}: {
+  locale: string
+  searchSlot?: ReactNode
+}) {
   const t = await getTranslations({ locale: locale as 'en' | 'ar', namespace: 'nav' })
   return (
     <>

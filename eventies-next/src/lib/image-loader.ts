@@ -16,15 +16,7 @@ import { parseMediaValue, stripMediaTransform } from './media-frame'
  */
 
 export type ImagePreset =
-  | 'tiny'
-  | 'logo'
-  | 'thumbnail'
-  | 'card'
-  | 'category'
-  | 'gallery'
-  | 'detail'
-  | 'hero'
-  | 'fullscreen'
+  'tiny' | 'logo' | 'thumbnail' | 'card' | 'category' | 'gallery' | 'detail' | 'hero' | 'fullscreen'
 
 interface PresetConfig {
   width: number
@@ -37,13 +29,48 @@ interface PresetConfig {
 export const PRESETS: Record<ImagePreset, PresetConfig> = {
   tiny: { width: 96, quality: 60, srcSetWidths: [48, 96, 144], useEmbeddedPreview: true },
   logo: { width: 240, quality: 70, srcSetWidths: [120, 240, 360], useEmbeddedPreview: true },
-  thumbnail: { width: 320, quality: 72, srcSetWidths: [160, 240, 320, 480], useEmbeddedPreview: true },
-  card: { width: 720, quality: 76, srcSetWidths: [320, 480, 640, 720, 960], useEmbeddedPreview: true },
-  category: { width: 800, quality: 77, srcSetWidths: [360, 540, 720, 900], useEmbeddedPreview: true },
-  gallery: { width: 1100, quality: 79, srcSetWidths: [480, 720, 960, 1200], useEmbeddedPreview: true },
-  detail: { width: 1600, quality: 82, srcSetWidths: [720, 960, 1280, 1600], useEmbeddedPreview: false },
-  hero: { width: 1600, quality: 82, srcSetWidths: [720, 960, 1280, 1600], useEmbeddedPreview: false },
-  fullscreen: { width: 1920, quality: 84, srcSetWidths: [960, 1280, 1600, 1920], useEmbeddedPreview: false },
+  thumbnail: {
+    width: 320,
+    quality: 72,
+    srcSetWidths: [160, 240, 320, 480],
+    useEmbeddedPreview: true,
+  },
+  card: {
+    width: 720,
+    quality: 76,
+    srcSetWidths: [320, 480, 640, 720, 960],
+    useEmbeddedPreview: true,
+  },
+  category: {
+    width: 800,
+    quality: 77,
+    srcSetWidths: [360, 540, 720, 900],
+    useEmbeddedPreview: true,
+  },
+  gallery: {
+    width: 1100,
+    quality: 79,
+    srcSetWidths: [480, 720, 960, 1200],
+    useEmbeddedPreview: true,
+  },
+  detail: {
+    width: 1600,
+    quality: 82,
+    srcSetWidths: [720, 960, 1280, 1600],
+    useEmbeddedPreview: false,
+  },
+  hero: {
+    width: 1600,
+    quality: 82,
+    srcSetWidths: [720, 960, 1280, 1600],
+    useEmbeddedPreview: false,
+  },
+  fullscreen: {
+    width: 1920,
+    quality: 84,
+    srcSetWidths: [960, 1280, 1600, 1920],
+    useEmbeddedPreview: false,
+  },
 }
 
 const SUPABASE_PUBLIC_MARKER = '/storage/v1/object/public/'

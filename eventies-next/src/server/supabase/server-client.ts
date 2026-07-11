@@ -16,18 +16,24 @@ export async function createSupabaseServerClient(): Promise<SupabaseClient<Datab
   const cookieStore = await cookies()
   const env = serverEnv()
 
-  return createServerClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll()
+  return createServerClient<Database>(
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // RSC render scope: cookie writes throw. The proxy owns refresh; ignore.
+          }
+        },
       },
-      setAll(cookiesToSet) {
-        try {
-          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-        } catch {
-          // RSC render scope: cookie writes throw. The proxy owns refresh; ignore.
-        }
-      },
-    },
-  })
+    }
+  )
 }

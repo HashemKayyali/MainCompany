@@ -25,8 +25,20 @@ describe('contact schema foundation', () => {
   })
 
   it('allows empty phone but rejects a malformed one', () => {
-    expect(contactSchema.safeParse({ name: 'Hashem', email: 'a@b.co', phone: '', message: 'long enough message' }).success).toBe(true)
-    const bad = contactSchema.safeParse({ name: 'Hashem', email: 'a@b.co', phone: 'abc', message: 'long enough message' })
+    expect(
+      contactSchema.safeParse({
+        name: 'Hashem',
+        email: 'a@b.co',
+        phone: '',
+        message: 'long enough message',
+      }).success
+    ).toBe(true)
+    const bad = contactSchema.safeParse({
+      name: 'Hashem',
+      email: 'a@b.co',
+      phone: 'abc',
+      message: 'long enough message',
+    })
     expect(bad.success).toBe(false)
   })
 })

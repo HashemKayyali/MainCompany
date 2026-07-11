@@ -32,9 +32,7 @@ for (const file of walk(SRC)) {
   const raw = readFileSync(file, 'utf8').replace(/^﻿/, '')
   // Strip comments before pattern-matching: the gates analyze CODE, not prose
   // (a comment may legitimately mention `import.meta.env` or `'use cache'`).
-  const text = raw
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/(^|[^:])\/\/[^\n]*/g, '$1')
+  const text = raw.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1')
 
   // GATE 1 (tests are exercised via the vitest server-only shim, not at runtime)
   if (rel.startsWith('src/server/') && !rel.includes('__tests__')) {
@@ -44,7 +42,9 @@ for (const file of walk(SRC)) {
   }
 
   // GATE 2 — QG-ARCH-3
-  const touchesSession = /server\/supabase\/(session|server-client)/.test(text) && !rel.startsWith('src/server/supabase/')
+  const touchesSession =
+    /server\/supabase\/(session|server-client)/.test(text) &&
+    !rel.startsWith('src/server/supabase/')
   if (touchesSession || rel.startsWith('src/server/supabase/')) {
     if (/'use cache'|"use cache"|force-cache|unstable_cache/.test(text)) {
       failures.push(`[QG-ARCH-3] ${rel} mixes session access with caching primitives`)

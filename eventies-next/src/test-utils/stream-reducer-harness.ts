@@ -51,13 +51,14 @@ export function runStreamReducerContract<S, Item>(
   options: StreamReducerHarnessOptions<Item>
 ): void {
   const { makeItem } = options
-  const ingestAll = (items: Item[]): S => items.reduce((s, m) => adapter.ingest(s, m), adapter.empty())
-  const ids = (state: S) => adapter.items(state).map(i => adapter.id(i))
+  const ingestAll = (items: Item[]): S =>
+    items.reduce((s, m) => adapter.ingest(s, m), adapter.empty())
+  const ids = (state: S) => adapter.items(state).map((i) => adapter.id(i))
 
   describe(`RD-01 stream-reducer contract: ${name}`, () => {
     it('ingests items newest-first by timestamp', () => {
       const state = ingestAll([makeItem(1), makeItem(2), makeItem(3)])
-      const ts = adapter.items(state).map(i => adapter.timestamp(i))
+      const ts = adapter.items(state).map((i) => adapter.timestamp(i))
       expect([...ts].sort((a, b) => b.localeCompare(a))).toEqual(ts)
     })
 
@@ -81,7 +82,7 @@ export function runStreamReducerContract<S, Item>(
       if (!adapter.read) return // policy only observable via a mutated field
       const mutated = adapter.read.withReadAt(original, '2026-07-07T00:00:00.000Z')
       const state2 = adapter.ingest(state1, mutated)
-      const stored = adapter.items(state2).find(i => adapter.id(i) === adapter.id(original))!
+      const stored = adapter.items(state2).find((i) => adapter.id(i) === adapter.id(original))!
       if (adapter.duplicatePolicy === 'last-write-wins') {
         expect(adapter.read.isRead(stored)).toBe(true)
       } else {
@@ -93,7 +94,9 @@ export function runStreamReducerContract<S, Item>(
       // Simulates the load race: items 1-4 exist; 3 and 4 arrive live while
       // the snapshot [1,2,3] is being fetched; buffer is replayed after.
       const [m1, m2, m3, m4] = [makeItem(1), makeItem(2), makeItem(3), makeItem(4)]
-      const snapshotThenReplay = ids([m3, m4].reduce((s, m) => adapter.ingest(s, m), ingestAll([m1, m2, m3])))
+      const snapshotThenReplay = ids(
+        [m3, m4].reduce((s, m) => adapter.ingest(s, m), ingestAll([m1, m2, m3]))
+      )
       const idealStream = ids(ingestAll([m1, m2, m3, m4]))
       expect(snapshotThenReplay).toEqual(idealStream)
     })
@@ -116,9 +119,9 @@ export function runStreamReducerContract<S, Item>(
         const marked = read.markRead(state, adapter.id(a), '2026-07-07T01:00:00.000Z')
         expect(read.unreadCount(marked)).toBe(1)
         const again = read.markRead(marked, adapter.id(a), '2026-07-07T02:00:00.000Z')
-        const storedA = adapter.items(again).find(i => adapter.id(i) === adapter.id(a))!
+        const storedA = adapter.items(again).find((i) => adapter.id(i) === adapter.id(a))!
         // First read timestamp wins — re-marking must not move the watermark.
-        expect(adapter.items(marked).find(i => adapter.id(i) === adapter.id(a))).toEqual(storedA)
+        expect(adapter.items(marked).find((i) => adapter.id(i) === adapter.id(a))).toEqual(storedA)
       })
 
       it('markAllRead zeroes the unread count', () => {

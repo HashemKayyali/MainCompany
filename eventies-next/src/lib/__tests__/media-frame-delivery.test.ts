@@ -29,7 +29,7 @@ describe('media delivery metadata', () => {
 
   it('preserves preview metadata when the canonical source is replaced', () => {
     const media = encodeMediaValue(hero, undefined, { previewSrc: preview })
-    const replaced = replaceMediaSource(media, src => `${src}?v=2`)
+    const replaced = replaceMediaSource(media, (src) => `${src}?v=2`)
     const parsed = parseMediaValue(replaced)
     expect(parsed.src).toBe(`${hero}?v=2`)
     expect(parsed.previewSrc).toBe(preview)
