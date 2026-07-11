@@ -8,6 +8,9 @@ import { SiteHeader } from '@/components/layout/SiteHeader'
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import { JsonLd } from '@/components/JsonLd'
 import { GLOBAL_JSON_LD } from '@/server/metadata/jsonld'
+import { SearchDialog, type SearchItem } from '@/features/catalog/SearchDialog'
+import { getProducts } from '@/server/dal/products'
+import { getCategories } from '@/server/dal/categories'
 import '../globals.css'
 
 /**
@@ -43,6 +46,14 @@ export default async function LocaleLayout({
 
   const dir = locale === 'ar' ? 'rtl' : 'ltr'
 
+  // CAT-019 search index — built server-side from the cached DAL and handed to
+  // the header as a slot (keeps components/ free of server/feature imports).
+  const [products, categories] = await Promise.all([getProducts(), getCategories()])
+  const searchItems: SearchItem[] = [
+    ...products.map((p) => ({ type: 'product' as const, name: p.name, href: `/products/${p.slug}` })),
+    ...categories.map((c) => ({ type: 'category' as const, name: c.name, href: `/categories/${c.slug}` })),
+  ]
+
   return (
     <html
       lang={locale}
@@ -64,7 +75,7 @@ export default async function LocaleLayout({
           <JsonLd key={i} data={node} />
         ))}
         <NextIntlClientProvider>
-          <SiteHeader locale={locale} />
+          <SiteHeader locale={locale} searchSlot={<SearchDialog items={searchItems} />} />
           <main id="main-content">{children}</main>
           <SiteFooter locale={locale} />
         </NextIntlClientProvider>

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { NavMenu } from './NavMenu'
@@ -10,7 +11,7 @@ import { LanguageSwitcher } from './LanguageSwitcher'
  * parts (mobile menu, language switch) are small client islands. Includes the
  * skip-link.
  */
-export async function SiteHeader({ locale }: { locale: string }) {
+export async function SiteHeader({ locale, searchSlot }: { locale: string; searchSlot?: ReactNode }) {
   const t = await getTranslations({ locale: locale as 'en' | 'ar', namespace: 'nav' })
   return (
     <>
@@ -34,6 +35,7 @@ export async function SiteHeader({ locale }: { locale: string }) {
           </Link>
           <div className="flex items-center gap-2">
             <NavMenu />
+            {searchSlot}
             <LanguageSwitcher locale={locale} />
           </div>
         </div>

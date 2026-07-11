@@ -18,9 +18,12 @@
     "ci": "npm run typecheck && npm run lint && npm run gate:arch && npm run gate:i18n && npm run gate:cycles && npm run test && npm run build"
   },
   "dependencies": {
+    "@paper-design/shaders-react": "^0.0.76",
     "@sentry/nextjs": "^10.65.0",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.110.2",
+    "framer-motion": "^11.18.2",
+    "lucide-react": "^0.575.0",
     "next": "16.2.10",
     "next-intl": "^4.13.2",
     "react": "19.2.4",

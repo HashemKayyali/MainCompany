@@ -50,5 +50,37 @@
     "formComingSoon": "The contact form is being upgraded. In the meantime, reach us by email or WhatsApp.",
     "emailUs": "Email us",
     "whatsapp": "WhatsApp"
+  },
+  "hero": {
+    "eyebrow": "Event Services Marketplace · Jordan",
+    "headline": "Plan and request event services from one organized marketplace.",
+    "subhead": "Explore event rentals, interactive activations, screens, booths, production support, and custom setups across Jordan — then submit a rental or purchase quote request for review.",
+    "exploreCta": "Explore Services",
+    "quoteCta": "Request a Quote",
+    "browse": "Browse",
+    "imageAlt": "A vibrant event powered by Eventies providers",
+    "trusted": "Trusted across Jordan",
+    "forClients": "For Clients",
+    "browseRequest": "Browse & Request",
+    "forProviders": "For Providers",
+    "growWithUs": "Grow with Us"
+  },
+  "home": {
+    "howHeading": "How it works",
+    "how1Title": "Browse",
+    "how1Body": "Explore services, activations, and custom builds by category.",
+    "how2Title": "Request",
+    "how2Body": "Submit one clear rental or purchase quote request for review.",
+    "how3Title": "Celebrate",
+    "how3Body": "The Eventies team coordinates availability, pricing, and logistics.",
+    "eventsHeading": "Built for every kind of event",
+    "faqHeading": "Frequently asked questions",
+    "ctaHeading": "Ready to plan your event?",
+    "ctaBody": "Send one clear request and the Eventies team will follow up.",
+    "ctaButton": "Start a request",
+    "search": "Search",
+    "searchPlaceholder": "Search services and categories…",
+    "searchEmpty": "No matches. Try another term.",
+    "searchClose": "Close search"
   }
 }
