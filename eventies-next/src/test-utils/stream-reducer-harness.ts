@@ -104,7 +104,7 @@ export function runStreamReducerContract<S, Item>(
         const state = ingestAll(items)
         const kept = adapter.items(state)
         expect(kept).toHaveLength(adapter.capacity!)
-        expect(adapter.id(kept[0])).toBe(adapter.id(items[items.length - 1]))
+        expect(adapter.id(kept[0]!)).toBe(adapter.id(items[items.length - 1]!))
       })
     }
 

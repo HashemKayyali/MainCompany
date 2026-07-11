@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
+import { alexandria, sora, ibmPlexSansArabic } from '@/lib/fonts'
 import '../globals.css'
 
 /**
@@ -39,8 +40,22 @@ export default async function LocaleLayout({
   const dir = locale === 'ar' ? 'rtl' : 'ltr'
 
   return (
-    <html lang={locale} dir={dir}>
-      <body>
+    <html
+      lang={locale}
+      dir={dir}
+      className={`${alexandria.variable} ${sora.variable} ${ibmPlexSansArabic.variable}`}
+    >
+      <head>
+        {/* FOUND-032 — preconnect parity with the audited index.html:
+            Supabase (data) + Cloudinary (images) + Fontshare (Zodiak, until
+            self-hosted in P2). Google Fonts preconnects are obsolete here:
+            next/font self-hosts those files. */}
+        <link rel="preconnect" href="https://dqizzlcsioqykfeldtsj.supabase.co" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://dqizzlcsioqykfeldtsj.supabase.co" />
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="" />
+      </head>
+      <body className="font-sans">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>
