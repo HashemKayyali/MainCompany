@@ -1,13 +1,46 @@
 {
   "tagline": "تأجير معدات الفعاليات والتفعيلات والتصاميم المخصصة في الأردن.",
+  "brandDescription": "تساعد إيفنتيز العملاء على اكتشاف خدمات الفعاليات، ومقارنة موردين موثوقين في جميع أنحاء الأردن، وإرسال طلبات واضحة من منصّة واحدة منظّمة.",
+  "trustBadge": "منصّة موثوقة لخدمات الفعاليات",
+  "categoriesHeading": "الفئات",
+  "companyHeading": "الشركة",
+  "supportHeading": "الدعم",
   "exploreHeading": "استكشف",
   "legalHeading": "قانوني",
   "contactHeading": "تواصل",
   "contactBody": "أرسل طلبًا واحدًا واضحًا وسيتابع معك فريق إيفنتيز.",
+  "browseServices": "تصفّح الخدمات",
+  "company": {
+    "home": "الرئيسية",
+    "about": "عن إيفنتيز",
+    "customBuilds": "التصاميم المخصصة",
+    "customers": "العملاء",
+    "gallery": "المعرض",
+    "contact": "تواصل"
+  },
+  "support": {
+    "browse": "تصفّح الخدمات",
+    "quote": "اطلب عرض سعر",
+    "track": "تتبّع الطلبات",
+    "provider": "كن مورّدًا",
+    "help": "مركز المساعدة"
+  },
+  "contactEmails": {
+    "general": "عام",
+    "eventRequests": "طلبات الفعاليات",
+    "vendors": "الموردون",
+    "support": "الدعم"
+  },
+  "amman": "عمّان، الأردن",
+  "followOn": "تابع إيفنتيز على {platform}",
   "privacy": "سياسة الخصوصية",
   "terms": "شروط الخدمة",
   "vendorTerms": "شروط الموردين",
   "refund": "سياسة الاسترجاع",
   "cookies": "سياسة ملفات الارتباط",
+  "privacyShort": "الخصوصية",
+  "termsShort": "الشروط",
+  "cookiesShort": "ملفات الارتباط",
+  "madeInJordan": "صُنع في الأردن",
   "rights": "جميع الحقوق محفوظة."
 }

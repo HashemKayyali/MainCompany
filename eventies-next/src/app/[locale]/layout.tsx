@@ -81,7 +81,10 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <SiteHeader locale={locale} searchSlot={<SearchDialog items={searchItems} />} />
           <main id="main-content">{children}</main>
-          <SiteFooter locale={locale} />
+          <SiteFooter
+            locale={locale}
+            categories={categories.map((c) => ({ slug: c.slug, name: c.name, icon: c.icon }))}
+          />
         </NextIntlClientProvider>
       </body>
     </html>

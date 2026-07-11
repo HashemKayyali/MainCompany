@@ -1,13 +1,46 @@
 {
   "tagline": "Event rentals, activations, and custom setups across Jordan.",
+  "brandDescription": "Eventies helps clients discover event services, compare trusted providers across Jordan, and submit clear requests from one organized marketplace.",
+  "trustBadge": "Trusted event services marketplace",
+  "categoriesHeading": "Categories",
+  "companyHeading": "Company",
+  "supportHeading": "Support",
   "exploreHeading": "Explore",
   "legalHeading": "Legal",
   "contactHeading": "Contact",
   "contactBody": "Send one clear request and the Eventies team follows up.",
+  "browseServices": "Browse Services",
+  "company": {
+    "home": "Home",
+    "about": "About Eventies",
+    "customBuilds": "Custom Builds",
+    "customers": "Customers",
+    "gallery": "Gallery",
+    "contact": "Contact"
+  },
+  "support": {
+    "browse": "Browse Services",
+    "quote": "Request a Quote",
+    "track": "Track Requests",
+    "provider": "Become a Provider",
+    "help": "Help Center"
+  },
+  "contactEmails": {
+    "general": "General",
+    "eventRequests": "Event Requests",
+    "vendors": "Vendors",
+    "support": "Support"
+  },
+  "amman": "Amman, Jordan",
+  "followOn": "Follow Eventies on {platform}",
   "privacy": "Privacy Policy",
   "terms": "Terms of Service",
   "vendorTerms": "Vendor Terms",
   "refund": "Refund Policy",
   "cookies": "Cookie Policy",
+  "privacyShort": "Privacy",
+  "termsShort": "Terms",
+  "cookiesShort": "Cookies",
+  "madeInJordan": "Made in Jordan",
   "rights": "All rights reserved."
 }
