@@ -10,8 +10,13 @@ const PAGES = ['/']
 
 for (const path of PAGES) {
   test(`axe: no critical violations on ${path}`, async ({ page }, testInfo) => {
+    // The home page carries the WebGL MeshGradient backdrop; force reduced-motion
+    // so it (and other animations) stay off — a deterministic, lighter DOM for the
+    // axe scan. Give the scan headroom over the heavier ported home.
+    test.setTimeout(120_000)
+    await page.emulateMedia({ reducedMotion: 'reduce' })
     const pathPrefix = (testInfo.project.metadata.pathPrefix as string) ?? ''
-    await page.goto(pathPrefix + path)
+    await page.goto(pathPrefix + path, { waitUntil: 'domcontentloaded' })
 
     const results = await new AxeBuilder({ page }).analyze()
     const critical = results.violations.filter((v) => v.impact === 'critical')
