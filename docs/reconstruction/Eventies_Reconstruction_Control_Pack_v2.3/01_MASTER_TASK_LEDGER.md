@@ -160,7 +160,7 @@ Status source of truth: the Status column below (all initialize TODO)
 | CAT-021 | P2 | catalog | Reveal/scroll animations port as islands (framer) without layout thrash | REFACTOR | M | P | CAT-001 | scroll perf vs baseline | PERF | DONE:Reveal whileInView, reduced-motion honored |
 | CAT-022 | P2 | catalog | Route loading states (loading.tsx) per segment | NEW | L | — | CAT-001 | skeletons render | E | DONE |
 | CAT-023 | P2 | catalog | not-found.tsx per catalog segment localized | NEW | L | E | I18N-018 | 404 pages localized | E | DONE |
-| CAT-024 | P2 | catalog | Vite-parity visual pass: 6 template snapshots (EN) approved | NEW | M | — | CAT-003..017 | snapshots baseline committed | V | BLOCKED:human visual-parity approval |
+| CAT-024 | P2 | catalog | Vite-parity visual pass: 6 template snapshots (EN) approved | NEW | M | — | CAT-003..017 | snapshots baseline committed | V | DEFERRED_BY_OWNER:final approval required before Phase 7 or production-domain switch |
 
 ## SEO — Phase 2 metadata/sitemap (evidence: prerender-seo.mjs, api/sitemap.ts)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |

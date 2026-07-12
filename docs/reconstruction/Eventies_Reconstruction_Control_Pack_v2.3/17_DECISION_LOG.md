@@ -1,6 +1,8 @@
 # 17 — DECISION LOG (ADR format)
 All contested questions from Audit V1, Review V2, and pack reconciliation. These rulings bind every other file.
 
+**OWNER-01 — CAT-024 visual-parity approval deferral (2026-07-12).** Decision: `CAT-024 = DEFERRED_BY_OWNER`. This status is neither DONE nor approval. The deferral does not block Phase 3 and does not authorize public-frontend redesign or polish during Phase 3. Final CAT-024 owner approval is a mandatory pre-cutover gate before Phase 7 or any production-domain switch.
+
 **ADR-01 — Framework.** Q: Vite SPA vs Next.js App Router vs RR7 Framework Mode vs Astro. Decision: **Next.js App Router.** Evidence: four structural SPA limits (Arabic indexability, deploy-coupled freshness via `scripts/prerender-seo.mjs`, soft-404 catch-all in `vercel.json`, no trusted server boundary for bot defense). Tradeoff: 6–10 wks rebuild + cutover window. Supersedes V1's "stay on Vite". Revisit: never during this project.
 
 **ADR-02 — Strategy.** Q: fix-Vite-first (A) vs freeze-and-reconstruct (B) vs pure strangler (C) vs domain rebuild (D). Decision: **B+D build, C as deployment mechanism** (route-group rewrites, rollback = restore rewrite). Evidence: V2 §4 matrix; i18n-on-Vite is throwaway plumbing. Tradeoff: two apps share one DB until P7 → no-destructive-migration window rule.

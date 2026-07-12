@@ -1,5 +1,7 @@
 # CAT-024 — Visual Reconstruction Progress Report
 
+> **Owner decision (2026-07-12): `CAT-024 = DEFERRED_BY_OWNER`.** Final visual-parity approval is intentionally deferred. This is not DONE or approved, does not block Phase 3, and becomes a mandatory gate before Phase 7 or any production-domain switch.
+
 **Status: NOT approved (owner-only).** This report documents code-side progress on the
 full component-by-component port of the Vite public experience into `eventies-next/`.
 Source of truth: the Vite app at the repository root (`src/`).

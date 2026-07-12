@@ -4,6 +4,8 @@ Source of truth: the **Vite app at the repository root** (`src/`). Target: `even
 
 Screenshots (both apps, 1440×1000 & 390×844, EN & AR) live under `docs/reconstruction/visual-parity/shots/{legacy,next}/`. **CAT-024 is owner-approved only** — this matrix tracks code-side status, not sign-off.
 
+**Owner decision (2026-07-12): `CAT-024 = DEFERRED_BY_OWNER`.** This is not approval and must not be recorded as DONE. It does not block Phase 3, but final owner approval is a mandatory pre-cutover gate before Phase 7 or any production-domain switch.
+
 ## Design system
 - **Ported verbatim** into `eventies-next/src/app/globals.css` (2,109 lines from `src/styles/input.css` + `src/styles/site.css`): brand/ink CSS vars, `hero-title-silver`, `glass`, `section-shell/label/title`, `premium-card`, `home-band`, `site-container-wide`, gradients, shadows, scrollbars, RTL rules. Fonts by literal family name (Alexandria/Sora Google Fonts, Zodiak Fontshare, IBM Plex Sans Arabic). ✅
 
