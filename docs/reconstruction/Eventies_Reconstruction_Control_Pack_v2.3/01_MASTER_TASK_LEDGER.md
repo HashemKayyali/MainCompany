@@ -103,7 +103,7 @@ Status source of truth: the Status column below (all initialize TODO)
 | I18N-003 | P1/P2 | i18n | Language switcher component (URL navigate + cookie) | NEW | L | — | FOUND-010 | switch preserves deep path | AR-SW | DONE |
 | I18N-004 | P1/P2 | i18n | Extraction script: legacy phrase dict → keyed corpus (en/ar JSON drafts) | REPLACE | H | E | FOUND-011 | ≥95% phrases mapped; report of leftovers | script test | DONE |
 | I18N-005 | P1/P2 | i18n | Domain dictionaries: common+catalog+forms curated from extraction | REPLACE | M | E | I18N-004 | key-coverage green for P2 scope | I18N-COV | DONE |
-| I18N-006 | P1/P2 | i18n | Dictionaries: auth+account | REPLACE | M | — | I18N-004 | coverage green P3/P4 scope | I18N-COV | TODO |
+| I18N-006 | P1/P2 | i18n | Dictionaries: auth+account | REPLACE | M | — | I18N-004 | coverage green P3/P4 scope | I18N-COV | DONE |
 | I18N-007 | P1/P2 | i18n | Dictionaries: chat+notifications | REPLACE | M | — | I18N-004 | coverage green P5 scope | I18N-COV | TODO |
 | I18N-008 | P1/P2 | i18n | Dictionaries: admin | REPLACE | M | — | I18N-004 | coverage green P6 scope | I18N-COV | TODO |
 | I18N-009 | P1/P2 | i18n | Migration FILES: `*_ar` columns (products, categories, custom_builds+cats, gallery album titles) — additive, nullable | NEW | H | E,D | DBMIG-001 | files reviewed; frozen-Vite compatible; NOT executed by Code | migration review checklist | DONE:migration FILE authored (apply human-gated) |
@@ -240,25 +240,25 @@ Phase status (owner decision 2026-07-13): **CODE_SIDE_COMPLETE · LIVE_STAGING_G
 ## REQ — Phase 4: transactional flows (evidence: cart/quote contexts, request RPCs; rollback: Group C restore)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| REQ-001 | P4 | transactions | Cart context port (client-owned, localStorage) into (commerce) group only | KEEP | M | D | CAT-006 | cart persists; group-scoped provider | E | TODO |
-| REQ-002 | P4 | transactions | PurchaseQuote context port (same scoping) | KEEP | L | D | REQ-001 | — | E | TODO |
-| REQ-003 | P4 | transactions | Migration FILE: idempotency-key column + unique index on rental requests | NEW | H | D | DBMIG-001 | additive; frozen-Vite safe | DBMIG review | TODO |
-| REQ-004 | P4 | transactions | Migration FILE: idempotency key on purchase quotes | NEW | M | D | REQ-003 | same | review | TODO |
-| REQ-005 | P4 | transactions | Migration FILES: DB CHECKs — quantities ≥1≤cap, date ordering, message lengths (verify absent first) | NEW | M | D | — | evidence of absence + files | review | TODO |
-| REQ-006 | P4 | transactions | Checkout flow rebuild: session-gated submit → RPC with idempotency key | REARCHITECT | H | D | AUTH-015, DBMIG-006 | MUT-DC/TO green | MUT-DC, MUT-TO | TODO |
-| REQ-007 | P4 | transactions | Quote flow rebuild (same pattern) | REARCHITECT | M | D | REQ-006 | green | MUT-DC | TODO |
-| REQ-008 | P4 | transactions | Draft persistence semantics preserved (cart survives login redirect) | KEEP | M | — | REQ-006 | MUT-SS green | MUT-SS | TODO |
-| REQ-009 | P4 | transactions | /my-requests list (server fetch no-store) + journey UI port | REARCHITECT | M | D | AUTH-015 | parity | E | TODO |
-| REQ-010 | P4 | transactions | /my-requests/[n] details + status timeline | REARCHITECT | M | D | REQ-009 | parity | E | TODO |
-| REQ-011 | P4 | transactions | /order-summary/[n] | REARCHITECT | L | — | REQ-009 | parity | E | TODO |
-| REQ-012 | P4 | transactions | /profile rebuild (avatar via existing pipeline) | REARCHITECT | M | S | AUTH-015 | update flow + profile-sync equivalent | E | TODO |
-| REQ-013 | P4 | transactions | Request/quote Zod schemas shared | NEW | M | D | FORM-001 | parse before RPC | unit | TODO |
-| REQ-014 | P4 | transactions | RPC contract tests extended for idempotency params | HARDEN | M | D | FOUND-028, REQ-003 | contracts green | CT-RPC | TODO |
-| REQ-015 | P4 | transactions | Stale-session mid-submit recovery UX | NEW | M | — | REQ-006 | MUT-SS | MUT-SS | TODO |
-| REQ-016 | P4 | transactions | DBT-01: Supabase timeout → error+retry UI | NEW | M | — | REQ-009 | green | DBT-01 | TODO |
-| REQ-017 | P4 | transactions | bfcache revalidation on personal routes (pageshow) | NEW | L | — | REQ-009 | BFC-01 | BFC-01 | TODO |
-| REQ-018 | P4 | transactions | Account dictionaries applied; AR flows E2E | NEW | M | — | I18N-006 | AR checkout green | E | TODO |
-| REQ-019 | P4 | transactions | Group C cutover readiness report | NEW | H | D | REQ-001..018 | QG-P4 pass | — | TODO |
+| REQ-001 | P4 | transactions | Cart context port (client-owned, localStorage) into (commerce) group only | KEEP | M | D | CAT-006 | cart persists; group-scoped provider | E | DONE |
+| REQ-002 | P4 | transactions | PurchaseQuote context port (same scoping) | KEEP | L | D | REQ-001 | — | E | DONE |
+| REQ-003 | P4 | transactions | Migration FILE: idempotency-key column + unique index on rental requests | NEW | H | D | DBMIG-001 | additive; frozen-Vite safe | DBMIG review | BLOCKED_BY_OWNER_STAGING:file authored+static contract green |
+| REQ-004 | P4 | transactions | Migration FILE: idempotency key on purchase quotes | NEW | M | D | REQ-003 | same | review | BLOCKED_BY_OWNER_STAGING:file authored+static contract green |
+| REQ-005 | P4 | transactions | Migration FILES: DB CHECKs — quantities ≥1≤cap, date ordering, message lengths (verify absent first) | NEW | M | D | — | evidence of absence + files | review | BLOCKED_BY_OWNER_STAGING:audit+file done; apply/verify deferred |
+| REQ-006 | P4 | transactions | Checkout flow rebuild: session-gated submit → RPC with idempotency key | REARCHITECT | H | D | AUTH-015, DBMIG-006 | MUT-DC/TO green | MUT-DC, MUT-TO | BLOCKED_BY_OWNER_STAGING:code+mock adversarial tests green |
+| REQ-007 | P4 | transactions | Quote flow rebuild (same pattern) | REARCHITECT | M | D | REQ-006 | green | MUT-DC | BLOCKED_BY_OWNER_STAGING:code+mock adversarial tests green |
+| REQ-008 | P4 | transactions | Draft persistence semantics preserved (cart survives login redirect) | KEEP | M | — | REQ-006 | MUT-SS green | MUT-SS | DONE |
+| REQ-009 | P4 | transactions | /my-requests list (server fetch no-store) + journey UI port | REARCHITECT | M | D | AUTH-015 | parity | E | DONE:code+safe fixtures; live data deferred |
+| REQ-010 | P4 | transactions | /my-requests/[n] details + status timeline | REARCHITECT | M | D | REQ-009 | parity | E | DONE:code+safe fixtures; live data deferred |
+| REQ-011 | P4 | transactions | /order-summary/[n] | REARCHITECT | L | — | REQ-009 | parity | E | DONE:code+safe fixtures; live data deferred |
+| REQ-012 | P4 | transactions | /profile rebuild (avatar via existing pipeline) | REARCHITECT | M | S | AUTH-015 | update flow + profile-sync equivalent | E | BLOCKED_BY_OWNER_STAGING:code/schema/RLS client contract done; live update deferred |
+| REQ-013 | P4 | transactions | Request/quote Zod schemas shared | NEW | M | D | FORM-001 | parse before RPC | unit | DONE |
+| REQ-014 | P4 | transactions | RPC contract tests extended for idempotency params | HARDEN | M | D | FOUND-028, REQ-003 | contracts green | CT-RPC | BLOCKED_BY_OWNER_STAGING:static contract green; DB contract deferred |
+| REQ-015 | P4 | transactions | Stale-session mid-submit recovery UX | NEW | M | — | REQ-006 | MUT-SS | MUT-SS | DONE:code+mock; live expiry deferred |
+| REQ-016 | P4 | transactions | DBT-01: Supabase timeout → error+retry UI | NEW | M | — | REQ-009 | green | DBT-01 | DONE:typed timeout+retry fixture |
+| REQ-017 | P4 | transactions | bfcache revalidation on personal routes (pageshow) | NEW | L | — | REQ-009 | BFC-01 | BFC-01 | DONE |
+| REQ-018 | P4 | transactions | Account dictionaries applied; AR flows E2E | NEW | M | — | I18N-006 | AR checkout green | E | DONE:safe EN/AR fixture matrix |
+| REQ-019 | P4 | transactions | Group C cutover readiness report | NEW | H | D | REQ-001..018 | QG-P4 pass | — | BLOCKED_BY_OWNER_STAGING:QG-P4 not passed |
 
 ## CHAT/NOTIF — Phase 5: realtime (evidence: chat.service, ChatContext, notifications.service; rollback: Group D restore)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
@@ -387,8 +387,8 @@ Phase status (owner decision 2026-07-13): **CODE_SIDE_COMPLETE · LIVE_STAGING_G
 | DBMIG-003 | P1 | dbmig | Wave A files+review: app_events (FOUND-016) | NEW | M | S | DBMIG-001 | reviewed; staging applied | CT | IN_PROGRESS:file authored+review-ready; staging apply blocked by DBMIG-002 |
 | DBMIG-004 | P2 | dbmig | Wave B: `*_ar` columns (I18N-009) — STAGING-VERIFIED gate; ⛔ prod apply | NEW | H | E,D | DBMIG-002, I18N-009 | staging verified; frozen-Vite test green; ⛔ approved | CT, SMOKE | IN_PROGRESS:file authored; staging apply blocked by DBMIG-002; prod ⛔ |
 | DBMIG-005 | P2 | dbmig | Wave B prod verification + feature enablement note (AR read path may ship) | NEW | M | E | DBMIG-004 | prod schema verified | — | BLOCKED:needs DBMIG-004 prod apply |
-| DBMIG-006 | P4 | dbmig | Wave C: idempotency keys (REQ-003/004) + DB CHECKs (REQ-005) — staging verified; ⛔ prod | NEW | H | D | DBMIG-002, REQ-003, REQ-004, REQ-005 | staging + contract green; ⛔ approved | CT-RPC | TODO |
-| DBMIG-007 | P4 | dbmig | Wave C prod verification | NEW | M | D | DBMIG-006 | verified | SMOKE | TODO |
+| DBMIG-006 | P4 | dbmig | Wave C: idempotency keys (REQ-003/004) + DB CHECKs (REQ-005) — staging verified; ⛔ prod | NEW | H | D | DBMIG-002, REQ-003, REQ-004, REQ-005 | staging + contract green; ⛔ approved | CT-RPC | BLOCKED_BY_OWNER_STAGING:file+static review ready; not applied |
+| DBMIG-007 | P4 | dbmig | Wave C prod verification | NEW | M | D | DBMIG-006 | verified | SMOKE | BLOCKED:requires DBMIG-006 and human production gate |
 | DBMIG-008 | P5 | dbmig | Wave D: chat client message id (CHAT-002) + msg-rate limit (CHAT-009) — staging verified; ⛔ prod | NEW | H | D | DBMIG-002, CHAT-002, CHAT-009 | staging + reducer tests green; ⛔ approved | RD-01 | TODO |
 | DBMIG-009 | P5 | dbmig | Wave D prod verification | NEW | M | D | DBMIG-008 | verified | RT-RC | TODO |
 | DBMIG-010 | P6 | dbmig | Wave E: AAL2/recent-auth DB enforcement migrations per APPROVED SEC-018 design (RPC assurance params / RLS checks / EXECUTE revocations) — staging verified; ⛔ prod | NEW | H | S,D | DBMIG-002, SEC-018 | BYPASS suite green on staging; ⛔ approved | BYPASS | TODO |
@@ -423,7 +423,7 @@ Phase status (owner decision 2026-07-13): **CODE_SIDE_COMPLETE · LIVE_STAGING_G
 | A11Y-009 | P2 | a11y | RTL keyboard behavior: arrow-key direction in carousels/lightbox under dir=rtl | NEW | M | — | I18N-013 | RTL key E2E | E | DONE:RTL arrow-key direction in lightbox |
 | A11Y-010 | P1 | a11y | axe CI integration (fails on critical, top-8 template set) | NEW | M | — | FOUND-005 | gate wired | axe CI | DONE |
 | A11Y-011 | P6 | a11y | Admin modal/dialog accessibility: focus trap, labels, destructive-confirm announced | NEW | M | — | ADMIN-003 | axe + trap E2E | E | TODO |
-| A11Y-012 | P4 | a11y | Checkout/cart flows: error summaries, quantity steppers, date pickers keyboard-operable | NEW | M | — | REQ-006 | E2E keyboard pass | E | TODO |
+| A11Y-012 | P4 | a11y | Checkout/cart flows: error summaries, quantity steppers, date pickers keyboard-operable | NEW | M | — | REQ-006 | E2E keyboard pass | E | DONE:safe fixture 4-project matrix |
 
 ## V2.1 SPLITS & NEW CROSS TASKS
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
