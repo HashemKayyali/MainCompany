@@ -4,6 +4,7 @@ import { Mail, Phone, MessageCircle } from 'lucide-react'
 import { buildMetadata } from '@/server/metadata/builders'
 import { EventiesHero } from '@/features/catalog/EventiesHero'
 import { social, socialLinks } from '@/shared/data/social'
+import { ContactForm } from '@/features/forms/ContactForm'
 
 /**
  * CAT-016 — /contact (RSC). Real contact channels from the ported social data
@@ -90,6 +91,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
                 </a>
               ))}
             </div>
+            <ContactForm />
           </div>
         </section>
       </div>

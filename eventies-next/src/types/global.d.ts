@@ -3,6 +3,8 @@ import type common from '../messages/en/common.json'
 import type nav from '../messages/en/nav.json'
 import type footer from '../messages/en/footer.json'
 import type catalog from '../messages/en/catalog.json'
+import type auth from '../messages/en/auth.json'
+import type forms from '../messages/en/forms.json'
 
 /** FOUND-011: typed message keys — a missing/typo'd key is a compile error. */
 declare module 'next-intl' {
@@ -13,6 +15,8 @@ declare module 'next-intl' {
       nav: typeof nav
       footer: typeof footer
       catalog: typeof catalog
+      auth: typeof auth
+      forms: typeof forms
     }
   }
 }

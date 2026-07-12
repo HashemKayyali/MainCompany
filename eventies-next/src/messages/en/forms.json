@@ -1,0 +1,29 @@
+{
+  "title": "Tell us what you need",
+  "description": "Send the details securely, then continue by WhatsApp or email if you prefer.",
+  "name": "Full name",
+  "email": "Email",
+  "phone": "Phone (optional)",
+  "message": "Message / notes",
+  "submit": "Send request",
+  "submitting": "Sending…",
+  "success": "Your request was saved. Our team will follow up.",
+  "fallback": "The request could not be saved. You can still contact us by WhatsApp or email.",
+  "duplicate": "This request was already received. Please wait before sending it again.",
+  "rateLimited": "Too many requests. Please wait and try again.",
+  "challenge": "Please complete the security check and try again.",
+  "whatsapp": "Continue on WhatsApp",
+  "emailUs": "Continue by email",
+  "errors": {
+    "nameRequired": "Enter your name.",
+    "nameTooShort": "Enter at least two characters.",
+    "nameTooLong": "Name is too long.",
+    "emailInvalid": "Enter a valid email address.",
+    "emailTooLong": "Email is too long.",
+    "phoneInvalid": "Enter a valid phone number.",
+    "messageRequired": "Enter a message.",
+    "messageTooShort": "Please add a little more detail.",
+    "messageTooLong": "Message is too long.",
+    "challengeRequired": "Complete the security check."
+  }
+}
