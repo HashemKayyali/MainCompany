@@ -49,7 +49,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   // Category cards with a live service count (BrowseCategories).
   const countByCategory = new Map<string, number>()
-  for (const p of allProducts) countByCategory.set(p.categoryId, (countByCategory.get(p.categoryId) ?? 0) + 1)
+  for (const p of allProducts)
+    countByCategory.set(p.categoryId, (countByCategory.get(p.categoryId) ?? 0) + 1)
   const categoryItems: CategoryGridItem[] = categories
     .filter((c) => c.slug.trim().length > 0)
     .map((c) => ({
@@ -60,7 +61,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       count: countByCategory.get(c.id) ?? 0,
     }))
 
-  const categoryNameById: Record<string, string> = Object.fromEntries(categories.map((c) => [c.id, c.name]))
+  const categoryNameById: Record<string, string> = Object.fromEntries(
+    categories.map((c) => [c.id, c.name])
+  )
   const popular = featured.length > 0 ? featured : allProducts
 
   // Hero chips + gallery shots (albums first, product images as fallback).
@@ -72,7 +75,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const seen = new Set<string>()
   const albumShots: GalleryShot[] = []
   for (const album of [...albums].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))) {
-    for (const url of [...(album.images ?? []), album.cover].filter((u): u is string => Boolean(u))) {
+    for (const url of [...(album.images ?? []), album.cover].filter((u): u is string =>
+      Boolean(u)
+    )) {
       if (seen.has(url)) continue
       seen.add(url)
       albumShots.push({ url, title: album.title })
