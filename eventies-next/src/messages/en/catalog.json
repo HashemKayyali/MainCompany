@@ -7,13 +7,29 @@
     "filterByCategory": "Filter by category",
     "requestCta": "Request this",
     "from": "From",
-    "featured": "Featured"
+    "featured": "Featured",
+    "heroEyebrow": "Service Catalog · Jordan",
+    "heroTitle": "Discover event services and rentals for every kind of occasion.",
+    "heroDescription": "Browse interactive games, screens, booths, production support, and event services from trusted providers across Jordan. Compare options and submit a rental or purchase quote request for review.",
+    "browseServices": "Browse Services",
+    "exploreCategories": "Explore Categories",
+    "browseLabel": "Browse",
+    "serviceCategory": "Service category",
+    "serviceCatalog": "Service Catalog",
+    "totalServices": "total services",
+    "inThisCategory": "in this category"
   },
   "categories": {
     "heading": "Browse Categories",
     "intro": "Explore Eventies services grouped by category.",
     "empty": "No categories yet.",
-    "viewCategory": "View {name}"
+    "viewCategory": "View {name}",
+    "heroEyebrow": "Service Categories · Jordan",
+    "heroTitle": "Explore event services by category.",
+    "heroDescription": "Every kind of event has a category built for it. Open any category to see the available services, packages, and providers across Jordan.",
+    "browseAllServices": "Browse All Services",
+    "allCategories": "All Categories",
+    "serviceCount": "{count, plural, one {# Service} other {# Services}}"
   },
   "customBuilds": {
     "heading": "Custom Event Builds & Interactive Experiences",

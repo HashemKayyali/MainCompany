@@ -7,13 +7,29 @@
     "filterByCategory": "التصفية حسب الفئة",
     "requestCta": "اطلب هذا",
     "from": "يبدأ من",
-    "featured": "مميّز"
+    "featured": "مميّز",
+    "heroEyebrow": "كتالوج الخدمات · الأردن",
+    "heroTitle": "اكتشف خدمات وتأجير الفعاليات لكل أنواع المناسبات.",
+    "heroDescription": "تصفّح الألعاب التفاعلية والشاشات والأكشاك ودعم الإنتاج وخدمات الفعاليات من موردين موثوقين في جميع أنحاء الأردن. قارن الخيارات وأرسل طلب تأجير أو عرض سعر للمراجعة.",
+    "browseServices": "تصفّح الخدمات",
+    "exploreCategories": "استكشف الفئات",
+    "browseLabel": "تصفّح",
+    "serviceCategory": "فئة الخدمة",
+    "serviceCatalog": "كتالوج الخدمات",
+    "totalServices": "إجمالي الخدمات",
+    "inThisCategory": "في هذه الفئة"
   },
   "categories": {
     "heading": "تصفّح الفئات",
     "intro": "استكشف خدمات إيفنتيز مصنّفة حسب الفئة.",
     "empty": "لا توجد فئات بعد.",
-    "viewCategory": "عرض {name}"
+    "viewCategory": "عرض {name}",
+    "heroEyebrow": "فئات الخدمات · الأردن",
+    "heroTitle": "استكشف خدمات الفعاليات حسب الفئة.",
+    "heroDescription": "لكل نوع من الفعاليات فئة مصمّمة له. افتح أي فئة لعرض الخدمات والباقات والموردين المتاحين في جميع أنحاء الأردن.",
+    "browseAllServices": "تصفّح كل الخدمات",
+    "allCategories": "كل الفئات",
+    "serviceCount": "{count, plural, zero {# خدمة} one {خدمة واحدة} two {خدمتان} few {# خدمات} many {# خدمة} other {# خدمة}}"
   },
   "customBuilds": {
     "heading": "تصاميم وتجارب تفاعلية مخصصة",
