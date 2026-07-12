@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { getGalleryAlbums } from '@/server/dal/catalog-extras'
 import { buildMetadata } from '@/server/metadata/builders'
+import { EventiesHero } from '@/features/catalog/EventiesHero'
 import { GalleryGrid, type GalleryImage } from '@/features/gallery/GalleryGrid'
 
 /**
@@ -33,29 +34,38 @@ export default async function GalleryPage({ params }: { params: Promise<{ locale
   )
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-ink-900">{t('heading')}</h1>
-        <p className="mt-2 text-ink-600">{t('intro')}</p>
-      </header>
-      {albums.length === 0 ? (
-        <p className="text-ink-500">{t('empty')}</p>
-      ) : (
-        <div className="space-y-12">
-          {albums.map((album) => {
-            const images: GalleryImage[] = (album.images ?? [])
-              .filter(Boolean)
-              .map((url, i) => ({ url, alt: `${album.title} ${i + 1}` }))
-            if (images.length === 0) return null
-            return (
-              <section key={album.id}>
-                <h2 className="mb-4 text-xl font-semibold text-ink-900">{album.title}</h2>
-                <GalleryGrid images={images} />
-              </section>
-            )
-          })}
-        </div>
-      )}
+    <div>
+      <EventiesHero
+        eyebrow={t('heroEyebrow')}
+        title={t('heroTitle')}
+        description={t('heroDescription')}
+        primaryAction={{ label: t('exploreServicesCta'), href: '/products' }}
+      />
+
+      <div className="bg-[#f8f3ff]">
+        <section className="site-section">
+          <div className="site-container-wide">
+            {albums.length === 0 ? (
+              <p className="text-center text-ink-500">{t('empty')}</p>
+            ) : (
+              <div className="space-y-12">
+                {albums.map((album) => {
+                  const images: GalleryImage[] = (album.images ?? [])
+                    .filter(Boolean)
+                    .map((url, i) => ({ url, alt: `${album.title} ${i + 1}` }))
+                  if (images.length === 0) return null
+                  return (
+                    <section key={album.id}>
+                      <h2 className="mb-4 text-xl font-bold text-ink-900">{album.title}</h2>
+                      <GalleryGrid images={images} />
+                    </section>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
     </div>
   )
 }

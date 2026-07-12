@@ -34,19 +34,78 @@
   "customBuilds": {
     "heading": "Custom Event Builds & Interactive Experiences",
     "intro": "Eventies designs and builds custom interactive experiences, branded activations, games, software, hardware, and event-ready setups.",
-    "empty": "No custom builds published yet."
+    "empty": "No custom builds published yet — new work is added as projects ship.",
+    "heroEyebrow": "R&D Studio · Jordan",
+    "heroTitle": "Custom builds for ideas that need more than a rental.",
+    "heroDescription": "When an event needs something built from scratch, Eventies shapes the concept, prototypes it, tests it, and prepares it for the venue — branded activations, interactive games, control systems, and event-ready hardware.",
+    "startCta": "Start a Custom Build",
+    "exploreServicesCta": "Explore Services",
+    "capabilitiesTitle": "What we build",
+    "capabilities": [
+      {
+        "title": "Branded Games",
+        "body": "Custom interactive games and challenges built around your brand, audience, and event goals."
+      },
+      {
+        "title": "Interactive Booths",
+        "body": "Special booths and stands with sensors, screens, and mechanics designed for engagement."
+      },
+      {
+        "title": "Control Systems",
+        "body": "Software, hardware, and control logic that make an activation reliable on the event floor."
+      },
+      {
+        "title": "Event-Ready Setups",
+        "body": "Fully designed, built, and field-tested setups delivered and installed before showtime."
+      }
+    ],
+    "processTitle": "From idea to event floor",
+    "process": [
+      {
+        "step": "01",
+        "title": "Concept",
+        "body": "We shape the idea, use case, and interaction into a clear plan."
+      },
+      {
+        "step": "02",
+        "title": "Prototype",
+        "body": "We build and iterate the core experience — mechanics, hardware, and flow."
+      },
+      {
+        "step": "03",
+        "title": "Test",
+        "body": "We field-test for reliability, safety, and audience engagement."
+      },
+      {
+        "step": "04",
+        "title": "Deploy",
+        "body": "We prepare, deliver, and install the venue-ready build before your event."
+      }
+    ],
+    "workTitle": "Recent custom builds",
+    "ctaTitle": "Have an idea that needs building?",
+    "ctaBody": "Share the concept and use case — the Eventies R&D team will shape, prototype, and prepare it for your event.",
+    "ctaButton": "Start a Custom Build"
   },
   "customers": {
     "heading": "Clients & Event Partners",
     "intro": "A curated look at brands, schools, venues, and organizations connected to Eventies.",
-    "empty": "Client list coming soon."
+    "empty": "Client list coming soon.",
+    "heroEyebrow": "Clients & Partners · Jordan",
+    "heroTitle": "Trusted by brands, schools, and venues across Jordan.",
+    "heroDescription": "A curated look at the brands, schools, venues, and organizations that partner with Eventies for memorable event experiences.",
+    "browseServicesCta": "Browse Services"
   },
   "gallery": {
     "heading": "Event Gallery & Activations",
     "intro": "Browse albums from Eventies activations, service setups, custom builds, and real event moments across Jordan.",
     "empty": "No albums published yet.",
     "viewAlbum": "View album",
-    "photoCount": "{count} photos"
+    "photoCount": "{count} photos",
+    "heroEyebrow": "Event Gallery · Jordan",
+    "heroTitle": "Moments from real Eventies activations.",
+    "heroDescription": "Browse albums from Eventies activations, service setups, custom builds, and real event moments across Jordan — inspiration for your next experience.",
+    "exploreServicesCta": "Explore Services"
   },
   "detail": {
     "backToServices": "All Services",
@@ -58,7 +117,42 @@
   },
   "about": {
     "heading": "About Eventies",
-    "intro": "Learn how Eventies helps clients, organizers, companies, and providers discover rentals, activations, production support, custom builds, and trusted event services across Jordan."
+    "intro": "Learn how Eventies helps clients, organizers, companies, and providers discover rentals, activations, production support, custom builds, and trusted event services across Jordan.",
+    "heroEyebrow": "About · Jordan",
+    "heroTitle": "One organized marketplace for event services in Jordan.",
+    "heroDescription": "Eventies helps clients, organizers, companies, and providers discover rentals, activations, production support, custom builds, and trusted event services — and submit one clear request from a single organized marketplace.",
+    "browseServicesCta": "Browse Services",
+    "contactCta": "Contact Us",
+    "missionEyebrow": "Our mission",
+    "missionTitle": "Make planning an event simple, clear, and trustworthy.",
+    "missionBody": "We bring event rentals, interactive activations, production support, and custom builds together in one place — so organizers can compare real options, check availability, and submit a single clear request instead of chasing scattered providers.",
+    "valuesTitle": "What we stand for",
+    "values": [
+      {
+        "title": "Trusted providers",
+        "body": "A curated network of vetted providers operating across Jordan."
+      },
+      {
+        "title": "One clear request",
+        "body": "Add what you need and submit one organized rental or purchase quote request."
+      },
+      {
+        "title": "Real availability",
+        "body": "Availability and pricing are reviewed for your exact dates before anything is confirmed."
+      },
+      {
+        "title": "Built for every event",
+        "body": "Corporate, exhibitions, schools, malls, celebrations, graduations, and more."
+      }
+    ],
+    "statsTitle": "Eventies at a glance",
+    "stats": [
+      { "value": "Nationwide", "label": "Coverage across Jordan" },
+      { "value": "One request", "label": "From browse to booking" },
+      { "value": "Custom builds", "label": "Beyond off-the-shelf rentals" }
+    ],
+    "ctaTitle": "Ready to plan your next event?",
+    "ctaBody": "Browse services, check availability, and send a single request — the Eventies team will help bring it all together."
   },
   "contact": {
     "heading": "Contact Eventies",
@@ -67,7 +161,11 @@
     "emailUs": "Email",
     "callUs": "Call",
     "whatsapp": "WhatsApp",
-    "followUs": "Follow us"
+    "followUs": "Follow us",
+    "heroEyebrow": "Get in touch · Jordan",
+    "heroTitle": "Let's plan your next event together.",
+    "heroDescription": "Reach the Eventies team for rentals, purchase requests, custom builds, support, and provider inquiries across Jordan. Send one clear message and we'll follow up.",
+    "browseServicesCta": "Browse Services"
   },
   "hero": {
     "eyebrow": "Event Services Marketplace · Jordan",

@@ -42,7 +42,15 @@ function ClientLogo({ item }: { item: LogoItem }) {
   )
 }
 
-export async function LogoCloud({ locale, customers }: { locale: string; customers: LogoItem[] }) {
+export async function LogoCloud({
+  locale,
+  customers,
+  showHeading = true,
+}: {
+  locale: string
+  customers: LogoItem[]
+  showHeading?: boolean
+}) {
   if (customers.length === 0) return null
   const t = await getTranslations({ locale: locale as 'en' | 'ar', namespace: 'catalog.home' })
   const [rowA, rowB] = splitRows(customers)
@@ -52,12 +60,14 @@ export async function LogoCloud({ locale, customers }: { locale: string; custome
   return (
     <section className="site-section">
       <div className="site-container-wide">
-        <SectionHeading
-          eyebrow={t('logoCloud.eyebrow')}
-          title={t('logoCloud.title')}
-          description={t('logoCloud.description')}
-          className="mb-10 sm:mb-12"
-        />
+        {showHeading && (
+          <SectionHeading
+            eyebrow={t('logoCloud.eyebrow')}
+            title={t('logoCloud.title')}
+            description={t('logoCloud.description')}
+            className="mb-10 sm:mb-12"
+          />
+        )}
 
         <ul className="sr-only">
           {customers.map((c) => (
