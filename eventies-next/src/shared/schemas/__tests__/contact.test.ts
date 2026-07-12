@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { contactSchema, fieldErrorKeys } from '../contact'
+import { contactSchema, fieldErrorKeys, publicFormSchema } from '../contact'
 
 /** FOUND-014 — sample schema + typed error-key map. */
 describe('contact schema foundation', () => {
@@ -40,5 +40,17 @@ describe('contact schema foundation', () => {
       message: 'long enough message',
     })
     expect(bad.success).toBe(false)
+  })
+})
+
+describe('publicFormSchema', () => {
+  it('requires a server-verifiable challenge token', () => {
+    const parsed = publicFormSchema.safeParse({
+      name: 'A',
+      email: 'a@example.com',
+      phone: '',
+      message: 'A sufficiently detailed request',
+    })
+    expect(parsed.success).toBe(false)
   })
 })

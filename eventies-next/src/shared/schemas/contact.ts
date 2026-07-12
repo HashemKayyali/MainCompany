@@ -23,8 +23,18 @@ export const contactSchema = z.object({
     .string({ error: 'forms.errors.messageRequired' })
     .trim()
     .min(10, 'forms.errors.messageTooShort')
-    .max(4000, 'forms.errors.messageTooLong'),
+    .max(2000, 'forms.errors.messageTooLong'),
 })
+
+export const publicFormSchema = contactSchema.extend({
+  turnstileToken: z.string().min(1, 'forms.errors.challengeRequired').max(2048),
+  productSlug: z.string().trim().max(160).optional().default(''),
+  city: z.string().trim().max(160).optional().default(''),
+  address: z.string().trim().max(240).optional().default(''),
+  subject: z.string().trim().max(160).optional().default(''),
+})
+
+export type PublicFormInput = z.infer<typeof publicFormSchema>
 
 export type ContactInput = z.infer<typeof contactSchema>
 
