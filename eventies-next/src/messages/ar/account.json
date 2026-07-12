@@ -39,6 +39,11 @@
   "requestCreated": "تم إنشاء الطلب",
   "remove": "إزالة",
   "quantity": "الكمية",
+  "rentalDates": "تواريخ التأجير",
+  "sharedDates": "تواريخ موحدة",
+  "perItemDates": "تواريخ لكل عنصر",
+  "startDate": "تاريخ البداية",
+  "endDate": "تاريخ النهاية",
   "status": {
     "pending_review": "قيد المراجعة",
     "contacted": "تم التواصل",

@@ -39,6 +39,11 @@
   "requestCreated": "Request created",
   "remove": "Remove",
   "quantity": "Quantity",
+  "rentalDates": "Rental dates",
+  "sharedDates": "Shared dates",
+  "perItemDates": "Per-item dates",
+  "startDate": "Start date",
+  "endDate": "End date",
   "status": {
     "pending_review": "Pending review",
     "contacted": "Contacted",

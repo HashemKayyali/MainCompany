@@ -3,6 +3,8 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { RequestDetailsView } from '@/features/account/RequestDetailsView'
 import { StatusBadge } from '@/features/account/StatusBadge'
+import { CommerceProviders } from '@/features/commerce/CommerceProviders'
+import { RentalDraftView } from '@/features/commerce/DraftList'
 import type { CustomerRequestDetails } from '@/shared/types/requests'
 
 const details: CustomerRequestDetails = {
@@ -70,6 +72,12 @@ export default async function Phase4Fixture({
   setRequestLocale(locale as 'en' | 'ar')
   const t = await getTranslations('account')
   const state = (await searchParams).state
+  if (state === 'draft')
+    return (
+      <CommerceProviders>
+        <RentalDraftView />
+      </CommerceProviders>
+    )
   if (state === 'error')
     return (
       <div className="site-container py-12 text-center">

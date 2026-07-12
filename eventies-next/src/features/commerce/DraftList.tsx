@@ -10,6 +10,45 @@ export function RentalDraftView() {
   if (!draft.hydrated) return <DraftLoading />
   return (
     <DraftShell title={t('rentalCart')} empty={draft.items.length === 0}>
+      <fieldset className="premium-card grid gap-3 p-4">
+        <legend className="font-black">{t('rentalDates')}</legend>
+        <div className="flex gap-4">
+          <label>
+            <input
+              type="radio"
+              name="rental-mode"
+              checked={draft.mode === 'shared'}
+              onChange={() => draft.setMode('shared')}
+            />{' '}
+            {t('sharedDates')}
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="rental-mode"
+              checked={draft.mode === 'per_item'}
+              onChange={() => draft.setMode('per_item')}
+            />{' '}
+            {t('perItemDates')}
+          </label>
+        </div>
+        {draft.mode === 'shared' && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <DateField
+              id="shared-start"
+              label={t('startDate')}
+              value={draft.sharedStartDate}
+              onChange={(value) => draft.setSharedDates(value, draft.sharedEndDate)}
+            />
+            <DateField
+              id="shared-end"
+              label={t('endDate')}
+              value={draft.sharedEndDate}
+              onChange={(value) => draft.setSharedDates(draft.sharedStartDate, value)}
+            />
+          </div>
+        )}
+      </fieldset>
       {draft.items.map((item) => (
         <li
           key={item.productSlug}
@@ -31,6 +70,22 @@ export function RentalDraftView() {
                 className="w-20 rounded-lg border p-2"
               />
             </label>
+            {draft.mode === 'per_item' && (
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <DateField
+                  id={`${item.productSlug}-start`}
+                  label={t('startDate')}
+                  value={item.startDate}
+                  onChange={(value) => draft.setItemDates(item.productSlug, value, item.endDate)}
+                />
+                <DateField
+                  id={`${item.productSlug}-end`}
+                  label={t('endDate')}
+                  value={item.endDate}
+                  onChange={(value) => draft.setItemDates(item.productSlug, item.startDate, value)}
+                />
+              </div>
+            )}
           </div>
           <button
             onClick={() => draft.remove(item.productSlug)}
@@ -103,5 +158,31 @@ function DraftLoading() {
     <div className="site-container py-12">
       <div className="h-32 animate-pulse rounded-3xl bg-violet-100" aria-label="Loading" />
     </div>
+  )
+}
+
+function DateField({
+  id,
+  label,
+  value,
+  onChange,
+}: {
+  id: string
+  label: string
+  value: string
+  onChange: (value: string) => void
+}) {
+  return (
+    <label htmlFor={id} className="grid gap-1 text-sm font-bold">
+      {label}
+      <input
+        id={id}
+        type="date"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="rounded-xl border border-violet-200 p-3"
+        required
+      />
+    </label>
   )
 }

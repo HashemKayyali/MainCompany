@@ -21,6 +21,7 @@ type RentalContextValue = RentalDraft & {
   setQuantity: (slug: string, quantity: number) => void
   setMode: (mode: RentalMode) => void
   setSharedDates: (startDate: string, endDate: string) => void
+  setItemDates: (slug: string, startDate: string, endDate: string) => void
   clear: () => void
 }
 type QuoteContextValue = {
@@ -85,6 +86,13 @@ export function CommerceProviders({ children }: { children: React.ReactNode }) {
       setMode: (mode) => setRental((current) => ({ ...current, mode })),
       setSharedDates: (sharedStartDate, sharedEndDate) =>
         setRental((current) => ({ ...current, sharedStartDate, sharedEndDate })),
+      setItemDates: (slug, startDate, endDate) =>
+        setRental((current) => ({
+          ...current,
+          items: current.items.map((item) =>
+            item.productSlug === slug ? { ...item, startDate, endDate } : item
+          ),
+        })),
       clear: () => setRental(EMPTY_RENTAL_DRAFT),
     }),
     [hydrated, rental]
