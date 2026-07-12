@@ -41,6 +41,17 @@ It was not applied to staging or production. Required next evidence: staging app
 
 **BLOCKED_BY_OWNER_STAGING.** QG-P4 is not passed and CUT-004 is not authorized.
 
+## Final non-production validation
+
+- Clean `npm ci --no-audit`: PASS; lockfile tree verified with `npm ls --depth=0`.
+- Format, strict typecheck, ESLint: PASS.
+- Architecture/service-role/cache gates: PASS.
+- I18N coverage: PASS — 7 EN/AR domains synchronized.
+- Circular dependency gate: PASS — 176 files, zero cycles.
+- Unit/static-contract tests: PASS — 17 files; 108 passed, 32 staging-gated skips, 2 pre-existing TODO.
+- Next 16.2.10 production build: PASS — authenticated customer routes are dynamic; public catalog/404/cache topology preserved.
+- Full Playwright matrix: PASS — 52/52 across EN/AR × desktop/mobile, including all prior Phase 0–3 tests and 20 Phase 4 safe fixture/session-gate cases.
+
 ## Scope guard
 
 Production was not mutated. Phase 5 was not started.
