@@ -8,7 +8,10 @@ import { getAnonServerClient } from '@/server/dal/anon-client'
 import { track } from '@/server/observability/track'
 import { consume, registerRateLimitStore } from '@/server/security/rate-limit'
 import { isTrustedMutationRequest, requestIp } from '@/server/security/request'
-import { pseudonymousBucket, supabaseRateLimitStore } from '@/server/security/supabase-rate-limit-store'
+import {
+  pseudonymousBucket,
+  supabaseRateLimitStore,
+} from '@/server/security/supabase-rate-limit-store'
 import { verifyTurnstileToken } from '@/server/security/turnstile'
 
 registerRateLimitStore(supabaseRateLimitStore)

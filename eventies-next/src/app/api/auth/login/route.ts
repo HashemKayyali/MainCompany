@@ -4,7 +4,10 @@ import { createSupabaseServerClient } from '@/server/supabase/server-client'
 import { authFailure } from '@/server/auth/responses'
 import { consume, progressiveDelayMs, registerRateLimitStore } from '@/server/security/rate-limit'
 import { isTrustedMutationRequest, requestIp } from '@/server/security/request'
-import { pseudonymousBucket, supabaseRateLimitStore } from '@/server/security/supabase-rate-limit-store'
+import {
+  pseudonymousBucket,
+  supabaseRateLimitStore,
+} from '@/server/security/supabase-rate-limit-store'
 import { verifyTurnstileToken } from '@/server/security/turnstile'
 import { track } from '@/server/observability/track'
 
@@ -24,7 +27,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, code: 'CHALLENGE_REQUIRED' }, { status: 403 })
     }
     const verified = await verifyTurnstileToken(parsed.data.turnstileToken, ip)
-    if (!verified.ok) return NextResponse.json({ ok: false, code: 'CHALLENGE_REQUIRED' }, { status: 403 })
+    if (!verified.ok)
+      return NextResponse.json({ ok: false, code: 'CHALLENGE_REQUIRED' }, { status: 403 })
   }
 
   const delay = progressiveDelayMs(attempt.count)
@@ -32,7 +36,9 @@ export async function POST(request: NextRequest) {
   const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase.auth.signInWithPassword(parsed.data)
   if (error || !data.user) {
-    await track('auth.login_failed', { identifierHash: pseudonymousBucket('identity', parsed.data.email) })
+    await track('auth.login_failed', {
+      identifierHash: pseudonymousBucket('identity', parsed.data.email),
+    })
     return authFailure()
   }
   await track('auth.login_succeeded', { provider: 'password' })

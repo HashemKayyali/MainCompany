@@ -11,7 +11,8 @@ export async function POST(request: NextRequest) {
   const parsed = signupSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return authFailure()
   const challenge = await verifyTurnstileToken(parsed.data.turnstileToken ?? '', requestIp(request))
-  if (!challenge.ok) return NextResponse.json({ ok: false, code: 'CHALLENGE_REQUIRED' }, { status: 403 })
+  if (!challenge.ok)
+    return NextResponse.json({ ok: false, code: 'CHALLENGE_REQUIRED' }, { status: 403 })
   const supabase = await createSupabaseServerClient()
   const { error } = await supabase.auth.signUp({
     email: parsed.data.email,

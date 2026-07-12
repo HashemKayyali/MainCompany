@@ -24,7 +24,9 @@ describe('SEC-005 mutation request checks', () => {
         req({ 'content-type': 'application/json', 'sec-fetch-site': 'cross-site' })
       )
     ).toBe(false)
-    expect(isTrustedMutationRequest(req({ 'content-type': 'application/x-www-form-urlencoded' }))).toBe(false)
+    expect(
+      isTrustedMutationRequest(req({ 'content-type': 'application/x-www-form-urlencoded' }))
+    ).toBe(false)
   })
 
   it('uses the leftmost forwarded address', () => {

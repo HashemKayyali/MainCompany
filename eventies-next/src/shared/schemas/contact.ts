@@ -27,7 +27,7 @@ export const contactSchema = z.object({
 })
 
 export const publicFormSchema = contactSchema.extend({
-  turnstileToken: z.string().min(1, 'forms.errors.challengeRequired').max(2048),
+  turnstileToken: z.string().max(2048).default(''),
   productSlug: z.string().trim().max(160).optional().default(''),
   city: z.string().trim().max(160).optional().default(''),
   address: z.string().trim().max(240).optional().default(''),

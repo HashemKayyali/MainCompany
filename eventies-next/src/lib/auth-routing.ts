@@ -16,7 +16,9 @@ export function getSafeRedirectPath(path: string | null | undefined, fallback = 
   }
   try {
     const parsed = new URL(candidate, 'https://eventies.invalid')
-    return parsed.origin === 'https://eventies.invalid' ? `${parsed.pathname}${parsed.search}${parsed.hash}` : fallback
+    return parsed.origin === 'https://eventies.invalid'
+      ? `${parsed.pathname}${parsed.search}${parsed.hash}`
+      : fallback
   } catch {
     return fallback
   }
@@ -35,7 +37,8 @@ export function getFriendlyCallbackError(raw: string): string {
   if (lower.includes('invalid request')) return 'auth.callback.expired'
   if (lower.includes('server_error')) return 'auth.callback.providerError'
   if (lower.includes('popup_closed')) return 'auth.callback.popupClosed'
-  if (lower.includes('already been used') || lower.includes('invalid')) return 'auth.callback.invalid'
+  if (lower.includes('already been used') || lower.includes('invalid'))
+    return 'auth.callback.invalid'
   return 'auth.callback.generic'
 }
 

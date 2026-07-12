@@ -17,8 +17,7 @@ export function ContactForm() {
   const [status, setStatus] = useState('')
   const [busy, setBusy] = useState(false)
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
-  const errorText = (key: string) =>
-    t(key.replace('forms.', '') as Parameters<typeof t>[0])
+  const errorText = (key: string) => t(key.replace('forms.', '') as Parameters<typeof t>[0])
 
   async function submit(event: React.FormEvent) {
     event.preventDefault()
@@ -67,35 +66,90 @@ export function ContactForm() {
 
   return (
     <section className="premium-card mt-10 p-6 sm:p-8" aria-labelledby="contact-form-title">
-      <h2 id="contact-form-title" className="text-2xl font-black text-ink-900">{t('title')}</h2>
+      <h2 id="contact-form-title" className="text-2xl font-black text-ink-900">
+        {t('title')}
+      </h2>
       <p className="mt-2 text-sm text-ink-600">{t('description')}</p>
       <form className="mt-6 grid gap-4" onSubmit={submit} noValidate>
         {(['name', 'email', 'phone'] as const).map((name) => (
           <div key={name}>
-            <label htmlFor={`contact-${name}`} className="mb-2 block text-sm font-bold text-ink-800">{t(name)}</label>
-            <input {...input(name)} type={name === 'email' ? 'email' : name === 'phone' ? 'tel' : 'text'} className="form-field" autoComplete={name === 'name' ? 'name' : name} />
-            {errors[name] && <p id={`contact-${name}-error`} className="mt-1 text-sm text-red-700">{errorText(errors[name])}</p>}
+            <label
+              htmlFor={`contact-${name}`}
+              className="mb-2 block text-sm font-bold text-ink-800"
+            >
+              {t(name)}
+            </label>
+            <input
+              {...input(name)}
+              type={name === 'email' ? 'email' : name === 'phone' ? 'tel' : 'text'}
+              className="form-field"
+              autoComplete={name === 'name' ? 'name' : name}
+            />
+            {errors[name] && (
+              <p id={`contact-${name}-error`} className="mt-1 text-sm text-red-700">
+                {errorText(errors[name])}
+              </p>
+            )}
           </div>
         ))}
         <div>
-          <label htmlFor="contact-message" className="mb-2 block text-sm font-bold text-ink-800">{t('message')}</label>
+          <label htmlFor="contact-message" className="mb-2 block text-sm font-bold text-ink-800">
+            {t('message')}
+          </label>
           <textarea {...input('message')} rows={5} className="form-field" />
-          {errors.message && <p id="contact-message-error" className="mt-1 text-sm text-red-700">{errorText(errors.message)}</p>}
+          {errors.message && (
+            <p id="contact-message-error" className="mt-1 text-sm text-red-700">
+              {errorText(errors.message)}
+            </p>
+          )}
         </div>
         {siteKey ? (
           <>
-            <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="lazyOnload" />
-            <div className="cf-turnstile" data-sitekey={siteKey} data-callback="eventiesTurnstileDone" />
-            <Script id="eventies-turnstile-callback" strategy="afterInteractive">{`window.eventiesTurnstileDone=function(token){window.dispatchEvent(new CustomEvent('eventies-turnstile',{detail:token}))}`}</Script>
+            <Script
+              src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+              strategy="lazyOnload"
+            />
+            <div
+              className="cf-turnstile"
+              data-sitekey={siteKey}
+              data-callback="eventiesTurnstileDone"
+            />
+            <Script
+              id="eventies-turnstile-callback"
+              strategy="afterInteractive"
+            >{`window.eventiesTurnstileDone=function(token){window.dispatchEvent(new CustomEvent('eventies-turnstile',{detail:token}))}`}</Script>
             <TurnstileListener onToken={setToken} />
           </>
-        ) : <p role="alert" className="text-sm text-red-700">{t('challenge')}</p>}
-        <button disabled={busy || !siteKey} className="rounded-full bg-violet-700 px-6 py-3 font-bold text-white disabled:opacity-50">{t(busy ? 'submitting' : 'submit')}</button>
-        <p aria-live="polite" role="status" className="min-h-6 text-sm font-semibold text-ink-700">{status}</p>
+        ) : (
+          <p role="alert" className="text-sm text-red-700">
+            {t('challenge')}
+          </p>
+        )}
+        <button
+          disabled={busy || !siteKey}
+          className="rounded-full bg-violet-700 px-6 py-3 font-bold text-white disabled:opacity-50"
+        >
+          {t(busy ? 'submitting' : 'submit')}
+        </button>
+        <p aria-live="polite" role="status" className="min-h-6 text-sm font-semibold text-ink-700">
+          {status}
+        </p>
       </form>
       <div className="mt-4 flex flex-wrap gap-3">
-        <a href={social.whatsapp} target="_blank" rel="noopener noreferrer" className="rounded-full border px-4 py-2 text-sm font-bold">{t('whatsapp')}</a>
-        <a href={`mailto:${social.email}`} className="rounded-full border px-4 py-2 text-sm font-bold">{t('emailUs')}</a>
+        <a
+          href={social.whatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-full border px-4 py-2 text-sm font-bold"
+        >
+          {t('whatsapp')}
+        </a>
+        <a
+          href={`mailto:${social.email}`}
+          className="rounded-full border px-4 py-2 text-sm font-bold"
+        >
+          {t('emailUs')}
+        </a>
       </div>
     </section>
   )

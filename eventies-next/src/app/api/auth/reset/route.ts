@@ -11,10 +11,14 @@ export async function POST(request: NextRequest) {
   const parsed = resetSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return authFailure()
   const challenge = await verifyTurnstileToken(parsed.data.turnstileToken, requestIp(request))
-  if (!challenge.ok) return NextResponse.json({ ok: false, code: 'CHALLENGE_REQUIRED' }, { status: 403 })
+  if (!challenge.ok)
+    return NextResponse.json({ ok: false, code: 'CHALLENGE_REQUIRED' }, { status: 403 })
   const supabase = await createSupabaseServerClient()
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: new URL(localizedPath(parsed.data.locale, '/auth/callback?redirect=/update-password'), request.url).toString(),
+    redirectTo: new URL(
+      localizedPath(parsed.data.locale, '/auth/callback?redirect=/update-password'),
+      request.url
+    ).toString(),
   })
   return NextResponse.json({ ok: true, message: UNIFORM_AUTH_MESSAGE })
 }

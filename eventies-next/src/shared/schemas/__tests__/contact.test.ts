@@ -44,13 +44,14 @@ describe('contact schema foundation', () => {
 })
 
 describe('publicFormSchema', () => {
-  it('requires a server-verifiable challenge token', () => {
+  it('normalizes a missing token for the fail-closed server verifier', () => {
     const parsed = publicFormSchema.safeParse({
-      name: 'A',
+      name: 'Ada',
       email: 'a@example.com',
       phone: '',
       message: 'A sufficiently detailed request',
     })
-    expect(parsed.success).toBe(false)
+    expect(parsed.success).toBe(true)
+    if (parsed.success) expect(parsed.data.turnstileToken).toBe('')
   })
 })
