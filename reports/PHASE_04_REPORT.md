@@ -52,6 +52,14 @@ It was not applied to staging or production. Required next evidence: staging app
 - Next 16.2.10 production build: PASS — authenticated customer routes are dynamic; public catalog/404/cache topology preserved.
 - Full Playwright matrix: PASS — 52/52 across EN/AR × desktop/mobile, including all prior Phase 0–3 tests and 20 Phase 4 safe fixture/session-gate cases.
 
+## Preview-safe evidence
+
+- Isolated Vercel project: `eventies-next-preview`.
+- Preview deployment: `dpl_6D5QDQRVSRHqq7sd6zaru7JWjttP` (`READY`, Preview target; no `--prod`).
+- Deployment URL: `https://eventies-next-preview-2c2nmgp7i-hashemkayyalis-projects.vercel.app`.
+- Phase 4 safe Preview Playwright: PASS — 20/20 across EN/AR × desktop/mobile.
+- Evidence was limited to signed-out session boundaries and the production-disabled, non-mutating fixture. No Supabase mutation was attempted.
+
 ## Scope guard
 
 Production was not mutated. Phase 5 was not started.
