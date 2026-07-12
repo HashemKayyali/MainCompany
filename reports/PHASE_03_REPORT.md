@@ -6,6 +6,17 @@ Date: 2026-07-12 · Branch `eventies-next-reconstruction`
 
 The code-side Phase 3 foundation is implemented and all available local gates are green, but the phase cannot be completed or declared cutover-ready without owner-controlled preview/staging prerequisites. Phase 4 was not started.
 
+## Live-gate continuation — 2026-07-12
+
+- Vercel CLI identity confirmed: `hashemkayyali99-1043`.
+- Linked project confirmed by project ID/name: **`eventies-next-preview`**.
+- Added Cloudflare's official always-pass dummy sitekey and secret key to the Vercel **Preview environment only** (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`). Production environment variables were not changed.
+- Preview-only deployment `dpl_9EzkQgD9DsdbdWcYeJ7SmUrVAu6Q` reached READY: `https://eventies-next-preview-qeafb6tvq-hashemkayyalis-projects.vercel.app`. No `--prod` flag or production target was used.
+- Non-mutating Preview Playwright evidence: **12/12 PASS** across EN/AR × desktop/mobile (auth localized/noindex, missing Turnstile token → 403, cross-site mutation → 403).
+- HTTPS curl evidence: `/login` returned 200 + HSTS + `X-Robots-Tag: noindex`; `/auth/callback?locale=ar&error=access_denied&redirect=/ar/products` returned 303 to `/ar/login?...&redirect=/ar/products`, proving locale/redirect preservation on Preview.
+- Supabase CLI authentication is available, but `projects list` contains no Eventies staging project and `branches list --project-ref dqizzlcsioqykfeldtsj` returned `branches: []`. The Preview Vercel project still uses the live Eventies Supabase URL. Therefore no SQL, auth-user creation, successful public-form insert, rate-limit counter mutation, or dedup claim was executed from Preview.
+- Full post-deploy local rerun: clean `npm ci --no-audit` PASS; format/typecheck/lint PASS; architecture/i18n/cycle gates PASS; unit suite 98 pass; production build PASS; local Playwright **32/32 PASS**.
+
 ## Implemented in this pass
 
 - AUTH-004/005/I18N-014: safe redirect sanitizer, AUTH_PATHS loop blocklist, locale-preserving callback Route Handler, used-code existing-session fallback, friendly error keys, and 303 redirects.
@@ -42,9 +53,9 @@ Progressive delay starts at 250 ms and doubles to a 4 s cap. State is designed f
 
 ## Missing preview/staging evidence and blockers
 
-1. **Turnstile keys unavailable:** `.env.local` contains no `NEXT_PUBLIC_TURNSTILE_SITE_KEY` or `TURNSTILE_SECRET_KEY`. The linked project is `eventies-next-preview`, but Vercel CLI has no credentials in this session, so preview env presence could not be inspected. This is an explicit Phase 3 stop condition.
-2. **Migration not staging-verified:** the new atomic counter/dedup migration must be reviewed and applied through the branch/staging DBMIG pipeline, then multi-instance concurrency and expiry/cleanup tests must run. It was not applied to production.
-3. **Real Turnstile integration evidence missing:** FORM-TS success/expiry/replay cases cannot run without preview test keys and staging RPCs.
+1. **Preview Turnstile variables: RESOLVED.** Official Cloudflare test keys now exist on `eventies-next-preview` Preview only; missing-token rejection is live-verified. Success/failure/replay application flows remain blocked by the absent staging DB because a successful token proceeds to the durable RPC.
+2. **Migration not staging-verified:** no Eventies Supabase staging project or preview branch exists. The new atomic counter/dedup migration must be applied to a newly supplied staging target through the DBMIG pipeline, then multi-instance concurrency and expiry/cleanup tests must run. It was not applied to production.
+3. **Real Turnstile integration evidence incomplete:** missing-token behavior is live-verified; success, explicit failure, expiry, and replay remain blocked until Preview is pointed at staging and the migration is applied.
 4. **Auth live-flow evidence missing:** AU-FLOWS, REVOKE-SEM, multi-tab logout/recovery, Google OAuth locale callback, and Secure-cookie header evidence require preview fixtures/configuration. ENV-006 remains “OAuth disabled on preview,” so password fixtures are appropriate unless the owner elects an OAuth-specific preview test.
 5. **Bridge cohort evidence missing:** no real cohort telemetry exists for the `<2%` forced re-login gate. Code-side adopted/failed events are wired, but AUTH-020 cannot pass without observation.
 6. **Remember-me incomplete:** AUTH-007 still needs the P1B-recommended persistent/session cookie split and the real-HTTPS `Secure` header assertion. The current form carries the choice but server cookie lifetime is still Supabase default.

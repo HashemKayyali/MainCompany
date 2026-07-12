@@ -226,8 +226,8 @@ Status source of truth: the Status column below (all initialize TODO)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
 | FORM-001 | P3 | forms | Zod schemas: contact/support/custom-build (mirror DB constraints) | NEW | M | S,D | FOUND-014 | parse rules match validators.ts+DB | unit | DONE |
-| FORM-002 | P3 | forms | /api/forms/contact: Zod→Turnstile→insert→typed errors | REARCHITECT | H | S | FORM-001, FOUND-034 | FORM-TS green | FORM-TS | BLOCKED:code done; live Turnstile/staging migration evidence missing |
-| FORM-003 | P3 | forms | /api/forms/support + custom-build handlers | REARCHITECT | M | S | FORM-002 | same pattern | FORM-TS | BLOCKED:code done; live Turnstile/staging migration evidence missing |
+| FORM-002 | P3 | forms | /api/forms/contact: Zod→Turnstile→insert→typed errors | REARCHITECT | H | S | FORM-001, FOUND-034 | FORM-TS green | FORM-TS | BLOCKED:Preview missing-token green; staging success/failure/replay pending |
+| FORM-003 | P3 | forms | /api/forms/support + custom-build handlers | REARCHITECT | M | S | FORM-002 | same pattern | FORM-TS | BLOCKED:Preview rejection path green; staging success/failure/replay pending |
 | FORM-004 | P3 | forms | Dedup window (identifier+hash, 10 min) | NEW | M | S,D | FORM-002 | duplicate rejected politely | I | BLOCKED:migration authored; staging integration pending |
 | FORM-005 | P3 | forms | Contact form island rewired to handler; WhatsApp/email fallback behavior preserved (existing UX) | REFACTOR | M | — | FORM-002 | fallback copy preserved | E | DONE |
 | FORM-006 | P3 | forms | Client cosmetic limiter removed from new form (DEL-11 forward) | REMOVE | L | — | FORM-005 | grep clean | — | DONE |
