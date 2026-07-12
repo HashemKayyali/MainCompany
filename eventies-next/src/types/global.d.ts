@@ -5,6 +5,7 @@ import type footer from '../messages/en/footer.json'
 import type catalog from '../messages/en/catalog.json'
 import type auth from '../messages/en/auth.json'
 import type forms from '../messages/en/forms.json'
+import type account from '../messages/en/account.json'
 
 /** FOUND-011: typed message keys — a missing/typo'd key is a compile error. */
 declare module 'next-intl' {
@@ -17,6 +18,7 @@ declare module 'next-intl' {
       catalog: typeof catalog
       auth: typeof auth
       forms: typeof forms
+      account: typeof account
     }
   }
 }
