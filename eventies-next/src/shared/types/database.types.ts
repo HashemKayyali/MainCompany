@@ -949,6 +949,14 @@ export interface Database {
 
     Views: Record<string, never>
     Functions: {
+      consume_app_rate_limit: {
+        Args: { p_bucket_key: string; p_window_seconds: number }
+        Returns: number
+      }
+      claim_public_form_dedup: {
+        Args: { p_dedup_key: string }
+        Returns: boolean
+      }
       get_notification_unread_count: {
         Args: Record<string, never>
         Returns: number

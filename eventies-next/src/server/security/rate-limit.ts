@@ -46,6 +46,11 @@ export interface RateLimitStore {
   reset(key: string): Promise<void>
 }
 
+export function progressiveDelayMs(failureCount: number): number {
+  if (failureCount <= RATE_LIMIT_RULES.loginFailuresBeforeDelay.limit) return 0
+  return Math.min(4000, 250 * 2 ** (failureCount - 4))
+}
+
 let store: RateLimitStore | null = null
 
 export function registerRateLimitStore(implementation: RateLimitStore): void {
