@@ -2,7 +2,15 @@
 
 Date: 2026-07-12 · Branch `eventies-next-reconstruction`
 
-## Verdict: **BLOCKED — QG-P3 not passed**
+## Owner-authorized code-side status (2026-07-13)
+
+`CODE_SIDE_COMPLETE`
+
+`LIVE_STAGING_GATES_BLOCKED_BY_OWNER`
+
+QG-P3 is **not passed**. The owner explicitly deferred Supabase staging setup and every mutation-based live-evidence gate. This deferral permits Phase 4 code-side work but does not convert missing evidence into a pass.
+
+## Verdict: **CODE_SIDE_COMPLETE / LIVE_STAGING_GATES_BLOCKED_BY_OWNER — QG-P3 not passed**
 
 The code-side Phase 3 foundation is implemented and all available local gates are green, but the phase cannot be completed or declared cutover-ready without owner-controlled preview/staging prerequisites. Phase 4 was not started.
 

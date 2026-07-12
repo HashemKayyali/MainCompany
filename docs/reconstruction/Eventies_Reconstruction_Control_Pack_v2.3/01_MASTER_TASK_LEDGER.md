@@ -199,6 +199,7 @@ Status source of truth: the Status column below (all initialize TODO)
 | IMG-014 | P2 | images | Bundle/image report per template vs BASE-004 budgets | NEW | M | P | CAT-024 | ≤ baselines | QG-PERF | DONE:bundle report 1176KB vs 2847KB baseline; shader ssr:false chunk |
 
 ## AUTH — Phase 3: auth reconstruction (evidence: supabase.ts, AuthCallback, Login/Register pages; rollback: Group B restore + bridge fallback)
+Phase status (owner decision 2026-07-13): **CODE_SIDE_COMPLETE · LIVE_STAGING_GATES_BLOCKED_BY_OWNER · QG-P3 NOT PASSED**.
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
 | AUTH-001 | P3 | auth | Login page island: canonical pipeline (07) with Zod mirror | REARCHITECT | H | S | FOUND-008, FOUND-014 | flow green; enumeration-safe copy | AU-FLOWS | TODO |
