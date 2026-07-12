@@ -568,6 +568,7 @@ export interface Database {
           status: string
           created_at: string
           updated_at: string
+          idempotency_key: string | null
         }
         Insert: {
           id?: string
@@ -588,6 +589,7 @@ export interface Database {
           status?: string
           created_at?: string
           updated_at?: string
+          idempotency_key?: string | null
         }
         Update: {
           customer_name?: string
@@ -604,6 +606,7 @@ export interface Database {
           grand_total?: number
           status?: string
           updated_at?: string
+          idempotency_key?: string | null
         }
         Relationships: []
       }
@@ -664,6 +667,7 @@ export interface Database {
           status: string
           created_at: string
           updated_at: string
+          idempotency_key: string | null
         }
         Insert: {
           id?: string
@@ -680,6 +684,7 @@ export interface Database {
           status?: string
           created_at?: string
           updated_at?: string
+          idempotency_key?: string | null
         }
         Update: {
           customer_name?: string
@@ -692,6 +697,7 @@ export interface Database {
           admin_internal_notes?: string | null
           status?: string
           updated_at?: string
+          idempotency_key?: string | null
         }
         Relationships: []
       }
