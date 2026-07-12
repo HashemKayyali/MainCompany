@@ -43,9 +43,12 @@ export function HeroClient({
       : {}
 
   return (
-    <section className="relative w-full overflow-hidden bg-gradient-to-br from-ink-900 via-brand-900 to-ink-800 text-white">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:py-24">
-        <div className="max-w-3xl">
+    <section className="relative -mt-[var(--app-header-offset)] w-full overflow-hidden text-white">
+      <div
+        className="eventies-hero-shell site-container-wide relative z-20 grid grid-cols-1 items-center gap-10 pb-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12 lg:pb-20"
+        style={{ paddingTop: 'calc(var(--app-navbar-height, 74px) + clamp(1.5rem, 4vw, 3rem))' }}
+      >
+        <div className="max-w-5xl">
           <motion.div
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-4 py-2 backdrop-blur-md"
             initial={motionOn ? fadeUp.hidden : false}
@@ -57,7 +60,7 @@ export function HeroClient({
           </motion.div>
 
           <motion.h1
-            className="font-display text-[clamp(2.4rem,5vw,4.2rem)] font-bold tracking-tight"
+            className="hero-title-silver max-w-[960px] font-display text-[clamp(2.45rem,5vw,4.35rem)] font-bold tracking-[-0.03em]"
             initial={motionOn ? fadeUp.hidden : false}
             animate={motionOn ? fadeUp.visible : undefined}
             transition={tr(0.06)}
@@ -193,6 +196,25 @@ export function HeroClient({
                 <div className="absolute bottom-3.5 start-3.5">
                   <div className="relative flex h-16 w-16 items-center justify-center">
                     <HeroShaderBadge />
+                    <motion.svg
+                      className="absolute inset-0 h-full w-full"
+                      viewBox="0 0 100 100"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+                      style={{ transform: 'scale(1.55)' }}
+                    >
+                      <defs>
+                        <path
+                          id="hero-badge-ring"
+                          d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"
+                        />
+                      </defs>
+                      <text className="fill-white/85 text-[8px] font-bold uppercase tracking-[0.12em]">
+                        <textPath href="#hero-badge-ring" startOffset="0%">
+                          Eventies · Plan · Request · Celebrate ·
+                        </textPath>
+                      </text>
+                    </motion.svg>
                   </div>
                 </div>
               ) : null}
