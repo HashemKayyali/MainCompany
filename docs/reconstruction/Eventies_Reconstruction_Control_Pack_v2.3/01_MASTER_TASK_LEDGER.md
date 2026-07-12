@@ -204,10 +204,10 @@ Status source of truth: the Status column below (all initialize TODO)
 | AUTH-001 | P3 | auth | Login page island: canonical pipeline (07) with Zod mirror | REARCHITECT | H | S | FOUND-008, FOUND-014 | flow green; enumeration-safe copy | AU-FLOWS | TODO |
 | AUTH-002 | P3 | auth | Signup page + Turnstile always | REARCHITECT | H | S | AUTH-001, FOUND-034 | server-verified challenge | FORM-TS | TODO |
 | AUTH-003 | P3 | auth | Enumeration-safe error map (single module) | NEW | H | S | AUTH-001 | AU-EN diff-test green | AU-EN | TODO |
-| AUTH-004 | P3 | auth | Sanitizer port to lib/ + wire login/OAuth redirects | KEEP | M | S | BASE-009 | SAN-01 green in new repo | SAN-01 | TODO |
-| AUTH-005 | P3 | auth | /auth/callback Route Handler: exchange + used-code fallback + friendly errors + 303 | REARCHITECT | H | S | AUTH-004 | refresh-mid-callback safe | AU-FLOWS | TODO |
+| AUTH-004 | P3 | auth | Sanitizer port to lib/ + wire login/OAuth redirects | KEEP | M | S | BASE-009 | SAN-01 green in new repo | SAN-01 | DONE |
+| AUTH-005 | P3 | auth | /auth/callback Route Handler: exchange + used-code fallback + friendly errors + 303 | REARCHITECT | H | S | AUTH-004 | refresh-mid-callback safe | AU-FLOWS | BLOCKED:code+unit done; live flow pending preview |
 | AUTH-006 | P3 | auth | Session listener + UI state: single browser listener; modal-survival regression test ported | REARCHITECT | H | S | FOUND-008 | AU-RS green in new app | AU-RS | TODO |
-| AUTH-007 | P3 | auth | Remember-me implementation per CLOSED ADR-17 (P1B evidence); release-note doc | REARCHITECT | M | S | AUTH-001, AUTHP-010 | behavior documented+tested | AU-FLOWS | TODO |
+| AUTH-007 | P3 | auth | Remember-me implementation per CLOSED ADR-17 (P1B evidence); release-note doc | REARCHITECT | M | S | AUTH-001, AUTHP-010 | behavior documented+tested | AU-FLOWS | BLOCKED:cookie split + HTTPS Secure evidence pending preview |
 | AUTH-008 | P3 | auth | Reset-password flow (uniform responses) | REARCHITECT | M | S | AUTH-003 | flow + limits | AU-FLOWS | TODO |
 | AUTH-009 | P3 | auth | Update-password flow (ssr recovery session; revoke others) | REARCHITECT | M | S | AUTH-008 | other session killed | AU-FLOWS | TODO |
 | AUTH-010 | P3 | auth | Logout (server-aware, multi-tab converge) | REARCHITECT | M | S | AUTH-006 | multi-tab test | AU-FLOWS | TODO |
@@ -220,21 +220,21 @@ Status source of truth: the Status column below (all initialize TODO)
 | AUTH-017 | P3 | auth | Auth pages noindex metadata | KEEP | L | E | SEO-010 | parity | SEO-PAR | TODO |
 | AUTH-018 | P3 | auth | Multi-tab session E2E in new app | NEW | M | S | AUTH-010 | green | AU-FLOWS | TODO |
 | AUTH-019 | P3 | auth | Expired-refresh handling: clean signed-out + return path | NEW | M | S | AUTH-006 | no loop | AU-FLOWS | TODO |
-| AUTH-020 | P3 | auth | Group B cutover readiness report (QG-P3 evidence) | NEW | H | S | AUTH-001..019, FORM-005 | gate pass | — | TODO |
+| AUTH-020 | P3 | auth | Group B cutover readiness report (QG-P3 evidence) | NEW | H | S | AUTH-001..019, FORM-005 | gate pass | — | BLOCKED:see reports/PHASE_03_REPORT.md |
 
 ## FORM — Phase 3: public forms (evidence: ContactForm, contact rate-limit migrations)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| FORM-001 | P3 | forms | Zod schemas: contact/support/custom-build (mirror DB constraints) | NEW | M | S,D | FOUND-014 | parse rules match validators.ts+DB | unit | TODO |
-| FORM-002 | P3 | forms | /api/forms/contact: Zod→Turnstile→insert→typed errors | REARCHITECT | H | S | FORM-001, FOUND-034 | FORM-TS green | FORM-TS | TODO |
-| FORM-003 | P3 | forms | /api/forms/support + custom-build handlers | REARCHITECT | M | S | FORM-002 | same pattern | FORM-TS | TODO |
-| FORM-004 | P3 | forms | Dedup window (identifier+hash, 10 min) | NEW | M | S,D | FORM-002 | duplicate rejected politely | I | TODO |
-| FORM-005 | P3 | forms | Contact form island rewired to handler; WhatsApp/email fallback behavior preserved (existing UX) | REFACTOR | M | — | FORM-002 | fallback copy preserved | E | TODO |
-| FORM-006 | P3 | forms | Client cosmetic limiter removed from new form (DEL-11 forward) | REMOVE | L | — | FORM-005 | grep clean | — | TODO |
+| FORM-001 | P3 | forms | Zod schemas: contact/support/custom-build (mirror DB constraints) | NEW | M | S,D | FOUND-014 | parse rules match validators.ts+DB | unit | DONE |
+| FORM-002 | P3 | forms | /api/forms/contact: Zod→Turnstile→insert→typed errors | REARCHITECT | H | S | FORM-001, FOUND-034 | FORM-TS green | FORM-TS | BLOCKED:code done; live Turnstile/staging migration evidence missing |
+| FORM-003 | P3 | forms | /api/forms/support + custom-build handlers | REARCHITECT | M | S | FORM-002 | same pattern | FORM-TS | BLOCKED:code done; live Turnstile/staging migration evidence missing |
+| FORM-004 | P3 | forms | Dedup window (identifier+hash, 10 min) | NEW | M | S,D | FORM-002 | duplicate rejected politely | I | BLOCKED:migration authored; staging integration pending |
+| FORM-005 | P3 | forms | Contact form island rewired to handler; WhatsApp/email fallback behavior preserved (existing UX) | REFACTOR | M | — | FORM-002 | fallback copy preserved | E | DONE |
+| FORM-006 | P3 | forms | Client cosmetic limiter removed from new form (DEL-11 forward) | REMOVE | L | — | FORM-005 | grep clean | — | DONE |
 | FORM-007 | P3 | forms | ratelimit.tripped telemetry + weekly review doc | NEW | L | S | FOUND-016 | events flowing | I | TODO |
-| FORM-008 | P3 | forms | Form dictionaries + AR validation messages | NEW | M | — | I18N-005 | AR errors correct | AR E2E | TODO |
+| FORM-008 | P3 | forms | Form dictionaries + AR validation messages | NEW | M | — | I18N-005 | AR errors correct | AR E2E | DONE |
 | FORM-009 | P3 | forms | E2E: rate-limit reached UX (friendly, localized) | NEW | M | — | FORM-002 | green | E | TODO |
-| FORM-010 | P3 | forms | Handlers documented as Expo-callable contracts (shared/contracts) | NEW | L | — | FORM-002 | contract doc | — | TODO |
+| FORM-010 | P3 | forms | Handlers documented as Expo-callable contracts (shared/contracts) | NEW | L | — | FORM-002 | contract doc | — | DONE |
 
 ## REQ — Phase 4: transactional flows (evidence: cart/quote contexts, request RPCs; rollback: Group C restore)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
@@ -440,7 +440,7 @@ Status source of truth: the Status column below (all initialize TODO)
 | ADMIN-028 | P6 | admin | Interior port: Logs page | REFACTOR | L | — | ADMIN-005 | parity | E | TODO |
 | ADMIN-029 | P6 | admin | Interior port: ContactSubmissions page | REFACTOR | L | — | ADMIN-005 | parity | E | TODO |
 | SEC-014 | P1 | security | ADR-18 closure: rate-limit state store evaluation (Supabase RPC counters vs KV/Redis vs WAF combo) with latency/cost/atomicity/privacy analysis + trusted client-IP source on Vercel + HMAC identifier keys + retention | NEW | H | S | FOUND-033 | ADR-18 CLOSED with evidence | — | DONE |
-| SEC-015 | P3 | security | Implement chosen rate-limit store (atomic increments, expiry, cleanup) behind FOUND-033 interface | NEW | H | S | SEC-014 | concurrency test; limits survive multi-instance | I | TODO |
+| SEC-015 | P3 | security | Implement chosen rate-limit store (atomic increments, expiry, cleanup) behind FOUND-033 interface | NEW | H | S | SEC-014 | concurrency test; limits survive multi-instance | I | BLOCKED:migration+adapter authored; staging multi-instance verification pending |
 | SEC-016 | P6 | security | Destructive-Op trusted-boundary APPLICATION implementation per SEC-018 design (handler wraps, RPC call-sites, EXECUTE-revocation consumers) — per operation | HARDEN | H | S,D | SEC-018, DBMIG-010 | matrix row-by-row enforced | BYPASS | TODO |
 | SEC-017 | P7 | security | CSP inline audit: violation inventory, nonce/hash feasibility, ⛔ P7 decision to drop 'unsafe-inline' or documented exception | HARDEN | M | S | SEC-003 | decision + final policy | QG-P7 | TODO |
 | CACHE-005 | P2 | cache | ADR-19 conformance: implement chosen Next 16 cache model (use cache + cacheTag + cacheLife) in DAL; integration tests for tag attach, TTL, new-slug, delete→404, SWR vs immediate semantics | NEW | H | D | DATA-001, FOUND-020 | CACHE-MODEL suite green | CACHE-MODEL | DONE:CACHE-MODEL conformance suite green (7 tests) |
