@@ -113,7 +113,10 @@
     "featuresHeading": "What's included",
     "partsHeading": "Parts & add-ons",
     "requestCta": "Request this service",
-    "priceOnRequest": "Price on request"
+    "priceOnRequest": "Price on request",
+    "addRental": "Add to rental draft",
+    "addQuote": "Add to quote draft",
+    "added": "Added to draft"
   },
   "about": {
     "heading": "About Eventies",

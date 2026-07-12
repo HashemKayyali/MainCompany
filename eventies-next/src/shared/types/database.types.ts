@@ -20,6 +20,7 @@ export interface Database {
           phone: string | null
           role: string
           created_at: string
+          avatar_url: string | null
         }
         Insert: {
           id: string
@@ -28,12 +29,14 @@ export interface Database {
           phone?: string | null
           role?: string
           created_at?: string
+          avatar_url?: string | null
         }
         Update: {
           name?: string | null
           email?: string | null
           phone?: string | null
           role?: string
+          avatar_url?: string | null
         }
         Relationships: [
           {

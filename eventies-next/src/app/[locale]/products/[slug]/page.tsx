@@ -8,6 +8,7 @@ import { productJsonLd, breadcrumbJsonLd } from '@/server/metadata/jsonld'
 import { normalizePublicHttpsUrl, SITE_URL } from '@/server/metadata/site'
 import { JsonLd } from '@/components/JsonLd'
 import { SmartImage } from '@/components/ui/SmartImage'
+import { AddToDraftActions } from '@/features/commerce/AddToDraftActions'
 import { ProductGallery } from '@/features/catalog/ProductGallery'
 import { Link } from '@/i18n/navigation'
 import { routing } from '@/i18n/routing'
@@ -106,6 +107,10 @@ export default async function ProductDetailPage({
           <p className="mt-6 rounded-xl bg-brand-50 px-4 py-3 text-sm text-brand-800">
             {t('requestCta')} — {t('priceOnRequest')}
           </p>
+          <AddToDraftActions
+            product={product}
+            labels={{ rental: t('addRental'), quote: t('addQuote'), added: t('added') }}
+          />
         </div>
       </div>
 

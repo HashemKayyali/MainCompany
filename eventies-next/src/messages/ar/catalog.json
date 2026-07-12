@@ -113,7 +113,10 @@
     "featuresHeading": "ما الذي يتضمنه",
     "partsHeading": "القطع والإضافات",
     "requestCta": "اطلب هذه الخدمة",
-    "priceOnRequest": "السعر عند الطلب"
+    "priceOnRequest": "السعر عند الطلب",
+    "addRental": "أضف إلى مسودة التأجير",
+    "addQuote": "أضف إلى مسودة العرض",
+    "added": "تمت الإضافة إلى المسودة"
   },
   "about": {
     "heading": "عن إيفنتيز",
