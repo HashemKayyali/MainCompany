@@ -73,7 +73,7 @@ begin
   if required_role not in ('admin', 'superadmin') or max_age_seconds < 1 or max_age_seconds > 3600 then
     raise exception 'Invalid assurance policy' using errcode = '22023';
   end if;
-  if pg_catalog.coalesce(v_claims ->> 'aal', '') <> 'aal2' then
+  if coalesce(v_claims ->> 'aal', '') <> 'aal2' then
     raise exception 'AAL2 required' using errcode = '42501';
   end if;
 
@@ -96,7 +96,7 @@ begin
   join auth.users as u on u.id = p.id
   where p.id = v_actor;
 
-  if not found or not pg_catalog.coalesce(v_active, false) or v_deleted_at is not null
+  if not found or not coalesce(v_active, false) or v_deleted_at is not null
      or (v_banned_until is not null and v_banned_until > pg_catalog.statement_timestamp()) then
     raise exception 'Active admin profile required' using errcode = '42501';
   end if;
