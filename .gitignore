@@ -32,6 +32,8 @@ storage-gc-reports/
 .env
 
 supabase/.temp/
+eventies-next/supabase/.temp/
+eventies-next/.secure-schema-capture/
 
 reports/baseline/perf/raw/
 
