@@ -115,6 +115,7 @@ async function requireAdmin(req: Request): Promise<
     .from('profiles')
     .select('role,is_active')
     .eq('id', userData.user.id)
+    .eq('is_active', true)
     .maybeSingle()
   if (adminError) {
     console.error('[cloudinary-assets] admin check failed', adminError)
@@ -174,7 +175,6 @@ async function handleSignUpload(
     const { data: allowed, error } = await auth.client.rpc(
       'consume_admin_upload_quota',
       {
-        p_actor_id: auth.actorId,
         p_hour_limit: 30,
         p_day_limit: 300,
       }
@@ -258,17 +258,14 @@ async function handleDelete(
       (item as Record<string, unknown>).resourceType
     )
 
-    if (cloudName !== config.cloudName) {
-      return json(
-        { error: 'Asset cloud name does not match this environment' },
-        400
-      )
-    }
     if (resourceType !== 'image') {
       return json({ error: 'Only image deletion is supported' }, 400)
     }
-    if (!isSafePublicId(publicId) || !isAllowedDeleteFolder(publicId)) {
-      return json({ error: 'Invalid Cloudinary public ID' }, 400)
+    if (!isOwnedCloudinaryAsset(cloudName, publicId, config.cloudName)) {
+      return json(
+        { error: 'Asset is outside the owned Cloudinary namespace' },
+        400
+      )
     }
 
     normalized.push({ publicId })
@@ -518,6 +515,18 @@ function isSafePublicId(value: string) {
 function isAllowedDeleteFolder(value: string) {
   const [root, folder] = value.split('/')
   return root === ROOT_FOLDER && Boolean(folder && ALLOWED_FOLDERS.has(folder))
+}
+
+function isOwnedCloudinaryAsset(
+  cloudName: string,
+  publicId: string,
+  configuredCloudName: string
+) {
+  return (
+    cloudName === configuredCloudName &&
+    isSafePublicId(publicId) &&
+    isAllowedDeleteFolder(publicId)
+  )
 }
 
 function hasRecentAal2(claims: Record<string, unknown>) {

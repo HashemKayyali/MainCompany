@@ -79,6 +79,9 @@ describe('DBMIG-010 assurance and BYPASS-01..09 static contract', () => {
     for (const name of ['set_admin_role', 'remove_admin']) {
       const fn = body(name)
       expect(fn).toContain("pg_advisory_xact_lock(hashtext('eventies:superadmin-invariant'))")
+      expect(fn).toContain('join auth.users')
+      expect(fn).toContain('u.deleted_at is null')
+      expect(fn).toContain('u.banned_until')
       expect(fn).toContain('v_remaining=0')
       expect(fn).toContain('final active superadmin')
     }
@@ -91,15 +94,21 @@ describe('DBMIG-010 assurance and BYPASS-01..09 static contract', () => {
     expect(begin).toContain('array_agg(distinct')
     expect(begin).toContain('for update')
     expect(begin).toContain("v_status in ('failed','orphaned')")
+    expect(begin).toContain('cloudinary_delete_started')
+    expect(begin).toContain('cloudinary_delete_retry')
+    expect(begin).toContain(
+      'categories|customers|parts|gallery|custom-builds|products|general|uploads'
+    )
     expect(sql).toContain('unique (actor_id, idempotency_key)')
     expect(body('complete_admin_media_delete')).toContain('write_admin_audit')
   })
 
-  it('implements durable atomic signing quotas without trusting the actor parameter', () => {
+  it('implements durable atomic signing quotas using only the authenticated actor', () => {
     const quota = body('consume_admin_upload_quota')
     expect(quota).toContain('assert_admin_assurance')
-    expect(quota).toContain('p_actor_id is distinct from v_actor')
+    expect(quota).not.toContain('p_actor_id')
     expect(quota).toContain('on conflict(actor_id,period,window_start) do update')
     expect(quota).toContain('write_admin_audit')
+    expect(quota).toContain("'succeeded'")
   })
 })

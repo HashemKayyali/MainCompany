@@ -1209,7 +1209,7 @@ export interface Database {
         Returns: Json
       }
       consume_admin_upload_quota: {
-        Args: { p_actor_id: string; p_hour_limit: number; p_day_limit: number }
+        Args: { p_hour_limit: number; p_day_limit: number }
         Returns: boolean
       }
     }

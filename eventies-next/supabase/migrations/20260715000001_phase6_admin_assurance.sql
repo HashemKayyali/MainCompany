@@ -242,9 +242,18 @@ begin
   v_actor:=public.assert_admin_assurance('superadmin',900);
   if new_role not in ('admin','superadmin') then raise exception 'Invalid role' using errcode='22023'; end if;
   perform pg_advisory_xact_lock(hashtext('eventies:superadmin-invariant'));
-  select p.role into strict v_target_role from public.profiles p where p.id=target_id and p.is_active;
+  select p.role into strict v_target_role
+  from public.profiles p
+  join auth.users u on u.id=p.id
+  where p.id=target_id and p.is_active and u.deleted_at is null
+    and (u.banned_until is null or u.banned_until<=pg_catalog.statement_timestamp());
   if v_target_role='superadmin' and new_role<>'superadmin' then
-    select count(*) into v_remaining from public.profiles p where p.role='superadmin' and p.is_active and p.id<>target_id;
+    select count(*) into v_remaining
+    from public.profiles p
+    join auth.users u on u.id=p.id
+    where p.role='superadmin' and p.is_active and p.id<>target_id
+      and u.deleted_at is null
+      and (u.banned_until is null or u.banned_until<=pg_catalog.statement_timestamp());
     if v_remaining=0 then raise exception 'Final active superadmin cannot be demoted' using errcode='23514'; end if;
   end if;
   select p.role into strict v_actor_role from public.profiles p where p.id=v_actor;
@@ -260,9 +269,18 @@ declare v_actor uuid; v_actor_role text; v_target_role text; v_remaining integer
 begin
   v_actor:=public.assert_admin_assurance('superadmin',900);
   perform pg_advisory_xact_lock(hashtext('eventies:superadmin-invariant'));
-  select p.role into strict v_target_role from public.profiles p where p.id=target_id and p.is_active;
+  select p.role into strict v_target_role
+  from public.profiles p
+  join auth.users u on u.id=p.id
+  where p.id=target_id and p.is_active and u.deleted_at is null
+    and (u.banned_until is null or u.banned_until<=pg_catalog.statement_timestamp());
   if v_target_role='superadmin' then
-    select count(*) into v_remaining from public.profiles p where p.role='superadmin' and p.is_active and p.id<>target_id;
+    select count(*) into v_remaining
+    from public.profiles p
+    join auth.users u on u.id=p.id
+    where p.role='superadmin' and p.is_active and p.id<>target_id
+      and u.deleted_at is null
+      and (u.banned_until is null or u.banned_until<=pg_catalog.statement_timestamp());
     if v_remaining=0 then raise exception 'Final active superadmin cannot be removed' using errcode='23514'; end if;
   end if;
   select p.role into strict v_actor_role from public.profiles p where p.id=v_actor;
@@ -275,32 +293,39 @@ create or replace function public.begin_admin_media_delete(p_idempotency_key uui
 returns table(operation_id uuid, should_execute boolean, prior_result jsonb)
 language plpgsql security definer set search_path = pg_catalog
 as $$
-declare v_actor uuid; v_id uuid; v_status text; v_result jsonb; v_ids text[]; v_existing_ids text[]; v_inserted integer;
+declare v_actor uuid; v_role text; v_id uuid; v_status text; v_result jsonb; v_ids text[]; v_existing_ids text[]; v_inserted integer; v_correlation uuid:=gen_random_uuid();
 begin
   v_actor:=public.assert_admin_assurance('admin',900);
+  select p.role into strict v_role from public.profiles p where p.id=v_actor;
   if p_idempotency_key is null or p_public_ids is null or cardinality(p_public_ids)=0 or cardinality(p_public_ids)>25 then
     raise exception 'Invalid media delete request' using errcode='22023'; end if;
   select array_agg(distinct x order by x) into v_ids from unnest(p_public_ids) x;
-  if exists(select 1 from unnest(v_ids) x where x !~ '^eventies/(products|categories|gallery|customers|builds)/[A-Za-z0-9/_-]+$') then
+  -- Ownership is the configured Cloudinary tenant plus Eventies' reserved root/folders.
+  -- The Edge boundary verifies the tenant; this predicate independently verifies
+  -- the complete application-owned namespace before any external destroy call.
+  if exists(select 1 from unnest(v_ids) x where x !~ '^eventies/(categories|customers|parts|gallery|custom-builds|products|general|uploads)/[A-Za-z0-9/_-]+$') then
     raise exception 'Invalid public ID' using errcode='22023'; end if;
   insert into public.admin_media_operations(actor_id,idempotency_key,operation,target_ids,status)
   values(v_actor,p_idempotency_key,'cloudinary.delete',v_ids,'pending')
   on conflict(actor_id,idempotency_key) do nothing returning id,status,result into v_id,v_status,v_result;
   get diagnostics v_inserted=row_count;
-  if v_inserted=1 then return query select v_id,true,v_result; return; end if;
+  if v_inserted=1 then
+    perform public.write_admin_audit(v_actor,v_role,'cloudinary_delete_started','media',v_id::text,'pending',v_correlation,jsonb_build_object('count',cardinality(v_ids)));
+    return query select v_id,true,v_result; return;
+  end if;
   select o.id,o.status,o.result,o.target_ids into strict v_id,v_status,v_result,v_existing_ids
   from public.admin_media_operations o where o.actor_id=v_actor and o.idempotency_key=p_idempotency_key for update;
   if v_existing_ids is distinct from v_ids then raise exception 'Idempotency key target mismatch' using errcode='22023'; end if;
   if v_status in ('failed','orphaned') then
     update public.admin_media_operations o set status='pending',target_ids=v_ids,updated_at=clock_timestamp()
     where o.id=v_id;
+    perform public.write_admin_audit(v_actor,v_role,'cloudinary_delete_retry','media',v_id::text,'pending',v_correlation,jsonb_build_object('count',cardinality(v_ids),'prior_status',v_status));
     return query select v_id,true,v_result; return;
   end if;
   return query select v_id,false,v_result || jsonb_build_object('status',v_status);
 end; $$;
 
 create or replace function public.consume_admin_upload_quota(
-  p_actor_id uuid,
   p_hour_limit integer,
   p_day_limit integer
 )
@@ -309,7 +334,6 @@ as $$
 declare v_actor uuid; v_role text; v_hour integer; v_day integer; v_correlation uuid:=gen_random_uuid();
 begin
   v_actor:=public.assert_admin_assurance('admin',900);
-  if p_actor_id is distinct from v_actor then raise exception 'Actor mismatch' using errcode='42501'; end if;
   if p_hour_limit not between 1 and 100 or p_day_limit not between 1 and 1000 then
     raise exception 'Invalid quota policy' using errcode='22023'; end if;
   insert into public.admin_upload_signing_windows(actor_id,period,window_start,request_count)
@@ -325,6 +349,8 @@ begin
     perform public.write_admin_audit(v_actor,v_role,'upload_quota','cloudinary','sign','denied',v_correlation,jsonb_build_object('hour_count',v_hour,'day_count',v_day));
     return false;
   end if;
+  select p.role into strict v_role from public.profiles p where p.id=v_actor;
+  perform public.write_admin_audit(v_actor,v_role,'upload_quota','cloudinary','sign','succeeded',v_correlation,jsonb_build_object('hour_count',v_hour,'day_count',v_day));
   return true;
 end; $$;
 
@@ -433,7 +459,7 @@ do $$ declare f regprocedure; begin
     'public.set_admin_role(uuid,text)'::regprocedure,
     'public.remove_admin(uuid)'::regprocedure,
     'public.begin_admin_media_delete(uuid,text[])'::regprocedure,
-    'public.consume_admin_upload_quota(uuid,integer,integer)'::regprocedure,
+    'public.consume_admin_upload_quota(integer,integer)'::regprocedure,
     'public.complete_admin_media_delete(uuid,text,jsonb)'::regprocedure
     ,'public.send_custom_notification(text,text,boolean,boolean,boolean,text,text)'::regprocedure
     ,'public.send_custom_notification_idempotent(text,text,boolean,boolean,boolean,text,text,uuid)'::regprocedure

@@ -17,6 +17,8 @@ describe('ADMIN-015/016 Edge Function hardening contract', () => {
   })
   it('bounds, validates, deduplicates, and audits Cloudinary deletion', () => {
     expect(source).toContain('const MAX_DELETE_BATCH = 25')
+    expect(source).toContain('isOwnedCloudinaryAsset(cloudName, publicId, config.cloudName)')
+    expect(source).toContain('cloudName === configuredCloudName')
     expect(source).toContain('isAllowedDeleteFolder(publicId)')
     expect(source).toContain('begin_admin_media_delete')
     expect(source).toContain('complete_admin_media_delete')
@@ -28,6 +30,7 @@ describe('ADMIN-015/016 Edge Function hardening contract', () => {
     expect(source).toContain('consume_admin_upload_quota')
     expect(source).toContain('p_hour_limit: 30')
     expect(source).toContain('p_day_limit: 300')
+    expect(source).not.toContain('p_actor_id: auth.actorId')
     expect(source).not.toContain('body.uploadPreset')
   })
 })

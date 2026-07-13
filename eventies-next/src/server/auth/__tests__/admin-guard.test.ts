@@ -83,6 +83,9 @@ describe('ADM-GATE / ADM-RA', () => {
   it('rejects missing and malformed auth_time claims before assurance evaluation', () => {
     expect(parseAuthTimeClaim(undefined)).toBeNull()
     expect(parseAuthTimeClaim('not-a-time')).toBeNull()
+    expect(parseAuthTimeClaim('NaN')).toBeNull()
+    expect(parseAuthTimeClaim('1e9')).toBeNull()
+    expect(parseAuthTimeClaim({ seconds: 1720958400 })).toBeNull()
     expect(parseAuthTimeClaim(-1)).toBeNull()
     expect(parseAuthTimeClaim('1720958400')).toBe(1720958400)
   })
