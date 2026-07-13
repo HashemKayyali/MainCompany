@@ -24,6 +24,8 @@ describe('DBMIG-010 assurance and BYPASS-01..09 static contract', () => {
     expect(assurance).toContain('auth.users')
     expect(assurance).toContain("!~ '^[0-9]+([.][0-9]+)?$'")
     expect(assurance).toContain('v_auth_time > v_now')
+    expect(assurance).toContain('extract(epoch from pg_catalog.statement_timestamp())')
+    expect(assurance).not.toContain('pg_catalog.extract(')
     expect(assurance).toContain('not pg_catalog.coalesce(v_active, false)')
     expect(sql).toContain(
       'alter function public.assert_admin_assurance(text, integer) owner to postgres'
@@ -76,6 +78,8 @@ describe('DBMIG-010 assurance and BYPASS-01..09 static contract', () => {
   })
 
   it('locks and preserves the final active superadmin', () => {
+    expect(sql).toContain('drop function if exists public.set_admin_role(uuid, text)')
+    expect(sql).toContain('drop function if exists public.remove_admin(uuid)')
     for (const name of ['set_admin_role', 'remove_admin']) {
       const fn = body(name)
       expect(fn).toContain("pg_advisory_xact_lock(hashtext('eventies:superadmin-invariant'))")

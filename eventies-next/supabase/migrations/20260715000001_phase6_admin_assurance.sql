@@ -65,7 +65,7 @@ declare
   v_banned_until timestamptz;
   v_auth_raw text;
   v_auth_time numeric;
-  v_now numeric := pg_catalog.extract(epoch from pg_catalog.statement_timestamp());
+  v_now numeric := extract(epoch from pg_catalog.statement_timestamp());
 begin
   if v_actor is null then
     raise exception 'Admin assurance required' using errcode = '42501';
@@ -234,6 +234,13 @@ begin
 end; $$;
 
 -- Preserve signatures used by frozen Vite; strengthen bodies in place.
+-- PostgreSQL cannot change an existing function's json return type to jsonb
+-- with CREATE OR REPLACE. Drop only these exact legacy signatures first; the
+-- argument contracts used by frozen Vite remain unchanged and grants are
+-- restored in the API-function block below.
+drop function if exists public.set_admin_role(uuid, text);
+drop function if exists public.remove_admin(uuid);
+
 create or replace function public.set_admin_role(target_id uuid, new_role text)
 returns jsonb language plpgsql security definer set search_path = pg_catalog
 as $$

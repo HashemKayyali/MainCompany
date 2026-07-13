@@ -14,7 +14,6 @@ export function ProfileForm({
   const [form, setForm] = useState({
     name: profile.name ?? '',
     phone: profile.phone ?? '',
-    avatarUrl: '',
   })
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
@@ -31,7 +30,6 @@ export function ProfileForm({
       .update({
         name: parsed.data.name,
         phone: parsed.data.phone || null,
-        avatar_url: parsed.data.avatarUrl || null,
       })
       .eq('id', profile.id)
     setStatus(error ? t('saveFailed') : t('saved'))
@@ -57,17 +55,6 @@ export function ProfileForm({
       <label htmlFor="profile-phone" className="font-bold">
         {t('phone')}
       </label>
-      <label htmlFor="profile-avatar" className="font-bold">
-        {t('avatar')}
-      </label>
-      <input
-        id="profile-avatar"
-        className="form-field"
-        type="url"
-        value={form.avatarUrl}
-        onChange={(event) => setForm({ ...form, avatarUrl: event.target.value })}
-        placeholder="https://"
-      />
       <input
         id="profile-phone"
         className="form-field"

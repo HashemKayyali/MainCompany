@@ -4,7 +4,8 @@
 // `supabase/migrations/` (newest wins). After applying a new migration you
 // should regenerate / reconcile these types, e.g.:
 //   supabase gen types typescript --project-id <id> --schema public > src/lib/database.types.ts
-// Last reconciled against: 20260706_notification_system.sql.
+// Last reconciled against: canonical baseline through
+// 20260715000001_phase6_admin_assurance.sql.
 // ----------------------------------------------------------------------------
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
@@ -20,7 +21,6 @@ export interface Database {
           phone: string | null
           role: string
           created_at: string
-          avatar_url: string | null
           is_active: boolean
         }
         Insert: {
@@ -30,7 +30,6 @@ export interface Database {
           phone?: string | null
           role?: string
           created_at?: string
-          avatar_url?: string | null
           is_active?: boolean
         }
         Update: {
@@ -38,7 +37,6 @@ export interface Database {
           email?: string | null
           phone?: string | null
           role?: string
-          avatar_url?: string | null
           is_active?: boolean
         }
         Relationships: [
@@ -60,6 +58,8 @@ export interface Database {
           icon: string | null
           description: string | null
           image: string | null
+          name_ar: string | null
+          description_ar: string | null
         }
         Insert: {
           id?: string
@@ -69,6 +69,8 @@ export interface Database {
           icon?: string | null
           description?: string | null
           image?: string | null
+          name_ar?: string | null
+          description_ar?: string | null
         }
         Update: {
           name?: string
@@ -76,6 +78,8 @@ export interface Database {
           icon?: string | null
           description?: string | null
           image?: string | null
+          name_ar?: string | null
+          description_ar?: string | null
         }
         Relationships: []
       }
@@ -117,6 +121,7 @@ export interface Database {
           sort_order: number | null
           created_at: string | null
           updated_at: string | null
+          title_ar: string | null
         }
         Insert: {
           id?: string
@@ -128,6 +133,7 @@ export interface Database {
           sort_order?: number | null
           created_at?: string | null
           updated_at?: string | null
+          title_ar?: string | null
         }
         Update: {
           slug?: string
@@ -137,6 +143,7 @@ export interface Database {
           category?: string | null
           sort_order?: number | null
           updated_at?: string | null
+          title_ar?: string | null
         }
         Relationships: []
       }
@@ -154,6 +161,8 @@ export interface Database {
           is_active: boolean | null
           created_at: string | null
           updated_at: string | null
+          title_ar: string | null
+          description_ar: string | null
         }
         Insert: {
           id?: string
@@ -167,6 +176,8 @@ export interface Database {
           is_active?: boolean | null
           created_at?: string | null
           updated_at?: string | null
+          title_ar?: string | null
+          description_ar?: string | null
         }
         Update: {
           title?: string
@@ -178,6 +189,8 @@ export interface Database {
           is_featured?: boolean | null
           is_active?: boolean | null
           updated_at?: string | null
+          title_ar?: string | null
+          description_ar?: string | null
         }
         Relationships: []
       }
@@ -190,6 +203,7 @@ export interface Database {
           is_active: boolean | null
           created_at: string | null
           updated_at: string | null
+          name_ar: string | null
         }
         Insert: {
           id?: string
@@ -198,12 +212,14 @@ export interface Database {
           is_active?: boolean | null
           created_at?: string | null
           updated_at?: string | null
+          name_ar?: string | null
         }
         Update: {
           name?: string
           sort_order?: number | null
           is_active?: boolean | null
           updated_at?: string | null
+          name_ar?: string | null
         }
         Relationships: []
       }
@@ -290,6 +306,9 @@ export interface Database {
           minimum_rental_days: number | null
           buffer_before_days: number | null
           buffer_after_days: number | null
+          title_ar: string | null
+          description_ar: string | null
+          short_description_ar: string | null
         }
         Insert: {
           id?: string
@@ -321,6 +340,9 @@ export interface Database {
           minimum_rental_days?: number | null
           buffer_before_days?: number | null
           buffer_after_days?: number | null
+          title_ar?: string | null
+          description_ar?: string | null
+          short_description_ar?: string | null
         }
         Update: {
           title?: string
@@ -350,6 +372,9 @@ export interface Database {
           minimum_rental_days?: number | null
           buffer_before_days?: number | null
           buffer_after_days?: number | null
+          title_ar?: string | null
+          description_ar?: string | null
+          short_description_ar?: string | null
         }
         Relationships: [
           {
@@ -590,7 +615,14 @@ export interface Database {
           updated_at?: string
         }
         Update: { status?: string; result?: Json; updated_at?: string }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'admin_media_operations_actor_id_fkey'
+            columns: ['actor_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
       }
       admin_rpc_idempotency: {
         Row: {
@@ -608,6 +640,137 @@ export interface Database {
           created_at?: string
         }
         Update: { result?: Json | null }
+        Relationships: [
+          {
+            foreignKeyName: 'admin_rpc_idempotency_actor_id_fkey'
+            columns: ['actor_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      admin_upload_signing_windows: {
+        Row: {
+          actor_id: string
+          period: string
+          window_start: string
+          request_count: number
+        }
+        Insert: {
+          actor_id: string
+          period: string
+          window_start: string
+          request_count: number
+        }
+        Update: {
+          actor_id?: string
+          period?: string
+          window_start?: string
+          request_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'admin_upload_signing_windows_actor_id_fkey'
+            columns: ['actor_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      app_events: {
+        Row: {
+          id: string
+          event: string
+          payload: Json
+          actor_hash: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event: string
+          payload?: Json
+          actor_hash?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event?: string
+          payload?: Json
+          actor_hash?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+
+      app_rate_limits: {
+        Row: {
+          bucket_key: string
+          event_count: number
+          window_expires_at: string
+          updated_at: string
+        }
+        Insert: {
+          bucket_key: string
+          event_count: number
+          window_expires_at: string
+          updated_at?: string
+        }
+        Update: {
+          bucket_key?: string
+          event_count?: number
+          window_expires_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+
+      chat_message_rate_counters: {
+        Row: {
+          sender_id: string
+          window_started_at: string
+          message_count: number
+        }
+        Insert: {
+          sender_id: string
+          window_started_at: string
+          message_count?: number
+        }
+        Update: {
+          sender_id?: string
+          window_started_at?: string
+          message_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'chat_message_rate_counters_sender_id_fkey'
+            columns: ['sender_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      contact_rate_limit: {
+        Row: {
+          ip: string
+          count: number
+          window_start: string
+        }
+        Insert: { ip: string; count?: number; window_start?: string }
+        Update: { ip?: string; count?: number; window_start?: string }
+        Relationships: []
+      }
+
+      public_form_dedup: {
+        Row: {
+          dedup_key: string
+          expires_at: string
+          created_at: string
+        }
+        Insert: { dedup_key: string; expires_at: string; created_at?: string }
+        Update: { dedup_key?: string; expires_at?: string; created_at?: string }
         Relationships: []
       }
 

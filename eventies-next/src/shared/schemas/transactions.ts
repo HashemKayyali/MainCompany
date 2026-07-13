@@ -56,7 +56,6 @@ export const profileUpdateSchema = z.object({
     .trim()
     .regex(/^\+?[\d\s\-()]{7,20}$/)
     .or(z.literal('')),
-  avatarUrl: z.url().max(2000).or(z.literal('')),
 })
 
 export type RentalRequestInput = z.infer<typeof rentalRequestSchema>
