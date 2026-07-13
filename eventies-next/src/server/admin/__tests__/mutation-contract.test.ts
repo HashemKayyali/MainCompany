@@ -33,4 +33,26 @@ describe('privileged mutation boundary contract', () => {
       expect(decide(mutation, 'superadmin')).toBe('allow')
     }
   })
+
+  it.each([
+    ['anonymous', null, 'aal1', 1, 'permission-denied'],
+    ['customer', 'customer', 'aal2', 1, 'permission-denied'],
+    ['provider', 'provider', 'aal2', 1, 'permission-denied'],
+    ['unknown role', 'unknown', 'aal2', 1, 'permission-denied'],
+    ['admin AAL1', 'admin', 'aal1', 1, 'aal2-required'],
+    ['admin stale', 'admin', 'aal2', 16, 'recent-auth-required'],
+    ['admin recent', 'admin', 'aal2', 1, 'allow'],
+    ['superadmin AAL1', 'superadmin', 'aal1', 1, 'aal2-required'],
+    ['superadmin stale', 'superadmin', 'aal2', 16, 'recent-auth-required'],
+    ['superadmin recent', 'superadmin', 'aal2', 1, 'allow'],
+    ['revoked admin', 'customer', 'aal2', 1, 'permission-denied'],
+    ['disabled admin', null, 'aal2', 1, 'permission-denied'],
+    ['missing profile', null, 'aal2', 1, 'permission-denied'],
+  ])('BYPASS persona: %s', (_name, role, aal, age, expected) => {
+    expect(decide('catalog.delete', role, aal, age)).toBe(expected)
+  })
+
+  it('uses the current authoritative role rather than a stale JWT role', () => {
+    expect(decide('catalog.delete', 'customer', 'aal2', 1)).toBe('permission-denied')
+  })
 })

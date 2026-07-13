@@ -15,6 +15,8 @@ export function DestructiveConfirm({
   const t = useTranslations('admin')
   const [open, setOpen] = useState(false)
   const [typed, setTyped] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState(false)
   const dialog = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!open) return
@@ -73,6 +75,11 @@ export function DestructiveConfirm({
               onChange={(e) => setTyped(e.target.value)}
               className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3"
             />
+            {error && (
+              <p role="alert" className="mt-2 text-sm text-rose-700">
+                {t('destructiveFailed')}
+              </p>
+            )}
             <div className="mt-5 flex justify-end gap-2">
               <button
                 type="button"
@@ -83,11 +90,21 @@ export function DestructiveConfirm({
               </button>
               <button
                 type="button"
-                disabled={typed !== confirmation}
-                onClick={() => void onConfirm()}
+                disabled={typed !== confirmation || busy}
+                onClick={() => {
+                  setBusy(true)
+                  setError(false)
+                  void onConfirm()
+                    .then(() => {
+                      setOpen(false)
+                      setTyped('')
+                    })
+                    .catch(() => setError(true))
+                    .finally(() => setBusy(false))
+                }}
                 className="rounded-full bg-rose-700 px-4 py-2 font-bold text-white disabled:opacity-40"
               >
-                {t('confirm')}
+                {busy ? t('saving') : t('confirm')}
               </button>
             </div>
           </div>

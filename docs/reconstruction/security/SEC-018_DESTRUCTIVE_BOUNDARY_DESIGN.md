@@ -1,6 +1,15 @@
 # SEC-018 — Destructive-operation trusted-boundary design
 
-Status: **AWAITING_OWNER_SECURITY_APPROVAL**. This specification is code-side complete, but DBMIG-010 and SEC-016 must not be implemented or applied until the owner approves it.
+Status: **APPROVED_BY_OWNER_SECURITY_DECISION — 2026-07-13**. DBMIG-010 and SEC-016 implementation is authorized subject to the mandatory conditions below. Application remains staging-gated and production is prohibited.
+
+## Approval conditions incorporated
+
+- The assurance helper is SECURITY DEFINER, trusted-role-owned, fixed-search-path, fully schema-qualified, non-executable by API roles, and rejects missing/malformed/future/expired claims plus missing/inactive/deleted/disabled identities.
+- Privileged RPCs assert current authoritative assurance before mutation, avoid dynamic SQL, return typed results, and persist audit evidence transactionally.
+- Bulk deletion is one atomic RPC, capped at 25 input IDs, duplicate-collapsing and all-or-nothing.
+- Role/admin changes preserve the final active superadmin and safely evaluate self-change under an advisory transaction lock.
+- Direct table DELETE revocations remain deferred to the atomic Group E cutover.
+- Cloudinary delete stays exclusively behind a fresh-JWT trusted Edge boundary with bounded IDs, idempotency and safe failure audit.
 
 ## Shared assurance predicate
 
@@ -40,4 +49,3 @@ Each row is called directly, without UI, as anonymous/non-admin, AAL1 admin, AAL
 ## Approval decision required
 
 Owner/security reviewer must approve: the shared JWT claim predicate, atomic timing of direct privilege revocation with Group E, frozen-Vite compatibility, 15-minute window, bulk cap 25, and the exact role requirements above.
-

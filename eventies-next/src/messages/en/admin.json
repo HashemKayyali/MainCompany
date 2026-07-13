@@ -25,6 +25,8 @@
   "typeConfirmation": "Typed confirmation",
   "cancel": "Cancel",
   "confirm": "Confirm",
+  "saving": "Saving…",
+  "destructiveFailed": "The operation was denied or failed. Nothing else was changed.",
   "mfaTitle": "Secure your admin account",
   "mfaDescription": "Admin access requires a time-based one-time password. Scan the QR code with your authenticator app, then enter the six-digit code.",
   "mfaEnroll": "Enroll authenticator",

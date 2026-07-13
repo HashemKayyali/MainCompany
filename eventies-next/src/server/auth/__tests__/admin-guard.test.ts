@@ -4,6 +4,7 @@ import {
   evaluatePrivilegedAssurance,
   isRecentAuthentication,
   mfaRolloutFromEnv,
+  parseAuthTimeClaim,
 } from '../admin-guard'
 
 describe('ADM-GATE / ADM-RA', () => {
@@ -77,5 +78,12 @@ describe('ADM-GATE / ADM-RA', () => {
         nowMs: now,
       })
     ).toBe('allow')
+  })
+
+  it('rejects missing and malformed auth_time claims before assurance evaluation', () => {
+    expect(parseAuthTimeClaim(undefined)).toBeNull()
+    expect(parseAuthTimeClaim('not-a-time')).toBeNull()
+    expect(parseAuthTimeClaim(-1)).toBeNull()
+    expect(parseAuthTimeClaim('1720958400')).toBe(1720958400)
   })
 })

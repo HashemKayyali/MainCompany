@@ -134,3 +134,28 @@ export const adminCatalogRecordSchema = adminCatalogMutationSchema.extend({
   active: z.boolean().default(true),
   idempotencyKey: z.uuid(),
 })
+
+export const adminDestructiveRequestSchema = z.discriminatedUnion('operation', [
+  z.object({
+    operation: z.enum(['product', 'category', 'gallery', 'custom_build']),
+    targetId: z.uuid(),
+    confirmation: z.literal('DELETE'),
+  }),
+  z.object({
+    operation: z.literal('bulk'),
+    entity: z.enum(['product', 'category', 'gallery', 'custom_build']),
+    targetIds: z.array(z.uuid()).min(1).max(25),
+    confirmation: z.literal('DELETE'),
+  }),
+  z.object({
+    operation: z.literal('role'),
+    targetId: z.uuid(),
+    newRole: z.enum(['admin', 'superadmin']),
+    confirmation: z.literal('CONFIRM'),
+  }),
+  z.object({
+    operation: z.literal('admin'),
+    targetId: z.uuid(),
+    confirmation: z.literal('REMOVE'),
+  }),
+])

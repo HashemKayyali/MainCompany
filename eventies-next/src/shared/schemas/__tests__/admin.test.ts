@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   adminCatalogRecordSchema,
   adminChatMessageSchema,
+  adminDestructiveRequestSchema,
   adminCatalogMutationSchema,
   adminMediaSchema,
   adminNotificationSchema,
@@ -114,5 +115,28 @@ describe('Phase 6 privileged payloads', () => {
     expect(adminMediaSchema.safeParse({ ...valid, mimeType: 'image/svg+xml' }).success).toBe(false)
     expect(adminMediaSchema.safeParse({ ...valid, size: 11 * 1024 * 1024 }).success).toBe(false)
     expect(adminMediaSchema.safeParse({ ...valid, publicId: 'other/stage' }).success).toBe(false)
+  })
+
+  it('caps destructive batches at 25 while allowing duplicate collapse in the RPC', () => {
+    const ids = Array.from(
+      { length: 25 },
+      (_, index) => `00000000-0000-4000-8000-${String(index).padStart(12, '0')}`
+    )
+    expect(
+      adminDestructiveRequestSchema.safeParse({
+        operation: 'bulk',
+        entity: 'product',
+        targetIds: [ids[0], ids[0]],
+        confirmation: 'DELETE',
+      }).success
+    ).toBe(true)
+    expect(
+      adminDestructiveRequestSchema.safeParse({
+        operation: 'bulk',
+        entity: 'product',
+        targetIds: [...ids, ids[0]],
+        confirmation: 'DELETE',
+      }).success
+    ).toBe(false)
   })
 })

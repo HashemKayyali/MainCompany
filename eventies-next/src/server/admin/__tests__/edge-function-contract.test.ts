@@ -8,10 +8,20 @@ const source = readFileSync(
 )
 
 describe('ADMIN-015/016 Edge Function hardening contract', () => {
-  it('stages AAL2 and recent-auth enforcement without changing the legacy default', () => {
-    expect(source).toContain("ADMIN_MFA_ENFORCEMENT') === '1'")
-    expect(source).toContain("aal !== 'aal2'")
+  it('keeps staged upload MFA while making delete assurance unconditional', () => {
+    expect(source).toMatch(/ADMIN_MFA_ENFORCEMENT['"]\) === ['"]1['"]/)
+    expect(source).toMatch(/aal !== ['"]aal2['"]/)
     expect(source).toContain('ageSeconds > 900')
+    expect(source).toContain('hasRecentAal2(auth.claims)')
+    expect(source).toMatch(/\.select\(['"]role,is_active['"]\)/)
+  })
+  it('bounds, validates, deduplicates, and audits Cloudinary deletion', () => {
+    expect(source).toContain('const MAX_DELETE_BATCH = 25')
+    expect(source).toContain('isAllowedDeleteFolder(publicId)')
+    expect(source).toContain('begin_admin_media_delete')
+    expect(source).toContain('complete_admin_media_delete')
+    expect(source).toContain('idempotencyKey')
+    expect(source.indexOf('begin_admin_media_delete')).toBeLessThan(source.indexOf('destroyImage('))
   })
   it('chooses the signed preset and fixed durable quotas server-side', () => {
     expect(source).toContain('CLOUDINARY_ADMIN_UPLOAD_PRESET')

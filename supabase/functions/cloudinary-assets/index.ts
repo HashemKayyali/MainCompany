@@ -2,7 +2,8 @@ import { createClient } from 'npm:@supabase/supabase-js@2.97.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
@@ -18,7 +19,7 @@ const ALLOWED_FOLDERS = new Set([
 ])
 
 const ROOT_FOLDER = 'eventies'
-const MAX_DELETE_BATCH = 100
+const MAX_DELETE_BATCH = 25
 
 type RequestBody =
   | { action: 'sign-upload'; folder?: unknown }
@@ -29,9 +30,10 @@ type RequestBody =
         publicId?: unknown
         resourceType?: unknown
       }>
+      idempotencyKey?: unknown
     }
 
-Deno.serve(async req => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -57,7 +59,15 @@ Deno.serve(async req => {
     }
 
     if (body.action === 'delete') {
-      return await handleDelete(body.assets, config.value)
+      if (Deno.env.get('ADMIN_DESTRUCTIVE_ENABLED') !== '1') {
+        return json({ error: 'Destructive rollout is disabled' }, 503)
+      }
+      return await handleDelete(
+        body.assets,
+        body.idempotencyKey,
+        config.value,
+        auth
+      )
     }
 
     return json({ error: 'Unsupported action' }, 400)
@@ -68,7 +78,13 @@ Deno.serve(async req => {
 })
 
 async function requireAdmin(req: Request): Promise<
-  | { ok: true; actorId: string; client: ReturnType<typeof createClient> }
+  | {
+      ok: true
+      actorId: string
+      role: 'admin' | 'superadmin'
+      claims: Record<string, unknown>
+      client: ReturnType<typeof createClient>
+    }
   | { ok: false; status: number; error: string }
 > {
   const authorization = req.headers.get('authorization') ?? ''
@@ -78,7 +94,11 @@ async function requireAdmin(req: Request): Promise<
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
   if (!supabaseUrl || !supabaseAnonKey) {
-    return { ok: false, status: 500, error: 'Supabase function environment is incomplete' }
+    return {
+      ok: false,
+      status: 500,
+      error: 'Supabase function environment is incomplete',
+    }
   }
 
   const client = createClient(supabaseUrl, supabaseAnonKey, {
@@ -91,33 +111,52 @@ async function requireAdmin(req: Request): Promise<
     return { ok: false, status: 401, error: 'Invalid or expired access token' }
   }
 
-  const { data: isAdmin, error: adminError } = await client.rpc('is_admin')
+  const { data: profile, error: adminError } = await client
+    .from('profiles')
+    .select('role,is_active')
+    .eq('id', userData.user.id)
+    .maybeSingle()
   if (adminError) {
     console.error('[cloudinary-assets] admin check failed', adminError)
     return { ok: false, status: 500, error: 'Could not verify admin access' }
   }
 
-  if (isAdmin !== true) {
+  const role = profile?.role
+  if (
+    (role !== 'admin' && role !== 'superadmin') ||
+    profile?.is_active === false
+  ) {
     return { ok: false, status: 403, error: 'Admin access required' }
   }
 
+  const claims = decodeJwtPayload(token)
   if (Deno.env.get('ADMIN_MFA_ENFORCEMENT') === '1') {
-    const claims = decodeJwtPayload(token)
     const aal = typeof claims?.aal === 'string' ? claims.aal : ''
-    const authTime = typeof claims?.auth_time === 'number' ? claims.auth_time : 0
+    const authTime =
+      typeof claims?.auth_time === 'number' ? claims.auth_time : 0
     const ageSeconds = Math.floor(Date.now() / 1000) - authTime
     if (aal !== 'aal2' || ageSeconds < 0 || ageSeconds > 900) {
-      return { ok: false, status: 403, error: 'AAL2 and recent authentication required' }
+      return {
+        ok: false,
+        status: 403,
+        error: 'AAL2 and recent authentication required',
+      }
     }
   }
 
-  return { ok: true, actorId: userData.user.id, client }
+  return {
+    ok: true,
+    actorId: userData.user.id,
+    role,
+    claims: claims ?? {},
+    client,
+  }
 }
 
 async function handleSignUpload(
   folderInput: unknown,
   config: CloudinaryConfig,
-  auth: { actorId: string; client: ReturnType<typeof createClient> },
+  auth: { actorId: string; client: ReturnType<typeof createClient> }
 ) {
   const folder = normalizeFolder(folderInput)
   if (!folder || !ALLOWED_FOLDERS.has(folder)) {
@@ -126,26 +165,32 @@ async function handleSignUpload(
 
   const timestamp = unixTimestamp()
   const signedFolder = `${ROOT_FOLDER}/${folder}`
-  const hardeningEnabled = Deno.env.get('ADMIN_UPLOAD_HARDENING_ENABLED') === '1'
-  const uploadPreset = Deno.env.get('CLOUDINARY_ADMIN_UPLOAD_PRESET')?.trim() || 'eventies_admin_signed'
+  const hardeningEnabled =
+    Deno.env.get('ADMIN_UPLOAD_HARDENING_ENABLED') === '1'
+  const uploadPreset =
+    Deno.env.get('CLOUDINARY_ADMIN_UPLOAD_PRESET')?.trim() ||
+    'eventies_admin_signed'
   if (hardeningEnabled) {
-    const { data: allowed, error } = await auth.client.rpc('consume_admin_upload_quota', {
-      p_actor_id: auth.actorId,
-      p_hour_limit: 30,
-      p_day_limit: 300,
-    })
+    const { data: allowed, error } = await auth.client.rpc(
+      'consume_admin_upload_quota',
+      {
+        p_actor_id: auth.actorId,
+        p_hour_limit: 30,
+        p_day_limit: 300,
+      }
+    )
     if (error || allowed !== true) {
-      console.warn('[app_event]', JSON.stringify({ event: 'upload.quota_denied', actor: auth.actorId }))
+      console.warn(
+        '[app_event]',
+        JSON.stringify({ event: 'upload.quota_denied', actor: auth.actorId })
+      )
       return json({ error: 'Upload signing quota exceeded' }, 429)
     }
   }
   const signedParams = hardeningEnabled
     ? { folder: signedFolder, timestamp, upload_preset: uploadPreset }
     : { folder: signedFolder, timestamp }
-  const signature = signCloudinaryParams(
-    signedParams,
-    config.apiSecret,
-  )
+  const signature = signCloudinaryParams(signedParams, config.apiSecret)
 
   return json({
     cloudName: config.cloudName,
@@ -162,7 +207,9 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
     const encoded = token.split('.')[1]
     if (!encoded) return null
     const normalized = encoded.replace(/-/g, '+').replace(/_/g, '/')
-    return JSON.parse(atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')))
+    return JSON.parse(
+      atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '='))
+    )
   } catch {
     return null
   }
@@ -170,12 +217,33 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
 
 async function handleDelete(
   assetsInput: unknown,
+  idempotencyInput: unknown,
   config: CloudinaryConfig,
+  auth: {
+    actorId: string
+    role: 'admin' | 'superadmin'
+    claims: Record<string, unknown>
+    client: ReturnType<typeof createClient>
+  }
 ) {
+  if (!hasRecentAal2(auth.claims)) {
+    return json({ error: 'AAL2 and recent authentication required' }, 403)
+  }
+  const idempotencyKey = stringValue(idempotencyInput)
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      idempotencyKey
+    )
+  ) {
+    return json({ error: 'Valid idempotency key required' }, 400)
+  }
   const assets = Array.isArray(assetsInput) ? assetsInput : []
   if (assets.length === 0) return json({ results: [] })
   if (assets.length > MAX_DELETE_BATCH) {
-    return json({ error: `Delete batch cannot exceed ${MAX_DELETE_BATCH} assets` }, 400)
+    return json(
+      { error: `Delete batch cannot exceed ${MAX_DELETE_BATCH} assets` },
+      400
+    )
   }
 
   const normalized: Array<{ publicId: string }> = []
@@ -186,40 +254,98 @@ async function handleDelete(
 
     const cloudName = stringValue((item as Record<string, unknown>).cloudName)
     const publicId = stringValue((item as Record<string, unknown>).publicId)
-    const resourceType = stringValue((item as Record<string, unknown>).resourceType)
+    const resourceType = stringValue(
+      (item as Record<string, unknown>).resourceType
+    )
 
     if (cloudName !== config.cloudName) {
-      return json({ error: 'Asset cloud name does not match this environment' }, 400)
+      return json(
+        { error: 'Asset cloud name does not match this environment' },
+        400
+      )
     }
     if (resourceType !== 'image') {
       return json({ error: 'Only image deletion is supported' }, 400)
     }
-    if (!isSafePublicId(publicId)) {
+    if (!isSafePublicId(publicId) || !isAllowedDeleteFolder(publicId)) {
       return json({ error: 'Invalid Cloudinary public ID' }, 400)
     }
 
     normalized.push({ publicId })
   }
 
-  const results = await mapWithConcurrency(normalized, 5, async asset => {
+  const publicIds = [...new Set(normalized.map((asset) => asset.publicId))]
+  const { data: begun, error: beginError } = await auth.client.rpc(
+    'begin_admin_media_delete',
+    {
+      p_idempotency_key: idempotencyKey,
+      p_public_ids: publicIds,
+    }
+  )
+  const operation = Array.isArray(begun) ? begun[0] : null
+  if (beginError || !operation) {
+    console.warn(
+      '[app_event]',
+      JSON.stringify({ event: 'upload.delete_denied', actor: auth.actorId })
+    )
+    return json({ error: 'Could not authorize media deletion' }, 403)
+  }
+  if (!operation.should_execute)
+    return json({ replayed: true, results: operation.prior_result })
+
+  const results = await mapWithConcurrency(publicIds, 5, async (publicId) => {
     try {
-      const result = await destroyImage(asset.publicId, config)
-      return { publicId: asset.publicId, ...result }
+      const result = await destroyImage(publicId, config)
+      return { publicId, ...result }
     } catch (error) {
       return {
-        publicId: asset.publicId,
+        publicId,
         result: 'error' as const,
         error: toErrorMessage(error),
       }
     }
   })
 
-  return json({ results })
+  const status = results.every(
+    (result) => result.result === 'ok' || result.result === 'not found'
+  )
+    ? 'succeeded'
+    : 'failed'
+  const { error: completeError } = await auth.client.rpc(
+    'complete_admin_media_delete',
+    {
+      p_operation_id: operation.operation_id,
+      p_status: status,
+      p_result: { results },
+    }
+  )
+  if (completeError) {
+    console.error(
+      '[app_event]',
+      JSON.stringify({
+        event: 'upload.delete_orphaned_audit',
+        operationId: operation.operation_id,
+      })
+    )
+    return json(
+      {
+        error: 'Deletion completed but audit persistence failed',
+        operationId: operation.operation_id,
+      },
+      500
+    )
+  }
+
+  return json({
+    operationId: operation.operation_id,
+    replayed: false,
+    results,
+  })
 }
 
 async function destroyImage(
   publicId: string,
-  config: CloudinaryConfig,
+  config: CloudinaryConfig
 ): Promise<{ result: 'ok' | 'not found' | 'error'; error?: string }> {
   const timestamp = unixTimestamp()
   const params = {
@@ -251,13 +377,18 @@ async function destroyImage(
   if (!response.ok || payload.error?.message) {
     return {
       result: 'error',
-      error: payload.error?.message || `Cloudinary destroy failed with HTTP ${response.status}`,
+      error:
+        payload.error?.message ||
+        `Cloudinary destroy failed with HTTP ${response.status}`,
     }
   }
 
   if (payload.result === 'ok') return { result: 'ok' }
   if (payload.result === 'not found') return { result: 'not found' }
-  return { result: 'error', error: `Unexpected Cloudinary result: ${String(payload.result)}` }
+  return {
+    result: 'error',
+    error: `Unexpected Cloudinary result: ${String(payload.result)}`,
+  }
 }
 
 interface CloudinaryConfig {
@@ -267,8 +398,7 @@ interface CloudinaryConfig {
 }
 
 function getCloudinaryConfig():
-  | { ok: true; value: CloudinaryConfig }
-  | { ok: false; error: string } {
+  { ok: true; value: CloudinaryConfig } | { ok: false; error: string } {
   const cloudName = Deno.env.get('CLOUDINARY_CLOUD_NAME')?.trim() ?? ''
   const apiKey = Deno.env.get('CLOUDINARY_API_KEY')?.trim() ?? ''
   const apiSecret = Deno.env.get('CLOUDINARY_API_SECRET')?.trim() ?? ''
@@ -282,10 +412,12 @@ function getCloudinaryConfig():
 
 function signCloudinaryParams(
   params: Record<string, string | number | boolean>,
-  apiSecret: string,
+  apiSecret: string
 ): string {
   const canonical = Object.entries(params)
-    .filter(([, value]) => value !== '' && value !== undefined && value !== null)
+    .filter(
+      ([, value]) => value !== '' && value !== undefined && value !== null
+    )
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, value]) => `${key}=${String(value)}`)
     .join('&')
@@ -321,7 +453,8 @@ function sha1(message: string): string {
 
   for (let offset = 0; offset < paddedLength; offset += 64) {
     for (let i = 0; i < 16; i += 1) w[i] = view.getUint32(offset + i * 4, false)
-    for (let i = 16; i < 80; i += 1) w[i] = rol(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1)
+    for (let i = 16; i < 80; i += 1)
+      w[i] = rol(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1)
 
     let a = h0
     let b = h1
@@ -360,7 +493,9 @@ function sha1(message: string): string {
     h4 = (h4 + e) >>> 0
   }
 
-  return [h0, h1, h2, h3, h4].map(value => value.toString(16).padStart(8, '0')).join('')
+  return [h0, h1, h2, h3, h4]
+    .map((value) => value.toString(16).padStart(8, '0'))
+    .join('')
 }
 
 function rol(value: number, bits: number) {
@@ -372,7 +507,25 @@ function normalizeFolder(value: unknown) {
 }
 
 function isSafePublicId(value: string) {
-  return value.length > 0 && value.length <= 500 && !value.includes('..') && !/[\u0000-\u001f]/.test(value)
+  return (
+    value.length > 0 &&
+    value.length <= 500 &&
+    !value.includes('..') &&
+    !/[\u0000-\u001f]/.test(value)
+  )
+}
+
+function isAllowedDeleteFolder(value: string) {
+  const [root, folder] = value.split('/')
+  return root === ROOT_FOLDER && Boolean(folder && ALLOWED_FOLDERS.has(folder))
+}
+
+function hasRecentAal2(claims: Record<string, unknown>) {
+  if (claims.aal !== 'aal2') return false
+  const authTime =
+    typeof claims.auth_time === 'number' ? claims.auth_time : Number.NaN
+  const age = Math.floor(Date.now() / 1000) - authTime
+  return Number.isFinite(authTime) && age >= 0 && age <= 900
 }
 
 function stringValue(value: unknown) {
@@ -386,7 +539,7 @@ function unixTimestamp() {
 async function mapWithConcurrency<T, R>(
   values: T[],
   concurrency: number,
-  mapper: (value: T) => Promise<R>,
+  mapper: (value: T) => Promise<R>
 ): Promise<R[]> {
   const results = new Array<R>(values.length)
   let cursor = 0
@@ -400,7 +553,9 @@ async function mapWithConcurrency<T, R>(
     }
   }
 
-  await Promise.all(Array.from({ length: Math.min(concurrency, values.length) }, () => worker()))
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, values.length) }, () => worker())
+  )
   return results
 }
 

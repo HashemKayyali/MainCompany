@@ -29,6 +29,15 @@ export const RPC = {
   removeAdmin: 'remove_admin',
   getAllUsers: 'get_all_users',
   adminUpdateUser: 'admin_update_user',
+  deleteAdminProduct: 'delete_admin_product',
+  deleteAdminCategory: 'delete_admin_category',
+  deleteAdminGalleryAlbum: 'delete_admin_gallery_album',
+  deleteAdminCustomBuild: 'delete_admin_custom_build',
+  bulkDeleteAdminEntities: 'bulk_delete_admin_entities',
+  beginAdminMediaDelete: 'begin_admin_media_delete',
+  completeAdminMediaDelete: 'complete_admin_media_delete',
+  sendCustomNotificationIdempotent: 'send_custom_notification_idempotent',
+  consumeAdminUploadQuota: 'consume_admin_upload_quota',
 } as const
 
 export type RpcName = (typeof RPC)[keyof typeof RPC]

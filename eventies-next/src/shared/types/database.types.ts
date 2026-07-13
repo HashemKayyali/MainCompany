@@ -21,6 +21,7 @@ export interface Database {
           role: string
           created_at: string
           avatar_url: string | null
+          is_active: boolean
         }
         Insert: {
           id: string
@@ -30,6 +31,7 @@ export interface Database {
           role?: string
           created_at?: string
           avatar_url?: string | null
+          is_active?: boolean
         }
         Update: {
           name?: string | null
@@ -37,6 +39,7 @@ export interface Database {
           phone?: string | null
           role?: string
           avatar_url?: string | null
+          is_active?: boolean
         }
         Relationships: [
           {
@@ -518,6 +521,10 @@ export interface Database {
           entity_name: string
           details: string
           created_at: string
+          actor_role: string | null
+          result: string | null
+          correlation_id: string | null
+          metadata: Json
         }
         Insert: {
           id?: string
@@ -530,6 +537,10 @@ export interface Database {
           entity_name: string
           details?: string
           created_at?: string
+          actor_role?: string | null
+          result?: string | null
+          correlation_id?: string | null
+          metadata?: Json
         }
         Update: {
           admin_id?: string | null
@@ -540,6 +551,10 @@ export interface Database {
           entity_id?: string
           entity_name?: string
           details?: string
+          actor_role?: string | null
+          result?: string | null
+          correlation_id?: string | null
+          metadata?: Json
         }
         Relationships: [
           {
@@ -549,6 +564,51 @@ export interface Database {
             referencedColumns: ['id']
           },
         ]
+      }
+
+      admin_media_operations: {
+        Row: {
+          id: string
+          actor_id: string
+          idempotency_key: string
+          operation: string
+          target_ids: string[]
+          status: string
+          result: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          actor_id: string
+          idempotency_key: string
+          operation: string
+          target_ids: string[]
+          status: string
+          result?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: { status?: string; result?: Json; updated_at?: string }
+        Relationships: []
+      }
+      admin_rpc_idempotency: {
+        Row: {
+          actor_id: string
+          idempotency_key: string
+          operation: string
+          result: Json | null
+          created_at: string
+        }
+        Insert: {
+          actor_id: string
+          idempotency_key: string
+          operation: string
+          result?: Json | null
+          created_at?: string
+        }
+        Update: { result?: Json | null }
+        Relationships: []
       }
 
       rental_requests: {
@@ -1106,6 +1166,51 @@ export interface Database {
       update_request_status: {
         Args: { request_type: string; request_id: string; new_status: string; note?: string | null }
         Returns: { ok: boolean; result_request_id: string; result_new_status: string }[]
+      }
+      delete_admin_product: {
+        Args: { target_id: string; confirmation: string }
+        Returns: { ok: boolean; deleted_id: string; deleted_slug: string }[]
+      }
+      delete_admin_category: {
+        Args: { target_id: string; confirmation: string }
+        Returns: { ok: boolean; deleted_id: string; deleted_slug: string }[]
+      }
+      delete_admin_gallery_album: {
+        Args: { target_id: string; confirmation: string }
+        Returns: { ok: boolean; deleted_id: string; deleted_slug: string }[]
+      }
+      delete_admin_custom_build: {
+        Args: { target_id: string; confirmation: string }
+        Returns: { ok: boolean; deleted_id: string; deleted_title: string }[]
+      }
+      bulk_delete_admin_entities: {
+        Args: { entity_type: string; target_ids: string[]; confirmation: string }
+        Returns: { ok: boolean; deleted_count: number; unique_count: number }[]
+      }
+      begin_admin_media_delete: {
+        Args: { p_idempotency_key: string; p_public_ids: string[] }
+        Returns: { operation_id: string; should_execute: boolean; prior_result: Json }[]
+      }
+      complete_admin_media_delete: {
+        Args: { p_operation_id: string; p_status: string; p_result: Json }
+        Returns: boolean
+      }
+      send_custom_notification_idempotent: {
+        Args: {
+          p_title: string
+          p_message: string
+          p_clients: boolean
+          p_admins: boolean
+          p_superadmins: boolean
+          p_target_url: string | null
+          p_type: string
+          p_idempotency_key: string
+        }
+        Returns: Json
+      }
+      consume_admin_upload_quota: {
+        Args: { p_actor_id: string; p_hour_limit: number; p_day_limit: number }
+        Returns: boolean
       }
     }
     Enums: Record<string, never>

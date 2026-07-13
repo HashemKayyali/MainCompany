@@ -73,3 +73,12 @@ export function evaluatePrivilegedAssurance(input: {
   if (!isRecentAuthentication(input.authTimeSeconds, input.nowMs)) return 'recent-auth-required'
   return 'allow'
 }
+
+export function parseAuthTimeClaim(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value) && value >= 0) return value
+  if (typeof value === 'string' && /^\d+(?:\.\d+)?$/.test(value)) {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : null
+  }
+  return null
+}

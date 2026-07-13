@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import type { AdminGridRow, AdminSection } from '@/shared/contracts/admin'
 import { DestructiveConfirm } from './DestructiveConfirm'
+import { requestAdminDelete, type DestructiveEntity } from './destructive-client'
 
 export function AdminInterior({
   section,
@@ -30,6 +31,17 @@ export function AdminInterior({
         },
       ]
     : rows
+  const destructiveEntity: DestructiveEntity | null =
+    section === 'products'
+      ? 'product'
+      : section === 'categories'
+        ? 'category'
+        : section === 'gallery'
+          ? 'gallery'
+          : section === 'custom-builds'
+            ? 'custom_build'
+            : null
+  const destructiveEnabled = process.env.NEXT_PUBLIC_ADMIN_DESTRUCTIVE_ENABLED === '1'
 
   return (
     <section aria-labelledby="admin-page-title">
@@ -124,6 +136,15 @@ export function AdminInterior({
                         label={t('delete')}
                         confirmation="DELETE"
                         onConfirm={async () => {}}
+                      />
+                    ) : destructiveEntity && destructiveEnabled ? (
+                      <DestructiveConfirm
+                        label={t('delete')}
+                        confirmation="DELETE"
+                        onConfirm={async () => {
+                          await requestAdminDelete(destructiveEntity, row.id)
+                          window.location.reload()
+                        }}
                       />
                     ) : section === 'requests' || section === 'quotes' ? (
                       <Link
