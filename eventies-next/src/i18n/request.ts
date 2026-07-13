@@ -8,7 +8,17 @@ import { routing } from './routing'
  * auth/account (P3/4) → chat/notifications (P5) → admin (P6).
  * I18N-017 keeps ar out of the en bundle by loading per-locale files here.
  */
-const DOMAINS = ['common', 'nav', 'footer', 'catalog', 'auth', 'forms', 'account'] as const
+const DOMAINS = [
+  'common',
+  'nav',
+  'footer',
+  'catalog',
+  'auth',
+  'forms',
+  'account',
+  'chat',
+  'notifications',
+] as const
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale

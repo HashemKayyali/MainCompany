@@ -1,0 +1,11 @@
+{
+  "title": "Eventies support",
+  "open": "Open support chat",
+  "close": "Close support chat",
+  "signInPrompt": "Choose a quick question or sign in to continue your conversation.",
+  "empty": "How can we help with your event?",
+  "message": "Message",
+  "placeholder": "Write a message…",
+  "send": "Send message",
+  "sendError": "The message could not be sent. Your draft is still here; please try again."
+}

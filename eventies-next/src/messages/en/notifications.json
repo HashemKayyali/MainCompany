@@ -1,0 +1,9 @@
+{
+  "title": "Notifications",
+  "unread": "{count, plural, =0 {No unread notifications} one {# unread notification} other {# unread notifications}}",
+  "markAll": "Mark all as read",
+  "unreadOnly": "Show unread only",
+  "loading": "Loading notifications…",
+  "empty": "No notifications yet.",
+  "emptyUnread": "You are all caught up."
+}
