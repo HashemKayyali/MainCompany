@@ -8,6 +8,8 @@ Date: 2026-07-14 · Branch `eventies-next-reconstruction`
 
 Phase 6 cannot honestly be marked code-side complete: the Control Pack mandates the acyclic chain SEC-018 owner approval → DBMIG-010 → SEC-016 → ADMIN-003. The SEC-018 design is authored but not approved, so no enforcement migration or authoritative privileged-operation implementation was created. Group E is not cutover-ready.
 
+The continuation requested on 2026-07-13 completed every additional independent contract listed below, but it did not waive that explicit human security-design gate.
+
 ## Completed independent code-side work
 
 - Fresh-user server admin gate, authoritative profile-role lookup, staged AAL2 policy, superadmin route policy, and 15-minute recent-auth predicate.
@@ -19,6 +21,13 @@ Phase 6 cannot honestly be marked code-side complete: the Control Pack mandates 
 - Bilingual bounded catalog schemas, destructive-operation schema, upload authorization schema, signed-preset policy, and audit-event catalog with PII scrub tests.
 - Cloudinary Edge Function staged flags for fresh AAL2/recent-auth, server-selected signed preset, and durable 30/hour + 300/day quota RPC. Legacy request/response behavior remains default while hardening flags are off.
 - SEC-018 row-by-row trusted-boundary design and BYPASS persona plan.
+- Deny-by-default admin/superadmin permission matrix shared by server reads and privileged mutation contracts.
+- Authorized, no-store server read models for dashboard, catalog, rental requests, purchase quotes, customers, providers, gallery, custom builds, chat inbox, notifications, administrators, users, audit/system events, contact submissions, and support inquiries.
+- Search, status, pagination, request/quote detail, loading, error, retry, empty, EN/AR, RTL, and bidi-isolated admin grid states.
+- Idempotent request/quote/chat/notification contracts; safe internal notification targets; normalized slugs; strict MIME, file-size, filename, public-ID, and folder validation.
+- Complete audit record shape: actor ID/role, operation, target type/ID, result, scrubbed metadata, correlation ID, and timestamp. Cache revalidation now records privileged success/failure audit evidence.
+- Upload partial-failure workflow: dedupe before upload, compensating Cloudinary destroy after record failure, and explicit orphan audit state if cleanup also fails.
+- MFA enrollment cancellation removes the unverified factor and exposes localized cancel/retry/restart states; the shared privileged assurance contract distinguishes AAL2 from stale authentication.
 
 ## Mutation → cache-tag coverage
 
@@ -60,15 +69,16 @@ Required owner/security decisions: approve the shared `auth.jwt()` AAL/auth_time
 - Live catalog/request/quote/customer/provider/chat/notification/admin/user/log/contact data and mutations.
 - Live audit persistence, cache invalidation after mutations, signed upload preset, quota denial, upload partial-failure/idempotency, and media deletion.
 - Full behavior-parity acceptance for individual admin interiors against staging data.
+- SEC-018 remains `AWAITING_OWNER_SECURITY_APPROVAL`; the continuation request did not explicitly approve its shared claim predicate, 15-minute window, bulk cap, role matrix, or atomic privilege-revocation timing.
 
 ## Final non-production evidence
 
 - Clean `npm ci --no-audit`: PASS — 707 packages; dependency tree valid.
 - Format (rerun after correction), strict typecheck, ESLint, architecture/service-role/cache gates: PASS.
 - I18N coverage: PASS — 10 EN/AR domains synchronized.
-- Circular dependency gate: PASS — 216 files, zero cycles.
-- Full unit/static-contract suite: PASS — 27 files; 137 passed, 32 staging-gated skips, 2 pre-existing TODO.
-- Focused MFA/authorization/audit/revalidation/upload suite: PASS — 19 tests.
+- Circular dependency gate: PASS — 225 files, zero cycles.
+- Full unit/static-contract suite: PASS — 30 files; 152 passed, 32 staging-gated skips, 2 pre-existing TODO.
+- Focused MFA/authorization/audit/revalidation/upload suite: PASS — 32 tests across 8 files.
 - Production build: PASS; admin routes are dynamic and public cache/404 topology remains intact.
 - Full local Playwright matrix: PASS — 84/84 across EN/AR desktop/mobile, including all prior Phase 0–5 tests and 16 Phase 6 cases.
 
@@ -76,11 +86,15 @@ Required owner/security decisions: approve the shared `auth.jwt()` AAL/auth_time
 
 - CLI identity: `hashemkayyali99-1043`.
 - Isolated project: `eventies-next-preview` (`prj_TgwOvGi0IIKhiI9fBIC0keVlKcl0`).
-- Preview deployment: `dpl_AvwvZtHQitGFaNqsnN5YrEHTsD6P` (`READY`, `target: null`; no `--prod`).
-- URL: `https://eventies-next-preview-bbuatrnrp-hashemkayyalis-projects.vercel.app`.
+- Latest Preview deployment: `dpl_6SazkVQ51fpnBBjSCDWbuGxk8p2S` (`READY`, `target: null`; no `--prod`).
+- URL: `https://eventies-next-preview-nu95h7wnw-hashemkayyalis-projects.vercel.app`.
 - Phase 6 Preview Playwright: PASS — 16/16 across EN/AR desktop/mobile.
 - Evidence was read-only/non-mutating: signed-out authorization boundaries, localized fixture states, dialog accessibility, and MFA surface before enrollment.
 
 ## Scope guard
 
 No database migration was authored from the unapproved design or applied anywhere. Production was not mutated. Phase 7 was not started.
+
+## Continuation commit
+
+- `38e48066` — `feat(ADMIN-005 ADMIN-009 ADMIN-010 ADMIN-011 ADMIN-013 ADMIN-017 ADMIN-020 ADMIN-029): complete admin server contracts`

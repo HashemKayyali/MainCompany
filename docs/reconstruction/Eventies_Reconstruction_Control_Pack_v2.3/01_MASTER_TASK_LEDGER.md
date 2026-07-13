@@ -286,19 +286,19 @@ Phase status (owner decision 2026-07-13): **CODE_SIDE_COMPLETE · LIVE_STAGING_G
 | ADMIN-002 | P6 | admin | MFA enrollment flow (TOTP) + staged rollout flag | NEW | H | S | ADMIN-001 | superadmin first; runbook for reset | E | BLOCKED_BY_OWNER_STAGING:flow/flag/reset runbook ready; live factors deferred |
 | ADMIN-003 | P6 | admin | Admin UX integration of destructive-op enforcement (typed confirm, recent-auth re-prompt flows — UX ONLY, never the enforcement) + final end-to-end enforcement verification | NEW | H | S | ADMIN-001, SEC-016 | ADM-RA green + BYPASS suite green end-to-end | ADM-RA, BYPASS | BLOCKED:SEC-018 approval→DBMIG-010→SEC-016 required; typed-confirm fixture green |
 | ADMIN-004 | P6 | admin | SuperAdmin gate for sensitive children (parity with SuperAdminGuard) | REARCHITECT | M | S | ADMIN-001 | route matrix parity | E | BLOCKED_BY_OWNER_STAGING:server route matrix implemented; live admin/superadmin personas deferred |
-| ADMIN-005 | P6 | admin | Interior port: Dashboard page (ADR-04: client page) | REFACTOR | M | — | ADMIN-001, FOUND-017 | behavior parity | E | TODO |
+| ADMIN-005 | P6 | admin | Interior port: Dashboard page (ADR-04: client page) | REFACTOR | M | — | ADMIN-001, FOUND-017 | behavior parity | E | BLOCKED_BY_OWNER_STAGING:authorized server count model+loading/error/empty UI ready; live parity evidence deferred |
 | ADMIN-006 | P6 | admin | Product/category forms + AR fields (I18N-020) + uploads via Edge Fn | REFACTOR | H | D | ADMIN-020, ADMIN-021, DBMIG-004 | CRUD green; AR saved | E | TODO |
 | ADMIN-007 | P6 | admin | Revalidation wiring: every catalog mutation → /api/revalidate tags | NEW | H | D | FOUND-021, ADMIN-006 | ADM-INV per entity | ADM-INV | DONE:100% mutation map+canonical client contract+unit green |
 | ADMIN-008 | P6 | admin | Revalidate-failure UX (warning + retry + event) | NEW | M | D | ADMIN-007 | simulated failure path | I | DONE:retry result contract+simulated failure test green |
-| ADMIN-009 | P6 | admin | Interior port: Parts page | REFACTOR | M | — | ADMIN-005 | parity | E | TODO |
-| ADMIN-010 | P6 | admin | Interior port: Requests list page | REFACTOR | M | D | ADMIN-005 | parity | E | TODO |
-| ADMIN-011 | P6 | admin | Interior port: Chats inbox page (manager-based sub) | REFACTOR | M | D | CHAT-001 | inbox realtime green | E | TODO |
+| ADMIN-009 | P6 | admin | Interior port: Parts page | REFACTOR | M | — | ADMIN-005 | parity | E | BLOCKED_BY_OWNER_STAGING:authorized searchable server grid ready; live parity deferred |
+| ADMIN-010 | P6 | admin | Interior port: Requests list page | REFACTOR | M | D | ADMIN-005 | parity | E | BLOCKED_BY_OWNER_STAGING:authorized list/filter/detail read model ready; live data and mutation parity deferred |
+| ADMIN-011 | P6 | admin | Interior port: Chats inbox page (manager-based sub) | REFACTOR | M | D | CHAT-001 | inbox realtime green | E | BLOCKED_BY_OWNER_STAGING:authorized inbox read contract ready; realtime admin persona evidence deferred |
 | ADMIN-012 | P6 | admin | Interior port: Admins page (role ops via trusted boundary) | REFACTOR | M | S | ADMIN-003 | BYPASS green for role ops | ADM-RA, BYPASS | TODO |
 | ADMIN-013 | P6 | admin | Audit events for sensitive ops appended to logs pattern | HARDEN | M | S | ADMIN-003 | events recorded | I | BLOCKED_BY_OWNER_STAGING:event catalog/scrubbing ready; live app_events evidence deferred |
 | ADMIN-014 | P6 | admin | Revoked-admin mid-session E2E (layout AND RPC deny) | NEW | H | S | ADMIN-001 | green | ADM-GATE | TODO |
 | ADMIN-015 | P6 | admin | Edge Fn hardening: signed upload PRESET with allowed_formats + max_file_size (verified Cloudinary mechanism per 10 §Upload; signer authorizes preset use) | HARDEN | M | S | — | signature includes constraints; upload of banned type fails | I | BLOCKED_BY_OWNER_STAGING:staged Edge code+preset contract ready; UPL-NEG/preset evidence deferred |
 | ADMIN-016 | P6 | admin | Edge Fn quota (SEC-013, provisional 30/h) | HARDEN | M | S | ADMIN-015 | 31st sign denied + event | I | BLOCKED:durable quota caller staged; RPC belongs to unapproved DBMIG-010 |
-| ADMIN-017 | P6 | admin | UPL-PF: partial upload failure → no orphan row; upload-record idempotency key prevents duplicate rows (Master Plan §11.7) | NEW | M | D | ADMIN-006 | green; dup-record test | UPL-PF | TODO |
+| ADMIN-017 | P6 | admin | UPL-PF: partial upload failure → no orphan row; upload-record idempotency key prevents duplicate rows (Master Plan §11.7) | NEW | M | D | ADMIN-006 | green; dup-record test | UPL-PF | DONE:dedupe-before-upload+compensating destroy+orphan audit contract unit green; live Cloudinary/DB evidence deferred |
 | ADMIN-018 | P6 | admin | Admin dictionaries (I18N-008) applied | NEW | L | — | I18N-008 | coverage green | I18N-COV | DONE:10-domain EN/AR coverage green |
 | ADMIN-019 | P6 | admin | Group E cutover readiness report | NEW | H | S | ADMIN-* | QG-P6 pass | — | BLOCKED:QG-P6 not passed; SEC-018 approval and staging evidence absent |
 
@@ -430,16 +430,16 @@ Phase status (owner decision 2026-07-13): **CODE_SIDE_COMPLETE · LIVE_STAGING_G
 |---|---|---|---|---|---|---|---|---|---|---|
 | CAT-025 | P2 | catalog | Home: stats/testimonials/CTA sections (RSC) | REARCHITECT | M | E,P | DATA-001 | parity + budgets | SEO-PAR | DONE:HowItWorks/EventTypes/CTA marketing sections |
 | CAT-026 | P2 | catalog | Home: events/locations sections (islands where interactive) | REARCHITECT | M | P | DATA-001 | parity + budgets | PERF | DONE:home sections (RSC) |
-| ADMIN-020 | P6 | admin | Interior port: Products page | REFACTOR | M | — | ADMIN-001, FOUND-017 | behavior parity | E | TODO |
-| ADMIN-021 | P6 | admin | Interior port: Categories page | REFACTOR | M | — | ADMIN-001, FOUND-017 | parity | E | TODO |
-| ADMIN-022 | P6 | admin | Interior port: Customers page | REFACTOR | M | — | ADMIN-005 | parity | E | TODO |
-| ADMIN-023 | P6 | admin | Interior port: CustomBuilds page | REFACTOR | M | — | ADMIN-005 | parity | E | TODO |
-| ADMIN-024 | P6 | admin | Interior port: Gallery page | REFACTOR | M | — | ADMIN-005 | parity | E | TODO |
-| ADMIN-025 | P6 | admin | Interior port: RequestDetails page (approval advisory-lock path untouched) | REFACTOR | H | D | ADMIN-010 | approval E2E; lock preserved | E | TODO |
+| ADMIN-020 | P6 | admin | Interior port: Products page | REFACTOR | M | — | ADMIN-001, FOUND-017 | behavior parity | E | BLOCKED_BY_OWNER_STAGING:authorized server grid+validated mutation/media contracts ready; full CRUD parity deferred |
+| ADMIN-021 | P6 | admin | Interior port: Categories page | REFACTOR | M | — | ADMIN-001, FOUND-017 | parity | E | BLOCKED_BY_OWNER_STAGING:authorized server grid+validated mutation/media contracts ready; full CRUD parity deferred |
+| ADMIN-022 | P6 | admin | Interior port: Customers page | REFACTOR | M | — | ADMIN-005 | parity | E | BLOCKED_BY_OWNER_STAGING:authorized server grid ready; live CRUD parity deferred |
+| ADMIN-023 | P6 | admin | Interior port: CustomBuilds page | REFACTOR | M | — | ADMIN-005 | parity | E | BLOCKED_BY_OWNER_STAGING:authorized server grid ready; live CRUD parity deferred |
+| ADMIN-024 | P6 | admin | Interior port: Gallery page | REFACTOR | M | — | ADMIN-005 | parity | E | BLOCKED_BY_OWNER_STAGING:authorized server grid+media validation ready; live CRUD parity deferred |
+| ADMIN-025 | P6 | admin | Interior port: RequestDetails page (approval advisory-lock path untouched) | REFACTOR | H | D | ADMIN-010 | approval E2E; lock preserved | E | BLOCKED_BY_OWNER_STAGING:authorized detail read+status/idempotency contract ready; approval RPC live evidence deferred |
 | ADMIN-026 | P6 | admin | Interior port: Notifications send page (broadcast preview preserved) | REFACTOR | M | D | ADMIN-011 | broadcast E2E | E | TODO |
 | ADMIN-027 | P6 | admin | Interior port: Users page | REFACTOR | M | S | ADMIN-003 | parity | E | TODO |
-| ADMIN-028 | P6 | admin | Interior port: Logs page | REFACTOR | L | — | ADMIN-005 | parity | E | TODO |
-| ADMIN-029 | P6 | admin | Interior port: ContactSubmissions page | REFACTOR | L | — | ADMIN-005 | parity | E | TODO |
+| ADMIN-028 | P6 | admin | Interior port: Logs page | REFACTOR | L | — | ADMIN-005 | parity | E | BLOCKED_BY_OWNER_STAGING:superadmin-only audit read model+complete redacted event contract ready; live persistence deferred |
+| ADMIN-029 | P6 | admin | Interior port: ContactSubmissions page | REFACTOR | L | — | ADMIN-005 | parity | E | BLOCKED_BY_OWNER_STAGING:contact/support split+authorized searchable server grid ready; live parity deferred |
 | SEC-014 | P1 | security | ADR-18 closure: rate-limit state store evaluation (Supabase RPC counters vs KV/Redis vs WAF combo) with latency/cost/atomicity/privacy analysis + trusted client-IP source on Vercel + HMAC identifier keys + retention | NEW | H | S | FOUND-033 | ADR-18 CLOSED with evidence | — | DONE |
 | SEC-015 | P3 | security | Implement chosen rate-limit store (atomic increments, expiry, cleanup) behind FOUND-033 interface | NEW | H | S | SEC-014 | concurrency test; limits survive multi-instance | I | BLOCKED:migration+adapter authored; staging multi-instance verification pending |
 | SEC-016 | P6 | security | Destructive-Op trusted-boundary APPLICATION implementation per SEC-018 design (handler wraps, RPC call-sites, EXECUTE-revocation consumers) — per operation | HARDEN | H | S,D | SEC-018, DBMIG-010 | matrix row-by-row enforced | BYPASS | BLOCKED:human approval and DBMIG-010 precede implementation by mandated chain |
