@@ -53,7 +53,7 @@ Deno.serve(async req => {
     }
 
     if (body.action === 'sign-upload') {
-      return handleSignUpload(body.folder, config.value)
+      return await handleSignUpload(body.folder, config.value, auth)
     }
 
     if (body.action === 'delete') {
@@ -68,7 +68,7 @@ Deno.serve(async req => {
 })
 
 async function requireAdmin(req: Request): Promise<
-  | { ok: true }
+  | { ok: true; actorId: string; client: ReturnType<typeof createClient> }
   | { ok: false; status: number; error: string }
 > {
   const authorization = req.headers.get('authorization') ?? ''
@@ -101,10 +101,24 @@ async function requireAdmin(req: Request): Promise<
     return { ok: false, status: 403, error: 'Admin access required' }
   }
 
-  return { ok: true }
+  if (Deno.env.get('ADMIN_MFA_ENFORCEMENT') === '1') {
+    const claims = decodeJwtPayload(token)
+    const aal = typeof claims?.aal === 'string' ? claims.aal : ''
+    const authTime = typeof claims?.auth_time === 'number' ? claims.auth_time : 0
+    const ageSeconds = Math.floor(Date.now() / 1000) - authTime
+    if (aal !== 'aal2' || ageSeconds < 0 || ageSeconds > 900) {
+      return { ok: false, status: 403, error: 'AAL2 and recent authentication required' }
+    }
+  }
+
+  return { ok: true, actorId: userData.user.id, client }
 }
 
-function handleSignUpload(folderInput: unknown, config: CloudinaryConfig) {
+async function handleSignUpload(
+  folderInput: unknown,
+  config: CloudinaryConfig,
+  auth: { actorId: string; client: ReturnType<typeof createClient> },
+) {
   const folder = normalizeFolder(folderInput)
   if (!folder || !ALLOWED_FOLDERS.has(folder)) {
     return json({ error: 'Unsupported upload folder' }, 400)
@@ -112,8 +126,24 @@ function handleSignUpload(folderInput: unknown, config: CloudinaryConfig) {
 
   const timestamp = unixTimestamp()
   const signedFolder = `${ROOT_FOLDER}/${folder}`
+  const hardeningEnabled = Deno.env.get('ADMIN_UPLOAD_HARDENING_ENABLED') === '1'
+  const uploadPreset = Deno.env.get('CLOUDINARY_ADMIN_UPLOAD_PRESET')?.trim() || 'eventies_admin_signed'
+  if (hardeningEnabled) {
+    const { data: allowed, error } = await auth.client.rpc('consume_admin_upload_quota', {
+      p_actor_id: auth.actorId,
+      p_hour_limit: 30,
+      p_day_limit: 300,
+    })
+    if (error || allowed !== true) {
+      console.warn('[app_event]', JSON.stringify({ event: 'upload.quota_denied', actor: auth.actorId }))
+      return json({ error: 'Upload signing quota exceeded' }, 429)
+    }
+  }
+  const signedParams = hardeningEnabled
+    ? { folder: signedFolder, timestamp, upload_preset: uploadPreset }
+    : { folder: signedFolder, timestamp }
   const signature = signCloudinaryParams(
-    { folder: signedFolder, timestamp },
+    signedParams,
     config.apiSecret,
   )
 
@@ -123,7 +153,19 @@ function handleSignUpload(folderInput: unknown, config: CloudinaryConfig) {
     timestamp,
     signature,
     folder: signedFolder,
+    ...(hardeningEnabled ? { uploadPreset } : {}),
   })
+}
+
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const encoded = token.split('.')[1]
+    if (!encoded) return null
+    const normalized = encoded.replace(/-/g, '+').replace(/_/g, '/')
+    return JSON.parse(atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')))
+  } catch {
+    return null
+  }
 }
 
 async function handleDelete(
