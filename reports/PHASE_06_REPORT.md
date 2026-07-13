@@ -61,14 +61,25 @@ Required owner/security decisions: approve the shared `auth.jwt()` AAL/auth_time
 - Live audit persistence, cache invalidation after mutations, signed upload preset, quota denial, upload partial-failure/idempotency, and media deletion.
 - Full behavior-parity acceptance for individual admin interiors against staging data.
 
-## Current non-production evidence
+## Final non-production evidence
 
-- Focused MFA/authorization/audit/revalidation/upload tests: 19 passed.
-- Typecheck, ESLint, architecture/service-role gates: PASS.
+- Clean `npm ci --no-audit`: PASS — 707 packages; dependency tree valid.
+- Format (rerun after correction), strict typecheck, ESLint, architecture/service-role/cache gates: PASS.
 - I18N coverage: PASS — 10 EN/AR domains synchronized.
 - Circular dependency gate: PASS — 216 files, zero cycles.
+- Full unit/static-contract suite: PASS — 27 files; 137 passed, 32 staging-gated skips, 2 pre-existing TODO.
+- Focused MFA/authorization/audit/revalidation/upload suite: PASS — 19 tests.
 - Production build: PASS; admin routes are dynamic and public cache/404 topology remains intact.
-- Phase 6 local Playwright: PASS — 16/16 across EN/AR desktop/mobile after one selector-only test correction.
+- Full local Playwright matrix: PASS — 84/84 across EN/AR desktop/mobile, including all prior Phase 0–5 tests and 16 Phase 6 cases.
+
+## Preview-safe evidence
+
+- CLI identity: `hashemkayyali99-1043`.
+- Isolated project: `eventies-next-preview` (`prj_TgwOvGi0IIKhiI9fBIC0keVlKcl0`).
+- Preview deployment: `dpl_AvwvZtHQitGFaNqsnN5YrEHTsD6P` (`READY`, `target: null`; no `--prod`).
+- URL: `https://eventies-next-preview-bbuatrnrp-hashemkayyalis-projects.vercel.app`.
+- Phase 6 Preview Playwright: PASS — 16/16 across EN/AR desktop/mobile.
+- Evidence was read-only/non-mutating: signed-out authorization boundaries, localized fixture states, dialog accessibility, and MFA surface before enrollment.
 
 ## Scope guard
 
