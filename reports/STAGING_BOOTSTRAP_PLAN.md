@@ -384,3 +384,13 @@ No secret value belongs in Git or command output.
 - Users or fixtures created: **No**.
 - Migration application begun: **No**.
 - Phase 7 begun: **No**.
+
+## Approved capture attempt update — 2026-07-13
+
+The owner-approved read-only capture was attempted after all repository, staging-link, credential-file, and ignore checks passed. The schema-only dry-run passed and contained no data-export or mutation flags.
+
+The production direct endpoint is IPv6-only from this host and the host has no usable IPv6 route. A region-derived IPv4 pooler hostname rejected the production tenant and was not accepted as an authoritative fallback. No authenticated production database session was established, no catalog metadata was obtained, and no baseline was guessed.
+
+The temporary credential file was deleted after the attempt. Production and staging were not modified, no production rows were copied, no SQL was applied, and Phase 7 was not started.
+
+Current bootstrap status remains **BLOCKED** pending the official production session-pooler database URL or a working IPv6 route. See `reports/PRODUCTION_SCHEMA_CAPTURE_REPORT.md` for the exact evidence and continuation requirement.
