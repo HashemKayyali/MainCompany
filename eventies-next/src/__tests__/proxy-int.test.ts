@@ -90,6 +90,57 @@ describe('PROXY-003: request-cookie propagation to downstream RSC', () => {
   })
 })
 
+describe('AUTH-007: refresh preserves remember-me lifetime', () => {
+  it('keeps rotated cookies session-scoped when remember-me is disabled', async () => {
+    mockState.refreshCookies = [
+      {
+        name: 'sb-access-token',
+        value: 'rotated-token',
+        options: { maxAge: 34_560_000, expires: new Date('2030-01-01T00:00:00Z') },
+      },
+    ]
+    const response = await proxy(
+      makeRequest('/products', { 'eventies-auth-persistence': 'session' })
+    )
+
+    expect(response.cookies.get('sb-access-token')?.maxAge).toBeUndefined()
+    expect(response.cookies.get('sb-access-token')?.expires).toBeUndefined()
+    expect(response.cookies.get('sb-access-token')?.secure).toBe(true)
+  })
+
+  it('retains the persistent lifetime when remember-me is enabled', async () => {
+    mockState.refreshCookies = [
+      {
+        name: 'sb-access-token',
+        value: 'rotated-token',
+        options: { maxAge: 34_560_000 },
+      },
+    ]
+    const response = await proxy(
+      makeRequest('/products', { 'eventies-auth-persistence': 'persistent' })
+    )
+
+    expect(response.cookies.get('sb-access-token')?.maxAge).toBe(34_560_000)
+    expect(response.cookies.get('sb-access-token')?.secure).toBe(true)
+  })
+
+  it('preserves deletion cookies when a session-scoped refresh clears stale chunks', async () => {
+    mockState.refreshCookies = [
+      {
+        name: 'sb-access-token.1',
+        value: '',
+        options: { maxAge: 0, expires: new Date(0) },
+      },
+    ]
+    const response = await proxy(
+      makeRequest('/products', { 'eventies-auth-persistence': 'session' })
+    )
+
+    expect(response.cookies.get('sb-access-token.1')?.maxAge).toBe(0)
+    expect(response.cookies.get('sb-access-token.1')?.expires).toEqual(new Date(0))
+  })
+})
+
 describe('PROXY-004: matcher exclusions per path class', () => {
   // Equivalent JS regex for the Next matcher '/((?!api|auth/callback|sitemap\.xml|robots\.txt|_next|_vercel|.*\..*).*)'
   const matcherRegex = /^\/(?!api|auth\/callback|sitemap\.xml|robots\.txt|_next|_vercel|.*\..*).*$/

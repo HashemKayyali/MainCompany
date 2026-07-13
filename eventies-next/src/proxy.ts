@@ -2,6 +2,11 @@ import createIntlMiddleware from 'next-intl/middleware'
 import { createServerClient } from '@supabase/ssr'
 import type { NextRequest, NextResponse } from 'next/server'
 import { routing } from '@/i18n/routing'
+import {
+  applyAuthCookiePolicy,
+  AUTH_PERSISTENCE_COOKIE,
+  authPersistenceFromCookie,
+} from '@/shared/auth-cookie-policy'
 
 /**
  * PROXY-001 — composition design (05 §Proxy Composition, binding order):
@@ -35,6 +40,8 @@ const handleI18nRouting = createIntlMiddleware(routing)
 
 export default async function proxy(request: NextRequest): Promise<NextResponse> {
   let response = handleI18nRouting(request)
+  const persistence = authPersistenceFromCookie(request.cookies.get(AUTH_PERSISTENCE_COOKIE)?.value)
+  const secure = request.nextUrl.protocol === 'https:'
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -58,7 +65,7 @@ export default async function proxy(request: NextRequest): Promise<NextResponse>
           response = handleI18nRouting(request)
           // (4) …and onto the outgoing response, whatever shape it has.
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
+            response.cookies.set(name, value, applyAuthCookiePolicy(options, persistence, secure))
           )
         },
       },

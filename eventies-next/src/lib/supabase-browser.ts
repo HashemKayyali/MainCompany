@@ -1,6 +1,14 @@
-import { createBrowserClient } from '@supabase/ssr'
+import { createBrowserClient, type CookieMethodsBrowser } from '@supabase/ssr'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { parse, serialize, type SerializeOptions } from 'cookie'
 import type { Database } from '@/shared/types/database.types'
+import {
+  applyAuthCookiePolicy,
+  AUTH_PERSISTENCE_COOKIE,
+  authPersistenceFromCookie,
+  persistenceMarkerOptions,
+  type AuthPersistence,
+} from '@/shared/auth-cookie-policy'
 
 /**
  * FOUND-008 — browser client (REARCHITECT of src/lib/supabase.ts):
@@ -11,7 +19,49 @@ import type { Database } from '@/shared/types/database.types'
  */
 let client: SupabaseClient<Database> | undefined
 
-export function getSupabaseBrowserClient(): SupabaseClient<Database> {
+function readPersistenceMarker(): string | undefined {
+  if (typeof document === 'undefined') return undefined
+  return parse(document.cookie)[AUTH_PERSISTENCE_COOKIE]
+}
+
+function writePersistenceMarker(persistence: AuthPersistence): void {
+  if (typeof document === 'undefined') return
+  document.cookie = serialize(
+    AUTH_PERSISTENCE_COOKIE,
+    persistence,
+    persistenceMarkerOptions(persistence, window.location.protocol === 'https:') as SerializeOptions
+  )
+}
+
+function browserCookieMethods(): CookieMethodsBrowser {
+  return {
+    getAll() {
+      if (typeof document === 'undefined') return []
+      return Object.entries(parse(document.cookie)).map(([name, value]) => ({
+        name,
+        value: value ?? '',
+      }))
+    },
+    setAll(cookiesToSet) {
+      if (typeof document === 'undefined') {
+        throw new Error('Supabase browser cookies cannot be written outside a browser')
+      }
+
+      const persistence = authPersistenceFromCookie(readPersistenceMarker())
+      const secure = window.location.protocol === 'https:'
+      cookiesToSet.forEach(({ name, value, options }) => {
+        document.cookie = serialize(
+          name,
+          value,
+          applyAuthCookiePolicy(options, persistence, secure) as SerializeOptions
+        )
+      })
+    },
+  }
+}
+
+export function getSupabaseBrowserClient(persistence?: AuthPersistence): SupabaseClient<Database> {
+  if (persistence) writePersistenceMarker(persistence)
   if (client) return client
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -20,6 +70,9 @@ export function getSupabaseBrowserClient(): SupabaseClient<Database> {
     throw new Error('Supabase browser env missing (NEXT_PUBLIC_SUPABASE_URL / _ANON_KEY)')
   }
 
-  client = createBrowserClient<Database>(url, anonKey)
+  client = createBrowserClient<Database>(url, anonKey, {
+    cookies: browserCookieMethods(),
+    isSingleton: false,
+  })
   return client
 }

@@ -111,7 +111,7 @@ export async function runAuthBridge(): Promise<BridgeResult> {
   const rememberMe = inferRememberMe(local, session, tokenKey)
 
   try {
-    const supabase = getSupabaseBrowserClient()
+    const supabase = getSupabaseBrowserClient(rememberMe ? 'persistent' : 'session')
 
     // If the cookie client already has a session, don't disturb it (Q1: no
     // unwanted logout; adoption is only for cookie-less first visits).

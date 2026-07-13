@@ -9,19 +9,23 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
  */
 
 const mocks = vi.hoisted(() => ({
+  getClient: vi.fn(),
   getSession: vi.fn(),
   setSession: vi.fn(),
   getUser: vi.fn(),
 }))
 
 vi.mock('@/lib/supabase-browser', () => ({
-  getSupabaseBrowserClient: () => ({
-    auth: {
-      getSession: mocks.getSession,
-      setSession: mocks.setSession,
-      getUser: mocks.getUser,
-    },
-  }),
+  getSupabaseBrowserClient: (persistence?: string) => {
+    mocks.getClient(persistence)
+    return {
+      auth: {
+        getSession: mocks.getSession,
+        setSession: mocks.setSession,
+        getUser: mocks.getUser,
+      },
+    }
+  },
 }))
 
 import { inferRememberMe, legacyStorageKey, readLegacyTokens, runAuthBridge } from '../bridge'
@@ -33,6 +37,7 @@ beforeEach(() => {
   localStorage.clear()
   sessionStorage.clear()
   document.cookie = 'ev-bridge-adopted=; path=/; max-age=0'
+  mocks.getClient.mockReset()
   mocks.getSession.mockReset().mockResolvedValue({ data: { session: null } })
   mocks.setSession.mockReset()
   mocks.getUser.mockReset()
@@ -96,6 +101,19 @@ describe('runAuthBridge soft-failure guarantees', () => {
     expect(localStorage.getItem(TOKEN_KEY)).toBe(VALID_BLOB)
     expect(localStorage.getItem('bl-auth-persistence')).toBe('persistent')
     expect(document.cookie).toContain('ev-bridge-adopted=1')
+  })
+
+  it('sets session persistence before adopting a session-scoped legacy token', async () => {
+    sessionStorage.setItem(TOKEN_KEY, VALID_BLOB)
+    sessionStorage.setItem('bl-auth-persistence', 'session')
+    mocks.setSession.mockResolvedValue({ data: { session: { user: { id: 'u2' } } }, error: null })
+    mocks.getUser.mockResolvedValue({ data: { user: { id: 'u2' } }, error: null })
+
+    const result = await runAuthBridge()
+
+    expect(result).toEqual({ status: 'adopted', rememberMe: false, userId: 'u2' })
+    expect(mocks.getClient).toHaveBeenCalledWith('session')
+    expect(sessionStorage.getItem(TOKEN_KEY)).toBe(VALID_BLOB)
   })
 
   it('expired/invalid refresh token → soft failed, no loop, keys untouched (Q4/Q6 shape)', async () => {

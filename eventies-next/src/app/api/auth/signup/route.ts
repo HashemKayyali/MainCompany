@@ -13,7 +13,9 @@ export async function POST(request: NextRequest) {
   const challenge = await verifyTurnstileToken(parsed.data.turnstileToken ?? '', requestIp(request))
   if (!challenge.ok)
     return NextResponse.json({ ok: false, code: 'CHALLENGE_REQUIRED' }, { status: 403 })
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient({
+    persistence: parsed.data.rememberMe ? 'persistent' : 'session',
+  })
   const { error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,

@@ -33,8 +33,13 @@ export async function POST(request: NextRequest) {
 
   const delay = progressiveDelayMs(attempt.count)
   if (delay) await new Promise((resolve) => setTimeout(resolve, delay))
-  const supabase = await createSupabaseServerClient()
-  const { data, error } = await supabase.auth.signInWithPassword(parsed.data)
+  const supabase = await createSupabaseServerClient({
+    persistence: parsed.data.rememberMe ? 'persistent' : 'session',
+  })
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  })
   if (error || !data.user) {
     await track('auth.login_failed', {
       identifierHash: pseudonymousBucket('identity', parsed.data.email),
