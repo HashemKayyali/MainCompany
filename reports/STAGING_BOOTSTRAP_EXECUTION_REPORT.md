@@ -1,8 +1,11 @@
 # Eventies staging bootstrap execution report
 
-**Execution date:** 2026-07-13  
-**Authorized target:** Supabase staging `ogfgaupebcabuoczoqcy`  
-**Forbidden target:** Supabase production `dqizzlcsioqykfeldtsj`  
+**Execution date:** 2026-07-13
+
+**Authorized target:** Supabase staging `ogfgaupebcabuoczoqcy`
+
+**Forbidden target:** Supabase production `dqizzlcsioqykfeldtsj`
+
 **Verdict:** `READY_FOR_STAGING_LIVE_VALIDATION`
 
 ## Safety precheck
