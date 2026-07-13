@@ -4,12 +4,10 @@ import { requestAdminRevalidation } from '../revalidation-client'
 describe('ADM-INV and revalidation failure retry', () => {
   afterEach(() => vi.unstubAllGlobals())
   it('sends the canonical entity and slug after mutation commit', async () => {
-    const fetchMock = vi.fn(
-      async (...args: Parameters<typeof fetch>) => {
-        void args
-        return new Response(JSON.stringify({ revalidated: ['catalog:products'] }), { status: 200 })
-      }
-    )
+    const fetchMock = vi.fn(async (...args: Parameters<typeof fetch>) => {
+      void args
+      return new Response(JSON.stringify({ revalidated: ['catalog:products'] }), { status: 200 })
+    })
     vi.stubGlobal('fetch', fetchMock)
     const result = await requestAdminRevalidation('product', 'stage')
     expect(result).toEqual({ ok: true, tags: ['catalog:products'] })
