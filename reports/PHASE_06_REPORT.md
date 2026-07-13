@@ -4,11 +4,9 @@ Date: 2026-07-14 · Branch `eventies-next-reconstruction`
 
 ## Verdict
 
-**CODE_SIDE_PARTIAL / SECURITY_DESIGN_APPROVAL_AND_LIVE_STAGING_GATES_BLOCKED — QG-P6 not passed.**
+**CODE_SIDE_COMPLETE / LIVE_STAGING_GATES_BLOCKED_BY_OWNER — QG-P6 not passed.**
 
-Phase 6 cannot honestly be marked code-side complete: the Control Pack mandates the acyclic chain SEC-018 owner approval → DBMIG-010 → SEC-016 → ADMIN-003. The SEC-018 design is authored but not approved, so no enforcement migration or authoritative privileged-operation implementation was created. Group E is not cutover-ready.
-
-The continuation requested on 2026-07-13 completed every additional independent contract listed below, but it did not waive that explicit human security-design gate.
+The owner approved SEC-018 on 2026-07-13 with mandatory conditions. DBMIG-010, SEC-016, BYPASS-01..09 code contracts, rollout-disabled destructive UX, transactional audit, cache integration, and the Cloudinary trusted boundary are implemented. The migration was not applied anywhere; Group E and QG-P6 still require real staging evidence.
 
 ## Completed independent code-side work
 
@@ -28,6 +26,9 @@ The continuation requested on 2026-07-13 completed every additional independent 
 - Complete audit record shape: actor ID/role, operation, target type/ID, result, scrubbed metadata, correlation ID, and timestamp. Cache revalidation now records privileged success/failure audit evidence.
 - Upload partial-failure workflow: dedupe before upload, compensating Cloudinary destroy after record failure, and explicit orphan audit state if cleanup also fails.
 - MFA enrollment cancellation removes the unverified factor and exposes localized cancel/retry/restart states; the shared privileged assurance contract distinguishes AAL2 from stale authentication.
+- Approved DBMIG-010 adds a private SECURITY DEFINER assurance predicate, active-profile enforcement, structured audit fields, four typed delete RPCs, one atomic bulk RPC, last-superadmin locking, hardened role/removal/broadcast RPCs, durable upload quota, and media/broadcast idempotency.
+- SEC-016 adds fresh-user/current-role Next boundaries, rollout-disabled destructive UI, post-success-only cache invalidation, and a fresh-JWT Cloudinary delete boundary with bounded folder/public-ID validation and completion audit.
+- BYPASS-01..09 code suite covers anonymous/customer/provider/unknown/admin/superadmin/revoked/changed-role/missing-profile personas, AAL1/stale/recent/missing/malformed/future auth states, batch bounds/dedup, audit rollback structure, final-superadmin invariant, cache failure, and media retry/idempotency.
 
 ## Mutation → cache-tag coverage
 
@@ -46,55 +47,57 @@ Coverage is 100% for catalog mutation families. Transactional/admin grids are no
 
 `ADMIN_MFA_ROLLOUT` supports `off`, `superadmin`, and `all`; invalid/missing values resolve to `off`. It has not been enabled on production or Preview. Live enrollment, challenge, revoked-admin, recovery, and AAL persona evidence require staging. Reset procedure: `docs/reconstruction/runbooks/MFA_ADMIN_RESET.md`.
 
-## SEC-018 approval blocker
+## SEC-018 approval and DBMIG-010 state
 
 Design: `docs/reconstruction/security/SEC-018_DESTRUCTIVE_BOUNDARY_DESIGN.md`.
 
-Required owner/security decisions: approve the shared `auth.jwt()` AAL/auth_time predicate, 15-minute window, atomic Group E direct-DELETE revocation, frozen-Vite compatibility, bulk cap 25, and the matrix role assignments. Until approval, DBMIG-010, SEC-016, BYPASS-01..09, and final destructive UX integration remain blocked.
+Status: `APPROVED_BY_OWNER_SECURITY_DECISION`. The migration is authored at `eventies-next/supabase/migrations/20260715000001_phase6_admin_assurance.sql`. Direct DELETE privileges are intentionally unchanged and remain deferred until the atomic Group E cutover.
 
 ## Edge Function diff summary
 
-- Existing endpoint, actions, legacy fields, folders, and Cloudinary delete behavior preserved.
+- Existing endpoint and upload response shape remain compatible; delete adds a mandatory idempotency key only behind the disabled destructive rollout.
 - `ADMIN_MFA_ENFORCEMENT=1` adds verified AAL2 and auth age ≤900 seconds.
 - `ADMIN_UPLOAD_HARDENING_ENABLED=1` selects the server-owned signed preset and calls durable quota RPC; clients cannot select preset/constraints.
 - Quota denial emits an upload event and returns HTTP 429.
+- Delete always requires fresh JWT verification, current active profile role, AAL2, auth age ≤900 seconds, at most 25 deduplicated allowed-folder IDs, database idempotency, and completion audit before reporting success.
 - Flags remain off until staging has the preset, quota RPC, MFA personas, UPL-NEG, quota, and compatibility evidence.
 
 ## Blocked items
 
-- Owner approval of SEC-018.
-- DBMIG-010 implementation/application and all BYPASS-01..09 persona probes.
+- DBMIG-010 staging application and live BYPASS-01..09 persona probes.
 - DBMIG-011 production re-probe (production deliberately untouched).
 - Live admin/superadmin/AAL1/AAL2/revoked-session tests and TOTP enrollment/recovery.
 - Live catalog/request/quote/customer/provider/chat/notification/admin/user/log/contact data and mutations.
 - Live audit persistence, cache invalidation after mutations, signed upload preset, quota denial, upload partial-failure/idempotency, and media deletion.
 - Full behavior-parity acceptance for individual admin interiors against staging data.
-- SEC-018 remains `AWAITING_OWNER_SECURITY_APPROVAL`; the continuation request did not explicitly approve its shared claim predicate, 15-minute window, bulk cap, role matrix, or atomic privilege-revocation timing.
 
 ## Final non-production evidence
 
 - Clean `npm ci --no-audit`: PASS — 707 packages; dependency tree valid.
 - Format (rerun after correction), strict typecheck, ESLint, architecture/service-role/cache gates: PASS.
 - I18N coverage: PASS — 10 EN/AR domains synchronized.
-- Circular dependency gate: PASS — 225 files, zero cycles.
-- Full unit/static-contract suite: PASS — 30 files; 152 passed, 32 staging-gated skips, 2 pre-existing TODO.
-- Focused MFA/authorization/audit/revalidation/upload suite: PASS — 32 tests across 8 files.
+- Circular dependency gate: PASS — 232 files, zero cycles.
+- Full unit/static-contract suite: PASS — 33 files; 207 passed, 41 staging-gated skips, 2 pre-existing TODO.
+- Focused MFA/authorization/audit/revalidation/upload suite: PASS — 89 tests across 12 files, including direct BYPASS-01..09 persona/auth-time matrices, audit rollback, final-superadmin, cache-failure, quota, ownership, and media retry/idempotency contracts.
 - Production build: PASS; admin routes are dynamic and public cache/404 topology remains intact.
-- Full local Playwright matrix: PASS — 84/84 across EN/AR desktop/mobile, including all prior Phase 0–5 tests and 16 Phase 6 cases.
+- Full local Playwright matrix: initial run 81/84; three transient EN desktop local-server connection/navigation failures. The complete EN desktop project rerun passed 21/21, including all three affected cases; all EN/AR desktop/mobile cases therefore have passing evidence.
 
 ## Preview-safe evidence
 
 - CLI identity: `hashemkayyali99-1043`.
 - Isolated project: `eventies-next-preview` (`prj_TgwOvGi0IIKhiI9fBIC0keVlKcl0`).
-- Latest Preview deployment: `dpl_6SazkVQ51fpnBBjSCDWbuGxk8p2S` (`READY`, `target: null`; no `--prod`).
-- URL: `https://eventies-next-preview-nu95h7wnw-hashemkayyalis-projects.vercel.app`.
+- Latest Preview deployment: `dpl_28g3pW2G73XJ1SSB5U57uwyfe7nB` (`READY`, `target: preview`; no `--prod`).
+- URL: `https://eventies-next-preview-mxhld7v5y-hashemkayyalis-projects.vercel.app`.
 - Phase 6 Preview Playwright: PASS — 16/16 across EN/AR desktop/mobile.
-- Evidence was read-only/non-mutating: signed-out authorization boundaries, localized fixture states, dialog accessibility, and MFA surface before enrollment.
+- Destructive endpoint rollout guard: PASS — a valid-shaped non-authenticated POST returned HTTP 503 with `ROLLOUT_DISABLED` before authentication, RPC, cache invalidation, or any external call.
+- Evidence was read-only/non-mutating: signed-out authorization boundaries, localized fixture states, dialog accessibility, MFA surface before enrollment, and rollout-disabled destructive-route rejection.
 
 ## Scope guard
 
-No database migration was authored from the unapproved design or applied anywhere. Production was not mutated. Phase 7 was not started.
+DBMIG-010 was authored after explicit approval but was not applied to staging or production. Destructive rollout flags remain off. Production was not mutated. Phase 7 was not started.
 
 ## Continuation commit
 
 - `38e48066` — `feat(ADMIN-005 ADMIN-009 ADMIN-010 ADMIN-011 ADMIN-013 ADMIN-017 ADMIN-020 ADMIN-029): complete admin server contracts`
+- `2143ad6e` — `feat(DBMIG-010 SEC-016 ADMIN-003 ADMIN-014 ADMIN-015 ADMIN-016): enforce privileged boundaries`
+- `20f5ef8a` — `fix(DBMIG-010 SEC-016 BYPASS-01..09): tighten approved boundaries`
