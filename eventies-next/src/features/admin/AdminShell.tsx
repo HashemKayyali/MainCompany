@@ -22,6 +22,8 @@ const SECTIONS = [
   'users',
   'logs',
   'contact-submissions',
+  'support-inquiries',
+  'system-events',
 ] as const
 
 export function AdminShell({
@@ -53,7 +55,9 @@ export function AdminShell({
           </Link>
           <nav aria-label={t('navigation')} className="space-y-1">
             {SECTIONS.filter(
-              (s) => role === 'superadmin' || !['admins', 'users', 'logs'].includes(s)
+              (s) =>
+                role === 'superadmin' ||
+                !['admins', 'users', 'logs', 'system-events', 'notifications'].includes(s)
             ).map((section) => {
               const href = section === 'dashboard' ? '/admin' : `/admin/${section}`
               const active = pathname === href || (href !== '/admin' && pathname.startsWith(href))

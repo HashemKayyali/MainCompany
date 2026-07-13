@@ -9,9 +9,9 @@ export function MfaEnrollment() {
   const [factorId, setFactorId] = useState('')
   const [qr, setQr] = useState('')
   const [code, setCode] = useState('')
-  const [status, setStatus] = useState<'idle' | 'enrolling' | 'challenging' | 'done' | 'error'>(
-    'idle'
-  )
+  const [status, setStatus] = useState<
+    'idle' | 'enrolling' | 'challenging' | 'cancelling' | 'cancelled' | 'done' | 'error'
+  >('idle')
 
   async function enroll() {
     setStatus('enrolling')
@@ -44,6 +44,23 @@ export function MfaEnrollment() {
       code: clean,
     })
     setStatus(error ? 'error' : 'done')
+  }
+
+  async function cancelEnrollment() {
+    if (!factorId) {
+      setStatus('idle')
+      return
+    }
+    setStatus('cancelling')
+    const { error } = await getSupabaseBrowserClient().auth.mfa.unenroll({ factorId })
+    if (error) {
+      setStatus('error')
+      return
+    }
+    setFactorId('')
+    setQr('')
+    setCode('')
+    setStatus('cancelled')
   }
 
   return (
@@ -80,6 +97,13 @@ export function MfaEnrollment() {
             <button className="mt-3 rounded-full bg-violet-700 px-5 py-2.5 font-semibold text-white">
               {t('mfaVerify')}
             </button>
+            <button
+              type="button"
+              onClick={() => void cancelEnrollment()}
+              className="ms-2 mt-3 rounded-full border border-slate-300 px-5 py-2.5 font-semibold"
+            >
+              {t('mfaCancel')}
+            </button>
           </form>
         </>
       )}
@@ -89,9 +113,38 @@ export function MfaEnrollment() {
         </p>
       )}
       {status === 'error' && (
-        <p role="alert" className="mt-6 rounded-xl bg-rose-50 p-3 text-rose-800">
-          {t('mfaError')}
+        <div role="alert" className="mt-6 rounded-xl bg-rose-50 p-3 text-rose-800">
+          <p>{t('mfaError')}</p>
+          <button
+            type="button"
+            onClick={() => setStatus(factorId ? 'challenging' : 'idle')}
+            className="mt-2 rounded-full border border-rose-300 px-4 py-2 font-semibold"
+          >
+            {t('retry')}
+          </button>
+          {factorId && (
+            <button
+              type="button"
+              onClick={() => void cancelEnrollment()}
+              className="ms-2 mt-2 rounded-full border border-rose-300 px-4 py-2 font-semibold"
+            >
+              {t('mfaCancel')}
+            </button>
+          )}
+        </div>
+      )}
+      {status === 'cancelling' && (
+        <p role="status" className="mt-6">
+          {t('mfaCancelling')}
         </p>
+      )}
+      {status === 'cancelled' && (
+        <div role="status" className="mt-6 rounded-xl bg-slate-100 p-3">
+          <p>{t('mfaCancelled')}</p>
+          <button type="button" onClick={() => setStatus('idle')} className="mt-2 underline">
+            {t('mfaRestart')}
+          </button>
+        </div>
       )}
     </section>
   )

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { evaluateAdminGate, isRecentAuthentication, mfaRolloutFromEnv } from '../admin-guard'
+import {
+  evaluateAdminGate,
+  evaluatePrivilegedAssurance,
+  isRecentAuthentication,
+  mfaRolloutFromEnv,
+} from '../admin-guard'
 
 describe('ADM-GATE / ADM-RA', () => {
   it.each([
@@ -51,5 +56,26 @@ describe('ADM-GATE / ADM-RA', () => {
     expect(isRecentAuthentication((now - 14 * 60_000) / 1000, now)).toBe(true)
     expect(isRecentAuthentication((now - 16 * 60_000) / 1000, now)).toBe(false)
     expect(isRecentAuthentication((now + 1_000) / 1000, now)).toBe(false)
+  })
+
+  it('requires both AAL2 and recent authentication at privileged boundaries', () => {
+    const now = Date.parse('2026-07-14T12:00:00Z')
+    expect(
+      evaluatePrivilegedAssurance({ aal: 'aal1', authTimeSeconds: now / 1000, nowMs: now })
+    ).toBe('aal2-required')
+    expect(
+      evaluatePrivilegedAssurance({
+        aal: 'aal2',
+        authTimeSeconds: (now - 16 * 60_000) / 1000,
+        nowMs: now,
+      })
+    ).toBe('recent-auth-required')
+    expect(
+      evaluatePrivilegedAssurance({
+        aal: 'aal2',
+        authTimeSeconds: (now - 5 * 60_000) / 1000,
+        nowMs: now,
+      })
+    ).toBe('allow')
   })
 })

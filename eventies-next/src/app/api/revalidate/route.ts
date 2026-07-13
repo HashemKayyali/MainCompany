@@ -3,6 +3,13 @@ import { createSupabaseServerClient } from '@/server/supabase/server-client'
 import { getSessionClaims, getAuthoritativeRole } from '@/server/supabase/session'
 import { revalidateEntity } from '@/server/cache/revalidate'
 import { track } from '@/server/observability/track'
+import { isTrustedMutationRequest } from '@/server/security/request'
+import { hasAdminPermission } from '@/server/admin/permissions'
+import {
+  buildAdminAuditRecord,
+  correlationIdFromHeaders,
+  writeAdminAudit,
+} from '@/server/admin/audit'
 
 /**
  * FOUND-021 — /api/revalidate: tag revalidation behind a real authorization
@@ -16,27 +23,13 @@ import { track } from '@/server/observability/track'
 const VALID_ENTITIES = ['product', 'category', 'gallery', 'build', 'customer', 'part'] as const
 type Entity = (typeof VALID_ENTITIES)[number]
 
-function isCrossSite(request: NextRequest): boolean {
-  const secFetchSite = request.headers.get('sec-fetch-site')
-  if (secFetchSite && secFetchSite !== 'same-origin' && secFetchSite !== 'same-site') return true
-  const origin = request.headers.get('origin')
-  if (origin) {
-    const host = request.headers.get('host')
-    try {
-      if (host && new URL(origin).host !== host) return true
-    } catch {
-      return true
-    }
-  }
-  return false
-}
-
 export async function POST(request: NextRequest) {
-  if (isCrossSite(request)) {
-    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
-  }
-  if (!request.headers.get('content-type')?.includes('application/json')) {
-    return NextResponse.json({ error: 'json only' }, { status: 415 })
+  if (!isTrustedMutationRequest(request)) {
+    const json = request.headers.get('content-type')?.includes('application/json')
+    return NextResponse.json(
+      { error: json ? 'forbidden' : 'json only' },
+      { status: json ? 403 : 415 }
+    )
   }
 
   const supabase = await createSupabaseServerClient()
@@ -45,7 +38,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
   const role = await getAuthoritativeRole(identity.userId, supabase)
-  if (role !== 'admin' && role !== 'superadmin') {
+  if (!hasAdminPermission(role, 'cache.revalidate')) {
     await track('revalidate.denied', { role: role ?? 'none' })
     return NextResponse.json({ error: 'forbidden' }, { status: 403 })
   }
@@ -64,7 +57,18 @@ export async function POST(request: NextRequest) {
 
   try {
     const tags = revalidateEntity(entity, typeof body.slug === 'string' ? body.slug : undefined)
-    await track('revalidate.succeeded', { entity, tagCount: tags.length })
+    await writeAdminAudit(
+      buildAdminAuditRecord({
+        actorId: identity.userId,
+        actorRole: role,
+        operation: 'cache_revalidated',
+        targetType: entity,
+        targetId: typeof body.slug === 'string' ? body.slug : entity,
+        result: 'succeeded',
+        correlationId: correlationIdFromHeaders(request.headers),
+        metadata: { tagCount: tags.length },
+      })
+    )
     return NextResponse.json({ revalidated: tags })
   } catch (error) {
     // 06 §Hard rule 4: failure is surfaced, evented, retryable — never silent.
@@ -72,6 +76,18 @@ export async function POST(request: NextRequest) {
       entity,
       message: error instanceof Error ? error.message : 'unknown',
     })
+    await writeAdminAudit(
+      buildAdminAuditRecord({
+        actorId: identity.userId,
+        actorRole: role,
+        operation: 'cache_revalidated',
+        targetType: entity,
+        targetId: typeof body.slug === 'string' ? body.slug : entity,
+        result: 'failed',
+        correlationId: correlationIdFromHeaders(request.headers),
+        metadata: { reason: error instanceof Error ? error.message : 'unknown' },
+      })
+    )
     return NextResponse.json({ error: 'revalidation failed' }, { status: 500 })
   }
 }

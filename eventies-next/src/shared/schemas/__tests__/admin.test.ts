@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
+  adminCatalogRecordSchema,
+  adminChatMessageSchema,
   adminCatalogMutationSchema,
+  adminMediaSchema,
+  adminNotificationSchema,
   destructiveConfirmationSchema,
+  requestStatusMutationSchema,
   uploadAuthorizationSchema,
   uploadPolicy,
 } from '../admin'
@@ -47,5 +52,67 @@ describe('Phase 6 admin schemas', () => {
     expect(uploadPolicy.maxFileSize).toBe(10 * 1024 * 1024)
     expect(uploadPolicy.hourlyQuota).toBe(30)
     expect(uploadPolicy.dailyQuota).toBe(300)
+  })
+})
+
+describe('Phase 6 privileged payloads', () => {
+  const key = '11111111-1111-4111-8111-111111111111'
+
+  it('normalizes safe slugs and rejects traversal', () => {
+    expect(
+      adminCatalogRecordSchema.parse({
+        entity: 'product',
+        name: 'Stage',
+        slug: 'Main-Stage',
+        idempotencyKey: key,
+      }).slug
+    ).toBe('main-stage')
+    expect(() =>
+      adminCatalogRecordSchema.parse({
+        entity: 'product',
+        name: 'Stage',
+        slug: '../stage',
+        idempotencyKey: key,
+      })
+    ).toThrow()
+  })
+
+  it('requires idempotency on request, chat, and notification mutations', () => {
+    expect(
+      requestStatusMutationSchema.safeParse({
+        requestType: 'rental',
+        requestId: key,
+        status: 'approved',
+      }).success
+    ).toBe(false)
+    expect(adminChatMessageSchema.safeParse({ conversationId: key, body: 'Hello' }).success).toBe(
+      false
+    )
+    expect(
+      adminNotificationSchema.safeParse({
+        title: 'Update',
+        message: 'Hello',
+        targetUrl: '//evil.example',
+        audience: { clients: true, admins: false, superadmins: false },
+        idempotencyKey: key,
+      }).success
+    ).toBe(false)
+  })
+
+  it('enforces media type, size, filename, public-ID, and folder isolation', () => {
+    const valid = {
+      operation: 'upload',
+      folder: 'eventies/products',
+      fileName: 'stage.webp',
+      publicId: 'eventies/products/stage-1',
+      mimeType: 'image/webp',
+      size: 1024,
+      idempotencyKey: key,
+    }
+    expect(adminMediaSchema.safeParse(valid).success).toBe(true)
+    expect(adminMediaSchema.safeParse({ ...valid, fileName: '../secret.jpg' }).success).toBe(false)
+    expect(adminMediaSchema.safeParse({ ...valid, mimeType: 'image/svg+xml' }).success).toBe(false)
+    expect(adminMediaSchema.safeParse({ ...valid, size: 11 * 1024 * 1024 }).success).toBe(false)
+    expect(adminMediaSchema.safeParse({ ...valid, publicId: 'other/stage' }).success).toBe(false)
   })
 })

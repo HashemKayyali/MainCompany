@@ -8,6 +8,7 @@ import { getAuthoritativeRole, getVerifiedUser } from '@/server/supabase/session
 export type AdminRole = 'admin' | 'superadmin'
 export type MfaRollout = 'off' | 'superadmin' | 'all'
 export type AdminGateDecision = 'allow' | 'signed-out' | 'forbidden' | 'mfa-required'
+export type PrivilegedAssuranceDecision = 'allow' | 'aal2-required' | 'recent-auth-required'
 
 export function evaluateAdminGate(input: {
   userPresent: boolean
@@ -60,4 +61,15 @@ export function isRecentAuthentication(authTimeSeconds: number | null, nowMs = D
   if (!authTimeSeconds) return false
   const age = nowMs - authTimeSeconds * 1000
   return age >= 0 && age <= 15 * 60 * 1000
+}
+
+/** Application-side contract; DB/RPC enforcement still follows SEC-018/SEC-016. */
+export function evaluatePrivilegedAssurance(input: {
+  aal: string | null
+  authTimeSeconds: number | null
+  nowMs?: number
+}): PrivilegedAssuranceDecision {
+  if (input.aal !== 'aal2') return 'aal2-required'
+  if (!isRecentAuthentication(input.authTimeSeconds, input.nowMs)) return 'recent-auth-required'
+  return 'allow'
 }

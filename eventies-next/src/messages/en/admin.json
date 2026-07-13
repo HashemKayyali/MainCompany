@@ -3,6 +3,11 @@
   "navigation": "Admin navigation",
   "menu": "Open admin menu",
   "create": "Create",
+  "search": "Search admin records",
+  "filter": "Filter",
+  "view": "View details",
+  "recordCount": "{count, plural, =0 {No records} one {# record} other {# records}}",
+  "mutationsAwaitStaging": "Mutation verification awaits staging",
   "ready": "Ready",
   "empty": "Empty",
   "error": "Error",
@@ -26,6 +31,10 @@
   "mfaQrAlt": "TOTP enrollment QR code",
   "mfaCode": "Six-digit authentication code",
   "mfaVerify": "Verify and continue",
+  "mfaCancel": "Cancel enrollment",
+  "mfaCancelling": "Cancelling the unverified factor…",
+  "mfaCancelled": "Enrollment was cancelled and the unverified factor was removed.",
+  "mfaRestart": "Start enrollment again",
   "mfaDone": "MFA enrollment is complete. Sign in again to establish AAL2.",
   "mfaError": "MFA enrollment could not be completed. No factor was enabled; try again or contact the owner.",
   "sections": {
@@ -44,6 +53,8 @@
     "admins": "Administrators",
     "users": "Users",
     "logs": "Audit logs",
-    "contact-submissions": "Contact submissions"
+    "contact-submissions": "Contact submissions",
+    "support-inquiries": "Support inquiries",
+    "system-events": "System events"
   }
 }
