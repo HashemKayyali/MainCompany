@@ -25,6 +25,11 @@ if ($sql -match '(?i)PASSWORD\s+''' -or $sql -match '(?i)postgres(?:ql)?://') {
 
 $sql = [regex]::Replace($sql, '(?m)^\\(?:un)?restrict\s+.*\r?\n?', '')
 $sql = $sql.Replace('CREATE SCHEMA "public";', 'CREATE SCHEMA IF NOT EXISTS "public";')
+$sql = [regex]::Replace(
+  $sql,
+  '(?m)^ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin".*;\r?\n?',
+  ''
+)
 
 # Production retains the frozen seven-argument admin_update_user signature,
 # but its body still referenced avatar columns removed from profiles. Preserve

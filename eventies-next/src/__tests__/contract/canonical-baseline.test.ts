@@ -65,6 +65,7 @@ describe('canonical pre-Next database baseline', () => {
     expect(sql).not.toMatch(/password\s+'/i)
     expect(sql).not.toMatch(/^\\(?:un)?restrict/m)
     expect(sql).not.toMatch(/^alter .* owner to /im)
+    expect(lower).not.toContain('alter default privileges for role "supabase_admin"')
   })
 
   it('reproduces captured auth, storage, and realtime configuration', () => {
