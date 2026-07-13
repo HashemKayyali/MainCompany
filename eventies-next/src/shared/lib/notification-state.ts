@@ -7,7 +7,7 @@ export function mergeNotificationRows(
 ): NotificationRow[] {
   const withoutIncoming = current.filter((item) => item.id !== incoming.id)
   return [incoming, ...withoutIncoming]
-    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id.localeCompare(a.id))
     .slice(0, Math.max(1, limit))
 }
 

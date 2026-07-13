@@ -849,6 +849,7 @@ export interface Database {
 
       chat_messages: {
         Row: {
+          client_message_id: string | null
           id: string
           conversation_id: string
           sender_id: string
@@ -859,6 +860,7 @@ export interface Database {
           created_at: string
         }
         Insert: {
+          client_message_id?: string | null
           id?: string
           conversation_id: string
           sender_id?: string
