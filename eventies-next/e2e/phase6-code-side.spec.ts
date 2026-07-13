@@ -13,7 +13,11 @@ test('admin fixture exposes localized ready, empty, and retry states', async ({ 
   await page.getByRole('button', { name: /Empty|فارغ/ }).click()
   await expect(page.getByText(/No records match|لا توجد سجلات/)).toBeVisible()
   await page.getByRole('button', { name: /Error|خطأ/ }).click()
-  await expect(page.getByRole('alert')).toBeVisible()
+  await expect(
+    page
+      .locator('[role="alert"]')
+      .filter({ hasText: /The admin data could not be loaded|تعذر تحميل بيانات الإدارة/ })
+  ).toBeVisible()
   await expect(page.getByRole('button', { name: /Retry|إعادة المحاولة/ })).toBeVisible()
 })
 

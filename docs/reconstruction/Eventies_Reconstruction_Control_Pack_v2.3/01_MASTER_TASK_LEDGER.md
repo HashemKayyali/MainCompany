@@ -105,7 +105,7 @@ Status source of truth: the Status column below (all initialize TODO)
 | I18N-005 | P1/P2 | i18n | Domain dictionaries: common+catalog+forms curated from extraction | REPLACE | M | E | I18N-004 | key-coverage green for P2 scope | I18N-COV | DONE |
 | I18N-006 | P1/P2 | i18n | Dictionaries: auth+account | REPLACE | M | — | I18N-004 | coverage green P3/P4 scope | I18N-COV | DONE |
 | I18N-007 | P1/P2 | i18n | Dictionaries: chat+notifications | REPLACE | M | — | I18N-004 | coverage green P5 scope | I18N-COV | DONE:EN/AR domains synchronized |
-| I18N-008 | P1/P2 | i18n | Dictionaries: admin | REPLACE | M | — | I18N-004 | coverage green P6 scope | I18N-COV | TODO |
+| I18N-008 | P1/P2 | i18n | Dictionaries: admin | REPLACE | M | — | I18N-004 | coverage green P6 scope | I18N-COV | DONE:EN/AR admin domain synchronized |
 | I18N-009 | P1/P2 | i18n | Migration FILES: `*_ar` columns (products, categories, custom_builds+cats, gallery album titles) — additive, nullable | NEW | H | E,D | DBMIG-001 | files reviewed; frozen-Vite compatible; NOT executed by Code | migration review checklist | DONE:migration FILE authored (apply human-gated) |
 | I18N-010 | P1/P2 | i18n | DAL locale-aware selects with EN fallback (coalesce pattern) | NEW | M | E | DBMIG-004, DATA-001 | AR page shows AR when present, EN fallback | AR-DL | BLOCKED:_ar coalesce selects need DBMIG-004 applied (columns absent until then) |
 | I18N-011 | P1/P2 | i18n | AR-coverage report tooling: count null `_ar` per entity (admin dashboard tile later) | NEW | L | — | I18N-009 | report runs; feeds R-06 | — | BLOCKED:AR coverage report needs _ar columns (DBMIG-004) |
@@ -117,7 +117,7 @@ Status source of truth: the Status column below (all initialize TODO)
 | I18N-017 | P1/P2 | i18n | messages loading strategy: per-locale per-domain split (no ar in en bundle) | NEW | M | P | FOUND-011 | bundle report shows split | PERF | DONE:per-locale per-domain message split (no ar in en bundle) |
 | I18N-018 | P1/P2 | i18n | 404/error pages localized | NEW | L | — | FOUND-015 | both locales | E | DONE |
 | I18N-019 | P1/P2 | i18n | Legal docs locale strategy decision + implementation (static MD per locale vs DB) | NEW | L | E | CAT-017 | decision logged; pages render | SEO-PAR | DONE:legal = repo-resident bilingual dict (ported) |
-| I18N-020 | P1/P2 | i18n | Admin forms AR fields (name_ar, description_ar...) wiring | NEW | M | E | I18N-009, ADMIN-006 | AR editable; saved; rendered on /ar | I | TODO:admin AR fields (P6) |
+| I18N-020 | P1/P2 | i18n | Admin forms AR fields (name_ar, description_ar...) wiring | NEW | M | E | I18N-009, ADMIN-006 | AR editable; saved; rendered on /ar | I | BLOCKED_BY_OWNER_STAGING:bilingual schemas/UI ready; live persistence needs DBMIG-004+staging |
 
 ## DATA/CACHE — server data layer (P1→P2) (evidence: DataContext, services)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
@@ -192,7 +192,7 @@ Status source of truth: the Status column below (all initialize TODO)
 | IMG-007 | P2 | images | GC schedule: monthly cron/runbook + report commit convention | KEEP | M | — | — | runbook committed | — | TODO:GC runbook (ops) |
 | IMG-008 | P2 | images | Execute GC cleanup batch (240 SAFE_CANDIDATE) per runbook — HUMAN-RUN, Code prepares commands | HARDEN | M | D | IMG-007 | verify step green; report committed | GC verify | BLOCKED:human-run GC batch |
 | IMG-009 | P2 | images | Static asset audit: public/ >150 KB list → compress/convert plan (globe jpg, capability webps) | HARDEN | L | P | — | list + fixes committed | PERF | TODO:static asset audit deferred |
-| IMG-010 | P2 | images | Admin preview components ported `<img>` (per ADR-08) | KEEP | L | — | ADMIN-005 | previews thumbnail preset | — | TODO:admin previews (P6) |
+| IMG-010 | P2 | images | Admin preview components ported `<img>` (per ADR-08) | KEEP | L | — | ADMIN-005 | previews thumbnail preset | — | BLOCKED_BY_OWNER_STAGING:MFA provider QR uses scoped img; catalog media previews await live interiors |
 | IMG-011 | P2 | images | Lightbox transfer budget + prefetch±1 verification | HARDEN | L | P | CAT-015 | budget met | PERF | DONE:lightbox prefetch±1 implemented |
 | IMG-012 | P2 | images | og-default reference swap if filename changes (P0 fix parity) | KEEP | L | E | BASE-017 | metadata points at compressed asset | SEO-PAR | DONE |
 | IMG-013 | P2 | images | Per-product OG transform preset (1200×630 crop) in loader | NEW | M | E | SEO-003 | ≤100 KB output | SEO | DONE |
@@ -282,25 +282,25 @@ Phase status (owner decision 2026-07-13): **CODE_SIDE_COMPLETE · LIVE_STAGING_G
 ## ADMIN — Phase 6 (evidence: pages/admin/*, AdminGuard; rollback: Group E restore)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| ADMIN-001 | P6 | admin | Server-gated admin layout: getUser→role→AAL2 | REARCHITECT | H | S | AUTH-015 | ADM-GATE green | ADM-GATE | TODO |
-| ADMIN-002 | P6 | admin | MFA enrollment flow (TOTP) + staged rollout flag | NEW | H | S | ADMIN-001 | superadmin first; runbook for reset | E | TODO |
-| ADMIN-003 | P6 | admin | Admin UX integration of destructive-op enforcement (typed confirm, recent-auth re-prompt flows — UX ONLY, never the enforcement) + final end-to-end enforcement verification | NEW | H | S | ADMIN-001, SEC-016 | ADM-RA green + BYPASS suite green end-to-end | ADM-RA, BYPASS | TODO |
-| ADMIN-004 | P6 | admin | SuperAdmin gate for sensitive children (parity with SuperAdminGuard) | REARCHITECT | M | S | ADMIN-001 | route matrix parity | E | TODO |
+| ADMIN-001 | P6 | admin | Server-gated admin layout: getUser→role→AAL2 | REARCHITECT | H | S | AUTH-015 | ADM-GATE green | ADM-GATE | BLOCKED_BY_OWNER_STAGING:fresh-user/role/AAL gate+unit/signed-out E2E green; live personas deferred |
+| ADMIN-002 | P6 | admin | MFA enrollment flow (TOTP) + staged rollout flag | NEW | H | S | ADMIN-001 | superadmin first; runbook for reset | E | BLOCKED_BY_OWNER_STAGING:flow/flag/reset runbook ready; live factors deferred |
+| ADMIN-003 | P6 | admin | Admin UX integration of destructive-op enforcement (typed confirm, recent-auth re-prompt flows — UX ONLY, never the enforcement) + final end-to-end enforcement verification | NEW | H | S | ADMIN-001, SEC-016 | ADM-RA green + BYPASS suite green end-to-end | ADM-RA, BYPASS | BLOCKED:SEC-018 approval→DBMIG-010→SEC-016 required; typed-confirm fixture green |
+| ADMIN-004 | P6 | admin | SuperAdmin gate for sensitive children (parity with SuperAdminGuard) | REARCHITECT | M | S | ADMIN-001 | route matrix parity | E | BLOCKED_BY_OWNER_STAGING:server route matrix implemented; live admin/superadmin personas deferred |
 | ADMIN-005 | P6 | admin | Interior port: Dashboard page (ADR-04: client page) | REFACTOR | M | — | ADMIN-001, FOUND-017 | behavior parity | E | TODO |
 | ADMIN-006 | P6 | admin | Product/category forms + AR fields (I18N-020) + uploads via Edge Fn | REFACTOR | H | D | ADMIN-020, ADMIN-021, DBMIG-004 | CRUD green; AR saved | E | TODO |
-| ADMIN-007 | P6 | admin | Revalidation wiring: every catalog mutation → /api/revalidate tags | NEW | H | D | FOUND-021, ADMIN-006 | ADM-INV per entity | ADM-INV | TODO |
-| ADMIN-008 | P6 | admin | Revalidate-failure UX (warning + retry + event) | NEW | M | D | ADMIN-007 | simulated failure path | I | TODO |
+| ADMIN-007 | P6 | admin | Revalidation wiring: every catalog mutation → /api/revalidate tags | NEW | H | D | FOUND-021, ADMIN-006 | ADM-INV per entity | ADM-INV | DONE:100% mutation map+canonical client contract+unit green |
+| ADMIN-008 | P6 | admin | Revalidate-failure UX (warning + retry + event) | NEW | M | D | ADMIN-007 | simulated failure path | I | DONE:retry result contract+simulated failure test green |
 | ADMIN-009 | P6 | admin | Interior port: Parts page | REFACTOR | M | — | ADMIN-005 | parity | E | TODO |
 | ADMIN-010 | P6 | admin | Interior port: Requests list page | REFACTOR | M | D | ADMIN-005 | parity | E | TODO |
 | ADMIN-011 | P6 | admin | Interior port: Chats inbox page (manager-based sub) | REFACTOR | M | D | CHAT-001 | inbox realtime green | E | TODO |
 | ADMIN-012 | P6 | admin | Interior port: Admins page (role ops via trusted boundary) | REFACTOR | M | S | ADMIN-003 | BYPASS green for role ops | ADM-RA, BYPASS | TODO |
-| ADMIN-013 | P6 | admin | Audit events for sensitive ops appended to logs pattern | HARDEN | M | S | ADMIN-003 | events recorded | I | TODO |
+| ADMIN-013 | P6 | admin | Audit events for sensitive ops appended to logs pattern | HARDEN | M | S | ADMIN-003 | events recorded | I | BLOCKED_BY_OWNER_STAGING:event catalog/scrubbing ready; live app_events evidence deferred |
 | ADMIN-014 | P6 | admin | Revoked-admin mid-session E2E (layout AND RPC deny) | NEW | H | S | ADMIN-001 | green | ADM-GATE | TODO |
-| ADMIN-015 | P6 | admin | Edge Fn hardening: signed upload PRESET with allowed_formats + max_file_size (verified Cloudinary mechanism per 10 §Upload; signer authorizes preset use) | HARDEN | M | S | — | signature includes constraints; upload of banned type fails | I | TODO |
-| ADMIN-016 | P6 | admin | Edge Fn quota (SEC-013, provisional 30/h) | HARDEN | M | S | ADMIN-015 | 31st sign denied + event | I | TODO |
+| ADMIN-015 | P6 | admin | Edge Fn hardening: signed upload PRESET with allowed_formats + max_file_size (verified Cloudinary mechanism per 10 §Upload; signer authorizes preset use) | HARDEN | M | S | — | signature includes constraints; upload of banned type fails | I | BLOCKED_BY_OWNER_STAGING:staged Edge code+preset contract ready; UPL-NEG/preset evidence deferred |
+| ADMIN-016 | P6 | admin | Edge Fn quota (SEC-013, provisional 30/h) | HARDEN | M | S | ADMIN-015 | 31st sign denied + event | I | BLOCKED:durable quota caller staged; RPC belongs to unapproved DBMIG-010 |
 | ADMIN-017 | P6 | admin | UPL-PF: partial upload failure → no orphan row; upload-record idempotency key prevents duplicate rows (Master Plan §11.7) | NEW | M | D | ADMIN-006 | green; dup-record test | UPL-PF | TODO |
-| ADMIN-018 | P6 | admin | Admin dictionaries (I18N-008) applied | NEW | L | — | I18N-008 | coverage green | I18N-COV | TODO |
-| ADMIN-019 | P6 | admin | Group E cutover readiness report | NEW | H | S | ADMIN-* | QG-P6 pass | — | TODO |
+| ADMIN-018 | P6 | admin | Admin dictionaries (I18N-008) applied | NEW | L | — | I18N-008 | coverage green | I18N-COV | DONE:10-domain EN/AR coverage green |
+| ADMIN-019 | P6 | admin | Group E cutover readiness report | NEW | H | S | ADMIN-* | QG-P6 pass | — | BLOCKED:QG-P6 not passed; SEC-018 approval and staging evidence absent |
 
 ## SEC/OBS — cross-phase security & observability
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
@@ -391,8 +391,8 @@ Phase status (owner decision 2026-07-13): **CODE_SIDE_COMPLETE · LIVE_STAGING_G
 | DBMIG-007 | P4 | dbmig | Wave C prod verification | NEW | M | D | DBMIG-006 | verified | SMOKE | BLOCKED:requires DBMIG-006 and human production gate |
 | DBMIG-008 | P5 | dbmig | Wave D: chat client message id (CHAT-002) + msg-rate limit (CHAT-009) — staging verified; ⛔ prod | NEW | H | D | DBMIG-002, CHAT-002, CHAT-009 | staging + reducer tests green; ⛔ approved | RD-01 | BLOCKED_BY_OWNER_STAGING:files+static contracts green; not applied |
 | DBMIG-009 | P5 | dbmig | Wave D prod verification | NEW | M | D | DBMIG-008 | verified | RT-RC | BLOCKED_BY_OWNER_STAGING:staging first; production untouched |
-| DBMIG-010 | P6 | dbmig | Wave E: AAL2/recent-auth DB enforcement migrations per APPROVED SEC-018 design (RPC assurance params / RLS checks / EXECUTE revocations) — staging verified; ⛔ prod | NEW | H | S,D | DBMIG-002, SEC-018 | BYPASS suite green on staging; ⛔ approved | BYPASS | TODO |
-| DBMIG-011 | P6 | dbmig | Wave E prod verification + bypass re-probe on prod | NEW | H | S | DBMIG-010 | BYPASS green on prod | BYPASS | TODO |
+| DBMIG-010 | P6 | dbmig | Wave E: AAL2/recent-auth DB enforcement migrations per APPROVED SEC-018 design (RPC assurance params / RLS checks / EXECUTE revocations) — staging verified; ⛔ prod | NEW | H | S,D | DBMIG-002, SEC-018 | BYPASS suite green on staging; ⛔ approved | BYPASS | BLOCKED:SEC-018 design authored; owner security approval required before migration implementation |
+| DBMIG-011 | P6 | dbmig | Wave E prod verification + bypass re-probe on prod | NEW | H | S | DBMIG-010 | BYPASS green on prod | BYPASS | BLOCKED:DBMIG-010 not approved/applied; production untouched |
 | DBMIG-012 | P7 | dbmig | Migration ledger close-out: every wave verified; no orphan migration files | NEW | M | D | DBMIG-003..011 | close-out report | — | TODO |
 
 ## ARB — Arabic content backfill & launch readiness (P2→cutover; evidence: I18N-009/011, R-06)
@@ -422,7 +422,7 @@ Phase status (owner decision 2026-07-13): **CODE_SIDE_COMPLETE · LIVE_STAGING_G
 | A11Y-008 | P2 | a11y | Contrast review of token palette on light/dark (fix violations or log exceptions) | NEW | M | — | FOUND-025 | axe contrast clean | axe CI | TODO:contrast review — CAT-024 visual pass |
 | A11Y-009 | P2 | a11y | RTL keyboard behavior: arrow-key direction in carousels/lightbox under dir=rtl | NEW | M | — | I18N-013 | RTL key E2E | E | DONE:RTL arrow-key direction in lightbox |
 | A11Y-010 | P1 | a11y | axe CI integration (fails on critical, top-8 template set) | NEW | M | — | FOUND-005 | gate wired | axe CI | DONE |
-| A11Y-011 | P6 | a11y | Admin modal/dialog accessibility: focus trap, labels, destructive-confirm announced | NEW | M | — | ADMIN-003 | axe + trap E2E | E | TODO |
+| A11Y-011 | P6 | a11y | Admin modal/dialog accessibility: focus trap, labels, destructive-confirm announced | NEW | M | — | ADMIN-003 | axe + trap E2E | E | DONE:labelled dialog+focus trap+Escape+typed confirmation E2E green |
 | A11Y-012 | P4 | a11y | Checkout/cart flows: error summaries, quantity steppers, date pickers keyboard-operable | NEW | M | — | REQ-006 | E2E keyboard pass | E | DONE:safe fixture 4-project matrix |
 
 ## V2.1 SPLITS & NEW CROSS TASKS
@@ -442,7 +442,7 @@ Phase status (owner decision 2026-07-13): **CODE_SIDE_COMPLETE · LIVE_STAGING_G
 | ADMIN-029 | P6 | admin | Interior port: ContactSubmissions page | REFACTOR | L | — | ADMIN-005 | parity | E | TODO |
 | SEC-014 | P1 | security | ADR-18 closure: rate-limit state store evaluation (Supabase RPC counters vs KV/Redis vs WAF combo) with latency/cost/atomicity/privacy analysis + trusted client-IP source on Vercel + HMAC identifier keys + retention | NEW | H | S | FOUND-033 | ADR-18 CLOSED with evidence | — | DONE |
 | SEC-015 | P3 | security | Implement chosen rate-limit store (atomic increments, expiry, cleanup) behind FOUND-033 interface | NEW | H | S | SEC-014 | concurrency test; limits survive multi-instance | I | BLOCKED:migration+adapter authored; staging multi-instance verification pending |
-| SEC-016 | P6 | security | Destructive-Op trusted-boundary APPLICATION implementation per SEC-018 design (handler wraps, RPC call-sites, EXECUTE-revocation consumers) — per operation | HARDEN | H | S,D | SEC-018, DBMIG-010 | matrix row-by-row enforced | BYPASS | TODO |
+| SEC-016 | P6 | security | Destructive-Op trusted-boundary APPLICATION implementation per SEC-018 design (handler wraps, RPC call-sites, EXECUTE-revocation consumers) — per operation | HARDEN | H | S,D | SEC-018, DBMIG-010 | matrix row-by-row enforced | BYPASS | BLOCKED:human approval and DBMIG-010 precede implementation by mandated chain |
 | SEC-017 | P7 | security | CSP inline audit: violation inventory, nonce/hash feasibility, ⛔ P7 decision to drop 'unsafe-inline' or documented exception | HARDEN | M | S | SEC-003 | decision + final policy | QG-P7 | TODO |
 | CACHE-005 | P2 | cache | ADR-19 conformance: implement chosen Next 16 cache model (use cache + cacheTag + cacheLife) in DAL; integration tests for tag attach, TTL, new-slug, delete→404, SWR vs immediate semantics | NEW | H | D | DATA-001, FOUND-020 | CACHE-MODEL suite green | CACHE-MODEL | DONE:CACHE-MODEL conformance suite green (7 tests) |
 | FOUND-035 | P1 | foundation | Version-lock decision: record exact Next 16.x/react/supabase-ssr/next-intl versions; pin via lockfile; major upgrades require ADR (ADR-16) | NEW | M | — | FOUND-001 | versions doc committed | — | DONE |
@@ -450,7 +450,7 @@ Phase status (owner decision 2026-07-13): **CODE_SIDE_COMPLETE · LIVE_STAGING_G
 ## V2.3 ADDITION (cycle fix)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| SEC-018 | P6 | security | Destructive-operation trusted-boundary DESIGN/SPECIFICATION: per 05-matrix row choose mechanism (A RPC self-enforce via auth.jwt() assurance inspection / B RLS / C EXECUTE-revoke + handler), define exact RPC param & claim checks, migration list for DBMIG-010, BYPASS test plan — ⛔ human design approval | NEW | H | S,D | — | approved design doc; every matrix row has a chosen mechanism + test | design review | TODO |
+| SEC-018 | P6 | security | Destructive-operation trusted-boundary DESIGN/SPECIFICATION: per 05-matrix row choose mechanism (A RPC self-enforce via auth.jwt() assurance inspection / B RLS / C EXECUTE-revoke + handler), define exact RPC param & claim checks, migration list for DBMIG-010, BYPASS test plan — ⛔ human design approval | NEW | H | S,D | — | approved design doc; every matrix row has a chosen mechanism + test | design review | BLOCKED:complete design authored; AWAITING_OWNER_SECURITY_APPROVAL |
 
 ## V2.2 ADDITIONS (Master Plan reconciliation — 4 real tasks)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
