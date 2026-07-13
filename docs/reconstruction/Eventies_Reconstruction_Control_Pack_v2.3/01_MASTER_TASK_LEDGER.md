@@ -104,7 +104,7 @@ Status source of truth: the Status column below (all initialize TODO)
 | I18N-004 | P1/P2 | i18n | Extraction script: legacy phrase dict → keyed corpus (en/ar JSON drafts) | REPLACE | H | E | FOUND-011 | ≥95% phrases mapped; report of leftovers | script test | DONE |
 | I18N-005 | P1/P2 | i18n | Domain dictionaries: common+catalog+forms curated from extraction | REPLACE | M | E | I18N-004 | key-coverage green for P2 scope | I18N-COV | DONE |
 | I18N-006 | P1/P2 | i18n | Dictionaries: auth+account | REPLACE | M | — | I18N-004 | coverage green P3/P4 scope | I18N-COV | DONE |
-| I18N-007 | P1/P2 | i18n | Dictionaries: chat+notifications | REPLACE | M | — | I18N-004 | coverage green P5 scope | I18N-COV | TODO |
+| I18N-007 | P1/P2 | i18n | Dictionaries: chat+notifications | REPLACE | M | — | I18N-004 | coverage green P5 scope | I18N-COV | DONE:EN/AR domains synchronized |
 | I18N-008 | P1/P2 | i18n | Dictionaries: admin | REPLACE | M | — | I18N-004 | coverage green P6 scope | I18N-COV | TODO |
 | I18N-009 | P1/P2 | i18n | Migration FILES: `*_ar` columns (products, categories, custom_builds+cats, gallery album titles) — additive, nullable | NEW | H | E,D | DBMIG-001 | files reviewed; frozen-Vite compatible; NOT executed by Code | migration review checklist | DONE:migration FILE authored (apply human-gated) |
 | I18N-010 | P1/P2 | i18n | DAL locale-aware selects with EN fallback (coalesce pattern) | NEW | M | E | DBMIG-004, DATA-001 | AR page shows AR when present, EN fallback | AR-DL | BLOCKED:_ar coalesce selects need DBMIG-004 applied (columns absent until then) |
@@ -263,21 +263,21 @@ Phase status (owner decision 2026-07-13): **CODE_SIDE_COMPLETE · LIVE_STAGING_G
 ## CHAT/NOTIF — Phase 5: realtime (evidence: chat.service, ChatContext, notifications.service; rollback: Group D restore)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| CHAT-001 | P5 | realtime | Subscription manager hook (stable keys, one channel per key, leak-proof) | REARCHITECT | H | D | FOUND-008 | RT-LEAK green | RT-LEAK | TODO |
-| CHAT-002 | P5 | realtime | Migration FILE: client message id uuid column + unique index | NEW | H | D | BASE-013, DBMIG-001 | additive; review | DBMIG review | TODO |
-| CHAT-003 | P5 | realtime | Chat reducer on harness: id-keyed idempotent, ordering rules | REARCHITECT | H | D | BASE-011 | RD-01 chat cases green | RD-01 | TODO |
-| CHAT-004 | P5 | realtime | Buffer→snapshot→replay wiring for conversation load | REARCHITECT | H | D | CHAT-001, CHAT-003 | RT-RACE green | RT-RACE | TODO |
-| CHAT-005 | P5 | realtime | Optimistic send + echo reconcile by id; retry = unique-violation → sent | REARCHITECT | H | D | DBMIG-008 | no dupes ever | RT-RC | TODO |
-| CHAT-006 | P5 | realtime | Reconnect catchup (watermark −60s refetch) | NEW | H | D | CHAT-004 | RT-RC green | RT-RC | TODO |
-| CHAT-007 | P5 | realtime | Unread counts server-recomputed; mark-all-read race rule | HARDEN | M | D | CHAT-003 | convergence E2E | RT-RC | TODO |
-| CHAT-008 | P5 | realtime | Chat widget island rebuild (quick questions anon path preserved) | REARCHITECT | M | — | CHAT-004 | anon+authed flows | E | TODO |
-| CHAT-009 | P5 | realtime | Migration FILE: chat msg-rate DB limit (pattern from contact) | NEW | M | S | — | review | review | TODO |
-| CHAT-010 | P5 | realtime | Chat dictionaries + Bidi bubbles | NEW | M | — | I18N-007, I18N-016 | AR chat correct | E | TODO |
-| NOTIF-001 | P5 | realtime | Notification stream on manager+reducer (port tested reducer) | KEEP→HARDEN | M | D | CHAT-001 | existing contract tests green | CT | TODO |
-| NOTIF-002 | P5 | realtime | Reconnect refetch for notifications | NEW | M | D | NOTIF-001 | RT-RC notif case | RT-RC | TODO |
-| NOTIF-003 | P5 | realtime | /notifications page rebuild | REARCHITECT | M | — | NOTIF-001, AUTH-015 | parity | E | TODO |
-| NOTIF-004 | P5 | realtime | Bell/badge island (multi-tab convergence) | REFACTOR | L | — | NOTIF-001 | converges | E | TODO |
-| NOTIF-005 | P5 | realtime | Group D cutover readiness report | NEW | M | D | CHAT-*, NOTIF-* | QG-P5 pass | — | TODO |
+| CHAT-001 | P5 | realtime | Subscription manager hook (stable keys, one channel per key, leak-proof) | REARCHITECT | H | D | FOUND-008 | RT-LEAK green | RT-LEAK | DONE:stable scoped registry+leak tests green |
+| CHAT-002 | P5 | realtime | Migration FILE: client message id uuid column + unique index | NEW | H | D | BASE-013, DBMIG-001 | additive; review | DBMIG review | BLOCKED_BY_OWNER_STAGING:file+static contract green; apply/review deferred |
+| CHAT-003 | P5 | realtime | Chat reducer on harness: id-keyed idempotent, ordering rules | REARCHITECT | H | D | BASE-011 | RD-01 chat cases green | RD-01 | DONE:pure id reducer+server ordering+bounded insertion green |
+| CHAT-004 | P5 | realtime | Buffer→snapshot→replay wiring for conversation load | REARCHITECT | H | D | CHAT-001, CHAT-003 | RT-RACE green | RT-RACE | DONE:protocol+race tests green |
+| CHAT-005 | P5 | realtime | Optimistic send + echo reconcile by id; retry = unique-violation → sent | REARCHITECT | H | D | DBMIG-008 | no dupes ever | RT-RC | BLOCKED_BY_OWNER_STAGING:code/dedup tests green; flag disabled pending DBMIG-008 |
+| CHAT-006 | P5 | realtime | Reconnect catchup (watermark −60s refetch) | NEW | H | D | CHAT-004 | RT-RC green | RT-RC | BLOCKED_BY_OWNER_STAGING:code/unit green; live disconnect/catchup deferred |
+| CHAT-007 | P5 | realtime | Unread counts server-recomputed; mark-all-read race rule | HARDEN | M | D | CHAT-003 | convergence E2E | RT-RC | BLOCKED_BY_OWNER_STAGING:server-count contract wired; live convergence deferred |
+| CHAT-008 | P5 | realtime | Chat widget island rebuild (quick questions anon path preserved) | REARCHITECT | M | — | CHAT-004 | anon+authed flows | E | BLOCKED_BY_OWNER_STAGING:lazy UI+anon read path done; authenticated mutation deferred |
+| CHAT-009 | P5 | realtime | Migration FILE: chat msg-rate DB limit (pattern from contact) | NEW | M | S | — | review | review | BLOCKED_BY_OWNER_STAGING:file+static security contract green; apply deferred |
+| CHAT-010 | P5 | realtime | Chat dictionaries + Bidi bubbles | NEW | M | — | I18N-007, I18N-016 | AR chat correct | E | DONE:EN/AR+RTL+Bidi fixture green |
+| NOTIF-001 | P5 | realtime | Notification stream on manager+reducer (port tested reducer) | KEEP→HARDEN | M | D | CHAT-001 | existing contract tests green | CT | DONE:preserved reducer extended with stable ordering+manager |
+| NOTIF-002 | P5 | realtime | Reconnect refetch for notifications | NEW | M | D | NOTIF-001 | RT-RC notif case | RT-RC | BLOCKED_BY_OWNER_STAGING:catchup code/unit green; live reconnect deferred |
+| NOTIF-003 | P5 | realtime | /notifications page rebuild | REARCHITECT | M | — | NOTIF-001, AUTH-015 | parity | E | BLOCKED_BY_OWNER_STAGING:session route+safe fixture done; live rows deferred |
+| NOTIF-004 | P5 | realtime | Bell/badge island (multi-tab convergence) | REFACTOR | L | — | NOTIF-001 | converges | E | BLOCKED_BY_OWNER_STAGING:island+server recount wired; multi-tab live evidence deferred |
+| NOTIF-005 | P5 | realtime | Group D cutover readiness report | NEW | M | D | CHAT-*, NOTIF-* | QG-P5 pass | — | BLOCKED_BY_OWNER_STAGING:report complete; QG-P5 not passed |
 
 ## ADMIN — Phase 6 (evidence: pages/admin/*, AdminGuard; rollback: Group E restore)
 | ID | Phase | Domain | Title | Type | Risk | Flags | Deps | Acceptance | Tests | Status |
@@ -389,8 +389,8 @@ Phase status (owner decision 2026-07-13): **CODE_SIDE_COMPLETE · LIVE_STAGING_G
 | DBMIG-005 | P2 | dbmig | Wave B prod verification + feature enablement note (AR read path may ship) | NEW | M | E | DBMIG-004 | prod schema verified | — | BLOCKED:needs DBMIG-004 prod apply |
 | DBMIG-006 | P4 | dbmig | Wave C: idempotency keys (REQ-003/004) + DB CHECKs (REQ-005) — staging verified; ⛔ prod | NEW | H | D | DBMIG-002, REQ-003, REQ-004, REQ-005 | staging + contract green; ⛔ approved | CT-RPC | BLOCKED_BY_OWNER_STAGING:file+static review ready; not applied |
 | DBMIG-007 | P4 | dbmig | Wave C prod verification | NEW | M | D | DBMIG-006 | verified | SMOKE | BLOCKED:requires DBMIG-006 and human production gate |
-| DBMIG-008 | P5 | dbmig | Wave D: chat client message id (CHAT-002) + msg-rate limit (CHAT-009) — staging verified; ⛔ prod | NEW | H | D | DBMIG-002, CHAT-002, CHAT-009 | staging + reducer tests green; ⛔ approved | RD-01 | TODO |
-| DBMIG-009 | P5 | dbmig | Wave D prod verification | NEW | M | D | DBMIG-008 | verified | RT-RC | TODO |
+| DBMIG-008 | P5 | dbmig | Wave D: chat client message id (CHAT-002) + msg-rate limit (CHAT-009) — staging verified; ⛔ prod | NEW | H | D | DBMIG-002, CHAT-002, CHAT-009 | staging + reducer tests green; ⛔ approved | RD-01 | BLOCKED_BY_OWNER_STAGING:files+static contracts green; not applied |
+| DBMIG-009 | P5 | dbmig | Wave D prod verification | NEW | M | D | DBMIG-008 | verified | RT-RC | BLOCKED_BY_OWNER_STAGING:staging first; production untouched |
 | DBMIG-010 | P6 | dbmig | Wave E: AAL2/recent-auth DB enforcement migrations per APPROVED SEC-018 design (RPC assurance params / RLS checks / EXECUTE revocations) — staging verified; ⛔ prod | NEW | H | S,D | DBMIG-002, SEC-018 | BYPASS suite green on staging; ⛔ approved | BYPASS | TODO |
 | DBMIG-011 | P6 | dbmig | Wave E prod verification + bypass re-probe on prod | NEW | H | S | DBMIG-010 | BYPASS green on prod | BYPASS | TODO |
 | DBMIG-012 | P7 | dbmig | Migration ledger close-out: every wave verified; no orphan migration files | NEW | M | D | DBMIG-003..011 | close-out report | — | TODO |
