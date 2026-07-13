@@ -18,6 +18,7 @@ const DOMAINS = [
   'account',
   'chat',
   'notifications',
+  'admin',
 ] as const
 
 export default getRequestConfig(async ({ requestLocale }) => {

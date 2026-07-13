@@ -8,6 +8,7 @@ import type forms from '../messages/en/forms.json'
 import type account from '../messages/en/account.json'
 import type chat from '../messages/en/chat.json'
 import type notifications from '../messages/en/notifications.json'
+import type admin from '../messages/en/admin.json'
 
 /** FOUND-011: typed message keys — a missing/typo'd key is a compile error. */
 declare module 'next-intl' {
@@ -23,6 +24,7 @@ declare module 'next-intl' {
       account: typeof account
       chat: typeof chat
       notifications: typeof notifications
+      admin: typeof admin
     }
   }
 }
