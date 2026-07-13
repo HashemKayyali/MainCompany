@@ -48,14 +48,26 @@ BASE-013 found no happy-path echo duplicate in the legacy client, but a real tim
 - Verify authenticated quick-question/text sending, live replies, live notification insert/update, bell/page convergence, and message-rate responses.
 - Human DBMIG/readiness approval and CUT-005 authorization.
 
-## Code-side evidence at report creation
+## Final non-production validation
 
-- Focused realtime and notification tests: 36 passed.
-- Typecheck, ESLint, architecture/service-role gates: PASS.
+- Clean `npm ci --no-audit`: PASS — 707 packages; `npm ls --depth=0` valid.
+- Format, strict typecheck, ESLint, architecture/service-role gates: PASS.
 - I18N coverage: PASS — 9 EN/AR domains synchronized.
-- Circular dependency gate: PASS — 193 files, zero cycles.
+- Circular dependency gate: PASS — 194 files, zero cycles.
+- Full unit/static-contract suite: PASS — 21 files; 118 passed, 32 staging-gated skips, 2 pre-existing TODO.
+- Focused realtime and notification suite: PASS — 36 tests.
 - Production build: PASS; `/notifications` is dynamic and prior public route/cache topology is preserved.
-- Phase 5 local Playwright: PASS — 16/16 across EN/AR desktop/mobile.
+- Full local Playwright matrix: PASS — 68/68 across EN/AR desktop/mobile, including prior Phase 0–4 coverage and 16 Phase 5 cases.
+
+## Preview-safe evidence
+
+- Authenticated CLI identity: `hashemkayyali99-1043`.
+- Isolated Vercel project: `eventies-next-preview` (`prj_TgwOvGi0IIKhiI9fBIC0keVlKcl0`).
+- Required Preview Turnstile variables exist: `TURNSTILE_SECRET_KEY`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (values remained encrypted).
+- Preview deployment: `dpl_9fRbt2JEGW59FhVosfukRjBt9Egq` (`READY`, `target: null`; no `--prod`).
+- URL: `https://eventies-next-preview-p6oighu1j-hashemkayyalis-projects.vercel.app`.
+- Phase 5 safe Preview Playwright: PASS — 16/16 across EN/AR desktop/mobile.
+- Evidence covered localized fixtures, Bidi/RTL, input bounds/keyboard access, signed-out notification boundaries, and the lazy widget. It did not mutate Supabase.
 
 ## Scope guard
 
