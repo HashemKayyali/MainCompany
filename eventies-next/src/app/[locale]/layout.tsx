@@ -31,6 +31,18 @@ export const metadata: Metadata = {
   title: 'Eventies',
 }
 
+function supabaseOrigin(): string | null {
+  const configuredUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!configuredUrl) return null
+
+  try {
+    const url = new URL(configuredUrl)
+    return url.protocol === 'https:' ? url.origin : null
+  } catch {
+    return null
+  }
+}
+
 export default async function LocaleLayout({
   children,
   params,
@@ -83,12 +95,17 @@ export default async function LocaleLayout({
     '--app-navbar-height': '74px',
     '--app-header-offset': '74px',
   } as CSSProperties
+  const configuredSupabaseOrigin = supabaseOrigin()
 
   return (
     <html lang={locale} dir={dir} className="light">
       <head>
-        <link rel="preconnect" href="https://dqizzlcsioqykfeldtsj.supabase.co" crossOrigin="" />
-        <link rel="dns-prefetch" href="https://dqizzlcsioqykfeldtsj.supabase.co" />
+        {configuredSupabaseOrigin ? (
+          <>
+            <link rel="preconnect" href={configuredSupabaseOrigin} crossOrigin="" />
+            <link rel="dns-prefetch" href={configuredSupabaseOrigin} />
+          </>
+        ) : null}
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
