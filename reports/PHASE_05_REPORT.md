@@ -76,3 +76,9 @@ Production was not mutated. QG-P5 is not passed. Phase 6 was not started.
 ## 2026-07-14 Staging isolation attempt
 
 QG-P5 remains **BLOCKED**. The environment guard stopped execution before chat, notification, Realtime, reconnect, multi-tab, rate-limit, or deduplication fixtures were created. No live Phase 5 mutation or subscription evidence was produced.
+
+## 2026-07-14 Staging live-validation continuation
+
+Real Staging evidence now passes for authenticated conversation creation, concurrent `client_message_id` duplicate collapse, cross-user conversation isolation, durable chat counter convergence, notification creation, mark-read, and server-authoritative unread-count convergence. The Preview EN/AR desktop/mobile suite also passed the localized realtime and notification surfaces. Fixture cleanup was verified.
+
+QG-P5 remains **BLOCKED** because live Realtime subscribe/buffer/snapshot/replay, reconnect overlap, anonymous chat behavior, and real multi-tab convergence were not executed. These are not inferred from reducer and fixture tests.

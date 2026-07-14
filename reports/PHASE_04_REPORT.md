@@ -67,3 +67,9 @@ Production was not mutated. Phase 5 was not started.
 ## 2026-07-14 Staging isolation attempt
 
 QG-P4 remains **BLOCKED**. Environment isolation failed closed before any customer fixture or transactional request. No rental, quote, profile, RLS-persona, idempotency, concurrency, retry, or cache-invalidation mutation was executed.
+
+## 2026-07-14 Staging live-validation continuation
+
+Real Staging evidence now passes for own-profile update, cross-user profile isolation, concurrent rental-request idempotency, concurrent purchase-quote idempotency, and cross-user request isolation. Two independently constructed application clients returned the same committed row for each shared idempotency key. All disposable users, requests, quotes, status history, item rows, and product fixtures were removed and zero residual fixtures were verified.
+
+QG-P4 remains **BLOCKED** because timeout-after-commit recovery, authenticated browser history/detail surfaces, post-success cache-tag invalidation observation, and a frozen-Vite live compatibility mutation were not completed. Production was not used as a substitute.

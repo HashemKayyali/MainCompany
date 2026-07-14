@@ -105,3 +105,9 @@ DBMIG-010 was authored after explicit approval but was not applied to staging or
 ## 2026-07-14 Staging isolation attempt
 
 QG-P6 remains **BLOCKED**. The environment guard stopped before admin/MFA personas, privileged RPCs, destructive operations, uploads, Cloudinary calls, audit persistence, rollback, cache invalidation, or last-superadmin live checks. The Staging Custom Access Token hook activation and Edge Function secret state were not inspected after the guard failure, and no Phase 6 mutation was attempted.
+
+## 2026-07-14 Staging live-validation continuation
+
+The environment guard and Preview isolation now pass, and PostgREST publishes all 29 application RPC contracts. However, an authorized admin fixture cannot be bootstrapped: the canonical `lock_profile_role` trigger rejects a service-role profile role change unless the request already has an authenticated superadmin. Staging has no owner-provided superadmin persona. Consequently AAL1/AAL2, MFA, role-change-after-JWT, disabled-admin, final-superadmin, BYPASS-01..09, destructive atomicity/audit/cache, and quota live matrices remain **BLOCKED**.
+
+`supabase functions list` returned no deployed functions, so the trusted `cloudinary-assets` Edge boundary and its secret state cannot be live-validated. No external Cloudinary delete was attempted. QG-P6 is not passed, direct DELETE revocation remains deferred, and Phase 7 was not started.

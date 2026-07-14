@@ -71,3 +71,11 @@ The repository now includes `eventies-next/scripts/assert-staging-environment.mj
 The official `vercel env run -e preview` command was tested before any subsequent build or integration command. With the existing ignored `.env.local` present, the guard rejected the Production-targeted local value. After temporarily isolating that file, Vercel CLI still did not inject the required Preview values into the child process. A read-only Preview environment pull confirmed that the relevant encrypted entries were unavailable as empty values to local execution. The original `.env.local` was restored unchanged, the temporary Preview snapshot was deleted, and neither file was tracked.
 
 Consequently, no subsequent build, database integration test, Playwright run, Preview deployment, fixture creation, or live mutation was performed. The previous anonymous Production read remains the only Production access recorded; no Production mutation occurred.
+
+## Live-validation continuation audit
+
+The prior Preview environment issue was resolved without restoring `eventies-next/.env.local`. A fresh Preview-only deployment was made after replacing the hard-coded Production Supabase preconnect with an environment-derived HTTPS origin. Deployment verification found Staging and no Production ref.
+
+Tracked continuation work consists of the environment-isolation correction, a non-mutating OpenAPI-based RPC discovery contract, a cleanup-safe Staging live smoke runner, and Phase 3–6 evidence reports. The runner prints only result labels, never credentials, tokens, cookies, emails, URLs containing secrets, or row identifiers. Its cleanup selector is limited to the reserved disposable email prefixes and exact product title; cleanup was verified after each attempt and after the final run.
+
+Validation passed: clean install, format, typecheck, lint, architecture/i18n/cycle gates, 230 unit/contract tests, 84 Preview Playwright tests, production build, migration-history comparison, and linked database lint. No applied migration file was edited, no forward migration was needed, no secret or customer data was added, Production was not accessed or modified in this continuation, and Phase 7 was not started.

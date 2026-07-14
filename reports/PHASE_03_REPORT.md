@@ -82,3 +82,11 @@ Progressive delay starts at 250 ms and doubles to a 4 s cap. State is designed f
 ## 2026-07-14 Staging isolation attempt
 
 QG-P3 remains **BLOCKED**. The Staging guard stopped before build or live Auth traffic because Vercel CLI could not inject the required Preview Supabase and Turnstile values into a local `env run` child process. No registration, login, recovery, password update, session, Turnstile-success, durable-limit, deduplication, BRIDGE-01 cohort, or dashboard-native limit evidence was produced in this attempt.
+
+## 2026-07-14 Staging live-validation continuation
+
+The prior environment blocker is resolved. The guard returned `STAGING_ENV_CONFIRMED` for `ogfgaupebcabuoczoqcy`, and the isolated Preview contains the Staging ref with the Production ref absent.
+
+Real disposable-fixture evidence passed for password login, profile creation, session refresh, password update, recovery-token exchange, HTTPS Secure cookies, session versus 400-day remember-me cookies, logout, global revocation, durable multi-client rate counters, concurrent form deduplication, missing-token challenge enforcement, and the Turnstile success path. Fixture cleanup was verified.
+
+QG-P3 remains **BLOCKED** for exact live gaps: public registration returned the enumeration-safe 200 response but did not persist an Auth user; the configured always-pass Turnstile test secret cannot prove invalid-token rejection or replay rejection; no BRIDGE-01 cohort percentage or Supabase dashboard-native limit evidence exists; OAuth-provider, expired-session, and true multi-tab evidence remain incomplete. No evidence was fabricated.
