@@ -207,12 +207,13 @@ try {
   } else {
     const signupEmail = `eventies-staging-signup-${Date.now()}-${randomUUID()}@${signupEmailDomain}`
     const signupPassword = `Rg!${randomBytes(18).toString('base64url')}7c`
+    const signupTurnstileToken = `staging-signup-${randomUUID()}`
     const signupResponse = await previewPost('/api/auth/signup', {
       email: signupEmail,
       password: signupPassword,
       rememberMe: false,
       name: 'Disposable Preview Registration',
-      turnstileToken: 'XXXX.DUMMY.TOKEN.XXXX',
+      turnstileToken: signupTurnstileToken,
     })
     assert(signupResponse.status === 200, `Preview registration returned ${signupResponse.status}`)
     const signupUsers = await service.auth.admin.listUsers({ page: 1, perPage: 1000 })
@@ -319,22 +320,24 @@ try {
   }
   assert(challengeRequired, 'Durable login threshold did not require Turnstile')
   record('P3_PREVIEW_TURNSTILE_MISSING', true)
+  const invalidTurnstileToken = `staging-invalid-${randomUUID()}`
   const failedChallenge = await previewPost('/api/auth/login', {
     email: userA.email,
     password: newPassword,
     rememberMe: false,
-    turnstileToken: 'invalid-staging-token',
+    turnstileToken: invalidTurnstileToken,
   })
   record(
     'P3_PREVIEW_TURNSTILE_FAILURE',
     failedChallenge.status === 403,
     failedChallenge.status === 403 ? '' : 'ALWAYS_PASS_TEST_SECRET'
   )
+  const loginTurnstileToken = `staging-login-${randomUUID()}`
   const passedChallenge = await previewPost('/api/auth/login', {
     email: userA.email,
     password: newPassword,
     rememberMe: false,
-    turnstileToken: 'XXXX.DUMMY.TOKEN.XXXX',
+    turnstileToken: loginTurnstileToken,
   })
   assert(passedChallenge.status === 200, 'Turnstile test-token success path failed')
   record('P3_PREVIEW_TURNSTILE_SUCCESS', true)
@@ -342,7 +345,7 @@ try {
     email: userA.email,
     password: newPassword,
     rememberMe: false,
-    turnstileToken: 'XXXX.DUMMY.TOKEN.XXXX',
+    turnstileToken: loginTurnstileToken,
   })
   record(
     'P3_PREVIEW_TURNSTILE_REPLAY',
