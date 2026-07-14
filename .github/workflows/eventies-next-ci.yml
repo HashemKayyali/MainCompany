@@ -39,6 +39,9 @@ jobs:
         env:
           CT_SUPABASE_URL: ${{ secrets.CT_SUPABASE_URL }}
           CT_SUPABASE_ANON_KEY: ${{ secrets.CT_SUPABASE_ANON_KEY }}
+          CT_ADMIN_KEY: ${{ secrets.CT_ADMIN_KEY }}
+          CT_USER_JWT: ${{ secrets.CT_USER_JWT }}
+          CT_ADMIN_JWT: ${{ secrets.CT_ADMIN_JWT }}
       - name: Build
         run: npm run build
         env:

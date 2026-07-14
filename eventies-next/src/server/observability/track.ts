@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { writeScrubbedAppEvent } from './app-events-sink'
 import { scrubPayload, type ScrubbedPayload } from './scrub'
 
 /**
@@ -22,6 +23,9 @@ export async function track(event: string, payload: Record<string, unknown> = {}
 
   // Structured log — always.
   console.log(`[app_event] ${JSON.stringify(record)}`)
+
+  // Durable DB sink — best effort and already scrubbed.
+  await writeScrubbedAppEvent(event, scrubbed)
 
   // Sentry — optional capability (FOUND-016); import lazily so the app never
   // pays for it when unconfigured.

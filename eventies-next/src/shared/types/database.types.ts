@@ -5,7 +5,7 @@
 // should regenerate / reconcile these types, e.g.:
 //   supabase gen types typescript --project-id <id> --schema public > src/lib/database.types.ts
 // Last reconciled against: canonical baseline through
-// 20260715000001_phase6_admin_assurance.sql.
+// 20260715000005_phase3_turnstile_replay_claims.sql.
 // ----------------------------------------------------------------------------
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
@@ -774,6 +774,17 @@ export interface Database {
         Relationships: []
       }
 
+      turnstile_token_claims: {
+        Row: {
+          token_hash: string
+          expires_at: string
+          created_at: string
+        }
+        Insert: { token_hash: string; expires_at: string; created_at?: string }
+        Update: { token_hash?: string; expires_at?: string; created_at?: string }
+        Relationships: []
+      }
+
       rental_requests: {
         Row: {
           id: string
@@ -1189,6 +1200,10 @@ export interface Database {
       }
       claim_public_form_dedup: {
         Args: { p_dedup_key: string }
+        Returns: boolean
+      }
+      claim_turnstile_token: {
+        Args: { p_token_hash: string; p_ttl_seconds?: number }
         Returns: boolean
       }
       get_notification_unread_count: {

@@ -58,12 +58,63 @@ describe.skipIf(!enabled)('CT-RLS: anon persona', () => {
   })
 })
 
+function authenticated(jwt: string) {
+  return createClient<Database>(url!, anonKey!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${jwt}` } },
+  })
+}
+
 describe.skipIf(!enabled || !process.env.CT_USER_JWT)('CT-RLS: authenticated persona', () => {
-  it.todo('user reads only own rental_requests (needs CT_USER_JWT fixture)')
+  const jwt = process.env.CT_USER_JWT!
+
+  it('reads the own profile and no other profiles', async () => {
+    const client = authenticated(jwt)
+    const identity = await client.auth.getUser(jwt)
+    expect(identity.error).toBeNull()
+    expect(identity.data.user?.id).toBeTruthy()
+
+    const userId = identity.data.user!.id
+    const own = await client.from('profiles').select('id,role').eq('id', userId).single()
+    expect(own.error).toBeNull()
+    expect(own.data?.id).toBe(userId)
+
+    const others = await client.from('profiles').select('id').neq('id', userId).limit(5)
+    expect(others.error).toBeNull()
+    expect(others.data ?? []).toHaveLength(0)
+  })
+
+  it('cannot promote the own profile through a direct table update', async () => {
+    const client = authenticated(jwt)
+    const identity = await client.auth.getUser(jwt)
+    const userId = identity.data.user!.id
+    const promoted = await client
+      .from('profiles')
+      .update({ role: 'admin' })
+      .eq('id', userId)
+      .select('role')
+
+    expect(promoted.error).not.toBeNull()
+  })
 })
 
 describe.skipIf(!enabled || !process.env.CT_ADMIN_JWT)('CT-RLS: admin persona', () => {
-  it.todo('admin write surface per policy matrix (needs CT_ADMIN_JWT fixture)')
+  const jwt = process.env.CT_ADMIN_JWT!
+
+  it('can read the admin-authorized profile surface', async () => {
+    const client = authenticated(jwt)
+    const identity = await client.auth.getUser(jwt)
+    expect(identity.error).toBeNull()
+    const userId = identity.data.user!.id
+
+    const own = await client.from('profiles').select('id,role,is_active').eq('id', userId).single()
+    expect(own.error).toBeNull()
+    expect(['admin', 'superadmin']).toContain(own.data?.role)
+    expect(own.data?.is_active).toBe(true)
+
+    const profiles = await client.from('profiles').select('id,role').limit(5)
+    expect(profiles.error).toBeNull()
+  })
 })
 
 if (!enabled) {

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { BridgeTestClient } from './bridge-test-client'
+import { isBridgeTestAvailable } from './availability'
 
 /**
  * AUTHP-002 — /bridge-test: preview-only P1B experiment surface.
@@ -12,6 +14,8 @@ export const metadata: Metadata = {
 }
 
 export default function BridgeTestPage() {
+  if (!isBridgeTestAvailable()) notFound()
+
   return (
     <main>
       <h1>P1B — auth bridge test</h1>

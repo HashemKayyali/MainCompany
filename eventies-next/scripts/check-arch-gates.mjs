@@ -18,6 +18,10 @@ import { join, relative, sep } from 'node:path'
 
 const SRC = join(process.cwd(), 'src')
 const failures = []
+const SERVICE_ROLE_ALLOWLIST = new Set([
+  'src/server/env.ts',
+  'src/server/supabase/service-role-rest.ts',
+])
 
 function* walk(dir) {
   for (const entry of readdirSync(dir)) {
@@ -52,7 +56,7 @@ for (const file of walk(SRC)) {
   }
 
   // GATE 3 — QG-ARCH-4
-  if (/SUPABASE_SERVICE_ROLE_KEY/.test(text) && rel !== 'src/server/env.ts') {
+  if (/SUPABASE_SERVICE_ROLE_KEY/.test(text) && !SERVICE_ROLE_ALLOWLIST.has(rel)) {
     failures.push(`[QG-ARCH-4] ${rel} references the service-role key outside src/server/env.ts`)
   }
   if (/NEXT_PUBLIC_[A-Z_]*SERVICE_ROLE/.test(text)) {

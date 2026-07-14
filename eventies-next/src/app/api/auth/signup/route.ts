@@ -16,11 +16,20 @@ export async function POST(request: NextRequest) {
   const supabase = await createSupabaseServerClient({
     persistence: parsed.data.rememberMe ? 'persistent' : 'session',
   })
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: { data: { name: parsed.data.name } },
   })
-  await track(error ? 'auth.signup_failed' : 'auth.signup_submitted', {})
+  if (error || !data.user) {
+    await track('auth.signup_failed', {
+      reason: error?.code ?? 'user-not-returned',
+      status: error?.status ?? 0,
+    })
+  } else {
+    await track('auth.signup_submitted', {
+      confirmationRequired: data.session === null,
+    })
+  }
   return NextResponse.json({ ok: true, message: UNIFORM_AUTH_MESSAGE })
 }

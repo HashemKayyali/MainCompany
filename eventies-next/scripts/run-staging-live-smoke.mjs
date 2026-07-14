@@ -7,6 +7,7 @@ const url = process.env.NEXT_PUBLIC_SUPABASE_URL
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const previewUrl = process.argv.find((argument) => argument.startsWith('https://'))
+const signupEmailDomain = process.env.STAGING_SIGNUP_EMAIL_DOMAIN?.trim().toLowerCase()
 
 if (!url || !anonKey || !serviceKey)
   throw new Error('Required Preview Supabase variables are missing')
@@ -106,7 +107,7 @@ async function cleanup() {
     if (listed.error) throw new Error('Fixture user discovery failed')
     fixtureUsers.push(
       ...listed.data.users.filter((user) =>
-        /^eventies-customer-[ab]-.*@example[.](?:test|com)$/u.test(user.email ?? '')
+        /^eventies-(?:customer-[ab]|staging-signup)-/u.test(user.email ?? '')
       )
     )
     if (listed.data.users.length < 100) break
@@ -159,8 +160,8 @@ async function cleanup() {
     await remove('admin_media_operations', 'actor_id', userIds)
     await remove('admin_rpc_idempotency', 'actor_id', userIds)
 
-    for (const user of fixtureUsers) {
-      const { error } = await service.auth.admin.deleteUser(user.id)
+    for (const userId of userIds) {
+      const { error } = await service.auth.admin.deleteUser(userId)
       if (error) throw new Error('Fixture auth-user cleanup failed')
     }
   }
@@ -175,7 +176,7 @@ async function cleanup() {
   if (listed.error) throw new Error('Cleanup verification failed')
   remainingUsers.push(
     ...listed.data.users.filter((user) =>
-      /^eventies-customer-[ab]-.*@example[.](?:test|com)$/u.test(user.email ?? '')
+      /^eventies-(?:customer-[ab]|staging-signup)-/u.test(user.email ?? '')
     )
   )
   const remainingProducts = await service
@@ -197,24 +198,41 @@ try {
   const userA = await createUser('customer-a')
   const userB = await createUser('customer-b')
 
-  const signupEmail = `eventies-customer-a-${Date.now()}-${randomUUID()}@example.com`
-  const signupPassword = `Rg!${randomBytes(18).toString('base64url')}7c`
-  const signupResponse = await previewPost('/api/auth/signup', {
-    email: signupEmail,
-    password: signupPassword,
-    rememberMe: false,
-    name: 'Disposable Preview Registration',
-    turnstileToken: 'XXXX.DUMMY.TOKEN.XXXX',
-  })
-  assert(signupResponse.status === 200, `Preview registration returned ${signupResponse.status}`)
-  const signupUsers = await service.auth.admin.listUsers({ page: 1, perPage: 1000 })
-  const signupUser = signupUsers.data.users.find((user) => user.email === signupEmail)
-  assert(!signupUsers.error, 'Preview registration verification failed')
-  if (signupUser) {
-    createdUsers.push(signupUser.id)
-    record('P3_PREVIEW_REGISTRATION_TURNSTILE_SUCCESS', true)
+  if (!signupEmailDomain || /(?:^|[.])(example|test|invalid)$/u.test(signupEmailDomain)) {
+    record(
+      'P3_PREVIEW_REGISTRATION_TURNSTILE_SUCCESS',
+      false,
+      'STAGING_SIGNUP_EMAIL_DOMAIN_REQUIRED'
+    )
   } else {
-    record('P3_PREVIEW_REGISTRATION_TURNSTILE_SUCCESS', false, 'AUTH_SIGNUP_NOT_PERSISTED')
+    const signupEmail = `eventies-staging-signup-${Date.now()}-${randomUUID()}@${signupEmailDomain}`
+    const signupPassword = `Rg!${randomBytes(18).toString('base64url')}7c`
+    const signupResponse = await previewPost('/api/auth/signup', {
+      email: signupEmail,
+      password: signupPassword,
+      rememberMe: false,
+      name: 'Disposable Preview Registration',
+      turnstileToken: 'XXXX.DUMMY.TOKEN.XXXX',
+    })
+    assert(signupResponse.status === 200, `Preview registration returned ${signupResponse.status}`)
+    const signupUsers = await service.auth.admin.listUsers({ page: 1, perPage: 1000 })
+    const signupUser = signupUsers.data.users.find((user) => user.email === signupEmail)
+    assert(!signupUsers.error, 'Preview registration verification failed')
+    if (signupUser) {
+      createdUsers.push(signupUser.id)
+      const profile = await service
+        .from('profiles')
+        .select('id')
+        .eq('id', signupUser.id)
+        .maybeSingle()
+      assert(
+        !profile.error && profile.data?.id === signupUser.id,
+        'Signup profile was not persisted'
+      )
+      record('P3_PREVIEW_REGISTRATION_TURNSTILE_SUCCESS', true)
+    } else {
+      record('P3_PREVIEW_REGISTRATION_TURNSTILE_SUCCESS', false, 'AUTH_SIGNUP_NOT_PERSISTED')
+    }
   }
 
   const { data: profiles, error: profileError } = await service

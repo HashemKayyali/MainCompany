@@ -2,6 +2,7 @@ import 'server-only'
 
 import { serverEnv } from '@/server/env'
 import { track } from '@/server/observability/track'
+import { claimVerifiedTurnstileToken } from './turnstile-replay-store'
 
 /**
  * FOUND-034 — server-side Turnstile verification (05 §Bot defense:
@@ -35,6 +36,17 @@ export async function verifyTurnstileToken(
     if (!data.success) {
       return { ok: false, errorCodes: data['error-codes'] ?? ['unknown'] }
     }
+
+    const replayClaim = await claimVerifiedTurnstileToken(token)
+    if (replayClaim === 'duplicate') {
+      await track('turnstile.replay_rejected', {})
+      return { ok: false, errorCodes: ['timeout-or-duplicate'] }
+    }
+    if (replayClaim === 'unavailable') {
+      await track('turnstile.replay_store_unavailable', {})
+      return { ok: false, errorCodes: ['replay-store-unavailable'] }
+    }
+
     return { ok: true }
   } catch (error) {
     await track('turnstile.verify_failed', {
