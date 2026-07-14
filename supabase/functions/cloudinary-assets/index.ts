@@ -500,7 +500,12 @@ function rol(value: number, bits: number) {
 }
 
 function normalizeFolder(value: unknown) {
-  return stringValue(value).replace(/^\/+|\/+$/g, '')
+  const normalized = stringValue(value).replace(/^\/+|\/+$/g, '')
+  const rootPrefix = `${ROOT_FOLDER}/`
+
+  return normalized.startsWith(rootPrefix)
+    ? normalized.slice(rootPrefix.length)
+    : normalized
 }
 
 function isSafePublicId(value: string) {

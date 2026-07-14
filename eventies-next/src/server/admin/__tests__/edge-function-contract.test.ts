@@ -33,4 +33,10 @@ describe('ADMIN-015/016 Edge Function hardening contract', () => {
     expect(source).not.toContain('p_actor_id: auth.actorId')
     expect(source).not.toContain('body.uploadPreset')
   })
+
+  it('accepts legacy and canonical upload folder forms', () => {
+    expect(source).toContain('const rootPrefix = ${ROOT_FOLDER}/')
+    expect(source).toContain('normalized.startsWith(rootPrefix)')
+    expect(source).toContain('normalized.slice(rootPrefix.length)')
+  })
 })
