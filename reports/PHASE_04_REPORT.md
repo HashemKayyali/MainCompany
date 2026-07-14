@@ -63,3 +63,7 @@ It was not applied to staging or production. Required next evidence: staging app
 ## Scope guard
 
 Production was not mutated. Phase 5 was not started.
+
+## 2026-07-14 Staging isolation attempt
+
+QG-P4 remains **BLOCKED**. Environment isolation failed closed before any customer fixture or transactional request. No rental, quote, profile, RLS-persona, idempotency, concurrency, retry, or cache-invalidation mutation was executed.

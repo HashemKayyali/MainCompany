@@ -72,3 +72,7 @@ BASE-013 found no happy-path echo duplicate in the legacy client, but a real tim
 ## Scope guard
 
 Production was not mutated. QG-P5 is not passed. Phase 6 was not started.
+
+## 2026-07-14 Staging isolation attempt
+
+QG-P5 remains **BLOCKED**. The environment guard stopped execution before chat, notification, Realtime, reconnect, multi-tab, rate-limit, or deduplication fixtures were created. No live Phase 5 mutation or subscription evidence was produced.

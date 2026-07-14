@@ -78,3 +78,7 @@ Progressive delay starts at 250 ms and doubles to a 4 s cap. State is designed f
 
 - No production migration, production deployment, production Vercel project/domain change, force push, or `npm audit fix --force` occurred.
 - Phase 4 was not started.
+
+## 2026-07-14 Staging isolation attempt
+
+QG-P3 remains **BLOCKED**. The Staging guard stopped before build or live Auth traffic because Vercel CLI could not inject the required Preview Supabase and Turnstile values into a local `env run` child process. No registration, login, recovery, password update, session, Turnstile-success, durable-limit, deduplication, BRIDGE-01 cohort, or dashboard-native limit evidence was produced in this attempt.

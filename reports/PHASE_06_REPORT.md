@@ -101,3 +101,7 @@ DBMIG-010 was authored after explicit approval but was not applied to staging or
 - `38e48066` — `feat(ADMIN-005 ADMIN-009 ADMIN-010 ADMIN-011 ADMIN-013 ADMIN-017 ADMIN-020 ADMIN-029): complete admin server contracts`
 - `2143ad6e` — `feat(DBMIG-010 SEC-016 ADMIN-003 ADMIN-014 ADMIN-015 ADMIN-016): enforce privileged boundaries`
 - `20f5ef8a` — `fix(DBMIG-010 SEC-016 BYPASS-01..09): tighten approved boundaries`
+
+## 2026-07-14 Staging isolation attempt
+
+QG-P6 remains **BLOCKED**. The environment guard stopped before admin/MFA personas, privileged RPCs, destructive operations, uploads, Cloudinary calls, audit persistence, rollback, cache invalidation, or last-superadmin live checks. The Staging Custom Access Token hook activation and Edge Function secret state were not inspected after the guard failure, and no Phase 6 mutation was attempted.

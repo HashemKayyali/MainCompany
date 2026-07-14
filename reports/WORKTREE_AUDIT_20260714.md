@@ -63,3 +63,11 @@ The `20260715000003` migration creates and grants the custom access-token hook f
 - Focused AUTH-007, BRIDGE-01, canonical-baseline, and Phase 6 migration contracts: PASS — 70/70.
 - Complete unit and contract suite: PASS — 38 files; 228 passed, 41 staging-gated skips, 2 existing TODOs.
 - Production build: PASS — Next.js 16.2.10 compiled, typechecked, and generated 115 static pages. The environment-target issue above remains an audit blocker even though the build itself passed.
+
+## Staging environment isolation follow-up
+
+The repository now includes `eventies-next/scripts/assert-staging-environment.mjs`. It requires the public Staging URL plus both configured public Supabase keys, rejects the Production project ref, and inspects every configured Supabase URL without printing values.
+
+The official `vercel env run -e preview` command was tested before any subsequent build or integration command. With the existing ignored `.env.local` present, the guard rejected the Production-targeted local value. After temporarily isolating that file, Vercel CLI still did not inject the required Preview values into the child process. A read-only Preview environment pull confirmed that the relevant encrypted entries were unavailable as empty values to local execution. The original `.env.local` was restored unchanged, the temporary Preview snapshot was deleted, and neither file was tracked.
+
+Consequently, no subsequent build, database integration test, Playwright run, Preview deployment, fixture creation, or live mutation was performed. The previous anonymous Production read remains the only Production access recorded; no Production mutation occurred.
