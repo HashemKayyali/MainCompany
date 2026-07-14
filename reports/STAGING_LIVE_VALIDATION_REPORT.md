@@ -59,7 +59,7 @@ The guard never returned `STAGING_ENV_CONFIRMED`. Therefore no safe build, integ
 - `QG-P3`: **BLOCKED** — no new mandatory live Auth/security evidence.
 - `QG-P4`: **BLOCKED** — no live customer transactional evidence.
 - `QG-P5`: **BLOCKED** — no live Realtime/chat/notification evidence.
-- `QG-P6`: **BLOCKED** — no live MFA/authorization/audit/media evidence.
+- `QG-P6`: **HOLD_SHARED_CACHE** — Phase 6 security/media implementation is closed; only shared live cache invalidation evidence remains under QG-P4.
 
 ## Safety and owner action
 
@@ -91,6 +91,33 @@ The prior environment blocker is resolved. `vercel env run -e preview` now injec
 - `QG-P3 BLOCKED`: signup did not persist a user; always-pass Turnstile keys cannot prove failure/replay; BRIDGE-01 percentage, dashboard limits, OAuth, expired-session, and real multi-tab evidence are missing.
 - `QG-P4 BLOCKED`: timeout-after-commit, authenticated browser detail/history, live cache invalidation, and frozen-Vite mutation evidence are missing.
 - `QG-P5 BLOCKED`: live Realtime subscription/replay/reconnect, anonymous chat, and multi-tab convergence are missing.
-- `QG-P6 BLOCKED`: no authorized Staging superadmin exists and the role-lock trigger prevents service-role bootstrap; no Edge Function is deployed, so MFA/AAL2, BYPASS-01..09, destructive/audit/cache, media, and quota evidence cannot run.
+- `QG-P6 HOLD_SHARED_CACHE`: Phase 6 security/media implementation is closed; only shared live cache invalidation evidence remains under QG-P4.
 
 Production was not accessed or modified during this resumed execution. No Production deployment, migration, user, data, domain, or Cloudinary asset was touched. Phase 7 was not started. Final verdict remains `BLOCKED_WITH_EXACT_REASON`.
+
+## 2026-07-15 Phase 6 authoritative closure evidence
+
+This section supersedes earlier Phase 6 owner-blocked and no-live-evidence
+statements in this report.
+
+- Authorized Staging ref confirmed: `ogfgaupebcabuoczoqcy`.
+- Production ref `dqizzlcsioqykfeldtsj` remained forbidden and untouched.
+- First Superadmin bootstrap, retirement, credential rotation, and audit: PASS.
+- TOTP enrollment/challenge, AAL1 denial, AAL2 success, and `auth_time`: PASS.
+- Role mutation, disabled-admin denial, role-change-after-JWT denial: PASS.
+- Final-Superadmin demotion/removal protections: PASS.
+- BYPASS-01 through BYPASS-09 direct-call matrix: PASS.
+- Atomic rollback, bulk cap 25, duplicate collapse, and audit matrix: PASS.
+- Disposable users, factors, sessions, notifications, and fixtures: CLEAN.
+- `cloudinary-assets`: ACTIVE, version 2.
+- Canonical `eventies/products` and legacy `products` upload folders: PASS.
+- Edge destructive rollout remains disabled.
+- Focused contract tests: 60/60 PASS.
+- TypeScript validation: PASS.
+
+Phase 6 implementation is CLOSED.
+
+Formal `QG-P6` remains `HOLD_SHARED_CACHE` only until the shared live
+read-after-mutation cache invalidation evidence is recorded with QG-P4.
+
+Phase 7 remains NOT STARTED.
