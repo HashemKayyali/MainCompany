@@ -89,7 +89,7 @@ export function HeroClient({
             >
               {t('exploreCta')}
               <ArrowRight
-                className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                className="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
                 strokeWidth={2.4}
               />
             </Link>

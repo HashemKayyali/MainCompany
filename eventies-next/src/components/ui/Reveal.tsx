@@ -33,7 +33,10 @@ export function Reveal({
     <motion.div
       className={className}
       dir={dir}
-      initial={{ opacity: 0, y }}
+      // Content is deliberately opaque in the server and initial client frame.
+      // IntersectionObserver enhances position only, so failed hydration,
+      // screenshot automation, or a slow observer can never hide the content.
+      initial={{ opacity: 1, y }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}
       transition={{ duration: 0.6, delay, ease: [0.4, 0, 0.2, 1] }}

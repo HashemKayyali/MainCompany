@@ -13,6 +13,7 @@ import { getProducts } from '@/server/dal/products'
 import { getCategories } from '@/server/dal/categories'
 import { AuthSessionLifecycle } from '@/features/auth/AuthSessionLifecycle'
 import { RealtimeShell } from '@/features/realtime/RealtimeShell'
+import { alexandria, ibmPlexSansArabic, sora } from '@/lib/fonts'
 import '../globals.css'
 
 /**
@@ -98,7 +99,11 @@ export default async function LocaleLayout({
   const configuredSupabaseOrigin = supabaseOrigin()
 
   return (
-    <html lang={locale} dir={dir} className="light">
+    <html
+      lang={locale}
+      dir={dir}
+      className={`${alexandria.variable} ${ibmPlexSansArabic.variable} ${sora.variable} light`}
+    >
       <head>
         {configuredSupabaseOrigin ? (
           <>
@@ -107,8 +112,6 @@ export default async function LocaleLayout({
           </>
         ) : null}
         <link rel="preconnect" href="https://res.cloudinary.com" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="" />
       </head>
       <body>

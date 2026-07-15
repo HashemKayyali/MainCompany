@@ -97,6 +97,8 @@ export function SiteNav({
   const moreRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const mobileToggleRef = useRef<HTMLButtonElement>(null)
+  const mobileDrawerRef = useRef<HTMLDivElement>(null)
 
   const overHero = HERO_PATHS.has(pathname) && !scrolled
 
@@ -148,9 +150,34 @@ export function SiteNav({
   useEffect(() => {
     if (!mobileOpen) return
     const prev = document.body.style.overflow
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const mobileToggle = mobileToggleRef.current
     document.body.style.overflow = 'hidden'
+    const drawer = mobileDrawerRef.current
+    const focusable = drawer?.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+    focusable?.[0]?.focus()
+
+    const trapFocus = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || !drawer || !focusable?.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (!first || !last) return
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+    document.addEventListener('keydown', trapFocus)
     return () => {
+      document.removeEventListener('keydown', trapFocus)
       document.body.style.overflow = prev
+      ;(previouslyFocused ?? mobileToggle)?.focus()
     }
   }, [mobileOpen])
 
@@ -448,10 +475,12 @@ export function SiteNav({
             />
 
             <button
+              ref={mobileToggleRef}
               type="button"
               onClick={() => setMobileOpen((o) => !o)}
               aria-label={t('menu')}
               aria-expanded={mobileOpen}
+              aria-controls="mobile-navigation-dialog"
               className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all lg:hidden ${utilityBtn}`}
             >
               {mobileOpen ? (
@@ -477,6 +506,8 @@ export function SiteNav({
               aria-hidden="true"
             />
             <motion.div
+              ref={mobileDrawerRef}
+              id="mobile-navigation-dialog"
               dir={dir}
               className="fixed inset-x-0 top-0 z-50 max-h-[92dvh] overflow-y-auto rounded-b-[24px] border-b border-violet-100 bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl lg:hidden"
               initial={{ y: '-100%' }}
