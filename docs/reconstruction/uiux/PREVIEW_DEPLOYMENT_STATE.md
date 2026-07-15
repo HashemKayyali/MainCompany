@@ -28,7 +28,11 @@ Two independent Vercel failures occur after or outside that successful applicati
 
 1. Git Integration builds inside `/vercel/path0/eventies-next/.next`, then its packaging
    phase looks for `/vercel/path0/.next/package.json` and fails with `ENOENT`. This is a Vercel
-   monorepo Root Directory packaging regression, not a Next build failure.
+   monorepo Root Directory packaging regression, not a Next build failure. The branch push at
+   commit `c62d714` reproduced it in Preview deployment
+   `eventies-next-preview-7du524fml-hashemkayyalis-projects.vercel.app`: Next `16.2.10` was
+   detected, TypeScript passed, 77/77 pages were generated, and Vercel reported “Build
+   Completed in /vercel/output” before the deployment ended in Error.
 2. A clean isolated project (`eventies-next-uiux-preview`) was created with Next.js defaults
    and Staging-only variables. Both a normal CLI deployment and an explicit
    `--target=preview` deployment were recorded by Vercel as `target: production`. Each attempt
