@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient } from '@/server/supabase/server-client'
 import { getSessionClaims, getAuthoritativeRole } from '@/server/supabase/session'
 import { revalidateEntity } from '@/server/cache/revalidate'
@@ -57,6 +58,14 @@ export async function POST(request: NextRequest) {
 
   try {
     const tags = revalidateEntity(entity, typeof body.slug === 'string' ? body.slug : undefined)
+
+    // Tag invalidation refreshes the shared data cache. The localized layout
+    // invalidation also purges the public Full Route Cache so already-rendered
+    // EN/AR pages cannot continue serving pre-mutation HTML.
+    const invalidatedLayouts = ['en', 'ar'] as const
+    for (const locale of invalidatedLayouts) {
+      revalidatePath(`/${locale}`, 'layout')
+    }
     await writeAdminAudit(
       buildAdminAuditRecord({
         actorId: identity.userId,
