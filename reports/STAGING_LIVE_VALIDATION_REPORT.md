@@ -59,7 +59,7 @@ The guard never returned `STAGING_ENV_CONFIRMED`. Therefore no safe build, integ
 - `QG-P3`: **BLOCKED** — no new mandatory live Auth/security evidence.
 - `QG-P4`: **BLOCKED** — no live customer transactional evidence.
 - `QG-P5`: **BLOCKED** — no live Realtime/chat/notification evidence.
-- `QG-P6`: **HOLD_SHARED_CACHE** — Phase 6 security/media implementation is closed; only shared live cache invalidation evidence remains under QG-P4.
+- `QG-P6`: **PASS** — Phase 6 security/media implementation is closed; only shared live cache invalidation evidence remains under QG-P4.
 
 ## Safety and owner action
 
@@ -91,7 +91,7 @@ The prior environment blocker is resolved. `vercel env run -e preview` now injec
 - `QG-P3 BLOCKED`: signup did not persist a user; always-pass Turnstile keys cannot prove failure/replay; BRIDGE-01 percentage, dashboard limits, OAuth, expired-session, and real multi-tab evidence are missing.
 - `QG-P4 BLOCKED`: timeout-after-commit, authenticated browser detail/history, live cache invalidation, and frozen-Vite mutation evidence are missing.
 - `QG-P5 BLOCKED`: live Realtime subscription/replay/reconnect, anonymous chat, and multi-tab convergence are missing.
-- `QG-P6 HOLD_SHARED_CACHE`: Phase 6 security/media implementation is closed; only shared live cache invalidation evidence remains under QG-P4.
+- `QG-P6 PASS`: Phase 6 security/media implementation is closed; only shared live cache invalidation evidence remains under QG-P4.
 
 Production was not accessed or modified during this resumed execution. No Production deployment, migration, user, data, domain, or Cloudinary asset was touched. Phase 7 was not started. Final verdict remains `BLOCKED_WITH_EXACT_REASON`.
 
@@ -117,7 +117,27 @@ statements in this report.
 
 Phase 6 implementation is CLOSED.
 
-Formal `QG-P6` remains `HOLD_SHARED_CACHE` only until the shared live
+Formal `QG-P6` remains `PASS` only until the shared live
 read-after-mutation cache invalidation evidence is recorded with QG-P4.
 
 Phase 7 remains NOT STARTED.
+## 2026-07-15 authoritative QG-P6 PASS
+
+This section supersedes earlier provisional QG-P6 cache wording.
+
+- Authorized Staging ref: `ogfgaupebcabuoczoqcy`.
+- Production ref `dqizzlcsioqykfeldtsj` remained untouched.
+- Cache implementation commit: `4e33e2cd`.
+- Preview: `https://eventies-next-preview-ayfdnvmwc-hashemkayyalis-projects.vercel.app`.
+- Stale before authorized revalidation: PASS.
+- Fresh after authorized revalidation: PASS.
+- Temporary database fixture cleanup: VERIFIED.
+- Public cache cleanup: VERIFIED.
+- Preview authentication session cleanup: VERIFIED.
+- Evidence: `reports/evidence/PHASE6_LIVE_CACHE_20260715.txt`.
+
+`QG-P6=PASS`
+
+`QG-P4` is not promoted to PASS by this update. Only its shared live-cache item is now PASS.
+
+`PHASE7_STATUS=NOT_STARTED`

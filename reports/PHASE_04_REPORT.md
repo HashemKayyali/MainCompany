@@ -73,3 +73,23 @@ QG-P4 remains **BLOCKED**. Environment isolation failed closed before any custom
 Real Staging evidence now passes for own-profile update, cross-user profile isolation, concurrent rental-request idempotency, concurrent purchase-quote idempotency, and cross-user request isolation. Two independently constructed application clients returned the same committed row for each shared idempotency key. All disposable users, requests, quotes, status history, item rows, and product fixtures were removed and zero residual fixtures were verified.
 
 QG-P4 remains **BLOCKED** because timeout-after-commit recovery, authenticated browser history/detail surfaces, post-success cache-tag invalidation observation, and a frozen-Vite live compatibility mutation were not completed. Production was not used as a substitute.
+
+## 2026-07-15 shared live-cache evidence
+
+**LIVE_READ_AFTER_MUTATION_CACHE_INVALIDATION=PASS**
+
+The isolated Staging Preview test used the canonical tagged `getProducts()` DAL
+through a response-no-store diagnostic boundary. It proved:
+
+1. an original value populated the shared cached read;
+2. a direct database mutation remained stale before revalidation;
+3. authorized `/api/revalidate` returned the expected product/list/home tags;
+4. the updated value became visible after revalidation;
+5. fixture deletion, cache cleanup, and session cleanup were verified.
+
+Cache implementation commit: `4e33e2cd`.
+Preview: `https://eventies-next-preview-ayfdnvmwc-hashemkayyalis-projects.vercel.app`.
+Evidence: `reports/evidence/PHASE6_LIVE_CACHE_20260715.txt`.
+
+This closes only the cache item shared with QG-P6. QG-P4 remains pending for its
+other listed evidence and is not labeled PASS here.

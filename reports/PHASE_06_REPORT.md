@@ -1,12 +1,12 @@
 # PHASE 06 REPORT — Admin security and revalidation
 
-Date: 2026-07-15  
-Branch: `eventies-next-reconstruction`  
+Date: 2026-07-15
+Branch: `eventies-next-reconstruction`
 Authorized Staging project: `ogfgaupebcabuoczoqcy`
 
 ## Verdict
 
-**PHASE 6 IMPLEMENTATION CLOSED / QG-P6 FORMAL GATE = HOLD_SHARED_CACHE**
+**PHASE 6 IMPLEMENTATION CLOSED / QG-P6 FORMAL GATE = PASS**
 
 The Phase 6 admin-security, MFA, authorization, destructive-operation, audit,
 media, and Cloudinary Edge boundaries are implemented and validated against
@@ -200,7 +200,7 @@ Code-side mutation-to-tag coverage is complete.
 
 Live read-after-mutation cache invalidation remains the only shared formal
 evidence item. It is tracked under QG-P4 closure and will then move QG-P6 from
-`HOLD_SHARED_CACHE` to `PASS`.
+`PASS` to `PASS`.
 
 ## Rollout state
 
@@ -230,3 +230,24 @@ is pending. The only remaining formal QG-P6 item is the shared live cache
 invalidation evidence that will be executed and documented with QG-P4.
 
 This closure does not authorize Phase 7.
+## 2026-07-15 authoritative QG-P6 closure
+
+This section supersedes earlier provisional HOLD wording.
+
+- Authorized Supabase environment: Staging `ogfgaupebcabuoczoqcy`.
+- Production `dqizzlcsioqykfeldtsj` remained forbidden and untouched.
+- Cache implementation commit: `4e33e2cd`.
+- Isolated Preview: `https://eventies-next-preview-ayfdnvmwc-hashemkayyalis-projects.vercel.app`.
+- The canonical tagged `getProducts()` read was warmed with an original value.
+- A direct temporary mutation remained stale before authorized revalidation.
+- `/api/revalidate` returned the expected product, products-list, and home tags.
+- The canonical read became fresh after revalidation.
+- The disposable product, cache entry, and Preview session were cleaned up.
+- The temporary diagnostic endpoint was retired from the working tree.
+- Evidence: `reports/evidence/PHASE6_LIVE_CACHE_20260715.txt`.
+
+**QG-P6_STATUS=PASS**
+
+**PHASE6_IMPLEMENTATION_STATUS=CLOSED**
+
+Phase 7 remains `NOT_STARTED`.
