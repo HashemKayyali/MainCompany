@@ -42,3 +42,6 @@ playwright-report/
 
 # Visual-parity raw screenshots (large local evidence; matrix + harness are tracked)
 docs/reconstruction/visual-parity/shots/
+.vercel/
+.env.local
+.env.*.local
