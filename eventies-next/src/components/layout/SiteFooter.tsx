@@ -99,9 +99,9 @@ export async function SiteFooter({
   const supportLinks = [
     { href: '/products', label: t('support.browse') },
     { href: '/contact', label: t('support.quote') },
-    { href: '/login', label: t('support.track') },
-    { href: '/contact', label: t('support.provider') },
-    { href: '/contact', label: t('support.help') },
+    { href: '/my-requests', label: t('support.track') },
+    { href: '/contact?type=provider', label: t('support.provider') },
+    { href: '/help', label: t('support.help') },
   ]
   const policyLinks = [
     { href: '/privacy-policy', label: t('privacy') },

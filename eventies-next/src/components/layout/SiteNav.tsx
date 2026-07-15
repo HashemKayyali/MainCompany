@@ -2,7 +2,18 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, ChevronDown, LayoutGrid, Menu, Package, Search, Tag, X } from 'lucide-react'
+import {
+  ArrowRight,
+  ChevronDown,
+  LayoutGrid,
+  Menu,
+  Package,
+  Search,
+  ShoppingBag,
+  Tag,
+  UserRound,
+  X,
+} from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Link, usePathname } from '@/i18n/navigation'
 import { SmartImage } from '@/components/ui/SmartImage'
@@ -13,8 +24,7 @@ import { LanguageSwitcher } from './LanguageSwitcher'
  * transparent over the hero routes and opaque/blurred after scroll. Priority
  * nav (Home · Categories▾ · Services · Gallery); secondary links collapse into a
  * More menu below 1720px. Inline desktop search with live suggestions; mobile
- * drawer with search + link grid + categories. Auth/cart actions are reserved
- * for Phase 3 (no auth in the public app) and intentionally not rendered.
+ * drawer with search + link grid + categories, request draft, and account.
  */
 export type NavSearchItem = {
   type: 'product' | 'category'
@@ -474,6 +484,24 @@ export function SiteNav({
               className={`hidden shrink-0 border md:inline-flex ${utilityBtn}`}
             />
 
+            <Link
+              href="/rental-cart"
+              aria-label={t('requestDraft')}
+              title={t('requestDraft')}
+              className={`hidden h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all md:inline-flex ${utilityBtn}`}
+            >
+              <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={2.2} />
+            </Link>
+
+            <Link
+              href="/login"
+              aria-label={t('account')}
+              title={t('account')}
+              className={`hidden h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all md:inline-flex ${utilityBtn}`}
+            >
+              <UserRound className="h-[18px] w-[18px]" strokeWidth={2.2} />
+            </Link>
+
             <button
               ref={mobileToggleRef}
               type="button"
@@ -584,6 +612,25 @@ export function SiteNav({
                 </span>
                 <ArrowRight className="h-4 w-4 text-violet-500 rtl:rotate-180" strokeWidth={2.2} />
               </Link>
+
+              <div className="mt-3 grid grid-cols-2 gap-2 border-t border-violet-100 pt-3">
+                <Link
+                  href="/rental-cart"
+                  onClick={() => setMobileOpen(false)}
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-violet-700 px-3 text-[13px] font-bold text-white"
+                >
+                  <ShoppingBag className="h-4 w-4" strokeWidth={2.2} />
+                  {t('requestDraft')}
+                </Link>
+                <Link
+                  href="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-violet-200 bg-white px-3 text-[13px] font-bold text-violet-800"
+                >
+                  <UserRound className="h-4 w-4" strokeWidth={2.2} />
+                  {t('account')}
+                </Link>
+              </div>
             </motion.div>
           </>
         )}

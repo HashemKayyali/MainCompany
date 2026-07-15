@@ -24,5 +24,7 @@
   "servicesCount": "{count, plural, one {# service} other {# services}}",
   "switchToArabic": "Switch to Arabic",
   "switchToEnglish": "Switch to English",
-  "skipToContent": "Skip to content"
+  "skipToContent": "Skip to content",
+  "requestDraft": "Request draft",
+  "account": "Account"
 }

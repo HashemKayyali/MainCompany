@@ -39,7 +39,12 @@ export function SmartImage({
   const original = (parsed.src || '').trim()
   const [errored, setErrored] = useState(false)
   const src = errored || !original ? FALLBACK : original
-  const unoptimized = src === FALLBACK
+  // The custom loader can resize Cloudinary/Supabase media but not files from
+  // public/. Passing a local file through it makes next/image generate several
+  // widths that all resolve to the same URL and emits a runtime warning. Local
+  // assets in this app are already delivery-sized WebP/SVG, so bypassing the
+  // loader is both honest and warning-free.
+  const unoptimized = src === FALLBACK || src.startsWith('/')
 
   const common = {
     src,

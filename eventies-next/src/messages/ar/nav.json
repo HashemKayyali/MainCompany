@@ -24,5 +24,7 @@
   "servicesCount": "{count, plural, zero {# خدمة} one {خدمة واحدة} two {خدمتان} few {# خدمات} many {# خدمة} other {# خدمة}}",
   "switchToArabic": "التبديل إلى العربية",
   "switchToEnglish": "التبديل إلى الإنجليزية",
-  "skipToContent": "تخطَّ إلى المحتوى"
+  "skipToContent": "تخطَّ إلى المحتوى",
+  "requestDraft": "مسودة الطلب",
+  "account": "الحساب"
 }

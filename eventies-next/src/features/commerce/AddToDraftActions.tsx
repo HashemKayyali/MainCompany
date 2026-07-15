@@ -85,7 +85,7 @@ export function AddToDraftActions({
           {labels.rental}
         </button>
       )}
-      {product.saleEnabled && (
+      {product.saleEnabled !== false && (
         <button
           onClick={addQuote}
           className="rounded-full border border-violet-300 px-5 py-3 font-bold text-violet-800"
