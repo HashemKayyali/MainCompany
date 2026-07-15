@@ -115,8 +115,32 @@
     "requestCta": "Request this service",
     "priceOnRequest": "Price on request",
     "addRental": "Add to rental draft",
-    "addQuote": "Add to quote draft",
-    "added": "Added to draft"
+    "addQuote": "Request a purchase quote",
+    "added": "Added to draft",
+    "optionsHeading": "Choose your setup",
+    "beforeHeading": "Before requesting",
+    "includedHeading": "What's included",
+    "reviewedPricing": "Reviewed pricing",
+    "tailoredQuote": "A tailored quote for your event",
+    "askWhatsapp": "Ask on WhatsApp",
+    "whatsappMessage": "Hi, I'd like to ask about “{product}” for my event.",
+    "reviewNotice": "Every request is reviewed first — we confirm availability, pricing, and delivery before anything is final.",
+    "similarHeading": "Similar services",
+    "similarDescription": "More options from {category}.",
+    "featured": "Featured",
+    "trust": {
+      "insured": "Insured equipment",
+      "delivery": "Delivery & setup",
+      "support": "On-site support"
+    },
+    "includedItems": [
+      "Availability confirmed after review",
+      "Delivery and setup on eligible services",
+      "On-site support when in scope",
+      "Custom branding when available",
+      "Insured equipment",
+      "Spare parts when required"
+    ]
   },
   "about": {
     "heading": "About Eventies",
