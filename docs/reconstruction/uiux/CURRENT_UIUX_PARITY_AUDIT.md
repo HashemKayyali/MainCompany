@@ -7,6 +7,13 @@ Target application: `eventies-next/` (Next.js `16.2.10`)
 Production visual reference: `https://www.eventiesjo.com/`  
 Phase 7: **not started and out of scope**
 
+> Deployment update (2026-07-15): framework/root detection is corrected and a
+> Staging-environment Next `16.2.10` build passes, but Vercel finalization still resolves
+> `.next` from the repository root. A clean project also reclassified explicit Preview
+> deploys as Production; both attempts were stopped and deleted. Further deploys are blocked
+> by the phase safety rules. See `PREVIEW_DEPLOYMENT_STATE.md` for the current evidence; the
+> older conclusions below preserve the initial pre-change audit record.
+
 ## Executive audit verdict
 
 The repository is clean and on the expected UI/UX branch. The isolated Vercel project
