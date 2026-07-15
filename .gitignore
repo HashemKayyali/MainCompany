@@ -42,6 +42,7 @@ playwright-report/
 
 # Visual-parity raw screenshots (large local evidence; matrix + harness are tracked)
 docs/reconstruction/visual-parity/shots/
+docs/reconstruction/visual-parity/uiux-arabic-first/raw/
 .vercel/
 .env.local
 .env.*.local
