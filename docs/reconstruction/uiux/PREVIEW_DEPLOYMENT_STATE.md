@@ -50,13 +50,13 @@ project-level correction.
 
 ## Safe reproducibility checks
 
-These non-deploying commands are green. The build was run with the ignored, locally pulled
+These non-deploying commands are green. The build uses the existing project's branch-scoped
 Preview environment after a fail-closed Staging-ref check; the clean project's new Sensitive
 variables are intentionally not downloadable from Vercel CLI.
 
 ```powershell
 cd eventies-next
-npm run build
+npx vercel env run -e preview --git-branch uiux-arabic-first-parity -- npm run build
 npm run typecheck
 npm run lint
 npm run gate:arch

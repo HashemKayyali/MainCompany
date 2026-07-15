@@ -1,16 +1,15 @@
 import type { Metadata } from 'next'
 import type { CSSProperties } from 'react'
+import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
-import { SiteNav, type NavSearchItem, type NavCategory } from '@/components/layout/SiteNav'
+import { SiteNav } from '@/components/layout/SiteNav'
 import { SiteBackground } from '@/components/layout/SiteBackground'
-import { SiteFooter } from '@/components/layout/SiteFooter'
+import { CatalogSiteFooter, CatalogSiteNav } from './SiteCatalogChrome'
 import { JsonLd } from '@/components/JsonLd'
 import { GLOBAL_JSON_LD } from '@/server/metadata/jsonld'
-import { getProducts } from '@/server/dal/products'
-import { getCategories } from '@/server/dal/categories'
 import { AuthSessionLifecycle } from '@/features/auth/AuthSessionLifecycle'
 import { RealtimeShell } from '@/features/realtime/RealtimeShell'
 import { alexandria, ibmPlexSansArabic, sora } from '@/lib/fonts'
@@ -58,40 +57,6 @@ export default async function LocaleLayout({
   const dir = locale === 'ar' ? 'rtl' : 'ltr'
   const tn = await getTranslations({ locale: locale as 'en' | 'ar', namespace: 'nav' })
 
-  const [products, categories] = await Promise.all([getProducts(), getCategories()])
-  const categoryNameById = new Map(categories.map((c) => [c.id, c.name]))
-  const countByCategory = new Map<string, number>()
-  for (const p of products)
-    countByCategory.set(p.categoryId, (countByCategory.get(p.categoryId) ?? 0) + 1)
-
-  // Nav categories (dropdown), sorted by service count.
-  const navCategories: NavCategory[] = categories
-    .filter((c) => c.slug.trim().length > 0)
-    .map((c) => ({
-      slug: c.slug,
-      name: c.name,
-      icon: c.icon ?? '',
-      count: countByCategory.get(c.id) ?? 0,
-    }))
-    .sort((a, b) => b.count - a.count)
-
-  // Nav search index (categories + products), meta localized server-side.
-  const navSearch: NavSearchItem[] = [
-    ...navCategories.map((c) => ({
-      type: 'category' as const,
-      name: c.name,
-      href: `/categories/${c.slug}`,
-      meta: tn('servicesCount', { count: c.count }),
-    })),
-    ...products.map((p) => ({
-      type: 'product' as const,
-      name: p.name,
-      href: `/products/${p.slug}`,
-      image: p.heroImage || p.gallery?.[0] || undefined,
-      meta: categoryNameById.get(p.categoryId) ?? tn('services'),
-    })),
-  ]
-
   const shellStyle = {
     '--app-navbar-height': '74px',
     '--app-header-offset': '74px',
@@ -130,14 +95,15 @@ export default async function LocaleLayout({
           <div className="relative flex min-h-screen min-w-0 flex-col overflow-x-clip">
             <SiteBackground />
             <div className="relative z-10 flex min-h-screen min-w-0 flex-col" style={shellStyle}>
-              <SiteNav locale={locale} search={navSearch} categories={navCategories} />
+              <Suspense fallback={<SiteNav locale={locale} search={[]} categories={[]} />}>
+                <CatalogSiteNav locale={locale} />
+              </Suspense>
               <main id="main-content" className="min-w-0 flex-1 pt-[var(--app-header-offset)]">
                 {children}
               </main>
-              <SiteFooter
-                locale={locale}
-                categories={categories.map((c) => ({ slug: c.slug, name: c.name, icon: c.icon }))}
-              />
+              <Suspense fallback={null}>
+                <CatalogSiteFooter locale={locale} />
+              </Suspense>
             </div>
           </div>
         </NextIntlClientProvider>
