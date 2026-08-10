@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useCategoriesData, useProductsData } from '../../contexts/DataContext'
-import { preloadRoute } from '../../utils/route-preload'
+import { rowPeekStyles, useRowPeek } from '../../hooks/useRowPeek'
 import CategoryGridCard, { type CategoryGridCardData } from '../category/CategoryGridCard'
 import Reveal from './Reveal'
 import SectionHeading, { ViewAllButton } from './SectionHeading'
@@ -12,6 +12,7 @@ export default function BrowseCategories({
 }) {
   const { categories } = useCategoriesData()
   const { getProductsByCategory } = useProductsData()
+  const [expanded, setExpanded] = useState(false)
   const sectionRef = useRef<HTMLElement | null>(null)
   const settledImagesRef = useRef(new Set<string>())
   const readyReportedRef = useRef(false)
@@ -31,7 +32,15 @@ export default function BrowseCategories({
         .sort((a, b) => b.count - a.count),
     [categories, getProductsByCategory]
   )
-  const visibleItems = useMemo(() => items.slice(0, 10), [items])
+  // Collapsed: never more than 3 rows at any width — 2 full rows plus a half-row peek.
+  const { ref: gridRef, peek } = useRowPeek()
+  const collapsedCount = peek.cols * 3
+  const visibleItems = useMemo(
+    () => (expanded ? items : items.slice(0, collapsedCount)),
+    [items, expanded, collapsedCount]
+  )
+  const clipped = !expanded && peek.clipHeight !== null
+  const peekStyles = rowPeekStyles(peek)
   const imageItemKeys = useMemo(
     () => visibleItems.filter(item => Boolean(item.image)).map(item => item.slug),
     [visibleItems],
@@ -98,21 +107,37 @@ export default function BrowseCategories({
           className="mb-12"
         />
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-          {visibleItems.map((category, index) => (
-            <Reveal key={category.slug} delay={Math.min(index * 0.05, 0.35)} y={22} className="h-full">
-              <CategoryGridCard
-                category={category}
-                imageLoading="eager"
-                onImageSettled={() => reportImageSettled(category.slug)}
-              />
-            </Reveal>
-          ))}
+        <div className="relative overflow-hidden" style={clipped ? { height: peek.clipHeight ?? undefined } : undefined}>
+          {/* Collapsed: cards fade out into a blur ramp instead of ending on a hard clip edge. */}
+          <div
+            ref={gridRef}
+            className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
+            style={clipped ? peekStyles.grid : undefined}
+          >
+            {visibleItems.map((category, index) => (
+              <Reveal key={category.slug} delay={Math.min(index * 0.05, 0.35)} y={22} className="h-full">
+                <CategoryGridCard
+                  category={category}
+                  imageLoading="eager"
+                  onImageSettled={() => reportImageSettled(category.slug)}
+                />
+              </Reveal>
+            ))}
+          </div>
+          {clipped && (
+            <div
+              className="pointer-events-none absolute inset-x-0 backdrop-blur-[5px]"
+              style={peekStyles.overlay}
+              aria-hidden="true"
+            />
+          )}
         </div>
 
-        <ViewAllButton to="/categories" onMouseEnter={() => preloadRoute('/categories')}>
-          View all categories
-        </ViewAllButton>
+        {peek.clipHeight !== null && (
+          <ViewAllButton onClick={() => setExpanded(value => !value)}>
+            {expanded ? 'Show less' : 'View all categories'}
+          </ViewAllButton>
+        )}
       </div>
     </section>
   )

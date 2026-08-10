@@ -137,7 +137,7 @@ export default function Hero({ image = HERO_IMAGE }: { image?: string }) {
 
         {/* ── RIGHT: showcase card ── */}
         <motion.div
-          className="relative"
+          className="relative hidden md:block"
           initial={heroEntrance ? { opacity: 0, y: 40, scale: 0.985 } : false}
           animate={heroEntrance ? { opacity: 1, y: 0, scale: 1 } : undefined}
           transition={heroTransition(0.08)}

@@ -282,5 +282,5 @@ Recommended next steps based on the current repository state:
 
 git status
 git add .
-git commit -m " MOBILE UI FIX3 "
+git commit -m " blur categories ui fix  "
 git push origin main

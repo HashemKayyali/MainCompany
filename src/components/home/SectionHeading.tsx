@@ -39,22 +39,29 @@ export default function SectionHeading({
   )
 }
 
-/** Centered "view all" style pill used beneath grids. */
-export function ViewAllButton({ to, children, onMouseEnter }: { to: string; children: ReactNode; onMouseEnter?: () => void }) {
+/** Centered "view all" style pill used beneath grids. Renders a button when `to` is omitted. */
+export function ViewAllButton({ to, children, onMouseEnter, onClick }: { to?: string; children: ReactNode; onMouseEnter?: () => void; onClick?: () => void }) {
   const { translateText } = useI18n()
   const translateNode = (value: ReactNode) => (typeof value === 'string' ? translateText(value) : value)
+  const className = "group inline-flex items-center gap-2 rounded-full border border-violet-200/85 bg-white px-6 py-3 text-[12px] font-bold text-violet-700 shadow-[0_10px_26px_-14px_rgba(124,58,237,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50 hover:text-violet-900"
 
   return (
     <div className="mt-10 flex justify-center">
-      <Link
-        to={to}
-        onMouseEnter={onMouseEnter}
-        onFocus={onMouseEnter}
-        onTouchStart={onMouseEnter}
-        className="group inline-flex items-center gap-2 rounded-full border border-violet-200/85 bg-white px-6 py-3 text-[12px] font-bold text-violet-700 shadow-[0_10px_26px_-14px_rgba(124,58,237,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-400 hover:bg-violet-50 hover:text-violet-900"
-      >
-        {translateNode(children)}
-      </Link>
+      {to ? (
+        <Link
+          to={to}
+          onMouseEnter={onMouseEnter}
+          onFocus={onMouseEnter}
+          onTouchStart={onMouseEnter}
+          className={className}
+        >
+          {translateNode(children)}
+        </Link>
+      ) : (
+        <button type="button" onClick={onClick} className={className}>
+          {translateNode(children)}
+        </button>
+      )}
     </div>
   )
 }

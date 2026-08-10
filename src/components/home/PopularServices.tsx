@@ -4,6 +4,7 @@ import { ArrowUpRight } from 'lucide-react'
 import { useCategoriesData, useProductsData } from '../../contexts/DataContext'
 import type { Product } from '../../data/products/types'
 import { preloadRoute } from '../../utils/route-preload'
+import { rowPeekStyles, useRowPeek } from '../../hooks/useRowPeek'
 import { PRODUCT_DETAIL_IMAGE_SIZES, preloadImage } from '../../lib/image-delivery'
 import FramedImage from '../ui/FramedImage'
 import Reveal from './Reveal'
@@ -104,6 +105,16 @@ export default function PopularServices({
 
   const items = useMemo(() => (featuredProducts ?? []).slice(0, 12), [featuredProducts])
   const [activeImageCount, setActiveImageCount] = useState(0)
+  const [expanded, setExpanded] = useState(false)
+  // Collapsed: never more than 3 rows at any width — 2 full rows plus a half-row peek.
+  const { ref: gridRef, peek } = useRowPeek()
+  const visibleItems = useMemo(
+    () => (expanded ? items : items.slice(0, peek.cols * 3)),
+    [items, expanded, peek.cols]
+  )
+  const clipped = !expanded && peek.clipHeight !== null
+  const peekStyles = rowPeekStyles(peek)
+  const renderedCount = visibleItems.length
   const settledImagesRef = useRef(new Set<string>())
   const usefulReportedRef = useRef(false)
   const completeReportedRef = useRef(false)
@@ -130,10 +141,11 @@ export default function PopularServices({
     settledImagesRef.current.add(key)
     setActiveImageCount(current => Math.min(items.length, current + 1))
 
+    // Thresholds track what is actually rendered — the collapsed grid stops at 3 rows.
     const settledCount = settledImagesRef.current.size
-    if (settledCount >= Math.max(1, Math.ceil(items.length * 0.66))) reportUseful()
-    if (settledCount >= items.length) reportComplete()
-  }, [items.length, reportComplete, reportUseful])
+    if (settledCount >= Math.max(1, Math.ceil(renderedCount * 0.66))) reportUseful()
+    if (settledCount >= renderedCount) reportComplete()
+  }, [items.length, renderedCount, reportComplete, reportUseful])
 
   useEffect(() => {
     settledImagesRef.current.clear()
@@ -164,23 +176,43 @@ export default function PopularServices({
           className="mb-12"
         />
 
-        <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-          {items.map((product, index) => (
-            <Reveal key={product.slug} delay={Math.min(index * 0.04, 0.32)} y={22} className="h-full">
-              <ServiceCard
-                product={product}
-                categoryLabel={categoryName(product.categoryId)}
-                imageActive={enabled && index < activeImageCount}
-                imageLoading="eager"
-                onImageSettled={() => reportImageSettled(product.slug)}
-              />
-            </Reveal>
-          ))}
+        <div className="relative overflow-hidden" style={clipped ? { height: peek.clipHeight ?? undefined } : undefined}>
+          {/* Collapsed: cards fade out into a blur ramp instead of ending on a hard clip edge. */}
+          <div
+            ref={gridRef}
+            className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
+            style={clipped ? peekStyles.grid : undefined}
+          >
+            {visibleItems.map((product, index) => (
+              <Reveal key={product.slug} delay={Math.min(index * 0.04, 0.32)} y={22} className="h-full">
+                <ServiceCard
+                  product={product}
+                  categoryLabel={categoryName(product.categoryId)}
+                  imageActive={enabled && (expanded || index < activeImageCount)}
+                  imageLoading="eager"
+                  onImageSettled={() => reportImageSettled(product.slug)}
+                />
+              </Reveal>
+            ))}
+          </div>
+          {clipped && (
+            <div
+              className="pointer-events-none absolute inset-x-0 backdrop-blur-[5px]"
+              style={peekStyles.overlay}
+              aria-hidden="true"
+            />
+          )}
         </div>
 
-        <ViewAllButton to="/products" onMouseEnter={() => preloadRoute('/products')}>
-          View all services
-        </ViewAllButton>
+        {peek.clipHeight !== null ? (
+          <ViewAllButton onClick={() => setExpanded(value => !value)}>
+            {expanded ? 'Show less' : 'View all services'}
+          </ViewAllButton>
+        ) : (
+          <ViewAllButton to="/products" onMouseEnter={() => preloadRoute('/products')}>
+            View all services
+          </ViewAllButton>
+        )}
       </div>
     </section>
   )
