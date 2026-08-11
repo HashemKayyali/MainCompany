@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useCategoriesData, useProductsData } from '../../contexts/DataContext'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { rowPeekStyles, useRowPeek } from '../../hooks/useRowPeek'
 import CategoryGridCard, { type CategoryGridCardData } from '../category/CategoryGridCard'
 import Reveal from './Reveal'
@@ -32,9 +33,10 @@ export default function BrowseCategories({
         .sort((a, b) => b.count - a.count),
     [categories, getProductsByCategory]
   )
-  // Collapsed: never more than 3 rows at any width — 2 full rows plus a half-row peek.
-  const { ref: gridRef, peek } = useRowPeek()
-  const collapsedCount = peek.cols * 3
+  // Collapsed: laptops cut from row 2, phones/tablets from row 3 (one full row less).
+  const fullRows = useMediaQuery('(min-width: 1024px)') ? 1 : 2
+  const { ref: gridRef, peek } = useRowPeek(fullRows)
+  const collapsedCount = peek.cols * (fullRows + 1)
   const visibleItems = useMemo(
     () => (expanded ? items : items.slice(0, collapsedCount)),
     [items, expanded, collapsedCount]

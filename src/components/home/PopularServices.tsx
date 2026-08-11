@@ -4,6 +4,7 @@ import { ArrowUpRight } from 'lucide-react'
 import { useCategoriesData, useProductsData } from '../../contexts/DataContext'
 import type { Product } from '../../data/products/types'
 import { preloadRoute } from '../../utils/route-preload'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { rowPeekStyles, useRowPeek } from '../../hooks/useRowPeek'
 import { PRODUCT_DETAIL_IMAGE_SIZES, preloadImage } from '../../lib/image-delivery'
 import FramedImage from '../ui/FramedImage'
@@ -106,11 +107,12 @@ export default function PopularServices({
   const items = useMemo(() => (featuredProducts ?? []).slice(0, 12), [featuredProducts])
   const [activeImageCount, setActiveImageCount] = useState(0)
   const [expanded, setExpanded] = useState(false)
-  // Collapsed: never more than 3 rows at any width — 2 full rows plus a half-row peek.
-  const { ref: gridRef, peek } = useRowPeek()
+  // Collapsed: laptops cut from row 2, phones/tablets from row 3 (one full row less).
+  const fullRows = useMediaQuery('(min-width: 1024px)') ? 1 : 2
+  const { ref: gridRef, peek } = useRowPeek(fullRows)
   const visibleItems = useMemo(
-    () => (expanded ? items : items.slice(0, peek.cols * 3)),
-    [items, expanded, peek.cols]
+    () => (expanded ? items : items.slice(0, peek.cols * (fullRows + 1))),
+    [items, expanded, peek.cols, fullRows]
   )
   const clipped = !expanded && peek.clipHeight !== null
   const peekStyles = rowPeekStyles(peek)

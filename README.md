@@ -282,5 +282,5 @@ Recommended next steps based on the current repository state:
 
 git status
 git add .
-git commit -m " blur categories ui fix  "
+git commit -m " blur categories ui 2  "
 git push origin main
