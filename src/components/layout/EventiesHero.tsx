@@ -146,7 +146,7 @@ export default function EventiesHero({
             initial={heroEntrance ? { opacity: 0, y: 40, scale: 0.985 } : false}
             animate={heroEntrance ? { opacity: 1, y: 0, scale: 1 } : undefined}
             transition={heroTransition(0.08)}
-            className={cn('relative', rightSlotClassName)}
+            className={cn('relative hidden lg:block', rightSlotClassName)}
           >
             {rightSlot}
           </motion.div>
