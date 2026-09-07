@@ -1,8 +1,7 @@
-import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, CalendarCheck, Sparkles, Store } from 'lucide-react'
-import { useCategoriesData } from '../../contexts/DataContext'
 import { useElementActivity } from '../../hooks/useElementActivity'
 import { useHeroEntranceMotion } from '../../hooks/useHeroEntranceMotion'
 import { useMotionEnabled } from '../../hooks/useMotionEnabled'
@@ -24,7 +23,6 @@ const PulsingBorder = lazy(() =>
 )
 
 export default function Hero({ image = HERO_IMAGE }: { image?: string }) {
-  const { categories } = useCategoriesData()
   const { translateText } = useI18n()
   const motionEnabled = useMotionEnabled()
   const { ref: activityRef, active: activityActive } = useElementActivity<HTMLElement>()
@@ -34,11 +32,6 @@ export default function Hero({ image = HERO_IMAGE }: { image?: string }) {
 
   useEffect(() => setMounted(true), [])
   const shadersOn = mounted && effectiveMotion
-
-  const chips = useMemo(
-    () => categories.filter(category => category.slug.trim().length > 0).slice(0, 5),
-    [categories]
-  )
 
   const float = (delay: number) =>
     effectiveMotion
@@ -109,35 +102,11 @@ export default function Hero({ image = HERO_IMAGE }: { image?: string }) {
               {translateText('Request a Quote')}
             </Link>
           </motion.div>
-
-          {chips.length > 0 && (
-            <motion.div
-              className="mt-8 flex flex-wrap items-center gap-2"
-              initial={heroEntrance ? heroFadeUp.hidden : false}
-              animate={heroEntrance ? heroFadeUp.visible : undefined}
-              transition={heroTransition(0.3)}
-            >
-              <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">{translateText('Browse')}</span>
-              {chips.map(category => {
-                const href = `/categories/${encodeURIComponent(category.slug)}`
-                return (
-                  <Link
-                    key={category.id}
-                    to={href}
-                    onMouseEnter={() => preloadRoute(href)}
-                    className="inline-flex items-center rounded-full border border-white/20 bg-white/[0.08] px-3.5 py-1.5 text-[11.5px] font-semibold text-white/90 backdrop-blur-sm transition-all hover:border-fuchsia-300/55 hover:bg-white/15 hover:text-white"
-                  >
-                    {translateText(category.name)}
-                  </Link>
-                )
-              })}
-            </motion.div>
-          )}
         </div>
 
         {/* ── RIGHT: showcase card ── */}
         <motion.div
-          className="relative hidden md:block"
+          className="relative hidden lg:block"
           initial={heroEntrance ? { opacity: 0, y: 40, scale: 0.985 } : false}
           animate={heroEntrance ? { opacity: 1, y: 0, scale: 1 } : undefined}
           transition={heroTransition(0.08)}
