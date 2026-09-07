@@ -12,22 +12,27 @@ import { useElementActivity } from '../../hooks/useElementActivity'
 import { cn } from '../../utils/cn'
 import FramedImage from './FramedImage'
 
-export type BentoGalleryItem = {
+export type GalleryStripItem = {
   id: number | string
   title: string
   desc?: string
   url: string
-  span: string
 }
 
-interface BentoGalleryProps {
-  imageItems: BentoGalleryItem[]
+interface GalleryStripProps {
+  imageItems: GalleryStripItem[]
 }
 
 const AUTO_SCROLL_SPEED = 54
 const INERTIA_FRICTION = 2.8
 const MAX_RELEASE_VELOCITY = 2200
 const MIN_SEQUENCE_ITEMS = 12
+const DEFAULT_RATIO = 4 / 3
+// Guard rails only, wide enough to hold every ordinary shape (9:16 portrait
+// through 2.5:1 landscape) at its exact proportions. A true panorama would
+// otherwise run several screens wide; it is letterboxed, never cropped.
+const MIN_RATIO = 0.5
+const MAX_RATIO = 2.6
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
@@ -42,8 +47,11 @@ function wrapTrackX(value: number, cycleWidth: number) {
   return next
 }
 
-export default function BentoGallery({ imageItems }: BentoGalleryProps) {
+export default function GalleryStrip({ imageItems }: GalleryStripProps) {
   const [cycleWidth, setCycleWidth] = useState(0)
+  // Tile width comes from the image's own proportions, so nothing is cropped to
+  // fit a preset frame. Keyed by url: both marquee copies share one measurement.
+  const [ratios, setRatios] = useState<Record<string, number>>({})
   const x = useMotionValue(0)
   const reduceMotion = useReducedMotion()
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -152,6 +160,15 @@ export default function BentoGallery({ imageItems }: BentoGalleryProps) {
     return () => window.cancelAnimationFrame(frameId)
   }, [activityActive, cycleWidth, reduceMotion, x])
 
+  const rememberRatio = useCallback((url: string, image: HTMLImageElement) => {
+    const { naturalWidth, naturalHeight } = image
+    if (!naturalWidth || !naturalHeight) return
+    const ratio = clamp(naturalWidth / naturalHeight, MIN_RATIO, MAX_RATIO)
+    setRatios(current => (
+      Math.abs((current[url] ?? 0) - ratio) < 0.001 ? current : { ...current, [url]: ratio }
+    ))
+  }, [])
+
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (pointerIdRef.current !== null) return
 
@@ -204,17 +221,12 @@ export default function BentoGallery({ imageItems }: BentoGalleryProps) {
   }
 
   const renderSequence = (copyIndex: number, ref?: (node: HTMLDivElement | null) => void) => (
-    <div
-      ref={ref}
-      className="grid w-max shrink-0 auto-cols-[8.75rem] grid-flow-col-dense grid-rows-[9.25rem_9.25rem] gap-[3px] sm:auto-cols-[10.5rem] sm:grid-rows-[11.25rem_11.25rem] sm:gap-1 lg:auto-cols-[12.25rem] lg:grid-rows-[13.25rem_13.25rem]"
-    >
+    <div ref={ref} className="flex h-full shrink-0 items-stretch gap-2 sm:gap-2.5">
       {sequenceItems.map((item, index) => (
-        <div
+        <figure
           key={`${copyIndex}-${item.id}`}
-          className={cn(
-            'group relative flex h-full min-w-0 cursor-grab select-none items-end overflow-hidden rounded-[9px] bg-violet-50 text-left active:cursor-grabbing',
-            item.span,
-          )}
+          className="group relative h-full shrink-0 cursor-grab overflow-hidden rounded-[16px] bg-violet-50 ring-1 ring-violet-200/50 transition-[transform,box-shadow] duration-500 ease-out will-change-transform hover:z-10 hover:scale-[1.025] hover:shadow-[0_26px_60px_-26px_rgba(46,10,114,0.6)] active:cursor-grabbing"
+          style={{ aspectRatio: ratios[item.url] ?? DEFAULT_RATIO }}
         >
           <FramedImage
             media={item.url}
@@ -227,12 +239,13 @@ export default function BentoGallery({ imageItems }: BentoGalleryProps) {
             fetchPriority="auto"
             draggable={false}
             revealMode="crisp"
-            fallbackTransform={{ fit: 'cover' }}
-            sizes="(max-width: 640px) 78vw, (max-width: 1024px) 48vw, 32vw"
-            className="absolute inset-0 h-full w-full select-none object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
+            fallbackTransform={{ fit: 'contain' }}
+            sizes="(max-width: 640px) 46vw, (max-width: 1024px) 32vw, 24vw"
+            className="h-full w-full select-none object-contain"
+            onLoad={event => rememberRatio(item.url, event.currentTarget)}
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-900/72 via-ink-900/22 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-          <div className="pointer-events-none relative z-10 translate-y-4 p-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-900/78 via-ink-900/18 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+          <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-3 p-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
             <h3 className="line-clamp-1 text-sm font-extrabold text-white sm:text-base">
               {item.title}
             </h3>
@@ -241,8 +254,8 @@ export default function BentoGallery({ imageItems }: BentoGalleryProps) {
                 {item.desc}
               </p>
             ) : null}
-          </div>
-        </div>
+          </figcaption>
+        </figure>
       ))}
     </div>
   )
@@ -262,7 +275,7 @@ export default function BentoGallery({ imageItems }: BentoGalleryProps) {
       onLostPointerCapture={handleLostPointerCapture}
     >
       <motion.div
-        className="flex w-max gap-[3px] py-2 will-change-transform sm:gap-1"
+        className="flex h-[10.5rem] w-max gap-2 py-2 will-change-transform sm:h-[13.5rem] sm:gap-2.5 lg:h-[17rem]"
         style={{ x }}
       >
         {renderSequence(0, node => {

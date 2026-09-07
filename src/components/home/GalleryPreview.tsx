@@ -2,22 +2,10 @@ import { useMemo } from 'react'
 import { useGalleryData, useProductsData } from '../../contexts/DataContext'
 import { preloadRoute } from '../../utils/route-preload'
 import { signalGalleryImageIntent } from '../../lib/gallery-image-warmup'
-import BentoGallery, { type BentoGalleryItem } from '../ui/bento-gallery'
+import GalleryStrip, { type GalleryStripItem } from '../ui/gallery-strip'
 import SectionHeading, { ViewAllButton } from './SectionHeading'
 
 type GalleryShot = { src: string; title: string }
-
-const tilePattern = [
-  'col-span-2 row-span-2 sm:col-span-2 lg:col-span-2',
-  'col-span-3 row-span-1 sm:col-span-3 lg:col-span-3',
-  'col-span-3 row-span-1 sm:col-span-3 lg:col-span-3',
-  'col-span-2 row-span-2 sm:col-span-2 lg:col-span-2',
-  'col-span-2 row-span-1 sm:col-span-2 lg:col-span-2',
-  'col-span-2 row-span-1 sm:col-span-2 lg:col-span-2',
-  'col-span-3 row-span-2 sm:col-span-3 lg:col-span-3',
-  'col-span-2 row-span-1 sm:col-span-2 lg:col-span-2',
-  'col-span-2 row-span-1 sm:col-span-2 lg:col-span-2',
-] as const
 
 function stableHash(value: string) {
   let hash = 2166136261
@@ -40,7 +28,7 @@ export default function GalleryPreview() {
   const { galleryAlbums, galleryLoading } = useGalleryData()
   const { products } = useProductsData()
 
-  const shots = useMemo<BentoGalleryItem[]>(() => {
+  const shots = useMemo<GalleryStripItem[]>(() => {
     const seen = new Set<string>()
     const albumShots: GalleryShot[] = []
 
@@ -69,11 +57,10 @@ export default function GalleryPreview() {
       return true
     })
 
-    return mixShots(uniqueFallbackShots).slice(0, 12).map((shot, index) => ({
+    return mixShots(uniqueFallbackShots).slice(0, 14).map((shot, index) => ({
       id: `${stableHash(shot.src)}-${index}`,
       title: shot.title || 'Gallery highlight',
       url: shot.src,
-      span: tilePattern[index % tilePattern.length],
     }))
   }, [galleryAlbums, galleryLoading, products])
 
@@ -90,7 +77,7 @@ export default function GalleryPreview() {
         />
       </div>
 
-      <BentoGallery imageItems={shots} />
+      <GalleryStrip imageItems={shots} />
 
       <div className="site-container-wide">
         <ViewAllButton to="/gallery" onMouseEnter={() => {
