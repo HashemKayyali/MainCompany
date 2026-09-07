@@ -271,12 +271,6 @@ export default function AboutPage() {
         description="Eventies is an organized event services marketplace that helps people discover rentals, activations, production support, custom builds, and trusted providers across Jordan."
         primaryAction={{ label: 'Explore Services', to: '/products' }}
         secondaryAction={{ label: 'Submit Request', to: '/contact' }}
-        chips={[
-          { label: 'Browse', to: '/products' },
-          { label: 'Compare', to: '/products' },
-          { label: 'Request', to: '/contact' },
-          { label: 'Review', to: '/about' },
-        ]}
         rightSlot={<AboutHeroShowcase />}
       />
 

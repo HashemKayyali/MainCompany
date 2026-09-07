@@ -95,7 +95,6 @@ export default function CustomersPage() {
     [cat, customers]
   )
 
-  const heroCats = useMemo(() => cats.slice(0, 5), [cats])
 
   const countForCat = (category: string) =>
     customers.filter(customer => customer.category === category).length
@@ -112,7 +111,6 @@ export default function CustomersPage() {
         description="A curated look at brands, schools, venues, and organizations connected to Eventies activations, custom builds, and event services across Jordan and the region."
         primaryAction={{ label: 'Browse Partners', href: '#customers-list' }}
         secondaryAction={{ label: 'See our work', to: '/gallery' }}
-        chips={heroCats.map(category => ({ label: category, onClick: () => setCat(category) }))}
         rightSlot={<CustomersHeroShowcase items={heroLogos} />}
       />
 

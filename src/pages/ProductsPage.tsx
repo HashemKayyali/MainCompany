@@ -333,11 +333,6 @@ function ProductsHero({
     return slotIndexes.map(productIndex => products[productIndex % products.length])
   }, [heroSlotIndexes, products])
 
-  const categoryChips = useMemo(
-    () => categories.filter(category => category.slug.trim().length > 0).slice(0, 5),
-    [categories]
-  )
-
   return (
     <EventiesHero
       sectionRef={heroSectionRef}
@@ -346,10 +341,6 @@ function ProductsHero({
       description="Browse interactive games, screens, booths, production support, and event services from trusted providers across Jordan. Compare options and submit a rental or purchase quote request for review."
       primaryAction={{ label: 'Browse Services', href: '#products-catalog' }}
       secondaryAction={{ label: 'Explore Categories', to: '/categories' }}
-      chips={categoryChips.map(category => ({
-        label: category.name,
-        to: `/categories/${encodeURIComponent(category.slug)}`,
-      }))}
       rightSlotClassName="h-[430px] sm:h-[500px] lg:h-[540px]"
       rightSlot={
         <ProductsHeroShowcase

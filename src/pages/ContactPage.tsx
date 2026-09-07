@@ -254,12 +254,6 @@ export default function ContactPage() {
         description="Have a question about rental requests, purchase quote requests, custom builds, availability, or provider partnerships? Send the right inquiry and the Eventies team will review the details and follow up with you."
         primaryAction={{ label: 'Submit Request', href: '#contact-form' }}
         secondaryAction={{ label: 'Email Main Team', href: `mailto:${social.email}` }}
-        chips={[
-          { label: 'Event Requests', href: '#contact-form' },
-          { label: 'Support', href: 'mailto:support@eventiesjo.com' },
-          { label: 'Providers', href: 'mailto:vendors@eventiesjo.com' },
-          { label: 'WhatsApp', href: social.whatsapp },
-        ]}
         rightSlot={<ContactHeroShowcase />}
       />
 

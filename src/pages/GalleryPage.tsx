@@ -43,18 +43,6 @@ export default function GalleryPage() {
     [selected]
   )
 
-  const heroChips = useMemo(
-    () => (albums.length > 0
-      ? albums.slice(0, 5).map(album => ({ label: album.title, href: '#gallery-work' }))
-      : [
-          { label: 'Events', href: '#gallery-work' },
-          { label: 'Services', href: '#gallery-work' },
-          { label: 'Setups', href: '#gallery-work' },
-          { label: 'Moments', href: '#gallery-work' },
-        ]),
-    [albums]
-  )
-
   return (
     <>
       <EventiesHero
@@ -67,7 +55,6 @@ export default function GalleryPage() {
         description="Browse albums from Eventies activations, service setups, custom builds, and real event moments across Jordan."
         primaryAction={{ label: 'Browse Albums', href: '#gallery-work' }}
         secondaryAction={{ label: 'Plan an Event', to: '/contact' }}
-        chips={heroChips}
         contentClassName="lg:col-span-2"
       />
 

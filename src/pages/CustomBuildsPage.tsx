@@ -300,14 +300,6 @@ const buildPossibilities: BuildPossibilityItem[] = [
   },
 ]
 
-const heroFocusAreas: { label: string; labelAr: string; icon: LucideIcon }[] = [
-  { label: 'Design', labelAr: 'تصميم', icon: Lightbulb },
-  { label: 'Engineering', labelAr: 'هندسة', icon: Cpu },
-  { label: 'R&D', labelAr: 'بحث وتطوير', icon: FlaskConical },
-  { label: 'Prototyping', labelAr: 'نماذج أولية', icon: CircuitBoard },
-  { label: 'Fabrication', labelAr: 'تصنيع', icon: Hammer },
-]
-
 const heroLabCards: {
   title: string
   detail: string
@@ -1583,10 +1575,6 @@ export default function CustomBuildsPage() {
           label: locale === 'ar' ? 'استكشف أعمالنا' : 'Inspect Our Work',
           href: '#work',
         }}
-        chipsLabel={locale === 'ar' ? 'الاستوديو' : 'Studio'}
-        chips={heroFocusAreas.map(({ label, labelAr }) => ({
-          label: locale === 'ar' ? labelAr : label,
-        }))}
         rightSlot={
           <CustomBuildsHeroShowcase
             motionEnabled={motionEnabled && heroActive}

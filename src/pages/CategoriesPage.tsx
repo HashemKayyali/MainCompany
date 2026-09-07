@@ -136,10 +136,6 @@ export default function CategoriesPage() {
   }, [items, query])
 
   const totalServices = useMemo(() => items.reduce((sum, category) => sum + category.count, 0), [items])
-  const heroChips = useMemo(
-    () => items.slice(0, 5).map(category => ({ label: category.name, to: `/categories/${encodeURIComponent(category.slug)}` })),
-    [items]
-  )
   const featuredCategories = useMemo(() => items.filter(category => category.count > 0).slice(0, 4), [items])
   const dataUnavailable = Boolean(error && !loading && items.length === 0)
 
@@ -151,8 +147,6 @@ export default function CategoriesPage() {
         description={`${items.length} ${items.length === 1 ? 'category' : 'categories'} and ${totalServices} service${totalServices === 1 ? '' : 's'} from trusted providers. Open any category to see what's available for your event.`}
         primaryAction={{ label: 'View Categories', href: '#categories-grid' }}
         secondaryAction={{ label: 'All services', to: '/products' }}
-        chipsLabel="Popular"
-        chips={heroChips}
         rightSlot={
           <CategoriesHeroShowcase
             query={query}

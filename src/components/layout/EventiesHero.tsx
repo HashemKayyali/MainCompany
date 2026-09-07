@@ -22,21 +22,12 @@ export type EventiesHeroAction = {
   external?: boolean
 }
 
-export type EventiesHeroChip = {
-  label: string
-  to?: string
-  href?: string
-  onClick?: () => void
-}
-
 type EventiesHeroProps = {
   eyebrow: string
   title: ReactNode
   description: ReactNode
   primaryAction?: EventiesHeroAction
   secondaryAction?: EventiesHeroAction
-  chipsLabel?: string
-  chips?: EventiesHeroChip[]
   rightSlot?: ReactNode
   className?: string
   contentClassName?: string
@@ -86,47 +77,12 @@ function HeroAction({ action, variant }: { action: EventiesHeroAction; variant: 
   )
 }
 
-function HeroChip({ chip }: { chip: EventiesHeroChip }) {
-  const { translateText } = useI18n()
-  const className =
-    'inline-flex items-center rounded-full border border-white/20 bg-white/[0.08] px-3.5 py-1.5 text-[11.5px] font-semibold text-white/90 backdrop-blur-sm transition-all hover:border-fuchsia-300/55 hover:bg-white/15 hover:text-white'
-
-  if (chip.to) {
-    const to = chip.to
-    return (
-      <Link to={to} onMouseEnter={() => preloadRoute(to)} onFocus={() => preloadRoute(to)} className={className}>
-        {translateText(chip.label)}
-      </Link>
-    )
-  }
-
-  if (chip.href) {
-    return (
-      <a href={chip.href} className={className}>
-        {translateText(chip.label)}
-      </a>
-    )
-  }
-
-  if (chip.onClick) {
-    return (
-      <button type="button" onClick={chip.onClick} className={className}>
-        {translateText(chip.label)}
-      </button>
-    )
-  }
-
-  return <span className={className}>{translateText(chip.label)}</span>
-}
-
 export default function EventiesHero({
   eyebrow,
   title,
   description,
   primaryAction,
   secondaryAction,
-  chipsLabel = 'Browse',
-  chips = [],
   rightSlot,
   className,
   contentClassName,
@@ -181,20 +137,6 @@ export default function EventiesHero({
             >
               {primaryAction && <HeroAction action={primaryAction} variant="primary" />}
               {secondaryAction && <HeroAction action={secondaryAction} variant="secondary" />}
-            </motion.div>
-          )}
-
-          {chips.length > 0 && (
-            <motion.div
-              className="mt-8 flex flex-wrap items-center gap-2"
-              initial={heroEntrance ? heroFadeUp.hidden : false}
-              animate={heroEntrance ? heroFadeUp.visible : undefined}
-              transition={heroTransition(0.3)}
-            >
-              <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">{translateText(chipsLabel)}</span>
-              {chips.map(chip => (
-                <HeroChip key={chip.label} chip={chip} />
-              ))}
             </motion.div>
           )}
         </div>
