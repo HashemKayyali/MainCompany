@@ -1112,3 +1112,46 @@ html[dir='rtl'] [data-bidi-managed='true'][dir='rtl'] {
   overscroll-behavior-y: auto;
   -webkit-overflow-scrolling: touch;
 }
+
+/* ── Arabic line boxes ──
+   The Latin display type on this site is tuned tight: 0.96–1.55 leading,
+   negative tracking, and negative block margins that pull the next element up.
+   Arabic glyphs are taller and joined, so the same metrics make consecutive
+   lines physically overlap. These rules give Arabic text a line box that fits
+   its glyphs and drop the Latin tracking. The numbers are measured, not
+   guessed: walking every wrapped Arabic line pair on the site and comparing the
+   ink descent of the upper glyph with the ink ascent of the glyph below it
+   wherever the two overlap horizontally, the worst pair needs 1.52. Headings
+   get 1.6 to clear that; body copy gets 1.75, the comfortable reading leading
+   for Arabic.
+   [data-i18n-skip] / [dir="ltr"] stay excluded so English database content keeps
+   the exact English metrics, per the contract above. */
+html[dir="rtl"] :is(body, button, input, textarea, select) {
+  line-height: 1.75;
+}
+
+html[dir="rtl"] :is(h1, h2, h3, h4, h5, h6):not([data-i18n-skip]):not([data-i18n-skip] *):not([dir="ltr"]):not([dir="ltr"] *) {
+  line-height: 1.6 !important;
+  letter-spacing: normal !important;
+}
+
+html[dir="rtl"] :is(p, li, blockquote, figcaption, dd):not([data-i18n-skip]):not([data-i18n-skip] *):not([dir="ltr"]):not([dir="ltr"] *):not(.rtl-description):not(.section-description):not(.hero-description) {
+  line-height: 1.75 !important;
+  letter-spacing: normal !important;
+}
+
+/* Leading utilities below 1.6 are Latin-tuned; on wrapped Arabic they collide.
+   Headings are excluded because the rule above already sizes them. */
+html[dir="rtl"] :is(.leading-none, .leading-tight, .leading-snug, .leading-normal, .leading-\[0\.96\], .leading-\[0\.98\], .leading-\[1\.02\], .leading-\[1\.03\], .leading-\[1\.05\], .leading-\[1\.06\], .leading-\[1\.15\], .leading-\[1\.16\], .leading-\[1\.18\], .leading-\[1\.2\], .leading-\[1\.25\], .leading-\[1\.3\], .leading-\[1\.4\], .leading-\[1\.45\], .leading-\[1\.5\], .leading-\[1\.55\]):not([data-i18n-skip]):not([data-i18n-skip] *):not([dir="ltr"]):not([dir="ltr"] *):not(:is(h1, h2, h3, h4, h5, h6)) {
+  line-height: 1.75 !important;
+}
+
+/* The Latin titles lean on negative block margins/padding to close the gap
+   their tight leading leaves behind. With Arabic leading there is no gap to
+   close, so the pull-up would clip the descenders instead. */
+html[dir="rtl"] .hero-title-silver,
+html[dir="rtl"] main h1.font-display,
+html[dir="rtl"] .section-title {
+  padding-block: 0;
+  margin-block-end: 0;
+}
